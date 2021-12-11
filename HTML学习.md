@@ -599,6 +599,62 @@ CSS 可以通过以下方式添加到HTML中:
 
 不建议使用的标签有: `<font>`, `<center>`, `<strike>` 。不建议使用的属性: color 和 bgcolor。
 
+## header标签
+
+`<header>` 标签定义文档或者文档的一部分区域的页眉。
+
+`<header>` 元素应该作为介绍内容或者导航链接栏的容器。
+
+在一个文档中，您可以定义多个 `<header>` 元素。
+
+**注释：** `<header>` 标签不能被放在 `<footer>`、`<address>` 或者另一个 `<header>` 元素内部。
+
+```html
+<article>
+    <header>
+        <h1>Internet Explorer 9</h1>
+        <p><time pubdate datetime="2011-03-15"></time></p>
+    </header>
+    <p> Windows Internet Explorer 9(缩写为 IE9 )是在2011年3月14日21:00发布的</p>
+</article>
+```
+
+## footer标签
+
+`<footer>` 标签定义文档或者文档的一部分区域的页脚。
+
+`<footer>` 元素应该包含它所包含的元素的信息。
+
+在典型情况下，该元素会包含文档创作者的姓名、文档的版权信息、使用条款的链接、联系信息等等。
+
+在一个文档中，您可以定义多个 `<footer>` 元素。
+
+```html
+<footer>
+  <p>Posted by: Hege Refsnes</p>
+  <p><time pubdate datetime="2012-03-01"></time></p>
+</footer>
+```
+
+
+
+## nav标签
+
+`<nav>` 标签定义导航链接的部分。
+
+并不是所有的 HTML 文档都要使用到 `<nav>` 元素。`<nav>` 元素只是作为标注一个导航链接的区域。
+
+在不同设备上（手机或者PC）可以制定导航链接是否显示，以适应不同屏幕的需求。
+
+```html
+<nav>
+  <a href="/html/">HTML</a> |
+  <a href="/css/">CSS</a> |
+  <a href="/js/">JavaScript</a> |
+  <a href="/jquery/">jQuery</a>
+</nav>
+```
+
 ## HTML 图像
 
 使用`<img>`标签定义 HTML 页面中的图像，`<img>`标签有两个必需的属性：`src`和`alt`。还有一个可选的title属性。
@@ -1166,7 +1222,38 @@ target 属性定义浏览器上下文（比如选项卡、窗口或内联框架�
 
 #### 属性
 
-
+|                             属性                             |                              值                              |                             描述                             |
+| :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| [accept](https://www.nowcoder.com/tutorial/10010/611d52eb9c3043139dd66c6018c5e8cc) |             audio/* video/* image/* *MIME_type*              |   规定通过文件上传来提交的文件的类型。 (只针对type="file")   |
+| [align](https://www.nowcoder.com/tutorial/10010/51569e730c034f9eb64925e2346e05fb) |                 left right top middle bottom                 | HTML5已废弃，不赞成使用。 规定图像输入的对齐方式。 (只针对type="image") |
+| [alt](https://www.nowcoder.com/tutorial/10010/67dea293558c4a1aa9a2bd8d6599ffd2) |                            *text*                            |        定义图像输入的替代文本。 (只针对type="image")         |
+| [autocomplete](https://www.nowcoder.com/tutorial/10010/ef53ac69ce7444049885dcf38cf4d48b) |                            on off                            | autocomplete 属性规定 `<input>` 元素输入字段 是否应该启用自动完成功能。 |
+| [autofocus](https://www.nowcoder.com/tutorial/10010/cbee7e6f1b5d43c3b292cf5eec5c1a8d) |                          autofocus                           |    属性规定当页面加载时 `<input>` 元素应该自动获得焦点。     |
+| [checked](https://www.nowcoder.com/tutorial/10010/ab0346da95494cea86422d60bcfa7fb5) |                           checked                            | checked 属性规定在页面加载时应该被预先选定的 `<input>` 元素。 (只针对 type="checkbox" 或者 type="radio") |
+| [disabled](https://www.nowcoder.com/tutorial/10010/df10a8c95ed240e49bd4bfef12c65259) |                           disabled                           |         disabled 属性规定应该禁用的 `<input>` 元素。         |
+| [form](https://www.nowcoder.com/tutorial/10010/2c307a4599604a0598d10ad7856bd8af) |                          *form_id*                           |      form 属性规定 `<input>` 元素所属的一个或多个表单。      |
+| [formaction](https://www.nowcoder.com/tutorial/10010/89993f8458544af488a956480f795eab) |                            *URL*                             | 属性规定当表单提交时处理输入控件的文件的 URL。 (只针对 type="submit" 和 type="image") |
+| [formenctype](https://www.nowcoder.com/tutorial/10010/a4218e83f0ba4d6f9420278015449b19) | application/x-www-form-urlencoded multipart/form-data text/plain | 属性规定当表单数据提交到服务器时如何编码 （只适合 type="submit" 和 type="image"）。 |
+| [formmethod](https://www.nowcoder.com/tutorial/10010/e158cb7310fd4120ae6914de6144495b) |                           get post                           | 定义发送表单数据到 action URL 的 HTTP 方法。 (只适合 type="submit" 和 type="image") |
+| [formnovalidate](https://www.nowcoder.com/tutorial/10010/0940572da88b4859addee5834bb966de) |                        formnovalidate                        |  formnovalidate 属性覆盖 `<form>` 元素的 novalidate 属性。   |
+| [formtarget](https://www.nowcoder.com/tutorial/10010/547ecb839fe843f191563ce58ac7d05b) |            _blank _self _parent _top *framename*             | 规定表示提交表单后在哪里显示接收到响应的名称或关键词。(只适合 type="submit" 和 type="image") |
+| [height](https://www.nowcoder.com/tutorial/10010/2189f657868f435c8e2f302d83f685e4) |                           *pixels*                           |        规定 `<input>`元素的高度。(只针对type="image")        |
+| [list](https://www.nowcoder.com/tutorial/10010/0a5a0d5c4b1c42eea4ac760515b2ed50) |                        *datalist_id*                         | 属性引用 `<datalist>` 元素， 其中包含 `<input>` 元素的预定义选项。 |
+| [max](https://www.nowcoder.com/tutorial/10010/1b3bac9608cf4ea79a917c05049507f5) |                       *number* *date*                        |              属性规定 `<input>` 元素的最大值。               |
+| [maxlength](https://www.nowcoder.com/tutorial/10010/0befa6cf26934ec7996382aadd8daa00) |                           *number*                           |         属性规定 `<input>` 元素中允许的最大字符数。          |
+| [min](https://www.nowcoder.com/tutorial/10010/8a3798a845dd4c4ab8e546f7a0ff075a) |                       *number* *date*                        |               属性规定 `<input>`元素的最小值。               |
+| [multiple](https://www.nowcoder.com/tutorial/10010/a872e4ab514f420182d6b577b4e23ae3) |                           multiple                           |       属性规定允许用户输入到 `<input>` 元素的多个值。        |
+| [name](https://www.nowcoder.com/tutorial/10010/4dfc1a1e1f124c29841aed690531eb7e) |                            *text*                            |             name 属性规定 `<input>` 元素的名称。             |
+| [pattern](https://www.nowcoder.com/tutorial/10010/9c93427ccd764877b424c1ef5bc33cbd) |                           *regexp*                           |  pattern 属性规定用于验证 `<input>` 元素的值的正则表达式。   |
+| [placeholder](https://www.nowcoder.com/tutorial/10010/d0ddb0b772334f3eb7350d59b14fbe59) |                            *text*                            | placeholder 属性规定可描述输入 `<input>` 字段预期值的简短的提示信息 。 |
+| [readonly](https://www.nowcoder.com/tutorial/10010/efa3fda9419741439f77d03ac08955d6) |                           readonly                           |             readonly 属性规定输入字段是只读的。              |
+| [required](https://www.nowcoder.com/tutorial/10010/05b7da85b2444b83bd11847796eaa4dd) |                           required                           |           属性规定必需在提交表单之前填写输入字段。           |
+| [size](https://www.nowcoder.com/tutorial/10010/d707791479c64b1581cf9c889c2740b5) |                           *number*                           |     size 属性规定以字符数计的 `<input>` 元素的可见宽度。     |
+| [src](https://www.nowcoder.com/tutorial/10010/ec128b1003b9463b8326db85a6ab4f55) |                            *URL*                             | src 属性规定显示为提交按钮的图像的 URL。 (只针对 type="image") |
+| [step](https://www.nowcoder.com/tutorial/10010/c08365d9ef0842f591b87892a0a0e7a2) |                           *number*                           |         step 属性规定 `<input>` 元素的合法数字间隔。         |
+| [type](https://www.nowcoder.com/tutorial/10010/ebaeb3f5a83b4d5b827b90ba82f65671) | button checkbox color date datetime datetime-local email file hidden image month number password radio range reset search submit tel text time url week |         type 属性规定要显示的 `<input>` 元素的类型。         |
+| [value](https://www.nowcoder.com/tutorial/10010/e8eeb75f2c2a4e5f84cd7788b3d4b5d0) |                            *text*                            |               指定 `<input>` 元素 value 的值。               |
+| [width](https://www.nowcoder.com/tutorial/10010/8755ae4ac44a46a9844053962dc1f33f) |                           *pixels*                           |  width 属性规定 `<input>` 元素的宽度。 (只针对type="image")  |
 
 ### 文本框
 
@@ -1256,7 +1343,7 @@ target 属性定义浏览器上下文（比如选项卡、窗口或内联框架�
 | [rows](https://www.nowcoder.com/tutorial/10010/03ef5c77e2ff4cb98e9a104742de5a8b) | *number*  |            规定文本区域内可见的行数。            |
 | [wrap](https://www.nowcoder.com/tutorial/10010/769edf5507414f85bc81fbf1383b17e5) | hard soft | 规定当提交表单时，文本区域中的文本应该怎样换行。 |
 
-### \<label\> 标签
+### label
 
 `<label>` 标签为 input 元素定义标注（标记）。
 
@@ -1274,3 +1361,379 @@ label 元素不会向用户呈现任何特殊效果。不过，它为鼠标用�
 </form>
 ```
 
+属性
+
+|                             属性                             |      值      |                 描述                  |
+| :----------------------------------------------------------: | :----------: | :-----------------------------------: |
+| [for](https://www.nowcoder.com/tutorial/10010/e80ace8e55ea4174a0b3de2919552ff1) | *element_id* |    规定 label 与哪个表单元素绑定。    |
+| [form](https://www.nowcoder.com/tutorial/10010/b60a3350d0dc4f0fad7a4d7610157580) |  *form_id*   | 规定 label 字段所属的一个或多个表单。 |
+
+### fieldset与legend
+
+`<fieldset>` 标签可以将表单内的相关元素分组。`<fieldset>` 标签会在相关表单元素周围绘制边框。
+
+<legend>标签为 `<fieldset>` 元素定义标题。
+
+```html
+<form>
+  <fieldset>
+    <legend>Personalia:</legend>
+    Name: <input type="text"><br>
+    Email: <input type="text"><br>
+    Date of birth: <input type="text">
+  </fieldset>
+</form>
+```
+
+### 下拉表单
+
+`<select>` 元素用来创建下拉列表。**提示：**`<select>` 元素是一种表单控件，可用于在表单中接受用户输入。
+
+`<select>` 元素中的<option> 标签定义了列表中的可用选项。
+
+```html
+<select>
+    <option value="volvo">Volvo</option>
+    <option value="saab">Saab</option>
+    <option value="mercedes">Mercedes</option>
+    <option value="audi">Audi</option>
+</select>
+```
+
+属性
+
+|                             属性                             |    值     |                        描述                        |
+| :----------------------------------------------------------: | :-------: | :------------------------------------------------: |
+| [autofocus](https://www.nowcoder.com/tutorial/10010/253f2c4867a04dc0be5276771d350c3e) | autofocus |       规定在页面加载时下拉列表自动获得焦点。       |
+| [disabled](https://www.nowcoder.com/tutorial/10010/47ab95acb5ec4709bb9349b5152fa32a) | disabled  |        当该属性为 true 时，会禁用下拉列表。        |
+| [form](https://www.nowcoder.com/tutorial/10010/5a58c36804be4a09b516e64fb37d27cc) | *form_id* |       定义 select 字段所属的一个或多个表单。       |
+| [multiple](https://www.nowcoder.com/tutorial/10010/06b9de4036164bfd9cfb44d9c21306f7) | multiple  |        当该属性为 true 时，可选择多个选项。        |
+| [name](https://www.nowcoder.com/tutorial/10010/9eefff7e97654eaab3c5e9e4430fd52f) |  *text*   |                定义下拉列表的名称。                |
+| [required](https://www.nowcoder.com/tutorial/10010/64145ee3e9d94693b5ae1fd5a650565f) | required  | 规定用户在提交表单前必须选择一个下拉列表中的选项。 |
+| [size](https://www.nowcoder.com/tutorial/10010/6f2593ef832840ddadfa6122142f061e) | *number*  |           规定下拉列表中可见选项的数目。           |
+
+### option
+
+`<option>` 标签定义下拉列表中的一个选项（一个条目）。<option> 标签中的内容作为 <select> 或者 <datalist> 一个元素使用。
+
+注释：`<option>` 标签可以在不带有任何属性的情况下使用，但是您通常需要使用 value 属性，此属性会指示出被送往服务器的内容。
+
+注释：请与 select 元素配合使用此标签，否则这个标签是没有意义的。
+
+提示：如果列表选项很多，可以使用 `<optgroup>` 标签对相关选项进行组合。
+
+|                             属性                             |    值    |                       描述                       |
+| :----------------------------------------------------------: | :------: | :----------------------------------------------: |
+| [disabled](https://www.nowcoder.com/tutorial/10010/73a8b9db666b439491250d3663fe8570) | disabled |         规定此选项应在首次加载时被禁用。         |
+| [label](https://www.nowcoder.com/tutorial/10010/1225acd20587490294bd317a76e0f218) |  *text*  |     定义当使用 `<optgroup>` 时所使用的标注。     |
+| [selected](https://www.nowcoder.com/tutorial/10010/01ab4ec470774fd9ad1afdf75c65079a) | selected | 规定选项（在首次显示在列表中时）表现为选中状态。 |
+| [value](https://www.nowcoder.com/tutorial/10010/4b03ece5166f4428844898d2d1f8a93b) |  *text*  |             定义送往服务器的选项值。             |
+
+### optgroup
+
+<optgroup> 标签经常用于把相关的选项组合在一起。如果你有很多的选项组合, 你可以使用 <optgroup> 标签能够很简单的将相关选项组合在一起。
+
+```html
+<select>
+  <optgroup label="Swedish Cars">
+    <option value="volvo">Volvo</option>
+    <option value="saab">Saab</option>
+  </optgroup>
+  <optgroup label="German Cars">
+    <option value="mercedes">Mercedes</option>
+    <option value="audi">Audi</option>
+  </optgroup>
+</select>
+```
+
+### button
+
+`<button>` 标签定义一个按钮。
+
+在 `<button>` 元素内部，您可以放置内容，比如文本或图像。这是该元素与使用 `<input>` 元素创建的按钮之间的不同之处。
+
+**提示：**请始终为 `<button>` 元素规定 type 属性，不同的浏览器对 `<button>` 元素的 type 属性使用不同的默认值。
+
+```html
+<button type="button">点我!</button>
+```
+
+注释：如果在 HTML 表单中使用 <button> 元素，不同的浏览器可能会提交不同的按钮值。请使用 <input> 在 HTML 表单中创建按钮。
+
+|                             属性                             |                              值                              |                             描述                             |
+| :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| [autofocus](https://www.nowcoder.com/tutorial/10010/edc1aae3c7c7403482c4b928ca5d3bfc) |                          autofocus                           |           规定当页面加载时按钮应当自动地获得焦点。           |
+| [disabled](https://www.nowcoder.com/tutorial/10010/cb5ff0f5043f42c2b79d58fe33e48c82) |                           disabled                           |                     规定应该禁用该按钮。                     |
+| [form](https://www.nowcoder.com/tutorial/10010/705dca09afda493a97dda7bf03f4246f) |                          *form_id*                           |                 规定按钮属于一个或多个表单。                 |
+| [formaction](https://www.nowcoder.com/tutorial/10010/51571eaced664c3f9d4d49985eeddd4b) |                            *URL*                             | 规定当提交表单时向何处发送表单数据。 覆盖 form 元素的 action 属性。 该属性与 type="submit" 配合使用。 |
+| [formenctype](https://www.nowcoder.com/tutorial/10010/636d7bf6a6024f99b5550d05bffcbf2b) | application/x-www-form-urlencoded multipart/form-data text/plain | 规定在向服务器发送表单数据之前如何对其进行编码。 覆盖 form 元素的 enctype 属性。 该属性与 type="submit" 配合使用。 |
+| [formmethod](https://www.nowcoder.com/tutorial/10010/154fa5d6188a4600b913d12343d8fe28) |                           get post                           | 规定用于发送表单数据的 HTTP 方法。 覆盖 form 元素的 method 属性。 该属性与 type="submit" 配合使用。 |
+| [formnovalidate](https://www.nowcoder.com/tutorial/10010/946fda27ed1e47ae8e2163c3afd85749) |                        formnovalidate                        | 如果使用该属性，则提交表单时不进行验证。 覆盖 form 元素的 novalidate 属性。 该属性与 type="submit" 配合使用。 |
+| [formtarget](https://www.nowcoder.com/tutorial/10010/ff506c68e89e493182cbf8b5432ff1a8) |            _blank _self _parent _top *framename*             | 规定在何处打开 action URL。 覆盖 form 元素的 target 属性。 该属性与 type="submit" 配合使用。 |
+| [name](https://www.nowcoder.com/tutorial/10010/b380cf76ef234b739afc494cd1efb113) |                            *name*                            |                       规定按钮的名称。                       |
+| [type](https://www.nowcoder.com/tutorial/10010/fd8171b7df02470faa31da42e430cce0) |                     button reset submit                      |                       规定按钮的类型。                       |
+| [value](https://www.nowcoder.com/tutorial/10010/5f7755e547a3409081d03d6dbcd9468c) |                            *text*                            |             规定按钮的初始值。可由脚本进行修改。             |
+
+### datalist
+
+`<datalist>` 标签规定了 `<input>` 元素可能的选项列表。
+
+`<datalist>` 标签被用来在为 `<input>` 元素提供"自动完成"的特性。用户能看到一个下拉列表，里边的选项是预先定义好的，将作为用户的输入数据。
+
+请使用 `<input>` 元素的 list 属性来绑定 `<datalist>` 元素。
+
+```html
+<input list="browsers">
+<datalist id="browsers">
+  <option value="Internet Explorer">
+  <option value="Firefox">
+  <option value="Chrome">
+  <option value="Opera">
+  <option value="Safari">
+</datalist>
+```
+
+### keygen
+
+`<keygen>` 标签规定用于表单的密钥对生成器字段。当提交表单时，私钥存储在本地，公钥发送到服务器。
+
+```html
+<form action="demo_keygen.asp" method="get">
+  用户名: <input type="text" name="usr_name">
+  加密: <keygen name="security">
+  <input type="submit">
+</form>
+```
+
+`<keygen>` 元素是 HTML5 新标签。该标签在新的 Web 标准中已废弃。
+
+### output
+
+`<output>` 标签作为计算结果输出显示(比如执行脚本的输出)。
+
+```html
+	<form oninput="x.value=parseInt(a.value)+parseInt(b.value)">0
+		<input type="range" id="a" value="50">100 +
+		<input type="number" id="b" value="0"> =
+		<output name="x" for="a b">50</output>
+	</form>
+```
+
+|                             属性                             |      值      |                    描述                    |
+| :----------------------------------------------------------: | :----------: | :----------------------------------------: |
+| [for](https://www.nowcoder.com/tutorial/10010/639bb1b75d7b4b4d99de0de7025c88fe) | *element_id* | 描述计算中使用的元素与计算结果之间的关系。 |
+| [form](https://www.nowcoder.com/tutorial/10010/3a4923f076b745749840545afef21f04) |  *form_id*   |     定义输入字段所属的一个或多个表单。     |
+| [name](https://www.nowcoder.com/tutorial/10010/90a9cbc90e79419aa9ec3b582a5cf5e1) |    *name*    |   定义对象的唯一名称（表单提交时使用）。   |
+
+
+
+## HTML 框架
+
+通过使用框架，你可以在同一个浏览器窗口中显示不止一个页面。
+
+```html
+<iframe src="URL"></iframe>
+```
+
+### 设置高度与宽度
+
+width 和 height 属性用来定义iframe标签的高度与宽度。属性默认以像素为单位, 但是你可以指定其按比例显示 (如："80%")。
+
+```html
+<iframe src="https://mo.fish" width="800" height="300"></iframe>
+```
+
+### 移除边框
+
+frameborder 属性用于定义iframe表示是否显示边框，设置属性值为 "0" 移除iframe的边框。
+
+```html
+<iframe src="https://s.weibo.com/top/summary?cate=realtimehot" frameborder="0" width="800" height="300"></iframe>
+```
+
+### 使用iframe来显示目标链接页面
+
+```html
+<iframe src="x.html" name="iframe_a"></iframe>
+<p><a href="http://www.nowcoder.com" target="iframe_a">NOWCODER.COM</a></p>
+```
+
+## HTML 颜色
+
+HTML 颜色由红色、绿色、蓝色混合而成。
+
+### 颜色值
+
+HTML 颜色由一个十六进制符号来定义，这个符号由红色、绿色和蓝色的值组成（RGB）。
+
+每种颜色的最小值是0（十六进制：#00）。最大值是255（十六进制：#FF）。
+
+三种颜色 红，绿，蓝的组合从0到255，一共有1600万种不同颜色(256 x 256 x 256)。
+
+十六进制值的写法为 # 号后跟三个或六个十六进制字符。
+
+三位数表示法为：#RGB，转换为6位数表示为：#RRGGBB。
+
+### 颜色名
+
+**目前所有浏览器都支持以下颜色名：**
+
+141个颜色名称是在HTML和CSS颜色规范定义的（17标准颜色，再加124）。
+
+**提示:** 17标准颜色：黑色，蓝色，水，紫红色，灰色，绿色，石灰，栗色，海军，橄榄，橙，紫，红，白，银，蓝绿色，黄色。
+
+##  HTML 脚本
+
+### \<script\> 标签
+
+`<script>` 标签用于定义客户端脚本，比如 JavaScript。
+
+`<script>` 元素既可包含脚本语句，也可通过 src 属性指向外部脚本文件。
+
+JavaScript 最常用于图片操作、表单验证以及内容动态更新。
+
+```html
+	<script type="text/javascript">
+		document.write("javascript脚本")
+	</script>
+```
+
+### \<noscript\> 标签
+
+`<noscript>` 标签提供无法使用脚本时的替代内容，比方在浏览器禁用脚本时，或浏览器不支持客户端脚本时。
+
+`<noscript>`元素可包含普通 HTML 页面的 body 元素中能够找到的所有元素。
+
+只有在浏览器不支持脚本或者禁用脚本时，才会显示 `<noscript>` 元素中的内容：
+
+```html
+<script>
+    document.write("Hello World!")
+</script>
+<noscript>
+    抱歉，你的浏览器不支持 JavaScript!
+</noscript>
+```
+
+## HTML 字符实体
+
+HTML 中的预留字符必须被替换为字符实体。一些在键盘上找不到的字符也可以使用字符实体来替换。
+
+###  实体
+
+在 HTML 中，某些字符是预留的。
+
+在 HTML 中不能使用小于号（<）和大于号（>），这是因为浏览器会误认为它们是标签。
+
+如果希望正确地显示预留字符，我们必须在 HTML 源代码中使用字符实体（character entities）。
+
+字符实体类似这样：
+
+```html
+&entity_name;
+&#entity_number;
+```
+
+如需显示小于号，我们必须这样写：`&lt` 或 `&#60` 或 `&#060`
+
+**提示：** 使用实体名而不是数字的好处是，名称易于记忆。不过坏处是，浏览器也许并不支持所有实体名称（对实体数字的支持却很好）。
+
+### 不间断空格
+
+HTML 中的常用字符实体是不间断空格( `&nbsp;`)。
+
+浏览器总是会截短 HTML 页面中的空格。如果您在文本中写 10 个空格，在显示该页面之前，浏览器会删除它们中的 9 个。如需在页面中增加空格的数量，您需要使用 `&nbsp;` 字符实体。
+
+### 结合音标符
+
+发音符号是加到字母上的一个"glyph(字形)"。
+
+一些变音符号, 如 尖音符 ( ̀) 和 抑音符 ( ́) 。
+
+变音符号可以出现字母的上面和下面，或者字母里面，或者两个字母间。
+
+变音符号可以与字母、数字字符的组合来使用。
+
+以下是一些实例:
+
+| 音标符 | 字符 | Construct | 输出结果 |
+| :----: | :--: | :-------: | :------: |
+|    ̀    |  a   |    `à`    |    à     |
+|    ́    |  a   |    `á`    |    á     |
+|    ̂    |  a   |    `â`    |    â     |
+|    ̃    |  a   |    `ã`    |    ã     |
+|    ̀    |  O   |    `Ò`    |    Ò     |
+|    ́    |  O   |    `Ó`    |    Ó     |
+|    ̂    |  O   |    `Ô`    |    Ô     |
+|    ̃    |  O   |    `Õ`    |    Õ     |
+
+### HTML字符实体
+
+实体名称对大小写敏感！
+
+| 显示结果 |    描述     |    实体名称    | 实体编号 |
+| :------: | :---------: | :------------: | :------: |
+|          |    空格     |      ` `       |   ` `    |
+|    <     |   小于号    |      `<`       |   `<`    |
+|    >     |   大于号    |      `>`       |   `>`    |
+|    &     |    和号     |      `&`       |   `&`    |
+|    "     |    引号     |      `"`       |   `"`    |
+|    '     |    撇号     | `'` (IE不支持) |   `'`    |
+|    ￠    |     分      |      `¢`       |   `¢`    |
+|    £     |     镑      |      `£`       |   `£`    |
+|    ¥     | 人民币/日元 |      `¥`       |   `¥`    |
+|    €     |    欧元     |      `€`       |   `€`    |
+|    §     |    小节     |      `§`       |   `§`    |
+|    ©     |    版权     |      `©`       |   `©`    |
+|    ®     |  注册商标   |      `®`       |   `®`    |
+|    ™     |    商标     |      `™`       |   `™`    |
+|    ×     |    乘号     |      `×`       |   `×`    |
+|    ÷     |    除号     |      `÷`       |   `÷`    |
+
+虽然 html 不区分大小写，但实体字符对大小写敏感。
+
+## HTML URL
+
+### URL统一资源定位器
+
+URL（Uniform Resource Locators） 是一个网页地址。URL可以由字母组成，如"nowcoder.com"，或互联网协议（IP）地址： 114.55.207.244。大多数人进入网站使用网站域名来访问，因为 名字比数字更容易记住。
+
+Web浏览器通过URL从Web服务器请求页面。
+
+当您点击 HTML 页面中的某个链接时，对应的 `<a>` 标签指向万维网上的一个地址。
+
+一个统一资源定位器(URL) 用于定位万维网上的文档。
+
+一个网页地址实例: `http://www.nowcoder.com/html/html-tutorial.html` 语法规则:
+
+```
+scheme://host.domain:port/path/filename
+```
+
+说明:
+
+- scheme - 定义因特网服务的类型，最常见的类型是 http。
+- host - 定义域主机（http 的默认主机是 www）。
+- domain - 定义因特网域名，比如 nowcoder.com。
+- port - 定义主机上的端口号（http 的默认端口号是 80）。
+- path - 定义服务器上的路径（如果省略，则文档必须位于网站的根目录中）。
+- filename - 定义文档/资源的名称。
+
+### 常见的 URL Scheme
+
+以下是一些URL scheme：
+
+| Scheme |        访问        |               用于...               |
+| :----: | :----------------: | :---------------------------------: |
+|  http  |   超文本传输协议   | 以 http:// 开头的普通网页。不加密。 |
+| https  | 安全超文本传输协议 |    安全网页，加密所有信息交换。     |
+|  ftp   |    文件传输协议    |    用于将文件下载或上传至网站。     |
+|  file  |                    |         您计算机上的文件。          |
+
+### URL 字符编码
+
+URL 只能使用 [ASCII 字符集](https://www.nowcoder.com/tutorial/10007/6db6a7adcb444d11a67e0b1012a9a876) 。来通过因特网进行发送。由于 URL 常常会包含 ASCII 集合之外的字符，URL 必须转换为有效的 ASCII 格式。
+
+URL 编码使用 "%" 其后跟随两位的十六进制数来替换非 ASCII 字符。
+
+URL 不能包含空格。URL 编码通常使用 + 来替换空格。
