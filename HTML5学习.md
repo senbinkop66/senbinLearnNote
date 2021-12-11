@@ -620,3 +620,329 @@ function drop(ev) {
 	</script>
 ```
 
+## HTML5 地理定位
+
+HTML5 Geolocation（地理定位）用于定位用户的位置。
+
+### 定位用户的位置
+
+HTML5 Geolocation API 用于获得用户的地理位置。
+
+鉴于该特性可能侵犯用户的隐私，除非用户同意，否则用户位置信息是不可用的。
+
+**注意:** Geolocation（地理定位）对于拥有 GPS 的设备，比如 iPhone，地理定位更加精确。
+
+### 使用地理定位
+
+请使用 getCurrentPosition() 方法来获得用户的位置。
+
+```html
+	<h3>HTML5 Geolocation 地理定位</h3>
+	<div>
+		<p id="demo1">地理位置</p>
+		<button onclick="getLocation()">点击获取位置</button>
+	</div>
+	<div id="mapholder"></div>
+	<script src="https://maps.google.com/maps/api/js?sensor=false"></script>
+	<script type="text/javascript">
+		var x=document.getElementById("demo1");
+		function getLocation(){
+            //检测是否支持地理定位
+			if (navigator.geolocation) {
+                //如果支持，则运行 getCurrentPosition() 方法。如果不支持，则向用户显示一段消息。
+                //如果 getCurrentPosition() 运行成功，则向参数 showPosition 中规定的函数返回一个 coordinates 对象
+				navigator.geolocation.getCurrentPosition(showPosition,showError);
+			}else{
+				x.innerHTML="该浏览器不支持获取地理位置";
+			}
+		}
+		/*
+		function showPosition(position){
+			x.innerHTML="维度:"+position.coords.latitude+"<br>经度:"+position.coords.longitude;
+		}
+		*/
+		function showError(error){
+			switch(error.code){
+				case error.PERMISSION_DENIED:
+					x.innerHTML="用户拒绝对获取地理位置的请求。"
+					break;
+				case error.POSITION_UNAVAILABLE:
+					x.innerHTML="位置信息是不可用的。"
+					break;
+				case error.TIMEOUT:
+					x.innerHTML="请求用户地理位置超时。"
+					break;
+				case error.UNKNOWN_ERROR:
+					x.innerHTML="未知错误。"
+					break;
+			}
+		}
+		function showPosition(position) {
+            //showPosition() 函数获得并显示经度和纬度
+			lat = position.coords.latitude;
+			lon = position.coords.longitude;
+			latlon = new google.maps.LatLng(lat, lon)
+			mapholder = document.getElementById('mapholder')
+			mapholder.style.height = '250px';
+			mapholder.style.width = '500px';
+
+			var myOptions = {
+				center: latlon,
+				zoom: 14,
+				mapTypeId: google.maps.MapTypeId.ROADMAP,
+				mapTypeControl: false,
+				navigationControlOptions: {
+					style: google.maps.NavigationControlStyle.SMALL
+				}
+			};
+			var map = new google.maps.Map(document.getElementById("mapholder"), myOptions);
+			var marker = new google.maps.Marker({
+				position: latlon,
+				map: map,
+				title: "You are here!"
+			});
+		}
+	</script>
+```
+
+### 处理错误和拒绝
+
+getCurrentPosition() 方法的第二个参数用于处理错误，它规定当获取用户位置失败时运行的函数。
+
+错误代码：
+
+- Permission denied - 用户不允许地理定位
+- Position unavailable - 无法获取当前位置
+- Timeout - 操作超时
+
+### 在地图中显示结果
+
+如需在地图中显示结果，您需要访问可使用经纬度的地图服务，比如谷歌地图或百度地图。
+
+### 给定位置的信息
+
+本页演示的是如何在地图上显示用户的位置。不过，地理定位对于给定位置的信息同样很有用处。
+
+实例:
+
+- 更新本地信息
+- 显示用户周围的兴趣点
+- 交互式车载导航系统 (GPS)
+
+### 返回数据
+
+若成功，则 getCurrentPosition() 方法返回对象。始终会返回 latitude、longitude 以及 accuracy 属性。如果可用，则会返回其他下面的属性。
+
+|          属性           |          描述          |
+| :---------------------: | :--------------------: |
+|     coords.latitude     |     十进制数的纬度     |
+|    coords.longitude     |     十进制数的经度     |
+|     coords.accuracy     |        位置精度        |
+|     coords.altitude     | 海拔，海平面以上以米计 |
+| coords.altitudeAccuracy |     位置的海拔精度     |
+|     coords.heading      | 方向，从正北开始以度计 |
+|      coords.speed       |   速度，以米/每秒计    |
+|        timestamp        |    响应的日期/时间     |
+
+### Geolocation 对象 
+
+watchPosition() - 返回用户的当前位置，并继续返回用户移动时的更新位置（就像汽车上的 GPS）。
+
+clearWatch() - 停止 watchPosition() 方法。
+
+下面的例子展示 watchPosition() 方法，您需要一台精确的 GPS 设备来测试该例（比如 iPhone）。
+
+```html
+<!DOCTYPE html>
+<html>
+<head> 
+<meta charset="utf-8"> 
+<title>牛客教程(nowcoder.com)</title>
+</head>
+<body>
+	<p id="demo">点击按钮获取您当前坐标（可能需要比较长的时间获取）：</p>
+	<button onclick="getLocation()">点我</button>
+	<script>
+		var x = document.getElementById("demo");
+
+		function getLocation() {
+			if (navigator.geolocation) {
+				navigator.geolocation.watchPosition(showPosition);
+			} else {
+				x.innerHTML = "该浏览器不支持获取地理位置。";
+			}
+		}
+
+		function showPosition(position) {
+			x.innerHTML = "纬度: " + position.coords.latitude +
+				"<br>经度: " + position.coords.longitude;
+		}
+	</script>
+</body>
+</html>
+```
+
+## Video(视频)
+
+HTML5 规定了一种通过 video 元素来包含视频的标准方法。
+
+```html
+<video width="320" height="240" controls>
+    <source src="movie.mp4" type="video/mp4">
+    <source src="movie.ogg" type="video/ogg">
+    您的浏览器不支持Video标签。
+</video>
+```
+
+`<video>` 元素提供了 播放、暂停和音量控件来控制视频。
+
+同时 `<video>` 元素也提供了 width 和 height 属性控制视频的尺寸.如果设置的高度和宽度，所需的视频空间会在页面加载时保留。如果没有设置这些属性，浏览器不知道大小的视频，浏览器就不能再加载时保留特定的空间，页面就会根据原始视频的大小而改变。
+
+`<video> 与 </video>` 标签之间插入的内容是提供给不支持 video 元素的浏览器显示的。
+
+`<video>` 元素支持多个 `<source> 元素，<source>` 元素可以链接不同的视频文件。浏览器将使用第一个可识别的格式。
+
+```html
+	<h3>HTML5 Vedio</h3>
+	<video width="300" height="500" controls>
+		<source src="video1/video1.mp4" type="video/mp4">
+			该浏览器不支持vedio
+	</video>
+	<div style="text-align: left;">
+		<button onclick="playPause()">播放/暂停</button>
+		<button onclick="makeBig()">放大</button>
+		<button onclick="makeSmall()">缩小</button>
+		<button onclick="makeNormal()">普通</button>
+		<br>
+		<video id="video1" width="320">
+			<source src="video1/video2.mp4" type="video/mp4">
+		</video>
+	</div>
+	<script type="text/javascript">
+		var myVideo=document.getElementById("video1");
+		function playPause(){
+			if (myVideo.paused) {
+				myVideo.play();
+			}else{
+				myVideo.pause();
+			}
+		}
+		function makeBig(){
+			myVideo.width=640;
+		}
+		function makeSmall(){
+			myVideo.width=200;
+		}
+		function makeNormal(){
+			myVideo.width=320;
+		}
+	</script>
+```
+
+### 视频格式
+
+- MP4 = 带有 H.264 视频编码和 AAC 音频编码的 MPEG 4 文件,  video/mp4
+- WebM = 带有 VP8 视频编码和 Vorbis 音频编码的 WebM 文件,  video/webm
+- Ogg = 带有 Theora 视频编码和 Vorbis 音频编码的 Ogg 文件,  video/ogg
+
+###  使用 DOM 进行控制
+
+HTML5 `<video>` 和 `<audio>` 元素同样拥有方法、属性和事件。
+
+`<video>` 和 `<audio>` 元素的方法、属性和事件可以使用JavaScript进行控制。
+
+其中的方法用于播放、暂停以及加载等。其中的属性（比如时长、音量等）可以被读取或设置。其中的 DOM 事件能够通知您，比方说，`<video>` 元素开始播放、已暂停，已停止，等等。
+
+### video属性
+
+|                             属性                             |         值         | 描述                                                         |
+| :----------------------------------------------------------: | :----------------: | :----------------------------------------------------------- |
+| [autoplay](https://www.nowcoder.com/tutorial/10010/548d3d533a154c2b96c574c80db8a209) |      autoplay      | 如果出现该属性，则视频在就绪后马上播放。                     |
+| [controls](https://www.nowcoder.com/tutorial/10010/a4ca492fcbf14c19a0e06db8ba66942e) |      controls      | 如果出现该属性，则向用户显示控件，比如播放按钮。             |
+| [height](https://www.nowcoder.com/tutorial/10010/9895c5ad4fb4473789f7d9dad5c23cef) |      *pixels*      | 设置视频播放器的高度。                                       |
+| [loop](https://www.nowcoder.com/tutorial/10010/2f6447994b854b16abe0c8a1d1a819f0) |        loop        | 如果出现该属性，则当媒介文件完成播放后再次开始播放。         |
+| [muted](https://www.nowcoder.com/tutorial/10010/40da56afbf7c463ea4cf709092a305cd) |       muted        | 如果出现该属性，视频的音频输出为静音。                       |
+| [poster](https://www.nowcoder.com/tutorial/10010/4d7ece6bb0144db3ac9d7a7db0bffab3) |       *URL*        | 规定视频正在下载时显示的图像，直到用户点击播放按钮。         |
+| [preload](https://www.nowcoder.com/tutorial/10010/dd1eaa2580f1417894b7b52286c9aaf4) | auto metadata none | 如果出现该属性，则视频在页面加载时进行加载，并预备播放。如果使用 "autoplay"，则忽略该属性。 |
+| [src](https://www.nowcoder.com/tutorial/10010/57356b7085c543dcb7929d2ad2912562) |       *URL*        | 要播放的视频的 URL。                                         |
+| [width](https://www.nowcoder.com/tutorial/10010/12b339dc570f4769b27c09c858e0df39) |      *pixels*      | 设置视频播放器的宽度。                                       |
+
+### source标签
+
+`<source>` 标签为媒体元素（比如 `<video>` 和 `<audio>`）定义媒体资源。
+
+`<source>` 标签允许您规定两个视频/音频文件共浏览器根据它对媒体类型或者编解码器的支持进行选择。
+
+|                             属性                             |      值       | 描述                                       |
+| :----------------------------------------------------------: | :-----------: | :----------------------------------------- |
+| [media](https://www.nowcoder.com/tutorial/10010/6022529e4d2f46c0b23afb3c7eeaad6e) | *media_query* | 规定媒体资源的类型，供浏览器决定是否下载。 |
+| [src](https://www.nowcoder.com/tutorial/10010/f6feada4223b47b182e99c5aa812e6f3) |     *URL*     | 规定媒体文件的 URL。                       |
+| [type](https://www.nowcoder.com/tutorial/10010/83a5c7e3dc104d3097233f347761a5a6) |  *MIME_type*  | 规定媒体资源的 MIME 类型。                 |
+
+### track标签
+
+```html
+<video width="320" height="240" controls>
+    <source src="forrest_gump.mp4" type="video/mp4">
+    <source src="forrest_gump.ogg" type="video/ogg">
+    <track src="subtitles_en.vtt" kind="subtitles" srclang="en" label="English">
+    <track src="subtitles_no.vtt" kind="subtitles" srclang="no" label="Norwegian">
+</video>
+```
+
+<`track>` 标签为媒体元素（比如 <`audio>` and <`video>`）规定外部文本轨道。
+
+这个元素用于规定字幕文件或其他包含文本的文件，当媒体播放时，这些文件是可见的。
+
+|                             属性                             |                        值                         | 描述                                                         |
+| :----------------------------------------------------------: | :-----------------------------------------------: | :----------------------------------------------------------- |
+| [default](https://www.nowcoder.com/tutorial/10010/1d90562126f34d3aa343e8f8d775a27f) |                      default                      | 规定该轨道是默认的。 如果用户没有选择任何轨道，则使用默认轨道。 |
+| [kind](https://www.nowcoder.com/tutorial/10010/6c16d0a6cee84a51ae3d3199303c1f92) | captions chapters descriptions metadata subtitles | 规定文本轨道的文本类型。                                     |
+| [label](https://www.nowcoder.com/tutorial/10010/580d80098c9c490a9355b7b5c32c75af) |                      *text*                       | 规定文本轨道的标签和标题。                                   |
+| [src](https://www.nowcoder.com/tutorial/10010/e8a0a28dec4f455fb66c3dc1189140c8) |                       *URL*                       | 必需的。规定轨道文件的 URL。                                 |
+| [srclang](https://www.nowcoder.com/tutorial/10010/55adbd0cc4e54ba0824fbf01c546ca34) |                  *language_code*                  | 规定轨道文本数据的语言。 如果 kind 属性值是 "subtitles"，则该属性是必需的。 |
+
+## Audio(音频)
+
+HTML5 规定了在网页上嵌入音频元素的标准，即使用 `<audio>` 元素。
+
+```html
+<audio controls>
+    <source src="horse.ogg" type="audio/ogg">
+    <source src="horse.mp3" type="audio/mpeg">
+    您的浏览器不支持 audio 元素。
+</audio>
+```
+
+control 属性供添加播放、暂停和音量控件。
+
+在 <`audio>` 与 <`/audio>` 之间你需要插入浏览器不支持的 <`audio>` 元素的提示文本 。
+
+<`audio>` 元素允许使用多个 <`source>` 元素， <`source>` 元素可以链接不同的音频文件，浏览器将使用第一个支持的音频文件。
+
+##  Input类型
+
+HTML5 拥有多个新的表单输入类型。这些新特性提供了更好的输入控制和验证。
+
+```html
+	<h3>HTML5 input类型</h3>
+	选择颜色:<input type="color" name="favcolor">
+	选择日期:<input type="date" name="birthday">
+	日期和时间：<input type="datetime" name="birthdaytime">
+	datetime-local:<input type="datetime-local" name="birthdaytime2">
+	年和月:<input type="month" name="month1">
+	<br>
+	E-mail:<input type="email" name="email1">
+	数值(0-100)：<input type="number" name="number1" min="0" max="100">
+	数值阈：<input type="range" name="range1" min="1" max="100" value="66">
+	搜索：<input type="search" name="search1">
+	电话:<input type="tel" name="tel1">
+	<br>
+	时间：<input type="time" name="time1">
+	URL:<input type="url" name="url1">
+	周：<input type="week" name="week1">
+	<hr>
+```
+
+**注意:** 并不是所有的主流浏览器都支持新的input类型，不过您已经可以在所有主流的浏览器中使用它们了。即使不被支持，仍然可以显示为常规的文本域。
+
