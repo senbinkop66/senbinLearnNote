@@ -147,6 +147,292 @@ p.marked {
 
 
 
+## CSS 组合选择符
+
+CSS组合选择符包括各种简单选择符的组合方式。
+
+在 CSS3 中包含了四种组合方式:
+
+- 后代选择器(以空格分隔)
+- 子元素选择器(以大于号分隔）
+- 相邻兄弟选择器（以加号分隔）
+- 普通兄弟选择器（以破折号分隔）
+
+*组合选择符说明了两个选择器直接的关系。*
+
+### 后代选择器
+
+后代选择器用于选取某元素的后代元素。
+
+以下实例选取所有在 `<div>` 元素中的 `<p>` 元素：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		div p {
+			background-color: yellow;
+		}
+	</style>
+</head>
+<body>
+
+	<div>
+		<p>段落 1。 在 div 中。</p>
+		<p>段落 2。 在 div 中。</p>
+	</div>
+
+	<p>段落 3。不在 div 中。</p>
+	<p>段落 4。不在 div 中。</p>
+
+</body>
+</html>
+```
+
+### 子元素选择器
+
+与后代选择器相比，子元素选择器（Child selectors）只能选择作为某元素子元素的元素。
+
+以下实例选择了 `<div>` 元素中所有**直接子元素** `<p>` ：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		div>p {
+			background-color: yellow;
+		}
+	</style>
+</head>
+
+<body>
+	<h1>Welcome to My Homepage</h1>
+	<div>
+		<h2>My name is Donald</h2>
+		<p>I live in Duckburg.</p>
+	</div>
+
+	<div>
+		<span>
+			<p>I will not be styled.</p>
+		</span>
+	</div>
+
+	<p>My best friend is Mickey.</p>
+</body>
+</html>
+```
+
+### 相邻兄弟选择器
+
+相邻兄弟选择器（Adjacent sibling selector）可选择紧接在另一元素后的元素，且二者有相同父元素。
+
+如果需要选择紧接在另一个元素后的元素，而且二者有相同的父元素，可以使用相邻兄弟选择器（Adjacent sibling selector）。
+
+以下实例选取了所有位于 `<div>` 元素后的第一个 `<p>` 元素：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		div+p {
+			background-color: yellow;
+		}
+	</style>
+</head>
+<body>
+
+	<h1>文章标题</h1>
+
+	<div>
+		<h2>DIV 内部标题</h2>
+		<p>DIV 内部段落。</p>
+	</div>
+
+	<p>DIV 之后的第一个 P 元素。</p>
+
+	<p>DIV 之后的第二个 P 元素。</p>
+
+</body>
+</html>
+```
+
+### 后续兄弟选择器
+
+后续兄弟选择器选取所有指定元素之后的相邻兄弟元素。
+
+以下实例选取了所有 `<div>` 元素之后的所有相邻兄弟元素 `<p>` :
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		div~p {
+			background-color: yellow;
+		}
+	</style>
+</head>
+<body>
+
+	<p>之前段落，不会添加背景颜色。</p>
+	<div>
+		<p>段落 1。 在 div 中。</p>
+		<p>段落 2。 在 div 中。</p>
+	</div>
+
+	<p>段落 3。不在 div 中。</p>
+	<p>段落 4。不在 div 中。</p>
+
+</body>
+</html>
+```
+
+
+
+## CSS 伪类
+
+CSS伪类是用来添加一些选择器的特殊效果。
+
+### 语法
+
+伪类的语法：
+
+```css
+selector:pseudo-class {property:value;}
+```
+
+CSS类也可以使用伪类
+
+```css
+selector.class:pseudo-class {property:value;}
+```
+
+### anchor伪类
+
+在支持 CSS 的浏览器中，链接的不同状态都可以以不同的方式显示。
+
+```css
+a:link {color:#FF0000;} /* 未访问的链接 */
+a:visited {color:#00FF00;} /* 已访问的链接 */
+a:hover {color:#FF00FF;} /* 鼠标划过链接 */
+a:active {color:#0000FF;} /* 已选中的链接 */
+```
+
+**注意：** 在CSS定义中，a:hover 必须被置于 a:link 和 a:visited 之后，才是有效的。
+
+**注意：** 在 CSS 定义中，a:active 必须被置于 a:hover 之后，才是有效的。
+
+**注意：**伪类的名称不区分大小写。
+
+### 伪类和CSS类
+
+伪类可以与 CSS 类配合使用：
+
+```css
+a.red:visited {color:#FF0000;}
+
+<a class="red" href="css-syntax.html">CSS 语法</a>
+```
+
+如果在上面的例子的链接已被访问，它会显示为红色。
+
+###  :first-child 伪类
+
+您可以使用 :first-child 伪类来选择父元素的第一个子元素。
+
+注意：在IE8的之前版本必须声明<!DOCTYPE> ，这样 :first-child 才能生效。
+
+#### 匹配第一个 \<p\> 元素
+
+在下面的例子中，选择器匹配作为任何元素的第一个子元素的
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		p:first-child {
+			color: blue;
+		}
+	</style>
+</head>
+
+<body>
+	<p>This is some text.</p>
+	<p>This is some text.</p>
+	<p><b>注意:</b>对于 :first-child 工作于 IE8 以及更早版本的浏览器, ！DOCTYPE 必须已经声明.</p>
+</body>
+</html>
+```
+
+#### 匹配所有 \<p\> 元素中的第一个 \<i\> 元素
+
+在下面的例子中，选择相匹配的所有 `<p>` 元素的第一个 `<i>` 元素：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		p>i:first-child {
+			color: blue;
+		}
+	</style>
+</head>
+
+<body>
+	<p>I am a <i>strong</i> man. I am a <i>strong</i> man.</p>
+	<p>I am a <i>strong</i> man. I am a <i>strong</i> man.</p>
+	<p><b>注意:</b> 当 :first-child 作用于 IE8 以及更早版本的浏览器, ！DOCTYPE 必须已经定义.</p>
+</body>
+</html>
+```
+
+#### 匹配所有作为第一个子元素的 \<p\> 元素中的所有 \<i\> 元素
+
+在下面的例子中，选择器匹配所有作为元素的第一个子元素的 `<p>` 元素中的所有 `<i>` 元素：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		p:first-child i {
+			color: blue;
+		}
+	</style>
+</head>
+
+<body>
+	<p>I am a <i>strong</i> man. I am a <i>strong</i> man.</p>
+	<p>I am a <i>strong</i> man. I am a <i>strong</i> man.</p>
+	<p><b>注意:</b> 当:first-child 作用于 IE8 及更早版本的浏览器, DOCTYPE 必须已经定义.</p>
+</body>
+</html>
+```
+
+
+
+
+
 ## CSS 创建
 
 ### 如何插入样式表
@@ -1914,3 +2200,537 @@ img {
 |    %    | 设置以包含元素的百分比计的底边位置。可使用负值。   |
 | length  | 使用 px、cm 等单位设置元素的底边位置。可使用负值。 |
 | inherit | 规定应该从父元素继承 bottom 属性的值。             |
+
+### left 属性
+
+```css
+/*把图像的左边缘设置在其包含元素左边缘向右5像素的位置：*/
+img {
+    position:absolute;
+    left:5px;
+}
+```
+
+left 属性规定元素的左边缘。该属性定义了定位元素左外边距边界与其包含块左边界之间的偏移。
+
+如果 "position" 属性的值为 "static"，那么设置 "left" 属性不会产生任何效果。
+
+|   值    | 描述                                               |
+| :-----: | :------------------------------------------------- |
+|  auto   | 默认值。通过浏览器计算左边缘的位置。               |
+|    %    | 设置以包含元素的百分比计的左边位置。可使用负值。   |
+| length  | 使用 px、cm 等单位设置元素的左边位置。可使用负值。 |
+| inherit | 规定应该从父元素继承 left 属性的值。               |
+
+### right 属性
+
+```css
+/*把图像的右边缘设置在其包含元素右边缘向左 5 像素的位置：：*/
+img {
+    position:absolute;
+    left:5px;
+}
+```
+
+对于 static 元素，为 auto；对于长度值，则为相应的绝对长度；对于百分比数值，为指定值；否则为 auto。 对于相对定义元素，left 的计算值始终等于 right。
+
+right 属性规定元素的右边缘。该属性定义了定位元素右外边距边界与其包含块右边界之间的偏移。
+
+**注意：** 如果 "position" 属性的值为 "static"，那么设置 "right" 属性不会产生任何效果。
+
+|   值    | 描述                                               |
+| :-----: | :------------------------------------------------- |
+|  auto   | 默认值。通过浏览器计算右边缘的位置。               |
+|    %    | 设置以包含元素的百分比计的右边位置。可使用负值。   |
+| length  | 使用 px、cm 等单位设置元素的右边位置。可使用负值。 |
+| inherit | 规定应该从父元素继承 right 属性的值。              |
+
+### clip 属性
+
+裁剪一张图像：
+
+```css
+img {
+    position:absolute;
+    clip:rect(0px,60px,200px,0px);
+}
+```
+
+如果图像大于包含它的元素，会发生什么？-clip属性，让你指定一个绝对定位的元素，该尺寸应该是可见的，该元素被剪裁成这种形状并显示。
+
+**注意：**如果先有"overflow：visible"，clip属性不起作用。
+
+|   值    | 描述                                                         |
+| :-----: | :----------------------------------------------------------- |
+|  shape  | 设置元素的形状。唯一合法的形状值是：rect (top, right, bottom, left) |
+|  auto   | 默认值。不应用任何剪裁。                                     |
+| inherit | 规定应该从父元素继承 clip 属性的值。                         |
+
+### cursor 属性
+
+一些不同的光标：
+
+```css
+span.crosshair {cursor:crosshair}
+span.help {cursor:help}
+span.wait {cursor:wait}
+```
+
+cursor属性定义了鼠标指针放在一个元素边界范围内时所用的光标形状
+
+|    值     | 描述                                                         |
+| :-------: | :----------------------------------------------------------- |
+|    url    | 需使用的自定义光标的 URL。 注释：请在此列表的末端始终定义一种普通的光标，以防没有由 URL 定义的可用光标。 |
+|  default  | 默认光标（通常是一个箭头）                                   |
+|   auto    | 默认。浏览器设置的光标。                                     |
+| crosshair | 光标呈现为十字线。                                           |
+|  pointer  | 光标呈现为指示链接的指针（一只手）                           |
+|   move    | 此光标指示某对象可被移动。                                   |
+| e-resize  | 此光标指示矩形框的边缘可被向右（东）移动。                   |
+| ne-resize | 此光标指示矩形框的边缘可被向上及向右移动（北/东）。          |
+| nw-resize | 此光标指示矩形框的边缘可被向上及向左移动（北/西）。          |
+| n-resize  | 此光标指示矩形框的边缘可被向上（北）移动。                   |
+| se-resize | 此光标指示矩形框的边缘可被向下及向右移动（南/东）。          |
+| sw-resize | 此光标指示矩形框的边缘可被向下及向左移动（南/西）。          |
+| s-resize  | 此光标指示矩形框的边缘可被向下移动（北/西）。                |
+| w-resize  | 此光标指示矩形框的边缘可被向左移动（西）。                   |
+|   text    | 此光标指示文本。                                             |
+|   wait    | 此光标指示程序正忙（通常是一只表或沙漏）。                   |
+|   help    | 此光标指示可用的帮助（通常是一个问号或一个气球）。           |
+
+### z-index 属性
+
+设置图像的 z-index：
+
+```css
+img {
+    position:absolute;
+    left:0px;
+    top:0px;
+    z-index:-1;
+}
+```
+
+z-index 属性指定一个元素的堆叠顺序。
+
+拥有更高堆叠顺序的元素总是会处于堆叠顺序较低的元素的前面。
+
+|   值    | 描述                                    |
+| :-----: | :-------------------------------------- |
+|  auto   | 默认。堆叠顺序与父元素相等。            |
+| number  | 设置元素的堆叠顺序。                    |
+| inherit | 规定应该从父元素继承 z-index 属性的值。 |
+
+
+
+## CSS 布局
+
+###  overflow 属性
+
+CSS overflow 属性用于控制内容溢出元素框时显示的方式。默认情况下，overflow 的值为 visible， 意思是内容溢出元素框。
+
+```css
+div.ex1 {
+    overflow: scroll;
+}
+
+div.ex2 {
+    overflow: hidden;
+}
+
+div.ex3 {
+    overflow: auto;
+}
+
+div.ex4 {
+    overflow: visible;
+}
+```
+
+CSS overflow 属性可以控制内容溢出元素框时在对应的元素区间内添加滚动条。
+
+overflow属性有以下值：
+
+|   值    | 描述                                                     |
+| :-----: | :------------------------------------------------------- |
+| visible | 默认值。内容不会被修剪，会呈现在元素框之外。             |
+| hidden  | 内容会被修剪，并且其余内容是不可见的。                   |
+| scroll  | 内容会被修剪，但是浏览器会显示滚动条以便查看其余的内容。 |
+|  auto   | 如果内容被修剪，则浏览器会显示滚动条以便查看其余的内容。 |
+| inherit | 规定应该从父元素继承 overflow 属性的值。                 |
+
+**注意:**overflow 属性只工作于指定高度的块元素上。
+
+**注意:** 在 OS X Lion ( Mac 系统) 系统上，滚动条默认是隐藏的，使用的时候才会显示 (设置 "overflow:scroll" 也是一样的)。
+
+### overflow-x 属性
+
+overflow-x属性指定如果它溢出了元素的内容区是否剪辑左/右边缘内容。
+
+**提示:** 使用overflow-y属性来判断顶部和底部边缘是否裁剪。
+
+```css
+div {
+    overflow-x:hidden;
+}
+overflow-x: visible|hidden|scroll|auto|no-display|no-content;
+```
+
+|     值     | 描述                                   |
+| :--------: | :------------------------------------- |
+|  visible   | 不裁剪内容，可能会显示在内容框之外。   |
+|   hidden   | 裁剪内容 - 不提供滚动机制。            |
+|   scroll   | 裁剪内容 - 提供滚动机制。              |
+|    auto    | 如果溢出框，则应该提供滚动机制。       |
+| no-display | 如果内容不适合内容框，则删除整个框。   |
+| no-content | 如果内容不适合内容框，则隐藏整个内容。 |
+
+### overflow-y 属性
+
+overflow-y属性指定如果它溢出了元素的内容区是否剪辑顶部/底部边缘内容。
+
+**提示:**使用 [overflow-x](https://www.nowcoder.com/tutorial/10011/903627ea4f2c471ea9144cbc81935663) 属性来判断左右边缘是否裁剪。
+
+```css
+overflow-y: visible|hidden|scroll|auto|no-display|no-content;
+```
+
+|     值     | 描述                                   |
+| :--------: | :------------------------------------- |
+|  visible   | 不裁剪内容，可能会显示在内容框之外。   |
+|   hidden   | 裁剪内容 - 不提供滚动机制。            |
+|   scroll   | 裁剪内容 - 提供滚动机制。              |
+|    auto    | 如果溢出框，则应该提供滚动机制。       |
+| no-display | 如果内容不适合内容框，则删除整个框。   |
+| no-content | 如果内容不适合内容框，则隐藏整个内容。 |
+
+
+
+## CSS 浮动
+
+CSS 的 Float（浮动），会使元素向左或向右移动，其周围的元素也会重新排列。
+
+Float（浮动），往往是用于图像，但它在布局时一样非常有用。
+
+### 元素怎样浮动
+
+元素的水平方向浮动，意味着元素只能左右移动而不能上下移动。
+
+一个浮动元素会尽量向左或向右移动，直到它的外边缘碰到包含框或另一个浮动框的边框为止。
+
+浮动元素之后的元素将围绕它。浮动元素之前的元素将不会受到影响。
+
+如果图像是右浮动，下面的文本流将环绕在它左边：
+
+```css
+img {
+    float:right;
+}
+```
+
+### 彼此相邻的浮动元素
+
+如果你把几个浮动的元素放到一起，如果有空间的话，它们将彼此相邻。
+
+在这里，我们对图片廊使用 float 属性：
+
+```css
+.thumbnail {
+    float:left;
+    width:110px;
+    height:90px;
+    margin:5px;
+}
+```
+
+### 清除浮动 
+
+元素浮动之后，周围的元素会重新排列，为了避免这种情况，使用 clear 属性。
+
+clear 属性指定元素两侧不能出现浮动元素。
+
+使用 clear 属性往文本中添加图片廊：
+
+```css
+.text_line {
+    clear:both;
+}
+```
+
+### float 属性
+
+float属性指定一个盒子（元素）是否应该浮动。
+
+|   值    | 描述                                                 |
+| :-----: | :--------------------------------------------------- |
+|  left   | 元素向左浮动。                                       |
+|  right  | 元素向右浮动。                                       |
+|  none   | 默认值。元素不浮动，并会显示在其在文本中出现的位置。 |
+| inherit | 规定应该从父元素继承 float 属性的值。                |
+
+### clear 属性
+
+clear属性指定段落的左侧或右侧不允许浮动的元素。
+
+```css
+img {
+    float:left;
+}
+p.clear {
+    clear:both;
+}
+```
+
+|   值    | 描述                                  |
+| :-----: | :------------------------------------ |
+|  left   | 在左侧不允许浮动元素。                |
+|  right  | 在右侧不允许浮动元素。                |
+|  both   | 在左右两侧均不允许浮动元素。          |
+|  none   | 默认值。允许浮动元素出现在两侧。      |
+| inherit | 规定应该从父元素继承 clear 属性的值。 |
+
+
+
+## CSS 对齐
+
+### 水平 & 垂直对齐
+
+要水平居中对齐一个元素(如 `<div>`)，可以使用 **margin: auto;**。
+
+设置到元素的宽度将防止它溢出到容器的边缘。元素通过指定宽度，并将两边的空外边距平均分配：
+
+```css
+.center {
+    margin: auto;
+    width: 50%;
+    border: 3px solid green;
+    padding: 10px;
+}
+```
+
+**注意:** 如果没有设置 **width** 属性(或者设置 100%)，居中对齐将不起作用。
+
+### 文本居中对齐
+
+如果仅仅是为了文本在元素内居中对齐，可以使用 **text-align: center;**
+
+```css
+.center {
+    text-align: center;
+    border: 3px solid green;
+}
+```
+
+### 图片居中对齐
+
+要让图片居中对齐, 可以使用 **margin: auto;** 并将它放到 **块** 元素中：
+
+```css
+img {
+    display: block;
+    margin: auto;
+    width: 40%;
+}
+```
+
+### 左右对齐 - 使用定位方式
+
+我们可以使用 **position: absolute;** 属性来对齐元素:
+
+```css
+/*右对齐*/
+.right {
+    position: absolute;
+    right: 0px;
+    width: 300px;
+    border: 3px solid #73AD21;
+    padding: 10px;
+}
+```
+
+注释：绝对定位元素会被从正常流中删除，并且能够交叠元素。
+
+**提示:** 当使用 **position** 来对齐元素时, 通常 `<body>` 元素会设置 **margin** 和 **padding** 。 这样可以避免在不同的浏览器中出现可见的差异。
+
+当使用 position 属性时，IE8 以及更早的版本存在一个问题。如果容器元素（在我们的案例中是 `<div class="container">`）设置了指定的宽度，并且省略了 !DOCTYPE 声明，那么 IE8 以及更早的版本会在右侧增加 17px 的外边距。这似乎是为滚动条预留的空间。当使用 position 属性时，请始终设置 !DOCTYPE 声明：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
+
+		.container {
+			position: relative;
+			width: 100%;
+		}
+
+		.right {
+			position: absolute;
+			right: 0px;
+			width: 300px;
+			background-color: #b0e0e6;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="right">
+			<p><b>注意: </b>当使用浮动属性对齐,总是包括 !DOCTYPE 声明!如果丢失,它将会在 IE 浏览器产生奇怪的结果。</p>
+		</div>
+	</div>
+</body>
+</html>
+```
+
+### 左右对齐 - 使用 float 方式
+
+我们也可以使用 **float** 属性来对齐元素：
+
+```
+.right {
+    float: right;
+    width: 300px;
+    border: 3px solid #73AD21;
+    padding: 10px;
+}
+```
+
+当像这样对齐元素时，对 `<body>` 元素的外边距和内边距进行预定义是一个好主意。这样可以避免在不同的浏览器中出现可见的差异。
+
+*注意：如果子元素的高度大于父元素，且子元素设置了浮动，那么子元素将溢出，这时候你可以使用 "clearfix(清除浮动)" 来解决该问题。*
+
+我们可以在父元素上添加 overflow: auto; 来解决子元素溢出的问题:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		div {
+			border: 3px solid #4CAF50;
+			padding: 5px;
+		}
+
+		.img1 {
+			float: right;
+		}
+
+		.clearfix {
+			overflow: auto;
+		}
+
+		.img2 {
+			float: right;
+		}
+	</style>
+</head>
+<body>
+
+	<p>以下实例图在父元素中溢出，很不美观:</p>
+
+	<div>
+		<img class="img1" src="//static.nowcoder.com/tutorial/web-examples/img/pineapple.jpg" alt="Pineapple" width="170" height="170">
+		牛客教程 - 学的不仅是技术，更是梦想！！！</div>
+
+	<p style="clear:right">在父元素上通过添加 clearfix 类，并设置 overflow: auto; 来解决该问题:</p>
+
+	<div class="clearfix">
+		<img class="img2" src="//static.nowcoder.com/tutorial/web-examples/img/pineapple.jpg" alt="Pineapple" width="170" height="170">
+		牛客教程 - 学的不仅是技术，更是梦想！！！</div>
+
+</body>
+</html>
+```
+
+### 垂直居中对齐 - 使用 padding
+
+CSS 中有很多方式可以实现垂直居中对齐。 一个简单的方式就是头部顶部使用 **padding**：
+
+```css
+.center {
+    padding: 70px 0;
+    border: 3px solid green;
+}
+```
+
+如果要水平和垂直都居中，可以使用 **padding** 和 **text-align: center**：
+
+```css
+.center {
+    padding: 70px 0;
+    border: 3px solid green;
+    text-align: center;
+}
+```
+
+### 垂直居中 - 使用 line-height
+
+```css
+.center {
+    line-height: 200px;
+    height: 200px;
+    border: 3px solid green;
+    text-align: center;
+}
+
+/* 如果文本有多行，添加以下代码: */
+.center p {
+    line-height: 1.5;
+    display: inline-block;
+    vertical-align: middle;
+}
+```
+
+### 垂直居中 - 使用 position 和 transform
+
+除了使用 **padding** 和 **line-height** 属性外,我们还可以使用 **transform** 属性来设置垂直居中：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		.center {
+			height: 200px;
+			position: relative;
+			border: 3px solid green;
+		}
+
+		.center p {
+			margin: 0;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			-ms-transform: translate(-50%, -50%);
+			transform: translate(-50%, -50%);
+		}
+	</style>
+</head>
+<body>
+
+	<h2>居中</h2>
+	<p>以下实例中，我们使用了 positioning 和 transform 属性来设置水平和垂直居中：</p>
+
+	<div class="center">
+		<p>我是水平和垂直居中的。</p>
+	</div>
+
+	<p>注意: IE8 及更早版本不支持 transform 属性。</p>
+
+</body>
+</html>
+```
+
+
+
