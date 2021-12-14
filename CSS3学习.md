@@ -862,3 +862,1082 @@ transform-Origin属性允许您更改转换元素的位置。2D转换元素可�
 |         skewY(*angle*)          |      定义 2D 倾斜转换，沿着 Y 轴。       |
 
 # CSS3 3D 转换
+
+CSS3 允许您使用 3D 转换来对元素进行格式化。
+
+## rotateX() 方法
+
+rotateX()方法，围绕其在一个给定度数X轴旋转的元素。
+
+```css
+div {
+    transform: rotateX(120deg);
+    -webkit-transform: rotateX(120deg); /* Safari 与 Chrome */
+}
+```
+
+## rotateY() 方法
+
+rotateY()方法，围绕其在一个给定度数Y轴旋转的元素。
+
+```css
+div {
+    transform: rotateY(130deg);
+    -webkit-transform: rotateY(130deg); /* Safari 与 Chrome */
+}
+```
+
+## 转换属性
+
+|                             属性                             |                 描述                 | CSS  |
+| :----------------------------------------------------------: | :----------------------------------: | :--: |
+| [transform](https://www.nowcoder.com/tutorial/10011/dbad0455be3f467197928acaf887e901) |      向元素应用 2D 或 3D 转换。      |  3   |
+| [transform-origin](https://www.nowcoder.com/tutorial/10011/e9c5f333a97249d79755c41a7753f97b) |     允许你改变被转换元素的位置。     |  3   |
+| [transform-style](https://www.nowcoder.com/tutorial/10011/2ea5a56b4b8b4545a34fd724b134c23c) | 规定被嵌套元素如何在 3D 空间中显示。 |  3   |
+| [perspective](https://www.nowcoder.com/tutorial/10011/56e3d68cb7fb4da19e9f4d9adc2ab56c) |       规定 3D 元素的透视效果。       |  3   |
+| [perspective-origin](https://www.nowcoder.com/tutorial/10011/74a2c7716b764ebd933ead4bff48d720) |       规定 3D 元素的底部位置。       |  3   |
+| [backface-visibility](https://www.nowcoder.com/tutorial/10011/dcbfe9fb4d6146b590385ccd9b489cd7) |   定义元素在不面对屏幕时是否可见。   |  3   |
+
+## 3D 转换方法
+
+|                             函数                             |                   描述                    |
+| :----------------------------------------------------------: | :---------------------------------------: |
+| matrix3d(*n*,*n*,*n*,*n*,*n*,*n*, *n*,*n*,*n*,*n*,*n*,*n*,*n*,*n*,*n*,*n*) |  定义 3D 转换，使用 16 个值的 4x4 矩阵。  |
+|                   translate3d(*x*,*y*,*z*)                   |              定义 3D 转化。               |
+|                       translateX(*x*)                        |    定义 3D 转化，仅使用用于 X 轴的值。    |
+|                       translateY(*y*)                        |    定义 3D 转化，仅使用用于 Y 轴的值。    |
+|                       translateZ(*z*)                        |    定义 3D 转化，仅使用用于 Z 轴的值。    |
+|                     scale3d(*x*,*y*,*z*)                     |            定义 3D 缩放转换。             |
+|                         scaleX(*x*)                          | 定义 3D 缩放转换，通过给定一个 X 轴的值。 |
+|                         scaleY(*y*)                          | 定义 3D 缩放转换，通过给定一个 Y 轴的值。 |
+|                         scaleZ(*z*)                          | 定义 3D 缩放转换，通过给定一个 Z 轴的值。 |
+|                rotate3d(*x*,*y*,*z*,*angle*)                 |              定义 3D 旋转。               |
+|                       rotateX(*angle*)                       |          定义沿 X 轴的 3D 旋转。          |
+|                       rotateY(*angle*)                       |          定义沿 Y 轴的 3D 旋转。          |
+|                       rotateZ(*angle*)                       |          定义沿 Z 轴的 3D 旋转。          |
+|                       perspective(*n*)                       |       定义 3D 转换元素的透视视图。        |
+
+# CSS3 过渡
+
+## 过渡如何工作
+
+CSS3 过渡是元素从一种样式逐渐改变为另一种的效果。
+
+要实现这一点，必须规定两项内容：
+
+- 指定要添加效果的CSS属性
+- 指定效果的持续时间。
+
+应用于宽度属性的过渡效果，时长为 2 秒：
+
+```css
+div {
+    transition: width 2s;
+    -webkit-transition: width 2s; /* Safari */
+}
+```
+
+**注意：** 如果未指定的期限，transition将没有任何效果，因为默认值是0。
+
+指定的CSS属性的值更改时效果会发生变化。一个典型CSS属性的变化是用户鼠标放在一个元素上时：
+
+规定当鼠标指针悬浮(:hover)于 `<div>` 元素上时：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		div {
+			width: 100px;
+			height: 100px;
+			background: red;
+			transition: width 2s;
+			-webkit-transition: width 2s;
+			/* Safari */
+		}
+
+		div:hover {
+			width: 300px;
+		}
+	</style>
+</head>
+<body>
+
+	<p><b>注意：</b>该实例无法在 Internet Explorer 9 及更早 IE 版本上工作。</p>
+
+	<div></div>
+
+	<p>鼠标移动到 div 元素上，查看过渡效果。</p>
+
+</body>
+</html>
+```
+
+## 多项改变
+
+要添加多个样式的变换效果，添加的属性由逗号分隔：
+
+添加了宽度，高度和转换效果：
+
+```css
+div {
+    transition: width 2s, height 2s, transform 2s;
+    -webkit-transition: width 2s, height 2s, -webkit-transform 2s;
+}
+```
+
+## 过渡属性
+
+|                             属性                             |                     描述                     | CSS  |
+| :----------------------------------------------------------: | :------------------------------------------: | :--: |
+| [transition](https://www.nowcoder.com/tutorial/10011/9e9d4291d496406abf6ae523999affb8) | 简写属性，用于在一个属性中设置四个过渡属性。 |  3   |
+| [transition-property](https://www.nowcoder.com/tutorial/10011/c4fb0b0dd04345449565d546154f61f9) |       规定应用过渡的 CSS 属性的名称。        |  3   |
+| [transition-duration](https://www.nowcoder.com/tutorial/10011/7ada4d9bc686469a955eabb367220655) |      定义过渡效果花费的时间。默认是 0。      |  3   |
+| [transition-timing-function](https://www.nowcoder.com/tutorial/10011/cf74c11503b648fe9be8dd0eea14fc9c) |   规定过渡效果的时间曲线。默认是 "ease"。    |  3   |
+| [transition-delay](https://www.nowcoder.com/tutorial/10011/78ec3bf160514d7f93795b1826fb50bd) |       规定过渡效果何时开始。默认是 0。       |  3   |
+
+# CSS3 动画
+
+CSS3 可以创建动画，它可以取代许多网页动画图像、Flash 动画和 JavaScript 实现的效果。
+
+动画是使元素从一种样式逐渐变化为另一种样式的效果。您可以改变任意多的样式任意多的次数。
+
+请用百分比来规定变化发生的时间，或用关键词 "from" 和 "to"，等同于 0% 和 100%。0% 是动画的开始，100% 是动画的完成。
+
+为了得到最佳的浏览器支持，您应该始终定义 0% 和 100% 选择器。
+
+## CSS3 @keyframes 规则
+
+要创建 CSS3 动画，你需要了解 @keyframes 规则。
+
+@keyframes 规则是创建动画。@keyframes 规则内指定一个 CSS 样式和动画将逐步从目前的样式更改为新的样式。
+
+```css
+@keyframes myfirst {
+    from {background: red;}
+    to {background: yellow;}
+}
+
+@-webkit-keyframes myfirst /* Safari 与 Chrome */ {
+    from {background: red;}
+    to {background: yellow;}
+}
+```
+
+## 动画使用
+
+当在 **@keyframes** 创建动画，把它绑定到一个选择器，否则动画不会有任何效果。
+
+指定至少这两个CSS3的动画属性绑定向一个选择器：
+
+- 规定动画的名称
+- 规定动画的时长
+
+把 "myfirst" 动画捆绑到 div 元素，时长：5 秒：
+
+```css
+div {
+    animation: myfirst 5s;
+    -webkit-animation: myfirst 5s; /* Safari 与 Chrome */
+}
+```
+
+**注意:** 您必须定义动画的名称和动画的持续时间。如果省略的持续时间，动画将无法运行，因为默认值是0。
+
+当动画为 25% 及 50% 时改变背景色，然后当动画 100% 完成时再次改变：
+
+```css
+@keyframes myfirst {
+    0%   {background: red;}
+    25%  {background: yellow;}
+    50%  {background: blue;}
+    100% {background: green;}
+}
+
+@-webkit-keyframes myfirst { /* Safari 与 Chrome */ 
+    0%   {background: red;}
+    25%  {background: yellow;}
+    50%  {background: blue;}
+    100% {background: green;}
+}
+```
+
+改变背景色和位置：
+
+```css
+@keyframes myfirst {
+    0%   {background: red; left:0px; top:0px;}
+    25%  {background: yellow; left:200px; top:0px;}
+    50%  {background: blue; left:200px; top:200px;}
+    75%  {background: green; left:0px; top:200px;}
+    100% {background: red; left:0px; top:0px;}
+}
+
+@-webkit-keyframes myfirst { /* Safari 与 Chrome */ 
+    0%   {background: red; left:0px; top:0px;}
+    25%  {background: yellow; left:200px; top:0px;}
+    50%  {background: blue; left:200px; top:200px;}
+    75%  {background: green; left:0px; top:200px;}
+    100% {background: red; left:0px; top:0px;}
+}
+```
+
+## CSS3的动画属性
+
+|                             属性                             | 描述                                                         | CSS  |
+| :----------------------------------------------------------: | :----------------------------------------------------------- | :--: |
+| [@keyframes](https://www.nowcoder.com/tutorial/10011/c28ea81c966e458a8a055f59e8b52db7) | 规定动画。                                                   |  3   |
+| [animation](https://www.nowcoder.com/tutorial/10011/0f634c81b5d142eea6725d2224f98a80) | 所有动画属性的简写属性，除了 animation-play-state 属性。     |  3   |
+| [animation-name](https://www.nowcoder.com/tutorial/10011/085233625d2d4ac991cadd951f33b067) | 规定 @keyframes 动画的名称。                                 |  3   |
+| [animation-duration](https://www.nowcoder.com/tutorial/10011/88b0103a22054c05a6d2abbd10aaa0aa) | 规定动画完成一个周期所花费的秒或毫秒。默认是 0。             |  3   |
+| [animation-timing-function](https://www.nowcoder.com/tutorial/10011/d57c7fbfa0264f4aa7d308025a1a83fd) | 规定动画的速度曲线。默认是 "ease"。                          |  3   |
+| [animation-fill-mode](https://www.nowcoder.com/tutorial/10011/c48f6da3163e495aa12f113306cdb578) | 规定当动画不播放时（当动画完成时，或当动画有一个延迟未开始播放时），要应用到元素的样式。 |  3   |
+| [animation-delay](https://www.nowcoder.com/tutorial/10011/eec8b6a0d2ef435db70148f5f2c30c1b) | 规定动画何时开始。默认是 0。                                 |  3   |
+| [animation-iteration-count](https://www.nowcoder.com/tutorial/10011/781743b4a2504c2ca04db66112434b9b) | 规定动画被播放的次数。默认是 1。                             |  3   |
+| [animation-direction](https://www.nowcoder.com/tutorial/10011/215fde613e244ecaa81f62f2851d0a5e) | 规定动画是否在下一周期逆向地播放。默认是 "normal"。          |  3   |
+| [animation-play-state](https://www.nowcoder.com/tutorial/10011/64328ec94e384f61a148103d148470f6) | 规定动画是否正在运行或暂停。默认是 "running"。               |      |
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		div {
+			width: 100px;
+			height: 100px;
+			background: red;
+			position: relative;
+			animation-name: myfirst;
+			animation-duration: 5s;
+			animation-timing-function: linear;
+			animation-delay: 2s;
+			animation-iteration-count: infinite;
+			animation-direction: alternate;
+			animation-play-state: running;
+			/* Safari and Chrome: */
+			-webkit-animation-name: myfirst;
+			-webkit-animation-duration: 5s;
+			-webkit-animation-timing-function: linear;
+			-webkit-animation-delay: 2s;
+			-webkit-animation-iteration-count: infinite;
+			-webkit-animation-direction: alternate;
+			-webkit-animation-play-state: running;
+		}
+
+		@keyframes myfirst {
+			0% {
+				background: red;
+				left: 0px;
+				top: 0px;
+			}
+
+			25% {
+				background: yellow;
+				left: 200px;
+				top: 0px;
+			}
+
+			50% {
+				background: blue;
+				left: 200px;
+				top: 200px;
+			}
+
+			75% {
+				background: green;
+				left: 0px;
+				top: 200px;
+			}
+
+			100% {
+				background: red;
+				left: 0px;
+				top: 0px;
+			}
+		}
+
+		@-webkit-keyframes myfirst
+
+		/* Safari and Chrome */
+			{
+			0% {
+				background: red;
+				left: 0px;
+				top: 0px;
+			}
+
+			25% {
+				background: yellow;
+				left: 200px;
+				top: 0px;
+			}
+
+			50% {
+				background: blue;
+				left: 200px;
+				top: 200px;
+			}
+
+			75% {
+				background: green;
+				left: 0px;
+				top: 200px;
+			}
+
+			100% {
+				background: red;
+				left: 0px;
+				top: 0px;
+			}
+		}
+	</style>
+</head>
+<body>
+
+	<p><b>注意:</b> 该实例在 Internet Explorer 9 及更早 IE 版本是无效的。</p>
+
+	<div></div>
+
+</body>
+</html>
+```
+
+# CSS3 多列
+
+## CSS3 多列属性
+
+|                             属性                             |                   描述                   |
+| :----------------------------------------------------------: | :--------------------------------------: |
+| [column-count](https://www.nowcoder.com/tutorial/10011/69baf9478b15405b9fb9d592b682d6e7) |        指定元素应该被分割的列数。        |
+| [column-fill](https://www.nowcoder.com/tutorial/10011/eae377b668864fa79a57fe9af0842b4b) |              指定如何填充列              |
+| [column-gap](https://www.nowcoder.com/tutorial/10011/7100840231b14a3990b8ce1e8a20e483) |           指定列与列之间的间隙           |
+| [column-rule](https://www.nowcoder.com/tutorial/10011/6f065ec6f20b4675b882e1f7762f0db5) |      所有 column-rule-* 属性的简写       |
+| [column-rule-color](https://www.nowcoder.com/tutorial/10011/4ab67085325e43eeb16baed30b970a9e) |           指定两列间边框的颜色           |
+| [column-rule-style](https://www.nowcoder.com/tutorial/10011/717e3fcedff843da977b5a724420d026) |           指定两列间边框的样式           |
+| [column-rule-width](https://www.nowcoder.com/tutorial/10011/de6a518bcb914ab5b889188ac830f560) |           指定两列间边框的厚度           |
+| [column-span](https://www.nowcoder.com/tutorial/10011/3f951c61a0914ab28891394de06b296c) |           指定元素要跨越多少列           |
+| [column-width](https://www.nowcoder.com/tutorial/10011/df662d5e5ffa4547afa0a749081a10b4) |               指定列的宽度               |
+| [columns](https://www.nowcoder.com/tutorial/10011/e256a850e24e4bc5a820e45a58c1a6b2) | 设置 column-width 和 column-count 的简写 |
+
+## CSS3 创建多列
+
+`column-count` 属性指定了需要分割的列数。
+
+以下实例将 `<div>` 元素中的文本分为 3 列：
+
+```css
+div {
+    -webkit-column-count: 3; /* Chrome, Safari, Opera */
+    -moz-column-count: 3; /* Firefox */
+    column-count: 3;
+}
+```
+
+## CSS3 多列中列与列间的间隙
+
+`column-gap` 属性指定了列与列间的间隙。
+
+以下实例指定了列与列间的间隙为 40 像素：
+
+```css
+		.newspaper {
+			-moz-column-count: 3;
+			/* Firefox */
+			-webkit-column-count: 3;
+			/* Safari and Chrome */
+			column-count: 3;
+
+			-moz-column-gap: 40px;
+			/* Firefox */
+			-webkit-column-gap: 40px;
+			/* Safari and Chrome */
+			column-gap: 40px;
+		}
+```
+
+## CSS3 列边框
+
+`column-rule-style` 属性指定了列与列间的边框样式：
+
+```css
+div {
+    -webkit-column-rule-style: solid; /* Chrome, Safari, Opera */
+    -moz-column-rule-style: solid; /* Firefox */
+    column-rule-style: solid;
+}
+```
+
+`column-rule-width` 属性指定了两列的边框厚度：
+
+```css
+div {
+    -webkit-column-rule-width: 1px; /* Chrome, Safari, Opera */
+    -moz-column-rule-width: 1px; /* Firefox */
+    column-rule-width: 1px;
+}
+```
+
+`column-rule-color` 属性指定了两列的边框颜色：
+
+```css
+div {
+    -webkit-column-rule-color: lightblue; /* Chrome, Safari, Opera */
+    -moz-column-rule-color: lightblue; /* Firefox */
+    column-rule-color: lightblue;
+}
+```
+
+`column-rule` 属性是 column-rule-* 所有属性的简写。
+
+以下实例设置了列直接的边框的厚度，样式及颜色：
+
+```css
+div {
+    -webkit-column-rule: 1px solid lightblue; /* Chrome, Safari, Opera */
+    -moz-column-rule: 1px solid lightblue; /* Firefox */
+    column-rule: 1px solid lightblue;
+}
+```
+
+## 指定元素跨越多少列
+
+以下实例指定 `<h2>` 元素跨越所有列：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		.newspaper {
+			column-count: 3;
+			-moz-column-count: 3;
+			/* Firefox */
+			-webkit-column-count: 3;
+			/* Safari and Chrome */
+
+		}
+
+		h2 {
+			column-span: all;
+			-webkit-column-span: all;
+			/* Safari and Chrome */
+		}
+	</style>
+</head>
+<body>
+
+	<p><b>注意:</b> Internet Explorer 9及更早 IE 版本浏览器不支持 column-count 属性。</p>
+
+	<div class="newspaper">
+		<h2>英国维斯米斯特教堂碑文</h2>
+		当我年轻的时候，我梦想改变这个世界；当我成熟以后，我发现我不能够改变这个世界，我将目光缩短了些，决定只改变我的国家；当我进入暮年以后，我发现我不能够改变我们的国家，我的最后愿望仅仅是改变一下我的家庭，但是，这也不可能。当我现在躺在床上，行将就木时，我突然意识到：如果一开始我仅仅去改变我自己，然后，我可能改变我的家庭；在家人的帮助和鼓励下，我可能为国家做一些事情；然后，谁知道呢?我甚至可能改变这个世界。
+	</div>
+
+</body>
+</html>
+```
+
+## 指定列的宽度
+
+`column-width` 属性指定了列的宽度。
+
+```css
+div {
+    -webkit-column-width: 100px; /* Chrome, Safari, Opera */
+    column-width: 100px;
+}
+```
+
+# CSS3 用户界面
+
+在 CSS3 中, 增加了一些新的用户界面特性来调整元素尺寸，框尺寸和外边框。
+
+## CSS3 调整尺寸(Resizing)
+
+CSS3中，resize属性指定一个元素是否应该由用户去调整大小。
+
+这个 div 元素由用户调整大小。 (在 Firefox 4+, Chrome, 和 Safari中)
+
+由用户指定一个div元素尺寸大小：
+
+```css
+div {
+    resize:both;
+    overflow:auto;
+}
+```
+
+## CSS3 方框大小调整(Box Sizing)
+
+box-sizing 属性允许您以确切的方式定义适应某个区域的具体内容。
+
+规定两个并排的带边框方框：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		div.container {
+			width: 30em;
+			border: 1em solid;
+		}
+
+		div.box {
+			box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			/* Firefox */
+			width: 50%;
+			border: 1em solid red;
+			float: left;
+		}
+	</style>
+</head>
+<body>
+
+	<div class="container">
+		<div class="box">这个 div 占据了左边的一半。</div>
+		<div class="box">这个 div 占据了右边的一半。</div>
+	</div>
+
+</body>
+</html>
+```
+
+## CSS3 外形修饰（outline-offset ）
+
+outline-offset 属性对轮廓进行偏移，并在超出边框边缘的位置绘制轮廓。
+
+轮廓与边框有两点不同：
+
+- 轮廓不占用空间
+- 轮廓可能是非矩形
+
+规定边框边缘之外 15 像素处的轮廓：
+
+```css
+		div {
+			margin: 20px;
+			width: 150px;
+			padding: 10px;
+			height: 70px;
+			border: 2px solid black;
+			outline: 2px solid red;
+			outline-offset: 15px;
+		}
+```
+
+## 新的用户界面特性
+
+|                             属性                             | 说明                                           | CSS  |
+| :----------------------------------------------------------: | :--------------------------------------------- | :--: |
+| [appearance](https://www.nowcoder.com/tutorial/10011/0bb21544a48b4add81454f0468d61dc7) | 允许您使一个元素的外观像一个标准的用户界面元素 |  3   |
+| [box-sizing](https://www.nowcoder.com/tutorial/10011/226e8e1421164e9188bc3a9ed0ab0ef0) | 允许你以适应区域而用某种方式定义某些元素       |  3   |
+| [icon](https://www.nowcoder.com/tutorial/10011/b03fe250e5334de9818c4fa3629f094a) | 为创作者提供了将元素设置为图标等价物的能力。   |  3   |
+| [nav-down](https://www.nowcoder.com/tutorial/10011/4b997fb61be64663a659233ee6102f8f) | 指定在何处使用箭头向下导航键时进行导航         |  3   |
+| [nav-index](https://www.nowcoder.com/tutorial/10011/1353e1625030433f81eaafe194fe58dd) | 指定一个元素的Tab的顺序                        |  3   |
+| [nav-left](https://www.nowcoder.com/tutorial/10011/81b8e3fbeeb14083abc407f0b8658118) | 指定在何处使用左侧的箭头导航键进行导航         |  3   |
+| [nav-right](https://www.nowcoder.com/tutorial/10011/a0501b89e86a486b867e76121a3a5c27) | 指定在何处使用右侧的箭头导航键进行导航         |  3   |
+| [nav-up](https://www.nowcoder.com/tutorial/10011/31ffab73bd1e48be88f0bb9810bd6970) | 指定在何处使用箭头向上导航键时进行导航         |  3   |
+| [outline-offset](https://www.nowcoder.com/tutorial/10011/c01dc8aa846042248beecd6cfce15fd9) | 外轮廓修饰并绘制超出边框的边缘                 |  3   |
+| [resize](https://www.nowcoder.com/tutorial/10011/0a824ad7f68e4e2cb1aa8c0aab964548) | 指定一个元素是否是由用户调整大小               |  3   |
+
+# CSS 图片
+
+## 圆角图片
+
+### 圆角图片
+
+```css
+img {
+    border-radius: 8px;
+}
+```
+
+### 椭圆形图片
+
+```css
+img {
+    border-radius: 50%;
+}
+```
+
+## 缩略图
+
+使用 `border` 属性来创建缩略图。
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		a {
+			display: inline-block;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			padding: 5px;
+			transition: 0.3s;
+		}
+
+		a:hover {
+			box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+		}
+	</style>
+</head>
+<body>
+
+	<h2>缩略图作为连接</h2>
+	<p>我们使用 border 属性来创建缩略图。在图片外层添加一个链接。</p>
+	<p>点击图片查看效果：</p>
+
+	<a target="_blank" href="//static.nowcoder.com/tutorial/web-examples/img/paris.jpg">
+		<img src="//static.nowcoder.com/tutorial/web-examples/img/paris.jpg" alt="Paris" width="400" height="300">
+	</a>
+
+</body>
+</html>
+```
+
+## 响应式图片
+
+响应式图片会自动适配各种尺寸的屏幕。实例中，你可以通过重置浏览器大小查看效果。
+
+如果你需要自由缩放图片，且图片放大的尺寸不大于其原始的最大值，则可使用以下代码：
+
+```css
+img {
+    max-width: 100%;
+    height: auto;
+}
+```
+
+## 图片文本
+
+如何定位图片文本：
+
+### **左上角**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		.container {
+			position: relative;
+		}
+
+		.topleft {
+			position: absolute;
+			top: 8px;
+			left: 16px;
+			font-size: 18px;
+		}
+
+		img {
+			width: 100%;
+			height: auto;
+			opacity: 0.3;
+		}
+	</style>
+</head>
+<body>
+
+	<h2>图片文本</h2>
+	<p>在图片左上角添加文本信息:</p>
+
+	<div class="container">
+		<img src="//static.nowcoder.com/tutorial/web-examples/img/trolltunga.jpg" alt="Norway" width="1000" height="300">
+		<div class="topleft">左上角</div>
+	</div>
+
+</body>
+</html>
+```
+
+### **右下角**
+
+```css
+.container {
+    position: relative;
+}
+
+.bottomright {
+    position: absolute;
+    bottom: 8px;
+    right: 16px;
+    font-size: 18px;
+}
+```
+
+### **居中**
+
+```css
+.container {
+    position: relative;
+}
+
+.center {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    text-align: center;
+    font-size: 18px;
+    margin-top:-9px;
+}
+```
+
+## 卡片式图片
+
+```css
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		body {
+			margin: 25px;
+		}
+
+		div.polaroid {
+			width: 80%;
+			background-color: white;
+			box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+			margin-bottom: 25px;
+		}
+
+		div.container {
+			text-align: center;
+			padding: 10px 20px;
+		}
+	</style>
+</head>
+<body>
+
+	<h2>响应式卡片</h2>
+
+	<div class="polaroid">
+		<img src="//static.nowcoder.com/tutorial/web-examples/img/rock600x400.jpg" alt="Norway" style="width:100%">
+		<div class="container">
+			<p>The Troll's tongue in Hardanger, Norway</p>
+		</div>
+	</div>
+
+	<div class="polaroid">
+		<img src="//static.nowcoder.com/tutorial/web-examples/img/lights600x400.jpg" alt="Norway" style="width:100%">
+		<div class="container">
+			<p>Northern Lights in Norway</p>
+		</div>
+	</div>
+
+</body>
+</html>
+```
+
+## 图片滤镜
+
+CSS `filter` 属性用为元素添加可视效果 (例如：模糊与饱和度) 。
+
+**注意:** Internet Explorer 或 Safari 5.1 (及更早版本) 不支持该属性。
+
+修改所有图片的颜色为黑白 (100% 灰度)：
+
+```css
+img {
+    -webkit-filter: grayscale(100%); /* Chrome, Safari, Opera */
+    filter: grayscale(100%);
+}
+```
+
+## 响应式图片相册
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		div.img {
+			border: 1px solid #ccc;
+		}
+
+		div.img:hover {
+			border: 1px solid #777;
+		}
+
+		div.img img {
+			width: 100%;
+			height: auto;
+		}
+
+		div.desc {
+			padding: 15px;
+			text-align: center;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		.responsive {
+			padding: 0 6px;
+			float: left;
+			width: 24.99999%;
+		}
+
+		@media only screen and (max-width: 700px) {
+			.responsive {
+				width: 49.99999%;
+				margin: 6px 0;
+			}
+		}
+
+		@media only screen and (max-width: 500px) {
+			.responsive {
+				width: 100%;
+			}
+		}
+
+		.clearfix:after {
+			content: "";
+			display: table;
+			clear: both;
+		}
+	</style>
+</head>
+<body>
+
+	<h2 style="text-align:center">响应式图片相册</h2>
+
+	<div class="responsive">
+		<div class="img">
+			<a target="_blank" href="//www.nowcoder.com">
+				<img src="//static.nowcoder.com/tutorial/web-examples/img/img_fjords.jpg" alt="Trolltunga Norway" width="300" height="200">
+			</a>
+			<div class="desc">Add a description of the image here</div>
+		</div>
+	</div>
+
+
+	<div class="responsive">
+		<div class="img">
+			<a target="_blank" href="//www.nowcoder.com">
+				<img src="//static.nowcoder.com/tutorial/web-examples/img/img_forest.jpg" alt="Forest" width="600" height="400">
+			</a>
+			<div class="desc">Add a description of the image here</div>
+		</div>
+	</div>
+
+	<div class="responsive">
+		<div class="img">
+			<a target="_blank" href="//www.nowcoder.com">
+				<img src="//static.nowcoder.com/tutorial/web-examples/img/img_lights.jpg" alt="Northern Lights" width="600" height="400">
+			</a>
+			<div class="desc">Add a description of the image here</div>
+		</div>
+	</div>
+
+	<div class="responsive">
+		<div class="img">
+			<a target="_blank" href="//www.nowcoder.com">
+				<img src="//static.nowcoder.com/tutorial/web-examples/img/img_mountains.jpg" alt="Mountains" width="600" height="400">
+			</a>
+			<div class="desc">Add a description of the image here</div>
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	<div style="padding:6px;">
+
+		<h4>重置浏览器大小查看效果</h4>
+	</div>
+
+</body>
+</html>
+```
+
+## 图片 Modal(模态)
+
+本实例演示了如何结合 CSS 和 JavaScript 来一起渲染图片。
+
+首先，我们使用 CSS 来创建 modal 窗口 (对话框), 默认是隐藏的。
+
+然后，我们使用 JavaScript 来显示模态窗口，当我们点击图片时，图片会在弹出的窗口中显示：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		#myImg {
+			border-radius: 5px;
+			cursor: pointer;
+			transition: 0.3s;
+		}
+
+		#myImg:hover {
+			opacity: 0.7;
+		}
+
+		/* The Modal (background) */
+		.modal {
+			display: none;
+			/* Hidden by default */
+			position: fixed;
+			/* Stay in place */
+			z-index: 1;
+			/* Sit on top */
+			padding-top: 100px;
+			/* Location of the box */
+			left: 0;
+			top: 0;
+			width: 100%;
+			/* Full width */
+			height: 100%;
+			/* Full height */
+			overflow: auto;
+			/* Enable scroll if needed */
+			background-color: rgb(0, 0, 0);
+			/* Fallback color */
+			background-color: rgba(0, 0, 0, 0.9);
+			/* Black w/ opacity */
+		}
+
+		/* Modal Content (image) */
+		.modal-content {
+			margin: auto;
+			display: block;
+			width: 80%;
+			max-width: 700px;
+		}
+
+		/* Caption of Modal Image */
+		#caption {
+			margin: auto;
+			display: block;
+			width: 80%;
+			max-width: 700px;
+			text-align: center;
+			color: #ccc;
+			padding: 10px 0;
+			height: 150px;
+		}
+
+		/* Add Animation */
+		.modal-content,
+		#caption {
+			-webkit-animation-name: zoom;
+			-webkit-animation-duration: 0.6s;
+			animation-name: zoom;
+			animation-duration: 0.6s;
+		}
+
+		@-webkit-keyframes zoom {
+			from {
+				-webkit-transform: scale(0)
+			}
+
+			to {
+				-webkit-transform: scale(1)
+			}
+		}
+
+		@keyframes zoom {
+			from {
+				transform: scale(0.1)
+			}
+
+			to {
+				transform: scale(1)
+			}
+		}
+
+		/* The Close Button */
+		.close {
+			position: absolute;
+			top: 15px;
+			right: 35px;
+			color: #f1f1f1;
+			font-size: 40px;
+			font-weight: bold;
+			transition: 0.3s;
+		}
+
+		.close:hover,
+		.close:focus {
+			color: #bbb;
+			text-decoration: none;
+			cursor: pointer;
+		}
+
+		/* 100% Image Width on Smaller Screens */
+		@media only screen and (max-width: 700px) {
+			.modal-content {
+				width: 100%;
+			}
+		}
+	</style>
+</head>
+<body>
+
+	<h2>图片模态框</h2>
+	<p>本实例演示了如何结合 CSS 和 JavaScript 来一起渲染图片。</p>
+	<p>
+		首先，我们使用 CSS 来创建 modal 窗口 (对话框), 默认是隐藏的。<p>
+			<p>然后，我们使用 JavaScript 来显示模态窗口，当我们点击图片时，图片会在弹出的窗口中显示：</p>
+			<img id="myImg" src="//static.nowcoder.com/tutorial/web-examples/img/img_lights.jpg" alt="Northern Lights, Norway" width="300" height="200">
+
+			<!-- The Modal -->
+			<div id="myModal" class="modal">
+				<span class="close">×</span>
+				<img class="modal-content" id="img01">
+				<div id="caption"></div>
+			</div>
+
+			<script>
+				// 获取模态窗口
+				var modal = document.getElementById('myModal');
+
+				// 获取图片模态框，alt 属性作为图片弹出中文本描述
+				var img = document.getElementById('myImg');
+				var modalImg = document.getElementById("img01");
+				var captionText = document.getElementById("caption");
+				img.onclick = function() {
+					modal.style.display = "block";
+					modalImg.src = this.src;
+					modalImg.alt = this.alt;
+					captionText.innerHTML = this.alt;
+				}
+
+				// 获取 <span> 元素，设置关闭模态框按钮
+				var span = document.getElementsByClassName("close")[0];
+
+				// 点击 <span> 元素上的 (x), 关闭模态框
+				span.onclick = function() {
+					modal.style.display = "none";
+				}
+			</script>
+
+</body>
+</html>
+```
+
+# CSS 按钮
