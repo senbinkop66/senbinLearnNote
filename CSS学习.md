@@ -4757,3 +4757,161 @@ input[type=button], input[type=submit], input[type=reset] {
 
 
 ## CSS 计数器
+
+CSS 计数器通过一个变量来设置，根据规则递增变量。
+
+### 使用计数器自动编号
+
+CSS 计数器根据规则来递增变量。
+
+CSS 计数器使用到以下几个属性：
+
+- `counter-reset` - 创建或者重置计数器
+- `counter-increment` - 递增变量
+- `content` - 插入生成的内容
+- `counter()` 或 `counters()` 函数 - 将计数器的值添加到元素
+
+要使用 CSS 计数器，得先用 counter-reset 创建：
+
+以下实例在页面创建一个计数器 (在 body 选择器中)，每个 `<h2>` 元素的计数值都会递增，并在每个 `<h2>` 元素前添加 "Section <计数值>: "
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		body {
+			counter-reset: section;
+		}
+
+		h2::before {
+			counter-increment: section;
+			content: "Section "counter(section) ": ";
+		}
+	</style>
+</head>
+<body>
+
+	<h1>使用 CSS 计数器:</h1>
+	<h2>HTML 教程</h2>
+	<h2>CSS 教程</h2>
+	<h2>JavaScript 教程</h2>
+
+	<p><b>注意:</b> IE8 需要指定 !DOCTYPE 才可以支持该属性。</p>
+
+</body>
+</html>
+```
+
+### 嵌套计数器
+
+以下实例在页面创建一个计数器，在每一个 `<h1>` 元素前添加计数值 "Section <主标题计数值>.", 嵌套的计数值则放在 `<h2>` 元素的前面，内容为 "<主标题计数值>.<副标题计数值>"：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		body {
+			counter-reset: section;
+		}
+
+		h1 {
+			counter-reset: subsection;
+		}
+
+		h1::before {
+			counter-increment: section;
+			content: "Section "counter(section) ". ";
+		}
+
+		h2::before {
+			counter-increment: subsection;
+			content: counter(section) "."counter(subsection) " ";
+		}
+	</style>
+</head>
+<body>
+
+
+	<h1>HTML 教程:</h1>
+	<h2>HTML 教程</h2>
+	<h2>CSS 教程</h2>
+
+	<h1>Scripting 教程:</h1>
+	<h2>JavaScript</h2>
+	<h2>VBScript</h2>
+
+	<h1>XML 教程:</h1>
+	<h2>XML</h2>
+	<h2>XSL</h2>
+
+	<p><b>注意:</b> IE8 需要指定 !DOCTYPE 才可以支持该属性。</p>
+
+</body>
+</html>
+```
+
+计数器也可用于列表中，列表的子元素会自动创建。这里我们使用了 `counters()` 函数在不同的嵌套层级中插入字符串：
+
+```css
+ol {
+  counter-reset: section;
+  list-style-type: none;
+}
+
+li::before {
+  counter-increment: section;
+  content: counters(section,".") " ";
+}
+```
+
+### CSS 计数器属性
+
+|                             属性                             | 描述                                                |
+| :----------------------------------------------------------: | :-------------------------------------------------- |
+| [content](https://www.nowcoder.com/tutorial/10011/cf3e280339e3468a8f74e11003de102d) | 使用 ::before 和 ::after 伪元素来插入自动生成的内容 |
+| [counter-increment](https://www.nowcoder.com/tutorial/10011/1d60089f01ee46cd9749f119b1bfc5bb) | 递增一个或多个值                                    |
+| [counter-reset](https://www.nowcoder.com/tutorial/10011/f177ed8af14b441ea893ab6174860627) | 创建或重置一个或多个计数器                          |
+
+#### counter-reset 属性
+
+counter-reset属性创建或重置一个或多个计数器。counter-reset属性通常是和counter-increment属性，content属性一起使用。
+
+|    值     | 说明                                                         |
+| :-------: | :----------------------------------------------------------- |
+|   none    | 默认。不能对选择器的计数器进行重置                           |
+| id number | id 定义重置计数器的选择器、id 或 class。 number 可设置此选择器出现次数的计数器的值。可以是正数、零或负数。 |
+|  inherit  | 规定应该从父元素继承 counter-reset 属性的值                  |
+
+#### counter-increment 属性
+
+counter-increment属性递增一个或多个计数器值。
+
+|    值     | 说明                                                         |
+| :-------: | :----------------------------------------------------------- |
+|   none    | 没有计数器将递增                                             |
+| id number | id 定义将增加计数的选择器、id 或 class。 number 定义增量。number 可以是正数、零或者负数。 |
+|  inherit  | 指定counter-increment属性的值，应该从父元素继承              |
+
+#### content 属性
+
+content 属性与 :before 及 :after 伪元素配合使用，来插入生成内容。
+
+|       值        | 说明                                                         |
+| :-------------: | :----------------------------------------------------------- |
+|      none       | 设置Content，如果指定成Nothing                               |
+|     normal      | 设置content，如果指定的话，正常，默认是"none"（该是nothing） |
+|     counter     | 设定计数器内容                                               |
+| attr(attribute) | 设置Content作为选择器的属性之一。                            |
+|    *string*     | 设置Content到你指定的文本                                    |
+|   open-quote    | 设置Content是开口引号                                        |
+|   close-quote   | 设置Content是闭合引号                                        |
+|  no-open-quote  | 如果指定，移除内容的开始引号                                 |
+| no-close-quote  | 如果指定，移除内容的闭合引号                                 |
+|    url(url)     | 设置某种媒体（图像，声音，视频等内容）                       |
+|     inherit     | 指定的content属性的值，应该从父元素继承                      |
