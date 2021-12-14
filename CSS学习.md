@@ -92,6 +92,122 @@ p.center {text-align:center;}
 
 
 
+## CSS 属性 选择器
+
+具有特定属性的HTML元素样式不仅仅是class和id。
+
+### 属性选择器
+
+下面的例子是把包含标题（title）的所有元素变为蓝色：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		[title] {
+			color: blue;
+		}
+	</style>
+</head>
+
+<body>
+	<h2>Will apply to:</h2>
+	<h1 title="Hello world">Hello world</h1>
+	<a title="nowcoder.com" href="//www.nowcoder.com/">nowcoder.com</a>
+	<hr>
+	<h2>Will not apply to:</h2>
+	<p>Hello!</p>
+</body>
+</html>
+```
+
+### 属性和值选择器
+
+下面的实例改变了标题title='nowcoder'元素的边框样式：
+
+```css
+[title=nowcoder] {
+    border:5px solid green;
+}
+```
+
+### 属性和值的选择器 - 多值
+
+下面是包含指定值的title属性的元素样式的例子，**使用（~）分隔属性和值**：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		[title~=hello] {
+			color: blue;
+		}
+	</style>
+</head>
+
+<body>
+	<h2>将适用:</h2>
+	<h1 title="hello world">Hello world</h1>
+	<p title="student hello">Hello CSS students!</p>
+	<hr>
+	<h2>将不适用:</h2>
+	<p title="student">Hi CSS students!</p>
+</body>
+</html>
+```
+
+下面是包含指定值的lang属性的元素样式的例子，**使用（|）分隔属性和值**：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		[lang|=en] {
+			color: blue;
+		}
+	</style>
+</head>
+
+<body>
+	<h2>将适用:</h2>
+	<p lang="en">Hello!</p>
+	<p lang="en-us">Hi!</p>
+	<p lang="en-gb">Ello!</p>
+	<hr>
+	<h2>将不适用:</h2>
+	<p lang="us">Hi!</p>
+	<p lang="no">Hei!</p>
+</body>
+</html>
+```
+
+### 表单样式
+
+属性选择器样式无需使用class或id的形式：
+
+```css
+input[type="text"] {
+    width:150px;
+    display:block;
+    margin-bottom:10px;
+    background-color:yellow;
+}
+input[type="button"] {
+    width:120px;
+    margin-left:35px;
+    display:block;
+}
+```
+
+## 
+
 ## CSS 分组和嵌套
 
 ### 分组选择器
@@ -299,8 +415,6 @@ CSS组合选择符包括各种简单选择符的组合方式。
 </html>
 ```
 
-
-
 ## CSS 伪类
 
 CSS伪类是用来添加一些选择器的特殊效果。
@@ -318,6 +432,46 @@ CSS类也可以使用伪类
 ```css
 selector.class:pseudo-class {property:value;}
 ```
+
+所有CSS伪类/元素
+
+| 选择器                                                       | 示例                  | 示例说明                                   |
+| :----------------------------------------------------------- | :-------------------- | :----------------------------------------- |
+| [:checked](https://www.nowcoder.com/tutorial/10011/6a62a19acdde4b1398a0ba443759abf7) | input:checked         | 选择所有选中的表单元素                     |
+| [:disabled](https://www.nowcoder.com/tutorial/10011/069e22b3a83743e289721ebf098d1fed) | input:disabled        | 选择所有禁用的表单元素                     |
+| [:empty](https://www.nowcoder.com/tutorial/10011/bdb308ee5c194f4fa1b6e6e10e25dd6b) | p:empty               | 选择所有没有子元素的p元素                  |
+| [:enabled](https://www.nowcoder.com/tutorial/10011/8d27db6749f64720b01d63a8f017e750) | input:enabled         | 选择所有启用的表单元素                     |
+| [:first-of-type](https://www.nowcoder.com/tutorial/10011/241c92654f814ac9b3b8ea4cc9d3b8b6) | p:first-of-type       | 选择的每个 p 元素是其父元素的第一个 p 元素 |
+| [:in-range](https://www.nowcoder.com/tutorial/10011/1983178a06b542b49bbed4f67d282ffb) | input:in-range        | 选择元素指定范围内的值                     |
+| [:invalid](https://www.nowcoder.com/tutorial/10011/8b6211968ff54581846c82fc40128b47) | input:invalid         | 选择所有无效的元素                         |
+| [:last-child](https://www.nowcoder.com/tutorial/10011/ebb78058049c41019ffb11d74a3a525c) | p:last-child          | 选择所有p元素的最后一个子元素              |
+| [:last-of-type](https://www.nowcoder.com/tutorial/10011/fa829cdbbc634cbca68fe441b1445d78) | p:last-of-type        | 选择每个p元素是其母元素的最后一个p元素     |
+| [:not(selector)](https://www.nowcoder.com/tutorial/10011/7fc2517a1c4342a0a2439a33915dd542) | :not(p)               | 选择所有p以外的元素                        |
+| [:nth-child(n)](https://www.nowcoder.com/tutorial/10011/bc120b09d8594702bd4208de01baa76d) | p:nth-child(2)        | 选择所有 p 元素的父元素的第二个子元素      |
+| [:nth-last-child(n)](https://www.nowcoder.com/tutorial/10011/10ac09b8b2924ba4886319a0070b38d7) | p:nth-last-child(2)   | 选择所有p元素倒数的第二个子元素            |
+| [:nth-last-of-type(n)](https://www.nowcoder.com/tutorial/10011/3f843fccd7d44fbeb5b9ce99e2a8314e) | p:nth-last-of-type(2) | 选择所有p元素倒数的第二个为p的子元素       |
+| [:nth-of-type(n)](https://www.nowcoder.com/tutorial/10011/15071521c91844d9951f198ad410a26e) | p:nth-of-type(2)      | 选择所有p元素第二个为p的子元素             |
+| [:only-of-type](https://www.nowcoder.com/tutorial/10011/cf73adcaec764549aeb6172178d7bb5b) | p:only-of-type        | 选择所有仅有一个子元素为p的元素            |
+| [:only-child](https://www.nowcoder.com/tutorial/10011/e8a6dc7500e24f5ca88ec23e551d5fd5) | p:only-child          | 选择所有仅有一个子元素的p元素              |
+| [:optional](https://www.nowcoder.com/tutorial/10011/64ca8bd6acb04d12a02d204e92ab49a6) | input:optional        | 选择没有"required"的元素属性               |
+| [:out-of-range](https://www.nowcoder.com/tutorial/10011/cfd96505bbaa493ba880b3dd1daad8f7) | input:out-of-range    | 选择指定范围以外的值的元素属性             |
+| [:read-only](https://www.nowcoder.com/tutorial/10011/d96fe81c7c19438fb6890015f2b16704) | input:read-only       | 选择只读属性的元素属性                     |
+| [:read-write](https://www.nowcoder.com/tutorial/10011/922bff1f61bf42d69767636e7e5273cb) | input:read-write      | 选择没有只读属性的元素属性                 |
+| [:required](https://www.nowcoder.com/tutorial/10011/489e16d53ff041789c37501dcbc71e1d) | input:required        | 选择有"required"属性指定的元素属性         |
+| [:root](https://www.nowcoder.com/tutorial/10011/cbd0b0045f0c4f8c8b7565d7739c1901) | root                  | 选择文档的根元素                           |
+| [:target](https://www.nowcoder.com/tutorial/10011/2b88d2b8ffea4da4b6af99a7456f31b6) | #news:target          | 选择当前活动#news元素(点击URL包含锚的名字) |
+| [:valid](https://www.nowcoder.com/tutorial/10011/7dd0878ab43f48acb22fc15286f43852) | input:valid           | 选择所有有效值的属性                       |
+| [:link](https://www.nowcoder.com/tutorial/10011/3bacadaa65b7447d910736d5d0ff9c68) | a:link                | 选择所有未访问链接                         |
+| [:visited](https://www.nowcoder.com/tutorial/10011/2d6a820bcf7b4d5f920435a6edc491f7) | a:visited             | 选择所有访问过的链接                       |
+| [:active](https://www.nowcoder.com/tutorial/10011/c18d3c3001fd4a24a03cabf8050dc405) | a:active              | 选择正在活动链接                           |
+| [:hover](https://www.nowcoder.com/tutorial/10011/a49ef44f893f48f1802c6ac30c8db82b) | a:hover               | 把鼠标放在链接上的状态                     |
+| [:focus](https://www.nowcoder.com/tutorial/10011/33b5eaf37e474465bfe4ffcc0c0a6da9) | input:focus           | 选择元素输入后具有焦点                     |
+| [:first-letter](https://www.nowcoder.com/tutorial/10011/5f51ddaee5d74c8baff788d5f06d91f2) | p:first-letter        | 选择每个 `<p>` 元素的第一个字母            |
+| [:first-line](https://www.nowcoder.com/tutorial/10011/8de542e2258a40e79d1a36e8c688fbf9) | p:first-line          | 选择每个 `<p>` 元素的第一行                |
+| [:first-child](https://www.nowcoder.com/tutorial/10011/5f188266cc2d443eaa2a51213f6d6f17) | p:first-child         | 选择器匹配属于任意元素的第一个子元素的元素 |
+| [:before](https://www.nowcoder.com/tutorial/10011/e9d9bc1bdc274603b26343cbbfd0c382) | p:before              | 在每个 `<p>` 元素之前插入内容              |
+| [:after](https://www.nowcoder.com/tutorial/10011/675df255316d45e3b2782b0213e392e6) | p:after               | 在每个 `<p>` 元素之后插入内容              |
+| [:lang(*language*)](https://www.nowcoder.com/tutorial/10011/e127c655bf69458785f97254b02a7891) | p:lang(it)            | 为 `<p>` 元素的lang属性选择一个开始值      |
 
 ### anchor伪类
 
@@ -429,7 +583,160 @@ a.red:visited {color:#FF0000;}
 </html>
 ```
 
+### :lang 伪类
 
+:lang 伪类使你有能力为不同的语言定义特殊的规则
+
+在下面的例子中，:lang 类为属性值为 no 的q元素定义引号的类型：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		q:lang(no) {
+			quotes: "~""~";
+		}
+	</style>
+</head>
+
+<body>
+	<p>Some text <q lang="no">A quote in a paragraph</q> Some text.</p>
+	<p>在这个例子中,:lang定义了q元素的值为lang =“no”</p>
+	<p><b>注意:</b> 仅当 !DOCTYPE 已经声明时 IE8 支持 :lang.</p>
+</body>
+</html>
+```
+
+## CSS 伪元素
+
+CSS伪元素是用来添加一些选择器的特殊效果。
+
+### 语法
+
+伪元素的语法：
+
+```css
+selector:pseudo-element {property:value;}
+```
+
+CSS类也可以使用伪元素：
+
+```css
+selector.class:pseudo-element {property:value;}
+```
+
+所有CSS伪类/元素
+
+|                            选择器                            |      示例      | 示例说明                                   |
+| :----------------------------------------------------------: | :------------: | :----------------------------------------- |
+| [:link](https://www.nowcoder.com/tutorial/10011/3bacadaa65b7447d910736d5d0ff9c68) |     a:link     | 选择所有未访问链接                         |
+| [:visited](https://www.nowcoder.com/tutorial/10011/2d6a820bcf7b4d5f920435a6edc491f7) |   a:visited    | 选择所有访问过的链接                       |
+| [:active](https://www.nowcoder.com/tutorial/10011/c18d3c3001fd4a24a03cabf8050dc405) |    a:active    | 选择正在活动链接                           |
+| [:hover](https://www.nowcoder.com/tutorial/10011/a49ef44f893f48f1802c6ac30c8db82b) |    a:hover     | 把鼠标放在链接上的状态                     |
+| [:focus](https://www.nowcoder.com/tutorial/10011/33b5eaf37e474465bfe4ffcc0c0a6da9) |  input:focus   | 选择元素输入后具有焦点                     |
+| [:first-letter](https://www.nowcoder.com/tutorial/10011/5f51ddaee5d74c8baff788d5f06d91f2) | p:first-letter | 选择每个元素的第一个字母                   |
+| [:first-line](https://www.nowcoder.com/tutorial/10011/8de542e2258a40e79d1a36e8c688fbf9) |  p:first-line  | 选择每个元素的第一行                       |
+| [:first-child](https://www.nowcoder.com/tutorial/10011/5f188266cc2d443eaa2a51213f6d6f17) | p:first-child  | 选择器匹配属于任意元素的第一个子元素的元素 |
+| [:before](https://www.nowcoder.com/tutorial/10011/e9d9bc1bdc274603b26343cbbfd0c382) |    p:before    | 在每个元素之前插入内容                     |
+| [:after](https://www.nowcoder.com/tutorial/10011/675df255316d45e3b2782b0213e392e6) |    p:after     | 在每个元素之后插入内容                     |
+| [:lang(*language*)](https://www.nowcoder.com/tutorial/10011/e127c655bf69458785f97254b02a7891) |   p:lang(it)   | 为元素的lang属性选择一个开始值             |
+
+### :first-line 伪元素
+
+"first-line" 伪元素用于向文本的首行设置特殊样式。
+
+在下面的例子中，浏览器会根据 "first-line" 伪元素中的样式对 p 元素的第一行文本进行格式化：
+
+```css
+p:first-line {
+    color:#ff0000;
+    font-variant:small-caps;
+}
+```
+
+**注意：**"first-line" 伪元素只能用于块级元素。
+
+**注意：** 下面的属性可应用于 "first-line" 伪元素：
+
+- font properties
+- color properties
+- background properties
+- word-spacing
+- letter-spacing
+- text-decoration
+- vertical-align
+- text-transform
+- line-height
+- clear
+
+### :first-letter 伪元素
+
+"first-letter" 伪元素用于向文本的首字母设置特殊样式：
+
+```css
+p:first-letter {
+    color:#ff0000;
+    font-size:xx-large;
+}
+```
+
+**注意：** "first-letter" 伪元素只能用于块级元素。
+
+### 伪元素和CSS类
+
+伪元素可以结合CSS类：
+
+下面的例子会使所有 class 为 article 的段落的首字母变为红色。
+
+```css
+p.article:first-letter {color:#ff0000;}
+
+<p class="article">文章段落</p>
+```
+
+### 多个伪元素
+
+可以结合多个伪元素来使用。
+
+在下面的例子中，段落的第一个字母将显示为红色，其字体大小为 xx-large。第一行中的其余文本将为蓝色，并以小型大写字母显示。段落中的其余文本将以默认字体大小和颜色来显示：
+
+```css
+p:first-letter {
+    color:#ff0000;
+    font-size:xx-large;
+}
+p:first-line {
+    color:#0000ff;
+    font-variant:small-caps;
+}
+```
+
+### :before 伪元素
+
+":before" 伪元素可以在元素的内容前面插入新内容。
+
+下面的例子在每个 `<h1>` 元素前面插入一幅图片：
+
+```css
+h1:before {
+    content:url(smiley.gif);
+}
+```
+
+### :after 伪元素
+
+":after" 伪元素可以在元素的内容之后插入新内容。
+
+下面的例子在每个 `<h1>` 元素后面插入一幅图片：
+
+```css
+h1:after {
+    content:url(smiley.gif);
+}
+```
 
 
 
@@ -2734,3 +3041,1719 @@ CSS 中有很多方式可以实现垂直居中对齐。 一个简单的方式就
 
 
 
+## CSS 导航栏
+
+### 导航栏 = 链接列表
+
+导航条基本上是一个链接列表，所以使用 `<ul>` 和 `<li>` 元素非常有意义：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+	</style>
+</head>
+<body>
+	<ul>
+		<li><a href="#home">主页</a></li>
+		<li><a href="#news">新闻</a></li>
+		<li><a href="#contact">联系</a></li>
+		<li><a href="#about">关于</a></li>
+	</ul>
+</body>
+</html>
+```
+
+例子解析：
+
+- list-style-type:none - 移除列表前小标志。一个导航栏并不需要列表标记
+- 移除浏览器的默认设置将边距和填充设置为0
+
+### 垂直导航栏
+
+上面的代码，我们只需要 `<a>` 元素的样式，建立一个垂直的导航栏：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+		li a {
+			display: block;
+			color: #000;
+			padding: 8px 16px;
+			text-decoration: none;
+		}
+		a:link,
+		a:visited {
+			display: block;
+			font-weight: bold;
+			color: #FFFFFF;
+			background-color: #98bf21;
+			width: 120px;
+			text-align: center;
+			padding: 4px;
+			text-decoration: none;
+			text-transform: uppercase;
+		}
+
+		/* 鼠标移动到选项上修改背景颜色 */
+		li a:hover {
+			background-color: #555;
+			color: white;
+		}
+		a:active {
+			background-color: #7A991A;
+		}
+	</style>
+</head>
+
+<body>
+	<ul>
+		<li><a href="#home">主页</a></li>
+		<li><a href="#news">新闻</a></li>
+		<li><a href="#contact">联系</a></li>
+		<li><a href="#about">关于</a></li>
+	</ul>
+</body>
+</html>
+```
+
+示例说明：
+
+- display:block - 显示块元素的链接，让整体变为可点击链接区域（不只是文本），它允许我们指定宽度
+- width:60px - 块元素默认情况下是最大宽度。我们要指定一个60像素的宽度
+
+**注意：** 请务必指定 `<a>` 元素在垂直导航栏的的宽度。如果省略宽度，IE6可能产生意想不到的效果。
+
+### 创建链接并添加边框
+
+可以在 `<li>` or `<a>` 上添加**text-align:center** 样式来让链接居中。
+
+可以在 **border** `<ul>` 上添加 **border** 属性来让导航栏有边框。如果要在每个选项上添加边框，可以在每个 `<li>` 元素上添加 **border-bottom** :
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+			width: 200px;
+			background-color: #f1f1f1;
+			border: 1px solid #555;
+		}
+
+		li a {
+			display: block;
+			color: #000;
+			padding: 8px 16px;
+			text-decoration: none;
+		}
+
+		li {
+			text-align: center;
+			border-bottom: 1px solid #555;
+		}
+
+		li:last-child {
+			border-bottom: none;
+		}
+
+		li a.active {
+			background-color: #4CAF50;
+			color: white;
+		}
+
+		li a:hover:not(.active) {
+			background-color: #555;
+			color: white;
+		}
+	</style>
+</head>
+<body>
+
+	<h2>垂直导航条</h2>
+	<p>以下实例让每个链接居中，并给每个列表选项添加边框。</p>
+
+	<ul>
+		<li><a class="active" href="#home">主页</a></li>
+		<li><a href="#news">新闻</a></li>
+		<li><a href="#contact">联系</a></li>
+		<li><a href="#about">关于</a></li>
+	</ul>
+
+</body>
+</html>
+```
+
+### 全屏高度的固定导航条
+
+创建一个左边是全屏高度的固定导航条，右边是可滚动的内容。
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		body {
+			margin: 0;
+		}
+
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+			width: 25%;
+			background-color: #f1f1f1;
+			position: fixed;
+			height: 100%;
+			overflow: auto;
+		}
+
+		li a {
+			display: block;
+			color: #000;
+			padding: 8px 16px;
+			text-decoration: none;
+		}
+
+		li a.active {
+			background-color: #4CAF50;
+			color: white;
+		}
+
+		li a:hover:not(.active) {
+			background-color: #555;
+			color: white;
+		}
+	</style>
+</head>
+<body>
+
+	<ul>
+		<li><a class="active" href="#home">主页</a></li>
+		<li><a href="#news">新闻</a></li>
+		<li><a href="#contact">联系</a></li>
+		<li><a href="#about">关于</a></li>
+	</ul>
+
+	<div style="margin-left:25%;padding:1px 16px;height:1000px;">
+		<h2>Fixed Full-height Side Nav</h2>
+		<h3>Try to scroll this area, and see how the sidenav sticks to the page</h3>
+		<p>Notice that this div element has a left margin of 25%. This is because the side navigation is set to 25% width.
+			If you remove the margin, the sidenav will overlay/sit on top of this div.</p>
+		<p>Also notice that we have set overflow:auto to sidenav. This will add a scrollbar when the sidenav is too long
+			(for example if it has over 50 links inside of it).</p>
+		<p>Some text..</p>
+		<p>Some text..</p>
+		<p>Some text..</p>
+		<p>Some text..</p>
+		<p>Some text..</p>
+		<p>Some text..</p>
+		<p>Some text..</p>
+	</div>
+
+</body>
+</html>
+```
+
+### 水平导航栏
+
+有两种方法创建横向导航栏。使用**内联(inline)**或**浮动(float)**的列表项。
+
+这两种方法都很好，但如果你想链接到具有相同的大小，你必须使用浮动的方法。
+
+#### 内联列表项
+
+建立一个横向导航栏的方法之一是指定元素， 上述代码是标准的内联：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		li {
+			display: inline;
+		}
+	</style>
+</head>
+
+<body>
+	<ul>
+		<li><a href="#home">主页</a></li>
+		<li><a href="#news">新闻</a></li>
+		<li><a href="#contact">联系</a></li>
+		<li><a href="#about">关于</a></li>
+	</ul>
+
+</body>
+</html>
+```
+
+实例解析：
+
+- display:inline;
+
+  默认情况下，`<li>` 元素是块元素。在这里，我们删除换行符之前和之后每个列表项，以显示一行。
+
+#### 浮动列表项
+
+在上面的例子中链接有不同的宽度。
+
+对于所有的链接宽度相等，浮动 `<li>` 元素，并指定为 `<a>` 元素的宽度：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+
+		li {
+			float: left;
+		}
+
+		a {
+			display: block;
+			width: 60px;
+			background-color: #dddddd;
+		}
+	</style>
+</head>
+
+<body>
+	<ul>
+		<li><a href="#home">Home</a></li>
+		<li><a href="#news">News</a></li>
+		<li><a href="#contact">Contact</a></li>
+		<li><a href="#about">About</a></li>
+	</ul>
+
+	<p><b>注意:</b> 如果 !DOCTYPE 没有定义, floating 可以产生意想不到的结果.</p>
+
+	<p>背景颜色添加到链接中显示链接的区域。整个链接区域是可点击的,不仅仅是文本。</p>
+
+	<p><b>注意:</b> overflow:hidden 添加到 ul 元素,以防止 li 元素列表的外出。.</p>
+
+</body>
+</html>
+```
+
+实例解析：
+
+- float:left - 使用浮动块元素的幻灯片彼此相邻
+- display:block - 显示块元素的链接，让整体变为可点击链接区域（不只是文本），它允许我们指定宽度
+- width:60px - 块元素默认情况下是最大宽度。我们要指定一个60像素的宽度
+
+#### 链接右对齐
+
+将导航条最右边的选项设置右对齐 (float:right;)：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			background-color: #333;
+		}
+
+		li {
+			float: left;
+		}
+
+		li a {
+			display: block;
+			color: white;
+			text-align: center;
+			padding: 14px 16px;
+			text-decoration: none;
+		}
+
+		li a:hover:not(.active) {
+			background-color: #111;
+		}
+
+		.active {
+			background-color: #4CAF50;
+		}
+	</style>
+</head>
+<body>
+
+	<ul>
+		<li><a href="#home">主页</a></li>
+		<li><a href="#news">新闻</a></li>
+		<li><a href="#contact">联系</a></li>
+		<li style="float:right"><a class="active" href="#about">关于</a></li>
+	</ul>
+
+</body>
+</html>
+```
+
+#### 添加分割线
+
+`<li>` 通过 **border-right** 样式来添加分割线：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			background-color: #333;
+		}
+
+		li {
+			float: left;
+			border-right: 1px solid #bbb;
+		}
+
+		li:last-child {
+			border-right: none;
+		}
+
+		li a {
+			display: block;
+			color: white;
+			text-align: center;
+			padding: 14px 16px;
+			text-decoration: none;
+		}
+
+		li a:hover:not(.active) {
+			background-color: #111;
+		}
+
+		.active {
+			background-color: #4CAF50;
+		}
+	</style>
+</head>
+<body>
+
+	<ul>
+		<li><a class="active" href="#home">主页</a></li>
+		<li><a href="#news">新闻</a></li>
+		<li><a href="#contact">联系</a></li>
+		<li style="float:right"><a href="#about">关于</a></li>
+	</ul>
+
+</body>
+</html>
+```
+
+### 固定导航条
+
+可以设置页面的导航条固定在头部或者底部：
+
+#### **固定在头部**
+
+```css
+ul {
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+```
+
+#### **固定在底部**
+
+```css
+ul {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+```
+
+### 灰色水平导航条
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			border: 1px solid #e7e7e7;
+			background-color: #f3f3f3;
+		}
+
+		li {
+			float: left;
+		}
+
+		li a {
+			display: block;
+			color: #666;
+			text-align: center;
+			padding: 14px 16px;
+			text-decoration: none;
+		}
+
+		li a:hover:not(.active) {
+			background-color: #ddd;
+		}
+
+		li a.active {
+			color: white;
+			background-color: #4CAF50;
+		}
+	</style>
+</head>
+<body>
+
+	<ul>
+		<li><a class="active" href="#home">主页</a></li>
+		<li><a href="#news">新闻</a></li>
+		<li><a href="#contact">联系</a></li>
+		<li><a href="#about">关于</a></li>
+	</ul>
+
+</body>
+</html>
+```
+
+
+
+## CSS 下拉菜单
+
+### 基本下拉菜单
+
+当鼠标移动到指定元素上时，会出现下拉菜单。
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<title>牛客教程(nowcoder.com)</title>
+	<meta charset="utf-8">
+	<style>
+		.dropdown {
+			position: relative;
+			display: inline-block;
+		}
+
+		.dropdown-content {
+			display: none;
+			position: absolute;
+			background-color: #f9f9f9;
+			min-width: 160px;
+			box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+			padding: 12px 16px;
+		}
+
+		.dropdown:hover .dropdown-content {
+			display: block;
+		}
+	</style>
+</head>
+<body>
+
+	<h2>鼠标移动后出现下拉菜单</h2>
+	<p>将鼠标移动到指定元素上就能看到下拉菜单。</p>
+
+	<div class="dropdown">
+		<span>鼠标移动到我这！</span>
+		<div class="dropdown-content">
+			<p>牛客教程</p>
+			<p>www.nowcoder.com</p>
+		</div>
+	</div>
+
+</body>
+</html>
+```
+
+**HTML 部分：**
+
+我们可以使用任何的 HTML 元素来打开下拉菜单，如：`<span>`, 或 `<button>` 元素。
+
+使用容器元素 (如： `<div>`) 来创建下拉菜单的内容，并放在任何你想放的位置上。
+
+使用 `<div>` 元素来包裹这些元素，并使用 CSS 来设置下拉内容的样式。
+
+**CSS 部分：**
+
+`.dropdown` 类使用 `position:relative`, 这将设置下拉菜单的内容放置在下拉按钮 (使用 `position:absolute`) 的右下角位置。
+
+`.dropdown-content` 类中是实际的下拉菜单。默认是隐藏的，在鼠标移动到指定元素后会显示。 注意 `min-width` 的值设置为 160px。你可以随意修改它。 **注意:** 如果你想设置下拉内容与下拉按钮的宽度一致，可设置 `width` 为 100% ( `overflow:auto` 设置可以在小尺寸屏幕上滚动)。
+
+我们使用 `box-shadow` 属性让下拉菜单看起来像一个"卡片"。
+
+`:hover` 选择器用于在用户将鼠标移动到下拉按钮上时显示下拉菜单。
+
+### 下拉菜单
+
+创建下拉菜单，并允许用户选取列表中的某一项。
+
+这个实例类似前面的实例，当我们在下拉列表中添加了链接，并设置了样式。
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<title>牛客教程(nowcoder.com)</title>
+	<meta charset="utf-8">
+	<style>
+		.dropbtn {
+			background-color: #4CAF50;
+			color: white;
+			padding: 16px;
+			font-size: 16px;
+			border: none;
+			cursor: pointer;
+		}
+
+		.dropdown {
+			position: relative;
+			display: inline-block;
+		}
+
+		.dropdown-content {
+			display: none;
+			position: absolute;
+			background-color: #f9f9f9;
+			min-width: 160px;
+			box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+		}
+
+		.dropdown-content a {
+			color: black;
+			padding: 12px 16px;
+			text-decoration: none;
+			display: block;
+		}
+
+		.dropdown-content a:hover {
+			background-color: #f1f1f1
+		}
+
+		.dropdown:hover .dropdown-content {
+			display: block;
+		}
+
+		.dropdown:hover .dropbtn {
+			background-color: #3e8e41;
+		}
+	</style>
+</head>
+<body>
+
+	<h2>下拉菜单</h2>
+	<p>鼠标移动到按钮上打开下拉菜单。</p>
+
+	<div class="dropdown">
+		<button class="dropbtn">下拉菜单</button>
+		<div class="dropdown-content">
+			<a href="//www.nowcoder.com">牛客教程 1</a>
+			<a href="//www.nowcoder.com">牛客教程 2</a>
+			<a href="//www.nowcoder.com">牛客教程 3</a>
+		</div>
+	</div>
+
+</body>
+</html>
+```
+
+### 下拉内容对齐方式
+
+如果你想设置右浮动的下拉菜单内容方向是从右到左，而不是从左到右，可以添加以下代码 `right: 0;`
+
+```css
+.dropdown-content {
+    right: 0;
+}
+```
+
+### 导航条上添加下拉菜单
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<title>牛客教程(nowcoder.com)</title>
+	<meta charset="utf-8">
+	<style>
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			background-color: #333;
+		}
+
+		li {
+			float: left;
+		}
+
+		li a,
+		.dropbtn {
+			display: inline-block;
+			color: white;
+			text-align: center;
+			padding: 14px 16px;
+			text-decoration: none;
+		}
+
+		li a:hover,
+		.dropdown:hover,
+		.dropbtn {
+			background-color: #111;
+		}
+
+		.dropdown {
+			display: inline-block;
+		}
+
+		.dropdown-content {
+			display: none;
+			position: absolute;
+			background-color: #f9f9f9;
+			min-width: 160px;
+			box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+		}
+
+		.dropdown-content a {
+			color: black;
+			padding: 12px 16px;
+			text-decoration: none;
+			display: block;
+		}
+
+		.dropdown-content a:hover {
+			background-color: #f1f1f1
+		}
+
+		.dropdown:hover .dropdown-content {
+			display: block;
+		}
+	</style>
+</head>
+<body>
+
+	<ul>
+		<li><a class="active" href="#home">主页</a></li>
+		<li><a href="#news">新闻</a></li>
+		<div class="dropdown">
+			<a href="#" class="dropbtn">下拉菜单</a>
+			<div class="dropdown-content">
+				<a href="#">链接 1</a>
+				<a href="#">链接 2</a>
+				<a href="#">链接 3</a>
+			</div>
+		</div>
+	</ul>
+
+	<h3>导航栏上的下拉菜单</h3>
+	<p>鼠标移动到 "下拉菜单" 链接先显示下拉菜单。</p>
+
+</body>
+</html>
+```
+
+
+
+##  CSS 提示工具
+
+### 基础提示框(Tooltip)
+
+提示框在鼠标移动到指定元素上显示：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+</head>
+<style>
+	.tooltip {
+		position: relative;
+		display: inline-block;
+		border-bottom: 1px dotted black;
+	}
+
+	.tooltip .tooltiptext {
+		visibility: hidden;
+		width: 120px;
+		background-color: black;
+		color: #fff;
+		text-align: center;
+		border-radius: 6px;
+		padding: 5px 0;
+
+		/* 定位 */
+		position: absolute;
+		z-index: 1;
+	}
+
+	.tooltip:hover .tooltiptext {
+		visibility: visible;
+	}
+</style>
+<body style="text-align:center;">
+
+	<div class="tooltip">鼠标移动到这
+		<span class="tooltiptext">提示文本</span>
+	</div>
+
+</body>
+</html>
+```
+
+实例解析
+
+**HTML：** 使用容器元素 (like `<div>`) 并添加 **"tooltip"** 类。在鼠标移动到 `<div>` 上时显示提示信息。
+
+提示文本放在内联元素上(如 `<span>`) 并使用 **class="tooltiptext"**。
+
+**CSS：** tooltip 类使用 **position:relative**, 提示文本需要设置定位值 **position:absolute**。 **注意:** 接下来的实例会显示更多的定位效果。
+
+**tooltiptext** 类用于实际的提示文本。模式是隐藏的，在鼠标移动到元素显示 。设置了一些宽度、背景色、字体色等样式。
+
+CSS3 **border-radius** 属性用于为提示框添加圆角。
+
+**:hover** 选择器用于在鼠标移动到到指定元素 `<div>` 上时显示的提示。
+
+### 定位提示工具
+
+#### **显示在左侧**
+
+以下实例中，提示工具显示在指定元素的右侧(**left:105%**) 。
+
+注意 **top:-5px** 同于定位在容器元素的中间。使用数字 **5** 因为提示文本的顶部和底部的内边距（padding）是 5px。
+
+如果你修改 padding 的值，top 值也要对应修改，这样才可以确保它是居中对齐的。
+
+在提示框显示在左边的情况也是这个原理。
+
+```css
+.tooltip .tooltiptext {
+    top: -5px;
+    left: 105%; 
+}
+```
+
+#### **显示在左侧**
+
+```css
+.tooltip .tooltiptext {
+    top: -5px;
+    right: 105%; 
+}
+```
+
+**显示在头部**
+
+如果你想要提示工具显示在头部和底部。我们需要使用 **margin-left** 属性，并设置为 -60px。 这个数字计算来源是使用宽度的一半来居中对齐，即： width/2 (120/2 = 60)。
+
+#### **显示在头部**
+
+```css
+.tooltip .tooltiptext {
+    width: 120px;
+    bottom: 100%;
+    left: 50%; 
+    margin-left: -60px; /* 使用一半宽度 (120/2 = 60) 来居中提示工具 */
+}
+```
+
+#### **显示在底部**
+
+```css
+.tooltip .tooltiptext {
+    width: 120px;
+    top: 100%;
+    left: 50%; 
+    margin-left: -60px; /* 使用一半宽度 (120/2 = 60) 来居中提示工具 */
+}
+```
+
+### 添加箭头
+
+我们可以用CSS 伪元素 ::after 及 content 属性为提示工具创建一个小箭头标志，箭头是由边框组成的，但组合起来后提示工具像个语音信息框。
+
+以下实例演示了如何为显示在顶部的提示工具添加底部箭头：
+
+#### **顶部提示框/底部箭头**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+</head>
+<style>
+	.tooltip {
+		position: relative;
+		display: inline-block;
+		border-bottom: 1px dotted black;
+	}
+
+	.tooltip .tooltiptext {
+		visibility: hidden;
+		width: 120px;
+		background-color: black;
+		color: #fff;
+		text-align: center;
+		border-radius: 6px;
+		padding: 5px 0;
+		position: absolute;
+		z-index: 1;
+		bottom: 150%;
+		left: 50%;
+		margin-left: -60px;
+	}
+
+	.tooltip .tooltiptext::after {
+		content: "";
+		position: absolute;
+		top: 100%;
+		left: 50%;
+		margin-left: -5px;
+		border-width: 5px;
+		border-style: solid;
+		border-color: black transparent transparent transparent;
+	}
+
+	.tooltip:hover .tooltiptext {
+		visibility: visible;
+	}
+</style>
+<body style="text-align:center;">
+
+	<h2>顶部提示框/底部箭头</h2>
+
+	<div class="tooltip">鼠标移动到我这
+		<span class="tooltiptext">提示文本</span>
+	</div>
+
+</body>
+</html>
+```
+
+在提示工具内定位箭头: **top: 100%** , 箭头将显示在提示工具的底部。**left: 50%** 用于居中对齐箭头。
+
+**注意：** **border-width** 属性指定了箭头的大小。如果你修改它，也要修改 **margin-left** 值。这样箭头在能居中显示。
+
+**border-color** 用于将内容转换为箭头。设置顶部边框为黑色，其他是透明的。如果设置了其他的也是黑色则会显示为一个黑色的四边形。
+
+#### **底部提示框/顶部箭头**
+
+```css
+.tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    bottom: 100%;  /* 提示工具头部 */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent black transparent;
+}
+```
+
+#### **右侧提示框/左侧箭头**
+
+```css
+.tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 50%;
+    right: 100%; /* 提示工具左侧 */
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent black transparent transparent;
+}
+```
+
+#### **左侧提示框/右侧箭头**
+
+```css
+.tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 50%;
+    left: 100%; /* 提示工具右侧 */
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent black;
+}
+```
+
+### 淡入效果
+
+我们可以使用 CSS3 transition 属性及 opacity 属性来实现提示工具的淡入效果：
+
+```css
+.tooltip .tooltiptext {
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+.tooltip:hover .tooltiptext {
+    opacity: 1;
+}
+```
+
+
+
+## CSS 图片廊
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		div.img {
+			margin: 5px;
+			border: 1px solid #ccc;
+			float: left;
+			width: 180px;
+		}
+
+		div.img:hover {
+			border: 1px solid #777;
+		}
+
+		div.img img {
+			width: 100%;
+			height: auto;
+		}
+
+		div.desc {
+			padding: 15px;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+
+	<div class="responsive">
+		<div class="img">
+			<a target="_blank" href="//www.nowcoder.com">
+				<img src="//static.nowcoder.com/tutorial/web-examples/img/demo1.jpg" alt="图片文本描述" width="300" height="200">
+			</a>
+			<div class="desc">这里添加图片文本描述</div>
+		</div>
+	</div>
+
+	<div class="responsive">
+		<div class="img">
+			<a target="_blank" href="//www.nowcoder.com">
+				<img src="//static.nowcoder.com/tutorial/web-examples/img/demo2.jpg" alt="图片文本描述" width="300" height="200">
+			</a>
+			<div class="desc">这里添加图片文本描述</div>
+		</div>
+	</div>
+
+	<div class="responsive">
+		<div class="img">
+			<a target="_blank" href="//www.nowcoder.com">
+				<img src="//static.nowcoder.com/tutorial/web-examples/img/demo3.jpg" alt="图片文本描述" width="300" height="200">
+			</a>
+			<div class="desc">这里添加图片文本描述</div>
+		</div>
+	</div>
+
+	<div class="responsive">
+		<div class="img">
+			<a target="_blank" href="//www.nowcoder.com">
+				<img src="//static.nowcoder.com/tutorial/web-examples/img/demo4.jpg" alt="图片文本描述" width="300" height="200">
+			</a>
+			<div class="desc">这里添加图片文本描述</div>
+		</div>
+	</div>
+
+</body>
+</html>
+```
+
+**响应式图片廊**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		div.img {
+			border: 1px solid #ccc;
+		}
+
+		div.img:hover {
+			border: 1px solid #777;
+		}
+
+		div.img img {
+			width: 100%;
+			height: auto;
+		}
+
+		div.desc {
+			padding: 15px;
+			text-align: center;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		.responsive {
+			padding: 0 6px;
+			float: left;
+			width: 24.99999%;
+		}
+
+		@media only screen and (max-width: 700px) {
+			.responsive {
+				width: 49.99999%;
+				margin: 6px 0;
+			}
+		}
+
+		@media only screen and (max-width: 500px) {
+			.responsive {
+				width: 100%;
+			}
+		}
+
+		.clearfix:after {
+			content: "";
+			display: table;
+			clear: both;
+		}
+	</style>
+</head>
+<body>
+
+	<h2 style="text-align:center">响应式图片相册</h2>
+
+	<div class="responsive">
+		<div class="img">
+			<a target="_blank" href="//www.nowcoder.com">
+				<img src="//static.nowcoder.com/tutorial/web-examples/img/img_fjords.jpg" alt="Trolltunga Norway" width="300" height="200">
+			</a>
+			<div class="desc">Add a description of the image here</div>
+		</div>
+	</div>
+
+
+	<div class="responsive">
+		<div class="img">
+			<a target="_blank" href="//www.nowcoder.com">
+				<img src="//static.nowcoder.com/tutorial/web-examples/img/img_forest.jpg" alt="Forest" width="600" height="400">
+			</a>
+			<div class="desc">Add a description of the image here</div>
+		</div>
+	</div>
+
+	<div class="responsive">
+		<div class="img">
+			<a target="_blank" href="//www.nowcoder.com">
+				<img src="//static.nowcoder.com/tutorial/web-examples/img/img_lights.jpg" alt="Northern Lights" width="600" height="400">
+			</a>
+			<div class="desc">Add a description of the image here</div>
+		</div>
+	</div>
+
+	<div class="responsive">
+		<div class="img">
+			<a target="_blank" href="//www.nowcoder.com">
+				<img src="//static.nowcoder.com/tutorial/web-examples/img/img_mountains.jpg" alt="Mountains" width="600" height="400">
+			</a>
+			<div class="desc">Add a description of the image here</div>
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	<div style="padding:6px;">
+
+		<h4>重置浏览器大小查看效果</h4>
+	</div>
+
+</body>
+</html>
+```
+
+## CSS 图像透明/不透明
+
+使用CSS很容易创建透明的图像，CSS3中属性的透明度是 **opacity**。
+
+*CSS Opacity属性是W3C的CSS3建议的一部分。*
+
+```css
+opacity:0.4;
+filter:alpha(opacity=40); /* IE8 及其更早版本 */
+```
+
+### 图像的透明度 - 悬停效果
+
+```css
+img {
+  opacity:0.4;
+  filter:alpha(opacity=40); /*  IE8 及其更早版本 */
+}
+img:hover {
+  opacity:1.0;
+  filter:alpha(opacity=100); /* IE8 及其更早版本 */
+}
+```
+
+### 透明的盒子中的文字
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		div.background {
+			width: 500px;
+			height: 250px;
+			background: url(img/klematis.jpg) repeat;
+			border: 2px solid black;
+		}
+
+		div.transbox {
+			width: 400px;
+			height: 180px;
+			margin: 30px 50px;
+			background-color: #ffffff;
+			border: 1px solid black;
+			opacity: 0.6;
+			filter: alpha(opacity=60);
+			/* For IE8 and earlier */
+		}
+
+		div.transbox p {
+			margin: 30px 40px;
+			font-weight: bold;
+			color: #000000;
+		}
+	</style>
+</head>
+<body>
+	<div class="background">
+		<div class="transbox">
+			<p>
+				这些文本在透明框里。这些文本在透明框里。这些文本在透明框里。这些文本在透明框里。这些文本在透明框里。这些文本在透明框里。这些文本在透明框里。这些文本在透明框里。这些文本在透明框里。这些文本在透明框里。这些文本在透明框里。这些文本在透明框里。这些文本在透明框里。
+			</p>
+		</div>
+	</div>
+</body>
+</html>
+```
+
+## CSS 图像拼合技术
+
+图像拼合就是单个图像的集合。
+
+有许多图像的网页可能需要很长的时间来加载和生成多个服务器的请求。
+
+使用图像拼合会降低服务器的请求数量，并节省带宽。
+
+### 图像拼合简单方法
+
+```css
+img.home {
+    width:46px;
+    height:44px;
+    background:url(img_navsprites.gif) 0 0;
+}
+```
+
+**实例解析：**
+
+- `<img class="home" src="img_trans.gif" />` - 因为不能为空,src属性只定义了一个小的透明图像。显示的图像将是我们在CSS中指定的背景图像
+- 宽度：46px;高度：44px; - 定义我们使用的那部分图像
+- background:url(img_navsprites.gif) 0 0; - 定义背景图像和它的位置（左0px，顶部0px）
+
+这是使用图像拼合最简单的方法，现在我们使用链接和悬停效果。
+
+### 创建一个导航列表
+
+我们想使用拼合图像 ("img_navsprites.gif")，以创建一个导航列表。
+
+我们将使用一个HTML列表，因为它可以链接，同时还支持背景图像：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>牛客教程(nowcoder.com)</title>
+	<style>
+		#navlist {
+			position: relative;
+		}
+
+		#navlist li {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			position: absolute;
+			top: 0;
+		}
+
+		#navlist li,
+		#navlist a {
+			height: 44px;
+			display: block;
+		}
+
+		#home {
+			left: 0px;
+			width: 45px;
+		}
+
+		#home {
+			background: url('//static.nowcoder.com/tutorial/web-examples/img/img_navsprites.gif') 0 0;
+		}
+
+		#prev {
+			left: 62px;
+			width: 43px;
+		}
+
+		#prev {
+			background: url('//static.nowcoder.com/tutorial/web-examples/img/img_navsprites.gif') -47px 0;
+		}
+
+		#next {
+			left: 130px;
+			width: 43px;
+		}
+
+		#next {
+			background: url('//static.nowcoder.com/tutorial/web-examples/img/img_navsprites.gif') -91px 0;
+		}
+	</style>
+</head>
+
+<body>
+	<ul id="navlist">
+		<li id="home"><a href="//www.nowcoder.com"></a></li>
+		<li id="prev"><a href="//www.nowcoder.com/courses"></a></li>
+		<li id="next"><a href="//www.nowcoder.com/library"></a></li>
+	</ul>
+</body>
+</html>
+```
+
+### 悬停效果
+
+现在，我们希望我们的导航列表中添加一个悬停效果。
+
+我们的新图像 ("img_navsprites_hover.gif") 包含三个导航图像和三幅图像：因为这是一个单一的图像，而不是6个单独的图像文件，当用户停留在图像上不会有延迟加载。
+
+我们添加悬停效果只添加三行代码：
+
+```css
+#home a:hover{background: url('img_navsprites_hover.gif') 0 -45px;}
+#prev a:hover{background: url('img_navsprites_hover.gif') -47px -45px;}
+#next a:hover{background: url('img_navsprites_hover.gif') -91px -45px;}
+```
+
+**实例解析：**
+
+- 由于该列表项包含一个链接，我们可以使用：hover伪类
+- `#home a:hover{background: transparent url(img_navsprites_hover.gif) 0 -45px;}` - 对于所有三个悬停图像，我们指定相同的背景位置，只是每个再向下45px
+
+## CSS 媒体类型
+
+媒体类型允许你指定文件将如何在不同媒体呈现。该文件可以以不同的方式显示在屏幕上，在纸张上，或听觉浏览器等等。
+
+一些 CSS 属性只设计了某些媒体。例如 **voice-family** 属性是专为听觉用户代理。其他一些属性可用于不同的媒体类型。例如， **font-size** 属性可用于屏幕和印刷媒体，但有不同的值。屏幕和纸上的文件不同，通常需要一个更大的字体，**sans-serif** 字体比较适合在屏幕上阅读，而 **serif** 字体更容易在纸上阅读。
+
+### @media 规则
+
+@media 规则允许在相同样式表为不同媒体设置不同的样式。
+
+在下面的例子告诉我们浏览器屏幕上显示一个 14 像素的 Verdana 字体样式。但是如果页面打印，将是 10 个像素的 Times 字体。请注意，font-weight 在屏幕上和纸上设置为粗体：
+
+```css
+@media screen {
+    p.test {font-family:verdana,sans-serif;font-size:14px;}
+}
+@media print {
+    p.test {font-family:times,serif;font-size:10px;}
+}
+@media screen,print {
+    p.test {font-weight:bold;}
+}
+```
+
+### 其他媒体类型
+
+**注意：**媒体类型名称不区分大小写。
+
+|  媒体类型  | 描述                                                   |
+| :--------: | :----------------------------------------------------- |
+|    all     | 用于所有的媒体设备。                                   |
+|   aural    | 用于语音和音频合成器。                                 |
+|  braille   | 用于盲人用点字法触觉回馈设备。                         |
+|  embossed  | 用于分页的盲人用点字法打印机。                         |
+|  handheld  | 用于小的手持的设备。                                   |
+|   print    | 用于打印机。                                           |
+| projection | 用于方案展示，比如幻灯片。                             |
+|   screen   | 用于电脑显示器。                                       |
+|    tty     | 用于使用固定密度字母栅格的媒体，比如电传打字机和终端。 |
+|     tv     | 用于电视机类型的设备。                                 |
+
+
+
+## CSS 表单
+
+### 输入框(input) 样式
+
+使用 width 属性来设置输入框的宽度：
+
+```css
+input {
+  width: 100%;
+}
+```
+
+以上实例中设置了所有 `<input>` 元素的宽度为 100%，如果你只想设置指定类型的输入框可以使用以下属性选择器：
+
+- `input[type=text]` - 选取文本输入框
+- `input[type=password]` - 选择密码的输入框
+- `input[type=number]` - 选择数字的输入框
+
+### 输入框填充
+
+使用 `padding` 属性可以在输入框中添加内边距。
+
+```css
+input[type=text] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+```
+
+注意我们设置了 `box-sizing` 属性为 `border-box`。这样可以确保浏览器呈现出带有指定宽度和高度的输入框是把边框和内边距一起计算进去的。
+
+### 输入框(input) 边框
+
+使用 `border` 属性可以修改 input 边框的大小或颜色，使用 `border-radius` 属性可以给 input 添加圆角：
+
+```css
+input[type=text] {
+  border: 2px solid red;
+  border-radius: 4px;
+}
+```
+
+如果你只想添加底部边框可以使用 `border-bottom` 属性：
+
+```css
+input[type=text] {
+  border: none;
+  border-bottom: 2px solid red;
+}
+```
+
+### 输入框(input) 颜色
+
+可以使用 `background-color` 属性来设置输入框的背景颜色，`color` 属性用于修改文本颜色：
+
+```css
+input[type=text] {
+  background-color: #3CBC8D;
+  color: white;
+}
+```
+
+### 输入框(input) 聚焦
+
+默认情况下，一些浏览器在输入框获取焦点时（点击输入框）会有一个蓝色轮廓。我们可以设置 input 样式为 `outline: none;` 来忽略该效果。
+
+使用 `:focus` 选择器可以设置输入框在获取焦点时的样式：
+
+```css
+input[type=text]:focus {
+  background-color: lightblue;
+}
+input[type=text]:focus {
+  border: 3px solid #555;
+}
+```
+
+### 输入框(input) 图标
+
+如果你想在输入框中添加图标，可以使用 `background-image` 属性和用于定位的`background-position` 属性。注意设置图标的左边距，让图标有一定的空间：
+
+```css
+input[type=text] {
+  background-color: white;
+  background-image: url('searchicon.png');
+  background-position: 10px 10px; 
+  background-repeat: no-repeat;
+  padding-left: 40px;
+}
+```
+
+### 带动画的搜索框
+
+以下实例使用了 CSS `transition` 属性，该属性设置了输入框在获取焦点时会向右延展。你可以在 [CSS 动画](https://www.nowcoder.com/tutorial/10008/1d53b4d5adc3447baa371d01056732c1) 章节查看更多内容。
+
+```css
+input[type=text] {
+  -webkit-transition: width 0.4s ease-in-out;
+  transition: width 0.4s ease-in-out;
+}
+
+input[type=text]:focus {
+  width: 100%;
+}
+```
+
+### 文本框（textarea）样式
+
+**注意:** 使用 `resize` 属性来禁用文本框可以重置大小的功能（一般拖动右下角可以重置大小）。
+
+```css
+textarea {
+  width: 100%;
+  height: 150px;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+  resize: none;
+}
+```
+
+
+
+### 下拉菜单（select）样式
+
+```css
+select {
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 4px;
+  background-color: #f1f1f1;
+}
+```
+
+
+
+### 按钮样式
+
+```css
+input[type=button], input[type=submit], input[type=reset] {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 16px 32px;
+  text-decoration: none;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+/* 提示: 使用 width: 100% 设置全宽按钮 */
+```
+
+
+
+### 响应式表单
+
+响应式表带可以根据浏览器窗口的大小重新布局各个元素，我们可以通过重置浏览器窗口大小来查看效果：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		input[type=text], select, textarea {
+			width: 100%;
+			padding: 12px;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			resize: vertical;
+		}
+
+		label {
+			padding: 12px 12px 12px 0;
+			display: inline-block;
+		}
+
+		input[type=submit] {
+			background-color: #4CAF50;
+			color: white;
+			padding: 12px 20px;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			float: right;
+		}
+
+		input[type=submit]:hover {
+			background-color: #45a049;
+		}
+
+		.container {
+			border-radius: 5px;
+			background-color: #f2f2f2;
+			padding: 20px;
+		}
+
+		.col-25 {
+			float: left;
+			width: 25%;
+			margin-top: 6px;
+		}
+
+		.col-75 {
+			float: left;
+			width: 75%;
+			margin-top: 6px;
+		}
+
+		/* 清除浮动 */
+		.row:after {
+			content: "";
+			display: table;
+			clear: both;
+		}
+
+		/* 响应式布局 layout - 在屏幕宽度小于 600px 时， 设置为上下堆叠元素 */
+		@media screen and (max-width: 600px) {
+			.col-25, .col-75, input[type=submit] {
+				width: 100%;
+				margin-top: 0;
+			}
+		}
+	</style>
+</head>
+<body>
+
+	<h2>响应式表单</h2>
+	<p>响应式表带可以根据浏览器窗口的大小重新布局各个元素，我们可以通过重置浏览器窗口大小来查看效果：</p>
+
+	<div class="container">
+		<form action="//www.nowcoder.com">
+			<div class="row">
+				<div class="col-25">
+					<label for="fname">First Name</label>
+				</div>
+				<div class="col-75">
+					<input type="text" id="fname" name="firstname" placeholder="Your name..">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-25">
+					<label for="lname">Last Name</label>
+				</div>
+				<div class="col-75">
+					<input type="text" id="lname" name="lastname" placeholder="Your last name..">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-25">
+					<label for="country">Country</label>
+				</div>
+				<div class="col-75">
+					<select id="country" name="country">
+						<option value="australia">Australia</option>
+						<option value="canada">Canada</option>
+						<option value="usa">USA</option>
+					</select>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-25">
+					<label for="subject">Subject</label>
+				</div>
+				<div class="col-75">
+					<textarea id="subject" name="subject" placeholder="Write something.." style="height:200px"></textarea>
+				</div>
+			</div>
+			<div class="row">
+				<input type="submit" value="Submit">
+			</div>
+		</form>
+	</div>
+
+</body>
+</html>
+```
+
+
+
+## CSS 计数器
