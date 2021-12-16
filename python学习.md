@@ -85,3 +85,79 @@ for file in files:
 
 ```
 
+遍历序列文件使用blastn比对
+
+```python
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+import os
+
+count=0
+
+def readDirFile(path):
+	global count
+	files=os.listdir(path)
+	for file in files:
+		#blastcmd='makeblastdb -in '+path+"/"+file+' -dbtype prot -parse_seqids -hash_index -out blastdatabase/'+file.replace(".faa","")
+		#print(blastcmd)
+		#os.system(blastcmd)
+		dbs=["B","M","W"]
+		newFile=os.path.join(path,file)
+		if os.path.isfile(newFile):
+			newdir=os.path.join("resultsFile",newFile.split("\\")[-2])
+			if not os.path.exists(newdir):
+				os.makedirs(newdir)
+			for i in range(3):
+				resultFile=os.path.join(newdir,os.path.basename(newFile).replace(".ffn","_")+dbs[i]+".txt")
+				blastn="blastn -query "+newFile+" -evalue 1e-5 -db "+os.path.join("blastdb",dbs[i])+\
+				" -outfmt 6 -out "+resultFile+" -num_threads 8"
+				#print(blastn)
+				os.system(blastn)
+		else:
+			readDirFile(newFile)
+
+testpath="bacteria3type"
+readDirFile(testpath)
+#print(count)
+
+#blastn -query blastseq/$seqFile -evalue $evalue -db blastdb/$dataset -outfmt 6 -out blastresult/$blastResult1 -num_threads 16
+
+```
+
+整合结果到一个文件
+
+```python
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+import os
+import shutil
+
+#shutil.copyfile(oldname,newname)
+
+count=0
+
+def readDirFile(path):
+	global count
+	files=os.listdir(path)
+	for file in files:
+		oldFile=os.path.join(path,file)
+		if os.path.isfile(oldFile):
+			os.path.getsize
+			if os.path.getsize(oldFile)!=0:
+				fo=open(oldFile,"r",encoding="utf-8")
+				fi=open("allresultofBlast.txt","a+",encoding="utf-8")
+				lines=fo.readlines()  #读取所有行
+				for line in lines:
+					count+=1
+					fi.write(oldFile+"\t"+line.strip()+"\n")
+					#print(oldFile+"\t"+line.strip())
+				fo.close()# 关闭文件
+				fi.close()
+		else:
+			readDirFile(oldFile)
+
+testpath="resultsFile"
+readDirFile(testpath)
+print(count)
+```
+
