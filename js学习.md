@@ -224,3 +224,4 @@ console.log(Object.getOwnPropertyDescriptors(book));
 */
 ```
 
+### 1.4 合并对象

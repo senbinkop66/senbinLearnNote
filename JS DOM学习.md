@@ -481,3 +481,123 @@ let hasXmlDom = document.implementation.hasFeature("XML", "1.0");
 由于实现不一致，**因此 hasFeature()的返回值并不可靠。目前这个方法已经被废弃，不再建议使用**。为了向后兼容，目前主流浏览器仍然支持这个方法，但无论检测什么都一律返回 true。
 
 ### 7 文档写入
+
+document 对象有一个古老的能力，即向网页输出流中写入内容。这个能力对应 4 个方法：write()、 writeln()、open()和 close()。其中，write()和 writeln()方法都接收一个字符串参数，可以将 这个字符串写入网页中。write()简单地写入文本，而 writeln()还会在字符串末尾追加一个换行符 （\n）。这两个方法可以用来在页面加载期间向页面中动态添加内容，如下所示：
+
+```html
+<html>
+	<head>
+		<title>document.write() Example</title>
+	</head>
+	<body>
+		<p>The current date and time is:
+		<script type="text/javascript">
+			document.write("<strong>" + (new Date()).toString() + "</strong>");
+		</script>
+		</p>
+	</body>
+</html>
+```
+
+这个例子会在页面加载过程中输出当前日期和时间。日期放在了<strong>元素中，如同它们之前 就包含在 HTML 页面中一样。这意味着会创建一个 DOM 元素，以后也可以访问。通过 write()和 writeln()输出的任何 HTML 都会以这种方式来处理。 
+
+write()和 writeln()方法经常用于动态包含外部资源，如 JavaScript 文件。在包含 JavaScript 文 件时，记住不能像下面的例子中这样直接包含字符串"</script>"，因为这个字符串会被解释为脚本块 的结尾，导致后面的代码不能执行：
+
+```html
+<html>
+	<head>
+		<title>document.write() Example</title>
+	</head>
+	<body>
+		<p>The current date and time is:
+		<script type="text/javascript">
+			document.write("<script type=\"text/javascript\" src=\"file.js\">"+"</script>");
+		</script>
+		</p>
+	</body>
+</html>
+```
+
+虽然这样写看起来没错，但输出之后的"</script>"会匹配最外层的<script>标签，导致页面中显示出");。为避免出现这个问题，需要对前面的例子稍加修改：
+
+```html
+<html>
+	<head>
+		<title>document.write() Example</title>
+	</head>
+	<body>
+		<p>The current date and time is:
+		<script type="text/javascript">
+			document.write("<script type=\"text/javascript\" src=\"file.js\">"+"<\/script>");
+		</script>
+		</p>
+	</body>
+</html>
+```
+
+这里的字符串"<\/script>"不会再匹配最外层的<script>标签，因此不会在页面中输出额外内容。
+
+前面的例子展示了在页面渲染期间通过 document.write()向文档中输出内容。如果是在页面加载完之后再调用 document.write()，则输出的内容会重写整个页面，如下面的例子所示：
+
+```html
+<html>
+	<head>
+		<title>document.write() Example</title>
+	</head>
+	<body>
+		<p>This is some content that you won't get to see because it will be overwritten.</p>
+            <script type="text/javascript">
+                window.onload = function(){
+                	document.write("Hello world!");
+                };
+			</script>
+		</p>
+	</body>
+</html>
+```
+
+这个例子使用了 window.onload 事件处理程序，将调用 document.write()的函数推迟到页面加载完毕后执行。执行之后，字符串"Hello world!"会重写整个页面内容。
+
+open()和 close()方法分别用于打开和关闭网页输出流。在调用 write()和 writeln()时，这两个方法都不是必需的。
+
+**注意** 严格的 XHTML 文档不支持文档写入。对于内容类型为 application/xml+xhtml的页面，这些方法不起作用。
+
+## 1.3 Element 类型
+
+除了 Document 类型，Element 类型就是 Web开发中最常用的类型了。Element 表示 XML或 HTML元素，对外暴露出访问元素标签名、子节点和属性的能力。Element 类型的节点具有以下特征：
+
+- nodeType 等于 1；
+- nodeName 值为元素的标签名；
+- nodeValue 值为 null；
+- parentNode 值为 Document 或 Element 对象；
+- 子节点可以是 Element、Text、Comment、ProcessingInstruction、CDATASection、EntityReference 类型。
+
+可以通过 nodeName 或 tagName 属性来获取元素的标签名。这两个属性返回同样的值（添加后一个属性明显是为了不让人误会）。比如有下面的元素：
+
+```html
+<div id="myDiv"></div>
+```
+
+可以像这样取得这个元素的标签名：
+
+```js
+let div = document.getElementById("myDiv");
+alert(div.tagName); // "DIV"
+alert(div.tagName == div.nodeName); // true
+```
+
+例子中的元素标签名为 div，ID 为"myDiv"。注意，div.tagName 实际上返回的是"DIV"而不是 "div"。在 HTML 中，元素标签名始终以全大写表示；在 XML（包括 XHTML）中，标签名始终与源 代码中的大小写一致。如果不确定脚本是在 HTML 文档还是 XML 文档中运行，最好将标签名转换为小 写形式，以便于比较：
+
+```js
+if (element.tagName == "div"){ // 不要这样做，可能出错！
+	// do something here
+}
+if (element.tagName.toLowerCase() == "div"){ // 推荐，适用于所有文档
+	// 做点什么
+}
+```
+
+这个例子演示了比较 tagName 属性的情形。第一个是容易出错的写法，因为 HTML 文档中 tagName返回大写形式的标签名。第二个先把标签名转换为全部小写后再比较，这是推荐的做法，因为这对 HTML和 XML 都适用。
+
+### 1 HTML 元素
+
