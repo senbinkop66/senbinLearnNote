@@ -2783,3 +2783,470 @@ b.baz(); // baz
 
 **注意** 很多 JavaScript 框架（特别是 React）已经抛弃混入模式，转向了组合模式（把方法 提取到独立的类和辅助对象中，然后把它们组合起来，但不使用继承）。这反映了那个众 所周知的软件设计原则：“**组合胜过继承**（composition over inheritance）。”这个设计原则被 很多人遵循，在代码设计中能提供极大的灵活性。
 
+
+
+# 迭代器与生成器
+
+## 1 理解迭代
+
+迭代的英文“iteration”源自拉丁文 itero，意思是“重复”或“再来”。在软件开发领域，“迭代”的意思是按照顺序反复多次执行一段程序，通常会有明确的终止条件。ECMAScript 6 规范新增了两个高级特性：迭代器和生成器。使用这两个特性，能够更清晰、高效、方便地实现迭代。
+
+在 JavaScript 中，计数循环就是一种最简单的迭代：
+
+```js
+for (let i = 1; i <= 10; ++i) {
+	console.log(i);
+}
+```
+
+**循环是迭代机制的基础**，这是因为它可以指定迭代的次数，以及每次迭代要执行什么操作。每次循环都会在下一次迭代开始之前完成，而每次迭代的顺序都是事先定义好的。
+
+**迭代会在一个有序集合上进行**。（“有序”可以理解为集合中所有项都可以按照既定的顺序被遍历到，特别是开始和结束项有明确的定义。）数组是 JavaScript 中有序集合的最典型例子。
+
+```js
+let collection = ['foo', 'bar', 'baz'];
+for (let index = 0; index < collection.length; ++index) {
+	console.log(collection[index]);
+}
+```
+
+因为数组有已知的长度，且数组每一项都可以通过索引获取，所以整个数组可以通过递增索引来遍历。
+
+由于如下原因，通过这种循环来执行例程并不理想。
+
+- **迭代之前需要事先知道如何使用数据结构**。数组中的每一项都只能先通过引用取得数组对象，然后再通过[]操作符取得特定索引位置上的项。这种情况并不适用于所有数据结构。
+- **遍历顺序并不是数据结构固有的**。通过递增索引来访问数据是特定于数组类型的方式，并不适用于其他具有隐式顺序的数据结构。
+
+ES5 新增了 Array.prototype.forEach()方法，向通用迭代需求迈进了一步（但仍然不够理想）：
+
+```js
+let collection = ['foo', 'bar', 'baz'];
+collection.forEach((item) => console.log(item));
+```
+
+这个方法解决了单独记录索引和通过数组对象取得值的问题。不过，没有办法标识迭代何时终止。 因此这个方法只适用于数组，而且回调结构也比较笨拙。
+
+ 在 ECMAScript 较早的版本中，执行迭代必须使用循环或其他辅助结构。随着代码量增加，代码会 变得越发混乱。很多语言都通过原生语言结构解决了这个问题，开发者无须事先知道如何迭代就能实现 迭代操作。这个解决方案就是迭代器模式。Python、Java、C++，还有其他很多语言都对这个模式提供 了完备的支持。JavaScript 在 ECMAScript 6 以后也支持了迭代器模式。
+
+## 2 迭代器模式
+
+### 2.0 可迭 代对象
+
+迭代器模式（特别是在 ECMAScript 这个语境下）描述了一个方案，**即可以把有些结构称为“可迭 代对象”（iterable）**，因为它们实现了正式的 Iterable 接口，而且可以通过迭代器 Iterator 消费。 
+
+可迭代对象是一种抽象的说法。基本上，可以把可迭代对象理解成数组或集合这样的集合类型的对 象。它们包含的元素都是有限的，而且都具有无歧义的遍历顺序：
+
+```js
+// 数组的元素是有限的
+// 递增索引可以按序访问每个元素
+let arr = [3, 1, 4];
+// 集合的元素是有限的
+// 可以按插入顺序访问每个元素
+let set = new Set().add(3).add(1).add(4);
+```
+
+不过，可迭代对象不一定是集合对象，也可以是仅仅具有类似数组行为的其他数据结构，比如本章 开头提到的计数循环。该循环中生成的值是暂时性的，但循环本身是在执行迭代。计数循环和数组都具 有可迭代对象的行为。
+
+**注意** 临时性可迭代对象可以实现为生成器
+
+任何实现 Iterable 接口的数据结构都可以被实现 Iterator 接口的结构“消费”（consume）。**迭 代器（iterator）是按需创建的一次性对象**。每个迭代器都会关联一个可迭代对象，而迭代器会暴露迭代 其关联可迭代对象的 API。迭代器无须了解与其关联的可迭代对象的结构，只需要知道如何取得连续的 值。这种概念上的分离正是 Iterable 和 Iterator 的强大之处。
+
+### 2.1 可迭代协议
+
+实现 Iterable 接口（可迭代协议）要求同时具备两种能力：**支持迭代的自我识别能力**和**创建实现 Iterator 接口的对象的能力**。在 ECMAScript 中，这意味着必须暴露一个属性作为“默认迭代器”，而 且这个属性必须使用特殊的 Symbol.iterator 作为键。这个默认迭代器属性必须引用一个迭代器工厂 函数，调用这个工厂函数必须返回一个新迭代器。 
+
+很多内置类型都实现了 Iterable 接口： 字符串 、数组 、映射 、集合 、arguments 对象 、NodeList 等 DOM 集合类型
+
+检查是否存在默认迭代器属性可以暴露这个**工厂函数**：
+
+```js
+let num = 1;
+let obj = {};
+// 这两种类型没有实现迭代器工厂函数
+console.log(num[Symbol.iterator]); // undefined
+console.log(obj[Symbol.iterator]); // undefined
+let str = 'abc';
+let arr = ['a', 'b', 'c'];
+let map = new Map().set('a', 1).set('b', 2).set('c', 3);
+let set = new Set().add('a').add('b').add('c');
+let els = document.querySelectorAll('div');
+// 这些类型都实现了迭代器工厂函数
+console.log(str[Symbol.iterator]); // f values() { [native code] }
+console.log(arr[Symbol.iterator]); // f values() { [native code] }
+console.log(map[Symbol.iterator]); // f values() { [native code] }
+console.log(set[Symbol.iterator]); // f values() { [native code] }
+console.log(els[Symbol.iterator]); // f values() { [native code] }
+// 调用这个工厂函数会生成一个迭代器
+console.log(str[Symbol.iterator]()); // StringIterator {}
+console.log(arr[Symbol.iterator]()); // ArrayIterator {}
+console.log(map[Symbol.iterator]()); // MapIterator {}
+console.log(set[Symbol.iterator]()); // SetIterator {}
+console.log(els[Symbol.iterator]()); // ArrayIterator {}
+```
+
+实际写代码过程中，不需要显式调用这个工厂函数来生成迭代器。实现可迭代协议的所有类型都会自动兼容接收可迭代对象的任何语言特性。接收可迭代对象的原生语言特性包括：
+
+- for-of 循环
+- 数组解构
+- 扩展操作符
+- Array.from()
+- 创建集合
+- 创建映射
+- Promise.all()接收由期约组成的可迭代对象
+- Promise.race()接收由期约组成的可迭代对象
+- yield*操作符，在生成器中使用
+
+这些原生语言结构会在后台调用提供的可迭代对象的这个工厂函数，从而创建一个迭代器：
+
+```js
+let arr = ['foo', 'bar', 'baz'];
+
+// for-of 循环
+for (let el of arr) {
+    console.log(el);
+}
+
+// 数组解构
+let [a, b, c] = arr;
+console.log(a, b, c); // foo, bar, baz
+
+// 扩展操作符
+let arr2 = [...arr];
+console.log(arr2); // ['foo', 'bar', 'baz']
+
+// Array.from()
+let arr3 = Array.from(arr);
+console.log(arr3); // ['foo', 'bar', 'baz']
+
+// Set 构造函数
+let set = new Set(arr);
+console.log(set); // Set(3) {'foo', 'bar', 'baz'}
+
+// Map 构造函数
+let pairs = arr.map((x, i) => [x, i]);
+console.log(pairs); // [['foo', 0], ['bar', 1], ['baz', 2]]
+
+let map = new Map(pairs);
+console.log(map); // Map(3) { 'foo'=>0, 'bar'=>1, 'baz'=>2 }
+```
+
+如果对象原型链上的父类实现了 Iterable 接口，那这个对象也就实现了这个接口：
+
+```js
+class FooArray extends Array {}
+let fooArr = new FooArray('foo', 'bar', 'baz');
+for (let el of fooArr) {
+	console.log(el);
+}
+```
+
+### 2.2 迭代器协议
+
+迭代器是一种一次性使用的对象，用于迭代与其关联的可迭代对象。迭代器 API 使用 next()方法 在可迭代对象中遍历数据。每次成功调用 next()，都会返回一个 IteratorResult 对象，其中包含迭 代器返回的下一个值。若不调用 next()，则无法知道迭代器的当前位置。 
+
+next()方法返回的迭代器对象 IteratorResult 包含两个属性：**done 和 value**。done 是一个布 尔值，表示是否还可以再次调用 next()取得下一个值；value 包含可迭代对象的下一个值（done 为 false），或者 undefined（done 为 true）。**done: true 状态称为“耗尽”**。可以通过以下简单的数 组来演示：
+
+```js
+// 可迭代对象
+let arr = ['foo', 'bar'];
+// 迭代器工厂函数
+console.log(arr[Symbol.iterator]); // f values() { [native code] }
+// 迭代器
+let iter = arr[Symbol.iterator]();
+console.log(iter); // ArrayIterator {}
+// 执行迭代
+console.log(iter.next()); // { done: false, value: 'foo' }
+console.log(iter.next()); // { done: false, value: 'bar' }
+console.log(iter.next()); // { done: true, value: undefined }
+```
+
+这里通过创建迭代器并调用 next()方法按顺序迭代了数组，直至不再产生新值。**迭代器并不知道怎么从可迭代对象中取得下一个值，也不知道可迭代对象有多大。只要迭代器到达 done: true 状态，后续调用 next()就一直返回同样的值了**：
+
+```js
+let arr = ['foo'];
+let iter = arr[Symbol.iterator]();
+console.log(iter.next()); // { done: false, value: 'foo' }
+console.log(iter.next()); // { done: true, value: undefined }
+console.log(iter.next()); // { done: true, value: undefined }
+console.log(iter.next()); // { done: true, value: undefined }
+```
+
+每个迭代器都表示对可迭代对象的一次性有序遍历。**不同迭代器的实例相互之间没有联系**，只会独立地遍历可迭代对象：
+
+```js
+let arr = ['foo', 'bar'];
+let iter1 = arr[Symbol.iterator]();
+let iter2 = arr[Symbol.iterator]();
+console.log(iter1.next()); // { done: false, value: 'foo' }
+console.log(iter2.next()); // { done: false, value: 'foo' }
+console.log(iter2.next()); // { done: false, value: 'bar' }
+console.log(iter1.next()); // { done: false, value: 'bar' }
+```
+
+迭代器并不与可迭代对象某个时刻的快照绑定，而仅仅是使用游标来记录遍历可迭代对象的历程。如果可迭代对象在迭代期间被修改了，那么迭代器也会反映相应的变化：
+
+```js
+let arr = ['foo', 'baz'];
+let iter = arr[Symbol.iterator]();
+console.log(iter.next()); // { done: false, value: 'foo' }
+// 在数组中间插入值
+arr.splice(1, 0, 'bar');
+console.log(iter.next()); // { done: false, value: 'bar' }
+console.log(iter.next()); // { done: false, value: 'baz' }
+console.log(iter.next()); // { done: true, value: undefined }
+```
+
+**注意** 迭代器维护着一个指向可迭代对象的引用，因此迭代器会阻止垃圾回收程序回收可迭代对象。
+
+迭代器”的概念有时候容易模糊，因为它可以指通用的迭代，也可以指接口，还可以指正式的迭代器类型。下面的例子比较了一个显式的迭代器实现和一个原生的迭代器实现。
+
+```js
+// 这个类实现了可迭代接口（Iterable）
+// 调用默认的迭代器工厂函数会返回
+// 一个实现迭代器接口（Iterator）的迭代器对象
+class Foo {
+    [Symbol.iterator]() {
+        return {
+            next() {
+                return { done: false, value: 'foo' };
+            }
+        }
+    }
+}
+let f = new Foo();
+// 打印出实现了迭代器接口的对象
+console.log(f[Symbol.iterator]()); // { next: [Function: next] }
+// Array 类型实现了可迭代接口（Iterable）
+// 调用 Array 类型的默认迭代器工厂函数
+// 会创建一个 ArrayIterator 的实例
+let a = new Array();
+// 打印出 ArrayIterator 的实例
+console.log(a[Symbol.iterator]()); // Object [Array Iterator] {}
+```
+
+### 2.3 自定义迭代器
+
+与 Iterable 接口类似，**任何实现 Iterator 接口的对象都可以作为迭代器使用**。下面这个例子中的 Counter 类只能被迭代一定的次数：
+
+```js
+class Counter{
+    // Counter 的实例应该迭代 limit 次
+    constructor(limit){
+        this.count=1;
+        this.limit=limit;
+    }
+
+    next(){
+        if (this.count<=this.limit) {
+            return {done:false,value:this.count++};
+        }else{
+            return {done:true,value:undefined};
+        }
+    }
+    [Symbol.iterator](){
+        return this;
+    }
+}
+
+let c1=new Counter(5);
+for (let i of c1){
+    console.log(i);
+}
+```
+
+这个类实现了 Iterator 接口，但不理想。这是因为它的每个实例只能被迭代一次：
+
+```js
+let c1=new Counter(5);
+for (let i of c1){
+    console.log(i);  //1,2,3,4,5
+}
+//没有输出
+for (let i of c1){
+    console.log(i);
+}
+```
+
+为了让一个可迭代对象能够创建多个迭代器，必须每创建一个迭代器就对应一个新计数器。为此，**可以把计数器变量放到闭包里，然后通过闭包返回迭代器**：
+
+```js
+class Counter{
+    // Counter 的实例应该迭代 limit 次
+    constructor(limit){
+        this.limit=limit;
+    }
+
+    
+    [Symbol.iterator](){
+        let count=1;
+        let limit=this.limit;
+        return {
+            next(){
+                if (count<=limit) {
+                    return {done:false,value:count++};
+                }else{
+                    return {done:true,value:undefined};
+                }
+            }
+        };
+    }
+}
+
+let c1=new Counter(5);
+for (let i of c1){
+    console.log(i);  //1,2,3,4,5
+}
+
+for (let i of c1){
+    console.log(i);  //1,2,3,4,5
+}
+```
+
+**每个以这种方式创建的迭代器也实现了 Iterable 接口**。Symbol.iterator 属性引用的工厂函数会返回相同的迭代器：
+
+```js
+let arr = ['foo', 'bar', 'baz'];
+let iter1 = arr[Symbol.iterator]();
+console.log(iter1[Symbol.iterator]); // f values() { [native code] }
+let iter2 = iter1[Symbol.iterator]();
+console.log(iter1 === iter2); // true
+```
+
+因为每个迭代器也实现了 Iterable 接口，所以它们可以用在任何期待可迭代对象的地方，比如for-of 循环：
+
+```js
+let arr = [3, 1, 4];
+let iter = arr[Symbol.iterator]();
+for (let item of arr ) { console.log(item); }
+// 3
+// 1
+// 4
+for (let item of iter ) { console.log(item); }
+// 3
+// 1
+// 4
+```
+
+### 2.4 提前终止迭代器
+
+**可选的 return()方法**用于指定在迭代器提前关闭时执行的逻辑。执行迭代的结构在想让迭代器知道它不想遍历到可迭代对象耗尽时，就可以“关闭”迭代器。可能的情况包括：
+
+- for-of 循环通过 break、continue、return 或 throw 提前退出；
+- 解构操作并未消费所有值。
+
+**return()方法必须返回一个有效的 IteratorResult 对象**。简单情况下，可以只返回{ done: true }。因为这个返回值只会用在生成器的上下文中，所以本章后面再讨论这种情况。
+
+如下面的代码所示，内置语言结构在发现还有更多值可以迭代，但不会消费这些值时，会自动调用return()方法。
+
+```js
+class Counter{
+    // Counter 的实例应该迭代 limit 次
+    constructor(limit){
+        this.limit=limit;
+    }
+
+    
+    [Symbol.iterator](){
+        let count=1;
+        let limit=this.limit;
+        return {
+            next(){
+                if (count<=limit) {
+                    return {done:false,value:count++};
+                }else{
+                    return {done:true};
+                }
+            },
+            return(){
+                console.log("exiting early");
+                return {done:true};
+            }
+        };
+    }
+}
+
+let c1=new Counter(5);
+for (let i of c1){
+    if (i>2) {
+        break;
+    }
+    console.log(i);
+}
+/*
+1
+2
+exiting early
+*/
+
+let c2=new Counter(5);
+try{
+    for (let i of c2){
+        if (i>2) {
+            throw "err";
+        }
+        console.log(i);
+    }
+}catch(e){}
+/*
+1
+2
+exiting early
+*/
+
+let c3=new Counter(5);
+//解构
+let [a,b]=c3;  //exiting early
+
+```
+
+**如果迭代器没有关闭，则还可以继续从上次离开的地方继续迭代**。比如，数组的迭代器就是不能关闭的：
+
+```js
+let a = [1, 2, 3, 4, 5];
+let iter = a[Symbol.iterator]();
+for (let i of iter) {
+    console.log(i);
+    if (i > 2) {
+        break
+    }
+}
+// 1
+// 2
+// 3
+for (let i of iter) {
+    console.log(i);
+}
+// 4
+// 5
+```
+
+因为 return()方法是可选的，所以**并非所有迭代器都是可关闭的**。要知道某个迭代器是否可关闭， 可以测试这个迭代器实例的 return 属性是不是函数对象。不过，仅仅给一个不可关闭的迭代器增加这 个方法并不能让它变成可关闭的。这是因为**调用 return()不会强制迭代器进入关闭状态**。即便如此， return()方法还是会被调用。
+
+```js
+let a = [1, 2, 3, 4, 5];
+let iter = a[Symbol.iterator]();
+iter.return = function() {
+    console.log('Exiting early');
+    return { done: true };
+};
+for (let i of iter) {
+    console.log(i);
+    if (i > 2) {
+        break
+    }
+}
+// 1
+// 2
+// 3
+// Exiting early
+for (let i of iter) {
+    console.log(i);
+}
+// 4
+// 5
+```
+
+
+
+## 3 生成器
+
