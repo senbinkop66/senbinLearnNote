@@ -3956,3 +3956,242 @@ console.log(g.next()); // { done: false, value: 3}
 
 **注意** 如果生成器对象还没有开始执行，那么调用 throw()抛出的错误不会在函数内部被 捕获，**因为这相当于在函数块外部抛出了错误**。
 
+
+
+# 集合引用类型
+
+## 1 Object
+
+到目前为止，大多数引用值的示例使用的是 Object 类型。Object 是 ECMAScript 中最常用的类型之一。虽然 Object 的实例没有多少功能，但很适合存储和在应用程序间交换数据。
+显式地创建 Object 的实例有两种方式。第一种是**使用 new 操作符和 Object 构造函数**，如下所示：
+
+```js
+let person = new Object();
+person.name = "Nicholas";
+person.age = 29;
+```
+
+另一种方式是使用**对象字面量（object literal）表示法**。对象字面量是对象定义的简写形式，目的是 为了简化包含大量属性的对象的创建。比如，下面的代码定义了与前面示例相同的 person 对象，但使 用的是对象字面量表示法：
+
+```js
+let person = {
+    name: "Nicholas",
+    age: 29
+};	
+```
+
+在这个例子中，左大括号（{）表示对象字面量开始，因为它出现在一个**表达式上下文**（expression context）中。在 ECMAScript 中，表达式上下文指的是期待返回值的上下文。赋值操作符表示后面要期 待一个值，因此左大括号表示一个表达式的开始。同样是左大括号，如果出现在语句上下文（statement context）中，比如 if 语句的条件后面，则表示一个语句块的开始。
+
+ 接下来指定了 name 属性，后跟一个冒号，然后是属性的值。逗号用于在对象字面量中分隔属性， 因此字符串"Nicholas"后面有一个逗号，而 29 后面没有，因为 age 是这个对象的最后一个属性。在 最后一个属性后面加上逗号在非常老的浏览器中会导致报错，但所有现代浏览器都支持这种写法。 
+
+在对象字面量表示法中，属性名可以是字符串或数值，比如：
+
+```js
+let person = {
+    "name": "Nicholas",
+    "age": 29,
+    5: true
+};
+```
+
+这个例子会得到一个带有属性 name、age 和 5 的对象。注意，数值属性会自动转换为字符串。
+
+当然也**可以用对象字面量表示法来定义一个只有默认属性和方法的对象**，只要使用一对大括号，中间留空就行了：
+
+```js
+let person = {}; // 与 new Object()相同
+person.name = "Nicholas";
+person.age = 29;
+```
+
+这个例子跟本节开始的第一个例子是等效的，虽然看起来有点怪。对象字面量表示法通常只在为了让属性一目了然时才使用。
+
+**注意** 在使用对象字面量表示法定义对象时，并不会实际调用 Object 构造函数。
+
+虽然使用哪种方式创建 Object 实例都可以，但实际上开发者更倾向于使用对象字面量表示法。这 是因为对象字面量代码更少，看起来也更有封装所有相关数据的感觉。事实上，对象字面量已经成为给 函数传递大量可选参数的主要方式，比如：
+
+```js
+function displayInfo(args) {
+    let output = "";
+    if (typeof args.name == "string"){
+        output += "Name: " + args.name + "\n";
+    }
+    if (typeof args.age == "number") {
+        output += "Age: " + args.age + "\n";
+    }
+    console.log(output);
+}
+displayInfo({
+    name: "Nicholas",
+    age: 29
+});
+displayInfo({
+    name: "Greg"
+});
+```
+
+这里，函数 displayInfo()接收一个名为 args 的参数。这个参数可能有属性 name 或 age，也可 能两个属性都有或者都没有。函数内部会使用 typeof 操作符测试每个属性是否存在，然后根据属性有 无构造并显示一条消息。然后，这个函数被调用了两次，每次都通过一个对象字面量传入了不同的数据。 两种情况下，函数都正常运行。
+
+**注意** 这种模式非常适合函数有大量可选参数的情况。一般来说，命名参数更直观，但在可选参数过多的时候就显得笨拙了。**最好的方式是对必选参数使用命名参数，再通过一个对象字面量来封装多个可选参数。**
+
+虽然属性一般是通过点语法来存取的，这也是面向对象语言的惯例，但也可以使用中括号来存取属性。在使用中括号时，要在括号内使用属性名的字符串形式，比如：
+
+```js
+console.log(person["name"]); // "Nicholas"
+console.log(person.name); // "Nicholas"
+```
+
+从功能上讲，这两种存取属性的方式没有区别。**使用中括号的主要优势就是可以通过变量访问属性**，就像下面这个例子中一样：
+
+```js
+let propertyName = "name";
+console.log(person[propertyName]); // "Nicholas"
+```
+
+另外，如果属性名中包含可能会导致语法错误的字符，或者包含关键字/保留字时，也可以使用中括号语法。比如：
+
+```js
+person["first name"] = "Nicholas";
+```
+
+因为"first name"中包含一个空格，所以不能使用点语法来访问。不过，**属性名中是可以包含非字母数字字符的，这时候只要用中括号语法存取它们就行了**。
+
+通常，**点语法是首选的属性存取方式**，除非访问属性时必须使用变量。
+
+
+
+## 2 Array
+
+除了 Object，Array 应该就是 ECMAScript 中最常用的类型了。ECMAScript 数组跟其他编程语言 的数组有很大区别。跟其他语言中的数组一样，ECMAScript 数组也是一组有序的数据，但跟其他语言 不同的是，**数组中每个槽位可以存储任意类型的数据**。这意味着可以创建一个数组，它的第一个元素 是字符串，第二个元素是数值，第三个是对象。**ECMAScript 数组也是动态大小的，会随着数据添加而 自动增长**。
+
+### 2.1 创建数组
+
+有几种基本的方式可以创建数组。一种是**使用 Array 构造函数**，比如：
+
+```js
+let colors = new Array();
+```
+
+如果知道数组中元素的数量，那么可以给构造函数传入一个数值，然后 **length 属性**就会被自动创建并设置为这个值。比如，下面的代码会创建一个初始 length 为 20 的数组：
+
+```js
+let colors = new Array(20);
+```
+
+也可以给 Array 构造函数传入要保存的元素。比如，下面的代码会创建一个包含 3 个字符串值的数组：
+
+```js
+let colors = new Array("red", "blue", "green");
+```
+
+**创建数组时可以给构造函数传一个值。这时候就有点问题**了，因为如果这个值是数值，则会创建一个长度为指定数值的数组；而如果这个值是其他类型的，则会创建一个只包含该特定值的数组。下面看一个例子：
+
+```js
+let colors = new Array(3); // 创建一个包含 3 个元素的数组
+let names = new Array("Greg"); // 创建一个只包含一个元素，即字符串"Greg"的数组
+```
+
+在使用 Array 构造函数时，也可以省略 new 操作符。结果是一样的，比如：
+
+```js
+let colors = Array(3); // 创建一个包含 3 个元素的数组
+let names = Array("Greg"); // 创建一个只包含一个元素，即字符串"Greg"的数组
+```
+
+另一种创建数组的方式是使用**数组字面量（array literal）表示法**。数组字面量是在中括号中包含以逗号分隔的元素列表，如下面的例子所示：
+
+```js
+let colors = ["red", "blue", "green"]; // 创建一个包含 3 个元素的数组
+let names = []; // 创建一个空数组
+let values = [1,2,]; // 创建一个包含 2 个元素的数组
+```
+
+在这个例子中，第一行创建一个包含 3 个字符串的数组。第二行用一对空中括号创建了一个空数组。第三行展示了在数组最后一个值后面加逗号的效果：values 是一个包含两个值（1 和 2）的数组。
+
+**注意** 与对象一样，**在使用数组字面量表示法创建数组不会调用 Array 构造函数**。
+
+Array 构造函数还有两个 ES6 新增的用于创建数组的静态方法：from()和 of()。**from()用于将类数组结构转换为数组实例**，而 **of()用于将一组参数转换为数组实例**。
+
+Array.from()的第一个参数是一个类数组对象，即任何可迭代的结构，或者有一个 length 属性和可索引元素的结构。这种方式可用于很多场合：
+
+```js
+// 字符串会被拆分为单字符数组
+console.log(Array.from("Arnold"));  //[ 'A', 'r', 'n', 'o', 'l', 'd' ]
+
+// 可以使用 from()将集合和映射转换为一个新数组
+let m=new Map().set(1,2).set(3,4);
+let s=new Set().add(1).add(2).add(3).add(4);
+console.log(Array.from(m));  //[ [ 1, 2 ], [ 3, 4 ] ]
+console.log(Array.from(s));  //[ 1, 2, 3, 4 ]
+
+// Array.from()对现有数组执行浅复制
+let a1=[1,2,3,4];
+let a2=Array.from(a1);
+console.log(a2);  //[ 1, 2, 3, 4 ]
+console.log(a1===a2);  //false
+
+// 可以使用任何可迭代对象
+let iter={
+    *[Symbol.iterator](){
+        yield 1;
+        yield 2;
+        yield 3;
+        yield 4;
+    }
+};
+console.log(Array.from(iter));  //[ 1, 2, 3, 4 ]
+
+// arguments 对象可以被轻松地转换为数组
+function getArgsArray(){
+    return Array.from(arguments);
+}
+console.log(getArgsArray(1,2,3,4));  //[ 1, 2, 3, 4 ]
+
+// from()也能转换带有必要属性的自定义对象
+let arrayLikeObject = {
+    0: 1,
+    1: 2,
+    2: 3,
+    3: 4,
+    4: 5,
+    length: 4
+};
+let arrayLikeObject2 = {
+    0: 1,
+    1: 2,
+    2: 3,
+    3: 4,
+    4: 5,
+    length: 5
+};
+console.log(Array.from(arrayLikeObject));  //[ 1, 2, 3, 4 ]
+console.log(Array.from(arrayLikeObject2));  //[ 1, 2, 3, 4 ,5 ]
+
+```
+
+Array.from()还**接收第二个可选的映射函数参数**。这个函数可以直接增强新数组的值，而无须像调用 Array.from().map()那样先创建一个中间数组。还可以**接收第三个可选参数，用于指定映射函数中 this 的值**。但这个重写的 this 值在箭头函数中不适用。
+
+```js
+let a1=[1,2,3,4];
+
+//两个参数
+let a2=Array.from(a1,x=>x*2);
+console.log(a2);  //[ 2, 4, 6, 8 ]
+
+//三个参数
+let a3=Array.from(a1,function(x){
+    return x**this.exponent
+},{exponent:2});
+console.log(a3);  //[ 1, 4, 9, 16 ]
+```
+
+Array.of()可以把一组参数转换为数组。这个方法用于替代在 ES6 之前常用的 Array.prototype.slice.call(arguments)，一种异常笨拙的将 arguments 对象转换为数组的写法：
+
+```js
+let a1=[1,2,3,4];
+
+console.log(Array.of(a1));  //[ [ 1, 2, 3, 4 ] ]
+console.log(Array.of(1,2,3,4));  //[ 1, 2, 3, 4 ]
+console.log(Array.of(undefined));  //[ undefined ]
+```
+
