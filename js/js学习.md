@@ -4112,6 +4112,8 @@ let values = [1,2,]; // 创建一个包含 2 个元素的数组
 
 Array 构造函数还有两个 ES6 新增的用于创建数组的静态方法：from()和 of()。**from()用于将类数组结构转换为数组实例**，而 **of()用于将一组参数转换为数组实例**。
 
+#### Array.from()
+
 Array.from()的第一个参数是一个类数组对象，即任何可迭代的结构，或者有一个 length 属性和可索引元素的结构。这种方式可用于很多场合：
 
 ```js
@@ -4185,7 +4187,9 @@ let a3=Array.from(a1,function(x){
 console.log(a3);  //[ 1, 4, 9, 16 ]
 ```
 
-Array.of()可以把一组参数转换为数组。这个方法用于替代在 ES6 之前常用的 Array.prototype.slice.call(arguments)，一种异常笨拙的将 arguments 对象转换为数组的写法：
+#### Array.of()
+
+**Array.of()可以把一组参数转换为数组**。这个方法用于替代在 ES6 之前常用的 Array.prototype.slice.call(arguments)，一种异常笨拙的将 arguments 对象转换为数组的写法：
 
 ```js
 let a1=[1,2,3,4];
@@ -4194,4 +4198,415 @@ console.log(Array.of(a1));  //[ [ 1, 2, 3, 4 ] ]
 console.log(Array.of(1,2,3,4));  //[ 1, 2, 3, 4 ]
 console.log(Array.of(undefined));  //[ undefined ]
 ```
+
+### 2.2 数组空位
+
+使用数组字面量初始化数组时，可以使用一串逗号来创建空位（hole）。**ECMAScript 会将逗号之间相应索引位置的值当成空位**，ES6 规范重新定义了该如何处理这些空位。
+
+可以像下面这样创建一个空位数组：
+
+```js
+const options = [,,,,,]; // 创建包含 5 个元素的数组
+console.log(options.length); // 5
+console.log(options); // [,,,,,]   [ <5 empty items> ]
+```
+
+ ES6 新增的方法和迭代器与早期 ECMAScript 版本中存在的方法行为不同。**ES6 新增方法普遍将这些空位当成存在的元素，只不过值为 undefined**：
+
+```js
+const options = [1,,,,5];
+for (const option of options) {
+    console.log(option === undefined);
+}
+// false
+// true
+// true
+// true
+// false
+const a = Array.from([,,,]); // 使用 ES6 的 Array.from()创建的包含 3 个空位的数组
+for (const val of a) {
+    console.log(val === undefined);
+}
+// true
+// true
+// true
+console.log(Array.of(...[,,,])); // [undefined, undefined, undefined]
+for (const [index, value] of options.entries()) {
+    console.log(value);
+}
+// 1
+// undefined
+// undefined
+// undefined
+// 5
+```
+
+ES6 之前的方法则会忽略这个空位，但具体的行为也会因方法而异：
+
+```js
+const options = [1,,,,5];
+// map()会跳过空位置
+console.log(options.map(() => 6)); // [ 6, <3 empty items>, 6 ]
+// join()视空位置为空字符串
+console.log(options.join('-')); // "1----5"
+```
+
+**注意** 由于行为不一致和存在性能隐患，因此**实践中要避免使用数组空位**。**如果确实需要空位，则可以显式地用 undefined 值代替**。
+
+### 2.3 数组索引
+
+要取得或设置数组的值，需要使用中括号并提供相应值的数字索引，如下所示：
+
+```js
+let colors = ["red", "blue", "green"]; // 定义一个字符串数组
+alert(colors[0]); // 显示第一项
+colors[2] = "black"; // 修改第三项
+colors[3] = "brown"; // 添加第四项
+```
+
+在中括号中提供的索引表示要访问的值。如果索引小于数组包含的元素数，则返回存储在相应位置 的元素，就像示例中 colors[0]显示"red"一样。设置数组的值方法也是一样的，就是替换指定位置的 值。**如果把一个值设置给超过数组最大索引的索引**，就像示例中的 colors[3]，**则数组长度会自动扩 展到该索引值加 1**（示例中设置的索引 3，所以数组长度变成了 4）。
+
+ 数组中元素的数量保存在 length 属性中，这个属性始终返回 0 或大于 0 的值，如下例所示：
+
+```js
+let colors = ["red", "blue", "green"]; // 创建一个包含 3 个字符串的数组
+let names = []; // 创建一个空数组
+alert(colors.length); // 3
+alert(names.length); // 0
+```
+
+数组 length 属性的独特之处在于，它不是只读的。**通过修改 length 属性，可以从数组末尾删除或添加元素**。来看下面的例子：
+
+```js
+let colors = ["red", "blue", "green"]; // 创建一个包含 3 个字符串的数组
+colors.length = 2;
+console.log(colors[2]); // undefined
+```
+
+这里，数组 colors 一开始有 3 个值。将 length 设置为 2，就删除了最后一个（位置 2 的）值，因此 colors[2]就没有值了。**如果将 length 设置为大于数组元素数的值，则新添加的元素都将以undefined 填充，**如下例所示：
+
+```js
+let colors = ["red", "blue", "green"]; // 创建一个包含 3 个字符串的数组
+colors.length = 4;
+alert(colors[3]); // undefined
+```
+
+这里将数组 colors 的 length 设置为 4，虽然数组只包含 3 个元素。位置 3 在数组中不存在，因此访问其值会返回特殊值 undefined。
+
+**使用 length 属性可以方便地向数组末尾添加元素**，如下例所示：
+
+```js
+let colors = ["red", "blue", "green"]; // 创建一个包含 3 个字符串的数组
+colors[colors.length] = "black"; // 添加一种颜色（位置 3）
+colors[colors.length] = "brown"; // 再添加一种颜色（位置 4）
+```
+
+数组中最后一个元素的索引始终是 length - 1，因此下一个新增槽位的索引就是 length。每次 在数组最后一个元素后面新增一项，数组的 length 属性都会自动更新，以反映变化。这意味着第二行 的 colors[colors.length]会在位置 3 添加一个新元素，下一行则会在位置 4 添加一个新元素。**新的 长度会在新增元素被添加到当前数组外部的位置上时自动更新**。换句话说，就是 length 属性会更新为 位置加上 1，如下例所示：
+
+```js
+let colors = ["red", "blue", "green"]; // 创建一个包含 3 个字符串的数组
+colors[99] = "black"; // 添加一种颜色（位置 99）
+console.log(colors.length); // 100
+```
+
+这里，colors 数组有一个值被插入到位置 99，结果新 length 就变成了 100（99 + 1）。这中间的 所有元素，即位置 3~98，实际上并不存在，因此在访问时会返回 undefined。 
+
+**注意** 数组**最多可以包含 4 294 967 295 个元素**，这对于大多数编程任务应该足够了。如果 尝试添加更多项，则会导致抛出错误。以这个最大值作为初始值创建数组，可能导致脚本 运行时间过长的错误。
+
+### 2.4 检测数组
+
+一个经典的 ECMAScript 问题是判断一个对象是不是数组。在只有一个网页（因而只有一个全局作用域）的情况下，使用 instanceof 操作符就足矣：
+
+```js
+if (value instanceof Array){
+// 操作数组
+}
+
+let colors = ["red", "blue", "green"]; 
+if (colors instanceof Array){
+	// 操作数组
+	console.log(colors);
+}
+```
+
+**使用 instanceof 的问题是假定只有一个全局执行上下文**。如果网页里有多个框架，则可能涉及两 个不同的全局执行上下文，因此就会有两个不同版本的 Array 构造函数。如果要把数组从一个框架传 给另一个框架，则这个数组的构造函数将有别于在第二个框架内本地创建的数组。
+
+为解决这个问题，ECMAScript 提供了 **Array.isArray()方法**。这个方法的目的就是确定一个值是 否为数组，而不用管它是在哪个全局执行上下文中创建的。来看下面的例子：
+
+```js
+if (Array.isArray(value)){
+	// 操作数组
+}
+let colors = ["red", "blue", "green"]; 
+if (Array.isArray(colors)){
+	// 操作数组
+	console.log(colors);
+}
+```
+
+### 2.5 迭代器方法
+
+在 ES6 中，Array 的原型上暴露了 3 个用于检索数组内容的方法：keys()、values()和entries()。keys()返回数组索引的迭代器，values()返回数组元素的迭代器，而 entries()返回索引/值对的迭代器：
+
+```js
+const a = ["foo", "bar", "baz", "qux"];
+
+//因为这些方法都返回迭代器，所以可以将它们的内容,通过 Array.from()直接转换为数组实例
+let aKeys=Array.from(a.keys());
+let aValues=Array.from(a.values());
+let aEntries=Array.from(a.entries());
+
+console.log(aKeys);  //[ 0, 1, 2, 3 ]
+console.log(aValues);  //[ 'foo', 'bar', 'baz', 'qux' ]
+console.log(aEntries);  //[ [ 0, 'foo' ], [ 1, 'bar' ], [ 2, 'baz' ], [ 3, 'qux' ] ]
+```
+
+使用 ES6 的解构可以非常容易地在循环中拆分键/值对：
+
+```js
+const a = ["foo", "bar", "baz", "qux"];
+for (const [idx, element] of a.entries()) {
+	console.log(idx);
+	console.log(element);
+}
+```
+
+### 2.6 复制和填充方法
+
+ES6 新增了两个方法：批量复制方法 copyWithin()，以及填充数组方法 fill()。这两个方法的 函数签名类似，都需要指定既有数组实例上的一个范围，包含开始索引，不包含结束索引。使用这个方 法不会改变数组的大小。 
+
+#### fill()方法
+
+使用 **fill()方法**可以向一个已有的数组中插入全部或部分相同的值。开始索引用于指定开始填充 的位置，它是可选的。如果不提供结束索引，则一直填充到数组末尾。负值索引从数组末尾开始计算。 也可以将负索引想象成数组长度加上它得到的一个正索引：
+
+```js
+console.log(zeroes);  //[ 0, 0, 0, 6, 6 ]
+
+// 用 7 填充索引大于等于 1 且小于 3 的元素
+zeroes.fill(7,1,3);
+console.log(zeroes);  //[ 0, 7, 7, 6, 6 ]
+
+// 用 8 填充索引大于等于 1 且小于 4 的元素
+// (-4 + zeroes.length = 1)
+// (-1 + zeroes.length = 4)
+//zeroes.fill(8,1,4);
+zeroes.fill(8,-4,-1);
+console.log(zeroes);  //[ 0, 8, 8, 8, 6 ]
+```
+
+fill()静默忽略超出数组边界、零长度及方向相反的索引范围：
+
+```js
+const zeroes = [0, 0, 0, 0, 0];
+// 索引过低，忽略
+zeroes.fill(1, -10, -6);
+console.log(zeroes); // [0, 0, 0, 0, 0]
+// 索引过高，忽略
+zeroes.fill(1, 10, 15);
+console.log(zeroes); // [0, 0, 0, 0, 0]
+// 索引反向，忽略
+zeroes.fill(2, 4, 2);
+console.log(zeroes); // [0, 0, 0, 0, 0]
+// 索引部分可用，填充可用部分
+zeroes.fill(4, 3, 10)
+console.log(zeroes); // [0, 0, 0, 4, 4]
+```
+
+#### copyWithin()
+
+与 fill()不同，**copyWithin()会按照指定范围浅复制数组中的部分内容，然后将它们插入到指定索引开始的位置**。开始索引和结束索引则与 fill()使用同样的计算方法：
+
+```js
+let ints;
+let reset=()=>ints=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9];  //重置函数
+reset();
+
+// 从 ints 中复制索引 0 开始的内容，插入到索引 5 开始的位置
+// 在源索引或目标索引到达数组边界时停止
+console.log(ints);  //[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+ints.copyWithin(5);
+console.log(ints);  //[0, 1, 2, 3, 4, 0, 1, 2, 3, 4]
+reset();
+
+// 从 ints 中复制索引 5 开始的内容，插入到索引 0 开始的位置
+ints.copyWithin(0,5);
+console.log(ints);  //[5, 6, 7, 8, 9, 5, 6, 7, 8, 9]
+reset();
+
+// 从 ints 中复制索引 0 开始到索引 3 结束的内容
+// 插入到索引 4 开始的位置
+ints.copyWithin(4,0,3);
+console.log(ints);  //[0, 1, 2, 3, 0, 1, 2, 7, 8, 9]
+reset();
+
+// JavaScript 引擎在插值前会完整复制范围内的值
+// 因此复制期间不存在重写的风险
+ints.copyWithin(2, 0, 6);
+console.log(ints);  //[0, 1, 0, 1, 2, 3, 4, 5, 8, 9]
+reset();
+
+// 支持负索引值，与 fill()相对于数组末尾计算正向索引的过程是一样的
+ints.copyWithin(-4, -7, -3);
+console.log(ints); // [0, 1, 2, 3, 4, 5, 3, 4, 5, 6]
+```
+
+copyWithin()静默忽略超出数组边界、零长度及方向相反的索引范围：
+
+```js
+let ints,
+reset = () => ints = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+reset();
+// 索引过低，忽略
+ints.copyWithin(1, -15, -12);
+console.log(ints); // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+reset()
+// 索引过高，忽略
+ints.copyWithin(1, 12, 15);
+console.log(ints); // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+reset();
+// 索引反向，忽略
+ints.copyWithin(2, 4, 2);
+console.log(ints); // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+reset();
+// 索引部分可用，复制、填充可用部分
+ints.copyWithin(4, 7, 10)
+console.log(ints); // [0, 1, 2, 3, 7, 8, 9, 7, 8, 9];
+```
+
+### 2.7 转换方法
+
+#### toString()
+
+#### valueOf()
+
+前面提到过，所有对象都有 toLocaleString()、toString()和 valueOf()方法。其中，valueOf()返回的还是数组本身。而 toString()返回由数组中每个值的等效字符串拼接而成的一个逗号分隔的字符串。也就是说，对数组的每个值都会调用其 toString()方法，以得到最终的字符串。来看下面的例子：
+
+```js
+let colors = ["red", "blue", "green"]; // 创建一个包含 3 个字符串的数组
+console.log(colors.toString()); // red,blue,green
+console.log(colors.valueOf()); // [ 'red', 'blue', 'green' ]
+console.log(colors); //[ 'red', 'blue', 'green' ]
+alert(colors);  // red,blue,green
+```
+
+首先是被显式调用的 toString()和 valueOf()方法，它们分别返回了数组的字符串表示，即将所有字符串组合起来，以逗号分隔。最后一行代码直接用 alert()显示数组，**因为 alert()期待字符 串，所以会在后台调用数组的 toString()方法**，从而得到跟前面一样的结果。 
+
+#### toLocaleString()
+
+**toLocaleString()方法也可能返回跟 toString()和 valueOf()相同的结果**，但也不一定。在 调用数组的 toLocaleString()方法时，会得到一个逗号分隔的数组值的字符串。它与另外两个方法 唯一的区别是，为了得到最终的字符串，会调用数组每个值的 toLocaleString()方法，而不是 toString()方法。看下面的例子：
+
+```js
+let person1 = {
+	toLocaleString() {
+		return "Nikolaos";
+	},
+	toString() {
+		return "Nicholas";
+	}
+};
+let person2 = {
+	toLocaleString() {
+		return "Grigorios";
+	},
+	toString() {
+		return "Greg";
+	}
+};
+
+let people = [person1, person2];
+alert(people); // Nicholas,Greg
+console.log(people); // 
+console.log(people.toString()); // Nicholas,Greg
+console.log(people.toLocaleString()); // Nikolaos,Grigorios
+```
+
+这里定义了两个对象 person1 和 person2，它们都定义了 toString()和 toLocaleString()方 法，而且返回不同的值。然后又创建了一个包含这两个对象的数组 people。在将数组传给 alert()时， 输出的是"Nicholas,Greg"，这是因为会在数组每一项上调用 toString()方法（与下一行显式调用 toString()方法结果一样）。而在调用数组的 toLocaleString()方法时，结果变成了"Nikolaos, Grigorios"，这是因为调用了数组每一项的 toLocaleString()方法。
+
+#### join()方法
+
+ **继承的方法 toLocaleString()以及 toString()都返回数组值的逗号分隔的字符串**。如果想使 用不同的分隔符，则可以使用 **join()方法**。join()方法接收一个参数，即字符串分隔符，返回包含所 有项的字符串。来看下面的例子：
+
+```js
+let colors = ["red", "green", "blue"];
+console.log(colors.join(",")); // red,green,blue
+console.log(colors.join("||")); // red||green||blue
+```
+
+这里在 colors 数组上调用了 join()方法，得到了与调用 toString()方法相同的结果。传入逗号 ， 结 果 就 是 逗 号 分 隔 的 字 符 串 。 最 后 一 行 给 join() 传 入 了 双 竖 线 ， 得 到 了 字 符 串"red||green||blue"。**如果不给 join()传入任何参数，或者传入 undefined，则仍然使用逗号作为分隔符。**
+
+**注意** 如果数组中某一项是 null 或 undefined，则在 join()、toLocaleString()、toString()和 valueOf()返回的结果中会以空字符串表示。
+
+### 2.8 栈方法
+
+ECMAScript 给数组提供几个方法，让它看起来像是另外一种数据结构。数组对象可以像栈一样， 也就是一种限制插入和删除项的数据结构。栈是一种后进先出（LIFO，Last-In-First-Out）的结构，也就 是最近添加的项先被删除。数据项的插入（称为推入，push）和删除（称为弹出，pop）只在栈的一个 地方发生，即栈顶。ECMAScript 数组提供了 push()和 pop()方法，以实现类似栈的行为。 
+
+#### push()方法
+
+#### pop()方法
+
+**push()方法**接收任意数量的参数，并将它们添加到数组末尾，返回数组的最新长度。**pop()方法**则 用于删除数组的最后一项，同时减少数组的 length 值，返回被删除的项。来看下面的例子：
+
+```js
+let colors = new Array(); // 创建一个数组
+let count = colors.push("red", "green"); // 推入两项
+alert(count); // 2
+count = colors.push("black"); // 再推入一项
+alert(count); // 3
+let item = colors.pop(); // 取得最后一项
+alert(item); // black
+alert(colors.length); // 2
+```
+
+这里创建了一个当作栈来使用的数组（注意不需要任何额外的代码，push()和 pop()都是数组的 默认方法）。首先，使用 push()方法把两个字符串推入数组末尾，将结果保存在变量 count 中（结果 为 2）。 然后，再推入另一个值，再把结果保存在 count 中。因为现在数组中有 3 个元素，所以 push()返 回 3。在调用 pop()时，会返回数组的最后一项，即字符串"black"。此时数组还有两个元素。 
+
+栈方法可以与数组的其他任何方法一起使用，如下例所示：
+
+```js
+let colors = ["red", "blue"];
+colors.push("brown"); // 再添加一项
+colors[3] = "black"; // 添加一项
+alert(colors.length); // 4
+let item = colors.pop(); // 取得最后一项
+alert(item); // black
+```
+
+这里先初始化了包含两个字符串的数组，然后通过 push()添加了第三个值，第四个值是通过直接 在位置 3 上赋值添加的。调用 pop()时，返回了字符串"black"，也就是最后添加到数组的字符串。
+
+### 2.9 队列方法
+
+####  shift()
+
+就像栈是以 LIFO 形式限制访问的数据结构一样，队列以先进先出（FIFO，First-In-First-Out）形式 限制访问。队列在列表末尾添加数据，但从列表开头获取数据。因为有了在数据末尾添加数据的 push() 方法，所以要模拟队列就差一个从数组开头取得数据的方法了。这个数组方法叫 shift()，它会删除数 组的第一项并返回它，然后数组长度减 1。使用 shift()和 push()，可以把数组当成队列来使用：
+
+```js
+let colors = new Array(); // 创建一个数组
+let count = colors.push("red", "green"); // 推入两项
+alert(count); // 2
+count = colors.push("black"); // 再推入一项
+alert(count); // 3
+let item = colors.shift(); // 取得第一项
+alert(item); // red
+alert(colors.length); // 2
+```
+
+这个例子创建了一个数组并用 push()方法推入三个值。加粗的那行代码使用 shift()方法取得了 数组的第一项，即"red"。删除这一项之后，"green"成为第一个元素，"black"成为第二个元素，数 组此时就包含两项。 
+
+####  unshift()
+
+ECMAScript 也为数组提供了 unshift()方法。顾名思义，unshift()就是执行跟 shift()相反的 操作：在数组开头添加任意多个值，然后返回新的数组长度。通过使用 unshift()和 pop()，可以在 相反方向上模拟队列，即在数组开头添加新数据，在数组末尾取得数据，如下例所示：
+
+```js
+let colors = new Array(); // 创建一个数组
+let count = colors.unshift("red", "green"); // 从数组开头推入两项
+alert(count); // 2
+count = colors.unshift("black"); // 再推入一项
+alert(count); // 3
+let item = colors.pop(); // 取得最后一项
+alert(item); // green
+alert(colors.length); // 2
+```
+
+这里，先创建一个数组，再通过 unshift()填充数组。首先，给数组添加"red"和"green"，再添 加"black"，得到["black","red","green"]。调用 pop()时，删除最后一项"green"并返回它。
+
+### 2.10 排序方法
 

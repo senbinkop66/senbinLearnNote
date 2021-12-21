@@ -161,3 +161,34 @@ readDirFile(testpath)
 print(count)
 ```
 
+
+
+提取内容到不同文件
+
+```python
+
+import os
+
+fi=open("allresultofBlast.txt","r",encoding="utf-8")
+f1=open("MG1655result.txt","w",encoding="utf-8")
+f2=open("BW25113result.txt","w",encoding="utf-8")
+f3=open("yeastS288Cresult.txt","w",encoding="utf-8")
+lines=fi.readlines()  #读取所有行
+for line in lines:
+	line=line.strip();
+	line=line.split("\t");
+	sp=line[1].split("_")[-1];
+	line="\t".join(line)
+	if sp=="MG1655":
+		f1.write(line+"\n")
+	elif sp=="BW25113":
+		f2.write(line+"\n")
+	else:
+		f3.write(line+"\n")
+
+fi.close()
+f1.close();
+f2.close();
+f3.close();
+```
+
