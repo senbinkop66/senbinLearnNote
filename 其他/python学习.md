@@ -192,3 +192,98 @@ f2.close();
 f3.close();
 ```
 
+提取GeneBank数据
+
+```python
+
+import os
+
+f1=open("E.coli_BW25113_seq.txt","r",encoding="utf-8")
+#f2=open("MG1655result.txt","w",encoding="utf-8")
+
+lines=f1.readlines()  #读取所有行
+count=0
+for line in lines:
+	line=line.strip();
+	if line.startswith(">"):
+		line=line.split("]")
+		print(line[0].replace("[","").replace(" gene=","\t"))
+		count+=1
+	#if count==5:
+		#break
+
+f1.close();
+
+```
+
+
+
+标记gene
+
+```python
+
+import os
+
+f1=open("BW25113AllGene.txt","r",encoding="utf-8")
+f2=open("BW25113SLGene.txt","r",encoding="utf-8")
+
+SLGenes=[]
+SLData=f2.readlines()
+for line in SLData:
+	SLGenes.append(line.strip())
+f2.close()
+#print(len(SLGenes))
+
+lines=f1.readlines()  #读取所有行
+count=0
+for line in lines:
+	line=line.strip();
+	line=line.split("\t")
+	if line[1] in SLGenes:
+		print("\t".join(line)+"\t1")
+		count+=1
+	else:
+		print("\t".join(line)+"\t0")
+f1.close();
+print(count)
+```
+
+计数
+
+```python
+
+import os
+
+f1=open("BW25113AllGene.txt","r",encoding="utf-8")
+f2=open("BW25113SLGene.txt","r",encoding="utf-8")
+
+SLGenes=[]
+SLData=f2.readlines()
+for line in SLData:
+	SLGenes.append(line.strip())
+f2.close()
+print(len(SLGenes))
+
+AllGenes=[]
+lines=f1.readlines()  #读取所有行
+
+for line in lines:
+	line=line.strip();
+	line=line.split("\t")
+	AllGenes.append(line[1])
+f1.close();
+
+count=0
+
+#print(len(AllGenes))
+
+AllGenes=set(AllGenes)
+print(len(AllGenes))
+for gene in SLGenes:
+	if gene not in AllGenes:
+		count+=1
+		print(gene)
+
+print(count)
+```
+
