@@ -4986,3 +4986,200 @@ console.log(mul);  //120
 
 ## 3 定型数组
 
+定型数组（typed array）是 ECMAScript 新增的结构，目的是提升向原生库传输数据的效率。实际上， JavaScript 并没有“TypedArray”类型，它所指的其实是一种特殊的包含数值类型的数组。为理解如何使 用定型数组，有必要先了解一下它的用途。
+
+### 3.1 历史
+
+### 3.2 ArrayBuffer
+
+**Float32Array 实际上是一种“视图**”，可以允许 JavaScript 运行时访问一块名为 ArrayBuffer 的预分配内存。**ArrayBuffer 是所有定型数组及视图引用的基本单位**。
+
+**注意** SharedArrayBuffer 是 ArrayBuffer 的一个变体，可以无须复制就在执行上下文间传递它。
+
+ArrayBuffer()是一个普通的 JavaScript 构造函数，**可用于在内存中分配特定数量的字节空间**。
+
+```js
+let buf=new ArrayBuffer(16);  // 在内存中分配 16 字节
+console.log(buf.byteLength);  //16
+```
+
+**ArrayBuffer 一经创建就不能再调整大小**。不过，可以使用 slice()复制其全部或部分到一个新实例中：
+
+```js
+let buf1=new ArrayBuffer(16);  // 在内存中分配 16 字节
+let buf2=buf1.slice(4,12);
+console.log(buf2.byteLength);  //8
+```
+
+ArrayBuffer 某种程度上类似于 C++的 malloc()，但**也有几个明显的区别**。 
+
+- malloc()在分配失败时会返回一个 null 指针。ArrayBuffer 在分配失败时会抛出错误。 
+- malloc()可以利用虚拟内存，因此最大可分配尺寸只受可寻址系统内存限制。ArrayBuffer 分配的内存不能超过 Number.MAX_SAFE_INTEGER（253  1）字节。 
+- malloc()调用成功不会初始化实际的地址。声明 ArrayBuffer 则会将所有二进制位初始化 为 0。 
+- 通过 malloc()分配的堆内存除非调用 free()或程序退出，否则系统不能再使用。而通过声明 ArrayBuffer 分配的堆内存可以被当成垃圾回收，不用手动释放。 
+
+不能仅通过对 ArrayBuffer 的引用就读取或写入其内容。**要读取或写入 ArrayBuffer，就必须 通过视图**。视图有不同的类型，但引用的都是 ArrayBuffer 中存储的二进制数据。
+
+### 3.3 DataView
+
+第一种允许你读写 ArrayBuffer 的视图是 DataView。这个视图专为文件 I/O 和网络 I/O 设计，其 API 支持对缓冲数据的高度控制，但相比于其他类型的视图性能也差一些。DataView 对缓冲内容没有 任何预设，也不能迭代。 
+
+必须在对已有的 ArrayBuffer 读取或写入时才能创建 DataView 实例。这个实例可以使用全部或 部分 ArrayBuffer，且维护着对该缓冲实例的引用，以及视图在缓冲中开始的位置。
+
+```js
+let buf=new ArrayBuffer(16);  // 在内存中分配 16 字节
+
+//DataView 默认使用整个 ArrayBuffer
+let fullDataView=new DataView(buf);
+console.log(fullDataView.byteOffset);  //0
+console.log(fullDataView.byteLength);  //16
+console.log(fullDataView.buffer===buf);  //true
+
+// 构造函数接收一个可选的字节偏移量和字节长度
+// byteOffset=0 表示视图从缓冲起点开始
+// byteLength=8 限制视图为前 8 个字节
+const firstHalfDataView = new DataView(buf, 0, 8);
+console.log(firstHalfDataView.byteOffset); // 0
+console.log(firstHalfDataView.byteLength); // 8
+console.log(firstHalfDataView.buffer === buf); // true
+
+// 如果不指定，则 DataView 会使用剩余的缓冲
+// byteOffset=8 表示视图从缓冲的第 9 个字节开始
+// byteLength 未指定，默认为剩余缓冲
+const secondHalfDataView = new DataView(buf, 8);
+console.log(secondHalfDataView.byteOffset); // 8
+console.log(secondHalfDataView.byteLength); // 8
+console.log(secondHalfDataView.buffer === buf); // true
+```
+
+要通过 DataView 读取缓冲，还需要几个组件。
+
+- 首先是要读或写的字节偏移量。可以看成 DataView 中的某种“地址”。
+- DataView 应该使用 ElementType 来实现 JavaScript 的 Number 类型到缓冲内二进制格式的转换。
+- 最后是内存中值的字节序。默认为大端字节序。
+
+#### ElementType
+
+DataView 对存储在缓冲内的数据类型没有预设。它暴露的 API 强制开发者在读、写时指定一个ElementType，然后 DataView 就会忠实地为读、写而完成相应的转换。
+ECMAScript 6 支持 8 种不同的 ElementType（见下表）。
+
+![8 种不同的 ElementType](E:\pogject\学习笔记\image\js\8 种不同的 ElementType.png)
+
+DataView 为上表中的每种类型都暴露了 get 和 set 方法，这些方法使用 byteOffset（字节偏移量）定位要读取或写入值的位置。类型是可以互换使用的，如下例所示：
+
+```js
+let buf=new ArrayBuffer(2);  // // 在内存中分配两个字节并声明一个 DataView
+let view=new DataView(buf);
+
+// 说明整个缓冲确实所有二进制位都是 0
+// 检查第一个和第二个字符
+console.log(view.getInt8(0));  //0
+console.log(view.getInt8(1));  //0
+
+// 检查整个缓冲
+console.log(view.getInt16(0));  //0
+
+// 将整个缓冲都设置为 1
+// 255 的二进制表示是 11111111（2^8 - 1）
+view.setUint8(0,255);
+console.log(view.getInt8(0));  //-1
+
+// DataView 会自动将数据转换为特定的 ElementType
+// 255 的十六进制表示是 0xFF
+view.setUint8(1,0xFF);
+console.log(view.getInt8(1));  //-1
+
+// 现在，缓冲里都是 1 了
+// 如果把它当成二补数的有符号整数，则应该是-1
+console.log(view.getInt16(0)); // -1
+```
+
+#### 字节序
+
+前面例子中的缓冲有意回避了字节序的问题。
+
+**“字节序**”指的是计算系统维护的一种字节顺序的约 定。DataView 只支持两种约定：大端字节序和小端字节序。**大端字节序**也称为“网络字节序”，意思 是最高有效位保存在第一个字节，而最低有效位保存在最后一个字节。**小端字节序**正好相反，即最低有 效位保存在第一个字节，最高有效位保存在最后一个字节。 
+
+JavaScript 运行时所在系统的原生字节序决定了如何读取或写入字节，但 DataView 并不遵守这 个约定。对一段内存而言，DataView 是一个中立接口，它会遵循你指定的字节序。DataView 的所 有 API 方法都以大端字节序作为默认值，但接收一个可选的布尔值参数，设置为 true 即可启用小端 字节序。
+
+```js
+let buf=new ArrayBuffer(2);  // 在内存中分配两个字节并声明一个 DataView
+let view=new DataView(buf);
+
+// 填充缓冲，让第一位和最后一位都是 1
+view.setUint8(0, 0x80); // 设置最左边的位等于 1
+view.setUint8(1, 0x01); // 设置最右边的位等于 1
+
+// 缓冲内容（为方便阅读，人为加了空格）
+// 0x8 0x0 0x0 0x1
+// 1000 0000 0000 0001
+
+// 按大端字节序读取 Uint16
+// 0x80 是高字节，0x01 是低字节
+// 0x8001 = 2^15 + 2^0 = 32768 + 1 = 32769
+console.log(view.getUint16(0)); // 32769
+
+// 按小端字节序读取 Uint16
+// 0x01 是高字节，0x80 是低字节
+// 0x0180 = 2^8 + 2^7 = 256 + 128 = 384
+console.log(view.getUint16(0, true)); // 384
+
+// 按大端字节序写入 Uint16
+view.setUint16(0, 0x0004);
+
+// 缓冲内容（为方便阅读，人为加了空格）
+// 0x0 0x0 0x0 0x4
+// 0000 0000 0000 0100
+
+console.log(view.getUint8(0)); // 0
+console.log(view.getUint8(1)); // 4
+
+// 按小端字节序写入 Uint16
+view.setUint16(0, 0x0002, true);
+
+// 缓冲内容（为方便阅读，人为加了空格）
+// 0x0 0x2 0x0 0x0
+// 0000 0010 0000 0000
+
+console.log(view.getUint8(0)); // 2
+console.log(view.getUint8(1)); // 0
+```
+
+#### 边界情形
+
+DataView 完成读、写操作的前提是必须有充足的缓冲区，否则就会抛出 RangeError：
+
+```js
+const buf = new ArrayBuffer(6);
+const view = new DataView(buf);
+// 尝试读取部分超出缓冲范围的值
+view.getInt32(4);
+// RangeError
+// 尝试读取超出缓冲范围的值
+view.getInt32(8);
+// RangeError
+// 尝试读取超出缓冲范围的值
+view.getInt32(-1);
+// RangeError
+// 尝试写入超出缓冲范围的值
+view.setInt32(4, 123);
+// RangeError
+```
+
+DataView 在写入缓冲里会尽最大努力把一个值转换为适当的类型，后备为 0。如果无法转换，则抛出错误：
+
+```js
+const buf = new ArrayBuffer(1);
+const view = new DataView(buf);
+view.setInt8(0, 1.5);
+console.log(view.getInt8(0)); // 1
+view.setInt8(0, [4]);
+console.log(view.getInt8(0)); // 4
+view.setInt8(0, 'f');
+console.log(view.getInt8(0)); // 0
+view.setInt8(0, Symbol());
+// TypeError
+```
+
+### 3.4 定型数组
+
