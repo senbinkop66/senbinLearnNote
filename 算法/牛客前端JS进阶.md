@@ -298,3 +298,172 @@ let result=closure();
 console.log(result());
 ```
 
+## **JS11** **列表动态渲染**
+
+请补全JavaScript代码，将预设代码中的"people"数组渲染在页面中。实现下面的列表：
+
+- 牛油1号 20岁
+- 牛油2号 21岁
+- 牛油3号 19岁
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <ul></ul>
+
+        <script>
+            var people = [
+                { name: '牛油1号', id: 1, age: 20 },
+                { name: '牛油2号', id: 2, age: 21 },
+                { name: '牛油3号', id: 3, age: 19 },
+            ]
+            var ul = document.querySelector('ul');
+            // 补全代码
+            people.forEach(item=>{
+                let li=document.createElement("li");
+                li.innerHTML=item.name+" "+item.age+"岁";
+                //可以使用模板字符串
+                //li.innerHTML=`${item.name} ${item.age}岁`;
+                ul.append(li);
+            });
+        </script>
+    </body>
+</html>
+```
+
+## **JS12** **模板字符串**
+
+请补全JavaScript代码，实现以下功能：
+\1. 根据已有的person对象的注册时间求出距离当前时间的天数（天数向下取整）。
+\2. 将获得的天数和person数据拼接成字符串，作为h2标签的内容。
+注意：使用模板字符串进行字符串拼接，字符串最终内容如：尊贵的牛客网2级用户小丽您好，您已经注册牛客网3天啦~
+
+```js
+new Date() // 当前日期和时间
+new Date(milliseconds)
+//返回从 1970 年 1 月 1 日至今的毫秒数
+new Date(dateString)
+new Date(year, month, day, hours, minutes, seconds, milliseconds)
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <h2></h2>
+
+        <script>
+            var person = {
+                level: '2',
+                name: '小丽',
+                registTime: '2021-11-01',
+            }
+            var h2 = document.querySelector('h2');
+            // 补全代码
+            let now=new Date();
+            let time=new Date(person.registTime);
+            let days=Math.floor((now-time)/(24*60*60*1000));
+            h2.innerText=`尊贵的牛客网${person.level}级用户${person.name}您好，您已经注册牛客网${days}天啦~`
+        </script>
+    </body>
+</html>
+```
+
+## **JS13** **类继承**
+
+请补全JavaScript代码，完成类的继承。要求如下：
+\1. "Chinese"类继承于"Human"类
+\2. "Human"类实现一个函数"getName"，返回该实例的"name"属性
+\3. "Chinese"类构造函数有两个参数，分别为"name"、"age"
+\4. "Chinese"类实现一个函数"getAge"，返回该实例的"age"属性
+
+```js
+class Human {
+    constructor(name) {
+        this.name = name
+        this.kingdom = 'animal'
+        this.color = ['yellow', 'white', 'brown', 'black']
+    }
+    // 补全代码
+    getName(){
+      return this.name;
+    }
+}
+
+// 补全代码
+class Chinese extends Human{
+    constructor(name,age){
+      super(name);
+      this.age=age;
+    }
+    getAge(){
+      return this.age;
+    }
+}
+```
+
+## **JS14** **参数解析器**
+
+请补全JavaScript代码，要求将字符串参数URL中的参数解析并以对象的形式返回。
+
+输入：getParams`(https://nowcoder.com/online?id=1&salas=1000`)
+输出：{id:1, salas: 100}
+
+```js
+const _getParams = (url) => {
+    let index=url.indexOf("?");
+    let obj={};
+    if (index!==-1) {
+      let newStr=url.slice(index+1);
+      newStr=newStr.split("&");
+      newStr.forEach((item)=>{
+        item=item.split("=");
+        obj[item[0]]=item[1];
+      })
+    }
+    return obj;
+}
+
+let str1="https://nowcoder.com/online?id=1&salas=1000";
+let result=_getParams(str1);
+console.log(result);
+```
+
+使用内置对象
+
+```js
+const _getParams = (url) => {
+    let myURL = new URL(url);
+    let searchParams = new URLSearchParams(myURL.search);
+    let obj={};
+    searchParams.forEach((value,key)=>{
+      obj[key]=value;
+    });
+    return obj;
+}
+
+let str1="https://scriptoj.com/problems?offset=100&limit=10";
+let result=_getParams(str1);
+console.log(result);
+```
+
+## **JS15** **生成页码**
+
+请补全JavaScript代码，要求根据参数动态生成"li"标签页码并插入"ul"标签下。要求如下：
+\1. "allItem"为总数据项个数，"pageItem"为每页的数据项个数
+\2. "li"标签内容为当前页码数，页码从1开始
+
+输入：_createPage(13,2)
+输出："li"长度为7，"li"内容依次为"1","2","3","4","5","6","7"
+
+```
+
+```
+

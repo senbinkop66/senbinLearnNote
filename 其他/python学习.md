@@ -287,3 +287,36 @@ for gene in SLGenes:
 print(count)
 ```
 
+
+
+筛选
+
+```python
+
+import os
+
+f1=open("BW25113AllGene.txt","r",encoding="utf-8")
+f2=open("BW25113result.txt","r",encoding="utf-8")
+f3=open("BW25113resultofSLgene.txt","w",encoding="utf-8")
+
+AllgeneLines=f1.readlines()  #读取所有行
+
+count=0
+lines=f2.readlines()
+
+for line in lines:
+	line=line.strip();
+	line=line.split("\t")
+	index=int(line[3].split("_")[-1])-1
+	geneinfo=AllgeneLines[index].split("\t")
+	if int(geneinfo[-1])==1:
+		#print("\t".join(line)+"\t"+geneinfo[1]+"\n")
+		f3.write("\t".join(line)+"\t"+geneinfo[1]+"\n")
+		count+=1
+
+f1.close()
+f2.close()
+f3.close()
+print(count)
+```
+
