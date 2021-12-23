@@ -463,6 +463,37 @@ console.log(result);
 输入：_createPage(13,2)
 输出："li"长度为7，"li"内容依次为"1","2","3","4","5","6","7"
 
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+    </head>
+    <body>
+        <ul id="ul">
+            
+        </ul>
+        <script type="text/javascript">
+            const _createPage = (allItem, pageItem) => {
+                // 补全代码
+                var ul = document.querySelector('#ul');
+                let pages=Math.ceil(allItem/pageItem);
+                for (let i=1;i<=pages;i++){
+                    let li=document.createElement("li");
+                    li.innerHTML=i;
+                    ul.append(li);
+                }
+            }
+            _createPage(13,2);
+        </script>
+    </body>
+</html>
+```
+
+## **JS16** **总成绩排名**
+
+请补全JavaScript代码，要求将数组参数中的对象以总成绩(包括属性"chinese"、"math"、"english")从高到低进行排序并返回。
+
 ```
 
 ```
