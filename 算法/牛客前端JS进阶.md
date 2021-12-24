@@ -494,6 +494,146 @@ console.log(result);
 
 请补全JavaScript代码，要求将数组参数中的对象以总成绩(包括属性"chinese"、"math"、"english")从高到低进行排序并返回。
 
+```js
+const _rank = array => {
+    // 补全代码
+    array.sort((a,b)=>(b.chinese+b.math+b.english)-(a.chinese+a.math+a.english));
+    return array;
+}
+let str1=[
+    {chinese:67,math:89,english:90},
+    {chinese:65,math:90,english:91},
+    {chinese:73,math:90,english:89},
+];
+
+let result=_rank(str1);
+console.log(result);
+```
+
+## **JS17** **子字符串频次**
+
+请补全JavaScript代码，该函数接受两个参数分别为字符串、子字符串，要求返回子字符串在字符串中出现的频次。
+
+```js
+const _searchStrIndexOf = (str, target) =>{
+    // 补全代码
+    let count=0;
+    let index=str.indexOf(target);
+    while(index!==-1){
+        count++;
+        index=str.indexOf(target,index+1);
+    }
+    return count;
+}
+
+let str1="dsdafewdsfedswf";
+let str2="dsda"
+
+let result=_searchStrIndexOf(str1,str2);
+console.log(result);
+```
+
+## **JS18** **继承**
+
+请补全JavaScript代码，实现以下功能：
+\1. 给"Human"构造函数的原型对象添加"getName"方法，返回当前实例"name"属性
+\2. 将"Chinese"构造函数继承于"Human"构造函数
+\3. 给"Chinese"构造函数的原型对象添加"getAge"方法，返回当前实例"age"属性
+
+```js
+function Human(name) {
+    this.name = name
+    this.kingdom = 'animal'
+    this.color = ['yellow', 'white', 'brown', 'black']
+}
+
+function Chinese(name,age) {
+        Human.call(this,name)
+        this.age = age
+        this.color = 'yellow'
+}
+
+// 补全代码
+Human.prototype.getName=function(){
+    return this.name;
+}
+// 原型链继承
+Chinese.prototype=new Human();
+//Chinese.prototype.__proto__ = Human.prototype;
+
+Chinese.prototype.getAge=function(){
+    return this.age;
+}
+```
+
+## **JS19** **判断斐波那契数组**
+
+请补全JavaScript代码，要求以Boolean的形式返回参数数组是否为斐波那契数列。在数学上，斐波那契数列以如下方法定义：F(0)=0，F(1)=1, F(n)=F(n - 1)+F(n - 2)（n ≥ 2，n ∈ N）
+注意：
+\1. [0,1,1]为最短有效斐波那契数列
+
+```js
+const _isFibonacci = array => {
+    if(array.length<3){return false;}
+    let i=2;
+    while (i<array.length){
+        if(array[i]!==array[i-1]+array[i-2]){
+            return false;
+        }
+        i++;
+    }
+    return true;
+}
+
+let str1=[0,1,1,2,3,5,8];
+let result=_isFibonacci(str1);
+console.log(result);
+```
+
+## **JS20** **数组扁平化**
+
+请补全JavaScript代码，要求将数组参数中的多维数组扩展为一维数组并返回该数组。
+注意：
+\1. 数组参数中仅包含数组类型和数字类型
+
+输入：
+
+```
+[1,[2,[3,[4]]]]
+```
+
+输出：
+
+```
+[1,2,3,4]
+```
+
+```json
+const _flatten = arr => {
+    // 补全代码
+    let newArr=[];
+    for (let i=0;i<arr.length;i++){
+        if (arr[i] instanceof Array) {
+            newArr=newArr.concat(_flatten(arr[i]));
+        }else{
+            newArr.push(arr[i]);
+        }
+    }
+    return newArr;
+}
+
+let str1=[1,[2,[3,[4]]]];
+let result=_flatten(str1);
+console.log(result);
+```
+
+## **JS21** **数组过滤**
+
+请补全JavaScript代码，要求根据下拉框选中的条件变换重新渲染列表中展示的商品，且只展示符合条件的商品。
+注意：
+\1. 必须使用DOM0级标准事件（onchange）
+\2. 建议使用ES6的filter方法
+
 ```
 
 ```
