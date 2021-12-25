@@ -6978,3 +6978,177 @@ console.log(getSum(1,2,3));
 ```
 
 ## 7 函数声明与函数表达式
+
+本章到现在一直没有把函数声明和函数表达式区分得很清楚。事实上，JavaScript 引擎在加载数据 时对它们是区别对待的。**JavaScript 引擎在任何代码执行之前，会先读取函数声明，并在执行上下文中 生成函数定义。**而函数表达式必须等到代码执行到它那一行，才会在执行上下文中生成函数定义。来看 下面的例子：
+
+```js
+// 没问题
+console.log(sum(10, 10));
+function sum(num1, num2) {
+	return num1 + num2;
+}
+```
+
+以上代码可以正常运行，**因为函数声明会在任何代码执行之前先被读取并添加到执行上下文。**这个 过程叫作**函数声明提升**（function declaration hoisting）。在执行代码时，JavaScript 引擎会先执行一遍扫描， 把发现的函数声明提升到源代码树的顶部。因此即使函数定义出现在调用它们的代码之后，引擎也会把 函数声明提升到顶部。**如果把前面代码中的函数声明改为等价的函数表达式，那么执行的时候就会出错**：
+
+```js
+// 会出错
+console.log(sum(10, 10));
+let sum = function(num1, num2) {
+	return num1 + num2;
+};
+```
+
+上面的代码之所以会出错，是因为这个函数定义包含在一个变量初始化语句中，而不是函数声明中。这意味着代码如果没有执行到加粗的那一行，那么执行上下文中就没有函数的定义，所以上面的代码会出错。这并不是因为使用 let 而导致的，使用 var 关键字也会碰到同样的问题：
+
+```js
+console.log(sum(10, 10));
+var sum = function(num1, num2) {
+	return num1 + num2;
+};
+```
+
+除了函数什么时候真正有定义这个区别之外，这两种语法是等价的。
+
+**注意** 在使用函数表达式初始化变量时，也可以给函数一个名称，比如 let sum =function sum() {}。
+
+## 8 函数作为值
+
+因为**函数名在 ECMAScript 中就是变量，所以函数可以用在任何可以使用变量的地方**。这意味着不仅可以把函数作为参数传给另一个函数，而且还可以在一个函数中返回另一个函数。来看下面的例子：
+
+```js
+function callSomeFunction(someFunction, someArgument) {
+	return someFunction(someArgument);
+}
+```
+
+这个函数接收两个参数。第一个参数应该是一个函数，第二个参数应该是要传给这个函数的值。任何函数都可以像下面这样作为参数传递：
+
+```js
+function callSomeFunction(func,para){
+	return func(para);
+}
+function add10(num) {
+	return num + 10;
+}
+let result1 = callSomeFunction(add10, 10);
+console.log(result1); // 20
+
+function getGreeting(name) {
+	return "Hello, " + name;
+}
+
+let result2 = callSomeFunction(getGreeting, "Nicholas");
+console.log(result2); // "Hello, Nicholas"
+```
+
+callSomeFunction()函数是通用的，第一个参数传入的是什么函数都可以，而且它始终返回调用 作为第一个参数传入的函数的结果。要注意的是，**如果是访问函数而不是调用函数，那就必须不带括号**， 所以传给 callSomeFunction()的必须是 add10 和 getGreeting，而不能是它们的执行结果。 
+
+**从一个函数中返回另一个函数也是可以的，而且非常有用**。例如，假设有一个包含对象的数组，而 我们想按照任意对象属性对数组进行排序。为此，可以定义一个 sort()方法需要的比较函数，它接收 两个参数，即要比较的值。但这个比较函数还需要想办法确定根据哪个属性来排序。**这个问题可以通过 定义一个根据属性名来创建比较函数的函数来解决。**比如：
+
+```js
+function createComparisionFunction(propertyName){
+	return function(object1,object2){
+		let value1=object1[propertyName];
+		let value2=object2[propertyName];
+		if (value1<value2){
+			return -1;
+		}else if(value1>value2){
+			return 1;
+		}else{
+			return 0;
+		}
+	};
+}
+```
+
+这个函数的语法乍一看比较复杂，但实际上就是在一个函数中返回另一个函数，注意那个 return操作符。**内部函数可以访问 propertyName 参数，并通过中括号语法取得要比较的对象的相应属性值。取得属性值以后，再按照 sort()方法的需要返回比较值就行了。**这个函数可以像下面这样使用：
+
+```js
+function createComparisionFunction(propertyName){
+	//按属性返回从小到大的排序函数
+	return function(object1,object2){
+		let value1=object1[propertyName];
+		let value2=object2[propertyName];
+		if (value1<value2){
+			return -1;
+		}else if(value1>value2){
+			return -1;
+		}else{
+			return 0;
+		}
+	};
+}
+
+let data = [
+	{name: "Zachary", age: 28},
+	{name: "Nicholas", age: 29}
+];
+
+data.sort(createComparisionFunction("name"));
+console.log(data);
+//[ { name: 'Nicholas', age: 29 }, { name: 'Zachary', age: 28 } ]
+data.sort(createComparisionFunction("name"));
+console.log(data);
+//[ { name: 'Zachary', age: 28 }, { name: 'Nicholas', age: 29 } ]
+```
+
+在上面的代码中，数组 data 中包含两个结构相同的对象。每个对象都有一个 name 属性和一个 age 属性。默认情况下，sort()方法要对这两个对象执行 toString()，然后再决定它们的顺序，但这样 得不到有意义的结果。而通过调用 createComparisonFunction("name")来创建一个比较函数，就 可以根据每个对象 name 属性的值来排序，结果 name 属性值为"Nicholas"、age 属性值为 29 的对象 会排在前面。而调用 createComparisonFunction("age")则会创建一个根据每个对象 age 属性的值 来排序的比较函数，结果 name 属性值为"Zachary"、age 属性值为 28 的对象会排在前面。
+
+## 9 函数内部
+
+在 ECMAScript 5 中，函数内部存在两个特殊的对象：arguments 和 this。ECMAScript 6 又新增了 new.target 属性。
+
+### 9.1 arguments.callee
+
+arguments 对象前面讨论过多次了，它是一个类数组对象，包含调用函数时传入的所有参数。这 个对象只有以 function 关键字定义函数（相对于使用箭头语法创建函数）时才会有。虽然主要用于包 含函数参数，但 **arguments 对象其实还有一个 callee 属性，是一个指向 arguments 对象所在函数的 指针**。来看下面这个经典的阶乘函数：
+
+```js
+function factorial(num) {
+	if (num <= 1) {
+		return 1;
+	} else {
+		return num * factorial(num - 1);
+	}
+}
+```
+
+阶乘函数一般定义成递归调用的，就像上面这个例子一样。只要给函数一个名称，而且这个名称不会变，这样定义就没有问题。但是，这个函数要正确执行就必须保证函数名是 factorial，从而导致了紧密耦合。**使用 arguments.callee 就可以让函数逻辑与函数名解耦**：
+
+```js
+function factorial(num) {
+	if (num <= 1) {
+		return 1;
+	} else {
+		return num * arguments.callee(num - 1);
+	}
+}
+
+console.log(factorial(5));
+```
+
+这个重写之后的 factorial()函数已经用 arguments.callee 代替了之前硬编码的 factorial。这意味着无论函数叫什么名称，都可以引用正确的函数。考虑下面的情况：
+
+```js
+function factorial(num) {
+	if (num <= 1) {
+		return 1;
+	} else {
+		return num * arguments.callee(num - 1);
+	}
+}
+
+let trueFactorial=factorial;
+
+factorial=function(){
+	return 0;
+}
+
+console.log(trueFactorial(5));  //120
+console.log(factorial(5));  //0
+```
+
+这里，trueFactorial 变量被赋值为 factorial，**实际上把同一个函数的指针又保存到了另一个 位置**。然后，**factorial 函数又被重写为一个返回 0 的函数**。如果像 factorial()最初的版本那样不 使用 arguments.callee，那么像上面这样调用 trueFactorial()就会返回 0。不过，**通过将函数与 名称解耦，trueFactorial()就可以正确计算阶乘，而 factorial()则只能返回 0。**
+
+### 9.2 this
+

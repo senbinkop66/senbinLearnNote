@@ -634,7 +634,167 @@ console.log(result);
 \1. 必须使用DOM0级标准事件（onchange）
 \2. 建议使用ES6的filter方法
 
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <select name="" id="">
+            <option value="0">请选择价格范围</option>
+            <option value="1">&lt100</option>
+            <option value="2">100~500</option>
+            <option value="3">&gt500</option>
+        </select>
+        <ul>
+            <li>牛客logo马克杯</li>
+            <li>无盖星空杯</li>
+            <li>老式茶杯</li>
+            <li>欧式印花杯</li>
+        </ul>
+
+        <script>
+            var cups = [
+                { type: 1, price: 100, color: 'black', sales: 60, name: '牛客logo马克杯' },
+                { type: 2, price: 40, color: 'blue', sales: 100, name: '无盖星空杯' },
+                { type: 4, price: 60, color: 'green', sales: 200, name: '老式茶杯' },
+                { type: 3, price: 50, color: 'green', sales: 600, name: '欧式印花杯' }
+            ]
+            var select = document.querySelector('select');
+            var ul = document.querySelector('ul');
+            // 补全代码
+            let newArr=[...cups];
+            select.onchange=function(){
+                let val=Number(select.value);
+                switch (val){
+                    case 1:
+                        newArr=cups.filter((item)=>item.sales<100);
+                        break;
+                    case 2:
+                        newArr=cups.filter((item)=>item.sales>=100 && item.sales<=500);
+                        break;
+                    case 3:
+                        newArr=cups.filter((item)=>item.sales>500);
+                        break;
+                }
+                update();
+            };
+            function update(){
+                while(ul.firstChild){
+                    ul.removeChild(ul.firstChild);
+                }
+                newArr.forEach(item=>{
+                    let li=document.createElement("li");
+                    li.innerHTML=item.name;
+                    ul.append(li);
+                });
+            }
+        </script>
+    </body>
+</html>
 ```
 
+## **JS22** **判断质数**
+
+请补全JavaScript代码，要求在Number对象的原型对象上添加"_isPrime"函数，该函数判断调用的对象是否为一个质数，是则返回true，否则返回false。
+
+```js
+Number.prototype._isPrime=function(){
+    let number=Number(this);
+    if (number<2) {return false;}
+    let n=2;
+    while (n<=Math.sqrt(number)){
+        if (number%n===0) {return false;}
+        n++;
+    }
+    return true;
+};
+
+let str1=37;
+let result=str1._isPrime();
+console.log(result);
+```
+
+## **JS23** **验证是否是身份证**
+
+请补全JavaScript代码，要求以Boolean的形式返回字符串参数是否符合身份证标准。
+注意：
+\1. 无需考虑地区信息、出生日期、顺序码与校验码的验证
+
+输入：
+
+```
+_isCard('21062319980907888X')
+```
+
+输出：
+
+```
+true
+```
+
+```js
+const _isCard = number => {
+    // 补全代码
+    //身份证是18位
+    if (number.length===18) {
+        return /[0-9]{17}[0-9X]{1}/.test(number);
+        //return /^[\d]{17}[X\d]{1}$/.test(number+'');
+    }else{
+        return false;
+    }
+};
+
+let str1='21062319980907888X';
+let result=_isCard(str1);
+console.log(result);
+```
+
+## **JS24** **Symbol**
+
+请补全JavaScript代码，要求以键/值对的对象形式返回参数数组。要求如下：
+\1. 键名的数据类型为Symbol
+\2. 键值为当前数组项
+\3. Symbol的描述为当前数组项
+\4. 返回普通对象
+
+```js
+const _symbolKey = array => {
+    // 补全代码
+    let obj={};
+    array.forEach((item)=>{
+        obj[Symbol(item)]=item;
+    })
+    return obj;
+};
+
+let str1=[1,2,3];
+let result=_symbolKey(str1);
+console.log(result);
+```
+
+## **JS25** **相同的Set**
+
+请补全JavaScript代码，要求以boolean的形式返回两个Set对象参数是否一样，是则返回true，否则返回false。
+
+```js
+const _isSameSet = (s1, s2) => {
+    // 补全代码
+    if(s1.length!==s2.length){return false;}
+
+    s2.forEach((item)=>{
+        if(!s1.has(item)){
+            return false;
+        }
+    });
+    return true;
+
+};
+
+let str1=new Set(['a', 'b', 'c']);
+let str2=new Set(['a', 'c', 'b']);
+let result=_isSameSet(str1,str2);
+console.log(result);
 ```
 
