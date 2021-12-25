@@ -7152,3 +7152,123 @@ console.log(factorial(5));  //0
 
 ### 9.2 this
 
+另一个特殊的对象是 this，它在标准函数和箭头函数中有不同的行为。
+
+**在标准函数中，this 引用的是把函数当成方法 *调用* 的上下文对象**，这时候**通常称其为 this 值**（在网页的全局上下文中调用函数时，this 指向 windows）。来看下面的例子：
+
+```js
+window.color="red";
+let o={
+	color:"blue"
+};
+
+function sayColor(){
+	console.log(this.color);
+}
+
+sayColor(); //red
+
+o.sayColor=sayColor;
+
+o.sayColor(); //blue
+```
+
+定义在全局上下文中的函数 sayColor()引用了 this 对象。**这个 this 到底引用哪个对象必须到 函数被调用时才能确定**。因此这个值在代码执行的过程中可能会变。如果在全局上下文中调用 sayColor()，这结果会输出"red"，因为 this 指向 window，而 this.color 相当于 window.color。 而在把 sayColor()赋值给 o 之后再调用 o.sayColor()，this 会指向 o，即 this.color 相当于 o.color，所以会显示"blue"。
+
+**在箭头函数中，this 引用的是 *定义* 箭头函数的上下文。**下面的例子演示了这一点。在对sayColor() 的两次调用中，this 引用的都是 window 对象，因为这个箭头函数是在 window 上下文中定义的：
+
+```js
+window.color="red";
+let o={
+	color:"blue"
+};
+
+let sayColor=()=>{
+	console.log(this.color);
+}
+
+sayColor(); //red
+
+o.sayColor=sayColor;
+
+o.sayColor(); //red
+```
+
+有读者知道，**在事件回调或定时回调中调用某个函数时，this 值指向的并非想要的对象**。此时将回调函数写成箭头函数就可以解决问题。这是因为*箭头函数中的 this 会保留定义该函数时的上下文：*
+
+```js
+function King(){
+	this.royaltyName = 'Henry';
+	// this 引用 King 的实例
+	//箭头函数this 会保留定义该函数时的上下文
+	setTimeout(()=>console.log(this.royaltyName),1000);
+}
+
+function Queen() {
+	this.royaltyName = 'Elizabeth';
+	//普通函数调用时才指定this
+	setTimeout(function() { console.log(this.royaltyName); }, 1000);
+}
+
+new King(); // Henry
+new Queen(); // undefined, this 引用 window 对象
+```
+
+
+
+注意 **函数名只是保存指针的变量。**因此全局定义的 sayColor()函数和 o.sayColor()是同一个函数，**只不过执行的上下文不同**。
+
+### 9.3 caller
+
+ECMAScript 5 也会给函数对象上添加一个属性：caller。虽然 ECMAScript 3 中并没有定义，但所有浏览器除了早期版本的 Opera 都支持这个属性。**这个属性引用的是调用当前函数的函数，或者如果是在全局作用域中调用的则为 null。**比如：
+
+```js
+function outer() {
+	inner();
+}
+function inner() {
+	console.log(inner.caller);
+}
+
+outer();  //[Function: outer]
+```
+
+以上代码会显示 outer()函数的源代码。这是因为 ourter()调用了 inner()，inner.caller指向 outer()。**如果要降低耦合度，则可以通过 arguments.callee.caller 来引用同样的值**：
+
+```js
+function outer() {
+	inner();
+}
+function inner() {
+	console.log(inner.arguments.callee.caller);
+}
+
+outer();  //[Function: outer]
+```
+
+在严格模式下访问 arguments.callee 会报错。ECMAScript 5 也定义了 **arguments.caller，但在严格模式下访问它会报错，在非严格模式下则始终是 undefined。这是为了分清 arguments.caller和函数的 caller 而故意为之的**。而作为对这门语言的安全防护，**这些改动也让第三方代码无法检测同一上下文中运行的其他代码**。
+
+**严格模式下还有一个限制，就是不能给函数的 caller 属性赋值**，否则会导致错误。
+
+### 9.4 new.target
+
+ECMAScript 中的**函数始终可以作为构造函数实例化一个新对象**，也可以作为普通函数被调用。ECMAScript 6 新增了检测函数是否使用 new 关键字调用的 new.target 属性。**如果函数是正常调用的，则 new.target 的值是 undefined**；如果**是使用 new 关键字调用的，则 new.target 将引用被调用的构造函数**。
+
+```js
+function King() {
+	if (!new.target) {
+		throw 'King must be instantiated using "new"'
+	}
+	console.log('King instantiated using "new"');
+}
+
+new King(); // King instantiated using "new"
+King(); // Error: King must be instantiated using "new"
+```
+
+
+
+## 10 函数属性与方法
+
+前面提到过，ECMAScript 中的函数是对象，因此有属性和方法。**每个函数都有两个属性：length和 prototype**。其中，**length 属性保存函数定义的命名参数的个数，**如下例所示：
+
