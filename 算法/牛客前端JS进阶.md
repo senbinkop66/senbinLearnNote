@@ -798,3 +798,184 @@ let result=_isSameSet(str1,str2);
 console.log(result);
 ```
 
+## **JS26** **Getter**
+
+请补全JavaScript代码，完成名为"Rectangle"的矩形类。要求如下：
+\1. 构造函数只包含两个参数，依次为"height"、"width"
+\2. 设置Getter，当获取该对象的"area"属性时，返回该对象"height"与"width"属性的乘积
+
+输入：
+
+```
+new Rectangle(12,12).area
+```
+
+输出：
+
+```
+144
+```
+
+```js
+class Rectangle {
+    // 补全代码
+    constructor(height,width){
+        this.height=height;
+        this.width=width;
+    }
+    get area(){
+        return this.width*this.height;
+    }
+
+};
+
+let str1=new Set(['a', 'c', 'b']);
+//let result=_isSameSet(str1);
+console.log(new Rectangle(12,13).area);
+```
+
+## **JS27** **控制动画**
+
+请补全代码，要求当滑动id为"range"的滑块控件时可以改变id为"rect"的矩形旋转速度。要求如下：
+\1. id为"rect"的矩形初始动画周期为10秒
+\2. id为"range"的滑块控件默认值为1、最小值为、最大值为10、滑动间隔为1
+\3. 当滑动滑块值为1时，矩形动画周期为10秒、当...，为...、当滑动滑块值为10时，矩形动画周期为1秒
+注意：
+\1. 必须使用DOM0级标准事件（onchange）
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            #rect {
+                width: 120px;
+                height: 100px;
+                background-color: black;
+                /*补全代码*/
+                animation: rect 10s linear infinite;
+            }
+            @keyframes rect {
+                from {
+                    transform: rotate(0deg);
+                }
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- 补全代码 -->
+        <div id="rect"></div>
+        <input id="range" type="range" min="1" max="10" value="1" step="1" />
+        
+        <script type="text/javascript">
+            // 补全代码
+            let range=document.querySelector("#range");
+            let rect=document.querySelector("#rect");
+            range.onchange=function(){
+                rect.style.animationDuration=11-range.value+'s';
+            };
+
+        </script>
+    </body>
+</html>
+```
+
+## **JS28** **Map保存节点**
+
+请补全JavaScript代码，要求将页面中的"p"标签以键名的形式保存在Map对象中，键名所对应的键值为该"p"标签的文字内容。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+    </head>
+    <body>
+        <p>1</p>
+        <script type="text/javascript">
+            const _elementKey = () => {
+                // 补全代码
+                let p=document.getElementsByTagName("p")[0];
+                let m=new Map([[p,p.innerText]]);
+                return m;
+            }
+        </script>
+    </body>
+</html>
+```
+
+## **JS29** **全选**
+
+请补全JavaScript代码，实现以下效果：
+\1. 选中"全选"框，以下所有选项全部勾选。
+\2. 把"全选"框从选中状态勾选成未选中状态，其他复选框全部取消选中效果。
+\3. 当其他复选框全部选中，"全选框"为选中状态。
+\4. 当其他复选框有一个未选中，"全选框"取消选中状态。
+注意：
+\1. 必须使用DOM0级标准事件（onchange）
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+        <style>
+            ul {
+                list-style: none;
+            }
+        </style>
+    <body>
+        <ul>
+            <li>全选<input type='checkbox' id='all'></li>
+            <li>Java<input type='checkbox' class='item'></li>
+            <li>javaScript<input type='checkbox' class='item'></li>
+            <li>C++<input type='checkbox' class='item'></li>
+            <li>python<input type='checkbox' class='item'></li>
+            <li>.net<input type='checkbox' class='item'></li>
+        </ul>
+
+        <script>
+            // 补全代码
+            var all=document.querySelector("#all");
+            var options=Array.from(document.querySelectorAll(".item"));
+            all.onchange=function(){
+                options.forEach((item)=>{
+                    item.checked=all.checked;
+                });
+            }
+            options.forEach((item)=>{
+                item.onchange=function(){
+                    let arr=options.filter(v=>v.checked===true);
+                    all.checked=arr.length===5;
+                }
+            });
+        </script>
+    </body>
+</html>
+```
+
+## **JS30** **回文字符串**
+
+请补全JavaScript代码，要求以boolean的形式返回参数字符串是否为回文字符串。
+
+```js
+const _isPalindrome = string => {
+    // 补全代码
+    for (let i=0;i<string.length/2;i++){
+        if (string[i]!==string[string.length-1-i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+let str1="dsferfre";
+let result=_isPalindrome(str1);
+console.log(result);
+```
+

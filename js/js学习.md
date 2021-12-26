@@ -7270,5 +7270,135 @@ King(); // Error: King must be instantiated using "new"
 
 ## 10 函数属性与方法
 
-前面提到过，ECMAScript 中的函数是对象，因此有属性和方法。**每个函数都有两个属性：length和 prototype**。其中，**length 属性保存函数定义的命名参数的个数，**如下例所示：
+前面提到过，ECMAScript 中的函数是对象，因此有属性和方法。**每个函数都有两个属性：length和 prototype**。其中，**length 属性保存函数定义的命名参数的个数，**
 
+### length 属性
+
+如下例所示：
+
+```js
+function sayName(name) {
+	console.log(name);
+}
+function sum(num1, num2) {
+	return num1 + num2;
+}
+function sayHi() {
+	console.log("hi");
+}
+
+console.log(sayName.length); // 1
+console.log(sum.length); // 2
+console.log(sayHi.length); // 0
+```
+
+以上代码定义了 3 个函数，每个函数的命名参数个数都不一样。sayName()函数有 1 个命名参数， 所以其 length 属性为 1。类似地，sum()函数有两个命名参数，所以其 length 属性是 2。而 sayHi() 没有命名参数，其 length 属性为 0。 
+
+### prototype 属性
+
+prototype 属性也许是 ECMAScript 核心中最有趣的部分。**prototype 是保存引用类型所有实例 方法的地方**，这意味着 toString()、valueOf()等方法实际上都保存在 prototype 上，进而由所有实 例共享。这个属性在自定义类型时特别重要。在 ECMAScript 5 中，**prototype 属性是不可枚举的，因此使用 for-in 循环不会返回这个属性。** 
+
+### apply()方法
+
+函数还有两个方法：apply()和 call()。这**两个方法都会以指定的 this 值来调用函数，**即会设 置调用函数时函数体内 this 对象的值。a**pply()方法接收两个参数：函数内 this 的值和一个参数数 组。**第二个参数可以是 Array 的实例，但也可以是 arguments 对象。来看下面的例子：
+
+```js
+function sum(num1, num2) {
+	return num1 + num2;
+}
+
+function callSum1(num1,num2){
+	return sum.apply(this,arguments);  // 传入 arguments 对象
+}
+
+function callSum2(num1,num2) {
+	return sum.apply(this,[num1,num2]);  //传入数组
+}
+
+console.log(callSum1(10,20)); // 30
+console.log(callSum2(10,20)); // 30
+
+```
+
+在这个例子中，callSum1()会调用 sum()函数，将 this 作为函数体内的 this 值（这里等于 window，因为是在全局作用域中调用的）传入，同时还传入了 arguments 对象。callSum2()也会调 用 sum()函数，但会传入参数的数组。这两个函数都会执行并返回正确的结果。 
+
+注意 **在严格模式下，调用函数时如果没有指定上下文对象，则 this 值不会指向 window**。 *除非使用 apply()或 call()把函数指定给一个对象，**否则 this 的值会变成 undefined。*** 
+
+### call()方法
+
+**call()方法与 apply()的作用一样，只是传参的形式不同**。第一个参数跟 apply()一样，也是 this 值，而剩下的要传给被调用函数的参数则是逐个传递的。**换句话说，通过 call()向函数传参时，必须 将参数一个一个地列出来**，比如：
+
+```js
+function sum(num1, num2) {
+	return num1 + num2;
+}
+
+function callSum(num1,num2){
+	return sum.call(this,num1,num2);  // 必须将参数一个一个地列出来
+}
+
+console.log(callSum(10,20)); // 30
+```
+
+这里的 callSum()函数必须逐个地把参数传给 call()方法。结果跟 apply()的例子一样。**到底是 使用 apply()还是 call()，完全取决于怎么给要调用的函数传参更方便。如果想直接传 arguments 对象或者一个数组，那就用 apply()**；否则，就用 call()。当然，如果不用给被调用的函数传参，则 使用哪个方法都一样。 
+
+**apply()和 call()真正强大的地方**并不是给函数传参，**而是控制函数调用上下文即函数体内 this 值的能力**。考虑下面的例子：
+
+```js
+window.color = 'red';
+
+let o = {
+	color: 'blue'
+};
+
+function sayColor() {
+	console.log(this.color);
+}
+
+sayColor(); // red
+sayColor.call(this); // red
+sayColor.call(window); // red
+sayColor.call(o); // blue
+```
+
+这个例子是在之前那个关于 this 对象的例子基础上修改而成的。同样，sayColor()是一个全局 函数，如果在全局作用域中调用它，那么会显示"red"。这是因为 this.color 会求值为 window.color。 如果在全局作用域中显式调用 sayColor.call(this)或者 sayColor.call(window)，则同样都会显示"red"。而在使用 sayColor.call(o)把函数的执行上下文即 this 切换为对象 o 之后，结果就变成 了显示"blue"了。
+
+**使用 call()或 apply()的好处是可以将任意对象设置为任意函数的作用域，这样对象可以不用关 心方法**。在前面例子最初的版本中，为切换上下文需要先把 sayColor()直接赋值为 o 的属性，然后再 调用。而在这个修改后的版本中，就不需要这一步操作了。 
+
+### bind()方法
+
+ECMAScript 5 出于同样的目的定义了一个新方法：bind()。**bind()方法会创建一个新的函数实例**， **其 this 值会被绑定到传给 bind()的对象**。比如：
+
+```js
+window.color = 'red';
+var o = {
+	color: 'blue'
+};
+function sayColor() {
+	console.log(this.color);
+}
+let objectSayColor = sayColor.bind(o);
+objectSayColor(); // blue
+```
+
+这里，在 sayColor()上调用 bind()并传入对象 o 创建了一个新函数 objectSayColor()。 objectSayColor()中的 this 值被设置为 o，因此直接调用这个函数，即使是在全局作用域中调用， 也会返回字符串"blue"。 
+
+**对函数而言，继承的方法 toLocaleString()和 toString()始终返回函数的代码**。返回代码的 具体格式因浏览器而异。有的返回源代码，包含注释，而有的只返回代码的内部形式，会删除注释，甚 至代码可能被解释器修改过。由于这些差异，因此不能在重要功能中依赖这些方法返回的值，而只应在 调试中使用它们。继承的方法 valueOf()返回函数本身。
+
+```js
+let color = 'red';
+
+function sayColor() {
+	console.log(this.color);
+}
+
+console.log(sayColor.toString());
+
+/*
+function sayColor() {
+	console.log(this.color);
+}
+*/
+```
+
+## 11 函数表达式
