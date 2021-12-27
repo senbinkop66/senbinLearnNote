@@ -7773,3 +7773,72 @@ compareNames = null;
  注意 **因为闭包会保留它们包含函数的作用域，所以比其他函数更占用内存**。过度使用闭 包可能导致内存过度占用，因此建议仅在十分必要时使用。V8 等优化的 JavaScript 引擎会 努力回收被闭包困住的内存，不过我们还是**建议在使用闭包时要谨慎**。
 
 ### 14.1 this 对象
+
+在闭包中使用 this 会让代码变复杂。如果内部函数没有使用箭头函数定义，则 this 对象会在运 行时绑定到执行函数的上下文。如果在全局函数中调用，则 this 在非严格模式下等于 window，在严 格模式下等于 undefined。如果作为某个对象的方法调用，则 this 等于这个对象。匿名函数在这种情 况下不会绑定到某个对象，这就意味着 this 会指向 window，除非在严格模式下 this 是 undefined。 不过，由于闭包的写法所致，这个事实有时候没有那么容易看出来。来看下面的例子：
+
+```js
+window.identity = 'The Window';
+
+let object = {
+	identity: 'My Object',
+	getIdentityFunc() {
+		return function() {
+			return this.identity;
+		};
+	}
+};
+
+console.log(object.getIdentityFunc()()); // 'The Window'
+```
+
+这里先创建了一个全局变量 identity，之后又创建一个包含 identity 属性的对象。这个对象还 包含一个 getIdentityFunc()方法，返回一个匿名函数。这个匿名函数返回 this.identity。因为 getIdentityFunc()返回函数，所以 object.getIdentityFunc()()会立即调用这个返回的函数， 从而得到一个字符串。可是，此时返回的字符串是"The Winodw"，即全局变量 identity 的值。为什么匿名函数没有使用其包含作用域（getIdentityFunc()）的 this 对象呢？ 
+
+前面介绍过，**每个函数在被调用时都会自动创建两个特殊变量：this 和 arguments**。**内部函数永 远不可能直接访问外部函数的这两个变量**。但是，如果把 this 保存到闭包可以访问的另一个变量中， 则是行得通的。比如：
+
+```js
+window.identity = 'The Window';
+
+let object = {
+	identity: 'My Object',
+	getIdentityFunc() {
+        //
+		let that=this;
+		return function() {
+			return that.identity;
+		};
+	}
+};
+
+console.log(object.getIdentityFunc()()); // 'My Object'
+```
+
+这里加粗的代码展示了与前面那个例子的区别。**在定义匿名函数之前，先把外部函数的 this 保存 到变量 that 中。**然后在定义闭包时，就可以让它访问 that，因为这是包含函数中名称没有任何冲突的 一个变量。即使在外部函数返回之后，that 仍然指向 object，所以调用 object.getIdentityFunc()() 就会返回"My Object"。
+
+ 注意 t**his 和 arguments 都是不能直接在内部函数中访问的。**如果想访问包含作用域中 的 arguments 对象，则同样需要将其引用先保存到闭包能访问的另一个变量中。 
+
+在一些特殊情况下，this 值可能并不是我们所期待的值。比如下面这个修改后的例子：
+
+```js
+window.identity = 'The Window';
+let object = {
+	identity: 'My Object',
+    getIdentity () {
+    	return this.identity;
+    }
+};
+```
+
+getIdentity()方法就是返回 this.identity 的值。以下是几种调用 object.getIdentity()的方式及返回值：
+
+```js
+object.getIdentity(); // 'My Object'
+(object.getIdentity)(); // 'My Object'
+(object.getIdentity = object.getIdentity)(); // 'The Window'
+```
+
+第一行调用 object.getIdentity()是正常调用，会返回"My Object"，因为 this.identity 就是 object.identity。第二行在调用时把 object.getIdentity 放在了括号里。虽然加了括号之 后看起来是对一个函数的引用，但 this 值并没有变。**这是因为按照规范，object.getIdentity 和 (object.getIdentity)是相等的**。第三行执行了一次赋值，然后再调用赋值后的结果。**因为赋值表 达式的值是函数本身，this 值不再与任何对象绑定，所以返回的是"The Window"**。 
+
+一般情况下，不大可能像第二行和第三行这样调用对象上的方法。但通过这个例子，我们可以知道， 即使语法稍有不同，也可能影响 this 的值。
+
+### 14.2 内存泄漏
+

@@ -320,3 +320,59 @@ f3.close()
 print(count)
 ```
 
+读取xlsx数据
+
+```python
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+import os
+import xlrd
+import openpyxl
+
+workbook = openpyxl.load_workbook("Actinomyces cardiffensis F0333.xlsx")
+#获取工作簿 workbook的所有工作表
+#shenames=workbook.sheetnames
+
+#获取当前活跃的worksheet,默认就是第一个worksheet
+worksheet = workbook.active
+
+#输出特定的列
+datas=list(worksheet.columns)[0][1:]
+for cell in datas:
+	print(cell.value,end=" ")
+```
+
+```python
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+import os
+import xlrd
+import openpyxl
+
+count=0
+
+def readDirFile(path):
+	global count
+	files=os.listdir(path)
+	for file in files:
+		oldFile=os.path.join(path,file)
+		if os.path.isfile(oldFile):
+			#print(oldFile)
+			workbook = openpyxl.load_workbook(oldFile)
+			worksheet = workbook.active
+			datas=list(worksheet.columns)[0][1:]
+			f2=open("OutResult.txt","a+",encoding="utf-8")
+			datas=list(worksheet.columns)[0][1:]
+			for cell in datas:
+				count+=1
+				f2.write(oldFile.replace(".xlsx","").replace("shuju\\","")+"\t"+cell.value+"\n")
+				#print(oldFile.replace(".xlsx","").replace("shuju\\","")+"\t"+cell.value+"\n")
+			f2.close()
+		else:
+			readDirFile(oldFile)
+
+testpath="shuju"
+readDirFile(testpath)
+print(count)
+```
+
