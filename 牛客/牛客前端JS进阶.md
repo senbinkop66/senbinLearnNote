@@ -979,3 +979,30 @@ let result=_isPalindrome(str1);
 console.log(result);
 ```
 
+## **JS31** **Proxy计数器**
+
+请补全JavaScript代码，请给参数对象添加拦截代理功能，并返回这个代理，要求每当通过代理调用该对象拥有的属性时，"count"值加1，否则减1。
+
+```js
+let count = 0
+const _proxy = object => {
+    // 补全代码
+    let proxy=new Proxy(object,{
+        get:function(target,propKey){
+            if (propKey in target) {
+                count++;
+            }else{
+                count--;
+            }
+        }
+    });
+    return proxy;
+}
+```
+
+## **JS32** **Proxy拦截器**
+
+请补全JavaScript代码，请给参数对象添加拦截代理功能并返回这个代理。要求如下：
+\1. 该函数接收多个参数，首个参数为对象，从第二个参数（包括）往后皆是该对象的属性名
+\2. 通过该函数给首个参数对象添加拦截器功能，每当该对象访问到该函数第二个参数（包括）往后的属性时，返回"noright"字符串，表示无权限。
+
