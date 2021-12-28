@@ -307,7 +307,7 @@ lines=f2.readlines()
 for line in lines:
 	line=line.strip();
 	line=line.split("\t")
-	index=int(line[3].split("_")[-1])-1
+	index=int(line[4].split("_")[-1])-1
 	geneinfo=AllgeneLines[index].split("\t")
 	if int(geneinfo[-1])==1:
 		#print("\t".join(line)+"\t"+geneinfo[1]+"\n")
@@ -319,6 +319,77 @@ f2.close()
 f3.close()
 print(count)
 ```
+
+标记是否是联合致死对
+
+```python
+import numpy
+import csv
+
+allgene=[]	#联合致死基因
+SLpairs={}	#所有联合致死基因与之联合致死的所有基因
+
+with open("EcoliBW25.csv",'r') as f:
+	data=csv.reader(f)
+	result=list(data)	
+	for i in range(1,len(result)):
+		if result[i][1] not in allgene:
+			allgene.append(result[i][1])
+		if result[i][2] not in allgene:
+			allgene.append(result[i][2])
+	for gene in allgene:
+		SLgene=[]	#每一个基因与之联合致死的所有基因
+		for i in range(1,len(result)):
+			if gene==result[i][1]:
+				SLgene.append(result[i][2])
+			if gene==result[i][2]:
+				SLgene.append(result[i][1])
+		SLpairs[gene]=SLgene
+
+#print(len(SLpairs))  # 890
+
+
+#f2=open("BW25113resultofSLgene.txt","r",encoding="utf-8")
+#f3=open("BW25113resultofSLPairs.txt","w",encoding="utf-8")
+
+f2=open("BW25113resultofSLgeneAndNoEcoli.txt","r",encoding="utf-8")
+f3=open("BW25113resultofSLPairsWithNoEcoli.txt","w",encoding="utf-8")
+
+lines=f2.readlines()
+
+count=0
+temgene=[]  #存储一个物种的同源SLgene
+tempInfo=[]  #同源SL基因的标识信息
+tempsp="Acaryochloris_marina_MBIC11017_uid58167|NC_009925"
+for line in lines:
+	line=line.strip()
+	line=line.split("\t")
+	sp=line[0]+"|"+line[1]
+	if sp!=tempsp:
+		if len(temgene)>1:
+			for i in range(len(temgene)):
+				geneA=temgene[i]
+				SLA=SLpairs[geneA]
+				for j in range(i+1,len(temgene)):
+					geneB=temgene[j]
+					if geneA!=geneB:
+						if geneB in SLA:
+							count+=1
+							f3.write(tempsp+"\t"+tempInfo[i]+"\t"+geneA+"\t"+tempInfo[j]+"\t"+geneB+"\n")
+							#print(tempsp+"\t"+geneA+"\t"+geneB)
+		tempsp=sp
+		temgene=[]
+		tempInfo=[]
+	temgene.append(line[-1])
+	tempInfo.append(line[3])
+
+f2.close()
+f3.close()
+print(count)
+
+```
+
+
 
 读取xlsx数据
 

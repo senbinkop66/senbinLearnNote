@@ -7842,3 +7842,375 @@ object.getIdentity(); // 'My Object'
 
 ### 14.2 内存泄漏
 
+由于 IE 在 IE9 之前对 JScript 对象和 COM 对象使用了不同的垃圾回收机制（第 4 章讨论过），所以闭包在这些旧版本 IE 中可能会导致问题。在这些版本的 IE 中，把 HTML 元素保存在某个闭包的作用域中，就相当于宣布该元素不能被销毁。来看下面的例子：
+
+```js
+function assignHandler() {
+	let element = document.getElementById('someElement');
+	element.onclick = () => console.log(element.id);
+}
+```
+
+以上代码创建了一个闭包，即 element 元素的事件处理程序。 而这个处理程序又创建了一个循环引用。**匿名函数引用着 assignHandler()的活动对象**，阻止了对 element 的引用计数归零。**只要这个匿名函数存在，element 的引用计数就至少等于 1**。也就是说， 内存不会被回收。其实只要这个例子稍加修改，就可以避免这种情况，比如：
+
+```js
+function assignHandler() {
+    let element = document.getElementById('someElement');
+    let id = element.id;
+    element.onclick = () => console.log(id);
+    element = null;
+}
+```
+
+在这个修改后的版本中，**闭包改为引用一个保存着 element.id 的变量 id，从而消除了循环引用。** 不过，光有这一步还不足以解决内存问题。因为闭包还是会引用包含函数的活动对象，而其中包含 element。**即使闭包没有直接引用 element，包含函数的活动对象上还是保存着对它的引用。因此，必 须再把 element 设置为 null。**这样就解除了对这个 COM 对象的引用，其引用计数也会减少，从而确 保其内存可以在适当的时候被回收。
+
+## 15 立即调用的函数表达式
+
+**立即调用的匿名函数**又被称作**立即调用的函数表达式**（IIFE，Immediately Invoked FunctionExpression）。它类似于函数声明，但由于被包含在括号中，所以会被解释为函数表达式。紧跟在第一组括号后面的第二组括号会立即调用前面的函数表达式。下面是一个简单的例子：
+
+```js
+(function() {
+	// 块级作用域
+})();
+```
+
+**使用 IIFE 可以模拟块级作用域，即在一个函数表达式内部声明变量，然后立即调用这个函数。**这样位于函数体作用域的变量就像是在块级作用域中一样。ECMAScript 5 尚未支持块级作用域，使用 IIFE模拟块级作用域是相当普遍的。比如下面的例子：
+
+```js
+//IIFE
+let count=5;
+(function(){
+	for (var i=0;i<count;i++){
+		console.log(i);  //0 1 2 3 4
+	}
+})();
+
+console.log(i);  //ReferenceError: i is not defined
+```
+
+前面的代码在执行到 IIFE 外部的 console.log()时会出错，因为它访问的变量是在 IIFE 内部定义 的，在外部访问不到。在 ECMAScript 5.1 及以前，为了防止变量定义外泄，IIFE 是个非常有效的方式。 这样也不会导致闭包相关的内存问题，因为不存在对这个匿名函数的引用。为此，只要函数执行完毕， 其作用域链就可以被销毁。 
+
+在 ECMAScript 6 以后，IIFE 就没有那么必要了，因为**块级作用域中的变量无须 IIFE 就可以实现同 样的隔离**。下面展示了两种不同的块级作用域形式：
+
+```js
+// 内嵌块级作用域
+{
+	let i;
+	for (i = 0; i < count; i++) {
+		console.log(i);
+	}
+}
+console.log(i); // 抛出错误
+
+// 循环的块级作用域
+for (let i = 0; i < count; i++) {
+	console.log(i);
+}
+console.log(i); // 抛出错误
+```
+
+说明 IIFE 用途的一个实际的例子，就是**可以用它锁定参数值**。比如：
+
+```js
+let divs = document.querySelectorAll('div');
+// 达不到目的！
+for (var i = 0; i < divs.length; ++i) {
+	divs[i].addEventListener('click', function() {
+	console.log(i);
+});
+}
+```
+
+**这里使用 var 关键字声明了循环迭代变量 i，但这个变量并不会被限制在 for 循环的块级作用域内。** 因此，渲染到页面上之后，点击每个<div>都会弹出元素总数。这是因为在执行单击处理程序时，迭代变 量的值是循环结束时的最终值，即元素的个数。而且，这个变量 i 存在于循环体外部，随时可以访问。
+
+以前，为了实现点击第几个<div>就显示相应的索引值，需要借助 IIFE 来执行一个函数表达式，传 入每次循环的当前索引，从而“锁定”点击时应该显示的索引值：
+
+```js
+let divs = document.querySelectorAll('div');
+for (var i = 0; i < divs.length; ++i) {
+    divs[i].addEventListener('click', (function(frozenCounter) {
+        return function() {
+            console.log(frozenCounter);
+        };
+	})(i));
+}
+```
+
+而使用 ECMAScript 块级作用域变量，就不用这么大动干戈了：
+
+```js
+let divs = document.querySelectorAll('div');
+for (let i = 0; i < divs.length; ++i) {
+	divs[i].addEventListener('click', function() {
+		console.log(i);
+	});
+}
+```
+
+这样就可以让每次点击都显示正确的索引了。这里，**事件处理程序执行时就会引用 for 循环块级作 用域中的索引值**。这是因为在 ECMAScript 6 中，**如果对 for 循环使用块级作用域变量关键字，在这里 就是 let，那么循环就会为每个循环创建独立的变量，**从而让每个单击处理程序都能引用特定的索引。 **但要注意**，如果把变量声明拿到 for 循环外部，那就不行了。下面这种写法会碰到跟在循环中使用 var i = 0 同样的问题：
+
+```js
+let divs = document.querySelectorAll('div');
+// 达不到目的！
+let i;
+for (i = 0; i < divs.length; ++i) {
+    divs[i].addEventListener('click', function() {
+    	console.log(i);
+    });
+}
+```
+
+## 16 私有变量
+
+严格来讲，JavaScript 没有私有成员的概念，所有对象属性都公有的。不过，倒是有**私有变量**的概 念。**任何定义在函数或块中的变量，都可以认为是私有的**，因为在这个函数或块的外部无法访问其中的 变量。**私有变量包括函数参数、局部变量，以及函数内部定义的其他函数**。
+
+来看下面的例子：
+
+```js
+function add(num1, num2) {
+	let sum = num1 + num2;
+	return sum;
+}
+```
+
+在这个函数中，函数 add()有 3 个私有变量：num1、num2 和 sum。这几个变量只能在函数内部使 用，不能在函数外部访问。**如果这个函数中创建了一个闭包，则这个闭包能通过其作用域链访问其外部 的这 3 个变量。基于这一点，就可以创建出能够访问私有变量的公有方法。** 
+
+### 特权方法
+
+**特权方法**（privileged method）是**能够访问函数私有变量（及私有函数）的公有方法**。在对象上有 两种方式创建特权方法。第一种是**在构造函数中实现**，比如：
+
+```js
+function MyObject() {
+	// 私有变量和私有函数
+	let privateVariable = 10;
+
+	function privateFunction() {
+		return false;
+	}
+
+	// 特权方法
+	this.publicMethod = function() {
+		privateVariable++;
+		return privateFunction();
+	};
+}
+
+let test=new MyObject();
+console.log(test.publicMethod())  //false
+```
+
+这个模式是把所有私有变量和私有函数都定义在构造函数中。然后，再创建一个能够访问这些私有成员的特权方法。**这样做之所以可行，是因为定义在构造函数中的特权方法其实是一个闭包，它具有访 问构造函数中定义的所有变量和函数的能力。**在这个例子中，变量 privateVariable 和函数 privateFunction()只能通过 publicMethod()方法来访问。在创建 MyObject 的实例后，没有办法 直接访问 privateVariable 和 privateFunction()，唯一的办法是使用 publicMethod()。 
+
+如下面的例子所示，可以定义私有变量和特权方法，以隐藏不能被直接修改的数据：
+
+```js
+function Person(name) {
+	this.getName = function() {
+		return name;
+	};
+	this.setName = function (value) {
+		name = value;
+	};
+}
+
+let person = new Person('Nicholas');
+console.log(person.getName()); // 'Nicholas'
+
+person.setName('Greg');
+console.log(person.getName()); // 'Greg'
+```
+
+这段代码中的构造函数定义了两个特权方法：getName()和 setName()。每个方法都可以构造函 数外部调用，并通过它们来读写私有的 name 变量。在 Person 构造函数外部，没有别的办法访问 name。 因为两个方法都定义在构造函数内部，所以它们都是能够通过作用域链访问 name 的闭包。**私有变量 name 对每个 Person 实例而言都是独一无二的，因为每次调用构造函数都会重新创建一套变量和方法。** 不过这样也有个问题：必须通过构造函数来实现这种隔离。正如第 8 章所讨论的，构造函数模式的缺点 是每个实例都会重新创建一遍新方法。使用静态私有变量实现特权方法可以避免这个问题。
+
+### 16.1 静态私有变量
+
+特权方法也可以通过使用**私有作用域**定义**私有变量和函数**来实现。这个模式如下所示：
+
+```js
+(function() {
+	// 私有变量和私有函数
+	let privateVariable = 10;
+	function privateFunction() {
+		return false;
+	}
+	
+	// 构造函数
+	MyObject = function() {};
+
+	// 公有和特权方法
+	MyObject.prototype.publicMethod = function() {
+		privateVariable++;
+		console.log(privateVariable);
+		return privateFunction();
+	};
+})();
+
+let test1=new MyObject();
+console.log(test1.publicMethod());
+
+let test2=new MyObject();
+console.log(test2.publicMethod());
+/*
+11
+false
+12
+false
+*/
+```
+
+在这个模式中，匿名函数表达式创建了一个包含构造函数及其方法的私有作用域。首先定义的是私 有变量和私有函数，然后又定义了构造函数和公有方法。**公有方法定义在构造函数的原型上，**与典型的 原型模式一样。注意，这个模式定义的构造函数**没有**使用函数声明，使用的是函数表达式。函数声明会创建内部函数，在这里并不是必需的。**基于同样的原因（但操作相反），这里声明 MyObject 并没有使 用任何关键字。因为不使用关键字声明的变量会创建在全局作用域中，所以 MyObject 变成了全局变量， 可以在这个私有作用域外部被访问。**注意在严格模式下给未声明的变量赋值会导致错误。 
+
+这个模式与前一个模式的**主要区别**就是，私有变量和私有函数是由实例共享的。**因为特权方法定义 在原型上，所以同样是由实例共享的**。特权方法作为一个闭包，始终引用着包含它的作用域。来看下面 的例子：
+
+```js
+(function() {
+	let name = '';
+	Person = function(value) {
+		name = value;
+	};
+
+	Person.prototype.getName = function() {
+		return name;
+	};
+	Person.prototype.setName = function(value) {
+		name = value;
+	};
+})();
+
+let person1 = new Person('Nicholas');
+console.log(person1.getName()); // 'Nicholas'
+person1.setName('Matt');
+console.log(person1.getName()); // 'Matt'
+
+let person2 = new Person('Michael');
+console.log(person1.getName()); // 'Michael'
+console.log(person2.getName()); // 'Michael'
+```
+
+这里的 Person 构造函数可以访问私有变量 name，跟 getName()和 setName()方法一样。**使用这 种模式，name 变成了静态变量，可供所有实例使用**。这意味着在任何实例上调用 setName()修改这个 变量都会影响其他实例。调用 setName()或创建新的 Person 实例都要把 name 变量设置为一个新值。 而所有实例都会返回相同的值。 
+
+**像这样创建静态私有变量可以利用原型更好地重用代码，只是每个实例没有了自己的私有变量**。最 终，到底是把私有变量放在实例中，还是作为静态私有变量，都需要根据自己的需求来确定。 
+
+注意 使用闭包和私有变量会导致作用域链变长，**作用域链越长，则查找变量所需的时间 也越多**。
+
+### 16.2 模块模式
+
+前面的模式通过自定义类型创建了私有变量和特权方法。而下面要讨论的 Douglas Crockford 所说的模块模式，则在一个单例对象上实现了相同的隔离和封装。单例对象（singleton）就是只有一个实例的对象。按照惯例，JavaScript 是通过对象字面量来创建单例对象的，如下面的例子所示：
+
+```js
+let singleton = {
+    name: value,
+    method() {
+    	// 方法的代码
+    }
+};
+```
+
+**模块模式**是在单例对象基础上加以扩展，**使其通过作用域链来关联私有变量和特权方法**。模块模式的样板代码如下：
+
+```js
+let singleton = function() {
+	// 私有变量和私有函数
+	let privateVariable = 10;
+	function privateFunction() {
+		return false;
+	}
+
+	// 特权/公有方法和属性
+	return {
+		publicProperty: true,
+		publicMethod() {
+			privateVariable++;
+			return privateFunction();
+		}
+	};
+}();
+```
+
+模块模式使用了匿名函数返回一个对象。在匿名函数内部，首先定义私有变量和私有函数。之后， 创建一个要通过匿名函数返回的对象字面量。这个对象字面量中只包含可以公开访问的属性和方法。因 为这个对象定义在匿名函数内部，所以它的所有公有方法都可以访问同一个作用域的私有变量和私有函 数。**本质上，对象字面量定义了单例对象的公共接口。**如果单例对象需要进行某种初始化，并且需要访 问私有变量时，那就可以采用这个模式：
+
+```js
+let application = function() {
+	// 私有变量和私有函数
+	let components = new Array();
+
+	// 初始化
+	components.push(new BaseComponent());
+
+	// 公共接口
+	return {
+		getComponentCount() {
+			return components.length;
+		},
+		registerComponent(component) {
+			if (typeof component == 'object') {
+				components.push(component);
+			}
+		}
+	};
+}();
+```
+
+在 Web 开发中，经常需要使用单例对象管理应用程序级的信息。上面这个简单的例子创建了一个 application 对象用于管理组件。在创建这个对象之后，内部就会创建一个私有的数组 components， 然后将一个 BaseComponent 组件的新实例添加到数组中。（BaseComponent 组件的代码并不重要，在这里用它只是为了说明模块模式的用法。）对象字面量中定义的 getComponentCount()和 register- Component()方法都是可以访问 components 私有数组的特权方法。前一个方法返回注册组件的数量， 后一个方法负责注册新组件。
+
+ **在模块模式中，单例对象作为一个模块，经过初始化可以包含某些私有的数据，而这些数据又可以 通过其暴露的公共方法来访问**。以这种方式创建的*每个单例对象都是 Object 的实例，因为最终单例都 由一个对象字面量来表示*。不过这无关紧要，因为单例对象通常是可以全局访问的，而不是作为参数传 给函数的，所以可以避免使用 instanceof 操作符确定参数是不是对象类型的需求。
+
+### 16.3 模块增强模式
+
+另一个利用模块模式的做法是**在返回对象之前先对其进行增强**。这适合单例对象需要是某个特定类型的实例，但又必须给它添加额外属性或方法的场景。来看下面的例子：
+
+```js
+let singleton = function() {
+	// 私有变量和私有函数
+	let privateVariable = 10;
+	function privateFunction() {
+		return false;
+	}
+
+	// 创建对象
+	let object = new CustomType();
+
+	// 添加特权/公有属性和方法
+	object.publicProperty = true;
+	object.publicMethod = function() {
+		privateVariable++;
+		return privateFunction();
+	};
+	// 返回对象
+	return object;
+}();
+```
+
+如果前一节的 application 对象必须是 BaseComponent 的实例，那么就可以使用下面的代码来创建它：
+
+```js
+let application = function() {
+	// 私有变量和私有函数
+	let components = new Array();
+
+	// 初始化
+	components.push(new BaseComponent());
+
+	// 创建局部变量保存实例
+	let app = new BaseComponent();
+
+	// 公共接口
+	app.getComponentCount = function() {
+		return components.length;
+	};
+	app.registerComponent = function(component) {
+		if (typeof component == "object") {
+			components.push(component);
+		}
+	};
+	
+	// 返回实例
+	return app;
+}();
+```
+
+在这个重写的 application 单例对象的例子中，首先定义了私有变量和私有函数，跟之前例子中 一样。主要区别在于这里创建了一个名为 app 的变量，其中保存了 BaseComponent 组件的实例。**这是 最终要变成 application 的那个对象的局部版本**。在给这个局部变量 app 添加了能够访问私有变量的 公共方法之后，匿名函数返回了这个对象。然后，这个对象被赋值给 application。
+
+
+
+# 代理与反射
