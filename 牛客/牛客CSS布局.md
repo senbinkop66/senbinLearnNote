@@ -561,3 +561,372 @@
 
 ## **CSS14** **display - flex**
 
+Flexbox，也就是Flexible Box Layout模块，是CSS提供的用于布局的一套新属性。这套属性包含针对容器、容器直接子元素（弹性项）的两类属性。Flexbox可以控制弹性项的这几个方面：
+1. 大小，基于内容以及可用空间
+
+2. 流动方向，水平还是垂直，正向还是反向
+
+3. 两个轴向上的对齐与分布
+
+4. 顺序，与源代码中的顺序无关
+ 
+ 现在给"ul"标签添加"display: flex"属性，让该列表成为flex容器，注意：**除非另有声明，否则该属性默认弹性项排列方向为正横向，即"flex-direction: row"**。现在可以看到，列表内容已经是水平排列，并且根据各自的内容宽度进行了收缩。
+ 
+ 现在对主轴（即"flex-direction"属性声明的轴向）进行排列，该属性为"justify-content"且默认值为"flex-start"，现在给"ul"标签设置"justify-content: center"属性，可以发现弹性项在主轴上已经居中了。**但是此时会发现由于"home"的字体比其他字体大，所以弹性项在辅轴（与主轴对应的另一方向的轴）上并没有对其，这是由于控制辅轴对齐方式的"align-items"属性默认为"stretch"即拉伸，会占满"ul"的所有高度空间，**并且该行的基线是默认的。
+ 
+ 现在再给"ul"标签添加"align-items: center"属性，会发现"li"标签此时没有撑满"ul"标签的高度，并且在辅轴上是居中对齐的，如果给该属性设置"baseline"值，仅仅会在辅轴上将内容文字对齐。 
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            nav ul {
+                height: 2rem;
+                list-style: none;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            nav ul li {
+                border: 1px solid black;
+            }
+            nav ul li:first-child {
+                font-size: 1.2rem;
+            }
+        </style>
+    </head>
+    <body>
+        <nav>
+            <ul>
+                <li>home</li>
+                <li>spaceships</li>
+                <li>planets</li>
+                <li>stars</li>
+            </ul>
+        </nav>
+    </body>
+</html>
+```
+
+## **CSS15** **display - flex - 可伸缩项属性**
+
+Flexbox支持对弹性项的灵活控制。Flex的意思为可伸缩，这体现在以下三个属性中：
+1. flex-basis：基础值
+2. flex-grow：拉伸弹性系数，如果容器宽度减去弹性项的基础值之和之后还有剩余空间，那么就按照弹性系数比例去分配剩余空间
+3. flex-shrink：缩减弹性系数，和拉伸弹性系数逻辑相反
+ **这三个属性应用给弹性项，而不是容器。**
+  现在首先给所有的"li"添加"flex: 1 0 0%"属性，该属性的三个值分别为flex-grow、flex-shrink和flex-basis，表示：**当有剩余空间时均匀分配剩余空间、当超出容器宽度时不进行缩放、弹性项的基础值都为容器的0%。此时可以看到四个每个"li"标签的宽度都为125px，分别占据了容器的1/4。**现在再单独给第一个"li"标签设置"flex-grow: 2"属性，此时又会发现所有"li"标签的宽度比值为2:1:1:1。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+            }
+            nav {
+                width: 500px;
+            }
+            nav ul {
+                display: flex;
+                list-style: none;
+            }
+            nav ul li{
+                flex: 1 0 0%;
+            }
+            nav ul li:first-child{
+                flex-grow: 2;
+            }
+        </style>
+    </head>
+    <body>
+         <nav>
+            <ul>
+                <li>home</li>
+                <li>spaceships</li>
+                <li>planets</li>
+                <li>stars</li>
+            </ul>
+        </nav>
+    </body>
+</html>
+```
+
+## **CSS16** **display - flex - 标签**
+
+通过之前的学习，现在来实现一组标签，表示星球的种类。当前的"li"标签都是行内盒子，虽然看似实现了标签效果，但是每一行的宽度却没有保持一致，当进行缩放时，布局会特别的混乱。现在使用Flex布局将当前的布局方式进行优化，
+
+首先删除"li"标签的"display: inline-block"属性，给"ul"添加"display: flex"使该元素称为弹性容器。
+
+再给容器添加"flex-wrap: wrap"属性表示换行，否则所有标签会在第一行排列。此时标签已经分行排列了，但，每一行的宽度看起来依然是不同的，这时候需要通过给弹性项添加属性，通过之前讲过的"flex"属性入手。继续给所有的"li"标签添加"flex: 1 0 auto"属性，**auto代表在计算剩余空间时需要减去每个标签自身的宽度而不是之前讲的0%那样忽略了自身的宽度。**
+
+此时标签功能基本上是完成了，但是注意，最后一行可能因为页面的缩放导致只有一个标签却占满了一整行。那么继续给所有的"li"标签设置"max-width: 10rem"即可，此时最后一行标签虽然少但是看起来依旧很和谐。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                font-size: 12px;
+                box-sizing: border-box;
+            }
+            nav ul {
+                padding: 0.5rem;
+                list-style: none;
+                /**/
+                display: flex;
+                flex-wrap: wrap;
+            }
+            nav ul li {
+                margin: 0.2rem;
+                /**/
+                flex: 1 0 auto;
+                max-width: 10rem;
+            }
+            nav ul li a {
+                position: relative;
+                display: block;
+                padding: 0.2rem 0.6rem;
+                color: white;
+                line-height: 1rem;
+                background-color: black;
+                border-radius: 0.2rem;
+                text-decoration: none;
+                text-align: center;
+            }
+            nav ul li a:before {
+                position: absolute;
+                content: '';
+                width: 0;
+                height: 0;
+                border: 0.7rem solid transparent;
+                border-right-width: 0.7rem;
+                border-right-color: black;
+                left: -1.2rem;
+                top: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <nav>
+            <ul>
+                <li><a href="">Fillithar</a></li>
+                <li><a href="">Berzite</a></li>
+                <li><a href="">Galidraan</a></li>
+                <li><a href="">Gravlex Med</a></li>
+                <li><a href="">Cato Neimoidia</a></li>
+                <li><a href="">Coruscant</a></li>
+                <li><a href="">Dantooine</a></li>
+                <li><a href="">Dhandu</a></li>
+                <li><a href="">Iktotchon</a></li>
+                <li><a href="">Hosnian Prime</a></li>
+                <li><a href="">Harkrova I</a></li>
+                <li><a href="">Livno III</a></li>
+                <li><a href="">Karfeddion</a></li>
+                <li><a href="">Eriadu</a></li>
+                <li><a href="">Jestefad</a></li>
+                <li><a href="">Iridonia</a></li>
+                <li><a href="">Malachor</a></li>
+                <li><a href="">Gan Moradir</a></li>
+                <li><a href="">Kethmandi</a></li>
+                <li><a href="">Mirrin Prime</a></li>
+                <li><a href="">Ezaraa</a></li>
+                <li><a href="">Muunilinst</a></li>
+                <li><a href="">Itapi Prime</a></li>
+                <li><a href="">Nam Chorios</a></li>
+            </ul>
+        </nav>
+    </body>
+</html>
+```
+
+## **CSS17** **display - flex - order**
+
+**使用Flexbox的order属性，可以完全摆脱项目在源码中顺序的约束。**默认情况下，**每个项目的order值都为0，意味着按照他们在源代码中的顺序进行排列**。可以观看右边的代码效果，从设计上说，把图片放在最前面可以抓住读者的眼球，是比较好的设计方式，但是对于浏览器而言，拿到标题并且直接将标题呈现给读者的代价一定比获取一张照片并渲染出来小得多。所以可以考虑折中的方式，先渲染标题但是优先显示图片。
+ 现在给"img"图片标签设置"order: -1"属性，此时观察效果会发现图片的排列在标题之上，其他内容的相对位置不会变，它们的order值仍然是0。**order的值不一定要连续，并且正负都可以。**
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            section {
+                display: flex;
+                flex-direction: column;
+                text-align: center;
+            }
+            img{
+                order: -1;
+            }
+        </style>
+    </head>
+    <body>
+        <section>
+            <h2>countdown</h2>
+            <img src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fuploads.xuexila.com%2Fallimg%2F1912%2F1135-191202143454.jpg&refer=http%3A%2F%2Fuploads.xuexila.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1639984107&t=eca951193e736a17eb96278117bcfb1f" width="100%">
+            <article>The countdown to Christmas starts here.</article>
+            <p><a href="#">more</a></p>
+        </section>
+    </body>
+</html>
+```
+
+## **CSS18** **display - grid**
+
+Grid，即网格布局。它将页面划分为一个个网格，可以任意组合不同的形态，做出理想的布局效果。Grid布局与Flexbox布局的**区别**在于，**Flexbox是根据轴线对弹性项进行排列**，而**Grid布局是将容器划分为行和列，产生单元格，然后再对单元格进行操作。**
+ 采用网格布局的区域称为**容器**。容器内部采用网格定位的每个子元素称为容器项，也是**单元格**。划分网格的线称为**网格线**，比如，3x3的网格有4条水平网格线和4条垂直网格线。
+ 现在给section盒子设置"display: grid"属性，将该盒子变成一个容器。**现在需要通过给该容器划分行和列来生成单元格，**给容器设置"grid-template-rows: 100px"和"grid-template-columns: repeat(2, 1fr)"两条属性以生成一个Nx2的网格，且每个容器项的宽度比为1:1、第一行的高度为100px（注意：实际上行高度可以不用设置，会根据每个容器项自动撑开，**但如果设置了，就要考虑清除需要多少行，当前的行值100px仅为第一行，如果需要前三行都为100px，需要设置为"grid-template-rows: 100px 100px 100px"）**。repeat方法可以简化属性值的书写，为了方便表示比例关系，网格布局提供了fr关键字，该关键字和flex-grow颇为相似。实际上如果想固定大小，完全可以将单位全部设置为固定的px值。现在继续给容器添加"grid-gap: 10px"属性，该属性为"grid-row-gap"和"grid-column-gap"两个属性的简写，**分别代表行间距和列间距。**
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            section {
+                width: 500px;
+                text-align: center;
+                display: grid;
+                grid-template-rows: 100px;
+                grid-template-columns: repeat(2, 1fr);
+                grid-gap: 10px;
+            }
+            article {
+                height: 100px;
+                border: 1px solid black;
+            }
+        </style>
+    </head>
+    <body>
+        <section>
+            <article>1</article>
+            <article>2</article>
+            <article>3</article>
+            <article>4</article>
+            <article>5</article>
+            <article>6</article>
+            <article>7</article>
+            <article>8</article>
+            <article>9</article>
+        </section>
+    </body>
+</html>
+```
+
+## **CSS19** **display - grid - 区域**
+
+网格布局允许指定区域，**一个区域由单个或多个单元格组成**。
+
+根据上一节学习的内容，请将"section"设置为网格布局容器，并且生成一个3x3的网格，该网格容器项的宽度、高度都为100px。再给容器添加"grid-template-areas: 'a b c''d e f''g h i'"属性，表示3x3的网格区域划分从左到右、从上到下依次为a、b、c、d、e、f、g、h、i。现在给第一个"article"标签设置"grid-area: e"属性，此时可以看到数字1已经被移动到了最中间的区域，即区域"e"。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            section {
+                width: 500px;
+                text-align: center;
+                display: grid;
+                grid-template-rows: 100px;
+                grid-template-columns: 100px;
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-areas: 'a b c''d e f''g h i';
+                grid-gap: 10px;
+            }
+            article {
+                height: 100px;
+                border: 1px solid black;
+            }
+            article:first-child{
+                grid-area: e;
+            }
+        </style>
+    </head>
+    <body>
+        <section>
+            <article>1</article>
+            <article>2</article>
+            <article>3</article>
+            <article>4</article>
+            <article>5</article>
+            <article>6</article>
+            <article>7</article>
+            <article>8</article>
+            <article>9</article>
+        </section>
+    </body>
+</html>
+```
+
+## **CSS20** **单列布局**
+
+**单列布局是将头部、内容区、底部在页面上垂直排列，是非常实用的一种布局方式**。主要对三个区域的宽度进行统一，然后通过设置自动外边距进行居中。
+
+现在给"header"、"section"、"footer"三个盒子统一设置"margin: 10px auto"、"width: 360px"、"border: 1px solid black"属性。此时因为内容区有内容而头部和底部没有内容所以只有内容区的高度被撑开，**一般头部和底部的内容是根据自己的需求固定大小的**，所以现在再给头部和底部统一设置高度，即"height: 32px"。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                width: 500px;
+            }
+            header,section,footer{
+                width: 360px;
+                margin: 10px auto;
+                border: 1px solid black;
+            }
+            header,footer{
+                height: 32px;
+            }
+        </style>
+    </head>
+    <body>
+        <header></header>
+        <section><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></section>
+        <footer></footer>
+    </body>
+</html>
+```
+
+## **CSS21** **双列布局 - 浮动**
+
