@@ -8738,7 +8738,7 @@ proxy.foo;  //get()
 - receiver：代理对象或继承代理对象的对象。
 
 4. 捕获器不变式
-  如果 target.property 不可写且不可配置，则处理程序返回的值必须与 target.property 匹配。
+    如果 target.property 不可写且不可配置，则处理程序返回的值必须与 target.property 匹配。
 
   如果 target.property 不可配置且[[Get]]特性为 undefined，处理程序的返回值也必须是 undefined。
 
@@ -8772,7 +8772,7 @@ proxy.foo="bar";  //set()
 - value：要赋给属性的值。
 - receiver：接收最初赋值的对象。
 4. 捕获器不变式
-  如果 target.property 不可写且不可配置，则不能修改目标属性的值。
+    如果 target.property 不可写且不可配置，则不能修改目标属性的值。
 
   如果 target.property 不可配置且[[Set]]特性为 undefined，则不能修改目标属性的值。在严格模式下，处理程序中返回 false 会抛出 TypeError。
 
@@ -8805,7 +8805,7 @@ has()必须返回布尔值，表示属性是否存在。返回非布尔值会被
 - target：目标对象。
 - property：引用的目标对象上的字符串键属性。
 4. 捕获器不变式
-  如果 target.property 存在且不可配置，则处理程序必须返回 true。
+    如果 target.property 存在且不可配置，则处理程序必须返回 true。
 
   如果 target.property 存在且目标对象不可扩展，则处理程序必须返回 true。
 
@@ -9113,4 +9113,327 @@ construct()必须返回一个对象。
 target 必须可以用作构造函数。
 
 ## 3 代理模式
+
+使用代理可以在代码中实现一些有用的编程模式。
+
+### 3.1 跟踪属性访问
+
+**通过捕获 get、set 和 has 等操作，可以知道对象属性什么时候被访问、被查询。**把实现相应捕获器的某个对象代理放到应用中，可以监控这个对象何时在何处被访问过：
+
+```js
+const user={
+    name:"Arnold"
+};
+
+const proxy=new Proxy(user,{
+    get(target,property,receiver){
+        console.log(`Getting ${property}`);
+        return Reflect.get(...arguments);
+    },
+    set(target,property,value,receiver){
+        console.log(`Setting ${property}=${value}`);
+        return Reflect.set(...arguments);
+    },
+});
+
+proxy.name;  //Getting name
+proxy.age=23;  //Setting age=23
+```
+
+### 3.2 隐藏属性
+
+代理的内部实现对外部代码是不可见的，因此要隐藏目标对象上的属性也轻而易举。比如：
+
+```js
+const hiddenProperties = ['foo', 'bar'];
+
+const targetObject = {
+    foo: 1,
+    bar: 2,
+    baz: 3
+};
+
+const proxy=new Proxy(targetObject,{
+    get(target,property){
+        if (hiddenProperties.includes(property)) {
+            return undefined;
+        }else{
+            return Reflect.get(...arguments);
+        }
+    },
+    has(target,property){
+        if (hiddenProperties.includes(property)) {
+            return false;
+        }else{
+            return Reflect.has(...arguments);
+        }
+    },
+});
+
+// get()
+console.log(proxy.foo); // undefined
+console.log(proxy.bar); // undefined
+console.log(proxy.baz); // 3
+// has()
+console.log('foo' in proxy); // false
+console.log('bar' in proxy); // false
+console.log('baz' in proxy); // true
+```
+
+### 3.3 属性验证
+
+因为所有赋值操作都会触发 set()捕获器，所以可以根据所赋的值决定是允许还是拒绝赋值：
+
+```js
+const target = {
+    onlyNumbersGoHere: 0
+};
+
+const proxy=new Proxy(target,{
+    set(target,property,value){
+        if (typeof value !=="number") {
+            return false;
+        }else{
+            return Reflect.set(...arguments);
+        }
+    }
+});
+
+proxy.onlyNumbersGoHere = 1;
+console.log(proxy.onlyNumbersGoHere); // 1
+proxy.onlyNumbersGoHere = '2';
+console.log(proxy.onlyNumbersGoHere); // 1
+```
+
+### 3.4 函数与构造函数参数验证
+
+跟保护和验证对象属性类似，也可对函数和构造函数参数进行审查。比如，可以让函数只接收某种类型的值：
+
+```js
+function median(...nums){
+    return nums.sort()[Math.floor(nums.length/2)]
+}
+
+const proxy=new Proxy(median,{
+    apply(target,thisArg,argumentsList){
+        for (let arg of argumentsList){
+            if (typeof arg !=="number") {
+                throw "Non-number argument provided";
+            }
+        }
+        return Reflect.apply(...arguments);
+    }
+});
+
+console.log(proxy(4, 7, 1)); // 4
+console.log(proxy(4, '7', 1));
+// Error: Non-number argument provided
+```
+
+类似地，可以要求实例化时必须给构造函数传参：
+
+### 3.5 数据绑定与可观察对象
+
+**通过代理可以把运行时中原本不相关的部分联系到一起**。这样就可以实现各种模式，从而让不同的代码互操作。
+
+比如，可以将被代理的类绑定到一个全局实例集合，让所有创建的实例都被添加到这个集合中：
+
+```js
+const userList = [];
+
+class User {
+    constructor(name) {
+        this.name_ = name;
+    }
+}
+
+const proxy=new Proxy(User,{
+    construct(target,argumentsList,newTarget){
+        const newUser = Reflect.construct(...arguments);
+        userList.push(newUser);
+        return newUser;
+    }
+});
+
+new proxy('John');
+new proxy('Jacob');
+new proxy('Jingleheimerschmidt');
+console.log(userList); // 
+/*
+[
+  User { name_: 'John' },
+  User { name_: 'Jacob' },
+  User { name_: 'Jingleheimerschmidt' }
+]
+*/
+```
+
+另外，还可以把集合绑定到一个事件分派程序，每次插入新实例时都会发送消息：
+
+```js
+const userList = [];
+
+function emit(newValue){
+    console.log(newValue);
+}
+
+const proxy=new Proxy(userList,{
+    set(target, property, value, receiver) {
+        const result=Reflect.set(...arguments);
+        if (result) {
+            emit(Reflect.get(target,property,receiver));
+        }
+        return result;
+    }
+});
+
+proxy.push('John');
+// John
+//1
+proxy.push('Jacob');
+// Jacob
+//2
+```
+
+
+
+# 期约与异步函数
+
+ECMAScript 6 及之后的几个版本逐步加大了对异步编程机制的支持，提供了令人眼前一亮的新特 性。ECMAScript 6 新增了正式的 **Promise（期约）**引用类型，支持优雅地定义和组织异步逻辑。接下 来几个版本增加了使用 async 和 await 关键字定义异步函数的机制。 
+
+注意 本章示例将大量使用异步日志输出的方式 setTimeout(console.log, 0, ... params)，旨在演示执行顺序及其他异步行为。异步输出的内容看起来虽然像是同步输出 的，但实际上是异步打印的。这样可以让期约等返回的值达到其最终状态。 此外，浏览器控制台的输出经常能打印出 JavaScript 运行中无法获取的对象信息（比如期 约的状态）。这个特性在示例中广泛使用，以便辅助读者理解相关概念。
+
+## 1 异步编程
+
+同步行为和异步行为的对立统一是计算机科学的一个基本概念。特别是在 JavaScript 这种单线程事 件循环模型中，同步操作与异步操作更是代码所要依赖的核心机制。**异步行为是为了优化因计算量大而 时间长的操作**。如果在等待其他操作完成的同时，即使运行其他指令，系统也能保持稳定，那么这样做 就是务实的。 
+
+重要的是，**异步操作并不一定计算量大或要等很长时间**。只要你不想为等待某个异步操作而阻塞线 程执行，那么任何时候都可以使用。
+
+### 1.1 同步与异步
+
+**同步行为**对应内存中顺序执行的处理器指令。每条指令都会严格按照它们出现的顺序来执行，而每 条指令执行后也能立即获得存储在系统本地（如寄存器或系统内存）的信息。这样的执行流程容易分析 程序在执行到代码任意位置时的状态（比如变量的值）。
+
+同步操作的例子可以是执行一次简单的数学计算：
+
+```js
+let x = 3;
+x = x + 4;
+```
+
+在程序执行的每一步，都可以推断出程序的状态。这是**因为后面的指令总是在前面的指令完成后才 会执行**。等到最后一条指定执行完毕，存储在 x 的值就立即可以使用。 
+
+这两行 JavaScript 代码对应的**低级指令**（从 JavaScript 到 x86）并不难想象。首先，操作系统会在栈 内存上分配一个存储浮点数值的空间，然后针对这个值做一次数学计算，再把计算结果写回之前分配的 内存中。**所有这些指令都是在单个线程中按顺序执行的**。在低级指令的层面，有充足的工具可以确定系 统状态。 
+
+相对地，**异步行为**类似于系统中断，**即当前进程外部的实体可以触发代码执行。异步操作经常是必 要的**，因为强制进程等待一个长时间的操作通常是不可行的（同步操作则必须要等）。如果代码要访问 一些高延迟的资源，比如向远程服务器发送请求并等待响应，那么就会出现长时间的等待。 
+
+异步操作的例子可以是在定时回调中执行一次简单的数学计算：
+
+```js
+et x = 3;
+setTimeout(() => x = x + 4, 1000);
+```
+
+这段程序最终与同步代码执行的任务一样，都是把两个数加在一起，但这一次执行线程不知道 x 值 何时会改变，**因为这取决于回调何时从消息队列出列并执行。** 
+
+异步代码不容易推断。虽然这个例子对应的低级代码最终跟前面的例子没什么区别，但**第二个指令 块**（加操作及赋值操作）是由系统计时器触发的，这会生成一个入队执行的中断。**到底什么时候会触发 这个中断，这对 JavaScript 运行时来说是一个黑盒**，因此实际上无法预知（尽管可以保证这发生在当前 线程的同步代码执行之后，否则回调都没有机会出列被执行）。**无论如何，在排定回调以后基本没办法 知道系统状态何时变化。**
+
+ **为了让后续代码能够使用 x，异步执行的函数需要在更新 x 的值以后通知其他代码**。如果程序不需 要这个值，那么就只管继续执行，不必等待这个结果了。 
+
+设计一个能够知道 x 什么时候可以读取的系统是非常难的。JavaScript 在实现这样一个系统的过程 中也经历了几次迭代。
+
+### 1.2 以往的异步编程模式
+
+异步行为是 JavaScript 的基础，但以前的实现不理想。在早期的 JavaScript 中，只支持定义回调函数 来表明异步操作完成。**串联多个异步操作是一个常见的问题，通常需要深度嵌套的回调函数**（俗称“***回调地狱***”）**来解决**。 假设有以下异步函数，使用了 setTimeout 在一秒钟之后执行某些操作：
+
+```js
+function double(value) {
+	setTimeout(() => setTimeout(console.log, 0, value * 2), 1000);
+}
+double(3);
+// 6（大约 1000 毫秒之后）
+```
+
+这里的代码没什么神秘的，但关键是理解为什么说它是一个异步函数。**setTimeout 可以定义一个 在指定时间之后会被调度执行的回调函数。**对这个例子而言，1000 毫秒之后，JavaScript 运行时会把回 调函数推到自己的消息队列上去等待执行。推到队列之后，回调什么时候出列被执行对 JavaScript 代码 就完全不可见了。还有一点，double()函数在 setTimeout 成功调度异步操作之后会立即退出。
+
+#### 异步返回值
+
+假设 setTimeout 操作会返回一个有用的值。有什么好办法把这个值传给需要它的地方？广泛接受的**一个策略是给异步操作提供一个回调**，这个回调中包含要使用异步返回值的代码（作为回调的参数）。
+
+```js
+function double(value,callback) {
+	setTimeout(() => callback(value * 2), 1000);
+}
+double(3,(x)=>console.log(`I was given: ${x}`));
+// I was given: 6（大约 1000 毫秒之后）
+```
+
+这里的 setTimeout 调用告诉 JavaScript 运行时在 1000 毫秒之后把一个函数推到消息队列上。这个函数会由运行时负责异步调度执行。**而位于函数闭包中的回调及其参数在异步执行时仍然是可用的**。
+
+####  失败处理
+
+异步操作的失败处理在回调模型中也要考虑，因此自然就出现了成功回调和失败回调：
+
+```js
+function double(value,success,failure) {
+	setTimeout(() => {
+		try{
+			if (typeof value!=="number") {
+				throw "Must provide number as first argument";
+			}
+			success(2*value);
+		}catch(e){
+			failure(e);
+		}
+	},1000);
+}
+
+const successCallback=(x)=>console.log(`success:${x}`);
+const failureCallback = (e) => console.log(`Failure: ${e}`);
+
+double(3,successCallback,failureCallback);  //Success: 6（大约 1000 毫秒之后）
+double('3',successCallback,failureCallback);  //Failure: Must provide number as first argument（大约 1000 毫秒之后）
+```
+
+**这种模式已经不可取了，因为必须在初始化异步操作时定义回调**。异步函数的返回值只在短时间内存在，只有预备好将这个短时间内存在的值作为参数的回调才能接收到它。
+
+#### 嵌套异步回调
+
+如果异步返值又依赖另一个异步返回值，那么回调的情况还会进一步变复杂。在实际的代码中，这就要求嵌套回调：
+
+```js
+function double(value,success,failure) {
+	setTimeout(() => {
+		try{
+			if (typeof value!=="number") {
+				throw "Must provide number as first argument";
+			}
+			success(2*value);
+		}catch(e){
+			failure(e);
+		}
+	},1000);
+}
+
+const successCallback=(x)=>{
+	double(x,(y)=>console.log(`success:${y}`));
+};
+const failureCallback = (e) => console.log(`Failure: ${e}`);
+
+double(3,successCallback,failureCallback);  //
+// Success: 12（大约 1000 毫秒之后）
+```
+
+显然，随着代码越来越复杂，回调策略是不具有扩展性的。**“回调地狱”这个称呼可谓名至实归。**嵌套回调的代码维护起来就是噩梦。
+
+## 2 期约
+
+**期约是对尚不存在结果的一个替身**。期约（promise）这个名字最早是由 Daniel Friedman 和 David Wise 在他们于 1976 年发表的论文“The Impact of Applicative Programming on Multiprocessing”中提出来的。 但直到十几年以后，Barbara Liskov 和 Liuba Shrira 在 1988 年发表了论文“Promises: Linguistic Support for Efficient Asynchronous Procedure Calls in Distributed Systems”，这个概念才真正确立下来。同一时期的计 算机科学家还使用了“终局”（eventual）、“期许”（future）、“延迟”（delay）和“迟付”（deferred）等 术语指代同样的概念。所有这些概念描述的都是一种异步程序执行的机制。
+
+### 2.1 Promises/A+规范
+
+早期的期约机制在 jQuery 和 Dojo 中是以 Deferred API 的形式出现的。到了 2010 年，CommonJS 项 目实现的 Promises/A 规范日益流行起来。Q 和 Bluebird 等第三方 JavaScript 期约库也越来越得到社区认 可，虽然这些库的实现多少都有些不同。为弥合现有实现之间的差异，2012 年 Promises/A+组织分叉（fork） 了 CommonJS 的 Promises/A 建议，并以相同的名字制定了 Promises/A+规范。这个规范最终成为了 ECMAScript 6 规范实现的范本。 
+
+ECMAScript 6 增加了对 Promises/A+规范的完善支持，即 Promise 类型。一经推出，Promise 就 大受欢迎，成为了主导性的异步编程机制。所有现代浏览器都支持 ES6 期约，很多其他浏览器 API（如 fetch()和 Battery Status API）也以期约为基础。
+
+### 2.2 期约基础
 

@@ -569,7 +569,7 @@ Flexbox，也就是Flexible Box Layout模块，是CSS提供的用于布局的一
 3. 两个轴向上的对齐与分布
 
 4. 顺序，与源代码中的顺序无关
- 
+
  现在给"ul"标签添加"display: flex"属性，让该列表成为flex容器，注意：**除非另有声明，否则该属性默认弹性项排列方向为正横向，即"flex-direction: row"**。现在可以看到，列表内容已经是水平排列，并且根据各自的内容宽度进行了收缩。
  
  现在对主轴（即"flex-direction"属性声明的轴向）进行排列，该属性为"justify-content"且默认值为"flex-start"，现在给"ul"标签设置"justify-content: center"属性，可以发现弹性项在主轴上已经居中了。**但是此时会发现由于"home"的字体比其他字体大，所以弹性项在辅轴（与主轴对应的另一方向的轴）上并没有对其，这是由于控制辅轴对齐方式的"align-items"属性默认为"stretch"即拉伸，会占满"ul"的所有高度空间，**并且该行的基线是默认的。
@@ -622,7 +622,7 @@ Flexbox支持对弹性项的灵活控制。Flex的意思为可伸缩，这体现
 2. flex-grow：拉伸弹性系数，如果容器宽度减去弹性项的基础值之和之后还有剩余空间，那么就按照弹性系数比例去分配剩余空间
 3. flex-shrink：缩减弹性系数，和拉伸弹性系数逻辑相反
  **这三个属性应用给弹性项，而不是容器。**
-  现在首先给所有的"li"添加"flex: 1 0 0%"属性，该属性的三个值分别为flex-grow、flex-shrink和flex-basis，表示：**当有剩余空间时均匀分配剩余空间、当超出容器宽度时不进行缩放、弹性项的基础值都为容器的0%。此时可以看到四个每个"li"标签的宽度都为125px，分别占据了容器的1/4。**现在再单独给第一个"li"标签设置"flex-grow: 2"属性，此时又会发现所有"li"标签的宽度比值为2:1:1:1。
+   现在首先给所有的"li"添加"flex: 1 0 0%"属性，该属性的三个值分别为flex-grow、flex-shrink和flex-basis，表示：**当有剩余空间时均匀分配剩余空间、当超出容器宽度时不进行缩放、弹性项的基础值都为容器的0%。此时可以看到四个每个"li"标签的宽度都为125px，分别占据了容器的1/4。**现在再单独给第一个"li"标签设置"flex-grow: 2"属性，此时又会发现所有"li"标签的宽度比值为2:1:1:1。
 
 ```html
 <!DOCTYPE html>
@@ -929,4 +929,520 @@ Grid，即网格布局。它将页面划分为一个个网格，可以任意组�
 ```
 
 ## **CSS21** **双列布局 - 浮动**
+
+**自适应的双列布局利用浮动、外边和触发父级BFC即可实现**，这种方法主要是因为BFC的高度计算会包含其内的浮动元素的高度，父盒子会被撑开。
+
+ 现在给类名为"container"的父盒子添加"overflow: hidden"属性，使该父盒子成为BFC。
+
+继续给类名为"left"的盒子设置"float: left"和"width: 100px"属性，使该盒子成为浮动元素并且需要一个固定的宽度。
+
+最后再给类名为"right"的盒子设置左外边距"margin-left: 100px"属性，**该属性值需要和左浮动的盒子宽度一致**。此时父盒子的高度会根据左边浮动元素、右边内容区中高度较高的一方进行计算，并且右边内容区的宽度自适应，**最好是根据需要，配合最大或最小宽度进行设置。**
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            .container {
+                border: 1px solid black;
+                overflow: hidden;
+            }
+            .left {
+                border: 1px solid black;
+                float: left;
+                width: 100px;
+            }
+            .right{
+                margin-left: 100px;
+            }
+        </style>
+    </head>
+    <body>
+        <section class="container">
+            <article class="left"><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></article>
+            <article class="right"></article>
+        </section>
+    </body>
+</html>
+```
+
+## **CSS22** **双列布局 - 绝对定位**
+
+通过绝对定位实现的双列布局看起来会比较僵硬，**因为父盒子首先需要设置定位属性并且父盒子的高度无法被子盒子撑开**，如果子盒子的高度是自适应的，那么父盒子的高度也就无法确定从而设置了，**但优点是设置属性比浮动来得更直观**。
+
+现在给类名为"container"的父盒子添加"position: relative"属性，为了保证子盒子绝对定位时不会根据html元素定位。
+
+继续给类名为"left"的盒子添加"position: absolute"、"left: 0"和"width: 100px"三条属性，*使该盒子定位到父盒子的最左边并且赋予宽度，但高度是根据内容自适应的*。
+
+最后给类名为"right"的盒子添加"position: absolute"、"left: 100px"和"right: 0px"，因为该盒子没有给定宽度，**设置"left"和"right"定位属性会使内容区保留在这个范围内，同样实现了自适应。**
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            .container {
+                position: relative;
+            }
+            .left {
+                border: 1px solid black;
+                position: absolute;
+                left: 0;
+                width: 100px;
+            }
+            .right{
+                position: absolute;
+                left: 100px;
+                right: 0px;
+            }
+        </style>
+    </head>
+    <body>
+        <section class="container">
+            <article class="left"><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></article>
+            <article class="right"></article>
+        </section>
+    </body>
+</html>
+```
+
+## **CSS23** **双列布局 - flex**
+
+通过Flexbox可以快速实现双列布局，**主要通过"flex: 1"这条弹性项属性给内容区申请到父盒子的所有剩余空间**，并且可以给弹性项设置"position"属性调整弹性项内部的子盒子细节。
+ 现在给类名为"container"的父盒子添加"display: flex"属性，使该盒子成为弹性盒容器。
+
+继续给类名为"left"的弹性项盒子添加"width: 100px"属性。
+
+最后给类名为"right"的弹性项盒子添加"flex: 1"属性。
+
+由于弹性项盒子默认占满弹性容器盒子的所有高度，所以两个弹性项盒子的高度也是自适应。右边的内容区宽度会占满弹性容器盒子的剩余空间，所以宽度也是自适应的。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            .container {
+                border: 1px solid black;
+                display: flex;
+            }
+            .left {
+                border: 1px solid black;
+                width: 100px;
+            }
+            .right {
+                border: 1px solid greenyellow;
+                flex: 1;
+            }
+        </style>
+    </head>
+    <body>
+        <section class="container">
+            <article class="left"><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></article>
+            <article class="right"></article>
+        </section>
+    </body>
+</html>
+```
+
+## **CSS24** **双列布局 - grid**
+
+**使用Grid网格布局实现双列布局的要点在于列数为2，且首列的宽度根据需要自行设置**，第二列使用片段"fr"属性进行自适应即可。**行数不需要指定，每行会根据内容高度进行自适应缩放。**
+
+现在给类名为"container"的盒子添加"display: grid"属性，使该盒子成为容器。
+
+再给该容器添加"grid-template-columns: 100px 1fr"属性，表示第一列宽度始终为100px，第二列的宽度为剩余的所有空间。此时可以看到整个容器的高度因为首列的内容被撑开了，并且右边内容区实现了自适应。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            .container {
+                border: 1px solid black;
+                display: grid;
+                grid-template-columns: 100px 1fr;
+            }
+            .left {
+                border: 1px solid black;
+            }
+            .right {
+                border: 1px solid greenyellow;
+            }
+        </style>
+    </head>
+    <body>
+        <section class="container">
+            <article class="left"><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></article>
+            <article class="right"></article>
+        </section>
+    </body>
+</html>
+```
+
+## **CSS25** **三列布局 - 浮动**
+
+使用浮动实现三列布局的注意点是**浮动元素需要写在内容元素之前**，否则布局是混乱的。这种方式实现三列布局是**优点是简单、兼容性好**，但**缺点**是需要清除浮动，否则父盒子的高度无法撑开，可能会导致其他页面元素的布局混乱。
+ 首先给类名为"container"的盒子添加"overflow: hidden"属性，**该属性可以使盒子成为BFC**，处理浮动元素父盒子高度塌陷的问题。
+
+再给类名为"left"的盒子添加"float: left"和"width: 100px"两条属性，首先往左浮动，宽度这里设置100px。
+
+继续给类名为"right"的盒子添加"float: right"和"width: 100px"两条属性，往右浮动。
+
+最后给类名为"center"的盒子设置外边距"margin: 0px 100px"，该属性上下外边距为0px，左右外边距为两边浮动元素的宽度100px，
+
+这样保证了中间的内容区域不会被两边的浮动元素覆盖住。注意，HTML文档中两个浮动元素的顺序在内容元素之前。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            .container {
+                border: 1px solid black;
+                overflow: hidden;
+            }
+            .left {
+                border: 1px solid black;
+                float: left;
+                width: 100px;
+            }
+            .right {
+                border: 1px solid black;
+                float: right;
+                width: 100px;
+            }
+            .center{
+                margin: 0px 100px;
+            }
+        </style>
+    </head>
+    <body>
+        <section class="container">
+            <article class="left"><br /><br /><br /></article>
+            <article class="right"><br /><br /><br /></article>
+            <article class="center"></article>
+        </section>
+    </body>
+</html>
+```
+
+## **CSS26** **三列布局 - 绝对定位**
+
+使用绝对定位实现三列布局，实际上是和之前使用绝对定位实现双列布局同一个原理。主要思路是，**两边通过绝对定位定位到父盒子的左、右边框上**，再**根据实际的需要设置两边盒子的宽度，高度是根据内容自适应的**。中间内容区通过定位属性左、右自适应宽度。
+ 现在给类名为"container"的盒子添加"position: relative"，该属性使子元素可以相对该盒子做定位。
+
+继续给类名为"left"的盒子添加"position: absolute"、"left: 0px"和"width: 100px"三条属性。
+
+继续给类名为"right"的盒子添加"position: absolute"、"right: 0px"和"width: 100px"三条属性。
+
+最后给类名为"center"的盒子添加"position: absolute"、"left: 100px"和"right: 100px"三条属性，表示自适应区域为距离左边100px至距离右边100px。此时可以看到三个盒子的高度不同，根据内容高度撑开，实际中可以按需设置高度值。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            .container {
+                border: 1px solid black;
+                position: relative;
+            }
+            .left {
+                border: 1px solid black;
+                position: absolute;
+                left: 0px;
+                width: 100px;
+            }
+            .right {
+                border: 1px solid black;
+                position: absolute;
+                right: 0px;
+                width: 100px;
+            }
+            .center{
+                border: 1px solid black;
+                position: absolute;
+                left: 100px;
+                right: 100px;
+            }
+        </style>
+    </head>
+    <body>
+        <section class="container">
+            <article class="left"><br /><br /><br /></article>
+            <article class="right"><br /><br /><br /></article>
+            <article class="center"></article>
+        </section>
+    </body>
+</html>
+```
+
+## **CSS27** **三列布局 - flex**
+
+相比于浮动和定位，使用Flexbox布局实现三列布局要更好，**因为弹性容器的高度会根据最高的弹性项进行修正，不会出现明显的台阶式效果**。Flexbox实现三列布局的特点为简单、使用、强大，**核心思路为设置中间内容盒子的"flex: 1"属性**，让中间内容区的宽度自适应，独自占据弹性容器的全部剩余空间。
+
+ 现在给类名为"container"的盒子添加"display: flex"属性，使该盒子成为弹性容器。
+
+再给类名为"left"和"right"的盒子添加"width: 100px"属性，
+
+最后给类名为"center"的盒子添加"flex: 1"属性，使该盒子占据容器盒子的全部剩余空间。
+
+此时会发现即使三个子盒子的内容高度不同，但容器和子会根据最高的子元素进行修正，并且没有出现浮动和定位中的台阶式效果。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            .container {
+                border: 1px solid black;
+                display: flex;
+            }
+            .left {
+                border: 1px solid black;
+                width: 100px;
+            }
+            .right {
+                border: 1px solid black;
+                width: 100px;
+            }
+            .center{
+                border: 1px solid black;
+                flex: 1;
+            }
+        </style>
+    </head>
+    <body>
+        <section class="container">
+            <article class="left"><br /><br /><br /></article>
+            <article class="right"><br /><br /><br /></article>
+            <article class="center"></article>
+        </section>
+    </body>
+</html>
+```
+
+## **CSS28** **三列布局 - grid**
+
+使用grid网格布局实现三列布局，和之前所讲的gird实现双列布局是同样的思想，**只是把列数变为了3**，高度依然不设置，通过容器项的内容高度自适应撑开整体高度。
+
+ 现在给类名为"container"的盒子添加"display: grid"属性，使该盒子成为网格布局容器。
+
+再给该容器添加"grid-template-columns: 100px auto 100px"属性，表示该容器一共有3列，且宽度分别为100px、自适应、100px。
+
+不需要设置行属性，当有多个元素时容器会自适应的往下顺次排列。
+
+**此时观察容器的高度，是根据容器项中高度最高的那一项决定的**，也不会产生台阶式效果。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            .container {
+                border: 1px solid black;
+                display: grid;
+                grid-template-columns: 100px auto 100px;
+            }
+            .left {
+                border: 1px solid black;
+            }
+            .right {
+                border: 1px solid black;
+            }
+            .center{
+                border: 1px solid black;
+            }
+        </style>
+    </head>
+    <body>
+        <section class="container">
+            <article class="left"><br /><br /><br /></article>
+            <article class="right"><br /><br /><br /></article>
+            <article class="center"></article>
+        </section>
+    </body>
+</html>
+```
+
+## **CSS29** **三列布局 - 圣杯布局**
+
+不像Flexbox或Grid布局可以控制元素显示的次序，**圣杯布局是通过浮动元素和外边距属性实现三列布局**，但最重要的一点是，**在文档中需要将优先渲染的内容写在最前方，但显示时看起来却好像是按照显示次序书写的一样。**
+
+ 首先给类名为"container"的盒子添加"overflow: hidden"和"padding: 0px 100px"属性，**以为了防止容器盒子高度塌陷和给之后的左、右浮动元素预留位置**。现在继续给类名为"left"的盒子添加以下属性：
+
+1. "float: left"，浮动，保证之后的"margin-left"属性可以将自身拉到上一行
+
+2. "width: 100px"，固定宽度
+
+3. "margin-left: -100%"，该属性可以将元素向左移动属性值的单位，100%相对于父容器计算
+
+4. "position: relative"，相对定位，需要将自身再向左移动自身的宽度，进入容器的"padding-left"区域
+
+5. "left: -100px"，自身的宽度，刚好进入容器的"padding-left"区域
+
+    
+
+    到这里圣杯布局中最核心的步骤和思想就完了。之后继续给类名为"right"的盒子添加"float: left"、"width: 100px"、"margin-left: -100px"、"position: relative"和"left 100px"属性，该右盒子的思想和左盒子一样，即，将右盒子向上拉一行并且再向右移动自身宽度进入"padding-right"区。最后再给类名为"center"的盒子添加"float: left"和"width: 100%"即可。此时中间内容区的宽度是自适应的，并且因为有内边距属性所以内容不会被两边的浮动盒子遮挡住。
+
+    
+
+    圣杯布局需要注意的是，**当中间内容区域的宽度小于左、右盒子的宽度时，整个布局就会混乱**，所以为了避免这种情况，再给容器盒子添加"min-width: 100px"属性，保证圣杯布局正确、有效。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                border: 1px solid black;
+                overflow: hidden;
+                padding: 0px 100px;
+                min-width: 100px;
+            }
+            .left {
+                background-color: greenyellow;
+                float: left;
+                width: 100px;
+                margin-left: -100%;
+                position: relative;
+                left: -100px;
+            }
+            .center {
+                background-color: darkorange;
+                float: left;
+                width: 100%;
+            }
+            .right {
+                background-color: darkgreen;
+                float: left;
+                width: 100px;
+                margin-left: -100px;
+                position: relative;
+                left: 100px;
+            }
+        </style>
+    </head>
+    <body>
+        <section class="container">
+            <article class="center"><br /><br /><br /></article>
+            <article class="left"><br /><br /><br /></article>
+            <article class="right"><br /><br /><br /></article>
+        </section>
+    </body>
+</html>
+```
+
+## **CSS30** **三列布局 - 双飞翼布局**
+
+双飞翼布局是在圣杯布局上做了优化，**解决了圣杯布局中布局发生错乱的问题**。核心思路**是在圣杯布局的基础上，再在内容区添加一层新的盒子，该盒子通过外边距将内容与两边的浮动元素分隔开，实际上中心盒子是没有"padding"属性的。**
+
+首先给类名为"container"的盒子添加"overflow: hidden"属性，*解决子浮动元素导致的高度塌陷问题*。
+
+然后继续给类名为"left"的盒子添加"float: left"、"margin-left: -100%"和"width: 100px"。
+
+再给类名为"center"的盒子添加"float: left"和"width: 100%"属性，该盒子并没有像圣杯布局时添加"padding"属性那样。
+
+继续给类名为"right"的盒子添加"float: left"、"width: 100px"和"margin-left: -100px"。
+
+最后给类名为"main"的盒子添加"margin: 0px 100px"，**该属性为双飞翼布局的核心点，使用外边距将内容封锁在两边浮动元素的中间**。
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                border: 1px solid black;
+                overflow: hidden;
+            }
+            .left {
+                background-color: greenyellow;
+                float: left;
+                margin-left: -100%;
+                width: 100px;
+            }
+            .main {
+                background-color: darkorange;
+                margin: 0px 100px;
+            }
+            .center{
+                float: left;
+                width: 100%;
+            }
+            .right {
+                background-color: darkgreen;
+                float: left;
+                width: 100px;
+                margin-left: -100px;
+            }
+        </style>
+    </head>
+    <body>
+        <section class="container">
+            <article class="center"><main class="main"><br /><br /><br /></main></article>
+            <article class="left"><br /><br /><br /></article>
+            <article class="right"><br /><br /><br /></article>
+        </section>
+    </body>
+</html>
+```
 

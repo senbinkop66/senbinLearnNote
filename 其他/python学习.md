@@ -447,3 +447,77 @@ readDirFile(testpath)
 print(count)
 ```
 
+
+
+获取gene信息
+
+```python
+
+import os
+
+
+
+def getPTTInfo(filename,LocalInfo):
+	fi=open(filename,"r",encoding="utf-8")
+	for line in fi.readlines():
+		line=line.strip()
+		tempInfo=line.split("\t")[0]
+		if ".." in tempInfo:
+			tempInfo=tempInfo.split("..")
+			if tempInfo[0] in LocalInfo and tempInfo[1] in LocalInfo:
+				fi.close()
+				return line
+	fi.close()
+	return "null"
+def getFFNInfo(filename,LocalInfo):
+	fi=open(filename,"r",encoding="utf-8")
+	seqInfo=""
+	flag=0
+	for line in fi.readlines():
+		line=line.strip()
+		if flag:
+			if line.startswith(">"):
+				fi.close()
+				return seqInfo
+			seqInfo+=line
+		if line.startswith(">"):
+			line=line.split(" ")[0].replace(">","").split(":")[-1]
+			if line==LocalInfo:
+				flag=1
+				continue
+	fi.close()
+	return "null"
+
+
+
+f1=open("./blastdatacontent/BW25113/BW25113resultofSLgeneAndNoEcoli.txt","r",encoding="utf-8")
+f2=open("BW25113resultofSLgeneInfo.txt","w",encoding="utf-8")
+
+lines=f1.readlines()  #读取所有行
+success=0
+failure=0
+for line in lines:
+	line=line.strip();
+	line=line.split("\t");
+	locInfo1=line[3].split(":")[-1].replace("c","").split("-")
+	locInfo2=line[3].split(":")[-1]
+	pttFile=os.path.join("bacteria3type",line[0],line[1]+".ptt")
+	ffnFile=os.path.join("bacteria3type",line[0],line[1]+".ffn")
+	pttInfo=getPTTInfo(pttFile,locInfo1)
+	ffnInfo=getFFNInfo(ffnFile,locInfo2)
+
+	allInfo="\t".join(line)+"\t"+pttInfo+"\t"+ffnInfo+"\n"
+	f2.write(allInfo)
+	#print(allInfo)
+	if pttInfo=="null" or ffnFile=="null":
+		failure+=1
+	else:
+		success+=1
+
+f1.close();
+f2.close();
+
+print(success)
+print(failure)
+```
+
