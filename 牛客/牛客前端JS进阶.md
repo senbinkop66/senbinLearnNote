@@ -1003,6 +1003,305 @@ const _proxy = object => {
 ## **JS32** **Proxy拦截器**
 
 请补全JavaScript代码，请给参数对象添加拦截代理功能并返回这个代理。要求如下：
-\1. 该函数接收多个参数，首个参数为对象，从第二个参数（包括）往后皆是该对象的属性名
-\2. 通过该函数给首个参数对象添加拦截器功能，每当该对象访问到该函数第二个参数（包括）往后的属性时，返回"noright"字符串，表示无权限。
+
+1. 该函数接收多个参数，首个参数为对象，**从第二个参数（包括）往后皆是该对象的属性名**
+
+2. 通过该函数给首个参数对象添加拦截器功能，**每当该对象访问到该函数第二个参数（包括）往后的属性时，返回"noright"字符串，表示无权限。**
+
+```js
+const _proxy = (object,...prototypes) => {
+    // 补全代码
+    let proxy=new Proxy(object,{
+        get(object,property){
+            //target：目标对象。property：引用的目标对象上的字符串键属性。
+            if ([...prototypes].includes(property)) {
+                return "noright";
+            }else{
+                return Reflect.get(...arguments);
+            }
+        }
+    });
+    return proxy;
+}
+
+//const hiddenProperties = ['foo', 'bar'];
+const targetObject = {
+    foo: 1,
+    bar: 2,
+    baz: 3
+};
+
+let p=_proxy(targetObject,"foo","bar");
+console.log(p.foo); // noright
+console.log(p.bar); // noright
+console.log(p.baz); // 3
+```
+
+## **JS33** **监听对象**
+
+请补全JavaScript代码，要求如下：
+1. 监听对象属性的变化
+
+2. 当"person"对象的属性发生变化时，页面中与该属性相关的数据同步更新
+    注意：
+
+3. 必须使用Object.defineProperty实现且触发set方法时更新视图
+
+4. 可以使用预设代码"_render"函数
+
+   ```html
+   <!DOCTYPE html>
+   <html lang="en">
+       <head>
+           <meta charset="UTF-8">
+       </head>
+       <body>
+           <style>
+               ul {
+                   list-style: none;
+               }
+           </style>
+           <ul></ul>
+   
+           <script>
+               var ul = document.querySelector('ul');
+               var person = { sex: '男', age: '25', name: '王大锤', height: 28, weight: 32 };
+               const _render = element => {
+                   var str = `<li>姓名：<span>${person.name}</span></li>
+                              <li>性别：<span>${person.sex}</span></li>
+                              <li>年龄：<span>${person.age}</span></li>
+                              <li>身高：<span>${person.height}</span></li>
+                              <li>体重：<span>${person.weight}</span></li>`
+                   element.innerHTML = str;
+               }
+               _render(ul);
+               // 补全代码
+               Object.keys(person).forEach(key=>{
+                   let oldValue=person.key;
+                   Object.defineProperty(person,key,{
+                       get(){
+                           return oldValue;
+                       },
+                       set(newValue){
+                           if (oldValue!==newValue) {
+                               oldValue=newValue;
+                               _render(ul);
+                           }
+                       }
+                   })
+               })
+           </script>
+       </body>
+   </html>
+   ```
+
+
+## **JS34** **购物面板**
+
+请补全JavaScript代码，要求如下：
+1. 当点击"-"按钮时，商品数量减1
+2. 当点击"+"按钮时，商品数量加1
+3. 每当点击任意按钮时，购物面板中相关信息必须同步更新
+注意：
+1. 必须使用DOM0级标准事件（onclick）
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+    </head>
+    <body>
+        <table>
+            <thead>
+                <caption>
+                    商品
+                </caption>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>炸鸡</td>
+                    <td>28元</td>
+                    <td><button id="zjtaiduola">-</button></td>
+                    <td><span id="zjsl">0</span></td>
+                    <td><button id="zjtaishaola">+</button></td>
+                </tr>
+                <tr>
+                    <td>可乐</td>
+                    <td>5元</td>
+                    <td><button id="kltaiduola">-</button></td>
+                    <td><span id="klsl">0</span></td>
+                    <td><button id="kltaishaola">+</button></td>
+                </tr>
+                <tr>
+                    <td>总价：</td>
+                    <td><span id="total">0</span></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <script type="text/javascript">
+            // 补全代码
+            let total=document.querySelector("#total");
+
+            let zjjian=document.querySelector("#zjtaiduola");
+            let zjsl=document.querySelector("#zjsl");
+            let zjjia=document.querySelector("#zjtaishaola");
+
+            let kljian=document.querySelector("#kltaiduola");
+            let klsl=document.querySelector("#klsl");
+            let kljia=document.querySelector("#kltaishaola");
+
+            function countTotal(){
+                let sum=28*Number(zjsl.innerText)+5*Number(klsl.innerText);
+                total.innerText=sum;
+            }
+
+            zjjia.onclick=function(){
+                let oldValue=Number(zjsl.innerText);
+                zjsl.innerText=oldValue+1;
+                countTotal();
+            }
+            zjjian.onclick=function(){
+                let oldValue=Number(zjsl.innerText);
+                if (oldValue>0) {
+                    zjsl.innerText=oldValue-1;
+                    countTotal();
+                }
+            }
+
+            kljia.onclick=function(){
+                let oldValue=Number(klsl.innerText);
+                klsl.innerText=oldValue+1;
+                countTotal();
+            }
+            kljian.onclick=function(){
+                let oldValue=Number(klsl.innerText);
+                if (oldValue>0) {
+                    klsl.innerText=oldValue-1;
+                    countTotal();
+                }
+            }
+        </script>
+    </body>
+</html>
+```
+
+## **JS35** **接口**
+
+请补全JavaScript代码，完成函数的接口功能。要求如下：
+1. 函数接收两种类型的参数，分别为"get?"和"update?name=xxx&to=yyy"，"name"、"to"为参数，"xxx"、"yyy"分别为参数对应的值。
+2. 当参数为"get?"时，返回data数据
+3. 当参数为"update?name=xxx&to=yyy"时，将data中所有"name"为"xxx"的项，更改为"name"值为"yyy"
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+    </head>
+    <body>
+        
+        <script type="text/javascript">
+            let data = [
+                {name: 'nowcoder1'},
+                {name: 'nowcoder2'}
+            ]
+            
+            const _api = string => {
+                // 补全代码
+                if (string==="get?") {
+                    return data;
+                }else{
+                    string=string.replace("update?");
+                    let oldValue=string.split("&")[0].split("=")[1];
+                    let newValue=string.split("&")[1].split("=")[1];
+                    if (oldValue!==newValue) {
+                        for (let i=0;i<data.length;i++){
+                            if (data[i].name===oldValue) {
+                                data[i].name=newValue;
+                            }
+                        }
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>
+```
+
+## **JS36** **切换Tab栏目**
+
+请补全JavaScript代码，实现效果如下：
+1. 当点击某个栏目（题库、面试、学习、求职）时，该栏目背景色变为'#25bb9b'，其它栏目背景色位'#fff'。
+2. 当选中某个栏目时，下方内容就展示索引值相同的类名为".items"的"li"元素
+注意：
+1. 必须使用DOM0级标准事件（onclick）
+2. 已使用自定义属性存储了栏目的索引值。点击栏目获取索引值，使用索引值控制类名为"items"下的"li"元素
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            ul {
+                padding: 0;
+                margin: 0;
+                list-style: none;
+            }
+
+            .options li {
+                float: left;
+                width: 100px;
+                height: 40px;
+                line-height: 40px;
+                text-align: center;
+                border: solid 1px #ddd;
+            }
+
+            .items li {
+                width: 405px;
+                height: 405px;
+                display: none;
+                border: solid 1px #ddd;
+            }
+        </style>
+    </head>
+    <body>
+        <ul class='options'>
+            <li data-type="0" style='background-color: #25bb9b;'>题库</li>
+            <li data-type="1">面试</li>
+            <li data-type="2">学习</li>
+            <li data-type="3">求职</li>
+        </ul>
+        <ul class='items'>
+            <li style="display: block;">牛客题库，包含编程题、选择题等</li>
+            <li>为你的面试提供一站式服务</li>
+            <li>校招学习来牛客</li>
+            <li>求职中有什么难题，可以联系我们</li>
+        </ul>
+
+        <script>
+            var options = document.querySelector('.options');
+            var optionItems = [].slice.call(document.querySelectorAll('.options li'));
+            var items = [].slice.call(document.querySelectorAll('.items li'));
+            // 补全代码
+            options.onclick=function(e){
+                for (let item in optionItems){
+                    if (e.target===optionItems[item]) {
+                        optionItems[item].style.backgroundColor="#25bb9b";
+                        items[item].style.display="block";
+                    }else{
+                        optionItems[item].style.backgroundColor="#fff";
+                        items[item].style.display="none";
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>
+```
+
+## **JS37** **双向绑定**
 
