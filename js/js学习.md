@@ -1,3 +1,7 @@
+# 基本引用类型
+
+
+
 # 对象
 
 ## 1 理解对象
@@ -10993,3 +10997,413 @@ function qux() {
 
 ### 3.2停止和恢复执行
 
+使用 await 关键字之后的区别其实比看上去的还要微妙一些。比如，下面的例子中按顺序调用了 3个函数，但它们的输出结果顺序是相反的：
+
+```js
+async function foo() {
+	console.log(await Promise.resolve('foo'));
+}
+async function bar() {
+	console.log(await 'bar');
+}
+async function baz() {
+	console.log('baz');
+}
+
+foo();
+bar();
+baz();
+// baz
+// foo
+// bar
+```
+
+async/await 中**真正起作用的是 await**。async 关键字，无论从哪方面来看，都不过是一个标识符。毕竟，**异步函数如果不包含 await 关键字，其执行基本上跟普通函数没有什么区别：**
+
+```js
+async function foo() {
+	console.log(2);
+}
+
+console.log(1);
+foo();
+console.log(3);
+
+// 1
+// 2
+// 3
+```
+
+要完全理解 await 关键字，必须知道它并非只是等待一个值可用那么简单。**JavaScript 运行时在碰 到 await 关键字时，会记录在哪里暂停执行。等到 await 右边的值可用了**，**JavaScript 运行时会向消息 队列中推送一个任务，这个任务会恢复异步函数的执行**。 
+
+因此，**即使 await 后面跟着一个立即可用的值，函数的其余部分也会被异步求值**。下面的例子演 示了这一点：
+
+```js
+async function foo() {
+	console.log(2);
+	await null;
+	console.log(4);
+}
+
+console.log(1);
+foo();
+console.log(3);
+// 1
+// 2
+// 3
+// 4
+```
+
+控制台中输出结果的顺序很好地解释了运行时的工作过程：
+(1) 打印 1；
+(2) 调用异步函数 foo()；
+(3)（在 foo()中）打印 2；
+(4)（在 foo()中）await 关键字暂停执行，**为立即可用的值 null 向消息队列中添加一个任务**；
+(5) foo()退出；
+(6) 打印 3；
+(7) 同步线程的代码执行完毕；
+(8) JavaScript 运行时从消息队列中取出任务，**恢复异步函数执行**；
+(9)（在 foo()中）恢复执行，await 取得 null 值（这里并没有使用）；
+(10)（在 foo()中）打印 4；
+(11) foo()返回。
+
+**如果 await 后面是一个期约，则问题会稍微复杂一些**。此时，为了执行异步函数，**实际上会有两个任务被添加到消息队列并被异步求值**。下面的例子虽然看起来很反直觉，但它演示了真正的执行顺序：
+
+```js
+async function foo() {
+	console.log(2);
+	console.log(await Promise.resolve(8));
+	console.log(9);
+}
+async function bar() {
+	console.log(4);
+	console.log(await 6);
+	console.log(7);
+}
+
+console.log(1);
+foo();
+console.log(3);
+bar();
+console.log(5);
+//1 2 3 4 5 8 9 6 7  在新版浏览器中
+
+//1 2 3 4 5 6 7 8 9
+
+```
+
+TC39 对 await 后面是期约的情况如何处理做过一次修改。修改后，本例中的 Promise.resolve(8)只会生成一个 异步任务。**因此在新版浏览器中，这个示例的输出结果为 123458967**。实际开发中，对于并行的异步操作我们通常 更关注结果，而不依赖执行顺序。
+
+运行时会像这样执行上面的例子：
+(1) 打印 1；
+(2) 调用异步函数 foo()；
+(3)（在 foo()中）打印 2；
+(4)（在 foo()中）await 关键字暂停执行，向消息队列中添加一个期约在落定之后执行的任务；
+(5) 期约立即落定，把给 await 提供值的任务添加到消息队列；
+(6) foo()退出；
+(7) 打印 3；
+(8) 调用异步函数 bar()；
+(9)（在 bar()中）打印 4；
+(10)（在 bar()中）await 关键字暂停执行，为立即可用的值 6 向消息队列中添加一个任务；
+(11) bar()退出；
+(12) 打印 5；
+(13) 顶级线程执行完毕；
+(14) JavaScript 运行时从消息队列中取出解决 await 期约的处理程序，并将解决的值 8 提供给它；
+(15) JavaScript 运行时向消息队列中添加一个恢复执行 foo()函数的任务；
+(16) JavaScript 运行时从消息队列中取出恢复执行 bar()的任务及值 6；
+(17)（在 bar()中）恢复执行，await 取得值 6；
+(18)（在 bar()中）打印 6；
+(19)（在 bar()中）打印 7；
+(20) bar()返回；
+(21) 异步任务完成，JavaScript 从消息队列中取出恢复执行 foo()的任务及值 8；
+(22)（在 foo()中）打印 8；
+(23)（在 foo()中）打印 9；
+(24) foo()返回。
+
+### 3.3 异步函数策略
+
+因为简单实用，所以异步函数很快成为 JavaScript 项目使用最广泛的特性之一。不过，在使用异步函数时，还是有些问题要注意。
+
+#### 实现 sleep()
+
+很多人在刚开始学习 JavaScript 时，想找到一个类似 Java 中 Thread.sleep()之类的函数，好在程 序中加入非阻塞的暂停。以前，这个需求基本上都通过 setTimeout()利用 JavaScript 运行时的行为来 实现的。 
+
+有了异步函数之后，就不一样了。**一个简单的箭头函数就可以实现 sleep()**：
+
+```js
+async function sleep(delay){
+	return new Promise((resolve,reject)=>setTimeout(resolve,delay));
+}
+
+async function foo(){
+	const t0=Date.now();
+	await sleep(1500);  //暂停约 1500 毫秒
+	console.log(Date.now()-t0);
+}
+
+foo();  //1509
+```
+
+#### 利用平行执行
+
+如果使用 await 时不留心，则很可能错过平行加速的机会。来看下面的例子，其中顺序等待了 5个随机的超时：
+
+```js
+async function randomDelay(id){
+	// 延迟 0~1000 毫秒
+	const delay=Math.random()*1000;
+	return new Promise((resolve,reject)=>setTimeout(()=>{
+		console.log(`${id} finished`);
+		resolve();
+	},delay));
+}
+
+async function foo(){
+	const t0=Date.now();
+	await randomDelay(0);
+	await randomDelay(1);
+	await randomDelay(2);
+	await randomDelay(3);
+	await randomDelay(4);
+	console.log(`${Date.now() - t0}ms elapsed`);
+}
+
+foo();
+/*
+0 finished
+1 finished
+2 finished
+3 finished
+4 finished
+2214ms elapsed
+*/
+```
+
+用一个 for 循环重写，就是：
+
+```js
+async function randomDelay(id){
+	// 延迟 0~1000 毫秒
+	const delay=Math.random()*1000;
+	return new Promise((resolve,reject)=>setTimeout(()=>{
+		console.log(`${id} finished`);
+		resolve();
+	},delay));
+}
+
+async function foo(){
+	const t0=Date.now();
+	for (let i=0;i<5;i++){
+		await randomDelay(i);
+	}
+	console.log(`${Date.now() - t0}ms elapsed`);
+}
+
+foo();
+/*
+0 finished
+1 finished
+2 finished
+3 finished
+4 finished
+2856ms elapsed
+*/
+```
+
+**就算这些期约之间没有依赖，异步函数也会依次暂停，等待每个超时完成**。这样可以保证执行顺序，但总执行时间会变长。
+
+如果顺序不是必需保证的，**那么可以先一次性初始化所有期约，然后再分别等待它们的结果**。比如：
+
+```js
+async function randomDelay(id){
+	// 延迟 0~1000 毫秒
+	const delay=Math.random()*1000;
+	return new Promise((resolve,reject)=>setTimeout(()=>{
+		setTimeout(console.log,0,`${id} finished`);
+		resolve();
+	},delay));
+}
+
+async function foo(){
+	const t0 = Date.now();
+	const p0 = randomDelay(0);
+	const p1 = randomDelay(1);
+	const p2 = randomDelay(2);
+	const p3 = randomDelay(3);
+	const p4 = randomDelay(4);
+
+	await p0;
+	await p1;
+	await p2;
+	await p3;
+	await p4;
+	setTimeout(console.log,0,`${Date.now() - t0}ms elapsed`)
+}
+
+foo();
+/*
+4 finished
+2 finished
+1 finished
+0 finished
+3 finished
+937ms elapsed
+*/
+```
+
+用数组和 for 循环再包装一下就是：
+
+```js
+async function randomDelay(id){
+	// 延迟 0~1000 毫秒
+	const delay=Math.random()*1000;
+	return new Promise((resolve,reject)=>setTimeout(()=>{
+		setTimeout(console.log,0,`${id} finished`);
+		resolve();
+	},delay));
+}
+
+async function foo(){
+	const t0 = Date.now();
+
+	const promises=Array(5).fill(null).map((_,i)=>randomDelay(i))
+
+	for (let p of promises){
+		await p;
+	}
+
+	setTimeout(console.log,0,`${Date.now() - t0}ms elapsed`)
+}
+
+foo();
+/*
+3 finished
+1 finished
+0 finished
+2 finished
+4 finished
+942ms elapsed
+*/
+```
+
+注意，**虽然期约没有按照顺序执行，但 await 按顺序收到了每个期约的值**：
+
+```js
+async function randomDelay(id){
+	// 延迟 0~1000 毫秒
+	const delay=Math.random()*1000;
+	return new Promise((resolve,reject)=>setTimeout(()=>{
+		setTimeout(console.log,0,`${id} finished`);
+		resolve(id);
+	},delay));
+}
+
+async function foo(){
+	const t0 = Date.now();
+
+	const promises=Array(5).fill(null).map((_,i)=>randomDelay(i))
+
+	for (let p of promises){
+		//await p;
+		console.log(`awaited ${await p}`);
+	}
+
+	setTimeout(console.log,0,`${Date.now() - t0}ms elapsed`)
+}
+
+foo();
+/*
+awaited 0
+0 finished
+4 finished
+2 finished
+awaited 1
+awaited 2
+1 finished
+awaited 3
+awaited 4
+3 finished
+722ms elapsed
+*/
+```
+
+#### 串行执行期约
+
+如何串行执行期约并把值传给后续的期约。使用 async/await，期约连锁会变得很简单：
+
+```js
+function addTwo(x) {return x + 2;}
+function addThree(x) {return x + 3;}
+function addFive(x) {return x + 5;}
+
+async function addTen(x) {
+	for (const fn of [addTwo, addThree, addFive]) {
+		x = await fn(x);
+	}
+	return x;
+}
+addTen(9).then(console.log); // 19
+```
+
+这里，**await 直接传递了每个函数的返回值，结果通过迭代产生**。当然，这个例子并没有使用期约，如果要使用期约，则可以把所有函数都改成异步函数。这样它们就都返回期约了：
+
+```js
+async function addTwo(x) {return x + 2;}
+async function addThree(x) {return x + 3;}
+async function addFive(x) {return x + 5;}
+
+async function addTen(x) {
+	for (const fn of [addTwo, addThree, addFive]) {
+		x = await fn(x);
+	}
+	return x;
+}
+addTen(9).then(console.log); // 19
+```
+
+#### 栈追踪与内存管理
+
+**期约与异步函数的功能有相当程度的重叠，但它们在内存中的表示则差别很大**。看看下面的例子，*它展示了拒绝期约的栈追踪信息：*
+
+```js
+function fooPromiseExecutor(resolve, reject) {
+	setTimeout(reject, 1000, 'bar');
+}
+
+function foo() {
+	new Promise(fooPromiseExecutor);
+}
+
+foo();
+
+// Uncaught (in promise) bar
+// setTimeout
+// setTimeout (async)
+// fooPromiseExecutor
+// foo
+```
+
+根据对期约的不同理解程度，以上栈追踪信息可能会让某些读者不解。**栈追踪信息应该相当直接地 表现 JavaScript 引擎当前栈内存中函数调用之间的嵌套关系**。在超时处理程序执行时和拒绝期约时，我 们看到的错误信息包含嵌套函数的标识符，那是被调用以创建最初期约实例的函数。可是，我们知道这 些函数已经返回了，因此栈追踪信息中不应该看到它们。 
+
+答案很简单，这是因为 JavaScript 引擎会在创建期约时尽可能保留完整的调用栈。**在抛出错误时， 调用栈可以由运行时的错误处理逻辑获取，因而就会出现在栈追踪信息中**。当然，这意味着栈追踪信息 会占用内存，从而带来一些计算和存储成本。 
+
+如果在前面的例子中使用的是异步函数，那又会怎样呢？比如：
+
+```js
+function fooPromiseExecutor(resolve, reject) {
+	setTimeout(reject, 1000, 'bar');
+}
+
+async function foo() {
+	await new Promise(fooPromiseExecutor);
+}
+
+foo();
+
+// Uncaught (in promise) bar
+// foo
+// async function (async)
+// foo
+```
+
+**这样一改，栈追踪信息就准确地反映了当前的调用栈**。fooPromiseExecutor()已经返回，所以 它不在错误信息中。但 foo()此时被挂起了，并没有退出。**JavaScript 运行时可以简单地在嵌套函数中 存储指向包含函数的指针，就跟对待同步函数调用栈一样。这个指针实际上存储在内存中，可用于在出 错时生成栈追踪信息。这样就不会像之前的例子那样带来额外的消耗**，因此在重视性能的应用中是可以 优先考虑的。
