@@ -1305,3 +1305,252 @@ console.log(p.baz); // 3
 
 ## **JS37** **双向绑定**
 
+请补全JavaScript代码，要求如下：
+1. 监听对象属性的变化
+2. 当"person"对象属性发生变化时，页面中与该属性相关的数据同步更新
+3. 将输入框中的值与"person"的"weight"属性绑定且当输入框的值发生变化时，页面中与该属性相关的数据同步更新
+  注意：
+4. 必须使用Object.defineProperty实现且触发set方法时更新视图
+5. 必须使用DOM0级标准事件（oninput）
+6. 可以使用预设代码"_render"函数
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <style>
+            ul {
+                list-style: none;
+            }
+        </style>
+        <input type="text">
+        <ul></ul>
+
+        <script>
+            var ul = document.querySelector('ul');
+            var person = { sex: '男', age: '25', name: '王大锤', height: 28, weight: 32 };
+            var inp = document.querySelector('input');
+            inp.value = person.weight;
+            const _render = () => {
+                var str = `<li>姓名：<span>${person.name}</span></li>
+                           <li>性别：<span>${person.sex}</span></li>
+                           <li>年龄：<span>${person.age}</span></li>
+                           <li>身高：<span>${person.height}</span></li>
+                           <li>体重：<span>${person.weight}</span></li>`
+                ul.innerHTML = str;
+                inp.value = person.weight;
+            }
+            _render(ul);
+            // 补全代码
+            Object.keys(person).forEach(key=>{
+                let oldValue=person.key;
+                Object.defineProperty(person,key,{
+                    get(){
+                        return oldValue;
+                    },
+                    set(newValue){
+                        if (oldValue!==newValue) {
+                            oldValue=newValue;
+                            _render(ul);
+                        }
+                    }
+                });
+            });
+            inp.oninput=function(){
+                let newValue=Number(inp.value);
+                if (!isNaN(newValue)) {
+                    if (newValue!==person.weight) {
+                        person.weight=newValue;
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>
+```
+
+## JS38 高频数据类型
+
+请补全JavaScript代码，要求找到参数数组中出现频次最高的数据类型，并且计算出出现的次数，要求以数组的形式返回。
+注意：
+
+1. 基本数据类型之外的任何引用数据类型皆为"object"
+2. 当多种数据类型出现频次相同时将结果拼接在返回数组中，出现次数必须在数组的最后
+示例1
+输入：
+__findMostType([0,0,'',''])
+输出：
+['number','string',2]或['string','number',2]
+
+```js
+const _findMostType = array => {
+    // 补全代码
+    let obj={};
+    let maxCount=0;
+    array.forEach((item)=>{
+        let type=typeof item;
+        obj[type]=obj[type]===undefined ? 1 : ++obj[type];
+        maxCount=obj[type]>maxCount ? obj[type] : maxCount;
+        //console.log(typeof item);
+    });
+
+    let newArr=[]
+    Object.keys(obj).forEach(type=>{
+        if (obj[type]===maxCount) {
+            newArr.push(type);
+        }
+    });
+    newArr.push(maxCount);
+    return newArr;
+}
+
+let str1=[2,"s",undefined,null,true,Symbol(),{a:2}];
+let result=_findMostType(str1);
+console.log(result);
+```
+
+## JS39 字体高亮
+
+请补全JavaScript代码，实现一个搜索字体高亮的效果。要求如下：
+
+1. 在input框中输入要搜索的内容，当点击查询按钮时，被搜索的字体样式变为加粗，背景色变为'yellow'
+2. 重新输入搜索文字，点击查询按钮时，去掉上一次的搜索效果，高亮显示效果只加在本次搜索文字上
+3. 如果搜索不到相关内容，清除之前的效果
+  注意：
+4. 需要加粗的文字请使用b标签包裹
+5. 必须使用DOM0级标准事件（onclick）
+
+**replace函数使用字符只能替换一个，使用正则才可以全局一次替换。**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <input type="text">
+        <button style="margin-right: 80px">查询</button>
+        <div class="text" style="margin-top: 70px">
+            牛客网隶属于北京牛客科技有限公司，牛客网成立于 2014 年 9 月，是以科技和创新驱动的教育科技公司。牛客网坚持以前沿技术服务于技术、以人工智能和大数据提升学习效率，专注探索在线教育创新模式，致力于为技术求职者提供能力提升解决方案，同时为企业级用户提供更高效的招聘解决方案，并为二者搭建桥梁，构建从学习到职业的良性生态圈。
+    发展至今，牛客网在技术类求职备考、社群交流、企业招聘服务等多个垂直领域影响力均在行业中遥遥领先，产品矩阵包括IT题库、在线编程练习、线上课程、交流社区、竞赛平台、笔面试服务、ATS系统等，用户覆盖全国高校百万IT学习者并在高速增长中，同时也为京东、百度、腾讯、滴滴、今日头条、华为等200多家企业提供校园招聘、编程竞赛等线上服务，并收获良好口碑。
+        </div>
+
+        <script>
+            var text = document.querySelector(".text");
+            var search = document.querySelector("input");
+            const btn = document.querySelector("button");
+
+            const reg1=/<b style="background-color:yellow;">/g;
+            const reg2=/<\/b>"/g;
+            const b1='<b style="background-color:yellow;">';
+            const b2="</b>";
+
+            btn.onclick = () => {
+                // 补全代码
+                let oldText=text.innerHTML;
+                oldText=oldText.replace(reg1,"");
+                oldText=oldText.replace(reg2,"");
+
+                let reg3=new RegExp(search.value,"g");
+                let newText=b1+search.value+b2;
+
+                oldText=oldText.replace(reg3,newText);
+
+                text.innerHTML=oldText;
+                //console.log(oldText);
+            }
+
+        </script>
+    </body>
+</html>
+```
+
+## **JS40** **虚拟DOM**
+
+请补全JavaScript代码，要求将对象参数转换为真实的DOM结构并返回。
+注意：
+
+1. tag为标签名称、props为属性、children为子元素、text为标签内容
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+
+        <script>
+            var vnode = {
+                tag: 'ul',
+                props: {
+                    class: 'list'
+                },
+                text: '',
+                children: [
+                    {
+                        tag: "li",
+                        props: {
+                            class: "item"
+                        },
+                        text: '',
+                        children: [
+                            {
+                                tag: undefined,
+                                props: {},
+                                text: '牛客网',
+                                children: []
+                            }
+                        ]
+                    },
+                    {
+                        tag: "li",
+                        props: {},
+                        text: '',
+                        children: [
+                            {
+                                tag: undefined,
+                                props: {},
+                                text: 'nowcoder',
+                                children: []
+                            }
+                        ]
+                    }
+                ]
+            }
+            function _createElm(vnode){
+                // 补全代码
+                
+                let element=document.createElement(vnode.tag);
+                for (let prop in vnode.props){
+                    element.setAttribute(prop,vnode.props[prop]);
+                }
+                element.innerText=vnode.text;
+                if (vnode.children.length>0) {
+                    for (let child of vnode.children){
+                        //arguments.callee 就是一个指向正在执行的函数的指针，因此可以在函数内部递归调用
+                        element.appendChild(arguments.callee(child));
+                    }
+                }
+                return element;
+            }
+            _createElm(vnode);
+        </script>
+    </body>
+</html>
+```
+
+## JS41 dom 节点查找
+
+查找两个节点的最近的一个共同父节点，可以包括节点自身
+输入描述：
+oNode1 和 oNode2 在同一文档中，且不会为相同的节点
+
+```
+
+```
+
