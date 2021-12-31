@@ -10516,3 +10516,479 @@ addTen(8).then(console.log); // 18
 
 ### 2.5 期约扩展
 
+ES6 期约实现是很可靠的，但它也有不足之处。比如，很多第三方期约库实现中具备而 ECMAScript规范却未涉及的两个特性：期约取消和进度追踪。
+
+#### 期约取消
+
+我们经常会遇到期约正在处理过程中，程序却不再需要其结果的情形。这时候如果能够取消期约就 好了。某些第三方库，比如 Bluebird，就提供了这个特性。实际上，TC39 委员会也曾准备增加这个特性， 但相关提案最终被撤回了。结果，ES6 期约被认为是“激进的”：只要期约的逻辑开始执行，就没有办 法阻止它执行到完成。 
+
+实际上，可以在现有实现基础上提供一种**临时性的封装，以实现取消期约的功能**。这可以用到 Kevin Smith 提到的“**取消令牌**”（cancel token）。**生成的令牌实例提供了一个接口，利用这个接口可以取消期 约；同时也提供了一个期约的实例，可以用来触发取消后的操作并求值取消状态**。
+
+下面是 CancelToken 类的一个基本实例：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>test js</title>
+</head>
+<body>
+	<button id="start">Start</button>
+	<button id="cancel">Cancel</button>
+<script type="text/javascript">
+	class CancelToken{
+		constructor(cancelFn){
+			this.promise=new Promise((resolve,reject)=>{
+				cancelFn(()=>{
+					setTimeout(console.log,0,"delay cancelled");
+					resolve();
+				});
+			});
+		}
+	}
+
+	const startButton = document.querySelector('#start');
+	const cancelButton = document.querySelector('#cancel');
+
+	function cancellableDelayedResolve(delay) {
+		setTimeout(console.log,0,"set delay");
+		return new Promise((resolve,reject)=>{
+			const id=setTimeout((()=>{
+				setTimeout(console.log,0,"delay resolve");
+				resolve();
+			}),delay);
+			const cancelToken=new CancelToken((cancelCallback)=>
+				cancelButton.addEventListener("click",cancelCallback));
+			cancelToken.promise.then(()=>clearTimeout(id));
+		});
+	}
+	startButton.addEventListener("click",()=>cancellableDelayedResolve(1000));
+
+</script>
+
+</body>
+</html>
+```
+
+每次单击“Start”按钮都会开始计时，并实例化一个新的 CancelToken 的实例。此时，“Cancel”按钮一旦被点击，就会触发令牌实例中的期约解决。而解决之后，单击“Start”按钮设置的超时也会被取消。
+
+####  期约进度通知
+
+执行中的期约可能会有不少离散的“阶段”，在最终解决之前必须依次经过。某些情况下，监控期约的执行进度会很有用。ECMAScript 6 期约并不支持进度追踪，但是可以通过扩展来实现。
+
+一种实现方式是**扩展 Promise 类，为它添加 notify()方法**，如下所示：
+
+```js
+class TrackablePromise extends Promise{
+	constructor(executor){
+		const notifyHandlers=[];
+		super((resolve,reject)=>{
+			return executor(resolve,reject,(status)=>{
+				notifyHandlers.map((handler)=>handler(status));
+			});
+		});
+		this.notifyHandlers=notifyHandlers;
+	}
+	notify(notifyHandler){
+		this.notifyHandlers.push(notifyHandler);
+		return this;
+	}
+}
+```
+
+这样，TrackablePromise 就可以在执行函数中使用 notify()函数了。可以像下面这样使用这个函数来实例化一个期约：
+
+```js
+let p=new TrackablePromise((resolve,reject,notify)=>{
+	function countdown(x){
+		if (x>0) {
+			notify(`${20*x}% remaining`);
+			setTimeout(()=>countdown(x-1),1000);
+		}else{
+			resolve();
+		}
+	}
+	countdown(5);
+});
+```
+
+这个期约会连续 5次递归地设置 1000毫秒的超时。每个超时回调都会调用 notify()并传入状态值。假设通知处理程序简单地这样写：
+
+```js
+p.notify((x)=>setTimeout(console.log,0,"progress:",x));
+p.then(()=>setTimeout(console.log,0,"completed"));
+// （约 1 秒后）80% remaining
+// （约 2 秒后）60% remaining
+// （约 3 秒后）40% remaining
+// （约 4 秒后）20% remaining
+// （约 5 秒后）completed
+```
+
+**notify()函数会返回期约，所以可以连缀调用，连续添加处理程序**。多个处理程序会针对收到的每条消息分别执行一遍，如下所示：
+
+```js
+p.notify((x)=>setTimeout(console.log,0,"a:",x))
+	.notify((x)=>setTimeout(console.log,0,"b:",x));
+p.then(()=>setTimeout(console.log,0,"completed"));
+
+// （约 1 秒后） a: 80% remaining
+// （约 1 秒后） b: 80% remaining
+// （约 2 秒后） a: 60% remaining
+// （约 2 秒后） b: 60% remaining
+// （约 3 秒后） a: 40% remaining
+// （约 3 秒后） b: 40% remaining
+// （约 4 秒后） a: 20% remaining
+// （约 4 秒后） b: 20% remaining
+// （约 5 秒后） completed
+```
+
+总体来看，这还是一个比较粗糙的实现，但应该可以演示出如何使用通知报告进度了。
+
+**注意 ES6 不支持取消期约和进度通知**，一个主要原因就*是这样会导致期约连锁和期约合成 过度复杂化*。比如在一个期约连锁中，如果某个被其他期约依赖的期约被取消了或者发出了 通知，那么接下来应该发生什么完全说不清楚。毕竟，如果取消了 Promise.all()中的一个 期约，或者期约连锁中前面的期约发送了一个通知，那么接下来应该怎么办才比较合理呢？
+
+
+
+## 3 异步函数
+
+**异步函数**，也称为“**async/await”（语法关键字）**，是 ES6 期约模式在 ECMAScript 函数中的应用。 async/await 是 ES8 规范新增的。这个特性从行为和语法上都增强了 JavaScript，让以同步方式写的代码能够异步执行。下面来看一个最简单的例子，这个期约在超时之后会解决为一个值：
+
+```js
+let p = new Promise((resolve, reject) => setTimeout(resolve, 1000, 3));
+```
+
+这个期约在 1000 毫秒之后解决为数值 3。如果程序中的其他代码要在这个值可用时访问它，则需要写一个解决处理程序：
+
+```js
+let p = new Promise((resolve, reject) => setTimeout(resolve, 1000, 3));
+p.then((x) => console.log(x)); // 3
+```
+
+这其实是**很不方便的，因为其他代码都必须塞到期约处理程序中**。不过可以把处理程序定义为一个函数：
+
+```js
+function handler(x) { console.log(x); }
+let p = new Promise((resolve, reject) => setTimeout(resolve, 1000, 3));
+p.then(handler); // 3
+```
+
+这个改进其实也不大。这是因为任何需要访问这个期约所产生值的代码，都需要以处理程序的形式来接收这个值。也就是说，代码照样还是要放到处理程序里。ES8 为此提供了 async/await 关键字。
+
+### 3.1 异步函数
+
+ES8 的 **async/await 旨在解决利用异步结构组织代码的问题**。为此，ECMAScript 对函数进行了扩展，为其增加了两个新关键字：async 和 await。
+
+#### async
+
+async 关键字用于声明异步函数。这个关键字可以用在函数声明、函数表达式、箭头函数和方法上：
+
+```js
+//函数声明
+async function foo(){}
+//函数表达式
+let bar=async function(){};
+//箭头函数
+let baz=async ()=>{};
+
+class Qux{
+    //方法
+	async qux(){}
+}
+```
+
+**使用 async 关键字可以让函数具有异步特征**，但**总体上其代码仍然是同步求值的**。而在参数或闭包方面，异步函数仍然具有普通 JavaScript 函数的正常行为。正如下面的例子所示，foo()函数仍然会在后面的指令之前被求值：
+
+```js
+async function foo(){
+	console.log(1);
+}
+
+foo();
+
+console.log(2);
+// 1
+// 2
+```
+
+不过，异步函数如果使用 return 关键字返回了值（如果没有 return 则会返回 undefined），**这个值会被 Promise.resolve()包装成一个期约对象**。***异步函数始终返回期约对象***。在函数外部调用这个函数可以得到它返回的期约：
+
+```js
+async function foo(){
+	console.log(1);
+	return 3;
+}
+
+// 给返回的期约添加一个解决处理程序
+
+foo().then(console.log);
+console.log(2);
+// 1
+// 2
+// 3
+```
+
+当然，直接返回一个期约对象也是一样的：
+
+```js
+async function foo(){
+	console.log(1);
+	return Promise.resolve(3);
+}
+
+// 给返回的期约添加一个解决处理程序
+foo().then(console.log);
+
+console.log(2);
+// 1
+// 2
+// 3
+```
+
+异步函数的返回值期待（但实际上并不要求）一个实现 thenable 接口的对象，但常规的值也可以。**如果返回的是实现 thenable 接口的对象，则这个对象可以由提供给 then()的处理程序“解包”**。如果不是，则返回值就被当作已经解决的期约。下面的代码演示了这些情况：
+
+```js
+// 返回一个原始值
+async function foo(){
+	return "foo";
+}
+// 给返回的期约添加一个解决处理程序
+foo().then(console.log);
+//foo
+
+// 返回一个没有实现 thenable 接口的对象
+async function bar(){
+	return ["bar"];
+}
+bar().then(console.log);
+//[ 'bar' ]
+
+// 返回一个实现了 thenable 接口的非期约对象
+async function baz(){
+	const thenable={
+		then(callback){
+			callback("baz");
+		}
+	};
+	return thenable;
+}
+baz().then(console.log);
+//baz
+
+// 返回一个期约
+async function qux(){
+	return Promise.resolve("qux");
+}
+qux().then(console.log);
+//qux
+```
+
+与在期约处理程序中一样，**在异步函数中抛出错误会返回拒绝的期约**：
+
+```js
+// 返回一个原始值
+async function foo(){
+	console.log(1);
+	throw 3;
+}
+// 给返回的期约添加一个拒绝处理程序
+foo().catch(console.log);
+console.log(2);
+// 1
+// 2
+// 3
+
+```
+
+不过，拒绝期约的**错误**不会被异步函数捕获：
+
+```js
+// 返回一个原始值
+async function foo(){
+	console.log(1);
+	Promise.reject(3);
+}
+// 给返回的期约添加一个拒绝处理程序
+foo().catch(console.log);
+console.log(2);
+// 1
+//2
+//(node:14616) UnhandledPromiseRejectionWarning: 3
+
+```
+
+#### await
+
+因为异步函数主要针对不会马上完成的任务，所以自然需要一种暂停和恢复执行的能力。**使用 await关键字可以暂停异步函数代码的执行，等待期约解决**。来看下面这个本章开始就出现过的例子：
+
+```js
+let p = new Promise((resolve, reject) => setTimeout(resolve, 1000, 3));
+p.then((x) => console.log(x)); // 3
+```
+
+使用 async/await 可以写成这样：
+
+```js
+async function foo() {
+	let p=new Promise((resolve,reject)=>setTimeout(resolve,1000,3));
+	console.log(await p);
+}
+foo();
+//3
+```
+
+注意，**await 关键字会暂停执行异步函数后面的代码，让出 JavaScript 运行时的执行线程**。这个行 为与生成器函数中的 yield 关键字是一样的。**await 关键字同样是尝试“解包”对象的值，然后将这 个值传给表达式，再异步恢复异步函数的执行**。 
+
+**await 关键字的用法与 JavaScript 的一元操作一样。它可以单独使用，也可以在表达式中使用**，如下面的例子所示：
+
+```js
+// 异步打印"foo"
+async function foo() {
+	console.log(await Promise.resolve("foo"));
+}
+foo();
+//foo
+
+// 异步打印"bar"
+async function bar() {
+	return await Promise.resolve("bar");
+}
+bar().then(console.log);
+// bar
+
+// 1000 毫秒后异步打印"baz"
+async function baz(){
+	await new Promise((resolve,reject)=>setTimeout(resolve,1000));
+	console.log("baz");
+}
+baz();
+// baz（1000 毫秒后）
+```
+
+**await 关键字期待**（但实际上并不要求）**一个实现 thenable 接口的对象**，但常规的值也可以。如 果是实现 thenable 接口的对象，则这个对象可以由 await 来“解包”。如果不是，则这个值就被当作 已经解决的期约。下面的代码演示了这些情况：
+
+```js
+// 等待一个原始值
+async function foo() {
+	console.log(await "foo");
+}
+foo();
+//foo
+
+// 等待一个没有实现 thenable 接口的对象
+async function bar() {
+	console.log(await ["bar"]);
+}
+bar();
+// ['bar']
+
+// 等待一个实现了 thenable 接口的非期约对象
+async function baz(){
+	const thenable = {
+		then(callback) { callback('baz'); }
+	};
+	console.log(await thenable);
+}
+baz();
+// baz
+
+// 等待一个期约
+async function qux(){
+	console.log(await Promise.resolve("qux"));
+}
+qux();
+//qux
+```
+
+等待会抛出错误的同步操作，会返回拒绝的期约：
+
+```js
+async function foo() {
+	console.log(1);
+	await (()=>{throw 3;})();
+}
+
+// 给返回的期约添加一个拒绝处理程序
+foo().catch(console.log);
+console.log(2);
+
+// 1
+// 2
+// 3
+
+```
+
+如前面的例子所示，**单独的 Promise.reject()不会被异步函数捕获，而会抛出未捕获错误**。不过，**对拒绝的期约使用 await 则会释放（unwrap）错误值**（将拒绝期约返回）：
+
+```js
+async function foo() {
+	console.log(1);
+	await Promise.reject(3);
+	console.log(4);  //这行代码不会执行
+}
+
+// 给返回的期约添加一个拒绝处理程序
+foo().catch(console.log);
+console.log(2);
+
+// 1
+// 2
+// 3
+```
+
+####  await 的限制
+
+**await 关键字必须在异步函数中使用**，不能在顶级上下文如<script>标签或模块中使用。不过，定义并立即调用异步函数是没问题的。下面两段代码实际是相同的：
+
+```js
+async function foo() {
+	console.log(await Promise.resolve(3));
+}
+foo();
+// 3
+
+// 立即调用的异步函数表达式
+(async function() {
+	console.log(await Promise.resolve(3));
+})();
+// 3
+```
+
+此外，**异步函数的特质不会扩展到嵌套函数**。因此，**await 关键字也只能直接出现在异步函数的定义中**。**在同步函数内部使用 await 会抛出 SyntaxError。**
+
+下面展示了一些会出错的例子：
+
+```js
+// 不允许：await 出现在了箭头函数中
+function foo() {
+	const syncFn = () => {
+	return await Promise.resolve('foo');
+	};
+	console.log(syncFn());
+}
+
+// 不允许：await 出现在了同步函数声明中
+function bar() {
+	function syncFn() {
+		return await Promise.resolve('bar');
+	}
+	console.log(syncFn());
+}
+
+// 不允许：await 出现在了同步函数表达式中
+function baz() {
+	const syncFn = function() {
+		return await Promise.resolve('baz');
+	};
+	console.log(syncFn());
+}
+
+// 不允许：IIFE 使用同步函数表达式或箭头函数
+function qux() {
+	(function () { console.log(await Promise.resolve('qux')); })();
+	(() => console.log(await Promise.resolve('qux')))();
+}
+```
+
+
+
+### 3.2停止和恢复执行
