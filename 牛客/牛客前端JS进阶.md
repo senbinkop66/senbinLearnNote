@@ -1309,7 +1309,7 @@ console.log(p.baz); // 3
 1. 监听对象属性的变化
 2. 当"person"对象属性发生变化时，页面中与该属性相关的数据同步更新
 3. 将输入框中的值与"person"的"weight"属性绑定且当输入框的值发生变化时，页面中与该属性相关的数据同步更新
-  注意：
+    注意：
 4. 必须使用Object.defineProperty实现且触发set方法时更新视图
 5. 必须使用DOM0级标准事件（oninput）
 6. 可以使用预设代码"_render"函数
@@ -1419,7 +1419,7 @@ console.log(result);
 1. 在input框中输入要搜索的内容，当点击查询按钮时，被搜索的字体样式变为加粗，背景色变为'yellow'
 2. 重新输入搜索文字，点击查询按钮时，去掉上一次的搜索效果，高亮显示效果只加在本次搜索文字上
 3. 如果搜索不到相关内容，清除之前的效果
-  注意：
+    注意：
 4. 需要加粗的文字请使用b标签包裹
 5. 必须使用DOM0级标准事件（onclick）
 
@@ -1550,7 +1550,276 @@ console.log(result);
 输入描述：
 oNode1 和 oNode2 在同一文档中，且不会为相同的节点
 
+```js
+function commonParentNode(oNode1, oNode2) {
+    //三种情况
+    //1、oNode1为oNode2的最近父节点；
+    //2、oNode2为oNode1的最近父节点；
+    //3、oNode1和oNode2在同一层
+    if (oNode1.contains(oNode2)) {
+        return oNode1;
+    }else if(oNode2.contains(oNode1)){
+        return oNode2;
+    }else{
+        return oNode1.parentNode;
+    }
+}
 ```
 
+## JS42 获取 url 参数
+
+获取 url 中的参数
+
+1. 指定参数名称，返回该参数的值 或者 空字符串
+2. 不指定参数名称，返回全部的参数对象 或者 {}
+3. 如果存在多个同名参数，则返回数组
+4. 不支持URLSearchParams方法
+
+输入：
+`http://www.nowcoder.com?key=1&key=2&key=3&test=4#hehe`   key
+输出：
+[1, 2, 3]
+
+```js
+function getUrlParam(sUrl, sKey) {
+    let index0=sUrl.indexOf("?");
+    if (index0!==-1) {
+        //保留?后面的
+        sUrl=sUrl.slice(index0+1);
+        if (sUrl.length===0  || sUrl.indexOf("=")===-1) {
+            //无法解析时
+            return sKey===undefined ? {} : "";
+        }
+        let index1=sUrl.indexOf("#");
+        if (index1!==-1) {
+            //去除#及其后面的内容
+            sUrl=sUrl.slice(0,index1);
+        }
+    }else{
+        //如果不存在任何参数
+        return sKey===undefined ? {} : "";
+    }
+
+    sUrl=sUrl.split("&");
+
+    let result={};
+
+    sUrl.forEach((item)=>{
+        item=item.split("=");
+        if (item.length>1) {
+            if (result[item[0]]!==undefined) {
+                result[item[0]]=result[item[0]].concat([item[1]]);
+            }else{
+                result[item[0]]=[item[1]];
+            }
+        }else{
+            if (result[item[0]]!==undefined) {
+                result[item[0]]=result[item[0]].concat([""]);
+            }else{
+                result[item[0]]=[""];
+            }
+        }
+    });
+
+    if (sKey===undefined) {
+        return result;
+    }else{
+        if (result[sKey]!==undefined) {
+            if (result[sKey].length>1) {
+                return result[sKey]
+            }else{
+                return result[sKey][0];
+            }
+        }else{
+            return "";
+        }
+    }
+
+}
+
+let str1="http://www.nowcoder.com?key=1&key=2&key=3&key=4&test=4#hehe";
+let result=getUrlParam(str1,"key");
+console.log(result);
+
+```
+
+## JS43 修改 this 指向
+
+封装函数 f，使 f 的 this 指向指定的对象
+
+call()、bind()、apply()的用法，改变this的指向，区别在于
+f.call(obj, arg1, arg2...),
+f.bind(obj, arg1, arg2,...)(),
+f.apply(obj, [arg1, arg2, .])
+
+```js
+//apply
+function bindThis(f, oTarget) {
+    return function(){
+        return f.apply(oTarget,arguments);
+    }
+}
+
+//bind
+function bindThis(f, oTarget) {
+    return f.bind(oTarget);
+}
+
+//call
+function bindThis(f, oTarget) {
+    return function(){
+        return f.call(oTarget,...arguments);
+    }
+}
+```
+
+## JS44 根据包名，在指定空间中创建对象
+
+根据包名，在指定空间中创建对象
+输入描述：
+namespace({a: {test: 1, b: 2}}, 'a.b.c.d')
+输出描述：
+{a: {test: 1, b: {c: {d: {}}}}}
+
+```js
+function namespace(oNamespace, sPackage) {
+    sPackage=sPackage.split(".");
+    const result=oNamespace;  //对原始对象的引用
+    for (let i=0;i<sPackage.length;i++){
+        //空间名在对象中
+        if (sPackage[i] in oNamespace) {
+            if (typeof oNamespace[sPackage[i]]!=="object") {
+                //不是对象,将此属性设为空对象 
+                oNamespace[sPackage[i]]={};
+            }
+        }else{
+             // 空间名不在对象中，建立此空间名属性，赋值为空
+             oNamespace[sPackage[i]]={};
+        }
+        //将指针指向下一个空间名属性
+        oNamespace=oNamespace[sPackage[i]];
+    }
+    return result;
+}
+
+let str1={a: {test: 1, b: 2}};
+let result=namespace(str1,"a.b.c.d");
+console.log(result);
+
+```
+
+## JS45 数组去重
+
+为 Array 对象添加一个去除重复项的方法
+示例1
+输入：
+[false, true, undefined, null, NaN, 0, 1, {}, {}, 'a', 'a', NaN]
+
+输出：
+[false, true, undefined, null, NaN, 0, 1, {}, {}, 'a']
+
+```js
+Array.prototype.uniq = function () {
+    //return [...new Set(this)];
+    let set=new Set();
+    this.forEach((item)=>{
+        set.add(item);
+    });
+    //ES6才行
+    return Array.from(set);
+}
+
+let str1=[false, true, undefined, null, NaN, 0, 1, {}, {}, 'a', 'a', NaN];
+let result=str1.uniq();
+console.log(result);
+
+```
+
+```js
+Array.prototype.uniq = function () {
+    let newArr=[];
+    let flag=true;
+    this.forEach((item)=>{
+        if (newArr.indexOf(item)===-1) {
+            if (item!==item) {
+                //排除 NaN
+                if (flag) {
+                    newArr.push(item);
+                    flag=false;
+                }
+            }else{
+                newArr.push(item);
+            }
+        }
+    });
+    return newArr;
+}
+```
+
+```js
+let str1=[0,1,false, true, undefined, null, NaN, {},{a:1},'a'];
+
+for (let i=0;i<str1.length;i++){
+    for (let j=i;j<str1.length;j++){
+        console.log(`${str1[i]}===${str1[j]} : ${str1[i]===str1[j]}`);
+    }
+}
+/*
+0===0 : true
+0===1 : false
+0===false : false
+0===true : false
+0===undefined : false
+0===null : false
+0===NaN : false
+0===[object Object] : false
+0===[object Object] : false
+0===a : false
+1===1 : true
+1===false : false
+1===true : false
+1===undefined : false
+1===null : false
+1===NaN : false
+1===[object Object] : false
+1===[object Object] : false
+1===a : false
+false===false : true
+false===true : false
+false===undefined : false
+false===null : false
+false===NaN : false
+false===[object Object] : false
+false===[object Object] : false
+false===a : false
+true===true : true
+true===undefined : false
+true===null : false
+true===NaN : false
+true===[object Object] : false
+true===[object Object] : false
+true===a : false
+undefined===undefined : true
+undefined===null : false
+undefined===NaN : false
+undefined===[object Object] : false
+undefined===[object Object] : false
+undefined===a : false
+null===null : true
+null===NaN : false
+null===[object Object] : false
+null===[object Object] : false
+null===a : false
+NaN===NaN : false
+NaN===[object Object] : false
+NaN===[object Object] : false
+NaN===a : false
+[object Object]===[object Object] : true
+[object Object]===[object Object] : false
+[object Object]===a : false
+[object Object]===[object Object] : true
+[object Object]===a : false
+a===a : true
+*/
 ```
 
