@@ -2015,3 +2015,53 @@ console.log(result);
 ```
 
 ## **JS51** **查找重复元素**
+
+找出数组 arr 中重复出现过的元素（不用考虑返回顺序）
+
+```js
+function duplicates(arr) {
+    //使用对象计数后filter
+    let obj={};
+    arr.forEach((item)=>{
+        obj[item]=obj[item]===undefined ? 1 : ++obj[item];
+    });
+    //console.log(obj);
+    let newArr=[];
+    //直接filter是字符串键
+    Object.keys(obj).forEach((key)=>{
+        if(obj[key]>1){
+            newArr.push(Number(key));
+        }
+    });
+    return newArr;
+}
+```
+
+## **JS52** **计时器**
+
+实现一个打点计时器，要求
+1、从 start 到 end（包含 start 和 end），每隔 100 毫秒 console.log 一个数字，每次数字增幅为 1
+2、返回的对象中需要包含一个 cancel 方法，用于停止定时操作
+3、第一个数需要立即输出
+
+```js
+function count(start, end) {
+    console.log(start++);
+    let timer=setInterval(()=>{
+        if (start<=end) {
+            console.log(start++);
+        }else{
+            clearInterval(timer);
+        }
+    },100);
+    return {
+        cancel:function(){
+            clearInterval(timer);
+        }
+    };
+}
+
+let test=count(1,20);
+//test.cancel();
+```
+
