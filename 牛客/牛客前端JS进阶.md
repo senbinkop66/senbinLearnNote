@@ -1823,3 +1823,195 @@ a===a : true
 */
 ```
 
+## **JS46** **斐波那契数列**
+
+用 JavaScript 实现斐波那契数列函数,返回第n个斐波那契数。 f(1) = 1, f(2) = 1 等
+
+```js
+function fibonacci(n) {
+    if (n<3) {
+        return 1;
+    }
+    return fibonacci(n-1)+fibonacci(n-2);
+}
+```
+
+## **JS47** **时间格式化输出**
+
+按所给的时间格式输出指定的时间
+格式说明
+对于 2014.09.05 13:14:20
+yyyy: 年份，2014
+yy: 年份，14
+MM: 月份，补满两位，09
+M: 月份, 9
+dd: 日期，补满两位，05
+d: 日期, 5
+HH: 24制小时，补满两位，13
+H: 24制小时，13
+hh: 12制小时，补满两位，01
+h: 12制小时，1
+mm: 分钟，补满两位，14
+m: 分钟，14
+ss: 秒，补满两位，20
+s: 秒，20
+w: 星期，为 ['日', '一', '二', '三', '四', '五', '六'] 中的某一个，本 demo 结果为 五
+
+示例1
+
+输入：
+
+```
+formatDate(new Date(1409894060000), 'yyyy-MM-dd HH:mm:ss 星期w')
+```
+
+输出：
+
+```
+2014-09-05 13:14:20 星期五
+```
+
+```js
+function formatDate(date,format) {
+    let obj={};
+    let items=["yyyy","yy","MM","M","dd","d","HH","H","hh","h","mm","m","ss","s","w"];
+
+    obj[items[0]]=date.getFullYear();  ////yyyy: 年份,  从 Date 对象以四位数字返回年份。
+    obj[items[1]]=obj[items[0]].toString().slice(2);  //yy: 年份
+
+    obj[items[3]]=date.getMonth()+1;  //,M: 月份  ,从 Date 对象返回月份 (0 ~ 11)。
+    obj[items[2]]=obj[items[3]]<10 ? "0"+""+obj[items[3]] : obj[items[3]];  //MM: 月份，补满两位
+
+    obj[items[5]]=date.getDate();  //d: 日期,  从 Date 对象返回一个月中的某一天 (1 ~ 31)。
+    obj[items[4]]=obj[items[5]]<10 ? "0"+""+obj[items[5]] : obj[items[5]];  //dd: 日期，补满两位
+
+    obj[items[7]]=date.getHours();  //H: 24制小时, 返回 Date 对象的小时 (0 ~ 23)。
+    obj[items[6]]=obj[items[7]]<10 ? "0"+""+obj[items[7]] : obj[items[7]];  //HH: 24制小时，补满两位
+    //
+    obj[items[9]]=obj[items[7]]>12 ? obj[items[7]]-12 : obj[items[7]];  //h: 12制小时
+    obj[items[8]]=obj[items[9]]<10 ? "0"+""+obj[items[9]] : obj[items[9]];  //hh: 12制小时，补满两位
+
+    obj[items[11]]=date.getMinutes();  //m: 分钟, 返回 Date 对象的分钟 (0 ~ 59)。
+    obj[items[10]]=obj[items[11]]<10 ? "0"+""+obj[items[11]] : obj[items[11]];  //mm: 分钟，补满两位
+
+    obj[items[13]]=date.getSeconds();  //s:秒, 返回 Date 对象的秒数 (0 ~ 59)。
+    obj[items[12]]=obj[items[13]]<10 ? "0"+""+obj[items[13]] : obj[items[13]];  //ss: 秒，补满两位
+
+    obj[items[14]]= ['日', '一', '二', '三', '四', '五', '六'][date.getDay()]    //w 星期,从 Date 对象返回一周中的某一天 (0 ~ 6)。
+    //let milliSecond=date.getMilliseconds();  //返回 Date 对象的毫秒(0 ~ 999)。
+    for (let i=0;i<items.length;i++){
+        let reg=new RegExp(items[i],"g");
+        format=format.replace(reg,obj[items[i]]);
+    }
+    //console.log(obj);
+    return format;
+
+}
+
+let date=new Date(1409894060000);
+format="yyyy-MM-dd HH:mm:ss 星期w"
+let result=formatDate(date,format);
+console.log(result);
+```
+
+## **JS48** **获取字符串的长度**
+
+如果第二个参数 bUnicode255For1 === true，则所有字符长度为 1
+否则如果字符 Unicode 编码 > 255 则长度为 2
+
+输入：
+
+```
+'hello world, 牛客', false
+```
+
+输出：
+
+```
+17
+```
+
+`**charCodeAt()**` 方法返回 `0` 到 `65535` 之间的整数，表示给定索引处的 UTF-16 代码单元
+
+```
+str.charCodeAt(index)
+参数
+index
+一个大于等于 0，小于字符串长度的整数。如果不是一个数值，则默认为 0。
+返回值
+指定 index 处字符的 UTF-16 代码单元值的一个数字；如果 index 超出范围，charCodeAt() 返回 NaN。
+```
+
+```js
+function strLength(s, bUnicode255For1) {
+    if (bUnicode255For1) {
+        return s.length;
+    }
+    //let len=s.length;
+    /*
+    for (let i=0;i<s.length;i++){
+        if (s.charCodeAt(i)>255) {
+            len++;
+        }
+        //console.log(item);
+    }
+    */
+    let len=0;
+    for (let item of s){
+        if (item.charCodeAt(0)>255) {
+            len+=2
+        }else{
+            len++;
+        }
+
+    }
+    return len;
+}
+
+let str1='hello world, 牛客';
+let result=strLength(str1,false);
+console.log(result);
+```
+
+## **JS49** **邮箱字符串判断**
+
+判断输入是否是正确的邮箱格式
+
+1.不限制长度
+
+2.不限制大小写
+
+3.邮箱开头必须是数字或字符串
+
+4.邮箱中可以使用字母、数字、点号、下划线、减号，但是不能连写点号、下划线、减号，如 abc_-de@q_.q.com
+
+5.@符号前后不能为点号、下划线、减号
+
+```js
+function isAvailableEmail(sEmail) {
+    // \w  单词字符包括：a-z、A-Z、0-9，以及下划线, 包含 _ (下划线) 字符。
+    // n+  匹配任何包含至少一个 n 的字符串
+    let reg=/^([\w+\.])+@\w+([.]\w+)+$/;
+    return reg.test(sEmail);
+}
+
+let str1='fheo221wio@qq.com';
+let result=isAvailableEmail(str1);
+console.log(result);
+```
+
+## **JS50** **计数**
+
+统计数组 arr 中值等于 item 的元素出现的次数
+
+```js
+function count(arr, item) {
+    return arr.filter((item0)=>item0===item).length;
+}
+
+let str1=[1, 2, 4, 4, 3, 4, 3];
+let result=count(str1,4);
+console.log(result);
+```
+
+## **JS51** **查找重复元素**
