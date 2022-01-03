@@ -2065,3 +2065,170 @@ let test=count(1,20);
 //test.cancel();
 ```
 
+## JS53 流程控制
+
+实现 fizzBuzz 函数，参数 num 与返回值的关系如下：
+1、如果 num 能同时被 3 和 5 整除，返回字符串 fizzbuzz
+2、如果 num 能被 3 整除，返回字符串 fizz
+3、如果 num 能被 5 整除，返回字符串 buzz
+4、如果参数为空或者不是 Number 类型，返回 false
+5、其余情况，返回参数 num
+
+```js
+function fizzBuzz(num) {
+    if (num===undefined || typeof num !=="number") {
+        return false;
+    }
+    if (num%3===0 && num%5===0) {
+        return "fizzbuzz";
+    }else if (num%3===0) {
+        return "fizz";
+    }else if(num%5===0){
+        return "buzz"
+    }else{
+        return num;
+    }
+}
+
+let test=15;
+let result=fizzBuzz(test);
+console.log(result);
+```
+
+## JS54 函数传参
+
+将数组 arr 中的元素作为调用函数 fn 的参数
+
+一般情况下都是对象调用函数，但此处是函数调用数组对象,用call(), apply()。第一个参数是传给当前函数对象。但是call()需要将参数挨个列出，apply直接传入数组对象。
+
+```js
+function argsAsArray(fn, arr) {
+    return fn(...arr);  //ES6方法
+    return fn.apply(this,arr);
+    return fn.call(this,arr[0],arr[1],arr[2]);
+}
+```
+
+## **JS55** **函数的上下文**
+
+将函数 fn 的执行上下文改为 obj 对象
+
+```js
+function speak(fn, obj) {
+    // 方法1 将函数fn直接挂载到obj上
+    obj.fn = fn;
+    return obj.fn();
+    //this的指向是动态变化的,需要把this的指向固定，所以就有了以下三种方法
+    //call()、apply()、bind() 都是用来重定义 this 这个对象的
+    //call 的参数是直接放进去的
+    //apply 的所有参数都必须放在一个数组里面传进去
+    //bind 除了返回是函数,它的参数和 call 一样
+    return fn.apply(obj);
+    return fn.call(obj);
+    return fn.bind(obj);
+}
+```
+
+JS56 返回函数
+实现函数 functionFunction，调用之后满足如下条件：
+1、返回值为一个函数 f
+2、调用返回的函数 f，返回值为按照调用顺序的参数拼接，拼接字符为英文逗号加一个空格，即 ', '
+3、所有函数的参数数量为 1，且均为 String 类型
+
+```js
+function functionFunction(str) {
+    return function(s){
+        return  str+", "+s;
+    }
+}
+```
+
+## **JS57** **使用闭包**
+
+实现函数 makeClosures，调用之后满足如下条件：
+1、返回一个函数数组 result，长度与 arr 相同
+2、运行 result 中第 i 个函数，即 `result[i]()`，结果与 fn(arr[i]) 相同
+
+```js
+function makeClosures(arr, fn) {
+    //使用forEach()
+    var result=[];
+    arr.forEach((item)=>{
+        result.push(function(num){
+            return function(){
+                return fn(num);
+            };
+        }(item));
+    });
+    return result;
+}
+
+function makeClosures(arr, fn) {
+    //ES6的let
+    var result=[];
+    for(let i=0;i<arr.length;i++){
+        result[i]=function(){
+            //let声明的变量只在let所在代码块内有效，因此每次循环的i都是一个新的变量
+            return fn(arr[i]);
+        };
+    }
+    return result;
+}
+```
+
+## **JS58** **二次封装函数**
+
+已知函数 fn 执行需要 3 个参数。请实现函数 partial，调用之后满足如下条件：
+1、返回一个函数 result，该函数接受一个参数
+2、执行 result(str3) ，返回的结果与 fn(str1, str2, str3) 一致
+
+```js
+// call和apply必须显式地调用str3，立即执行
+// bind不是立即执行，未传入str3时，并未执行，只是返回一个函数，等待参数传入
+// this用于上下文不确定的情况
+
+function partial(fn, str1, str2) {
+    //call
+    function result(str3){
+        return fn.call(this,str1,str2,str3);
+    }
+    return result;
+}
+
+function partial(fn, str1, str2) {
+    //apply
+    function result(str3){
+        return fn.apply(this,[str1,str2,str3]);
+    }
+    return result;
+}
+
+function partial(fn, str1, str2) {
+    //这个bind会生成一个新函数（对象）, 它的str1, str2参数都定死了, str3未传入, 一旦传入就会执行
+    return fn.bind(this,str1,str2);  //或 return fn.bind(null, str1, str2);
+}
+
+// bind同上, 多了一步, 把str3传入的过程写在另一个函数里面,
+// 而另一个函数也有str1, str2参数
+// 此法有种多次一举的感觉，但是表示出了后续的调用。
+
+function partial(fn, str1, str2) {
+    function result(str3) {
+        return fn.bind(this, str1, str2)(str3);
+    }
+    return result;
+}
+
+
+function partial(fn, str1, str2) {
+    //匿名函数，默认this绑定global，与bind的第一个参数为this时效果一样。
+    return function(str3){
+        return fn(str1,str2,str3);
+    }
+}
+
+// ES6,this指向undefined.
+const partial = (fn, str1, str2) => str3 => fn(str1, str2, str3);
+
+```
+
