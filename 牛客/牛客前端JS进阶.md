@@ -2176,7 +2176,7 @@ function makeClosures(arr, fn) {
 }
 ```
 
-## **JS58** **二次封装函数**
+## **JS58** **二次封装函数1**
 
 已知函数 fn 执行需要 3 个参数。请实现函数 partial，调用之后满足如下条件：
 1、返回一个函数 result，该函数接受一个参数
@@ -2232,3 +2232,164 @@ const partial = (fn, str1, str2) => str3 => fn(str1, str2, str3);
 
 ```
 
+## **JS59** **使用 arguments**
+
+函数 useArguments 可以接收 1 个及以上的参数。请实现函数 useArguments，返回所有调用参数相加后的结果。本题的测试参数全部为 Number 类型，不需考虑参数转换。
+
+```js
+function useArguments() {
+    let sum= Array.prototype.reduce.call(arguments,function(prev,cur){return prev+cur;});
+    return sum;
+};
+```
+
+## **JS60** **使用 apply 调用函数**
+
+实现函数 callIt，调用之后满足如下条件
+1、返回的结果为调用 fn 之后的结果
+2、fn 的调用参数为 callIt 的第一个参数之后的全部参数
+
+```js
+function callIt(fn) {
+    //将arguments转化为数组后，截取第一个元素之后的所有元素
+    let args=Array.prototype.slice.call(arguments,1);
+    //调用fn
+    let result=fn.apply(null,args);
+    return result;
+}
+```
+
+## **JS61** **二次封装函数2**
+
+实现函数 partialUsingArguments，调用之后满足如下条件：
+1、返回一个函数 result
+2、调用 result 之后，返回的结果与调用函数 fn 的结果一致
+3、fn 的调用参数为 partialUsingArguments 的第一个参数之后的全部参数以及 result 的调用参数
+
+```js
+/*arguments不能用slice方法直接截取，需要先转换为数组，var args =
+Array.prototype.slice.call(arguments);合并参数可以使用concat方法，并且也需要将arguments先转换为数组才能使用concat进行合并。最用使用apply执行传入的函数即可。*/
+function partialUsingArguments(fn) {
+    let args=Array.prototype.slice.call(arguments,1);
+    //声明result函数
+    let result= function(){
+        let args2=Array.prototype.slice.call(arguments);
+        return fn.apply(null,args.concat(args2));
+    };
+    return result;
+}
+
+function partialUsingArguments(fn) {
+    //解法2 使用解构赋值和括号函数
+    const [f,...res]=arguments;
+    return (...rest)=>fn(...res,...rest);
+}
+
+```
+
+## **JS62** **柯里化**
+
+已知 fn 为一个预定义函数，实现函数 curryIt，调用之后满足如下条件：
+1、返回一个函数 a，a 的 length 属性值为 1（即显式声明 a 接收一个参数）
+2、调用 a 之后，返回一个函数 b, b 的 length 属性值为 1
+3、调用 b 之后，返回一个函数 c, c 的 length 属性值为 1
+4、调用 c 之后，返回的结果与调用 fn 的返回值一致
+5、fn 的参数依次为函数 a, b, c 的调用参数
+
+柯里化是把接受多个参数的函数变换成接受一个单一参数(最初函数的第一个参数)的函数，并且返回接受余下的参数且返回结果的新函数的技术。简单理解题目意思，就是指，我们将预定义的函数的参数逐一传入到curryIt中，当参数全部传入之后，就执行预定义函数。于是，我们首先要获得预定义函数的参数个数fn.length，然后声明一个空数组去存放这些参数。返回一个匿名函数接收参数并执行，当参数个数小于fn.length，则再次返回该匿名函数，继续接收参数并执行，直至参数个数等于fn.length。最后，调用apply执行预定义函数。
+
+```js
+function curryIt(fn) {
+    //获取fn参数的数量
+    let n=fn.length;
+    //声明一个数组args
+    let args=[];
+    //返回一个匿名函数
+    return function(arg){
+        //将curryIt后面括号中的参数放入数组
+        args.push(arg);
+        //如果args中的参数个数小于fn函数的参数个数，
+        //则执行arguments.callee（其作用是引用当前正在执行的函数，这里是返回的当前匿名函数）。
+        //否则，返回fn的调用结果
+        if (args.length<n) {
+            return arguments.callee;
+        }else{
+            return fn.apply(null,args);
+        }
+    }
+}
+
+//这样比较麻烦
+function curryIt(fn) {
+    return function a(xa){
+        return function b(xb){
+            return function c(xc){
+                return fn.call(this,xa,xb,xc);
+            };
+        };
+    };
+}
+
+//ES6
+function curryIt(fn) {
+    return (a)=>(b)=>(c)=>fn(a,b,c);
+}
+```
+
+## **JS63** **模块**
+
+完成函数 createModule，调用之后满足如下要求：
+1、返回一个对象
+2、对象的 greeting 属性值等于 str1， name 属性值等于 str2
+3、对象存在一个 sayIt 方法，该方法返回的字符串为 greeting属性值 + ', ' + name属性值
+
+```js
+//原型模式
+function createModule(str1, str2) {
+    function obj(){};
+    //使用函数表达式也可
+    //let obj= function() {}
+    obj.prototype.greeting=str1;
+    obj.prototype.name=str2;
+    obj.prototype.sayIt=function(){
+        return this.greeting+", "+this.name;
+    }
+    return new obj();
+}
+
+//构造函数模式
+function createModule(str1, str2) {
+    function obj(){
+        this.greeting=str1;
+        this.name=str2;
+        this.sayIt=function(){
+            return this.greeting+", "+this.name;
+        }
+    }
+    return new obj();
+}
+
+//工厂模式
+function createModule(str1, str2) {
+    let o=new Object();
+    o.greeting=str1;
+    o.name=str2;
+    o.sayIt=function(){
+         return this.greeting+", "+this.name;
+    }
+    return o;
+}
+
+//字面量模式
+function createModule(str1, str2) {
+    var obj =
+            {
+                greeting : str1,
+                name : str2,
+                sayIt : function(){return this.greeting + ", " + this.name;}
+            };
+    return obj;    
+
+```
+
+## **JS64** **二进制转换**
