@@ -169,3 +169,206 @@ function() {
 使用 HTML 指定事件处理程序的最后一个问题是 HTML 与 JavaScript 强耦合。**如果需要修改事件处 理程序，则必须在两个地方，即 HTML 和 JavaScript 中，修改代码**。这也是很多开发者不使用 HTML 事件处理程序，而使用 JavaScript 指定事件处理程序的主要原因。
 
 ### 2.2 DOM0 事件处理程序
+
+在 JavaScript 中指定事件处理程序的**传统方式**是**把一个函数赋值给（DOM 元素的）一个事件处理程 序属性**。这也是在第四代 Web 浏览器中开始支持的事件处理程序赋值方法，直到现在所有现代浏览器 仍然都支持此方法，主要原因是简单。要使用 JavaScript 指定事件处理程序，必须先取得要操作对象的 引用。
+
+ **每个元素（包括 window 和 document）都有通常小写的事件处理程序属性**，比如 onclick。只要 把这个属性赋值为一个函数即可：
+
+```js
+let btn = document.getElementById("myBtn");
+btn.onclick = function() {
+	console.log("Clicked");
+};
+```
+
+这里先从文档中取得按钮，然后给它的 onclick 事件处理程序赋值一个函数。注意，前面的代码 在运行之后才会给事件处理程序赋值。因此如果在页面中上面的代码出现在按钮之后，则有可能出现用 户点击按钮没有反应的情况。 
+
+**像这样使用 DOM0 方式为事件处理程序赋值时，所赋函数被视为元素的方法**。因此，事件处理程 序会在元素的作用域中运行，**即 this 等于元素**。下面的例子演示了使用 this 引用元素本身：
+
+```js
+let btn = document.getElementById("myBtn");
+btn.onclick = function() {
+	console.log(this.id); // "myBtn"
+};
+```
+
+点击按钮，这段代码会显示元素的 ID。这个 ID 是通过 this.id 获取的。不仅仅是 id，**在事件处 理程序里通过 this 可以访问元素的任何属性和方法**。
+
+以这种方式添加事件处理程序是**注册在事件流的 冒泡阶段**的。 
+
+**通过将事件处理程序属性的值设置为 null，可以移除通过 DOM0 方式添加的事件处理程序**，如下 面的例子所示：
+
+```js
+btn.onclick = null; // 移除事件处理程序
+```
+
+把事件处理程序设置为 null，**再点击按钮就不会执行任何操作了**。
+
+**注意** 如果事件处理程序是在 HTML 中指定的，则 onclick 属性的值是一个包装相应 HTML 事件处理程序属性值的函数。这些事件处理程序也可以通过在 JavaScript 中将相应 属性设置为 null 来移除。
+
+### 2.3 DOM2 事件处理程序
+
+DOM2 Events 为事件处理程序的赋值和移除定义了两个方法：**addEventListener()和 remove- EventListener()**。这两个方法暴露在所有 DOM 节点上，它们接收 3 个参数：**事件名、事件处理函 数和一个布尔值**，true 表示在捕获阶段调用事件处理程序，**false（默认值）表示在冒泡阶段调用事 件处理程序**。
+
+仍以给按钮添加 click 事件处理程序为例，可以这样写：
+
+```js
+let btn = document.getElementById("myBtn");
+btn.addEventListener("click", () => {
+	console.log(this.id);
+}, false);
+```
+
+以上代码为按钮添加了会在事件冒泡阶段触发的 onclick 事件处理程序（因为最后一个参数值为 false）。与 DOM0 方式类似，这个事件处理程序同样在被附加到的元素的作用域中运行。**使用 DOM2 方式的主要优势是可以为同一个事件添加多个事件处理程序**。来看下面的例子：
+
+```js
+let btn = document.getElementById("myBtn");
+btn.addEventListener("click", () => {
+	console.log(this.id);
+}, false);
+btn.addEventListener("click", () => {
+	console.log("Hello world!");
+}, false);
+```
+
+这里给按钮添加了两个事件处理程序。**多个事件处理程序以添加顺序来触发**，因此前面的代码会先 打印元素 ID，然后显示消息“Hello world!”。 
+
+通过 addEventListener()添加的事件处理程序**只能使用 removeEventListener()并传入与添 加时同样的参数来移除**。这**意味着使用 addEventListener()添加的匿名函数无法移除**，如下面的例 子所示：
+
+```js
+let btn = document.getElementById("myBtn");
+btn.addEventListener("click", () => {
+	console.log(this.id);
+}, false);
+
+// 其他代码
+btn.removeEventListener("click", function() { // 没有效果！
+	console.log(this.id);
+}, false);
+```
+
+这个例子通过 addEventListener()添加了一个匿名函数作为事件处理程序。然后，又以看起来 相同的参数调用了 removeEventListener()。但实际上，第二个参数与传给 addEventListener() 的完全不是一回事。**传给 removeEventListener()的事件处理函数必须与传给 addEventListener() 的是同一个**，如下面的例子所示：
+
+```js
+let btn = document.getElementById("myBtn");
+let handler = function() {
+	console.log(this.id);
+};
+
+btn.addEventListener("click", handler, false);
+// 其他代码
+btn.removeEventListener("click", handler, false); // 有效果！
+```
+
+这个例子有效，因为调用 addEventListener()和 removeEventListener()时传入的是同一个 函数。 
+
+大多数情况下，**事件处理程序会被添加到事件流的冒泡阶段**，主要原因是跨浏览器兼容性好。把事 件处理程序注册到捕获阶段通常用于在事件到达其指定目标之前拦截事件。**如果不需要拦截，则不要使 用事件捕获**。
+
+### 2.4 IE 事件处理程序
+
+IE 实现了与 DOM 类似的方法，即 **attachEvent()和 detachEvent()**。这两个方法接收两个同样 的参数：事件处理程序的名字和事件处理函数。因为 IE8 及更早版本只支持事件冒泡，所以使**用 attachEvent()添加的事件处理程序会添加到冒泡阶段**。 
+
+要使用 attachEvent()给按钮添加 click 事件处理程序，可以使用以下代码：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.attachEvent("onclick",function(){
+	console.log("Clicked");
+});
+```
+
+注意，**attachEvent()的第一个参数是"onclick**"，而不是 DOM 的 addEventListener()方法 的"click"。 
+
+在 IE 中使用 attachEvent()与使用 DOM0 方式的主要区别是事件处理程序的作用域。使用 DOM0 方式时，事件处理程序中的 this 值等于目标元素。而使用 attachEvent()时，事件处理程序**是在全 局作用域中运行的**，因此 **this 等于 window**。来看下面使用 attachEvent()的例子：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.attachEvent("onclick", function() {
+	console.log(this === window); // true
+});
+```
+
+理解这些差异对编写跨浏览器代码是非常重要的。
+
+与使用 addEventListener()一样，使用 attachEvent()方法也可以给一个元素添加多个事件处理程序。比如下面的例子：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.attachEvent("onclick", function() {
+	console.log("Clicked");
+});
+btn.attachEvent("onclick", function() {
+	console.log("Hello world!");
+});
+```
+
+这里调用了两次 attachEvent()，分别给同一个按钮添加了两个不同的事件处理程序。不过，与 DOM 方法不同，这里的事件处理程序会**以添加它们的顺序反向触发**。换句话说，在点击例子中的按钮 后，控制台中会先打印出"Hello world!"，然后再打印出"Clicked"。 
+
+使用 attachEvent()添加的事件处理程序将使用 detachEvent()来移除，只要提供相同的参数。 与使用 DOM 方法类似，作为事件处理程序添加的匿名函数也无法移除。但**只要传给 detachEvent() 方法相同的函数引用，就可以移除**。下面的例子演示了附加和剥离事件：
+
+```js
+var btn = document.getElementById("myBtn");
+var handler=function(){
+	console.log("Clicked");
+}
+btn.attachEvent("onclick",handler);
+//
+btn.detachEvent("onclick",handler);
+```
+
+这里先把事件处理程序保存到变量 handler，之后又将其传给 detachEvent()来移除事件处理程序。
+
+### 2.5 跨浏览器事件处理程序
+
+为了以跨浏览器兼容的方式处理事件，很多开发者会选择使用一个 JavaScript 库，**其中抽象了不同 浏览器的差异**。有些开发者也可能会自己编写代码，以便使用最合适的事件处理手段。自己编写跨浏览 器事件处理代码也很简单，主要依赖能力检测。要确保事件处理代码具有最大兼容性，**只需要让代码在 冒泡阶段运行即可**。 
+
+为此，需要先创建一个 **addHandler()方法**。这个方法的任务是根据需要分别使用 DOM0 方式、 DOM2 方式或 IE 方式来添加事件处理程序。这个方法会在 EventUtil 对象（本章示例使用的对象）上 添加一个方法，以实现跨浏览器事件处理。添加的这个 addHandler()方法接收 3 个参数：目标元素、 事件名和事件处理函数。 
+
+有了 addHandler()，还要写一个也接收同样的 3 个参数的 **removeHandler()**。这个方法的任务 是移除之前添加的事件处理程序，不管是通过何种方式添加的，默认为 DOM0 方式。 
+
+以下就是包含这两个方法的 EventUtil 对象：
+
+```js
+var EventUtil={
+	addHandler:function(element,type,handler){
+		if (element.addEventListener) {
+			element.addEventListener(type,handler,false);
+		}else if(element.attachEvent){
+			element.attachEvent("on"+type,handler);
+		}else{
+			element["on"+type]=handler;
+		}
+	},
+	removeHandler:function(element,type,handler){
+		if (element.removeEventListener) {
+			element.removeEventListener(type,handler,false);
+		}else if(element.detachEvent){
+			element.detachEvent("on"+type,handler);
+		}else{
+			element["on"+type]=null;
+		}
+	}
+};
+
+```
+
+两个方法都是首先检测传入元素上是否存在 DOM2 方式。如果有 DOM2 方式，就使用该方式，传 入事件类型和事件处理函数，以及表示冒泡阶段的第三个参数 false。否则，如果存在 IE 方式，则使 用该方式。注意这时候必须在事件类型前加上"on"，才能保证在 IE8 及更早版本中有效。**最后是使用 DOM0 方式（在现代浏览器中不会到这一步**）。注意使用 DOM0 方式时使用了中括号计算属性名，并将 事件处理程序或 null 赋给了这个属性。 可以像下面这样使用 EventUtil 对象：
+
+```js
+var btn = document.getElementById("myBtn");
+var handler=function(){
+	console.log("Clicked");
+}
+EventUtil.addHandler(btn,"click",handler);
+//其他代码
+EventUtil.removeHandler(btn,"onclick",handler);
+```
+
+这里的 addHandler()和 removeHandler()方法**并没有解决所有跨浏览器一致性问题**，比如 **IE 的作用域问题、多个事件处理程序执行顺序问题等**。不过，这两个方法已经实现了跨浏览器添加和移除 事件处理程序。另外也要注意，DOM0 只支持给一个事件添加一个处理程序。好在 DOM0 浏览器已经 很少有人使用了，所以影响应该不大。
+
+## 3 事件对象
+
+在 DOM 中发生事件时，所有相关信息都会被收集并存储在一个名为 **event** 的对象中。这个对象包 含了一些基本信息，比如**导致事件的元素、发生的事件类型，以及可能与特定事件相关的任何其他数据**。 例如，鼠标操作导致的事件会生成鼠标位置信息，而键盘操作导致的事件会生成与被按下的键有关的信 息。所有浏览器都支持这个 event 对象，尽管支持方式不同。
+
+### 3.1 DOM 事件对象
+
