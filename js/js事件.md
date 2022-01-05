@@ -372,3 +372,428 @@ EventUtil.removeHandler(btn,"onclick",handler);
 
 ### 3.1 DOM 事件对象
 
+在 DOM 合规的浏览器中，**event 对象是传给事件处理程序的唯一参数**。不管以哪种方式（DOM0 或 DOM2）指定事件处理程序，都会传入这个 event 对象。下面的例子展示了在两种方式下都可以使 用事件对象：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.onclick = function(event) {
+	console.log(event.type); // "click"
+};
+btn.addEventListener("click", (event) => {
+	console.log(event.type); // "click"
+}, false);
+```
+
+这个例子中的两个事件处理程序都会在控制台打出 event.type 属性包含的事件类型。这个属性中 始终包含被触发事件的类型，如"click"（与传给 addEventListener()和 removeEventListener() 方法的事件名一致）。 
+
+在通过 HTML 属性指定的事件处理程序中，同样可以使用变量 event 引用事件对象。下面的例子 中演示了如何使用这个变量：
+
+```js
+<input type="button" value="Click Me" onclick="console.log(event.type)">
+```
+
+以这种方式提供 event 对象，可以让 HTML 属性中的代码实现与 JavaScript 函数同样的功能。 
+
+如前所述，**事件对象包含与特定事件相关的属性和方法**。*不同的事件生成的事件对象也会包含不同 的属性和方法*。不过，所有事件对象都会包含下表列出的这些公共属性和方法。
+
+![事件对象公共属性和方法](E:\pogject\学习笔记\image\js\事件对象公共属性和方法.png)
+
+#### this、currentTarget 和 target
+
+在事件处理程序内部，**this 对象始终等于 currentTarget 的值**，而 target 只包含事件的实际 目标。**如果事件处理程序直接添加在了意图的目标，则 this、currentTarget 和 target 的值是一样 的**。下面的例子展示了这两个属性都等于 this 的情形：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.onclick = function(event) {
+	console.log(event.currentTarget===this); // true
+	console.log(event.target===this);  //true;
+};
+```
+
+上面的代码检测了 currentTarget 和 target 的值是否等于 this。因为 click 事件的目标是按 钮，所以这 3 个值是相等的。**如果这个事件处理程序是添加到按钮的父节点（如 document.body）上， 那么它们的值就不一样了**。比如下面的例子在 document.body 上添加了单击处理程序：
+
+```js
+var btn = document.getElementById("myBtn");
+document.body.onclick = function(event) {
+	console.log(event.currentTarget===this); // true
+	console.log(event.target===this);  //false;
+	console.log(event.currentTarget === document.body); // true
+	console.log(this === document.body); // true
+	console.log(event.target === document.getElementById("myBtn")); // true
+};
+```
+
+这种情况下点击按钮，this 和 currentTarget 都等于 document.body，这是**因为它是注册事件 处理程序的元素**。**而 target 属性等于按钮本身，这是因为那才是 click 事件真正的目标**。由于按钮 本身并没有注册事件处理程序，因此 click 事件**冒泡**到 document.body，从而触发了在它上面注册的 处理程序。 
+
+#### type 属性
+
+**type 属性在一个处理程序处理多个事件时很有用**。比如下面的处理程序中就使用了 event.type：
+
+```js
+var btn = document.getElementById("myBtn");
+
+let handler=function(event){
+	switch(event.type){
+		case "click":
+			console.log("Clicked");
+			break;
+		case "mouseover":
+			event.target.style.backgroundColor="red";
+			break;
+		case "mouseout":
+			event.target.style.backgroundColor="";
+			break;
+	}
+};
+
+btn.onclick=handler;
+btn.onmouseover=handler;
+btn.onmouseout=handler;
+```
+
+在这个例子中，函数 handler 被用于处理 3 种不同的事件：click、mouseover 和 mouseout。 当按钮被点击时，应该在控制台打印一条消息，如前面的例子所示。而把鼠标放到按钮上，会导致按钮 背景变成红色，接着把鼠标从按钮上移开，背景颜色应该又恢复成默认值。**这个函数使用 event.type 属性确定了事件类型，从而可以做出不同的响应。** 
+
+#### preventDefault()方法和cancelable 属性
+
+**preventDefault()方法用于阻止特定事件的默认动作**。比如，链接的默认行为就是在被单击时导 航到 href 属性指定的 URL。如果想阻止这个导航行为，可以在 onclick 事件处理程序中取消，如下 面的例子所示：
+
+```html
+<a href="https://www.baidu.com/" id="myLink" target="_blank">preventDefault</a>
+<script type="text/javascript">
+let link = document.getElementById("myLink");
+link.onclick = function(event) {
+	event.preventDefault();
+};
+</script>
+```
+
+任何可以通过 preventDefault()取消默认行为的事件，**其事件对象的 cancelable 属性都会设置为 true。**
+
+#### stopPropagation()方法
+
+**stopPropagation()方法用于立即阻止事件流在 DOM 结构中传播，取消后续的事件捕获或冒泡**。 例如，直接添加到按钮的事件处理程序中调用 stopPropagation()，可以阻止 document.body 上注 册的事件处理程序执行。比如：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.onclick = function(event) {
+	console.log("Clicked");
+	event.stopPropagation();
+};
+document.body.onclick = function(event) {
+	console.log("Body clicked");
+};
+```
+
+如果这个例子中不调用stopPropagation()，那么点击按钮就会打印两条消息。但这里由于click 事件不会传播到 document.body，因此 onclick 事件处理程序永远不会执行。 
+
+####  eventPhase 属性
+
+**eventPhase 属性可用于确定事件流当前所处的阶段**。
+
+- 如果事件处理程序在捕获阶段被调用，则 eventPhase 等于 1；
+
+- 如果事件处理程序在目标上被调用，则 eventPhase 等于 2；
+
+- 如果事件处理程序 在冒泡阶段被调用，则 eventPhase 等于 3。
+
+不过要注意的是，**虽然“到达目标”是在冒泡阶段发生的， 但其 eventPhase 仍然等于 2**。下面的例子展示了 eventPhase 在不同阶段的值：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.onclick = function(event) {
+    //接着，会触发按钮本身的事件处理程序（尽管是注册在冒泡阶段）
+	console.log(event.eventPhase);  //2
+};
+document.body.addEventListener("click", (event) => {
+    //首先会触发注册在捕获阶段的 document.body 上的事件处理程序
+	console.log(event.eventPhase); // 1
+}, true);
+
+document.body.onclick = (event) => {
+    //最后触发的是注册在冒泡阶段的 document.body 上的事件处理程序
+	console.log(event.eventPhase); // 3
+};
+```
+
+在这个例子中，点击按钮首先会触发注册在捕获阶段的 document.body 上的事件处理程序， 显示 eventPhase 为 1。接着，会触发按钮本身的事件处理程序（尽管是注册在冒泡阶段），此时显 示 eventPhase 等于 2。最后触发的是注册在冒泡阶段的 document.body 上的事件处理程序，显示 eventPhase 为 3。**而当 eventPhase 等于 2 时，this、target 和 currentTarget 三者相等**。
+
+注意 **event 对象只在事件处理程序执行期间存在，一旦执行完毕，就会被销毁**。
+
+### 3.2 IE 事件对象
+
+与 DOM 事件对象不同， **IE 事件对象可以基于事件处理程序被指定的方式以不同方式来访问**。如果事件处理程序是使用 DOM0 方式指定的，则 event 对象只是 window 对象的一个属性，如下所示：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.onclick = function() {
+    let event = window.event;
+    console.log(event.type); // "click"
+};
+```
+
+这里，window.event 中保存着 event 对象，其 event.type 属性保存着事件类型（IE 的这个属 性的值与 DOM 事件对象中一样）。不过，**如果事件处理程序是使用 attachEvent()指定的，则 event 对象会作为唯一的参数传给处理函数**，如下所示：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.attachEvent("onclick", function(event) {
+	console.log(event.type); // "click"
+});
+```
+
+**使用 attachEvent()时，event 对象仍然是 window 对象的属性**（像 DOM0 方式那样），只是出 于方便也将其作为参数传入。 
+
+**如果是使用 HTML 属性方式指定的事件处理程序，则 event 对象同样可以通过变量 event 访问**（与 DOM 模型一样）。下面是在 HTML 事件属性中使用 event.type 的例子：
+
+```html
+<input type="button" value="Click Me" onclick="console.log(event.type)">
+```
+
+I**E 事件对象也包含与导致其创建的特定事件相关的属性和方法，其中很多都与相关的 DOM 属性和 方法对应**。与 DOM 事件对象一样，基于触发的事件类型不同，event 对象中包含的属性和方法也不一 样。不过，所有 IE 事件对象都会包含下表所列的公共属性和方法。
+
+| 属性/方法    | 类 型  | 类 型  | 说 明                                                        |
+| ------------ | ------ | ------ | ------------------------------------------------------------ |
+| cancelBubble | 布尔值 | 读/写  | 默认为 false，设置为 true 可以取消冒泡（与 DOM 的 stopPropagation()方法相同） |
+| returnValue  | 布尔值 | 布尔值 | 默认为 true，设置为 false 可以取消事件默认行为 （与 DOM 的 preventDefault()方法相同） |
+| srcElement   | 元素   | 只读   | 事件目标（与 DOM 的 target 属性相同）                        |
+| type         | 字符串 | 只读   | 触发的事件类型                                               |
+
+#### srcElement 属性
+
+由于事件处理程序的作用域取决于指定它的方式，**因此 this 值并不总是等于事件目标**。为此，**更 好的方式是使用事件对象的 srcElement 属性代替 this**。下面的例子表明，不同事件对象上的 srcElement 属性中保存的都是事件目标：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.onclick = function() {
+	console.log(window.event.srcElement === this); // true
+};
+btn.attachEvent("onclick", function(event) {
+	console.log(event.srcElement === this); // false
+});
+```
+
+在第一个以 DOM0 方式指定的事件处理程序中，srcElement 属性等于 this，而在第二个事件处 理程序中（运行在全局作用域下），两个值就不相等了。 
+
+#### returnValue 属性
+
+returnValue 属性等价于 DOM 的 preventDefault()方法，都是用于取消给定事件默认的行为。 **只不过在这里要把 returnValue 设置为 false 才是阻止默认动作**。下面是一个设置该属性的例子：
+
+```js
+var link = document.getElementById("myLink");
+link.onclick = function() {
+	window.event.returnValue = false;
+};
+```
+
+在这个例子中，returnValue 在 onclick 事件处理程序中被设置为 false，阻止了链接的默认行 为。
+
+#### cancelBubble 属性
+
+与 DOM 不同，没有办法通过 JavaScript 确定事件是否可以被取消。 **cancelBubble 属性与 DOM stopPropagation()方法用途一样，都可以阻止事件冒泡**。因为 IE8 及更早版本不支持捕获阶段，所以只会取消冒泡。stopPropagation()则既取消捕获也取消冒泡。下 面是一个取消冒泡的例子：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.onclick = function() {
+	console.log("Clicked");
+	window.event.cancelBubble = true;
+};
+document.body.onclick = function() {
+	console.log("Body clicked");
+};
+```
+
+通过在按钮的 onclick 事件处理程序中将 cancelBubble 设置为 true，可以阻止事件冒泡到document.body，也就阻止了调用注册在它上面的事件处理程序。于是，点击按钮只会输出一条消息
+
+### 3.3 跨浏览器事件对象
+
+虽然 DOM 和 IE 的事件对象并不相同，但它们有足够的相似性可以实现跨浏览器方案。**DOM 事件对象中包含 IE 事件对象的所有信息和能力，只是形式不同。这些共性可让两种事件模型之间的映射成 为可能**。本章前面的 EventUtil 对象可以像下面这样再添加一些方法：
+
+```js
+var EventUtil={
+    addHandler:function(element,type,handler){
+        if (element.addEventListener) {
+            element.addEventListener(type,handler,false);
+        }else if(element.attachEvent){
+            element.attachEvent("on"+type,handler);
+        }else{
+
+            element["on"+type]=handler;
+        }
+    },
+    removeHandler:function(element,type,handler){
+        if (element.removeEventListener) {
+            element.removeEventListener(type,handler,false);
+        }else if(element.detachEvent){
+            element.detachEvent("on"+type,handler);
+        }else{
+
+            element["on"+type]=null;
+        }
+    },
+    getEvent:function(event){
+    	return event ? event : window.event;
+    },
+    getTarget:function(event){
+    	return event.target || event.srcElement;
+    },
+    preventDefault:function(event){
+    	if (event.preventDefault) {
+    		event.preventDefault();
+    	}else{
+    		event.returnValue=false;
+    	}
+    },
+    stopPropagation:function(event){
+    	if (event.stopPropagation) {
+    		event.stopPropagation();
+    	}else{
+    		event.cancelBubble=true;
+    	}
+    }
+};
+```
+
+这里一共给 EventUtil 增加了 4 个新方法。**首先是 getEvent()**，其返回对 event 对象的引用。 IE 中事件对象的位置不同，而使用这个方法可以不用管事件处理程序是如何指定的，都可以获取到 event 对象。**使用这个方法的前提是，事件处理程序必须接收 event 对象，并把它传给这个方法**。下 面是使用 EventUtil 中这个方法统一获取 event 对象的一个例子：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.onclick = function(event) {
+	event = EventUtil.getEvent(event);
+};
+```
+
+在 DOM 合规的浏览器中，event 对象会直接传入并返回。而在 IE 中，event 对象可能并没有被 定义（因为使用了 attachEvent()），因此返回 window.event。这样就可以确保无论使用什么浏览器， 都可以获取到事件对象。 
+
+**第二个方法是 getTarget()，其返回事件目标**。在这个方法中，首先检测 event 对象是否存在 target 属性。如果存在就返回这个值；否则，就返回 event.srcElement 属性。下面是使用这个方 法的示例：
+
+```js
+btn.onclick = function(event) {
+	event = EventUtil.getEvent(event);
+    
+	let target = EventUtil.getTarget(event);
+	console.log(target);
+};
+
+```
+
+**第三个方法是 preventDefault()，其用于阻止事件的默认行为**。在传入的 event 对象上，如果 有 preventDefault()方法，就调用这个方法；否则，就将 event.returnValue 设置为 false。下 面是使用这个方法的例子：
+
+```js
+let link = document.getElementById("myLink");
+link.onclick = function(event) {
+	console.log("preventDefault");
+	event = EventUtil.getEvent(event);
+	EventUtil.preventDefault(event);
+};
+```
+
+以上代码能在所有主流浏览器中阻止单击链接后跳转到其他页面。这里首先通过 EventUtil. getEvent()获取事件对象，然后又把它传给了 EventUtil.preventDefault()以阻止默认行为。 
+
+**第四个方法 stopPropagation()以类似的方式运行**。同样先检测用于停止事件流的 DOM 方法， 如果没有再使用 cancelBubble 属性。下面是使用这个通用 stopPropagation()方法的示例：
+
+```js
+var btn = document.getElementById("myBtn");
+btn.onclick = function(event) {
+
+	console.log("Clicked");
+
+	event = EventUtil.getEvent(event);
+
+	let target = EventUtil.getTarget(event);
+	console.log(target);
+
+	EventUtil.stopPropagation(event);
+};
+
+document.body.onclick = function(event) {
+	console.log("Body clicked");
+};
+```
+
+同样，先通过 EventUtil.getEvent()获取事件对象，然后又把它传给了 EventUtil.stop Propagation()。不过，这个方法在浏览器上可能会停止事件冒泡，也可能会既停止事件冒泡也停止 事件捕获。
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>test js</title>
+</head>
+<body>
+
+	<input type="button" value="Click Me" id="myBtn"><br>
+	<a href="https://www.baidu.com/" id="myLink" target="_blank">preventDefault</a>
+<script type="text/javascript">
+var EventUtil={
+    addHandler:function(element,type,handler){
+        if (element.addEventListener) {
+            element.addEventListener(type,handler,false);
+        }else if(element.attachEvent){
+            element.attachEvent("on"+type,handler);
+        }else{
+
+            element["on"+type]=handler;
+        }
+    },
+    removeHandler:function(element,type,handler){
+        if (element.removeEventListener) {
+            element.removeEventListener(type,handler,false);
+        }else if(element.detachEvent){
+            element.detachEvent("on"+type,handler);
+        }else{
+
+            element["on"+type]=null;
+        }
+    },
+    getEvent:function(event){
+    	return event ? event : window.event;
+    },
+    getTarget:function(event){
+    	return event.target || event.srcElement;
+    },
+    preventDefault:function(event){
+    	if (event.preventDefault) {
+    		event.preventDefault();
+    	}else{
+    		event.returnValue=false;
+    	}
+    },
+    stopPropagation:function(event){
+    	if (event.stopPropagation) {
+    		event.stopPropagation();
+    	}else{
+    		event.cancelBubble=true;
+    	}
+    }
+};
+
+var btn = document.getElementById("myBtn");
+btn.onclick = function(event) {
+
+	console.log("Clicked");
+
+	event = EventUtil.getEvent(event);
+
+	let target = EventUtil.getTarget(event);
+	console.log(target);
+
+	EventUtil.stopPropagation(event);
+};
+
+document.body.onclick = function(event) {
+	console.log("Body clicked");
+};
+
+let link = document.getElementById("myLink");
+link.onclick = function(event) {
+	console.log("preventDefault");
+	event = EventUtil.getEvent(event);
+	EventUtil.preventDefault(event);
+};
+
+</script>
+
+</body>
+</html>
+```
+
+## 4 事件类型
