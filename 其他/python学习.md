@@ -366,6 +366,7 @@ for line in lines:
 	line=line.split("\t")
 	sp=line[0]+"|"+line[1]
 	if sp!=tempsp:
+		#划分每一个物种数据
 		if len(temgene)>1:
 			for i in range(len(temgene)):
 				geneA=temgene[i]
@@ -374,6 +375,7 @@ for line in lines:
 					geneB=temgene[j]
 					if geneA!=geneB:
 						if geneB in SLA:
+							#在SL对里找到，则标记为SL
 							count+=1
 							f3.write(tempsp+"\t"+tempInfo[i]+"\t"+geneA+"\t"+tempInfo[j]+"\t"+geneB+"\n")
 							#print(tempsp+"\t"+geneA+"\t"+geneB)
@@ -519,5 +521,33 @@ f2.close();
 
 print(success)
 print(failure)
+```
+
+统计gene个数
+
+```python
+import os
+
+f1=open("BW25113resultofSLPairsWithNoEcoli.txt","r",encoding="utf-8")
+
+SLPairs=[];
+SLGenes=[];
+
+count=0
+lines=f1.readlines()
+
+for line in lines:
+	line=line.strip();
+	line=line.split("\t")
+	SLGenes.append(line[-3])
+	SLGenes.append(line[-1])
+	#print(line[-3]+"\t"+line[-1])
+
+setGene=set(SLGenes);
+for gene in setGene:
+	print(gene);
+print(len(setGene))
+f1.close()
+print(count)
 ```
 

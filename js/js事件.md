@@ -797,3 +797,289 @@ link.onclick = function(event) {
 ```
 
 ## 4 事件类型
+
+Web 浏览器中可以发生很多种事件。如前所述，所发生事件的类型决定了事件对象中会保存什么信息。DOM3 Events 定义了如下事件类型。
+- 用户界面事件（UIEvent）：涉及与 BOM 交互的通用浏览器事件。
+- 焦点事件（FocusEvent）：在元素获得和失去焦点时触发。
+- 鼠标事件（MouseEvent）：使用鼠标在页面上执行某些操作时触发。
+- 滚轮事件（WheelEvent）：使用鼠标滚轮（或类似设备）时触发。
+- 输入事件（InputEvent）：向文档中输入文本时触发。
+- 键盘事件（KeyboardEvent）：使用键盘在页面上执行某些操作时触发。
+- 合成事件（CompositionEvent）：在使用某种 IME（Input Method Editor，输入法编辑器）输入字符时触发。
+
+除了这些事件类型之外，HTML5 还定义了另一组事件，而浏览器通常在 DOM 和 BOM 上实现专有事 件。这些专有事件基本上都是根据开发者需求而不是按照规范增加的，因此不同浏览器的实现可能不同。 
+
+DOM3 Events 在 DOM2 Events 基础上重新定义了事件，并增加了新的事件类型。所有主流浏览器 都支持 DOM2 Events 和 DOM3 Events。
+
+### 4.1 用户界面事件
+
+用户界面事件或 UI 事件不一定跟用户操作有关。这类事件在 DOM 规范出现之前就已经以某种形 式存在了，保留它们是为了向后兼容。UI 事件主要有以下几种。 
+- DOMActivate：元素被用户通过鼠标或键盘操作激活时触发（比 click 或 keydown 更通用）。 这个事件在 DOM3 Events 中**已经废弃**。因为浏览器实现之间存在差异，所以不要使用它。 
+- **load**：**在 window 上当页面加载完成后触发**，在窗套（<frameset>）上当所有窗格（<frame>） 都加载完成后触发，在<img>元素上当图片加载完成后触发，在<object>元素上当相应对象加 载完成后触发。 
+- **unload**：**在 window 上当页面完全卸载后触发**，在窗套上当所有窗格都卸载完成后触发，在 <object>元素上当相应对象卸载完成后触发。 
+- **abort**：在<object>元素上当相应对象**加载完成前被用户提前终止下载时**触发。 
+- **error**：在 window 上当 JavaScript 报错时触发，在<img>元素上当无法加载指定图片时触发， 在<object>元素上当无法加载相应对象时触发，在窗套上当一个或多个窗格无法完成加载时 触发。 
+- **select**：在文本框（<input>或 textarea）上当用户选择了一个或多个字符时触发。 
+- **resize**：在 window 或窗格上当窗口或窗格被缩放时触发。 
+- **scroll**：当用户滚动包含滚动条的元素时在元素上触发。<body>元素包含已加载页面的滚动条。 
+
+大多数 HTML 事件与 window 对象和表单控件有关。 
+
+除了 DOMActivate，这些事件在 DOM2 Events 中都被归为 HTML Events（DOMActivate 在 DOM2 中仍旧是 UI 事件）。
+
+#### load 事件
+
+**load 事件可能是 JavaScript 中最常用的事件。**在 window 对象上，load 事件会在整个页面（包括 所有外部资源如图片、JavaScript 文件和 CSS 文件）加载完成后触发。可以通过两种方式指定 load 事 件处理程序。第一种是 JavaScript 方式，如下所示：
+
+```js
+window.addEventListener("load",(event)=>{
+	console.log("loaded!");
+});
+```
+
+这是使用 addEventListener()方法来指定事件处理程序。与其他事件一样，事件处理程序会接 收到一个 event 对象。**这个 event 对象并没有提供关于这种类型事件的额外信息**，虽然在 DOM 合规 的浏览器中，event.target 会被设置为 document，但在 IE8 之前的版本中，不会设置这个对象的 srcElement 属性。
+
+**第二种指定 load 事件处理程序的方式是向<body>元素添加 onload 属性**，如下所示：
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+    	<title>Load Event Example</title>
+    </head>
+    <body onload="console.log('Loaded!')">
+    </body>
+</html>
+```
+
+**一般来说，任何在 window 上发生的事件，都可以通过给<body>元素上对应的属性赋值来指定**， **这是因为 HTML 中没有 window 元素**。这实际上是为了保证向后兼容的一个策略，但在所有浏览器中都 能得到很好的支持。**实际开发中要尽量使用 JavaScript 方式。** 
+
+注意 根据 DOM2 Events，**load 事件应该在 document** 而非 window 上**触发**。可是为了 向后兼容，所有浏览器都在 window 上实现了 load 事件。 
+
+**图片上也会触发 load 事件**，包括 DOM中的图片和非 DOM中的图片。可以在 HTML中直接给<img> 元素的 onload 属性指定事件处理程序，比如：
+
+```html
+<img src="bg2.jpg" onload="console.log('Image loaded.')">
+```
+
+这个例子会在图片加载完成后输出一条消息。同样，使用 JavaScript 也可以为图片指定事件处理程序：
+
+```js
+let image = document.getElementById("myImage");
+image.addEventListener("load", (event) => {
+	console.log(event.target.src);  //file:///E:/pogject/js/bg2.jpg
+});
+```
+
+这里使用 JavaScript 为图片指定了 load 事件处理程序。处理程序会接收到 event 对象，虽然这个 对象上没有多少有用的信息。这个事件的目标是<img>元素，因此可以直接从 event.target.src 属 性中取得图片地址并打印出来。 
+
+在通过 JavaScript 创建新<img>元素时，也可以给这个元素指定一个在加载完成后执行的事件处理 程序。**在这里，关键是要在赋值 src 属性前指定事件处理程序**，如下所示：
+
+```js
+window.addEventListener("load", () => {
+	let image = document.createElement("img");
+	image.addEventListener("load", (event) => {
+		console.log(event.target.src);
+	});
+	document.body.appendChild(image);
+	image.src = "bg2.jpg";
+});
+```
+
+这个例子首先为 window 指定了一个 load 事件处理程序。因为示例涉及向 DOM 中添加新元素， 所以必须确保页面已经加载完成。**如果在页面加载完成之前操作 document.body，则会导致错误**。然 后，代码创建了一个新的<img>元素，并为这个元素设置了 load 事件处理程序。最后，才把这个元素 添加到文档中并指定了其 src 属性。
+
+**注意，下载图片并不一定要把<img>元素添加到文档，只要给它设 置了 src 属性就会立即开始下载。** 
+
+同样的技术也适用于 DOM0 的 Image 对象。在 DOM 出现之前，客户端都使用 Image 对象预先加 载图片。可以像使用前面（通过 createElement()方法创建）的<img>元素一样使用 Image 对象，只 是不能把后者添加到 DOM 树。下面的例子**使用新 Image 对象实现了图片预加载**：
+
+```js
+window.addEventListener("load", () => {
+	let image = new Image();
+	image.addEventListener("load", (event) => {
+		console.log("Image loaded!");
+		console.log(event.target.src);
+	});
+	image.src = "bg2.jpg";
+});
+```
+
+这里调用 Image 构造函数创建了一个新图片，并给它设置了事件处理程序。**有些浏览器会把 Image 对象实现为<img>元素**，但并非所有浏览器都如此。所以最好把它们看成是两个东西。 
+
+注意 在 IE8 及早期版本中，如果图片没有添加到 DOM 文档中，则 load 事件发生时不 会生成 event 对象。对未被添加到文档中的<img>元素以及 Image 对象来说都是这样。 IE9 修复了这个问题。 
+
+还有一些元素也以非标准的方式支持 load 事件。**<script>元素会在 JavaScript 文件加载完成后触 发 load 事件，从而可以动态检测**。**与图片不同，要下载 JavaScript 文件必须同时指定 src 属性并把 <script>元素添加到文档中**。因此指定事件处理程序和指定 src 属性的顺序在这里并不重要。下面的 代码展示了如何给动态创建的<script>元素指定事件处理程序：
+
+```js
+window.addEventListener("load", () => {
+	let script=document.createElement("script");
+	script.addEventListener("load",(event)=>{
+		console.log("loaded");
+	});
+	script.src="jscode.js";
+	document.body.appendChild(script);
+});
+```
+
+**这里 event 对象的 target 属性在大多数浏览器中是<script>节点**。IE8及更早版本不支持<script> 元素触发 load 事件。 
+
+**IE 和 Opera 支持<link>元素触发 load 事件，因而支持动态检测样式表是否加载完成**。下面的代码 展示了如何设置这样的事件处理程序：
+
+```js
+window.addEventListener("load", () => {
+	let link = document.createElement("link");
+	link.type = "text/css";
+	link.rel= "stylesheet";
+	link.addEventListener("load", (event) => {
+		console.log("css loaded");
+	});
+	link.href = "example.css";
+document.getElementsByTagName("head")[0].appendChild(link);
+});
+```
+
+**与<script>节点一样，在指定 href 属性并把<link>节点添加到文档之前不会下载样式表**。
+
+#### unload 事件
+
+与 load 事件相对的是 unload 事件，**unload 事件会在文档卸载完成后触发**。unload 事件一般是 在从一个页面导航到另一个页面时触发，**最常用于清理引用，以避免内存泄漏**。与 load 事件类似， unload 事件处理程序也有两种指定方式。第一种是 JavaScript 方式，如下所示：
+
+```js
+window.addEventListener("unload", (event) => {
+	console.log("Unloaded!");
+});
+```
+
+**这个事件生成的 event 对象在 DOM 合规的浏览器中只有 target 属性（值为 document）**。IE8 及更早版本在这个事件上不提供 srcElement 属性。 
+
+第二种方式与 load 事件类似，就是给<body>元素添加 onunload 属性：
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Unload Event Example</title>
+    </head>
+    <body onunload="console.log('Unloaded!')">
+    </body>
+</html>
+```
+
+无论使用何种方式，都要注意事件处理程序中的代码。**因为 unload 事件是在页面卸载完成后触发的，所以不能使用页面加载后才有的对象**。此时要访问 DOM 或修改页面外观都会导致错误。
+
+注意 根据 DOM2 Events，**unload 事件应该在<body>**而非 window 上**触发**。可是为了向后兼容，所有浏览器都在 window 上实现了 unload 事件。
+
+#### resize 事件
+
+**当浏览器窗口被缩放到新高度或宽度时，会触发 resize 事件**。这个事件在 window 上触发，因此 可以通过 JavaScript 在 window 上或者为<body>元素添加 onresize 属性来指定事件处理程序。优先使 用 JavaScript 方式：
+
+```js
+window.addEventListener("resize", (event) => {
+	console.log("Resized!");
+});
+```
+
+**类似于其他在 window 上发生的事件，此时会生成 event 对象**，且这个对象的 target 属性**在 DOM 合规的浏览器中是 documen**t。而 IE8 及更早版本中并没有提供可用的属性。 
+
+不同浏览器在决定何时触发 resize 事件上存在重要差异。IE、Safari、Chrome 和 Opera 会在窗口 缩放超过 1 像素时触发 resize 事件，然后随着用户缩放浏览器窗口不断触发。Firefox 早期版本则只在 用户停止缩放浏览器窗口时触发 resize 事件。**无论如何，都应该避免在这个事件处理程序中执行过多 计算**。否则可能由于执行过于频繁而导致浏览器响应明确变慢。 
+
+**注意 浏览器窗口在最大化和最小化时也会触发 resize 事件**。
+
+#### scroll 事件
+
+**虽然 scroll 事件发生在 window 上**，但**实际上反映的是页面中相应元素的变化**。在混杂模式下， 可以通过<body>元素检测 scrollLeft 和 scrollTop 属性的变化。而在标准模式下，这些变化在除 早期版的 Safari 之外的所有浏览器中都发生在<html>元素上（早期版的 Safari 在<body>上跟踪滚动位 置）。下面的代码演示了如何处理这些差异：
+
+```js
+window.addEventListener("scroll", (event) => {
+	if (document.compatMode == "CSS1Compat") {
+		console.log(document.documentElement.scrollTop);
+	} else {
+		console.log(document.body.scrollTop);
+	}
+});
+```
+
+以上事件处理程序会在页面滚动时**输出垂直方向上滚动的距离**，而且适用于不同渲染模式。因为 Safari 3.1 之前不支持 document.compatMode，所以早期版本会走第二个分支。 
+
+**类似于 resize，scroll 事件也会随着文档滚动而重复触发**，**因此最好保持事件处理程序的代码 尽可能简单**。
+
+### 4.2 焦点事件
+
+焦点事件在页面元素获得或失去焦点时触发。这些事件可以与 document.hasFocus()和 document.activeElement 一起为开发者提供用户在页面中导航的信息。焦点事件有以下 6 种。
+
+- **blur**：当元素失去焦点时触发。**这个事件不冒泡**，所有浏览器都支持。
+- DOMFocusIn：当元素获得焦点时触发。这个事件**是 focus 的冒泡版**。Opera 唯一支持这个事件的主流浏览器。DOM3 Events 废弃了 DOMFocusIn，推荐 focusin。
+- DOMFocusOut：当元素失去焦点时触发。这个事件是 **blur 的通用版**。Opera 是唯一支持这个事件的主流浏览器。DOM3 Events 废弃了 DOMFocusOut，推荐 focusout。
+- **focus**：当元素获得焦点时触发。这个事件**不冒泡**，所有浏览器都支持。
+- **focusin**：当元素获得焦点时触发。这个事件是 **focus 的冒泡版**。
+- **focusout**：当元素失去焦点时触发。这个事件是 **blur 的通用版**。
+
+焦点事件中的两个主要事件是 focus 和 blur，这两个事件在 JavaScript 早期就得到了浏览器支持。 它们最大的问题是不冒泡。这导致 IE后来又增加了 focusin 和 focusout，Opera又增加了 DOMFocusIn 和 DOMFocusOut。**IE 新增的这两个事件已经被 DOM3 Events 标准化**。 
+
+当焦点从页面中的一个元素移到另一个元素上时，会依次发生如下事件。
+
+(1) focuscout 在失去焦点的元素上触发。
+(2) focusin 在获得焦点的元素上触发。
+(3) blur 在失去焦点的元素上触发。
+(4) DOMFocusOut 在失去焦点的元素上触发。
+(5) focus 在获得焦点的元素上触发。
+(6) DOMFocusIn 在获得焦点的元素上触发。
+
+其中，blur、DOMFocusOut 和 focusout 的事件目标是**失去焦点的元素**，而 focus、DOMFocusIn和 focusin 的事件目标是**获得焦点的元素**。
+
+### 4.3 鼠标和滚轮事件
+
+鼠标事件是 Web 开发中最常用的一组事件，这是因为鼠标是用户的主要定位设备。DOM3 Events定义了 9 种鼠标事件。
+
+- click：在用户单击鼠标主键（通常是左键）或按键盘回车键时触发。这主要是基于无障碍的考 虑，让键盘和鼠标都可以触发 onclick 事件处理程序。 
+- dblclick：在用户双击鼠标主键（通常是左键）时触发。这个事件不是在 DOM2 Events 中定义 的，但得到了很好的支持，DOM3 Events 将其进行了标准化。 
+- mousedown：在用户按下任意鼠标键时触发。这个事件不能通过键盘触发。 
+- mouseenter：在用户把鼠标光标从元素外部移到元素内部时触发。这个事件**不冒泡**，也不会在 光标经过后代元素时触发。mouseenter 事件不是在 DOM2 Events 中定义的，而是 DOM3 Events 中新增的事件。 
+- mouseleave：在用户把鼠标光标从元素内部移到元素外部时触发。这个事件**不冒泡**，也不会在 光标经过后代元素时触发。mouseleave 事件不是在 DOM2 Events 中定义的，而是 DOM3 Events 中新增的事件。 
+- mousemove：在鼠标光标在元素上移动时反复触发。这个事件不能通过键盘触发。 
+- mouseout：在用户把鼠标光标从一个元素移到另一个元素上时触发。移到的元素可以是原始元 素的外部元素，也可以是原始元素的子元素。这个事件不能通过键盘触发。 
+- mouseover：在用户把鼠标光标从元素外部移到元素内部时触发。这个事件不能通过键盘触发。 
+- mouseup：在用户释放鼠标键时触发。这个事件不能通过键盘触发。
+
+页面中的所有元素都支持鼠标事件。**除了 mouseenter 和 mouseleave，所有鼠标事件都会冒泡**，都可以被取消，而这会影响浏览器的默认行为。
+
+**由于事件之间存在关系，因此取消鼠标事件的默认行为也会影响其他事件**。
+
+比如，click 事件触发的前提是 mousedown 事件触发后，紧接着又在同一个元素上触发了 mouseup 事件。如果 mousedown 和 mouseup 中的任意一个事件被取消，那么 click 事件就不会触发。类似地， 两次连续的 click 事件会导致 dblclick 事件触发。只要有任何逻辑阻止了这两个 click 事件发生（比 如取消其中一个 click 事件或者取消 mousedown 或 mouseup 事件中的任一个），dblclick 事件就不 会发生。这 4 个事件永远会按照如下顺序触发：
+
+(1) mousedown
+(2) mouseup
+(3) click
+(4) mousedown
+(5) mouseup
+(6) click
+(7) dblclick
+
+**click 和 dblclick 在触发前都依赖其他事件触发**，**mousedown 和 mouseup 则不会受其他事件影响**。
+
+IE8 及更早版本的实现中有个问题，这会导致双击事件跳过第二次 mousedown 和 click 事件。相应的顺序变成了：
+
+(1) mousedown
+(2) mouseup
+(3) click
+(4) mouseup
+(5) dblclick
+
+鼠标事件在 DOM3 Events 中对应的类型是"MouseEvent"，而不是"MouseEvents"。
+
+鼠标事件还有一个名为滚轮事件的子类别。滚轮事件只有一个事件 mousewheel，反映的是鼠标滚轮或带滚轮的类似设备上滚轮的交互。
+
+#### 客户端坐标
+
+鼠标事件都是在浏览器视口中的某个位置上发生的。**这些信息被保存在 event 对象的 clientX 和clientY 属性中。**这两个属性表示事件发生时鼠标光标在视口中的坐标，所有浏览器都支持。
+
+可以通过下面的方式获取鼠标事件的客户端坐标：
+
+```js
+	let div=document.getElementById("myDiv");
+	div.addEventListener("click",(event)=>{
+		console.log(` Client coordinates: ${event.clientX}, ${event.clientY}`);
+	});
+```
+
+这个例子为<div>元素指定了一个 onclick 事件处理程序。当元素被点击时，会显示事件发生时 鼠标光标在**客户端视口**中的坐标。**注意客户端坐标不考虑页面滚动，因此这两个值并不代表鼠标在页面 上的位置。**
+
