@@ -2392,4 +2392,160 @@ function createModule(str1, str2) {
 
 ```
 
-## **JS64** **二进制转换**
+## **JS64** **二进制转换**1
+
+获取数字 num 二进制形式第 bit 位的值。注意：
+1、bit 从 1 开始
+2、返回 0 或 1
+3、举例：2 的二进制为 10，第 1 位为 0，第 2 位为 1
+
+输入：
+
+```
+128, 8
+```
+
+输出：
+
+```
+1
+```
+
+```js
+function valueAtBit(num, bit) {
+    let result=[];
+    while(num>0){
+        result.push(num%2);
+        num>>=1;
+    }
+    return result[bit-1];
+}
+
+let test =128;
+let result=valueAtBit(test,8)
+console.log(result);
+
+
+function valueAtBit(num, bit) {
+    let result=num.toString(2);
+    console.log(result);
+    return result[result.length-bit];
+}
+
+function valueAtBit(num, bit) {
+    return (num>>(bit-1)) & 1;
+}
+```
+
+## **JS65  二进制转换2**
+
+给定二进制字符串，将其换算成对应的十进制数字
+示例1
+输入：
+	'11000000'
+输出：
+	192
+
+```js
+function base10(str) {
+    let num=0;
+    for (let i=str.length-1;i>=0;i--){
+        num+=Number(str[i])*Math.pow(2,(str.length-1-i));
+    }
+    return num;
+}
+
+let test ='11000000';
+let result=base10(test)
+console.log(result);
+
+function base10(str) {
+     /**
+        其它进制转十进制
+        parseInt(str,2)
+        parseInt(str,8)
+        parseInt(str,16)
+    */
+    return parseInt(str,2);
+}
+
+```
+
+## **JS66** **二进制转换**3
+
+将给定数字转换成二进制字符串。如果字符串长度不足 8 位，则在前面补 0 到满8位。
+
+```js
+function convertToBinary(num) {
+    let result=[];
+    while(num>0){
+        result.unshift(num%2);
+        num>>=1;
+    }
+    while(result.length<8){
+        result.unshift(0);
+    }
+    return result.join("");
+}
+
+let test =65;
+let result=convertToBinary(test)
+console.log(result);
+
+
+function convertToBinary(num) {
+    return (num.toString(2).length>=8) ? num.toString(2) :  ("00000000" + num.toString(2)).slice(-8);
+}
+```
+
+## **JS67** **乘法**
+
+求 a 和 b 相乘的值，a 和 b 可能是小数，需要注意结果的精度问题
+
+输入：
+
+```
+3, 0.0001
+```
+
+输出：
+
+```
+0.0003
+```
+
+```js
+function multiply(a, b) {
+    //计算两小数的小数点位数，然后相加得到保留的小数点位数，用tofixed函数即可
+    // 先将数字转换为字符串
+    let strA=""+a;
+    let strB=""+b;
+    //获取两个数的小数位数
+    let lenA=(strA.indexOf(".")===-1) ? 0 : (strA.length-strA.indexOf(".")-1);
+    let lenB=(strB.indexOf(".")===-1) ? 0 : (strB.length-strB.indexOf(".")-1);
+    // 比较两数的精度，精度大的作为结果数精度
+    let maxLen=lenA>lenB ? lenA : lenB;
+    // 计算运算结果
+    let result=parseFloat(a*b).toFixed(maxLen);
+    return result;
+}
+```
+
+## **JS68** **改变上下文**
+
+将函数 fn 的执行上下文改为 obj，返回 fn 执行后的值
+
+```js
+function alterContext(fn, obj) {
+    //apply 方法改变函数 this 值
+    return fn.apply(obj);
+    // call 方法改变函数 this 值
+    return fn.call(obj);
+    // bind 方法创建指定 this 值的函数实例
+    return fn.bind(obj)();
+    //给 obj 增加 fn 方法
+    obj.fn=fn;
+    return obj.fn();
+}
+```
+
