@@ -2549,3 +2549,144 @@ function alterContext(fn, obj) {
 }
 ```
 
+## **JS69** **批量改变对象的属性**
+
+给定一个构造函数 constructor，请完成 alterObjects 方法，将 constructor 的所有实例的 greeting 属性指向给定的 greeting 变量。
+
+```js
+function alterObjects(constructor, greeting) {
+    //只需要在constructor的原型上面添加greeting属性，并指定值
+    constructor.prototype.greeting=greeting;
+}
+```
+
+## **JS70** **属性遍历**
+
+找出对象 obj **不在**原型链上的属性(注意这题测试例子的**冒号后面也有一个空格**~)
+1、返回数组，格式为 key: value
+2、结果数组不要求顺序
+
+```js
+//要求找不在原型链上的属性，即返回实例属性
+
+//Object.keys 方法
+function iterate(obj) {
+    //返回可枚举的实例属性的数组
+    return Object.keys(obj).map((key)=>{
+        return key+": "+obj[key];
+    });
+}
+
+//for-in 和 hasOwnProperty 方法
+function iterate(obj) {
+    //前者用于遍历所有属性，后者用于判断是否为实例属性。
+    let result=[];
+    for (let prop in obj){
+        if (obj.hasOwnProperty(prop)) {
+            result.push(prop+": "+obj[prop]);
+        }
+    }
+    return result;
+}
+
+//Object.getOwnPropertyNames 方法
+function iterate(obj){
+    //用法跟1.一样，区别在于返回的是所有实例属性（包括不可枚举的）
+    return Object.getOwnPropertyNames(obj).map((key)=>{
+        return key+": "+obj[key];
+    });
+}
+```
+
+## **JS71** **判断是否包含数字**
+
+给定字符串 str，检查其是否包含数字，包含返回 true，否则返回 false
+
+```js
+function containsNumber(str) {
+    return /\d/.test(str);
+}
+```
+
+## **JS72** **检查重复字符串**
+
+给定字符串 str，检查其是否包含连续重复的字母（a-zA-Z），包含返回 true，否则返回 false
+
+```js
+function containsRepeatingLetter(str) {
+    /*对正则表达式中前一个子表达式的引用，并不是指对子表达式模式的引用，而指的是与那个模式相匹配的文本的引用。这样，引用可以用于实施一条约束，即一个字符串各个单独部分包含的是完全相同的字符。*/
+    /*在正则表达式中，利用()进行分组，使用斜杠加数字表示引用，\1就是引用第一个分组，\2就是引用第二个分组。将[a-zA-Z]做为一个分组，然后引用，就可以判断是否有连续重复的字母。*/
+    return /([a-zA-Z])\1/.test(str);
+}
+```
+
+## **JS73** **判断是否以元音字母结尾**
+
+给定字符串 str，检查其是否以元音字母结尾
+1、元音字母包括 a，e，i，o，u，以及对应的大写
+2、包含返回 true，否则返回 false
+
+```js
+function endsWithVowel(str) {
+    //return /[a|e|i|o|u|A|E|I|O|U]$/.test(str);
+    //$表示匹配结尾，/i表示忽略大小写
+    return /[aeiou]$/i.test(str);
+    return "aeiou".indexOf(str[str.length-1].toLowerCase())!==-1;
+}
+```
+
+## **JS74** **获取指定字符串**
+
+给定字符串 str，检查其是否包含 连续3个数字，请使用正则表达式实现。
+1、如果包含，返回最先出现的 3 个数字的字符串
+2、如果不包含，返回 false
+
+```js
+function captureThreeNumbers(str) {
+    let result=/[\d]{3}/.exec(str);
+    return result!==null ? result : false;
+}
+```
+
+## **JS75** **判断是否符合指定格式**
+
+给定字符串 str，检查其是否符合如下格式
+1、XXX-XXX-XXXX
+2、其中 X 为 Number 类型
+
+```js
+function matchesPattern(str) {
+    let reg=/^[\d]{3}-[\d]{3}-[\d]{4}$/;
+    return reg.test(str);
+}
+
+let test="399-333-2211";
+let result=matchesPattern(test);
+console.log(result);
+```
+
+## **JS76** **判断是否符合 USD 格式**
+
+给定字符串 str，检查其是否符合美元书写格式
+1、以 $ 开始
+2、整数部分，从个位起，满 3 个数字用 , 分隔
+3、如果为小数，则小数部分长度为 2
+4、正确的格式如：$1,023,032.03 或者 $2.03，错误的格式如：$3,432,12.12 或者 $34,344.3
+
+```js
+function isUSD(str) {
+    if (/[^\d,.\$]/.test(str)) {
+        //排除有其它字符的情况
+        return false;
+    }
+    //首位不为0
+    //let reg=/^\$[\d]{1,3}(,[\d]{3})*(\.[\d]{2})?$/;
+    let reg=/^\$[1-9]\d{0,2}(,[\d]{3})*(\.[\d]{2})?$/;
+    return reg.test(str);
+}
+
+let test="$20,933,209";
+let result=isUSD(test);
+console.log(result);
+```
+
