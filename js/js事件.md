@@ -1484,3 +1484,41 @@ event 对象上还有一个名为 **inputMethod 的属性**，该属性表示向
 
 ### 4.5 合成事件
 
+合成事件是 DOM3 Events 中新增的，**用于处理通常使用 IME 输入时的复杂输入序列。IME 可以让 用户输入物理键盘上没有的字符。**例如，使用拉丁字母键盘的用户还可以使用 IME 输入日文。IME 通 常需要同时按下多个键才能输入一个字符。合成事件用于检测和控制这种输入。合成事件有以下 3 种：
+
+- compositionstart，在 IME 的文本合成系统打开时触发，表示输入即将开始；
+- compositionupdate，在新字符插入输入字段时触发；
+- compositionend，在 IME 的文本合成系统关闭时触发，表示恢复正常键盘输入。
+
+**合成事件在很多方面与输入事件很类似**。在合成事件触发时，事件目标是接收文本的输入字段。唯一增加的事件属性是 data，其中包含的值视情况而异：
+
+- 在 compositionstart 事件中，包含正在编辑的文本（例如，已经选择了文本但还没替换）；
+- 在 compositionupdate 事件中，包含要插入的新字符；
+- 在 compositionend 事件中，包含本次合成过程中输入的全部内容。
+
+与文本事件类似，合成事件可以用来在必要时过滤输入内容。可以像下面这样使用合成事件：
+
+```js
+	let textbox = document.getElementById("myText");
+	textbox.addEventListener("compositionstart", (event) => {
+		console.log(event.data);
+	});
+	textbox.addEventListener("compositionupdate", (event) => {
+		console.log(event.data);
+	});
+	textbox.addEventListener("compositionend", (event) => {
+		console.log(event.data);
+	});
+```
+
+### 4.6 变化事件
+
+DOM2 的变化事件（Mutation Events）是为了在 DOM 发生变化时提供通知。
+
+**注意 这些事件已经被废弃**，浏览器已经在有计划地停止对它们的支持。变化事件已经被Mutation Observers 所取代。
+
+### 4.7 HTML5 事件
+
+DOM 规范并未涵盖浏览器都支持的所有事件。很多浏览器根据特定的用户需求或使用场景实现了 自定义事件。HTML5 详尽地列出了浏览器支持的所有事件。
+
+#### contextmenu 事件
