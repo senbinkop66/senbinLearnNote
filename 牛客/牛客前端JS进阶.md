@@ -2690,3 +2690,225 @@ let result=isUSD(test);
 console.log(result);
 ```
 
+## **JS77** **颜色字符串转换**
+
+将 rgb 颜色字符串转换为十六进制的形式，如 rgb(255, 255, 255) 转为 #ffffff
+1. rgb 中每个 , 后面的空格数量不固定
+2. 十六进制表达式使用六位小写字母
+3. 如果输入不符合 rgb 格式，返回原始输入
+
+```js
+function rgb2hex(sRGB) {
+    let reg=/rgb\(\d+(,\s*\d+){2}\)/;
+    if (!reg.test(sRGB)) {
+        return sRGB;
+    }
+    let result=["#"];
+    sRGB.replace(/\d+/g,function($0){
+        result.push(('0'+(+$0).toString(16)).slice(-2));
+    });
+    return result.join("");
+}
+
+let test = "rgb(255, 255, 255)";
+let result=rgb2hex(test)
+console.log(result);
+```
+
+```js
+function rgb2hex(sRGB) {
+    let reg=/rgb\(\d+(,\s*\d+){2}\)/;
+    if (!reg.test(sRGB)) {
+        return sRGB;
+    }
+    let arr=sRGB.match(/\d{1,3}/g);
+    for (let i=0;i<3;i++){
+        if (Number(arr[i])>=0 && Number(arr[i])<=255){
+            arr[i]=('0'+Number(arr[i]).toString(16)).slice(-2);
+        }else{
+            return sRGB;
+        }
+    }
+    
+    return "#"+arr.join("");
+}
+```
+
+## **JS78** **将字符串转换为驼峰格式**
+
+css 中经常有类似 background-image 这种通过 - 连接的字符，通过 javascript 设置样式的时候需要将这种样式转换成 backgroundImage 驼峰格式，请完成此转换功能
+1. 以 - 为分隔符，将第二个起的非空单词首字母转为大写
+2. -webkit-border-image 转换后的结果为 webkitBorderImage
+
+```js
+function cssStyle2DomStyle(sName) {
+    return sName.replace(/\-[a-z]/g , function(a, b){
+        return b == 0 ? a.replace('-','') : a.replace('-','').toUpperCase();
+    });
+
+}
+
+let test = "-webkit-border-image";
+let result=cssStyle2DomStyle(test)
+console.log(result);
+```
+
+## **JS79** **购物车**
+
+HTML模块为一个简化版的购物车，tbody为商品列表，tfoot为统计信息，系统会随机在列表中生成一些初始商品信息
+1、请完成add函数，在列表后面显示items商品信息。参数items为{name: String, price: Number}组成的数组
+2、请完成bind函数，点击每一行的删除按钮(包括通过add增加的行)，从列表中删除对应行
+3、请注意同步更新统计信息，价格保留小数点后两位
+4、列表和统计信息格式请与HTML示例保持一致
+5、不要直接手动修改HTML中的代码
+6、不要使用第三方库
+
+```
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style type="text/css">
+            body,html{
+                padding: 0;
+                margin: 0;
+                font-size: 14px;
+                color: #000000;
+            }
+            table{
+                border-collapse: collapse;
+                width: 100%;
+                table-layout: fixed;
+            }
+            thead{
+                background: #3d444c;
+                color: #ffffff;
+            }
+            td,th{
+                border: 1px solid #e1e1e1;
+                padding: 0;
+                height: 30px;
+                line-height: 30px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <table id="jsTrolley">
+            <thead><tr><th>名称</th><th>价格</th><th>操作</th></tr></thead>
+            <tbody>
+                <tr><td>产品1</td><td>10.00</td><td><a href="javascript:void(0);">删除</a></td></tr>
+                <tr><td>产品2</td><td>30.20</td><td><a href="javascript:void(0);">删除</a></td></tr>
+                <tr><td>产品3</td><td>20.50</td><td><a href="javascript:void(0);">删除</a></td></tr>
+            </tbody>
+            <tfoot><tr><th>总计</th><td colspan="2">60.70(3件商品)</td></tr></tfoot>
+        </table>
+<script>
+    function add(items) {
+        let fragment=document.createDocumentFragment();
+        items.forEach((item)=>{
+            let tr=document.createElement("tr");
+            tr.innerHTML=`<td>${item.name}</td>
+            <td>${item.price.toFixed(2)}</td>
+            <td><a href="javascript:void(0);">删除</a></td>
+            `;
+            fragment.appendChild(tr);
+        });
+        document.querySelector("tbody").appendChild(fragment);
+        updatePrice();
+    }
+
+    function bind() {
+        let tbody=document.getElementsByTagName("tbody")[0];
+        let a=document.querySelectorAll('a');
+        a.forEach((item)=>{
+            item.addEventListener("click",(event)=>{
+                let tr=event.target.parentNode.parentNode;
+                tbody.remove(tr);
+                updatePrice();
+            });
+        });
+    }
+    function updatePrice(){
+        let tbody=document.querySelector('#jsTrolley > tbody');
+        console.log(tbody);
+        let trElements=tbody.getElementsByTagName("tr");
+        let total=0;
+        trElements.forEach((item)=>{
+            let tdP=item.getElementsByTagName("td")[1].innerHTML;
+            total+=Number(tdP);
+        });
+        let total_element=document.querySelector("tfoot td");
+        total_element.innerHTML=total.toFixed(2)+`(${trElements.length})件商品`;
+    }
+    bind();
+</script>
+    </body>
+</html>
+```
+
+## **JS80** **表格排序**
+
+系统会在tbody中随机生成一份产品信息表单，如html所示。
+请完成 sort 函数，根据参数的要求对表单所有行进行重新排序。
+1、type为id、price或者sales，分别对应第1 ~ 3列
+2、order为asc或者desc，asc表示升序，desc为降序
+3、例如 sort('price', 'asc') 表示按照price列从低到高排序
+4、所有表格内容均为数字，每一列数字均不会重复
+5、不要使用第三方插件
+
+```
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<style type="text/css">
+body,html{
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+    color: #000000;
+}
+table{
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+}
+thead{
+    background: #3d444c;
+    color: #ffffff;
+}
+td,th{
+    border: 1px solid #e1e1e1;
+    padding: 0;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+}
+</style>
+    </head>
+    <body>
+<table>
+    <thead>
+        <tr><th>id</th><th>price</th><th>sales</th></tr>
+    </thead>
+    <tbody id="jsList">
+        <tr><td>1</td><td>10.0</td><td>800</td></tr>
+        <tr><td>2</td><td>30.0</td><td>600</td></tr>
+        <tr><td>3</td><td>20.5</td><td>700</td></tr>
+        <tr><td>4</td><td>40.5</td><td>500</td></tr>
+        <tr><td>5</td><td>60.5</td><td>300</td></tr>
+        <tr><td>6</td><td>50.0</td><td>400</td></tr>
+        <tr><td>7</td><td>70.0</td><td>200</td></tr>
+        <tr><td>8</td><td>80.5</td><td>100</td></tr>
+    </tbody>
+</table>
+<script>
+    function sort(type, order) {
+        
+    }
+</script>
+    </body>
+</html>
+```
+
