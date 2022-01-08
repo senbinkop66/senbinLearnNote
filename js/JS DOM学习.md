@@ -601,3 +601,44 @@ if (element.tagName.toLowerCase() == "div"){ // 推荐，适用于所有文档
 
 ### 1 HTML 元素
 
+**所有 HTML 元素都通过 HTMLElement 类型表示，包括其直接实例和间接实例**。另外，**HTMLElement 直接继承 Element 并增加了一些属性。每个属性都对应下列属性之一**，它们是所有 HTML 元素上都有 的标准属性：
+
+- id，元素在文档中的唯一标识符；
+- title，包含元素的额外信息，通常以提示条形式展示；
+- lang，元素内容的语言代码（很少用）；
+- dir，语言的书写方向（"ltr"表示从左到右，"rtl"表示从右到左，同样很少用）；
+- className，相当于 class 属性，用于指定元素的 CSS 类（因为 class 是 ECMAScript 关键字，所以不能直接用这个名字）。
+
+所有这些都可以用来获取对应的属性值，也可以用来修改相应的值。比如有下面的 HTML 元素：
+
+```html
+<div id="myDiv" class="bd" title="Body text" lang="en" dir="ltr"></div>
+```
+
+这个元素中的所有属性都可以使用下列 JavaScript 代码读取：
+
+```js
+let div = document.getElementById("myDiv");
+alert(div.id); // "myDiv"
+alert(div.className); // "bd"
+alert(div.title); // "Body text"
+alert(div.lang); // "en"
+alert(div.dir); // "ltr"
+```
+
+而且，可以使用下列代码修改元素的属性：
+
+```js
+div.id = "someOtherId";
+div.className = "ft";
+div.title = "Some other text";
+div.lang = "fr";
+div.dir ="rtl";
+```
+
+**并非所有这些属性的修改都会对页面产生影响**。比如，把 id 或 lang 改成其他值对用户是不可见 的（假设没有基于这两个属性应用 CSS 样式），而修改 title 属性则只会在鼠标移到这个元素上时才会 反映出来。修改 dir 会导致页面文本立即向左或向右对齐。修改 className 会立即反映应用到新类名 的 CSS 样式（如果定义了不同的样式）。
+
+如前所述，所有 HTML 元素都是 HTMLElement 或其子类型的实例。下表列出了所有 HTML 元素及其对应的类型（斜体表示已经废弃的元素）。
+
+### 2. 取得属性
+
