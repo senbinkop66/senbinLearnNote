@@ -642,3 +642,92 @@ div.dir ="rtl";
 
 ### 2. 取得属性
 
+每个元素都有零个或多个属性，通常用于为元素或其内容附加更多信息。与属性相关的 DOM 方法 主要有 3 个：getAttribute()、setAttribute()和 removeAttribute()。这些方法主要用于操纵 属性，包括在 HTMLElement 类型上定义的属性。下面看一个例子：
+
+```js
+let div = document.getElementById("myDiv");
+alert(div.getAttribute("id")); // "myDiv"
+console.log(div.id);  //"myDiv"
+alert(div.getAttribute("class")); // "bd"
+alert(div.getAttribute("title")); // "Body text"
+alert(div.getAttribute("lang")); // "en"
+alert(div.getAttribute("dir")); // "ltr"
+```
+
+**注意传给 getAttribute()的属性名与它们实际的属性名是一样的**，因此这里要传"class"而非"className"（className 是作为对象属性时才那么拼写的）。**如果给定的属性不存在，则 getAttribute() 返回 null。**
+
+getAttribute()方法**也能取得**不是 HTML 语言正式属性的**自定义属性的值**。比如下面的元素：
+
+```html
+<div id="myDiv" my_special_attribute="hello!"></div>
+```
+
+这个元素有一个自定义属性 my_special_attribute，值为"hello!"。可以像其他属性一样使用getAttribute()取得这个属性的值：
+
+```js
+let value = div.getAttribute("my_special_attribute");
+```
+
+**注意，属性名不区分大小写**，因此"ID"和"id"被认为是同一个属性。另外，**根据 HTML5 规范的要求，自定义属性名应该前缀 data-以方便验证。**
+
+**元素的所有属性也可以通过相应 DOM 元素对象的属性来取得**。当然，这包括 HTMLElement 上定 义的直接映射对应属性的 5 个属性，还有所有公认（非自定义）的属性也会被添加为 DOM 对象的属性。 比如下面的例子：
+
+```html
+<div id="myDiv" align="left" my_special_attribute="hello"></div>
+```
+
+因为 id 和 align 在 HTML 中是<div>元素公认的属性，所以 DOM 对象上也会有这两个属性。但my_special_attribute 是自定义属性，因此不会成为 DOM 对象的属性。
+
+通过 DOM 对象访问的属性中有**两个返回的值**跟使用 getAttribute()取得的值**不一样**。首先是 **style 属性**，这个属性用于为元素设定 CSS 样式。在使用 getAttribute()访问 style 属性时，返回的 是 CSS 字符串。而在通过 DOM 对象的属性访问时，style 属性返回的是一个（CSSStyleDeclaration） 对象。DOM 对象的 style 属性用于以编程方式读写元素样式，因此不会直接映射为元素中 style 属 性的字符串值。
+
+第二个属性其实是一类，即**事件处理程序（或者事件属性）**，比如 onclick。在元素上使用事件属 性时（比如 onclick），属性的值是一段 JavaScript 代码。如果使用 getAttribute()访问事件属性， 则返回的是字符串形式的源代码。而通过 DOM 对象的属性访问事件属性时返回的则是一个 JavaScript 函数（未指定该属性则返回 null）。这是因为 onclick 及其他事件属性是可以接受函数作为值的。
+
+考虑到以上差异，开发者在进行 DOM编程时通常会**放弃使用 getAttribute()而只使用对象属性**。getAttribute()主要用于取得自定义属性的值。
+
+### 3.设置属性
+
+与 getAttribute()配套的方法是 setAttribute()，这个方法接收两个参数：**要设置的属性名** 和**属性的值**。如果属性已经存在，则 setAttribute()会以指定的值替换原来的值；如果属性不存在， 则 setAttribute()会以指定的值创建该属性。下面看一个例子：
+
+```js
+div.setAttribute("id", "someOtherId");
+div.setAttribute("class", "ft");
+div.setAttribute("title", "Some other text");
+div.setAttribute("lang","fr");
+div.setAttribute("dir", "rtl");
+```
+
+**setAttribute()适用于 HTML 属性，也适用于自定义属性**。另外，使用 setAttribute()方法 设置的属性名**会规范为小写形式**，因此"ID"会变成"id"。 
+
+因为元素属性也是 DOM 对象属性，**所以直接给 DOM 对象的属性赋值也可以设置元素属性的值**， 如下所示：
+
+```js
+div.id = "someOtherId";
+div.align = "left";
+```
+
+注意，在 DOM 对象上添加自定义属性，如下面的例子所示，**不会自动让它变成元素的属性**：
+
+```js
+div.mycolor = "red";
+alert(div.getAttribute("mycolor")); // null（IE 除外）
+```
+
+这个例子添加了一个自定义属性 mycolor 并将其值设置为"red"。在多数浏览器中，这个属性不 会自动变成元素属性。因此调用 getAttribute()取得 mycolor 的值会返回 null。 
+
+最后一个方法 **removeAttribute()**用于从元素中删除属性。**这样不单单是清除属性的值，而是会 把整个属性完全从元素中去掉，**如下所示：
+
+```js
+div.removeAttribute("class");
+```
+
+这个方法用得并不多，但在序列化 DOM 元素时可以通过它控制要包含的属性。
+
+### 4.attributes 属性
+
+Element 类型是唯一使用 attributes 属性的 DOM 节点类型。attributes 属性包含一个 NamedNodeMap 实例，是一个类似 NodeList 的“实时”集合。元素的每个属性都表示为一个 Attr 节 点，并保存在这个 NamedNodeMap 对象中。NamedNodeMap 对象包含下列方法：
+
+- getNamedItem(name)，返回 nodeName 属性等于 name 的节点；
+- removeNamedItem(name)，删除 nodeName 属性等于 name 的节点；
+- setNamedItem(node)，向列表中添加 node 节点，以其 nodeName 为索引；
+- item(pos)，返回索引位置 pos 处的节点。
+
