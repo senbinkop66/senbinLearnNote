@@ -287,3 +287,47 @@ var sumOfUnique = function(nums) {
 let test=[2,2,1,1,1,2,2];
 let result=sumOfUnique(test);
 console.log(result);
+
+/**
+ * @param {string} columnTitle
+ * @return {number}
+ */
+var titleToNumber = function(columnTitle) {
+    let result=0;
+    let n=columnTitle.length
+    for (let i=0; i<n; i++){
+        let num=columnTitle.charCodeAt(n-1-i)-64;
+        result+=num*Math.pow(26,i);
+    }
+    return result;
+};
+
+
+let test="FXSHRXW";
+let result=titleToNumber(test);
+console.log(result);
+
+var reverseBits = function(n) {
+    const M1 = 0x55555555; // 01010101010101010101010101010101
+    const M2 = 0x33333333; // 00110011001100110011001100110011
+    const M4 = 0x0f0f0f0f; // 00001111000011110000111100001111
+    const M8 = 0x00ff00ff; // 00000000111111110000000011111111
+
+    n = n >>> 1 & M1 | (n & M1) << 1;
+    n = n >>> 2 & M2 | (n & M2) << 2;
+    n = n >>> 4 & M4 | (n & M4) << 4;
+    n = n >>> 8 & M8 | (n & M8) << 8;
+    return (n >>> 16 | n << 16) >>> 0;
+};
+
+var reverseBits = function(n) {
+    let rev=0;
+    for (let i=0;i<32 && n>0;++i){
+        rev |=(n & 1) << (31-i);  //按位或操作符用管道符
+        n >>>=1;  //无符号右移用 3 个大于号表示
+    }
+    return rev >>> 0;
+};
+
+
+

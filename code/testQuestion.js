@@ -1,25 +1,20 @@
 /**
- * @param {number[]} nums
+ * @param {number} n - a positive integer
  * @return {number}
  */
-var sumOfUnique = function(nums) {
-    let obj={};
-    let sum=0;
-    for(let i=0;i<nums.length;i++){
-        obj[nums[i]]===undefined ? obj[nums[i]]=1 : ++obj[nums[i]];
-        if (obj[nums[i]]===1) {
-            //计数为1时，加该值
-            sum+=nums[i];
-        }
-        if (obj[nums[i]]===2) {
-            //计数为2时,减掉
-            sum-=nums[i];
-        }
+var hammingWeight = function(n) {
+    let ret=0;
+    while(n){
+        //因为每次运算会使得 nn 的最低位的 11 被翻转，因此运算次数就等于 nn 的二进制位中 11 的个数。
+        n&=n-1;
+        ret++;
     }
-    return sum;
+    return ret;
 };
 
 
-let test=[2,2,1,1,1,2,2];
-let result=sumOfUnique(test);
+
+let test=100;
+let result=hammingWeight(test);
 console.log(result);
+
