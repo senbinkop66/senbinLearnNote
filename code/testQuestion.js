@@ -1,38 +1,20 @@
 /**
- * @param {number} a
- * @param {number} b
- * @param {number} c
- * @return {string}
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
  */
-var longestDiverseString = function(a, b, c) {
-    let result=[];
-    const arr=[[a,'a'],[b,'b'],[c,'c']];
-    while(true){
-        arr.sort((a,b)=>b[0]-a[0]);
-        let hasNext=false;
-        for(const [i,[c,ch]] of arr.entries()){
-            if (c<=0) {
-                break;
-            }
-            const m=result.length;
-            if (m>=2 && result[m-2]===ch && result[m-1]===ch) {
-                continue;
-            }
-            hasNext=true;
-            result.push(ch);
-            arr[i][0]--;
-            break;
-        }
-        if (!hasNext) {
-            break;
-        }
+/**
+ * @param {ListNode} head
+ * @return {ListNode}
+ */
+var reverseList = function(head) {
+    if (head===null || head.next===null) {
+        return head;
     }
-    return result.join("");
+    const newHead=reverseList(head.next);
+    head.next.next=head;
+    head.next=null;
+    return newHead;
 };
-
-
-
-let test=100;
-let result=longestDiverseString(1,1,7);
-console.log(result);
-

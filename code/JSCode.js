@@ -367,5 +367,108 @@ let test=100;
 let result=longestDiverseString(1,1,7);
 console.log(result);
 
+/**
+ * @param {number} n
+ * @return {boolean}
+ */
+var isHappy = function(n) {
+    let set=new Set();
+    while(true){
+        console.log(n);
+        let str=n.toString();
+        if (set.has(n)) {
+            //如果该数已经计算过，则不是快乐数
+            return false;
+        }else{
+            set.add(n);
+        }
+        n=0;
+        for(let i=0;i<str.length;i++){
+            n+=str[i]*str[i];
+        }
+        if (n===1) {
+            return true;
+        }
+    }
+};
 
+let test=19;
+let result=isHappy(test);
+console.log(result);
+
+var removeElements = function(head, val) {
+    const pre=new ListNode(0);
+    pre.next=head;
+    let temp=pre;
+    while(temp.next!==null){
+        if (temp.next.val===val) {
+            temp.next=temp.next.next;
+        }else{
+            temp=temp.next;
+        }
+    }
+    return pre.next;
+};
+
+var removeElements = function(head, val) {
+    if (head===null) {
+        return head;
+    }
+    head.next=removeElements(head.next,val);
+    return head.val===val ? head.next : head;
+};
+
+/**
+ * @param {string} s
+ * @param {string} t
+ * @return {boolean}
+ */
+var isIsomorphic = function(s, t) {
+    let m1=new Map();
+    let m2=new Map();
+    for (let i=0;i<s.length;i++){
+        if (m1.has(s[i])) {
+            //当映射存在
+            if (m1.get(s[i])!==t[i]) {
+                return false;
+            }
+        }else{
+            m1.set(s[i],t[i]);
+        }
+        if (m2.has(t[i])) {
+            if (m2.get(t[i])!==s[i]) {
+                return false;
+            }
+        }else{
+            m2.set(t[i],s[i]);
+        }
+    }
+    return true;
+};
+
+let test="paper";
+let result=isIsomorphic(test,"title");
+console.log(result);
+
+var reverseList = function(head) {
+    let prev=null;
+    let curr=head;
+    while(curr){
+        const next=curr.next;  //当前结点的后继
+        curr.next=prev;  //将当前节点的 next 指针改为指向前一个节点
+        prev=curr;  //先存储其前一个节点
+        curr=next;  //存储后一个节点
+    }
+    return prev;
+};
+
+var reverseList = function(head) {
+    if (head===null || head.next===null) {
+        return head;
+    }
+    const newHead=reverseList(head.next);
+    head.next.next=head;
+    head.next=null;
+    return newHead;
+};
 
