@@ -1,25 +1,45 @@
-/**
- * @param {number[]} nums
- * @param {number} k
- * @return {boolean}
- */
-var containsNearbyDuplicate = function(nums, k) {
-    let m=new Map();
-    for(let i=0;i<nums.length;i++){
-        if (m.has(nums[i])) {
-            if (Math.abs(m.get(nums[i])-i)<=k) {
-                return true;
-            }else{
-                m.set(nums[i],i);
-            }
-        }else{
-            m.set(nums[i],i);
-        }
-        //console.log(m);
-    }
-    return false;
+var MyStack = function() {
+    this.queue=[];
 };
 
-let test=[1,0,1,1];
-let result=containsNearbyDuplicate(test,1);
-console.log(result);
+/** 
+ * @param {number} x
+ * @return {void}
+ */
+MyStack.prototype.push = function(x) {
+    let n=this.queue.length;
+    this.queue.push(x);
+    for (let i=0;i<n;i++){
+        this.queue.push(this.queue.shift());
+    }
+};
+
+/**
+ * @return {number}
+ */
+MyStack.prototype.pop = function() {
+    return this.queue.shift();
+};
+
+/**
+ * @return {number}
+ */
+MyStack.prototype.top = function() {
+    return this.queue[0];
+};
+
+/**
+ * @return {boolean}
+ */
+MyStack.prototype.empty = function() {
+    return this.queue.length===0;
+};
+
+/**
+ * Your MyStack object will be instantiated and called as such:
+ * var obj = new MyStack()
+ * obj.push(x)
+ * var param_2 = obj.pop()
+ * var param_3 = obj.top()
+ * var param_4 = obj.empty()
+ */
