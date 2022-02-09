@@ -638,3 +638,90 @@ MyStack.prototype.empty = function() {
  * var param_3 = obj.top()
  * var param_4 = obj.empty()
  */
+/**
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number}
+ */
+var countKDifference = function(nums, k) {
+    nums.sort((a,b)=>a-b);
+    let i=0;
+    let j=1;
+    let n=nums.length;
+    let result=0;
+    for(let i=0;i<n-1;i++){
+        for(let j=i+1;j<n;j++){
+            if (nums[j]-nums[i]===k) {
+                result+=1;
+            }
+            if (nums[j]-nums[i]>k) {
+                break;
+            }
+        }
+    }
+    return result;
+};
+
+let test=[1,2,2,1];
+let result=countKDifference(test,1);
+console.log(result);
+
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {TreeNode}
+ */
+var invertTree = function(root) {
+    if (root===null) {
+        return root;
+    }
+    if (root.left || root.right) {
+        let temp=root.left;
+        root.left=root.right;
+        root.right=temp;
+        invertTree(root.left);
+        invertTree(root.right);
+    }
+    return root;
+};
+
+/**
+ * @param {number[]} nums
+ * @return {string[]}
+ */
+var summaryRanges = function(nums) {
+    if (nums.length===0) {
+        return [];
+    }
+    let i=0;
+    let j=1;
+    let result=[];
+    for(j;j<nums.length;j++){
+        if (nums[j]-nums[j-1]!==1) {
+            if (i===j-1) {
+                result.push(nums[i].toString());
+            }else{
+                result.push(nums[i].toString()+"->"+nums[j-1].toString());
+            }
+            i=j;
+        }
+    }
+    if (i===j-1) {
+        result.push(nums[i].toString());
+    }else{
+        result.push(nums[i].toString()+"->"+nums[j-1].toString());
+    }
+    return result;
+};
+
+let test=[0,1,2,4,5,7];
+let result=summaryRanges(test);
+console.log(result);
+

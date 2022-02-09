@@ -1,27 +1,32 @@
 /**
  * @param {number[]} nums
- * @param {number} k
- * @return {number}
+ * @return {string[]}
  */
-var countKDifference = function(nums, k) {
-    nums.sort((a,b)=>a-b);
+var summaryRanges = function(nums) {
+    if (nums.length===0) {
+        return [];
+    }
     let i=0;
     let j=1;
-    let n=nums.length;
-    let result=0;
-    for(let i=0;i<n-1;i++){
-        for(let j=i+1;j<n;j++){
-            if (nums[j]-nums[i]===k) {
-                result+=1;
+    let result=[];
+    for(j;j<nums.length;j++){
+        if (nums[j]-nums[j-1]!==1) {
+            if (i===j-1) {
+                result.push(nums[i].toString());
+            }else{
+                result.push(nums[i].toString()+"->"+nums[j-1].toString());
             }
-            if (nums[j]-nums[i]>k) {
-                break;
-            }
+            i=j;
         }
+    }
+    if (i===j-1) {
+        result.push(nums[i].toString());
+    }else{
+        result.push(nums[i].toString()+"->"+nums[j-1].toString());
     }
     return result;
 };
 
-let test=[1,2,2,1];
-let result=countKDifference(test,1);
+let test=[0,1,2,4,5,7];
+let result=summaryRanges(test);
 console.log(result);
