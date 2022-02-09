@@ -725,3 +725,114 @@ let test=[0,1,2,4,5,7];
 let result=summaryRanges(test);
 console.log(result);
 
+var isPowerOfTwo = function(n) {
+    if (n<=0) {
+        //小于等于0的不满足
+        return false;
+    }
+    while(n>=1){
+        if (n===1) {
+            return true;
+        }
+        if (n%2!==0) {
+            //如果不能被2整除则不满足
+            return false;
+        }
+        n=n/2;
+    }
+};
+
+let test=5;
+let result=isPowerOfTwo(test);
+console.log(result);
+
+var MyQueue = function() {
+    this.stack1=[];  //用于存储
+    this.stack2=[];  //用于交换
+};
+
+/** 
+ * @param {number} x
+ * @return {void}
+ */
+MyQueue.prototype.push = function(x) {
+    while(this.stack1.length>0){
+        //把栈1的所有元素弹出到栈2
+        this.stack2.push(this.stack1.pop());
+    }
+    this.stack1.push(x);  //进队列元素压到栈1底部
+    while(this.stack2.length>0){
+        //把栈2的所有元素弹出到栈1
+        this.stack1.push(this.stack2.pop());
+    }
+};
+
+/**
+ * @return {number}
+ */
+MyQueue.prototype.pop = function() {
+    return this.stack1.pop();
+};
+
+/**
+ * @return {number}
+ */
+MyQueue.prototype.peek = function() {
+    return this.stack1[this.stack1.length-1];
+};
+
+/**
+ * @return {boolean}
+ */
+MyQueue.prototype.empty = function() {
+    return this.stack1.length===0;
+};
+
+/**
+ * Your MyQueue object will be instantiated and called as such:
+ * var obj = new MyQueue()
+ * obj.push(x)
+ * var param_2 = obj.pop()
+ * var param_3 = obj.peek()
+ * var param_4 = obj.empty()
+ */
+
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @return {boolean}
+ */
+var isPalindrome = function(head) {
+    let n=0;
+    let temp1=head;
+    while(temp1!==null){
+        //先遍历一遍，计数
+        n++;
+        temp1=temp1.next;
+    }
+    let m=n>>1;
+    let temp2=head;
+    temp1=head;
+    for(let i=0;i<m;i++){
+        //遍历过对称轴
+        temp2=temp2.next;
+    }
+    if (n%2!==0) {
+        temp2=temp2.next;
+    }
+    for(let i=0;i<m;i++){
+        if (temp1.val!==temp2.val) {
+            return false;
+        }
+        temp1=temp1.next;
+        temp2=temp2.next;
+    }
+    return true;
+};
+
