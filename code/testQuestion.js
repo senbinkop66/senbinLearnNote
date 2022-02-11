@@ -1,28 +1,24 @@
 /**
- * @param {number} n
- * @return {string[]}
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number}
  */
-var simplifiedFractions = function(n) {
-    if(n===1){
-        return [];
+var minimumDifference = function(nums, k) {
+    if (nums.length<2) {
+        return 0;
     }
-    let result=[];
-    for(let i=2;i<=n;i++){
-        for(j=1;j<i;j++){
-            if (gcd(i,j)===1) {
-                result.push(j+"/"+i);
-            }
+    nums.sort((a,b)=>a-b);  //排序
+    let mindiff=nums[nums.length-1]-nums[0];  //初始为最大差值
+    for(i=0;i<nums.length-k+1;i++){
+        let temp=nums[i+k-1]-nums[i];
+        mindiff=temp<mindiff ? temp : mindiff;
+        if (mindiff===0) {
+            return 0;
         }
     }
-    return result;
+    return mindiff;
 };
-var gcd=function(a,b){
-    //辗转相除获取最大公约数
-    if (a%b===0) {
-        return b;
-    }
-    return arguments.callee(b,a%b);
-}
-let test=5;
-let result=simplifiedFractions(test);
+
+let test=[9,4,1,7];
+let result=minimumDifference(test,2);
 console.log(result);
