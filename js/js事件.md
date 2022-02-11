@@ -1735,3 +1735,211 @@ window.addEventListener("hashchange", (event) => {
 ```
 
 ### 4.8 设备事件
+
+#### orientationchange 事件
+
+苹果公司在移动 Safari 浏览器上创造了 orientationchange 事件，以方便开发者判断用户的设备 是处于垂直模式还是水平模式。移动 Safari 在 window 上暴露了 window.orientation 属性，它有以 下 3 种值之一：0 表示垂直模式，90 表示左转水平模式（主屏幕键在右侧），–90 表示右转水平模式（主 屏幕键在左）。虽然相关文档也提及设备倒置后的值为 180，但设备本身至今还不支持。图 17-9 展示了 window.orientation 属性的各种值。
+
+每当用户旋转设备改变了模式，就会触发 orientationchange 事件。但 event 对象上没有暴露 任何有用的信息，这是因为相关信息都可以从 window.orientation 属性中获取。以下是这个事件典 型的用法：
+
+```js
+	window.addEventListener("load", (event) => {
+		let div = document.getElementById("myDiv");
+		div.innerHTML = "Current orientation is " + window.orientation;
+		window.addEventListener("orientationchange", (event) => {
+		div.innerHTML = "Current orientation is " + window.orientation;
+		});
+	});
+```
+
+这个例子会在 load 事件触发时显示设备初始的朝向。然后，又指定了 orientationchange 事件 处理程序。此后，只要这个事件触发，页面就会更新以显示新的朝向信息。 
+
+所有 iOS 设备都支持 orientationchange 事件和 window.orientation 属性。 
+
+注意 因为 orientationchange 事件被认为是 window 事件，所以也可以通过给<body> 元素添加 onorientationchange 属性来指定事件处理程序。
+
+#### deviceorientation 事件
+
+deviceorientation 是 DeviceOrientationEvent规范定义的事件。如果可以获取设备的加速计信息， 而且数据发生了变化，这个事件就会在 window 上触发。要注意的是，deviceorientation 事件只反 映设备在空间中的朝向，而不涉及移动相关的信息。 
+
+设备本身处于 3D 空间即拥有 x 轴、y 轴和 z 轴的坐标系中。如果把设备静止放在水平的表面上，那 么三轴的值均为 0，其中，x 轴方向为从设备左侧到右侧，y 轴方向为从设备底部到上部，z 轴方向为从 设备背面到正面。
+
+#### devicemotion 事件
+
+DeviceOrientationEvent 规范也定义了 devicemotion 事件。这个事件用于提示设备实际上在移动， 而不仅仅是改变了朝向。例如，devicemotion 事件可以用来确定设备正在掉落或者正拿在一个行走的 人手里。
+
+### 4.9 触摸及手势事件
+
+#### 触摸事件
+
+iPhone 3G 发布时，iOS 2.0 内置了新版本的 Safari。这个新的移动 Safari 支持一些与触摸交互有关的 新事件。后来的 Android 浏览器也实现了同样的事件。当手指放在屏幕上、在屏幕上滑动或从屏幕移开 时，触摸事件即会触发。触摸事件有如下几种。
+
+- touchstart：手指放到屏幕上时触发（即使有一个手指已经放在了屏幕上）。
+- touchmove：手指在屏幕上滑动时连续触发。在这个事件中调用 preventDefault()可以阻止滚动。
+- touchend：手指从屏幕上移开时触发。
+- touchcancel：系统停止跟踪触摸时触发。文档中并未明确什么情况下停止跟踪。
+
+这些事件都会冒泡，也都可以被取消。尽管触摸事件不属于 DOM 规范，但浏览器仍然以兼容 DOM 的方式实现了它们。因此，每个触摸事件的 event 对象都提供了鼠标事件的公共属性：bubbles、 cancelable、view、clientX、clientY、screenX、screenY、detail、altKey、shiftKey、 ctrlKey 和 metaKey。
+
+除了这些公共的 DOM 属性，触摸事件还提供了以下 3 个属性用于跟踪触点。
+
+- touches：Touch 对象的数组，表示当前屏幕上的每个触点。
+- targetTouches：Touch 对象的数组，表示特定于事件目标的触点。
+- changedTouches：Touch 对象的数组，表示自上次用户动作之后变化的触点。
+
+每个 Touch 对象都包含下列属性。
+
+- clientX：触点在视口中的 x 坐标。
+- clientY：触点在视口中的 y 坐标。
+- identifier：触点 ID。
+- pageX：触点在页面上的 x 坐标。
+- pageY：触点在页面上的 y 坐标。
+- screenX：触点在屏幕上的 x 坐标。
+- screenY：触点在屏幕上的 y 坐标。
+- target：触摸事件的事件目标。
+
+这些属性可用于追踪屏幕上的触摸轨迹。
+
+```js
+function handleTouchEvent(event) {
+// 只针对一个触点
+if (event.touches.length == 1) {
+let output = document.getElementById("output");
+switch(event.type) {
+case "touchstart":
+output.innerHTML += `<br>Touch started:` +
+`(${event.touches[0].clientX}` +
+` ${event.touches[0].clientY})`;
+break;
+case "touchend":
+output.innerHTML += `<br>Touch ended:` +
+`(${event.changedTouches[0].clientX}` +
+` ${event.changedTouches[0].clientY})`;
+break;
+case "touchmove":
+event.preventDefault(); // 阻止滚动
+output.innerHTML += `<br>Touch moved:` +
+`(${event.changedTouches[0].clientX}` +
+` ${event.changedTouches[0].clientY})`;
+break;
+}
+}
+}
+document.addEventListener("touchstart", handleTouchEvent);
+document.addEventListener("touchend", handleTouchEvent);
+document.addEventListener("touchmove", handleTouchEvent);
+```
+
+以上代码会追踪屏幕上的一个触点。为简单起见，代码只会在屏幕有一个触点时输出信息。在 touchstart 事件触发时，触点的位置信息会输出到 output 元素中。在 touchmove 事件触发时，会 取消默认行为以阻止滚动（移动触点通常会滚动页面），并输出变化的触点信息。在 touchend 事件触 发时，会输出触点最后的信息。注意，touchend 事件触发时 touches 集合中什么也没有，这是因为 没有滚动的触点了。此时必须使用 changedTouches 集合。 
+
+这些事件会在文档的所有元素上触发，因此可以分别控制页面的不同部分。当手指点触屏幕上的元 素时，依次会发生如下事件（包括鼠标事件）：
+
+(1) touchstart
+(2) mouseover
+(3) mousemove（1 次）
+(4) mousedown
+(5) mouseup
+(6) click
+(7) touchend
+
+#### 手势事件
+
+iOS 2.0 中的 Safari 还增加了一种手势事件。手势事件会在两个手指触碰屏幕且相对距离或旋转角度 变化时触发。手势事件有以下 3 种。
+
+- gesturestart：一个手指已经放在屏幕上，再把另一个手指放到屏幕上时触发。
+- gesturechange：任何一个手指在屏幕上的位置发生变化时触发。
+- gestureend：其中一个手指离开屏幕时触发。
+
+## 5 内存与性能
+
+因为事件处理程序在现代 Web 应用中可以实现交互，所以很多开发者会错误地在页面中大量使用 它们。在创建 GUI 的语言如 C#中，通常会给 GUI 上的每个按钮设置一个 onclick 事件处理程序。这 样做不会有什么性能损耗。在 JavaScript 中，页面中事件处理程序的数量与页面整体性能直接相关。原 因有很多。首先，每个函数都是对象，都占用内存空间，对象越多，性能越差。其次，为指定事件处理 程序所需访问 DOM 的次数会先期造成整个页面交互的延迟。只要在使用事件处理程序时多注意一些方 法，就可以改善页面性能。
+
+### 5.1 事件委托
+
+“过多事件处理程序”的解决方案是使用事件委托。事件委托利用事件冒泡，可以只使用一个事件 处理程序来管理一种类型的事件。例如，click 事件冒泡到 document。这意味着可以为整个页面指定 一个 onclick 事件处理程序，而不用为每个可点击元素分别指定事件处理程序。
+
+如果对页面中所有需要使用 onclick 事件处理程序的元素都如法炮制，结果就会出现大片雷同的 只为指定事件处理程序的代码。使用事件委托，只要给所有元素共同的祖先节点添加一个事件处理程序， 就可以解决问题。
+
+```html
+<ul id="myLinks">
+<li id="goSomewhere">Go somewhere</li>
+<li id="doSomething">Do something</li>
+<li id="sayHi">Say hi</li>
+</ul>
+```
+
+```js
+let list = document.getElementById("myLinks");
+list.addEventListener("click", (event) => {
+    let target = event.target;
+    switch(target.id) {
+    case "doSomething":
+        document.title = "I changed the document's title";
+        break;
+    case "goSomewhere":
+        location.href = "http:// www.wrox.com";
+        break;
+    case "sayHi":
+        console.log("hi");
+        break;
+    }
+});
+```
+
+这里只给<ul id="myLinks">元素添加了一个 onclick 事件处理程序。因为所有列表项都是这个 元素的后代，所以它们的事件会向上冒泡，最终都会由这个函数来处理。但事件目标是每个被点击的列 表项，只要检查 event 对象的 id 属性就可以确定，然后再执行相应的操作即可。相对于前面不使用事 件委托的代码，这里的代码不会导致先期延迟，因为只访问了一个 DOM 元素和添加了一个事件处理程 序。结果对用户来说没有区别，但这种方式占用内存更少。所有使用按钮的事件（大多数鼠标事件和键 盘事件）都适用于这个解决方案。
+
+只要可行，就应该考虑只给 document 添加一个事件处理程序，通过它处理页面中所有某种类型的 事件。相对于之前的技术，事件委托具有如下优点。
+
+- document 对象随时可用，任何时候都可以给它添加事件处理程序（不用等待 DOMContentLoaded 或 load 事件）。这意味着只要页面渲染出可点击的元素，就可以无延迟地起作用。 
+- 节省花在设置页面事件处理程序上的时间。只指定一个事件处理程序既可以节省 DOM 引用，也 可以节省时间。 
+- 减少整个页面所需的内存，提升整体性能。 最适合使用事件委托的事件包括：click、mousedown、mouseup、keydown 和 keypress。
+
+最适合使用事件委托的事件包括：click、mousedown、mouseup、keydown 和 keypress。 mouseover 和 mouseout 事件冒泡，但很难适当处理，且经常需要计算元素位置（因为 mouseout 会 在光标从一个元素移动到它的一个后代节点以及移出元素之外时触发）。
+
+### 5.2 删除事件处理程序
+
+把事件处理程序指定给元素后，在浏览器代码和负责页面交互的 JavaScript 代码之间就建立了联系。 **这种联系建立得越多，页面性能就越差。**除了通过事件委托来限制这种连接之外，还应该及时删除不用 的事件处理程序。很多 Web 应用性能不佳都是由于无用的事件处理程序长驻内存导致的。
+
+```html
+<div id="myDiv">
+<input type="button" value="Click Me" id="myBtn">
+</div>
+<script type="text/javascript">
+    let btn = document.getElementById("myBtn");
+    btn.onclick = function() {
+    // 执行操作
+    document.getElementById("myDiv").innerHTML = "Processing...";
+    // 不好！
+    };
+</script>
+```
+
+这里的按钮在<div>元素中。单击按钮，会将自己删除并替换为一条消息，以阻止双击发生。这是 很多网站上常见的做法。问题在于，按钮被删除之后仍然关联着一个事件处理程序。在<div>元素上设 置 innerHTML 会完全删除按钮，但事件处理程序仍然挂在按钮上面。某些浏览器，特别是 IE8 及更早 版本，在这时候就会有问题了。很有可能元素的引用和事件处理程序的引用都会残留在内存中。如果知 道某个元素会被删除，那么最好在删除它之前手工删除它的事件处理程序，比如：
+
+```html
+<div id="myDiv">
+	<input type="button" value="Click Me" id="myBtn">
+</div>
+<script type="text/javascript">
+    let btn = document.getElementById("myBtn");
+    btn.onclick = function() {
+    // 执行操作
+    btn.onclick = null; // 删除事件处理程序
+    document.getElementById("myDiv").innerHTML = "Processing...";
+    };
+</script>
+```
+
+在这个重写后的例子中，设置<div>元素的 innerHTML 属性之前，按钮的事件处理程序先被删除 了。这样就可以确保内存被回收，按钮也可以安全地从 DOM 中删掉。 
+
+但也要注意，在事件处理程序中删除按钮会阻止事件冒泡。**只有事件目标仍然存在于文档中时，事 件才会冒泡。** 
+
+注意 事件委托也有助于解决这种问题。如果提前知道页面某一部分会被使用 innerHTML 删除，就不要直接给该部分中的元素添加事件处理程序了。把事件处理程序添加到更高层 级的节点上同样可以处理该区域的事件。
+
+**另一个可能导致内存中残留引用的问题是页面卸载**。同样，IE8 及更早版本在这种情况下有很多问 题，不过好像所有浏览器都会受这个问题影响。如果在页面卸载后事件处理程序没有被清理，则它们仍然会残留在内存中。之后，浏览器每次加载和卸载页面（比如通过前进、后退或刷新），内存中残留对 象的数量都会增加，这是因为事件处理程序不会被回收
+
+一般来说，**最好在 onunload 事件处理程序中趁页面尚未卸载先删除所有事件处理程序**。这时候也 能体现使用事件委托的优势，因为事件处理程序很少，所以很容易记住要删除哪些。关于卸载页面时的 清理，可以记住一点：onload 事件处理程序中做了什么，最好在 onunload 事件处理程序中恢复。 
+
+注意 在页面中使用 onunload 事件处理程序意味着页面不会被保存在往返缓存 （bfcache）中。如果这对应用很重要，可以考虑只在 IE 中使用 onunload 来删除事件处理 程序。
+
+## 6 模拟事件
