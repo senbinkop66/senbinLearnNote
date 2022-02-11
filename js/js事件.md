@@ -1943,3 +1943,42 @@ list.addEventListener("click", (event) => {
 注意 在页面中使用 onunload 事件处理程序意味着页面不会被保存在往返缓存 （bfcache）中。如果这对应用很重要，可以考虑只在 IE 中使用 onunload 来删除事件处理 程序。
 
 ## 6 模拟事件
+
+事件就是为了表示网页中某个有意义的时刻。通常，事件都是由用户交互或浏览器功能触发。事实 上，可能很少有人知道可以通过 JavaScript 在任何时候触发任意事件，而这些事件会被当成浏览器创建 的事件。这意味着同样会有事件冒泡，因而也会触发相应的事件处理程序。这种能力在测试 Web 应用 时特别有用。DOM3 规范指明了模拟特定类型事件的方式。IE8 及更早版本也有自己模拟事件的方式。
+
+### 6.1 DOM 事件模拟
+
+#### 模拟鼠标事件
+
+#### 模拟键盘事件
+
+#### 模拟其他事件
+
+#### 自定义 DOM 事件
+
+DOM3 增加了自定义事件的类型。自定义事件不会触发原生 DOM 事件，但可以让开发者定义自己 的 事 件 。 要 创 建 自 定 义 事 件 ， 需 要 调 用 createEvent("CustomEvent") 。 返 回 的 对 象 包 含 initCustomEvent()方法，该方法接收以下 4 个参数。
+
+- type（字符串）：要触发的事件类型，如"myevent"。
+- bubbles（布尔值）：表示事件是否冒泡。
+- cancelable（布尔值）：表示事件是否可以取消。
+- detail（对象）：任意值。作为 event 对象的 detail 属性。
+
+自定义事件可以像其他事件一样在 DOM 中派发，比如：
+
+```js
+	let div = document.getElementById("myDiv"),event;
+	div.addEventListener("myevent", (event) => {
+		console.log("DIV: " + event.detail);
+	});
+	document.addEventListener("myevent", (event) => {
+		console.log("DOCUMENT: " + event.detail);
+	});
+	if (document.implementation.hasFeature("CustomEvents", "3.0")) {
+		event = document.createEvent("CustomEvent");
+		event.initCustomEvent("myevent", true, false, "Hello world!");
+		div.dispatchEvent(event);
+	}
+```
+
+这个例子创建了一个名为"myevent"的冒泡事件。event 对象的 detail 属性就是一个简单的字符 串，<div>元素和 document 都为这个事件注册了事件处理程序。因为使用 initCustomEvent()初始 化时将事件指定为可以冒泡，所以浏览器会负责把事件冒泡到 document。
+

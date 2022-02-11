@@ -890,3 +890,102 @@ let test=[9,4,1,7];
 let result=minimumDifference(test,2);
 console.log(result);
 
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+
+/**
+ * @param {TreeNode} root
+ * @param {TreeNode} p
+ * @param {TreeNode} q
+ * @return {TreeNode}
+ */
+var lowestCommonAncestor = function(root, p, q) {
+    //注意是二叉搜索
+    if (root.val<p.val && root.val<q.val) {
+        return lowestCommonAncestor(root.right,p,q);
+    }else if(root.val>p.val && root.val>q.val) {
+        return lowestCommonAncestor(root.left,p,q);
+    }else{
+        return root;
+    }
+};
+
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+/**
+ * @param {ListNode} node
+ * @return {void} Do not return anything, modify node in-place instead.
+ */
+var deleteNode = function(node) {
+    node.val=node.next.val;
+    node.next=node.next.next;
+};
+
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {string[]}
+ */
+var binaryTreePaths = function(root) {
+    root.val=[root.val];
+    let arr=[root];
+    let result=[];
+    while(arr.length>0){
+        let n=arr.length;
+        while(n>0){
+            let node=arr.shift();
+            if (node.left===null && node.right===null) {
+                result.push(node.val.join("->"));
+            }
+            if (node.left!==null) {
+                node.left.val=node.val.concat([node.left.val])
+                arr.push(node.left);
+            }
+            if (node.right!==null) {
+                node.right.val=node.val.concat([node.right.val])
+                arr.push(node.right);
+            }
+            n--;
+        }
+    }
+    return result;
+};
+
+/**
+ * @param {number} num
+ * @return {number}
+ */
+var addDigits = function(num) {
+
+    while(num>9){
+        let arr=(""+num).split("");
+        num=0;
+        arr.forEach((item)=>{
+            num+=Number(item);
+        });
+        console.log(num);
+    }
+    return num;
+};
+
+let test=236;
+let result=addDigits(test);
+console.log(result);
+
