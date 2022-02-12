@@ -731,3 +731,268 @@ Element 类型是唯一使用 attributes 属性的 DOM 节点类型。attributes
 - setNamedItem(node)，向列表中添加 node 节点，以其 nodeName 为索引；
 - item(pos)，返回索引位置 pos 处的节点。
 
+attributes 属性中的每个节点的 nodeName 是对应属性的名字，nodeValue 是属性的值。比如，要取得元素 id 属性的值，可以使用以下代码：
+
+```js
+let id = element.attributes.getNamedItem("id").nodeValue;
+```
+
+下面是使用中括号访问属性的简写形式：
+
+```js
+let id = element.attributes["id"].nodeValue;
+```
+
+同样，也可以用这种语法设置属性的值，即先取得属性节点，再将其 nodeValue 设置为新值，如下所示：
+
+```js
+element.attributes["id"].nodeValue = "someOtherId";
+```
+
+removeNamedItem()方法与元素上的 removeAttribute()方法类似，也是删除指定名字的属性。 下面的例子展示了这两个方法唯一的不同之处，就是 removeNamedItem()返回表示被删除属性的 Attr 节点：
+
+```js
+let oldAttr = element.attributes.removeNamedItem("id");
+```
+
+setNamedItem()方法很少使用，它接收一个属性节点，然后给元素添加一个新属性，如下所示：
+
+```js
+element.attributes.setNamedItem(newAttr);
+```
+
+一般来说，因为使用起来更简便，通常开发者更喜欢使用 getAttribute()、removeAttribute() 和 setAttribute()方法，而不是刚刚介绍的 NamedNodeMap 对象的方法。 
+
+**attributes 属性最有用的场景是需要迭代元素上所有属性的时候**。这时候往往是要把 DOM 结构 序列化为 XML 或 HTML 字符串。比如，以下代码能够迭代一个元素上的所有属性并以 attribute1= "value1" attribute2="value2"的形式生成格式化字符串：
+
+```js
+function outputAttributes(element) {
+	let pairs = [];
+	for (let i = 0, len = element.attributes.length; i < len; ++i) {
+		const attribute = element.attributes[i];
+		pairs.push(`${attribute.nodeName}="${attribute.nodeValue}"`);
+	}
+	return pairs.join(" ");
+}
+```
+
+这个函数使用数组存储每个名/值对，迭代完所有属性后，再将这些名/值对用空格拼接在一起。（这 个技术常用于序列化为长字符串。）这个函数中的 for 循环使用 attributes.length 属性迭代每个属 性，将每个属性的名字和值输出为字符串。不同浏览器返回的 attributes 中的属性顺序也可能不一样。 HTML 或 XML 代码中属性出现的顺序不一定与 attributes 中的顺序一致。
+
+### 5.创建元素
+
+可以使用 document.createElement()方法创建新元素。这个方法接收一个参数，即要创建元素 的标签名。在 HTML 文档中，标签名是不区分大小写的，而 XML 文档（包括 XHTML）是区分大小写 的。要创建<div>元素，可以使用下面的代码：
+
+```js
+let div = document.createElement("div");
+```
+
+使用 createElement()方法创建新元素的同时也会将其 ownerDocument 属性设置为 document。此时，可以再为其添加属性、添加更多子元素。比如：
+
+```js
+div.id = "myNewDiv";
+div.className = "box";
+```
+
+在新元素上设置这些属性只会附加信息。因为这个元素还没有添加到文档树，所以不会影响浏览器 显示。**要把元素添加到文档树，可以使用 appendChild()、insertBefore()或 replaceChild()。** 比如，以下代码会把刚才创建的元素添加到文档的<body>元素中：
+
+```js
+document.body.appendChild(div);
+```
+
+元素被添加到文档树之后，浏览器会立即将其渲染出来。之后再对这个元素所做的任何修改，都会立即在浏览器中反映出来。
+
+### 6.元素后代
+
+**元素可以拥有任意多个子元素和后代元素，因为元素本身也可以是其他元素的子元素。**childNodes 属性包含元素所有的子节点，这些子节点可能是其他元素、文本节点、注释或处理指令。不同浏览器在 识别这些节点时的表现有明显不同。比如下面的代码：
+
+```html
+<ul id="myList">
+    <li>Item 1</li>
+    <li>Item 2</li>
+    <li>Item 3</li>
+</ul>
+```
+
+在解析以上代码时，<ul>元素会包含 7 个子元素，其中 3 个是<li>元素，还有 4 个 Text 节点（表 示<li>元素周围的空格）。如果把元素之间的空格删掉，变成下面这样，则所有浏览器都会返回同样数 量的子节点：
+
+```html
+<ul id="myList"><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>
+```
+
+所有浏览器解析上面的代码后，<ul>元素都会包含 3 个子节点。考虑到这种情况，通常在执行某个操作之后需要先检测一下节点的 nodeType，如下所示：
+
+```js
+for (let i = 0, len = element.childNodes.length; i < len; ++i) {
+    if (element.childNodes[i].nodeType == 1) {
+    	// 执行某个操作
+    }
+}
+```
+
+以上代码会遍历某个元素的子节点，并且只在 nodeType 等于 1（即 Element 节点）时执行某个 操作。 
+
+**要取得某个元素的子节点和其他后代节点，可以使用元素的 getElementsByTagName()方法**。在 元素上调用这个方法与在文档上调用是一样的，只不过搜索范围限制在当前元素之内，即只会返回当前 元素的后代。对于本节前面<ul>的例子，可以像下面这样取得其所有的<li>元素：
+
+```js
+let ul = document.getElementById("myList");
+let items = ul.getElementsByTagName("li");
+```
+
+这里例子中的<ul>元素只有一级子节点，如果它包含更多层级，则所有层级中的<li>元素都会返回。
+
+## 1.4 Text 类型
+
+Text 节点由 Text 类型表示，包含按字面解释的纯文本，也可能包含转义后的 HTML 字符，但不含 HTML 代码。Text 类型的节点具有以下特征：
+
+- nodeType 等于 3；
+- nodeName 值为"#text"；
+- nodeValue 值为节点中包含的文本；
+- parentNode 值为 Element 对象；
+- 不支持子节点。
+
+Text 节点中包含的文本可以通过 nodeValue 属性访问，也可以通过 data 属性访问，这两个属性 包含相同的值。修改 nodeValue 或 data 的值，也会在另一个属性反映出来。文本节点暴露了以下操 作文本的方法：
+
+- appendData(text)，向节点末尾添加文本 text；
+- deleteData(offset, count)，从位置 offset 开始删除 count 个字符；
+- insertData(offset, text)，在位置 offset 插入 text；
+- replaceData(offset, count, text)，用 text 替换从位置 offset 到 offset + count 的文本；
+- splitText(offset)，在位置 offset 将当前文本节点拆分为两个文本节点；
+- substringData(offset, count)，提取从位置 offset 到 offset + count 的文本。
+
+除了这些方法，还可以通过 length 属性获取文本节点中包含的字符数量。这个值等于 nodeValue. length 和 data.length。 
+
+**默认情况下，包含文本内容的每个元素最多只能有一个文本节点**。例如：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<style>
+	</style>
+</head>	
+<body>
+	<!-- 没有内容，因此没有文本节点 -->
+	<div></div>
+	<!-- 有空格，因此有一个文本节点 -->
+	<div> </div>
+	<!-- 有内容，因此有一个文本节点 -->
+	<div>Hello World!</div>
+	<button onclick="changeText()">更改文本</button>
+
+</body>
+<script type="text/javascript">
+	let div=document.getElementsByTagName("div");
+	console.log(div);
+	function changeText(){
+		div[1].firstChild.nodeValue = "Some other message";
+		console.log("dd");
+	}
+
+</script>
+</html>
+```
+
+示例中的第一个<div>元素中不包含内容，因此不会产生文本节点。只要开始标签和结束标签之间 有内容，就会创建一个文本节点，因此第二个<div>元素会有一个文本节点的子节点，虽然它只包含空 格。这个文本节点的 nodeValue 就是一个空格。第三个<div>元素也有一个文本节点的子节点，其 nodeValue 的值为"Hello World!"。下列代码可以用来访问这个文本节点：
+
+```js
+let textNode = div.firstChild; // 或 div.childNodes[0]
+```
+
+取得文本节点的引用后，可以像这样来修改它：
+
+```js
+	let div=document.getElementsByTagName("div");
+	console.log(div);
+	function changeText(){
+		div[1].firstChild.nodeValue = "Some other message";
+		console.log("dd");
+	}
+
+```
+
+只要节点在当前的文档树中，这样的修改就会马上反映出来。修改文本节点还有一点要注意，就是 HTML 或 XML 代码（取决于文档类型）会被转换成实体编码，即小于号、大于号或引号会被转义，如 下所示：
+
+```js
+// 输出为"Some &lt;strong&gt;other&lt;/strong&gt; message"
+div.firstChild.nodeValue = "Some <strong>other</strong> message";
+```
+
+这实际上是在将 HTML 字符串插入 DOM 文档前进行编码的有效方式。
+
+### 1. 创建文本节点
+
+document.createTextNode()可以用来创建新文本节点，它接收一个参数，即要插入节点的文本。跟设置已有文本节点的值一样，这些要插入的文本也会应用 HTML 或 XML 编码，如下面的例子所示：
+
+```js
+let textNode = document.createTextNode("<strong>Hello</strong> world!");
+```
+
+创建新文本节点后，其 ownerDocument 属性会被设置为 document。但在把这个节点添加到文档树之前，我们不会在浏览器中看到它。以下代码创建了一个<div>元素并给它添加了一段文本消息：
+
+```js
+let element = document.createElement("div");
+element.className = "message";
+let textNode = document.createTextNode("Hello world!");
+element.appendChild(textNode);
+document.body.appendChild(element);
+```
+
+这个例子首先创建了一个<div>元素并给它添加了值为"message"的 class 属性，然后又创建了 一个文本节点并添加到该元素。最后一步是把这个元素添加到文档的主体上，这样元素及其包含的文本 会出现在浏览器中。 
+
+一般来说一个元素只包含一个文本子节点。不过，也可以让元素包含多个文本子节点，如下面的例 子所示：
+
+```js
+let element = document.createElement("div");
+element.className = "message";
+let textNode = document.createTextNode("Hello world!");
+element.appendChild(textNode);
+let anotherTextNode = document.createTextNode("Yippee!");
+element.appendChild(anotherTextNode);
+document.body.appendChild(element);
+```
+
+在将一个文本节点作为另一个文本节点的同胞插入后，两个文本节点的文本之间不会包含空格。
+
+### 2. 规范化文本节点
+
+DOM 文档中的同胞文本节点可能导致困惑，因为一个文本节点足以表示一个文本字符串。同样， DOM 文档中也经常会出现两个相邻文本节点。为此，有一个方法可以合并相邻的文本节点。这个方法 叫 normalize()，是在 Node 类型中定义的（因此所有类型的节点上都有这个方法）。在包含两个或多 个相邻文本节点的父节点上调用 normalize()时，所有同胞文本节点会被合并为一个文本节点，这个 文本节点的 nodeValue 就等于之前所有同胞节点 nodeValue 拼接在一起得到的字符串。来看下面的 例子：
+
+```js
+let element = document.createElement("div");
+element.className = "message";
+let textNode = document.createTextNode("Hello world!");
+element.appendChild(textNode);
+let anotherTextNode = document.createTextNode("Yippee!");
+element.appendChild(anotherTextNode);
+document.body.appendChild(element);
+alert(element.childNodes.length); // 2
+element.normalize();
+alert(element.childNodes.length); // 1
+alert(element.firstChild.nodeValue); // "Hello world!Yippee!"
+```
+
+浏览器在解析文档时，永远不会创建同胞文本节点。同胞文本节点只会出现在 DOM 脚本生成的文档树中。
+
+### 3. 拆分文本节点
+
+Text 类型定义了一个与 normalize()相反的方法——splitText()。这个方法可以在指定的偏移 位置拆分 nodeValue，将一个文本节点拆分成两个文本节点。拆分之后，原来的文本节点包含开头到 偏移位置前的文本，新文本节点包含剩下的文本。这个方法返回新的文本节点，具有与原来的文本节点 相同的 parentNode。来看下面的例子：
+
+```js
+let element = document.createElement("div");
+element.className = "message";
+let textNode = document.createTextNode("Hello world!");
+element.appendChild(textNode);
+document.body.appendChild(element);
+let newNode = element.firstChild.splitText(5);
+alert(element.firstChild.nodeValue); // "Hello"
+alert(newNode.nodeValue); // " world!"
+alert(element.childNodes.length); // 2
+```
+
+在这个例子中，包含"Hello world!"的文本节点被从位置 5 拆分成两个文本节点。位置 5 对应 "Hello"和"world!"之间的空格，因此原始文本节点包含字符串"Hello"，而新文本节点包含文本"world!"（包含空格）。
+
+**拆分文本节点最常用于从文本节点中提取数据的 DOM 解析技术。**
+
+## 1.5 Comment 类型
