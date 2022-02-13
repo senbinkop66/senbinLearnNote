@@ -1,55 +1,22 @@
-var numEnclaves = function(grid) {
-    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-    const m = grid.length;
-    const n = grid[0].length;
-    const visited = new Array(m).fill(0).map(() => new Array(n).fill(false));
-    const queue=[];
+/**
+ * @param {number} n
+ * @return {number[]}
+ */
+var countBits = function(n) {
+    let result=[0];
+    let len=1;
+    while(n>0){
+        len=result.length < n ? result.length : n;
+        for(let i=0;i<len;i++){
+            result.push(1+result[i])
+        }
+        n=n-len;
+    }
+    //console.log(result);
+    return result;
+};
 
-    for (let i = 0; i < m; i++) {
-        if (grid[i][0]===1) {
-            visited[i][0]=true;
-            queue.push([i,0]);
-        }
-        if (grid[i][n-1]===1) {
-            visited[i][n-1]=true;
-            queue.push([i,n-1]);
-        }
-    }
-    for (let j = 1; j < n - 1; j++) {
-        if (grid[0][j]===1) {
-            visited[0][j]=true;
-            queue.push([0,j]);
-        }
-        if (grid[m-1][j]===1) {
-            visited[m-1][j]=true;
-            queue.push([m-1,j]);
-        }
-    }
-    while(queue.length){
-        const cell=queue.shift();
-        const currRow=cell[0];
-        const currCol=cell[1];
-        for (const dir of dirs){
-            const nextRow=currRow+dir[0];
-            const nextCol=currCol+dir[1];
-            if (nextRow > 0 && nextRow < m && nextCol >= 0 && nextCol < n && grid[nextRow][nextCol] == 1 && !visited[nextRow][nextCol]) {
-            visited[nextRow][nextCol]=true;
-            queue.push([nextRow,nextCol]);
-        }
-        }
-
-    }
-    let enclaves = 0;
-    for (let i = 1; i < m - 1; i++) {
-        for (let j = 1; j < n - 1; j++) {
-            if (grid[i][j] === 1 && !visited[i][j]) {
-                enclaves++;
-            }
-        }
-    }
-    return enclaves;
+for(let i=0;i<=64;i++){
+    let result=countBits(i);
+    console.log(i,result[i]);
 }
-
-let test=[[0,0,0,0],[1,0,1,0],[0,1,1,0],[0,0,0,0]];
-let result=numEnclaves(test);
-console.log(result);

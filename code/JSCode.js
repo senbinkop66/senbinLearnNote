@@ -1123,3 +1123,234 @@ class UnionFind {
     }
 }
 
+/**
+ * @param {number} n
+ * @return {boolean}
+ */
+var isUgly = function(n) {
+    if (n<=0) {
+        return false;
+    }
+    let factors=[2,3,5];
+    for (let f of factors){
+        //对n反复除以2,3,5
+        while(n%f===0){
+            n/=f;
+        }
+    }
+    return n===1;
+};
+
+let test=100;
+let result=isUgly(test);
+console.log(result);
+
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var missingNumber = function(nums) {
+    let n=nums.length;
+    let sum=n*(n+1)/2;
+    for (let i=0;i<n;i++){
+        sum-=nums[i];
+    }
+    return sum;
+};
+
+let test=[9,6,4,2,3,5,7,0,1];
+let result=missingNumber(test);
+console.log(result);
+
+/**
+ * @param {string} text
+ * @return {number}
+ */
+var maxNumberOfBalloons = function(text) {
+    let m=new Map([["b",0],["a",0],["l",0],["o",0],["n",0]]);
+    for(let i=0;i<text.length;i++){
+        if (m.has(text[i])) {
+            m.set(text[i],m.get(text[i])+1);
+        }
+    }
+    let minNum=text.length;
+    m.forEach((v,k)=>{
+        if (k==="l" || k==="o") {
+            minNum=Math.min(minNum,v>>1);
+        }else{
+            minNum=Math.min(minNum,v);
+        }
+    });
+    return minNum;
+};
+
+
+let test="loonbalxballpoon";
+let result=maxNumberOfBalloons(test);
+console.log(result);
+
+/**
+ * Definition for isBadVersion()
+ * 
+ * @param {integer} version number
+ * @return {boolean} whether the version is bad
+ * isBadVersion = function(version) {
+ *     ...
+ * };
+ */
+
+/**
+ * @param {function} isBadVersion()
+ * @return {function}
+ */
+var solution = function(isBadVersion) {
+    /**
+     * @param {integer} n Total versions
+     * @return {integer} The first bad version
+     */
+    return function(n) {
+        let left=1;
+        let right=n;
+        while(left<right){
+             let mid = Math.floor(left + (right - left) / 2); // 防止计算时溢出
+            if (isBadVersion(mid)) {
+                right=mid;
+            }else{
+                left=mid+1;
+            }
+        }
+        return left;
+    };
+};
+
+/**
+ * @param {string} pattern
+ * @param {string} s
+ * @return {boolean}
+ */
+var wordPattern = function(pattern, s) {
+    s=s.split(" ");
+    if (pattern.length!==s.length) {
+        return false;
+    }
+    let m1=new Map();
+    let m2=new Map();
+    for(let i=0;i<pattern.length;i++){
+        if(m1.has(pattern[i])){
+            if (m1.get(pattern[i])!==s[i]) {
+                return false;
+            }
+        }else{
+            m1.set(pattern[i],s[i]);
+        }
+        if(m2.has(s[i])){
+            if (m2.get(s[i])!==pattern[i]) {
+                return false;
+            }
+        }else{
+            m2.set(s[i],pattern[i]);
+        }
+    }
+    return true;
+};
+
+let test="dog cat cat fish";
+let result=wordPattern("abba",test);
+console.log(result);
+
+/**
+ * @param {number[]} nums
+ */
+var NumArray = function(nums) {
+    this.nums=nums;
+};
+
+/** 
+ * @param {number} left 
+ * @param {number} right
+ * @return {number}
+ */
+NumArray.prototype.sumRange = function(left, right) {
+    let sum=this.nums[right];
+    for (let i=left;i<right;i++){
+        sum+=this.nums[i];
+    }
+    return sum;
+};
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * var obj = new NumArray(nums)
+ * var param_1 = obj.sumRange(left,right)
+ */
+
+/**
+ * @param {number[]} nums
+ */
+var NumArray = function(nums) {
+    let n=nums.length;
+    this.sums=new Array(n+1).fill(0); //前n个数的和
+    for (let i=0;i<n;i++){
+        this.sums[i+1]=this.sums[i]+nums[i];
+    }
+};
+
+/** 
+ * @param {number} left 
+ * @param {number} right
+ * @return {number}
+ */
+NumArray.prototype.sumRange = function(left, right) {
+    return this.sums[right+1]-this.sums[left];
+};
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * var obj = new NumArray(nums)
+ * var param_1 = obj.sumRange(left,right)
+ */
+
+/**
+ * @param {number} n
+ * @return {boolean}
+ */
+var isPowerOfThree = function(n) {
+    if (n<=0) {
+        return false;
+    }
+    if (n%3!==0 && n!==1) {
+        return false;
+    }
+    while(n>1){
+        n/=3;
+    }
+    return n===1;
+};
+
+let test=81;
+let result=isPowerOfThree(test);
+console.log(result);
+
+/**
+ * @param {number} n
+ * @return {number[]}
+ */
+var countBits = function(n) {
+    let result=[0];
+    let len=1;
+    while(n>0){
+        len=result.length < n ? result.length : n;
+        for(let i=0;i<len;i++){
+            result.push(1+result[i])
+        }
+        n=n-len;
+    }
+    //console.log(result);
+    return result;
+};
+
+for(let i=0;i<=64;i++){
+    let result=countBits(i);
+    console.log(i,result[i]);
+}
+
