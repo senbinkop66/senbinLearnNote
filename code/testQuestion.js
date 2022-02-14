@@ -1,22 +1,22 @@
 /**
- * @param {number} n
- * @return {number[]}
+ * @param {number[]} nums
+ * @return {number}
  */
-var countBits = function(n) {
-    let result=[0];
-    let len=1;
-    while(n>0){
-        len=result.length < n ? result.length : n;
-        for(let i=0;i<len;i++){
-            result.push(1+result[i])
-        }
-        n=n-len;
-    }
-    //console.log(result);
-    return result;
+var singleNonDuplicate = function(nums) {
+     //数组长度一定是奇数个
+     let left=0;
+     let right=nums.length-1;
+     while(left<right){
+          let mid=(left+right)>>1;
+          if (nums[mid]===nums[mid^1]) {
+               left=mid+1;
+          }else{
+               right=mid;
+          }
+     }
+     return nums[left];
 };
 
-for(let i=0;i<=64;i++){
-    let result=countBits(i);
-    console.log(i,result[i]);
-}
+let test=[3,3,7,7,10,11,11];
+let result=singleNonDuplicate(test);
+console.log(result);
