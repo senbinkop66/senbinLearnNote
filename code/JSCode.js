@@ -1559,3 +1559,108 @@ let test=2126753390;
 let result=guessNumber(test);
 console.log(result);
 
+/**
+ * @param {string} ransomNote
+ * @param {string} magazine
+ * @return {boolean}
+ */
+var canConstruct = function(ransomNote, magazine) {
+    let m=new Map();
+    for(let i=0;i<magazine.length;i++){
+        m.set(magazine[i],m.has(magazine[i]) ? m.get(magazine[i])+1 : 1);
+    }
+    for(let i=0;i<ransomNote.length;i++){
+        if (m.has(ransomNote[i])) {
+            if (m.get(ransomNote[i])===0) {
+                return false;
+            }else{
+                m.set(ransomNote[i],m.get(ransomNote[i])-1);
+            }
+        }else{
+            return false;
+        }
+    }
+    return true;
+};
+
+
+let test="ab";
+let result=canConstruct("aa",test);
+console.log(result);
+
+/**
+ * @param {string} s
+ * @param {string} t
+ * @return {boolean}
+ */
+var isSubsequence = function(s, t) {
+    if (s.length===0) {
+        //s为空时一定是
+        return true;
+    }
+    if (s.length===t.length) {
+        return s===t;
+    }
+    if(s.length>t.length){
+        return false;
+    }
+    for (let i=0,j=0;i<s.length;j++){
+        if (j===t.length) {
+            //遍历完t,但s没有遍历完
+            return false;
+        }
+        if (s[i]===t[j]) {
+            i++;
+        }
+    }
+    return true;
+};
+
+
+let test1="abec";
+let test2="abcde";
+let result=isSubsequence(test1,test2);
+console.log(result);
+
+
+/**
+ * @param {string} s
+ * @param {string} t
+ * @return {boolean}
+ */
+var isSubsequence = function(s, t) {
+    let m=t.length;
+    let n=s.length;
+    const f=new Array(m+1);
+    for(let j=0;j<m+1;j++){
+        f[j]=new Array(26).fill(m);
+    }
+
+    //预处理出对于 t 的每一个位置，从该位置开始往后每一个字符第一次出现的位置。
+    for(let i=m-1;i>=0;i--){
+        for(let j=0;j<26;j++){
+            if (t.charCodeAt(i)==="a".charCodeAt()+j) {
+                f[i][j]=i;
+            }else{
+                f[i][j]=f[i+1][j];
+            }
+        }
+    }
+    //console.log(f);
+    let add=0;
+    for(let i=0;i<n;i++){
+        if (f[add][s.charCodeAt(i)-"a".charCodeAt()]===m) {
+            //m表示遍历完t了
+            return false;
+        }
+        add=f[add][s.charCodeAt(i)-"a".charCodeAt()]+1;
+    }
+    return true;
+};
+
+
+let test1="abecd";
+let test2="zxabdeccde";
+let result=isSubsequence(test1,test2);
+console.log(result);
+
