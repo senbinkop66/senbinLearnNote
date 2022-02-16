@@ -1,69 +1,44 @@
-/**
- * @param {number[][]} pairs
- * @return {number}
+/** 
+ * Forward declaration of guess API.
+ * @param {number} num   your guess
+ * @return              -1 if num is lower than the guess number
+ *                       1 if num is higher than the guess number
+ *                       otherwise return 0
  */
-var checkWays = function(pairs) {
-    const adj = new Map();
-    for (const p of pairs) {
-        if (!adj.has(p[0])) {
-            adj.set(p[0], new Set());
-        }
-        if (!adj.has(p[1])) {
-            adj.set(p[1], new Set());
-        }
-        adj.get(p[0]).add(p[1]);
-        adj.get(p[1]).add(p[0]);
-    }
-    /* 检测是否存在根节点*/
-    let root = -1;
-    const entries = new Set();
-    for (const entry of adj.entries()) {
-        entries.add(entry);
-    }
-    for (const [node, neg] of entries) {
-        if (neg.size === adj.size - 1) {
-            root = node;
-        }
-    }
-    if (root === -1) {
+var guess = function(num) {
+    if (num>1702766719) {
+        return -1;
+    }else if(num<1702766719){
+        return 1;
+    }else{
         return 0;
     }
-    let res = 1;
-    for (const [node, neg] of entries) {
-        /* 如果当前节点为根节点 */
-        if (root === node) {
-            continue;
+}
+
+
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var guessNumber = function(n) {
+    let left=1;
+    let right=n;
+    let mid;
+    while(left<right){
+        mid= Math.floor(left + (right - left) / 2);  // 防止计算时溢出;
+        if(guess(mid)===-1) {
+            right=mid-1;
+        }else if(guess(mid)===1){
+            left=mid+1;
+        }else{
+            return mid;
         }
-        const currDegree = neg.size;
-        let parentNode = -1;
-        let parentDegree = Number.MAX_SAFE_INTEGER;
-        /* 根据degree的大小找到当前节点的父节点 */
-        for (const neighbour of neg) {
-            if (adj.has(neighbour) && adj.get(neighbour).size < parentDegree && adj.get(neighbour).size >= currDegree) {
-                parentNode = neighbour;
-                parentDegree = adj.get(neighbour).size;
-            }
-        }
-        if (parentNode === -1) {
-            return 0;
-        }
-        /* 检测父节点的集合是否包含所有的孩子节点 */
-        for (const neighbour of neg) {
-            if (neighbour === parentNode) {
-                continue;
-            }
-            if (!adj.get(parentNode).has(neighbour)) {
-                return 0;
-            }
-        }
-        if (parentDegree === currDegree) {
-            res = 2;
-        }
+        //console.log(mid);
     }
-    return res;
+    return left;
 };
 
 
-let test= [[1,2],[2,3],[1,3]];
-let result=checkWays(test);
+let test=2126753390;
+let result=guessNumber(test);
 console.log(result);

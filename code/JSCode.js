@@ -1410,3 +1410,152 @@ let test=[[1,10,4,2],[9,3,8,7],[15,16,17,12]];
 let result=luckyNumbers(test);
 console.log(result);
 
+/**
+ * @param {character[]} s
+ * @return {void} Do not return anything, modify s in-place instead.
+ */
+var reverseString = function(s) {
+    let n=s.length-1;
+    let m=n>>1;
+    for(let i=0;i<=m;i++){
+        let temp=s[i];
+        s[i]=s[n-i];
+        s[n-i]=temp;
+    }
+    return s;
+};
+
+let test= ["A"," ","m","a","n",","," ","a"," ","p","l","a","n",","," ","a"," ","c","a","n","a","l",":"," ","P","a","n","a","m","a"];
+let result=reverseString(test);
+console.log(result);
+
+/**
+ * @param {string} s
+ * @return {string}
+ */
+var reverseVowels = function(s) {
+    s=s.split("");
+    let right=s.length-1;
+    let left=0;
+    let temp="";
+    let set=new Set(["a","e","i","o","u","A","E","I","O","U"]);
+    //console.log(set);
+    while(left<right){
+        if (set.has(s[left])) {
+            temp=s[left];
+            if (set.has(s[right])) {
+                s[left]=s[right];
+                s[right]=temp;
+                left++;
+                right--;
+            }else{
+                right--;
+            }
+        }else{
+            left++;
+        }
+    }
+    return s.join("");
+};
+
+let test="leetcode";
+let result=reverseVowels(test);
+console.log(result);
+
+/**
+ * @param {number[]} nums1
+ * @param {number[]} nums2
+ * @return {number[]}
+ */
+var intersection = function(nums1, nums2) {
+    let result=[];
+    let set=new Set();
+    for(let i=0;i<nums1.length;i++){
+        set.add(nums1[i]);
+    }
+    for(let i=0;i<nums2.length;i++){
+        if (set.has(nums2[i])) {
+            result.push(nums2[i]);
+            set.delete(nums2[i]);
+        }
+    }
+    return result;
+};
+
+let test=[1,2,4,2,1,4,6];
+let result=intersection(test,[9,4,9,8,4]);
+console.log(result);
+
+/**
+ * @param {number} num
+ * @return {boolean}
+ */
+var isPerfectSquare = function(num) {
+    let result=true;
+    //2分法
+    let left=0;
+    let right=num;
+    let mid;
+    while(left<=right){
+        mid=(left+right)>>1;
+        if(mid*mid>num) {
+            right=mid-1;
+        }else if(mid*mid<num){
+            left=mid+1;
+        }else{
+            return true;
+        }
+        //console.log(mid);
+    }
+    return false;
+};
+
+let test=100000000;
+let result=isPerfectSquare(test);
+console.log(result);
+
+/** 
+ * Forward declaration of guess API.
+ * @param {number} num   your guess
+ * @return              -1 if num is lower than the guess number
+ *                       1 if num is higher than the guess number
+ *                       otherwise return 0
+ */
+var guess = function(num) {
+    if (num>1702766719) {
+        return -1;
+    }else if(num<1702766719){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+
+
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var guessNumber = function(n) {
+    let left=1;
+    let right=n;
+    let mid;
+    while(left<right){
+        mid= Math.floor(left + (right - left) / 2);  // 防止计算时溢出;
+        if(guess(mid)===-1) {
+            right=mid-1;
+        }else if(guess(mid)===1){
+            left=mid+1;
+        }else{
+            return mid;
+        }
+        //console.log(mid);
+    }
+    return left;
+};
+
+
+let test=2126753390;
+let result=guessNumber(test);
+console.log(result);
+
