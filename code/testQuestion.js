@@ -1,32 +1,69 @@
 /**
- * @param {number[][]} matrix
- * @return {number[]}
+ * @param {number[][]} pairs
+ * @return {number}
  */
-var luckyNumbers  = function(matrix) {
-     let m=matrix.length;
-     let n=matrix[0].length;
-     const maxColArr=new Array(n).fill(0);;  //每一列的最大值
-     const minRowArr=new Array(m).fill(0);  //每一行的最大值索引;
-     for(let i=0;i<m;i++){
-          for(let j=0;j<n;j++){
-               maxColArr[j]=Math.max(maxColArr[j],matrix[i][j]);
-               //矩阵中的所有元素都是不同的
-               minRowArr[i]=matrix[i][minRowArr[i]]<matrix[i][j] ? minRowArr[i] : j;
-          }
-     }
-     //console.log(matrix);
-     //console.log(maxColArr);
-     //console.log(minRowArr);
-     let result=[];
-     for (let i=0;i<m;i++){
-          if (matrix[i][minRowArr[i]]===maxColArr[minRowArr[i]]) {
-               result.push(matrix[i][minRowArr[i]]);
-          }
-     }
-     return result;
-
+var checkWays = function(pairs) {
+    const adj = new Map();
+    for (const p of pairs) {
+        if (!adj.has(p[0])) {
+            adj.set(p[0], new Set());
+        }
+        if (!adj.has(p[1])) {
+            adj.set(p[1], new Set());
+        }
+        adj.get(p[0]).add(p[1]);
+        adj.get(p[1]).add(p[0]);
+    }
+    /* 检测是否存在根节点*/
+    let root = -1;
+    const entries = new Set();
+    for (const entry of adj.entries()) {
+        entries.add(entry);
+    }
+    for (const [node, neg] of entries) {
+        if (neg.size === adj.size - 1) {
+            root = node;
+        }
+    }
+    if (root === -1) {
+        return 0;
+    }
+    let res = 1;
+    for (const [node, neg] of entries) {
+        /* 如果当前节点为根节点 */
+        if (root === node) {
+            continue;
+        }
+        const currDegree = neg.size;
+        let parentNode = -1;
+        let parentDegree = Number.MAX_SAFE_INTEGER;
+        /* 根据degree的大小找到当前节点的父节点 */
+        for (const neighbour of neg) {
+            if (adj.has(neighbour) && adj.get(neighbour).size < parentDegree && adj.get(neighbour).size >= currDegree) {
+                parentNode = neighbour;
+                parentDegree = adj.get(neighbour).size;
+            }
+        }
+        if (parentNode === -1) {
+            return 0;
+        }
+        /* 检测父节点的集合是否包含所有的孩子节点 */
+        for (const neighbour of neg) {
+            if (neighbour === parentNode) {
+                continue;
+            }
+            if (!adj.get(parentNode).has(neighbour)) {
+                return 0;
+            }
+        }
+        if (parentDegree === currDegree) {
+            res = 2;
+        }
+    }
+    return res;
 };
 
-let test=[[1,10,4,2],[9,3,8,7],[15,16,17,12]];
-let result=luckyNumbers(test);
+
+let test= [[1,2],[2,3],[1,3]];
+let result=checkWays(test);
 console.log(result);
