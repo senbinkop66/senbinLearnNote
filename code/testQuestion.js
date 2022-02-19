@@ -1,15 +1,43 @@
 /**
- * @param {number} n
- * @param {number} k
- * @param {number} row
- * @param {number} column
- * @return {number}
+ * @param {number[]} arr
+ * @return {number[]}
  */
-var knightProbability = function(n, k, row, column) {
-    const dirs=[[-2,1],[-1,2],[1,2],[2,1],[2,-1],[1,-2],[-1,-2],[-2,-1]];
-    
-};
+var pancakeSort = function(arr) {
+    let result=[];
+    let n=arr.length;
+    while(n>1){
+        let maxValueIndex=findMaxValueIndex(arr,n);
+        if (maxValueIndex!==n-1) {
+            if (maxValueIndex!==0) {
+                result.push(maxValueIndex+1);
+                swapArrSort(arr,maxValueIndex);
+            }
+            result.push(n);
+            swapArrSort(arr,n-1);
+        }
+        n--;
+        //console.log(arr);
+    }
+    return result;
 
-let n = 3, k = 2, row = 0, column = 0;
-let result=knightProbability(n, k, row, column);
+};
+var findMaxValueIndex=function(arr,n){
+    for(let i=0;i<n;i++){
+        if (arr[i]===n) {
+            return i;
+        }
+    }
+}
+var swapArrSort=function(arr,n){
+    let temp;
+    for(let i=0,j=n;i<j;i++,j--){
+        temp=arr[i];
+        arr[i]=arr[j];
+        arr[j]=temp;
+    }
+}
+
+
+let test=[3,2,4,5,6,1];
+let result=pancakeSort(test);
 console.log(result);
