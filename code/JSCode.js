@@ -1708,3 +1708,87 @@ let test=[3,2,4,5,6,1];
 let result=pancakeSort(test);
 console.log(result);
 
+/**
+ * @param {number[]} bits
+ * @return {boolean}
+ */
+var isOneBitCharacter = function(bits) {
+    let n=bits.length-1;
+    if (bits[n]===1) {
+        return false;
+    }
+    for(let i=0;i<n;){
+        if (i===n-1) {
+            if (bits[i]===1) {
+                return false;
+            }
+        }
+        if (bits[i]==1) {
+            i+=2;
+        }else{
+            i++;
+        }
+    }
+    return true;
+};
+
+let test=[1, 1, 1, 0];
+let result=isOneBitCharacter(test);
+console.log(result);
+
+/**
+ * @param {number} turnedOn
+ * @return {string[]}
+ */
+var readBinaryWatch = function(turnedOn) {
+    if (turnedOn>8) {
+        return [];
+    }
+    //const hours=[0,1,2,4,8];
+    //const minutes=[0,1,2,4,8,16,32];
+    const hourOfNums=new Array(4);  //亮几个灯时能代表的小时数,最多亮三盏灯
+    for(let i=0;i<4;i++){
+        hourOfNums[i]=new Array();
+    }
+    for(let i=0;i<12;i++){
+        let numOfOne=countBitOfOne(i.toString(2));
+        hourOfNums[numOfOne].push(i.toString());
+    }
+
+    const minuteOfNums=new Array(6);  //亮几个灯时能代表的分钟数,最多亮5盏灯
+    for(let i=0;i<6;i++){
+        minuteOfNums[i]=new Array();
+    }
+    for(let i=0;i<60;i++){
+        let numOfOne=countBitOfOne(i.toString(2));
+        minuteOfNums[numOfOne].push(("00"+i.toString()).slice(-2));
+    }
+
+    let result=[];
+    for(let h=0;h<=turnedOn;h++){
+        let m=turnedOn-h;
+        if (h<=3 && m<=5) {
+            for(let i=0;i<hourOfNums[h].length;i++){
+                for(let j=0;j<minuteOfNums[m].length;j++){
+                    result.push(hourOfNums[h][i]+":"+minuteOfNums[m][j]);
+                }
+            }
+            
+        }
+    }
+    return result;
+};
+
+var countBitOfOne=function(bits){
+    let count=0;
+    bits=bits.split("");
+    for(let i=0;i<bits.length;i++){
+        count+=Number(bits[i]);
+    }
+    return count;
+}
+
+let test=1;
+let result=readBinaryWatch(test);
+console.log(result);
+
