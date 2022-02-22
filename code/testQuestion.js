@@ -1,50 +1,57 @@
-/**
- * @param {string} dominoes
- * @return {string}
- */
-var pushDominoes = function(dominoes) {
-    let n=dominoes.length;
-    dominoes=dominoes.split("");
-    let left=-1;  //往右倒的
-    let right=n;  //往左倒的
-    for(let i=0;i<n;i++){
-        if(dominoes[i]==="L"){
-            right=i;
-            if (left===-1) {
-                //前面向right倒的没有或倒完了
-                while(dominoes[right-1]==="."){
-                    dominoes[--right]="L";
-                }
-                right=n;
-            }else{
-                //前面有向right倒的
-                while((left+1)!==(right-1) && (left+1)!==right && left!==(right-1)){
-                    dominoes[++left]="R";
-                    dominoes[--right]="L";
-                }
-                left=-1;
-                right=n;
-            }
-        }else if(dominoes[i]==="R"){
-            if (left!==-1) {
-                //连续遇到往右倒的
-                while(dominoes[left+1]==="."){
-                    dominoes[++left]="R";
-                }
-            }
-            left=i;
-
-        }else{}
+const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29];
+const NUM_MAX = 30;
+const MOD = 1000000007;
+var numberOfGoodSubsets = function(nums) {
+    const freq = new Array(NUM_MAX + 1).fill(0);
+    for (const num of nums) {
+        ++freq[num];
     }
-    if (right===n && left!==-1) {
-        while((left+1)<n){
-            //后面只有往右倒的
-            dominoes[++left]="R";
+
+    const f = new Array(1 << PRIMES.length).fill(0);
+    f[0] = 1;
+    for (let i = 0; i < freq[1]; ++i) {
+        f[0] = f[0] * 2 % MOD;
+    }
+    
+    for (let i = 2; i <= NUM_MAX; ++i) {
+        if (freq[i] === 0) {
+            continue;
+        }
+        
+        // 检查 i 的每个质因数是否均不超过 1 个
+        let subset = 0, x = i;
+        let check = true;
+        for (let j = 0; j < PRIMES.length; ++j) {
+            const prime = PRIMES[j];
+            if (x % (prime * prime) == 0) {
+                check = false;
+                break;
+            }
+            if (x % prime === 0) {
+                subset |= (1 << j);
+            }
+        }
+        if (!check) {
+            continue;
+        }
+
+        // 动态规划
+        for (let mask = (1 << PRIMES.length) - 1; mask > 0; --mask) {
+            if ((mask & subset) === subset) {
+                f[mask] = ((f[mask] + (f[mask ^ subset]) * freq[i]) % MOD);
+            }
         }
     }
-    return dominoes.join("");
+
+    let ans = 0;
+    for (let mask = 1, maskMax = (1 << PRIMES.length); mask < maskMax; ++mask) {
+        ans = (ans + f[mask]) % MOD;
+    }
+    
+    return ans;
 };
 
-let test=".L.R...LR..L..";
-let result=pushDominoes(test);
+
+let test= [4,2,3,15];
+let result=numberOfGoodSubsets(test);
 console.log(result);
