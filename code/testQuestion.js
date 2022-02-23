@@ -1,57 +1,38 @@
-const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29];
-const NUM_MAX = 30;
-const MOD = 1000000007;
-var numberOfGoodSubsets = function(nums) {
-    const freq = new Array(NUM_MAX + 1).fill(0);
-    for (const num of nums) {
-        ++freq[num];
-    }
-
-    const f = new Array(1 << PRIMES.length).fill(0);
-    f[0] = 1;
-    for (let i = 0; i < freq[1]; ++i) {
-        f[0] = f[0] * 2 % MOD;
-    }
-    
-    for (let i = 2; i <= NUM_MAX; ++i) {
-        if (freq[i] === 0) {
-            continue;
-        }
-        
-        // 检查 i 的每个质因数是否均不超过 1 个
-        let subset = 0, x = i;
-        let check = true;
-        for (let j = 0; j < PRIMES.length; ++j) {
-            const prime = PRIMES[j];
-            if (x % (prime * prime) == 0) {
-                check = false;
-                break;
+/**
+ * @param {string} s
+ * @return {string}
+ */
+var reverseOnlyLetters = function(s) {
+	s=s.split("");
+    let right=s.length-1;
+    let left=0;
+    let temp="";
+    //console.log(set);
+    while(left<right){
+    	let acci1=s[left].toLowerCase().charCodeAt()
+        if (acci1>96 && acci1<123) {
+            temp=s[left];
+    		let acci2=s[right].toLowerCase().charCodeAt()
+            if (acci2>96 && acci2<123) {
+                s[left]=s[right];
+                s[right]=temp;
+                left++;
+                right--;
+            }else{
+                right--;
             }
-            if (x % prime === 0) {
-                subset |= (1 << j);
-            }
-        }
-        if (!check) {
-            continue;
-        }
-
-        // 动态规划
-        for (let mask = (1 << PRIMES.length) - 1; mask > 0; --mask) {
-            if ((mask & subset) === subset) {
-                f[mask] = ((f[mask] + (f[mask ^ subset]) * freq[i]) % MOD);
-            }
+        }else{
+            left++;
         }
     }
-
-    let ans = 0;
-    for (let mask = 1, maskMax = (1 << PRIMES.length); mask < maskMax; ++mask) {
-        ans = (ans + f[mask]) % MOD;
-    }
-    
-    return ans;
+    return s.join("");
 };
 
-
-let test= [4,2,3,15];
-let result=numberOfGoodSubsets(test);
+let test= "a-bC-dEf-ghIj";
+let result=reverseOnlyLetters(test);
 console.log(result);
+
+//console.log("a".charCodeAt());  //97
+//console.log("z".charCodeAt());  //122
+//console.log("A".charCodeAt());  //65
+//console.log("Z".charCodeAt());  //90
