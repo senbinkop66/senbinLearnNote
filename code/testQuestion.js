@@ -1,38 +1,16 @@
 /**
- * @param {string} s
+ * @param {string} num1
+ * @param {string} num2
  * @return {string}
  */
-var reverseOnlyLetters = function(s) {
-	s=s.split("");
-    let right=s.length-1;
-    let left=0;
-    let temp="";
-    //console.log(set);
-    while(left<right){
-    	let acci1=s[left].toLowerCase().charCodeAt()
-        if (acci1>96 && acci1<123) {
-            temp=s[left];
-    		let acci2=s[right].toLowerCase().charCodeAt()
-            if (acci2>96 && acci2<123) {
-                s[left]=s[right];
-                s[right]=temp;
-                left++;
-                right--;
-            }else{
-                right--;
-            }
-        }else{
-            left++;
-        }
-    }
-    return s.join("");
+var complexNumberMultiply = function(num1, num2) {
+    num1=num1.replace("i","").split("+");
+    num2=num2.replace("i","").split("+");
+    let real=Number(num1[0])*Number(num2[0])-Number(num1[1])*Number(num2[1]);
+    let imaginary_part=Number(num1[0])*Number(num2[1])+Number(num1[1])*Number(num2[0]);
+    return real.toString()+"+"+imaginary_part.toString()+"i";
 };
 
-let test= "a-bC-dEf-ghIj";
-let result=reverseOnlyLetters(test);
-console.log(result);
 
-//console.log("a".charCodeAt());  //97
-//console.log("z".charCodeAt());  //122
-//console.log("A".charCodeAt());  //65
-//console.log("Z".charCodeAt());  //90
+let result=complexNumberMultiply("1+-1i","1+-1i");
+console.log(result);
