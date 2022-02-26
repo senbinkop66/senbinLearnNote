@@ -2,22 +2,106 @@
 <html>
     <head>
         <meta charset=utf-8>
+        <script src="https://unpkg.com/vue@3.2.31"></script>
     </head>
     <body>
-        <input id="input" type="text" />
-        <span id="span"></span>
+        <div id="counter">
+            Counter: {{counter}}
+        </div>
 
-        <script type="text/javascript">
-            // 补全代码
-            let input_e=document.getElementById("input");
-            let span_e=document.getElementById("span");
-            input_e.onchange=function(){
-                span_e.innerText=input_e.value;
+<script type="text/javascript">
+    const Counter={
+        data(){
+            return {
+                counter:0
             }
+        },
+        mounted(){
+            setInterval(()=>{
+                this.counter++;
+            },1000);
+        }
+    }
+    Vue.createApp(Counter).mount('#counter');
+</script>
 
-            input_e.onchange=function(){
-                span_e.innerText=this.value;
+        <div id="bind-attribute">
+            <span v-bind:title="message">
+                鼠标悬停几秒钟查看此处动态绑定的提示信息！
+            </span>
+        </div>
+<script type="text/javascript">
+    const AttributeBinding={
+        data(){
+            return {
+                message:`You loaded this page on ${new Date().toLocale}`
             }
-        </script>
+        },
+        mounted(){
+            setInterval(()=>{
+                this.counter++;
+            },1000);
+        }
+    }
+    Vue.createApp(AttributeBinding).mount('#bind-attribute');
+
+</script>
+    <div id="event-handing">
+        <p>{{message}}</p>
+        <button v-on:click="reverseMessage">反转 Message</button>
+    </div>
+<script type="text/javascript">
+    const EventHanding={
+        data(){
+            return {
+                message:`Hello Vue.js`
+            }
+        },
+        methods:{
+            reverseMessage(){
+                this.message=this.message.split("").reverse().join("");
+            }
+        },
+        
+    }
+    Vue.createApp(EventHanding).mount('#event-handing');
+
+</script>
+
+    <div id="todo-list-app">
+        <ol>
+            <todo-item 
+            v-for="item in groceryList" 
+            v-bind:todo="item" 
+            v-bind:key="item.id"></todo-item>
+        </ol>
+    </div>
+<script type="text/javascript">
+    const TodoItem={
+        props:['todo'],
+        template:`<li>{{ todo.text }}</li>`
+    }
+    // 创建 Vue 应用
+    const TodoList={
+        components:{
+            TodoItem
+        },
+        data() {
+            return {
+              groceryList: [
+                { id: 0, text: 'Vegetables' },
+                { id: 1, text: 'Cheese' },
+                { id: 2, text: 'Whatever else humans are supposed to eat' }
+              ]
+            }
+        },
+        //组件的其它 property
+    };
+    const app=Vue.createApp(TodoList);
+    app.mount("#todo-list-app");
+</script>
+
+
+
     </body>
 </html>

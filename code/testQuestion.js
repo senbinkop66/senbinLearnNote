@@ -1,16 +1,18 @@
 /**
- * @param {string} num1
- * @param {string} num2
- * @return {string}
+ * @param {number[]} nums
+ * @return {number}
  */
-var complexNumberMultiply = function(num1, num2) {
-    num1=num1.replace("i","").split("+");
-    num2=num2.replace("i","").split("+");
-    let real=Number(num1[0])*Number(num2[0])-Number(num1[1])*Number(num2[1]);
-    let imaginary_part=Number(num1[0])*Number(num2[1])+Number(num1[1])*Number(num2[0]);
-    return real.toString()+"+"+imaginary_part.toString()+"i";
+var maximumDifference = function(nums) {
+     let max_diff=0;
+     let min_val=nums[0];
+     for(let i=1;i<nums.length;i++){
+        let diff=nums[i]-min_val;
+        max_diff=max_diff>diff ? max_diff : diff;
+        min_val=nums[i]<min_val ? nums[i] : min_val;
+     }
+    return max_diff>0 ? max_diff : -1;
 };
 
-
-let result=complexNumberMultiply("1+-1i","1+-1i");
+let test=[1,5,2,10];
+let result=maximumDifference(test);
 console.log(result);
