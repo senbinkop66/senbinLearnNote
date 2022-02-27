@@ -1,18 +1,28 @@
 /**
- * @param {number[]} nums
+ * @param {string} s
  * @return {number}
  */
-var maximumDifference = function(nums) {
-     let max_diff=0;
-     let min_val=nums[0];
-     for(let i=1;i<nums.length;i++){
-        let diff=nums[i]-min_val;
-        max_diff=max_diff>diff ? max_diff : diff;
-        min_val=nums[i]<min_val ? nums[i] : min_val;
-     }
-    return max_diff>0 ? max_diff : -1;
+var longestPalindrome = function(s) {
+   let m=new Map();
+   for(let i=0;i<s.length;i++){
+      m.set(s[i],m.has(s[i]) ? m.get(s[i])+1 : 1);
+   }
+   let ans=0;
+   let flag=false;  //是否存在奇数个，中间可以是奇数个
+   for(let val of m.values()){
+      if (val%2===0) {
+         ans+=val;
+      }else{
+         ans+=val-1;
+         flag=true;
+      }
+   }
+   if (flag) {
+      ans+=1;
+   }
+   return ans;
 };
 
-let test=[1,5,2,10];
-let result=maximumDifference(test);
+let test="abccccdd";
+let result=longestPalindrome(test);
 console.log(result);

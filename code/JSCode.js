@@ -1975,3 +1975,108 @@ let test=[1,5,2,10];
 let result=maximumDifference(test);
 console.log(result);
 
+/**
+ * @param {number[]} nums
+ * @return {string}
+ */
+var optimalDivision = function(nums) {
+   let n=nums.length;
+   if (n===1) {
+      return nums[0]+"";
+   }
+   if (n===2) {
+      return nums.join("/");
+   }
+   let result=nums[0]+"/("+nums.slice(1,n).join("/")+")"
+   return result;
+};
+
+let test=[1000,100,10,2];
+let result=optimalDivision(test);
+console.log(result);
+
+
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number}
+ */
+var sumOfLeftLeaves = function(root) {
+   return root!==null ? dfs(root) : 0;
+};
+
+var dfs=function(root){
+   let ans=0;
+   if (root.left!==null) {
+      ans+=isLeafNode(root.left) ? root.left.val : dfs(root.left);
+   }
+   if (root.right!==null && !isLeafNode(root.right)) {
+      ans+=dfs(root.right);
+   }
+   return ans;
+}
+
+var isLeafNode=function(root){
+   return root.left===null && root.right===null;
+}
+
+/**
+ * @param {number} num
+ * @return {string}
+ */
+var toHex = function(num) {
+   if (num===0) {
+      return "0";
+   }
+   const ans=[];
+   for (let i=7;i>=0;i--){
+      let val=(num>>(4*i)) & 0xf;
+      if (ans.length>0 || val>0) {
+         let digit=val<10 ? String.fromCharCode("0".charCodeAt()+val) : String.fromCharCode("a".charCodeAt()+val-10);
+         ans.push(digit);
+      }
+   }
+   return ans.join("");
+};
+
+
+let test=26;
+let result=toHex(test);
+console.log(result);
+
+/**
+ * @param {string} s
+ * @return {number}
+ */
+var longestPalindrome = function(s) {
+   let m=new Map();
+   for(let i=0;i<s.length;i++){
+      m.set(s[i],m.has(s[i]) ? m.get(s[i])+1 : 1);
+   }
+   let ans=0;
+   let flag=false;  //是否存在奇数个，中间可以是奇数个
+   for(let val of m.values()){
+      if (val%2===0) {
+         ans+=val;
+      }else{
+         ans+=val-1;
+         flag=true;
+      }
+   }
+   if (flag) {
+      ans+=1;
+   }
+   return ans;
+};
+
+let test="abccccdd";
+let result=longestPalindrome(test);
+console.log(result);
+
