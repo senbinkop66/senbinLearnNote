@@ -101,7 +101,80 @@
     app.mount("#todo-list-app");
 </script>
 
+    <div id="computed-basics">
+        <p>Has published books:</p>
+        <span>{{ publishedBooksMessage }}</span>
+        <p>{{ now }}</p>
+    </div>
+<script type="text/javascript">
+    Vue.createApp({
+        data(){
+            return {
+                 author: {
+                    name: 'John Doe',
+                    books: [
+                      'Vue 2 - Advanced Guide',
+                      'Vue 3 - Basic Guide',
+                      'Vue 4 - The Mystery'
+                    ]
+                  }
+            }
+        },
+        computed:{
+            // 计算属性的 getter
+            publishedBooksMessage(){
+                // `this` 指向 vm 实例
+                return this.author.books.length>0 ? 'Yes' : 'No';
+            },
+            now(){
+                return Date.now();
+            },
+        }
+    }).mount("#computed-basics");
+</script>
+    
+    <div id="watch-example">
+      <p>
+        Ask a yes/no question:
+        <input v-model="question" />
+      </p>
+      <p>{{ answer }}</p>
+    </div>
 
+<!-- 因为 AJAX 库和通用工具的生态已经相当丰富，Vue 核心代码没有重复 -->
+<!-- 提供这些功能以保持精简。这也可以让你自由选择自己更熟悉的工具。 -->
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script>
+  const watchExampleVM = Vue.createApp({
+    data() {
+      return {
+        question: '',
+        answer: 'Questions usually contain a question mark. ;-)'
+      }
+    },
+    watch: {
+      // 每当 question 发生变化时，该函数将会执行
+      question(newQuestion, oldQuestion) {
+        if (newQuestion.indexOf('?') > -1) {
+          this.getAnswer()
+        }
+      }
+    },
+    methods: {
+      getAnswer() {
+        this.answer = 'Thinking...'
+        axios
+          .get('https://yesno.wtf/api')
+          .then(response => {
+            this.answer = response.data.answer
+          })
+          .catch(error => {
+            this.answer = 'Error! Could not reach the API. ' + error
+          })
+      }
+    }
+  }).mount('#watch-example')
+</script>
 
     </body>
 </html>

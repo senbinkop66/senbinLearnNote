@@ -2127,3 +2127,50 @@ let requests = [[0,1],[1,0],[0,1],[1,2],[2,0],[3,4]]
 let result=maximumRequests(n,requests);
 console.log(result);
 
+/**
+ * @param {number} n
+ * @return {string[]}
+ */
+var fizzBuzz = function(n) {
+   const ans=["1"];
+   let i=2;
+   while(i<=n){
+      if (i%3===0 && i%5===0) {
+         ans.push("FizzBuzz");
+      }else if(i%3===0){
+         ans.push("Fizz");
+      }else if(i%5===0){
+         ans.push("Buzz");
+      }else{
+         ans.push(i+"");
+      }
+      i++;
+   }
+   return ans;
+};
+
+let n = 5;
+let result=fizzBuzz(n);
+console.log(result);
+
+var thirdMax = function(nums) {
+    let a = -Number.MAX_VALUE, b = -Number.MAX_VALUE, c = -Number.MAX_VALUE;
+    for (const num of nums) {
+        if (num > a) {
+            c = b;
+            b = a;
+            a = num;
+        } else if (a > num && num > b) {
+            c = b;
+            b = num;
+        } else if (b > num && num > c) {
+            c = num;
+        }
+    }
+    return c === -Number.MAX_VALUE ? a : c;
+};
+
+let nums = [3, 2, 1,2,3,4,2,5];
+let result=thirdMax(nums);
+console.log(result);
+
