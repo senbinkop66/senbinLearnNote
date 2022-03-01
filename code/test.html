@@ -4,176 +4,76 @@
         <meta charset=utf-8>
         <script src="https://unpkg.com/vue@3.2.31"></script>
     </head>
+    <style type="text/css">
+        .demo {
+          font-family: sans-serif;
+          border: 1px solid #eee;
+          border-radius: 2px;
+          padding: 20px 30px;
+          margin-top: 1em;
+          margin-bottom: 40px;
+          user-select: none;
+          overflow-x: auto;
+        }
+    </style>
     <body>
-        <div id="counter">
-            Counter: {{counter}}
-        </div>
 
-<script type="text/javascript">
-    const Counter={
-        data(){
-            return {
-                counter:0
-            }
-        },
-        mounted(){
-            setInterval(()=>{
-                this.counter++;
-            },1000);
-        }
-    }
-    Vue.createApp(Counter).mount('#counter');
-</script>
-
-        <div id="bind-attribute">
-            <span v-bind:title="message">
-                鼠标悬停几秒钟查看此处动态绑定的提示信息！
-            </span>
-        </div>
-<script type="text/javascript">
-    const AttributeBinding={
-        data(){
-            return {
-                message:`You loaded this page on ${new Date().toLocale}`
-            }
-        },
-        mounted(){
-            setInterval(()=>{
-                this.counter++;
-            },1000);
-        }
-    }
-    Vue.createApp(AttributeBinding).mount('#bind-attribute');
-
-</script>
-    <div id="event-handing">
-        <p>{{message}}</p>
-        <button v-on:click="reverseMessage">反转 Message</button>
+    <div id="todo-list-example" class="demo">
+        <form v-on:submit.prevent="addNewTodo">
+            <label for="new-todo">Add a todo</label>
+            <input v-model="newTodoText" id="new-todo" placeholder="E.g. eat food" />
+            <button>Add</button>
+        </form>
+        <ul>
+            <todo-item v-for="(todo,index) in todos" 
+                :key="todo.id" 
+                :title="todo.title" 
+                @remove="todos.splice(index,1)"></todo-item>
+        </ul>
     </div>
 <script type="text/javascript">
-    const EventHanding={
-        data(){
-            return {
-                message:`Hello Vue.js`
+    const app=Vue.createApp({
+        data() {
+        return {
+              newTodoText: '',
+              todos: [
+                {
+                  id: 1,
+                  title: 'Do the dishes'
+                },
+                {
+                  id: 2,
+                  title: 'Take out the trash'
+                },
+                {
+                  id: 3,
+                  title: 'Mow the lawn'
+                }
+              ],
+              nextTodoId: 4
             }
         },
         methods:{
-            reverseMessage(){
-                this.message=this.message.split("").reverse().join("");
+            addNewTodo(){
+                this.todos.push({
+                    id:this.nextTodoId++,
+                    title:this.newTodoText
+                });
+                this.newTodoText="";
             }
-        },
-        
-    }
-    Vue.createApp(EventHanding).mount('#event-handing');
-
-</script>
-
-    <div id="todo-list-app">
-        <ol>
-            <todo-item 
-            v-for="item in groceryList" 
-            v-bind:todo="item" 
-            v-bind:key="item.id"></todo-item>
-        </ol>
-    </div>
-<script type="text/javascript">
-    const TodoItem={
-        props:['todo'],
-        template:`<li>{{ todo.text }}</li>`
-    }
-    // 创建 Vue 应用
-    const TodoList={
-        components:{
-            TodoItem
-        },
-        data() {
-            return {
-              groceryList: [
-                { id: 0, text: 'Vegetables' },
-                { id: 1, text: 'Cheese' },
-                { id: 2, text: 'Whatever else humans are supposed to eat' }
-              ]
-            }
-        },
-        //组件的其它 property
-    };
-    const app=Vue.createApp(TodoList);
-    app.mount("#todo-list-app");
-</script>
-
-    <div id="computed-basics">
-        <p>Has published books:</p>
-        <span>{{ publishedBooksMessage }}</span>
-        <p>{{ now }}</p>
-    </div>
-<script type="text/javascript">
-    Vue.createApp({
-        data(){
-            return {
-                 author: {
-                    name: 'John Doe',
-                    books: [
-                      'Vue 2 - Advanced Guide',
-                      'Vue 3 - Basic Guide',
-                      'Vue 4 - The Mystery'
-                    ]
-                  }
-            }
-        },
-        computed:{
-            // 计算属性的 getter
-            publishedBooksMessage(){
-                // `this` 指向 vm 实例
-                return this.author.books.length>0 ? 'Yes' : 'No';
-            },
-            now(){
-                return Date.now();
-            },
         }
-    }).mount("#computed-basics");
-</script>
-    
-    <div id="watch-example">
-      <p>
-        Ask a yes/no question:
-        <input v-model="question" />
-      </p>
-      <p>{{ answer }}</p>
-    </div>
-
-<!-- 因为 AJAX 库和通用工具的生态已经相当丰富，Vue 核心代码没有重复 -->
-<!-- 提供这些功能以保持精简。这也可以让你自由选择自己更熟悉的工具。 -->
-<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
-<script>
-  const watchExampleVM = Vue.createApp({
-    data() {
-      return {
-        question: '',
-        answer: 'Questions usually contain a question mark. ;-)'
-      }
-    },
-    watch: {
-      // 每当 question 发生变化时，该函数将会执行
-      question(newQuestion, oldQuestion) {
-        if (newQuestion.indexOf('?') > -1) {
-          this.getAnswer()
-        }
-      }
-    },
-    methods: {
-      getAnswer() {
-        this.answer = 'Thinking...'
-        axios
-          .get('https://yesno.wtf/api')
-          .then(response => {
-            this.answer = response.data.answer
-          })
-          .catch(error => {
-            this.answer = 'Error! Could not reach the API. ' + error
-          })
-      }
-    }
-  }).mount('#watch-example')
+    });
+    app.component("todo-item",{
+        template:`
+            <li>
+                {{ title }}
+                <button @click="$emit('remove')">Remove</button>
+            </li>
+        `,
+        props:['title'],
+        emits:['remove']
+    });
+    app.mount("#todo-list-example");
 </script>
 
     </body>
