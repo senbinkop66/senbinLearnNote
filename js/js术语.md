@@ -23,3 +23,60 @@
 | [null](https://developer.mozilla.org/zh-CN/docs/Glossary/Null) | [null](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null) - 缺少值 |      |
 | [undefined](https://developer.mozilla.org/zh-CN/docs/Glossary/undefined) | [undefined](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) - 原始值 |      |
 | [NaN](https://developer.mozilla.org/zh-CN/docs/Glossary/NaN) | [NaN ](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN)- 非数值 |      |
+
+# Vendor Prefix
+
+Vendor Prefix 浏览器引擎前缀
+
+浏览器厂商们有时会给实验性的或者非标准的 CSS 属性和 JavaScript API 添加前缀，这样开发者就可以用这些新的特性进行试验，同时（理论上）防止他们的试验代码被依赖，从而在标准化过程中破坏 web 开发者的代码。开发者应该等到浏览器行为标准化之后再使用未加前缀的属性。
+
+## [CSS 前缀](https://developer.mozilla.org/zh-CN/docs/Glossary/Vendor_Prefix#css_前缀)
+
+主流浏览器引擎前缀:
+
+- `-webkit-` （谷歌，Safari，新版Opera浏览器，以及几乎所有iOS系统中的浏览器（包括 iOS 系统中的火狐浏览器）；基本上所有基于WebKit 内核的浏览器）
+- `-moz-` （火狐浏览器）
+- `-o-` （旧版Opera浏览器）
+- `-ms-` （IE浏览器 和 Edge浏览器）
+
+示例:
+
+```css
+-webkit-transition: all 4s ease;
+-moz-transition: all 4s ease;
+-ms-transition: all 4s ease;
+-o-transition: all 4s ease;
+transition: all 4s ease; 
+```
+
+## [API 前缀](https://developer.mozilla.org/zh-CN/docs/Glossary/Vendor_Prefix#api_前缀)
+
+过去，浏览器引擎也使用前缀修饰实验性质的API。如果整个接口都是实验性的，前缀修饰的就是接口名（但不包括其中的属性或者方法）。如果将一个实验性的接口或者方法添加到一个标准化的接口中，这个新增的接口或者方法被前缀修饰。 
+
+### [接口前缀](https://developer.mozilla.org/zh-CN/docs/Glossary/Vendor_Prefix#接口前缀)
+
+需要使用**大写**的前缀修饰接口名：
+
+- `WebKit` (谷歌, Safari, 新版Opera浏览器, 以及几乎所有iOS系统中的浏览器(包括iOS 系统中的火狐浏览器); 简单的说，所有基于WebKit 内核的浏览器)
+- `Moz` (火狐浏览器)
+- `O` (旧版Opera浏览器)
+- `MS` (IE浏览器 和 Edge浏览器)
+
+### [属性和方法前缀](https://developer.mozilla.org/zh-CN/docs/Glossary/Vendor_Prefix#属性和方法前缀)
+
+需要使用**小写**的前缀修饰属性或者方法
+
+- `webkit` (谷歌, Safari, 新版Opera浏览器, 以及几乎所有iOS系统中的浏览器(包括iOS 系统中的火狐浏览器); 简单的说，所有基于WebKit 内核的浏览器)
+- `moz` (火狐浏览器)
+- `o` (旧版Opera浏览器等
+- `ms` (IE浏览器 和 Edge浏览器)
+
+示例:
+
+```js
+var requestAnimationFrame = window.requestAnimationFrame ||
+                            window.mozRequestAnimationFrame ||
+                            window.webkitRequestAnimationFrame ||
+                            window.oRequestAnimationFrame ||
+                            window.msRequestAnimationFrame;
+```
