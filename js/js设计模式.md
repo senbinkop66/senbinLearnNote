@@ -1134,3 +1134,427 @@ console.log(func.length);  //
 
 ```
 
+
+
+## 闭包和高阶函数
+
+### 闭包
+
+对于 JavaScript 程序员来说，闭包（closure）是一个难懂又必须征服的概念。闭包的形成与变量的作用域以及变量的生存周期密切相关。
+
+#### 变量的作用域
+
+变量的作用域，就是**指变量的有效范围**。我们最常谈到的是在函数中声明的变量作用域。 
+
+当在函数中声明一个变量的时候，**如果该变量前面没有带上关键字 var，这个变量就会成为 全局变量**，这当然是一种容易造成命名冲突的做法。
+
+ 另外一种情况是**用 var 关键字在函数中声明变量，这时候的变量即是局部变量**，只有在该函 数内部才能访问到这个变量，在函数外面是访问不到的。代码如下：
+
+```js
+var func=function(){
+   var a=1;
+   console.log(a);
+}
+func();  //1
+console.log(a);  //ReferenceError: a is not defined
+```
+
+在 JavaScript 中，函数可以用来创造函数作用域。此时的函数像一层半透明的玻璃，在函数 里面可以看到外面的变量，而在函数外面则无法看到函数里面的变量。这是因为当在函数中搜索 一个变量的时候，如果该函数内并没有声明这个变量，那么此次搜索的过程**会随着代码执行环境 创建的作用域链往外层逐层搜索**，一直搜索到全局对象为止。**变量的搜索是从内到外而非从外到 内的**。 
+
+下面这段包含了嵌套函数的代码，也许能帮助我们加深对变量搜索过程的理解：
+
+```js
+var a=1;
+var func1=function(){
+   var b=2;
+   var func2=function(){
+      var c=2;
+      console.log(a);  // 1
+      console.log(b);  //2
+   }
+   func2();
+   console.log(c);  //ReferenceError: c is not defined
+}
+func1();  //1
+
+```
+
+#### 变量的生存周期
+
+除了变量的作用域之外，另外一个跟闭包有关的概念是变量的生存周期。 
+
+对于全局变量来说，全局变量的生存周期当然是永久的，除非我们主动销毁这个全局变量。 
+
+而对于在函数内用 var 关键字声明的局部变量来说，当退出函数时，这些局部变量即失去了 它们的价值，它们都会随着函数调用的结束而被销毁：
+
+```js
+var func=function(){
+   var a=1;  // 退出函数后局部变量 a 将被销毁
+   console.log(a);
+}
+func();  //1
+
+```
+
+现在来看看下面这段代码：
+
+```js
+var func=function(){
+   var a=1;
+   return function(){
+      a++;
+      console.log(a);
+   }
+};
+
+var f=func();
+
+f();  //  2
+f();  //  3
+f();  //  4
+f();  //  5
+
+```
+
+跟我们之前的推论相反，当退出函数后，局部变量 a 并没有消失，而是似乎一直在某个地方 存活着。这是**因为当执行 var f = func();时，f 返回了一个匿名函数的引用，它可以访问到 func() 被调用时产生的环境，而局部变量 a 一直处在这个环境里**。既然局部变量所在的环境还能被外界 访问，这个局部变量就有了不被销毁的理由。在这里产生了一个闭包结构，局部变量的生命看起 来被延续了。 
+
+利用闭包我们可以完成许多奇妙的工作，下面介绍一个闭包的经典应用。假设页面上有 5 个 div 节点，我们通过循环来给每个 div 绑定 onclick 事件，按照索引顺序，点击第 1 个 div 时弹出 0，点击第 2 个 div 时弹出 1，以此类推。代码如下：
+
+```html
+<div>1</div>
+<div>2</div>
+<div>3</div>
+<div>4</div>
+<div>5</div>
+
+<script type="text/javascript">
+    var nodes=document.getElementsByTagName("div");
+    for(var i=0,len=nodes.length;i<len;i++){
+        nodes[i].onclick=function(){
+            console.log(i);
+        };
+    }
+</script>
+```
+
+测试这段代码就会发现，无论点击哪个 div，最后弹出的结果都是 5。这是**因为 div 节点的 onclick 事件是被异步触发的**，**当事件被触发的时候，for 循环早已结束，此时变量 i 的值已经是 5**，所以在 div 的 onclick 事件函数中顺着作用域链从内到外查找变量 i 时，查找到的值总是 5。 
+
+**解决方法是在闭包的帮助下，把每次循环的 i 值都封闭起来**。当在事件函数中顺着作用域链 中从内到外查找变量 i 时，会先找到被封闭在闭包环境中的 i，如果有 5 个 div，这里的 i 就分别 是 0,1,2,3,4：
+
+```js
+    var nodes=document.getElementsByTagName("div");
+    for(var i=0,len=nodes.length;i<len;i++){
+        (function(i){
+            nodes[i].onclick=function(){
+                console.log(i);
+            }
+        })(i);
+    }
+```
+
+或使用 let
+
+```js
+    var nodes=document.getElementsByTagName("div");
+    for(let i=0,len=nodes.length;i<len;i++){
+        nodes[i].onclick=function(){
+            console.log(i);
+        };
+    }
+```
+
+根据同样的道理，我们还可以编写如下一段代码：
+
+```js
+    var Type={};
+    for(var i=0,type;type=['String', 'Array', 'Number'][i++];){
+        (function(type){
+            Type['is'+type]=function(obj){
+                return Object.prototype.toString.call(obj)==='[object '+type+']';
+            }
+        })(type);
+    }
+    console.log(Type.isArray([]));  //true
+    console.log(Type.isString("str"));  //true
+```
+
+#### 闭包的更多作用
+
+在实际开发中，闭包的运用非常广泛。
+
+##### 1. 封装变量
+
+闭包可以帮助把一些不需要暴露在全局的变量封装成“私有变量”。假设有一个计算乘积的简单函数：
+
+```js
+var mult=function(){
+   var a=1;
+   for(var i=0;i<arguments.length;i++){
+      a=a*arguments[i];
+   }
+   return a;
+};
+console.log(mult(1,2,3,4));  //24
+```
+
+mult 函数接受一些 number 类型的参数，并返回这些参数的乘积。现在我们觉得对于那些相同的参数来说，每次都进行计算是一种浪费，我们**可以加入缓存机制来提高这个函数的性能**：
+
+```js
+var cache={};
+
+var mult=function(){
+   var args=Array.prototype.join.call(arguments,",");
+   if (cache[args]) {
+      return cache[args];
+   }
+   var a=1;
+   for(var i=0;i<arguments.length;i++){
+      a=a*arguments[i];
+   }
+   return cache[args]=a;
+};
+
+console.log(mult(1,2,3,4));  //24
+console.log(mult(1,2,3,4));  //24
+console.log(cache);  //{ '1,2,3,4': 24 }
+console.log(mult(1,2,3,4,5));  //120
+console.log(cache);  //{ '1,2,3,4': 24, '1,2,3,4,5': 120 }
+
+```
+
+我们看到 cache 这个变量仅仅在 mult 函数中被使用，与其让 cache 变量跟 mult 函数一起平行 地暴露在全局作用域下，**不如把它封闭在 mult 函数内部，这样可以减少页面中的全局变量**，以 避免这个变量在其他地方被不小心修改而引发错误。代码如下：
+
+```js
+var mult=(function(){
+   var cache={};
+   return function(){
+      console.log(cache);
+      var args=Array.prototype.join.call(arguments,",");
+      if (cache[args]) {
+         return cache[args];
+      }
+      var a=1;
+      for(var i=0;i<arguments.length;i++){
+         a=a*arguments[i];
+      }
+      return cache[args]=a;
+   }
+})();
+
+console.log(mult(1,2,3,4));  //24
+console.log(mult(1,2,3,4));  //24
+console.log(mult(1,2,3,4,5));  //120
+
+```
+
+提炼函数是代码重构中的一种常见技巧。如果在一个大函数中有一些代码块能够独立出来， 我们常常把这些代码块封装在独立的小函数里面。独立出来的小函数有助于代码复用，如果这些 小函数有一个良好的命名，它们本身也起到了注释的作用。**如果这些小函数不需要在程序的其他 地方使用，最好是把它们用闭包封闭起来。**代码如下：
+
+```js
+var mult=(function(){
+   var cache={};
+   var calculate=function(){
+      //封闭 calculate 函数
+      var a=1;
+      for(var i=0;i<arguments.length;i++){
+         a=a*arguments[i];
+      }
+      return a;
+   };
+   return function(){
+      var args=Array.prototype.join.call(arguments,",");
+      if (args in cache) {
+         return cache[args];
+      }
+      return cache[args]=calculate.apply(null,arguments);
+   }
+})();
+
+console.log(mult(1,2,3,4));  //24
+console.log(mult(1,2,3,4));  //24
+console.log(mult(1,2,3,4,5));  //120
+
+```
+
+#####  2. 延续局部变量的寿命
+
+img 对象经常用于进行数据上报，如下所示：
+
+```js
+var report=function(src){
+    var img=new Image();
+    img.src=src;
+};
+report("https://v3.cn.vuejs.org/");
+
+```
+
+但是通过查询后台的记录我们得知，因为一些低版本浏览器的实现存在 bug，在这些浏览器 下使用 report 函数进行数据上报会丢失 30%左右的数据，也就是说，report 函数并不是每一次 都成功发起了 HTTP 请求。丢失数据的原因是 img 是 report 函数中的局部变量，**当 report 函数的 调用结束后，img 局部变量随即被销毁，而此时或许还没来得及发出 HTTP 请求，所以此次请求 就会丢失掉**。 
+
+现在我们把 img 变量用闭包封闭起来，便能解决请求丢失的问题：
+
+```js
+var report=(function(src){
+    var imgs=[];
+    return function(){
+        var img=new Image();
+        imgs.push(img);
+        img.src=src;
+    }
+    
+})();
+report("http:/ss/fasta_protein.png");
+```
+
+#### 闭包和面向对象设计
+
+过程与数据的结合是形容面向对象中的“对象”时经常使用的表达。对象以方法的形式包含 了过程，而闭包则是在过程中以环境的形式包含了数据。通常用面向对象思想能实现的功能，用 闭包也能实现。反之亦然。在 JavaScript 语言的祖先 Scheme 语言中，甚至都没有提供面向对象 的原生设计，但可以使用闭包来实现一个完整的面向对象系统。 
+
+下面来看看这段跟闭包相关的代码：
+
+```js
+var extent=function(){
+   var value=0;
+   return {
+      call:function(){
+         value++;
+         console.log(value);
+      }
+   }
+};
+
+var extent=extent();
+extent.call();  //  1
+extent.call();  //  2
+extent.call();  //  3
+```
+
+如果换成面向对象的写法，就是：
+
+```js
+var extent={
+   value:0,
+   call:function(){
+      this.value++;
+      console.log(this.value);
+   }
+};
+
+extent.call();  //  1
+extent.call();  //  2
+extent.call();  //  3
+```
+
+或者
+
+```js
+var Extent=function(){
+   this.value=0;
+};
+Extent.prototype.call=function(){
+   this.value++;
+   console.log(this.value);
+};
+
+var extent=new Extent();
+extent.call();  //  1
+extent.call();  //  2
+extent.call();  //  3
+```
+
+#### 用闭包实现命令模式
+
+在完成闭包实现的命令模式之前，我们先用**面向对象的方式**来编写一段命令模式的代码。虽 然还没有进入设计模式的学习，但这个作为演示作用的命令模式结构非常简单，不会对我们的理 解造成困难，代码如下：
+
+```html
+<button id="execute">点击我执行命令</button>
+<button id="undo">点击我执行命令</button>
+
+<script type="text/javascript">
+//面向对象的方式
+var Tv={
+    open:function(){
+        console.log("打开电视机");
+    },
+    close:function(){
+        console.log("关闭电视机");
+    }
+};
+var OpenTvCommand=function(receiver){
+    this.receiver=receiver;
+};
+
+OpenTvCommand.prototype.execute=function(){
+    this.receiver.open();  //执行命令，打开电视机
+};
+OpenTvCommand.prototype.undo=function(){
+    this.receiver.close();  //撤销命令，关闭电视机
+};
+
+var setCommand=function(command){
+    document.getElementById("execute").onclick=function(){
+        command.execute();  //输出：打开电视机
+    }
+    document.getElementById("undo").onclick=function(){
+        command.undo();  //输出：关闭电视机
+    }
+};
+
+setCommand(new OpenTvCommand(Tv));
+
+</script>
+```
+
+**命令模式的意图是把请求封装为对象，从而分离请求的发起者和请求的接收者（执行者）之 间的耦合关系**。在命令被执行之前，可以预先往命令对象中植入命令的接收者。 
+
+但在 JavaScript 中，函数作为一等对象，本身就可以四处传递，用函数对象而不是普通对象 来封装请求显得更加简单和自然。如果需要往函数对象中预先植入命令的接收者，那么闭包可以 完成这个工作。**在面向对象版本的命令模式中，预先植入的命令接收者被当成对象的属性保存起 来**；而**在闭包版本的命令模式中，命令接收者会被封闭在闭包形成的环境中**，代码如下：
+
+```js
+//闭包版本
+var Tv={
+    open:function(){
+        console.log("打开电视机");
+    },
+    close:function(){
+        console.log("关闭电视机");
+    }
+};
+
+var createCommand=function(receiver){
+    var execute=function(){
+        return receiver.open();  //执行命令，打开电视机
+    };
+    var undo=function(){
+        return receiver.close();  //执行命令，关闭电视机
+    };
+    return {
+        execute:execute,
+        undo:undo
+    }
+};
+
+var setCommand=function(command){
+    document.getElementById("execute").onclick=function(){
+        command.execute();  //输出：打开电视机
+    }
+    document.getElementById("undo").onclick=function(){
+        command.undo();  //输出：关闭电视机
+    }
+};
+
+setCommand(createCommand(Tv));
+```
+
+#### 闭包与内存管理
+
+闭包是一个非常强大的特性，但人们对其也有诸多误解。一种耸人听闻的说法是闭包会造成 内存泄露，所以要尽量减少闭包的使用。 
+
+局部变量本来应该在函数退出的时候被解除引用，**但如果局部变量被封闭在闭包形成的环境 中，那么这个局部变量就能一直生存下去。从这个意义上看，闭包的确会使一些数据无法被及时 销毁**。
+
+使用闭包的一部分原因是我们选择主动把一些变量封闭在闭包中，因为可能在以后还需要 使用这些变量，把这些变量放在闭包中和放在全局作用域，对内存方面的影响是一致的，这里并 不能说成是内存泄露。**如果在将来需要回收这些变量，我们可以手动把这些变量设为 null。** 
+
+跟闭包和内存泄露有关系的地方是，**使用闭包的同时比较容易形成循环引用**，如果闭包的作 用域链中保存着一些 DOM 节点，这时候就有可能造成内存泄露。但这本身并非闭包的问题，也 并非 JavaScript 的问题。在 IE 浏览器中，由于 BOM 和 DOM 中的对象是使用 C++以 COM 对象 的方式实现的，而 COM 对象的垃圾收集机制采用的是引用计数策略。**在基于引用计数策略的垃圾回收机制中，如果两个对象之间形成了循环引用，那么这两个对象都无法被回收**，但**循环引用 造成的内存泄露在本质上也不是闭包造成的**。 
+
+同样，如果要解决循环引用带来的内存泄露问题，我们只需要把循环引用中的变量设为 null 即可。**将变量设置为 null 意味着切断变量与它此前引用的值之间的连接。当垃圾收集器下次运 行时，就会删除这些值并回收它们占用的内存**。
+
+### 高阶函数
+

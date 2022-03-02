@@ -39,55 +39,44 @@
 </style>
     <body>
 
-
-<div id="dynamic-component-demo" class="demo">
-    <button 
-        v-for="tab in tabs" 
-        v-bind:key="tab" 
-        v-bind:class="['tab-button',{active:currentTab===tab}]" 
-        v-on:click="currentTab=tab"
-        >
-        {{tab}}
-    </button>
-    <component v-bind:is="currentTabComponent" class="tab"></component>
-</div>
+<button id="execute">点击我执行命令</button>
+<button id="undo">点击我执行命令</button>
 
 <script type="text/javascript">
-    const app=Vue.createApp({
-        data(){
-            return {
-                currentTab:"Home",
-                tabs:['Home','Posts','Archive']
-            }
-        },
-        computed:{
-            currentTabComponent(){
-                return 'tab-'+this.currentTab.toLowerCase();
-            }
-        }
-    });
-    app.component('tab-home',{
-        template:`
-            <div class="demo-tab">
-                Home component
-            </div>
-        `,
-    });
-    app.component('tab-posts',{
-        template:`
-            <div class="demo-tab">
-                Posts component
-            </div>
-        `,
-    });
-    app.component('tab-archive',{
-        template:`
-            <div class="demo-tab">
-                Archive component
-            </div>
-        `,
-    });
-    app.mount("#dynamic-component-demo");
+//闭包版本
+var Tv={
+    open:function(){
+        console.log("打开电视机");
+    },
+    close:function(){
+        console.log("关闭电视机");
+    }
+};
+
+var createCommand=function(receiver){
+    var execute=function(){
+        return receiver.open();  //执行命令，打开电视机
+    };
+    var undo=function(){
+        return receiver.close();  //执行命令，关闭电视机
+    };
+    return {
+        execute:execute,
+        undo:undo
+    }
+};
+
+var setCommand=function(command){
+    document.getElementById("execute").onclick=function(){
+        command.execute();  //输出：打开电视机
+    }
+    document.getElementById("undo").onclick=function(){
+        command.undo();  //输出：关闭电视机
+    }
+};
+
+setCommand(createCommand(Tv));
+
 </script>
 
     </body>

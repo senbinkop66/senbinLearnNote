@@ -1,6 +1,12 @@
-var func=function(){};
+var Extent=function(){
+   this.value=0;
+};
+Extent.prototype.call=function(){
+   this.value++;
+   console.log(this.value);
+};
 
-Array.prototype.push.call(func,"first");
-
-console.log(func.length);  //
-//TypeError: Cannot assign to read only property 'length' of function 'function(){}'
+var extent=new Extent();
+extent.call();  //  1
+extent.call();  //  2
+extent.call();  //  3
