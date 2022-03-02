@@ -4,102 +4,90 @@
         <meta charset=utf-8>
         <script src="https://unpkg.com/vue@3.2.31"></script>
     </head>
-    <style type="text/css">
-        .demo {
-          font-family: sans-serif;
-          border: 1px solid #eee;
-          border-radius: 2px;
-          padding: 20px 30px;
-          margin-top: 1em;
-          margin-bottom: 40px;
-          user-select: none;
-          overflow-x: auto;
-        }
-    </style>
+<style type="text/css">
+.demo {
+  font-family: sans-serif;
+  border: 1px solid #eee;
+  border-radius: 2px;
+  padding: 20px 30px;
+  margin-top: 1em;
+  margin-bottom: 40px;
+  user-select: none;
+  overflow-x: auto;
+}
+
+.tab-button {
+  padding: 6px 10px;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background: #f0f0f0;
+  margin-bottom: -1px;
+  margin-right: -1px;
+}
+.tab-button:hover {
+  background: #e034e0;
+}
+.tab-button.active {
+  background: #02e0e0;
+}
+.demo-tab {
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+</style>
     <body>
 
-    <div id="todo-list-example" class="demo">
-        <form v-on:submit.prevent="addNewTodo">
-            <label for="new-todo">Add a todo</label>
-            <input v-model="newTodoText" id="new-todo" placeholder="E.g. eat food" />
-            <button>Add</button>
-        </form>
-        <ul>
-            <todo-item v-for="(todo,index) in todos" 
-                :key="todo.id" 
-                :title="todo.title" 
-                @remove="todos.splice(index,1)"></todo-item>
-        </ul>
-    </div>
+
+<div id="dynamic-component-demo" class="demo">
+    <button 
+        v-for="tab in tabs" 
+        v-bind:key="tab" 
+        v-bind:class="['tab-button',{active:currentTab===tab}]" 
+        v-on:click="currentTab=tab"
+        >
+        {{tab}}
+    </button>
+    <component v-bind:is="currentTabComponent" class="tab"></component>
+</div>
+
 <script type="text/javascript">
     const app=Vue.createApp({
-        data() {
-        return {
-              newTodoText: '',
-              todos: [
-                {
-                  id: 1,
-                  title: 'Do the dishes'
-                },
-                {
-                  id: 2,
-                  title: 'Take out the trash'
-                },
-                {
-                  id: 3,
-                  title: 'Mow the lawn'
-                }
-              ],
-              nextTodoId: 4
+        data(){
+            return {
+                currentTab:"Home",
+                tabs:['Home','Posts','Archive']
             }
         },
-        methods:{
-            addNewTodo(){
-                this.todos.push({
-                    id:this.nextTodoId++,
-                    title:this.newTodoText
-                });
-                this.newTodoText="";
+        computed:{
+            currentTabComponent(){
+                return 'tab-'+this.currentTab.toLowerCase();
             }
         }
     });
-    app.component("todo-item",{
+    app.component('tab-home',{
         template:`
-            <li>
-                {{ title }}
-                <button @click="$emit('remove')">Remove</button>
-            </li>
+            <div class="demo-tab">
+                Home component
+            </div>
         `,
-        props:['title'],
-        emits:['remove']
     });
-    app.mount("#todo-list-example");
-</script>
-
-<div id="div1">div元素</div>
-<script type="text/javascript">
-
-Function.prototype.bind=function(){
-    var self=this;  //保存原函数
-    var context=[].shift.call(arguments);  //需要绑定的 this 上下文
-    var args=[].slice.call(arguments);  //剩余的参数转成数组
-    return function(){  // 返回一个新的函数
-        return self.apply(context,[].concat.call(args,[].slice.call(arguments)));  // 执行新的函数的时候，会把之前传入的 context当作新函数体内的 this
-        //并且组合两次分别传入的参数，作为新函数的参数
-    }
-};
-
-var obj={
-    name:"Arnold"
-};
-
-var func=function(a,b,c,d){
-    console.log(this.name);  //Arnold
-    console.log([a,b,c,d]);  // 
-}.bind(obj,1,2);
-
-func(3,4);
-
+    app.component('tab-posts',{
+        template:`
+            <div class="demo-tab">
+                Posts component
+            </div>
+        `,
+    });
+    app.component('tab-archive',{
+        template:`
+            <div class="demo-tab">
+                Archive component
+            </div>
+        `,
+    });
+    app.mount("#dynamic-component-demo");
 </script>
 
     </body>
