@@ -1558,3 +1558,207 @@ setCommand(createCommand(Tv));
 
 ### 高阶函数
 
+高阶函数是指至少满足下列条件之一的函数。
+- 函数可以作为参数被传递；
+- 函数可以作为返回值输出。
+
+JavaScript 语言中的函数显然满足高阶函数的条件，在实际开发中，无论是将函数当作参数 传递，还是让函数的执行结果返回另外一个函数，这两种情形都有很多应用场景，下面就列举一 些高阶函数的应用场景。
+
+#### 函数作为参数传递
+
+把函数当作参数传递，这代表我们可以抽离出一部分容易变化的业务逻辑，把这部分业务逻 辑放在函数参数中，这样一来可以分离业务代码中变化与不变的部分。其中一个重要应用场景就 是常见的回调函数。
+
+##### 1. 回调函数
+
+在 ajax 异步请求的应用中，回调函数的使用非常频繁。当我们想在 ajax 请求返回之后做一 些事情，但又并不知道请求返回的确切时间时，最常见的方案就是把 callback 函数当作参数传入 发起 ajax 请求的方法中，待请求完成之后执行 callback 函数：
+
+```js
+var getUserInfo = function( userId, callback ){
+   $.ajax( 'http://xxx.com/getUserInfo?' + userId, function( data ){
+      if ( typeof callback === 'function' ){
+         callback( data );
+      }
+   });
+}
+getUserInfo( 13157, function( data ){
+   alert ( data.userName );
+});
+```
+
+回调函数的应用不仅只在异步请求中，**当一个函数不适合执行一些请求时，我们也可以把这 些请求封装成一个函数，并把它作为参数传递给另外一个函数，“委托”给另外一个函数来执行**。 
+
+比如，我们想在页面中创建 100 个 div 节点，然后把这些 div 节点都设置为隐藏。下面是一种编写代码的方式：
+
+```js
+var appendDiv=function(){
+   for(var i=0;i<100;i++){
+      var div=document.createElement("div");
+      div.innerHTML=i;
+      document.body.appendChild(div);
+      div.style.display="none";
+   }
+}
+appendDiv();
+```
+
+把 div.style.display = 'none'的逻辑硬编码在 appendDiv 里显然是不合理的，appendDiv 未免 有点个性化，成为了一个难以复用的函数，并不是每个人创建了节点之后就希望它们立刻被隐藏。 
+
+于是**我们把 div.style.display = 'none'这行代码抽出来，用回调函数的形式传入 appendDiv 方法**：
+
+```js
+var appendDiv=function(callback){
+   for(var i=0;i<100;i++){
+      var div=document.createElement("div");
+      div.innerHTML=i;
+      document.body.appendChild(div);
+      if (typeof callback==="function") {
+         callback(div);
+      }
+   }
+}
+appendDiv(function(node){
+   node.style.display="none";
+});
+```
+
+可以看到，**隐藏节点的请求实际上是由客户发起的，但是客户并不知道节点什么时候会创 建好，于是把隐藏节点的逻辑放在回调函数中，“委托”给 appendDiv 方法**。appendDiv 方法当 然知道节点什么时候创建好，所以在节点创建好的时候，appendDiv 会执行之前客户传入的回 调函数。
+
+##### 2.  Array.prototype.sort
+
+Array.prototype.sort 接受一个函数当作参数，这个函数里面封装了数组元素的排序规则。从 Array.prototype.sort 的使用可以看到，我们的目的是对数组进行排序，这是不变的部分；而使 用 什 么 规 则 去 排 序 ， 则 是 可 变 的 部 分 。 **把 可 变 的 部 分 封 装 在 函 数 参 数 里 ， 动 态 传 入 Array.prototype.sort，使 Array.prototype.sort 方法成为了一个非常灵活的方法**，代码如下：
+
+```js
+//从小到大排列
+let result=[1,4,3,2].sort(function(a,b){
+   return a-b;
+});
+console.log(result);
+
+//从大到小排列
+result=[1,4,3,2].sort(function(a,b){
+   return b-a;
+});
+console.log(result);
+```
+
+#### 函数作为返回值输出
+
+相比把函数当作参数传递，函数当作返回值输出的应用场景也许更多，也更能体现函数式编程的巧妙。让函数继续返回一个可执行的函数，意味着运算过程是可延续的。
+##### 1. 判断数据的类型
+
+我们来看看这个例子，判断一个数据是否是数组，在以往的实现中，可以基于鸭子类型的概 念来判断，比如判断这个数据有没有 length 属性，有没有 sort 方法或者 slice 方法等。但更好 的方式是用 Object.prototype.toString 来计算。Object.prototype.toString.call( obj )返回一个 字 符 串 ， 比 如 Object.prototype.toString.call( [1,2,3] ) 总 是 返 回 "[object Array]" ， 而 Object.prototype.toString.call( “str”)总是返回"[object String]"。所以我们可以编写一系列的 isType 函数。代码如下：
+
+```js
+var isString=function(obj){
+   return Object.prototype.toString.call(obj)==="[object String]";
+};
+var isArray=function(obj){
+   return Object.prototype.toString.call(obj)==="[object Array]";
+};
+var isNumber=function(obj){
+   return Object.prototype.toString.call(obj)==="[object Number]";
+};
+```
+
+我们发现，这些函数的大部分实现都是相同的，不同的只是 Object.prototype.toString. call( obj )返回的字符串。为了避免多余的代码，我们尝试把这些字符串作为参数提前值入 isType 函数。代码如下：
+
+```js
+var isType=function(type){
+   return function(obj){
+      return Object.prototype.toString.call(obj)==='[object '+ type +']';
+   }
+};
+var isString=isType("String");
+var isArray=isType("Array");
+var isNumber=isType("Number");
+
+console.log(isArray([12,3,4]));
+
+```
+
+我们还可以用循环语句，来批量注册这些 isType 函数：
+
+```js
+var Type={};
+for(var i=0,type;type=[ 'String', 'Array', 'Number' ][ i++ ];){
+   (function(type){
+      Type['is'+type]=function(obj){
+         return Object.prototype.toString.call(obj)==='[object '+ type +']';
+      }
+   })(type);
+};
+
+console.log(Type.isArray([12,3,4]));
+console.log(Type.isNumber([12,3,4]));
+
+```
+
+##### 2. getSingle
+
+下面是一个单例模式的例子，在第三部分设计模式的学习中，我们将进行更深入的讲解，这里暂且只了解其代码实现：
+
+```js
+var getSingle=function(fn){
+   var ret;
+   return function(){
+      return ret || (ret=fn.apply(this,arguments));
+   };
+};
+```
+
+这个高阶函数的例子，**既把函数当作参数传递，又让函数执行后返回了另外一个函数**。我们可以看看 getSingle 函数的效果：
+
+```js
+var getScript=getSingle(function(){
+   return document.createElement("script");
+});
+
+var script1=getScript();
+var script2=getScript();
+console.log(script1===script2);  //true
+```
+
+#### 高阶函数实现AOP
+
+AOP（面向切面编程）的**主要作用是把一些跟核心业务逻辑模块无关的功能抽离出来**，这些 跟业务逻辑无关的功能通常包括日志统计、安全控制、异常处理等。把这些功能抽离出来之后， 再通过“动态织入”的方式掺入业务逻辑模块中。这样做的好处首先是可以保持业务逻辑模块的纯净和高内聚性，其次是可以很方便地复用日志统计等功能模块。
+
+在 Java 语言中，可以通过反射和动态代理机制来实现 AOP 技术。而在 JavaScript 这种动态 语言中，AOP 的实现更加简单，这是 JavaScript 与生俱来的能力。 
+
+通常，在 JavaScript 中实现 AOP，**都是指把一个函数“动态织入”到另外一个函数之中**，具 体的实现技术有很多，本节我们通过扩展 Function.prototype 来做到这一点。代码如下：
+
+```js
+Function.prototype.before=function(beforefn){
+   var __self=this;  // 保存原函数的引用
+   return function(){  // 返回包含了原函数和新函数的"代理"函数
+      beforefn.apply(this,arguments);  // 执行新函数，修正 this
+      return __self.apply(this,arguments);  // 执行原函数
+   }
+};
+
+Function.prototype.after=function(afterfn){
+   var __self=this;  // 保存原函数的引用
+   return function(){  //
+      var ret=__self.apply(this,arguments);
+      afterfn.apply(this,arguments);  // 
+      return ret;
+   }
+};
+
+var func=function(){
+   console.log(2);
+}
+
+func=func.before(function(){
+   console.log(1);
+}).after(function(){
+   console.log(3);
+});
+
+func();
+```
+
+我们把负责打印数字 1 和打印数字 3 的两个函数通过 AOP 的方式动态植入 func 函数。通过执行上面的代码，我们看到控制台顺利地返回了执行结果 1、2、3。
+
+这种使用 AOP 的方式来给函数添加职责，也是 JavaScript 语言中一种非常特别和巧妙的装饰者模式实现。这种装饰者模式在实际开发中非常有用。
+
+#### 高阶函数的其他应用
