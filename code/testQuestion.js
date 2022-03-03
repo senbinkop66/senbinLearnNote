@@ -1,28 +1,24 @@
-Function.prototype.before=function(beforefn){
-   var __self=this;  // 保存原函数的引用
-   return function(){  // 返回包含了原函数和新函数的"代理"函数
-      beforefn.apply(this,arguments);  // 执行新函数，修正 this
-      return __self.apply(this,arguments);  // 执行原函数
-   }
+var throttle=function(){
+   var __self=fn,  // 保存需要被延迟执行的函数引用
+      timer,  // 定时器
+      firstTime=true;  //是否是第一次调用
+   return function(){
+      var args=arguments,__me=this;
+      if (firstTime) {  // 如果是第一次调用，不需延迟执行
+         __self.apply(__me,args);
+         return firstTime=false;
+      }
+      if (timer) {  // 如果定时器还在，说明前一次延迟执行还没有完成
+         return false;
+      }
+      timer=setTimeout(function(){  // 延迟一段时间执行
+         clearTimeout(timer);
+         timer=null;
+         __self.apply(__me,args);
+      },interval || 500)
+   };
 };
 
-Function.prototype.after=function(afterfn){
-   var __self=this;  // 保存原函数的引用
-   return function(){  //
-      var ret=__self.apply(this,arguments);
-      afterfn.apply(this,arguments);  // 
-      return ret;
-   }
-};
-
-var func=function(){
-   console.log(2);
-}
-
-func=func.before(function(){
+window.onresize=throttle(function(){
    console.log(1);
-}).after(function(){
-   console.log(3);
-});
-
-func();
+},500);
