@@ -39,31 +39,10 @@
 </style>
     <body>
 
-<div id="div1">点我绑定事件</div>
 
 <script type="text/javascript">
 
-var addEvent=function(elem,type,handler){
-    if (window.addEventListener) {
-        addEvent=function(elem,type,handler){
-            elem.addEventListener(type,handler,false);
-        }
-    }else if (window.attachEvent) {
-        addEvent=function(elem,type,handler){
-            elem.attachEvent('on'+type,handler);
-        }
-    }
-    addEvent(elem,type,handler);
-};
 
-var div = document.getElementById( 'div1' );
-addEvent( div, 'click', function(){
-    console.log(1);
-});
-
-addEvent( div, 'click', function(){
-    console.log(2);
-});
 
 </script>
 
