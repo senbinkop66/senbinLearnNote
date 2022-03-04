@@ -1,22 +1,18 @@
-/**
- * @param {number[]} nums
- * @return {number}
- */
-var subArrayRanges = function(nums) {
-   let ans=0;
-   let n=nums.length;
-   for(let i=0;i<n;i++){
-      let minValue=Number.MAX_VALUE,maxValue=-Number.MAX_VALUE;
-      for(let j=i;j<n;j++){
-         minValue=Math.min(minValue,nums[j]);
-         maxValue=Math.max(maxValue,nums[j]);
-         ans+=maxValue-minValue;
-      }
-   }
-   return ans;
-
+var strategies={
+   "S":function(salary){
+      return salary*4;
+   },
+   "A":function(salary){
+      return salary*3;
+   },
+   "B":function(salary){
+      return salary*2;
+   },
 };
 
-let str1=[1,2,3,4,5];
-let result=subArrayRanges(str1);
-console.log(result);
+var calculateBonus=function(level,salary){
+   return strategies[level](salary);
+}
+
+console.log( calculateBonus( 'S', 20000 ) ); // 输出：80000
+console.log( calculateBonus( 'A', 10000 ) ); // 输出：30000

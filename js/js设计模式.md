@@ -2653,3 +2653,197 @@ render();
 
 可以看到，render 函数和 bindEvent 函数都分别执行了 3 次，但 div 实际上只被绑定了一个事件。
 
+
+
+## 策略模式
+
+策略模式的定义是：**定义一系列的算法，把它们一个个封装起来，并且使它们可以相互替换。**
+
+### 使用策略模式计算奖金
+
+很多公司的年终奖是根据员工的工资基数和年底绩效情况来发放的。例如，绩效为 S 的人年 终奖有 4 倍工资，绩效为 A 的人年终奖有 3 倍工资，而绩效为 B 的人年终奖是 2 倍工资。假设财 务部要求我们提供一段代码，来方便他们计算员工的年终奖。
+
+#### 最初的代码实现
+
+ 我们可以编写一个名为 calculateBonus 的函数来计算每个人的奖金数额。很显然， calculateBonus 函数要正确工作，就需要接收两个参数：员工的工资数额和他的绩效考核等级。 代码如下：
+
+```js
+var calculateBonus = function( performanceLevel, salary ){
+   if ( performanceLevel === 'S' ){
+      return salary * 4;
+   }
+   if ( performanceLevel === 'A' ){
+      return salary * 3;
+   }
+   if ( performanceLevel === 'B' ){
+      return salary * 2;
+   }
+};
+calculateBonus( 'B', 20000 ); // 输出：40000
+calculateBonus( 'S', 6000 ); // 输出：24000
+```
+
+可以发现，这段代码十分简单，但是存在着显而易见的缺点。 
+- calculateBonus 函数比较庞大，包含了很多 if-else 语句，这些语句需要覆盖所有的逻辑 分支。 
+- calculateBonus 函数缺乏弹性，如果增加了一种新的绩效等级 C，或者想把绩效 S 的奖金 系数改为 5，那我们必须深入 calculateBonus 函数的内部实现，这是违反开放封闭原则的。 
+- 算法的复用性差，如果在程序的其他地方需要重用这些计算奖金的算法呢？我们的选择 只有复制和粘贴。 
+
+因此，我们需要重构这段代码。
+
+#### 使用组合函数重构代码
+
+一般最容易想到的办法就是使用组合函数来重构代码，我们把各种算法封装到一个个的小函 数里面，这些小函数有着良好的命名，可以一目了然地知道它对应着哪种算法，它们也可以被复用在程序的其他地方。代码如下：
+
+```js
+var performanceS = function( salary ){
+   return salary * 4;
+};
+var performanceA = function( salary ){
+   return salary * 3;
+};
+var performanceB = function( salary ){
+   return salary * 2;
+};
+var calculateBonus = function( performanceLevel, salary ){
+   if ( performanceLevel === 'S' ){
+      return performanceS( salary );
+   }
+   if ( performanceLevel === 'A' ){
+      return performanceA( salary );
+   }
+   if ( performanceLevel === 'B' ){
+      return performanceB( salary );
+   }
+};
+calculateBonus( 'A' , 10000 ); // 输出：30000
+```
+
+目前，我们的程序得到了一定的改善，但这种改善非常有限，我们依然没有解决最重要的问题：calculateBonus 函数有可能越来越庞大，而且在系统变化的时候缺乏弹性。
+
+#### 使用策略模式重构代码
+
+经过思考，我们想到了更好的办法——使用策略模式来重构代码。策略模式指的是定义一系 列的算法，把它们一个个封装起来。**将不变的部分和变化的部分隔开**是每个设计模式的主题，策 略模式也不例外，策略模式的**目的就是将算法的使用与算法的实现分离开来**。 
+
+在这个例子里，算法的使用方式是不变的，都是根据某个算法取得计算后的奖金数额。而算 法的实现是各异和变化的，每种绩效对应着不同的计算规则。 
+
+一个基于策略模式的程序至少由两部分组成。第一个部分是一组**策略类**，策略类**封装了具体 的算法，并负责具体的计算过程**。 第二个部分是**环境类** Context，Context **接受客户的请求，随后 把请求委托给某一个策略类**。要做到这点，说明 Context 中要维持对某个策略对象的引用。 
+
+现在用策略模式来重构上面的代码。第一个版本是模仿传统面向对象语言中的实现。我们先 把每种绩效的计算规则都封装在对应的策略类里面：
+
+```js
+var performanceS=function(){};
+performanceS.prototype.calculate = function( salary ){
+   return salary * 4;
+};
+
+var performanceA=function(){};
+performanceA.prototype.calculate = function( salary ){
+   return salary * 3;
+};
+
+var performanceB=function(){};
+performanceB.prototype.calculate = function( salary ){
+   return salary * 2;
+};
+
+//接下来定义奖金类 Bonus：
+var Bonus=function(){
+   this.salary=null;  // 原始工资
+   this.strategy=null;  //绩效等级对应的策略对象
+}
+Bonus.prototype.setSalary=function(salary){
+   this.salary=salary;  // 设置员工的原始工资
+}
+Bonus.prototype.setStrategy = function( strategy ){
+   this.strategy = strategy;  // 设置员工绩效等级对应的策略对象
+};
+
+Bonus.prototype.getBonus=function(){  // 取得奖金数额
+   if (!this.strategy) {
+      throw new Error("未设置strategy属性");
+   }
+   return this.strategy.calculate(this.salary);  // 把计算奖金的操作委托给对应的策略对象
+}
+```
+
+在完成最终的代码之前，我们再来回顾一下策略模式的思想：
+
+**定义一系列的算法，把它们一个个封装起来，并且使它们可以相互替换。**
+
+“并且使它们可以相互替换”，这句话在很大程度上是相对于静态类型语言而言的。因为静态类型语言中有类型检 查机制，所以各个策略类需要实现同样的接口。当它们的真正类型被隐藏在接口后面时，它们才能被相互替换。 而在 JavaScript 这种“类型模糊”的语言中没有这种困扰，任何对象都可以被替换使用。因此，JavaScript 中的“可 以相互替换使用”表现为它们具有相同的目标和意图。
+
+这句话如果说得更详细一点，就是：定义一系列的算法，把它们各自封装成策略类，算法被 封装在策略类内部的方法里。在客户对 Context 发起请求的时候，Context 总是把请求委托给这些 策略对象中间的某一个进行计算。 
+
+现在我们来完成这个例子中剩下的代码。先创建一个 bonus 对象，并且给 bonus 对象设置一些原始的数据，比如员工的原始工资数额。接下来把某个计算奖金的策略对象也传入 bonus 对象 内部保存起来。当调用 bonus.getBonus()来计算奖金的时候，bonus 对象本身并没有能力进行计算， 而是把请求委托给了之前保存好的策略对象：
+
+```js
+var bonus=new Bonus();
+bonus.setSalary(10000);
+bonus.setStrategy(new performanceS());  // 设置策略对象
+console.log( bonus.getBonus() ); // 输出：40000
+
+bonus.setStrategy( new performanceA() ); // 设置策略对象
+console.log( bonus.getBonus() ); // 输出：30000
+```
+
+刚刚我们用策略模式重构了这段计算年终奖的代码，可以看到通过策略模式重构之后，代码 变得更加清晰，各个类的职责更加鲜明。**但这段代码是基于传统面向对象语言的模仿**，下一节我 们将了解用 JavaScript 实现的策略模式。
+
+
+
+### JavaScript 版本的策略模式
+
+我们让 strategy 对象从各个策略类中创建而来，这是模拟一些传统面向对象语 言的实现。**实际上在 JavaScript 语言中，函数也是对象，所以更简单和直接的做法是把 strategy 直接定义为函数**：
+
+```js
+var strategies={
+   "S":function(salary){
+      return salary*4;
+   },
+   "A":function(salary){
+      return salary*3;
+   },
+   "B":function(salary){
+      return salary*2;
+   },
+};
+```
+
+同样，Context 也没有必要必须用 Bonus 类来表示，我们依然用 calculateBonus 函数充当Context 来接受用户的请求。经过改造，代码的结构变得更加简洁：
+
+```js
+
+var calculateBonus=function(level,salary){
+   return strategies[level](salary);
+}
+
+console.log( calculateBonus( 'S', 20000 ) ); // 输出：80000
+console.log( calculateBonus( 'A', 10000 ) ); // 输出：30000
+```
+
+
+
+### 多态在策略模式中的体现
+
+通过使用策略模式重构代码，我们消除了原程序中大片的条件分支语句。所有跟计算奖金有 关的逻辑不再放在 Context 中，而是分布在各个策略对象中。Context 并没有计算奖金的能力，而 是把这个职责委托给了某个策略对象。每个策略对象负责的算法已被各自封装在对象内部。**当我 们对这些策略对象发出“计算奖金”的请求时，它们会返回各自不同的计算结果，这正是对象多 态性的体现**，也是“它们可以相互替换”的目的。**替换 Context 中当前保存的策略对象，便能执 行不同的算法来得到我们想要的结果。**
+
+
+
+### 使用策略模式实现缓动动画
+
+#### 实现动画效果的原理
+
+用 JavaScript 实现动画效果的原理跟动画片的制作一样，动画片是把一些差距不大的原画以较快的帧数播放，来达到视觉上的动画效果。在 JavaScript 中，可以通过连续改变元素的某个 CSS 属性，比如 left、top、background-position 来实现动画效果。
+
+#### 思路和一些准备工作
+
+我们目标是编写一个动画类和一些缓动算法，让小球以各种各样的缓动效果在页面中运动。
+
+现在来分析实现这个程序的思路。在运动开始之前，需要提前记录一些有用的信息，至少包括以下信息：
+
+- 动画开始时，小球所在的原始位置；
+- 小球移动的目标位置；
+- 动画开始时的准确时间点；
+- 小球运动持续的时间。
+
+随后，我们会用 setInterval 创建一个定时器，定时器每隔 19ms 循环一次。在定时器的每一 帧里，我们会把动画已消耗的时间、小球原始位置、小球目标位置和动画持续的总时间等信息传 入缓动算法。该算法会通过这几个参数，计算出小球当前应该所在的位置。最后再更新该 div 对 应的 CSS 属性，小球就能够顺利地运动起来了。
+
