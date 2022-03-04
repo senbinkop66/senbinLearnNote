@@ -39,9 +39,35 @@
 </style>
     <body>
 
+<div id="div1">
+    click
+</div>
 
 <script type="text/javascript">
 
+var getSingle=function(fn){
+    var result;
+    return function(){
+        return result || (result=fn.apply(this,arguments));
+    }
+};
+
+
+var bindEvent=getSingle(function(){
+    document.getElementById("div1").addEventListener("click",function(){
+        console.log("Clicked");
+    });
+    return true;
+});
+
+var render=function(){
+    console.log("开始渲染列表");
+    bindEvent();
+};
+
+render();
+render();
+render();
 
 
 </script>
