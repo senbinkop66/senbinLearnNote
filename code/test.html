@@ -39,36 +39,30 @@
 </style>
     <body>
 
-<div id="div1">
-    click
+<div id="date-picker" class="demo">
+  <custom-layout id="custom-layout" @click="changeValue"></custom-layout>
 </div>
 
 <script type="text/javascript">
 
-var getSingle=function(fn){
-    var result;
-    return function(){
-        return result || (result=fn.apply(this,arguments));
+const app = Vue.createApp({
+  methods: {
+    showChange(event) {
+      console.log(event.target.value) // 将打印所选选项的值
     }
-};
-
-
-var bindEvent=getSingle(function(){
-    document.getElementById("div1").addEventListener("click",function(){
-        console.log("Clicked");
-    });
-    return true;
+  }
 });
 
-var render=function(){
-    console.log("开始渲染列表");
-    bindEvent();
-};
+// 没有警告，$attrs 被传递到 <main> 元素
+app.component('custom-layout', {
+  template: `
+    <header>...</header>
+    <main v-bind="$attrs">...</main>
+    <footer>...</footer>
+  `
+});
 
-render();
-render();
-render();
-
+app.mount("#date-picker")
 
 </script>
 
