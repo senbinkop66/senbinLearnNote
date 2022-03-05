@@ -1,22 +1,23 @@
-
-var tween={
-   linear:function(t,b,c,d){
-      return c*t/d+b;
-   },
-   easeIn:function(t,b,c,d){
-      return c*(t/=d)*t+b;
-   },
-   strongEaseIn: function(t, b, c, d){
-      return c * ( t /= d ) * t * t * t * t + b;
-   },
-   strongEaseOut: function(t, b, c, d){
-      return c * ( ( t = t / d - 1) * t * t * t * t + 1 ) + b;
-   },
-   sineaseIn: function( t, b, c, d ){
-      return c * ( t /= d) * t * t + b;
-   },
-   sineaseOut: function(t,b,c,d){
-      return c * ( ( t = t / d - 1) * t * t + 1 ) + b;
+/**
+ * @param {string} a
+ * @param {string} b
+ * @return {number}
+ */
+var findLUSlength = function(a, b) {
+   let m=a.length;
+   let n=b.length;
+   if (m!==n) {
+      return Math.max(m,n);
    }
+   while(m>0){
+      m--;
+      if (a[m]!==b[m]) {
+         return Math.max(m+1,n-m-1);
+      }
+   }
+   return -1;
 };
 
+let a = "aba", b = "cdc";
+let result=findLUSlength(a,b);
+console.log(result);

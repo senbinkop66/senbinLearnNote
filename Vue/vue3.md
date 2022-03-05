@@ -3723,3 +3723,72 @@ app.component('my-component', {
 
 
 # 插槽
+
+## 插槽内容
+
+Vue 实现了一套内容分发的 API，这套 API 的设计灵感源自 [Web Components 规范草案](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/Slots-Proposal.md)，将 `<slot>` 元素作为承载分发内容的出口。
+
+它允许你像这样合成组件：
+
+```html
+<todo-button>
+  Add todo
+</todo-button>
+```
+
+然后在 `<todo-button>` 的模板中，你可能有：
+
+```html
+<!-- todo-button 组件模板 -->
+<button class="btn-primary">
+  <slot></slot>
+</button>
+```
+
+当组件渲染的时候，`<slot></slot>` 将会被替换为“Add todo”。
+
+```html
+<!-- 渲染 HTML -->
+<button class="btn-primary">
+  Add todo
+</button>
+```
+
+不过，字符串只是开始！插槽还可以包含任何模板代码，包括 HTML：
+
+```html
+<todo-button>
+  <!-- 添加一个 Font Awesome 图标 -->
+  <i class="fas fa-plus"></i>
+  Add todo
+</todo-button>
+```
+
+或其他组件：
+
+```html
+<todo-button>
+  <!-- 添加一个图标的组件 -->
+  <font-awesome-icon name="plus"></font-awesome-icon>
+  Add todo
+</todo-button>
+```
+
+如果 `<todo-button>` 的 template 中**没有**包含一个 `<slot>` 元素，则该组件起始标签和结束标签之间的任何内容都会被抛弃。
+
+```html
+<!-- todo-button 组件模板 -->
+
+<button class="btn-primary">
+  Create a new item
+</button>
+```
+
+```html
+<todo-button>
+  <!-- 以下文本不会渲染 -->
+  Add todo
+</todo-button>
+```
+
+## 渲染作用域

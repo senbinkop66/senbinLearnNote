@@ -3109,7 +3109,7 @@ Validator.prototype.start = function(){
 };
 ```
 
-使用策略模式重构代码之后，我们仅仅通过“配置”的方式就可以完成一个表单的校验， 这些校验规则也可以复用在程序的任何地方，还能作为插件的形式，方便地被移植到其他项 目中。 
+**使用策略模式重构代码之后，我们仅仅通过“配置”的方式就可以完成一个表单的校验**， 这些校验规则也可以复用在程序的任何地方，还能作为插件的形式，方便地被移植到其他项 目中。 
 
 在修改某个校验规则的时候，只需要编写或者改写少量的代码。比如我们想将用户名输入框 的校验规则改成用户名不能少于 4 个字符。可以看到，这时候的修改是毫不费力的。代码如下：
 
@@ -3118,4 +3118,141 @@ validator.add( registerForm.userName, 'isNonEmpty', '用户名不能为空' );
 // 改成：
 validator.add( registerForm.userName, 'minLength:10', '用户名长度不能小于 10 位' );
 ```
+
+#### 给某个文本输入框添加多种校验规则
+
+为了让读者把注意力放在策略模式的使用上，目前我们的表单校验实现留有一点小遗憾：一 个文本输入框只能对应一种校验规则，比如，用户名输入框只能校验输入是否为空.
+
+如果我们既想校验它是否为空，又想校验它输入文本的长度不小于 10 呢？我们期望以这样 的形式进行校验：
+
+```js
+validator.add( registerForm.userName, [{
+    strategy: 'isNonEmpty',
+    errorMsg: '用户名不能为空'
+    }, {
+    strategy: 'minLength:6',
+    errorMsg: '用户名长度不能小于 10 位'
+}] );
+```
+
+下面提供的代码可用于一个文本输入框对应多种校验规则：
+
+```html
+<div id="demo">
+  <form action="#" id="registerForm" method="post">
+    请输入用户名：<input type="text" name="userName"/ >
+    请输入密码：<input type="text" name="password"/ >
+    请输入手机号码：<input type="text" name="phoneNumber"/ >
+    <button>提交</button>
+  </form>
+</div>
+
+<script type="text/javascript">
+
+var strategies={
+  isNonEmpty:function(value,errorMessage){
+    if (value==="") {
+      return errorMessage;
+    }
+  },
+  minLength:function(value,length,errorMessage){
+    if (value.length<length) {
+      return errorMessage;
+    }
+  },
+  isMobile:function(value,errorMessage){
+    if (!/(^1[3|5|8][0-9]{9}$)/.test(value)) {
+      return errorMessage;
+    }
+  },
+};
+
+var Validator=function(){
+  this.cache=[];  //保存校验规则
+};
+
+Validator.prototype.add = function( dom, rules ){
+  var self=this;
+  for(let i=0,rule;i<rules.length;i++){
+    rule=rules[i];
+    (function(rule){
+      var strategyAry = rule.strategy.split( ':' );
+      var errorMsg = rule.errorMsg;
+      self.cache.push(function(){
+        //把校验的步骤用空函数包装起来，并且放入 cache
+        var strategy = strategyAry.shift(); // 用户挑选的 strategy
+        strategyAry.unshift( dom.value ); // 把 input 的 value 添加进参数列表
+        strategyAry.push( errorMsg ); // 把 errorMsg 添加进参数列表
+        return strategies[ strategy ].apply( dom, strategyAry );
+      });
+    })(rule);
+  }
+};
+
+Validator.prototype.start = function(){
+  for ( var i = 0, validatorFunc; validatorFunc = this.cache[ i++ ]; ){
+    var msg = validatorFunc(); // 开始校验，并取得校验后的返回信息
+    if ( msg ){ // 如果有确切的返回值，说明校验没有通过
+      return msg;
+    }
+  }
+};
+
+var validateFunc=function(){
+  var validator=new Validator();  //创建一个 validator 对象
+  //添加一些校验规则
+  validator.add( registerForm.userName, [{
+    strategy: 'isNonEmpty',
+    errorMsg: '用户名不能为空'
+    }, {
+    strategy: 'minLength:6',
+    errorMsg: '用户名长度不能小于 10 位'
+    }]);
+  validator.add( registerForm.password, [{
+    strategy: 'minLength:6',
+    errorMsg: '密码长度不能小于 6 位'
+    }]);
+  validator.add( registerForm.phoneNumber, [{
+    strategy: 'isMobile',
+    errorMsg: '手机号码格式不正确'
+    }]);
+  var errorMsg = validator.start(); // 获得校验结果
+  return errorMsg; // 返回校验结果
+}
+
+var registerForm = document.getElementById( 'registerForm' );
+registerForm.onsubmit = function(){
+    var errorMsg = validateFunc(); // 如果 errorMsg 有确切的返回值，说明未通过校验
+    if ( errorMsg ){
+      alert ( errorMsg );
+      return false; // 阻止表单提交
+    }
+};
+
+</script>
+```
+
+### 策略模式的优缺点
+
+策略模式是一种常用且有效的设计模式，本章提供了计算奖金、缓动动画、表单校验这三个 例子来加深大家对策略模式的理解。从这三个例子中，我们可以总结出策略模式的一些**优点**。 
+- 策略模式利用组合、委托和多态等技术和思想，可以有效地避免多重条件选择语句。 
+- 策略模式提供了对开放—封闭原则的完美支持，将算法封装在独立的 strategy 中，使得它 们易于切换，易于理解，易于扩展。 
+- 策略模式中的算法也可以复用在系统的其他地方，从而避免许多重复的复制粘贴工作。 
+- 在策略模式中利用组合和委托来让 Context 拥有执行算法的能力，这也是继承的一种更轻 便的替代方案。
+
+当然，策略模式也有一些**缺点**，但这些缺点并不严重。 
+
+首先，使用策略模式会在程序中增加许多策略类或者策略对象，但实际上这比把它们负责的 逻辑堆砌在 Context 中要好。 
+
+其次，要使用策略模式，必须了解所有的 strategy，必须了解各个 strategy 之间的不同点， 这样才能选择一个合适的 strategy。比如，我们要选择一种合适的旅游出行路线，必须先了解选 择飞机、火车、自行车等方案的细节。此时 strategy 要向客户暴露它的所有实现，这是违反最少 知识原则的。
+
+### 一等函数对象与策略模式
+
+本章提供的几个策略模式示例，既有模拟传统面向对象语言的版本，也有针对 JavaScript 语 言的特有实现。在以类为中心的传统面向对象语言中，不同的算法或者行为被封装在各个策略类 中，Context 将请求委托给这些策略对象，这些策略对象会根据请求返回不同的执行结果，这样 便能表现出对象的多态性。 
+
+Peter Norvig 在他的演讲中曾说过：“**在函数作为一等对象的语言中，策略模式是隐形的**。 **strategy 就是值为函数的变量**。”在 JavaScript 中，除了使用类来封装算法和行为之外，使用函数 当然也是一种选择。这些“算法”可以被封装到函数中并且四处传递，也就是我们常说的“高阶 函数”。**实际上在 JavaScript 这种将函数作为一等对象的语言里，策略模式已经融入到了语言本身 当中，我们经常用高阶函数来封装不同的行为，并且把它传递到另一个函数中**。当我们对这些函 数发出“调用”的消息时，不同的函数会返回不同的执行结果。在 JavaScript 中，“函数对象的多态性”来得更加简单。
+
+
+
+## 代理模式
 
