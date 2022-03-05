@@ -2847,3 +2847,275 @@ console.log( calculateBonus( 'A', 10000 ) ); // 输出：30000
 
 随后，我们会用 setInterval 创建一个定时器，定时器每隔 19ms 循环一次。在定时器的每一 帧里，我们会把动画已消耗的时间、小球原始位置、小球目标位置和动画持续的总时间等信息传 入缓动算法。该算法会通过这几个参数，计算出小球当前应该所在的位置。最后再更新该 div 对 应的 CSS 属性，小球就能够顺利地运动起来了。
 
+#### 让小球运动起来
+
+ 在实现完整的功能之前，我们先了解一些常见的缓动算法，这些算法最初来自 Flash，但可 以非常方便地移植到其他语言中。 
+
+这些算法都接受 4 个参数，这 **4 个参数的含义**分别是动画已消耗的时间、小球原始位置、小 球目标位置、动画持续的总时间，返回的值则是动画元素应该处在的当前位置。代码如下：
+
+```js
+
+var tween={
+   linear:function(t,b,c,d){
+      return c*t/d+b;
+   },
+   easeIn:function(t,b,c,d){
+      return c*(t/=d)*t+b;
+   },
+   strongEaseIn: function(t, b, c, d){
+      return c * ( t /= d ) * t * t * t * t + b;
+   },
+   strongEaseOut: function(t, b, c, d){
+      return c * ( ( t = t / d - 1) * t * t * t * t + 1 ) + b;
+   },
+   sineaseIn: function( t, b, c, d ){
+      return c * ( t /= d) * t * t + b;
+   },
+   sineaseOut: function(t,b,c,d){
+      return c * ( ( t = t / d - 1) * t * t + 1 ) + b;
+   }
+};
+
+```
+
+现在我们开始编写完整的代码，下面代码的思想来自 jQuery 库，由于本节的目标是演示策略模式，而非编写一个完整的动画库，因此我们省去了动画的队列控制等更多完整功能。
+
+现在进入代码实现阶段，首先在页面中放置一个 div：
+
+```html
+<div style="position:absolute;background:#345678" id="div">我是 div</div>
+```
+
+接下来定义 **Animate 类**，Animate 的构造函数接受一个参数：即将运动起来的 dom 节点。Animate类的代码如下：
+
+```js
+var Animate=function(dom){
+  this.dom = dom; // 进行运动的 dom 节点
+  this.startTime = 0; // 动画开始时间
+  this.startPos = 0; // 动画开始时，dom 节点的位置，即 dom 的初始位置
+  this.endPos = 0; // 动画结束时，dom 节点的位置，即 dom 的目标位置
+  this.propertyName = null; // dom 节点需要被改变的 css 属性名
+  this.easing = null; // 缓动算法
+  this.duration = null; // 动画持续时间
+};
+```
+
+接下来 Animate.prototype.start 方法负责启动这个动画，在动画被启动的瞬间，要记录一些 信息，供缓动算法在以后计算小球当前位置的时候使用。在记录完这些信息之后，此方法还要负 责启动定时器。代码如下：
+
+```js
+Animate.prototype.start=function(propertyName,endPos,duration,easing){
+  this.startTime=+new Date;  //动画启动时间
+  this.startPos=this.dom.getBoundingClientRect()[propertyName];  //dom 节点初始位置
+  this.propertyName=propertyName;  //dom 节点需要被改变的 CSS 属性名
+  this.endPos=endPos;  //dom 节点目标位置
+  this.duration=duration;  //动画持续事件
+  this.easing=tween[easing];  //缓动算法
+
+  var self=this;
+  var timeId=setInterval(function(){  //启动定时器，开始执行动画
+    if (self.step()===false) {
+      clearInterval(timeId);  //如果动画已结束，则清除定时器
+    }
+  },19);
+};
+```
+
+Animate.prototype.start 方法接受以下 4 个参数。
+- propertyName：要改变的 CSS 属性名，比如'left'、'top'，分别表示左右移动和上下移动。
+- endPos： 小球运动的目标位置。
+- duration： 动画持续时间。
+- easing： 缓动算法。
+
+再接下来是 Animate.prototype.step 方法，该方法代表小球运动的每一帧要做的事情。在此 处，这个方法负责计算小球的当前位置和调用更新 CSS 属性值的方法 Animate.prototype.update。 代码如下：
+
+```js
+Animate.prototype.step=function(){
+  var t=+new Date;  //取得当前时间
+  if (t>=this.startTime+this.duration) {  //(1)
+    this.update(this.endPos);  //更新小球的 CSS 属性值
+    return false;
+  }
+  var pos=this.easing(t-this.startTime,this.startPos,this.endPos-this.startPos,this.duration);  //pos 为小球当前位置
+  this.update(pos);  //更新小球的 CSS 属性值
+}
+```
+
+在这段代码中，(1)处的意思是，如果当前时间大于动画开始时间加上动画持续时间之和，说 明动画已经结束，此时要修正小球的位置。因为在这一帧开始之后，小球的位置已经接近了目标 位置，但很可能不完全等于目标位置。此时我们要主动修正小球的当前位置为最终的目标位置。 此外让 Animate.prototype.step 方法返回 false，可以通知 Animate.prototype.start 方法清除定 时器。 
+
+最后是负责更新小球 CSS 属性值的 Animate.prototype.update 方法：
+
+```js
+Animate.prototype.update=function(pos){
+  this.dom.style[this.propertyName]=pos+"px";
+};
+```
+
+如果不嫌麻烦，我们可以进行一些小小的测试：
+
+```js
+var div = document.getElementById( 'div' );
+var animate = new Animate( div );
+animate.start( 'left', 500, 500, 'strongEaseOut' );
+animate.start( 'top', 500, 500, 'strongEaseIn' );
+```
+
+通过这段代码，可以看到小球按照我们的期望以各种各样的缓动算法在页面中运动。
+
+本节我们学会了怎样编写一个动画类，利用这个动画类和一些缓动算法就可以让小球运动起 来。我们使用策略模式把算法传入动画类中，来达到各种不同的缓动效果，这些算法都可以轻易 地被替换为另外一个算法，这是策略模式的经典运用之一。策略模式的实现并不复杂，关键是如 何从策略模式的实现背后，找到封装变化、委托和多态性这些思想的价值。
+
+
+
+### 更广义的“算法”
+
+策略模式指的是定义一系列的算法，并且把它们封装起来。本章我们介绍的计算奖金和缓动 动画的例子都封装了一些算法。 
+
+从定义上看，策略模式就是用来封装算法的。但如果把策略模式仅仅用来封装算法，未免有 一点大材小用。在实际开发中，我们**通常会把算法的含义扩散开来，使策略模式也可以用来封装 一系列的“业务规则”。只要这些业务规则指向的目标一致，并且可以被替换使用，我们就可以 用策略模式来封装它们**。 
+
+GoF 在《设计模式》一书中提到了一个利用策略模式来校验用户是否输入了合法数据的例子， 但 GoF 未给出具体的实现。刚好在 Web 开发中，表单校验是一个非常常见的话题。下面我们就 看一个使用策略模式来完成表单校验的例子。
+
+### 表单校验
+
+在一个 Web 项目中，注册、登录、修改用户信息等功能的实现都离不开提交表单。 
+
+在将用户输入的数据交给后台之前，常常要做一些客户端力所能及的校验工作，比如注册的 时候需要校验是否填写了用户名，密码的长度是否符合规定，等等。这样可以避免因为提交不合 法数据而带来的不必要网络开销。
+
+假设我们正在编写一个注册的页面，在点击注册按钮之前，有如下几条校验逻辑。
+- 用户名不能为空。
+- 密码长度不能少于 6 位。
+- 手机号码必须符合格式。
+
+#### 表单校验的第一个版本
+
+现在编写表单校验的第一个版本，可以提前透露的是，目前我们还没有引入策略模式。代码如下：
+
+```html
+<div id="demo">
+  <form action="http:// xxx.com/register" id="registerForm" method="post">
+    请输入用户名：<input type="text" name="userName"/ >
+    请输入密码：<input type="text" name="password"/ >
+    请输入手机号码：<input type="text" name="phoneNumber"/ >
+    <button>提交</button>
+  </form>
+</div>
+
+<script type="text/javascript">
+var registerForm = document.getElementById( 'registerForm' );
+  registerForm.onsubmit = function(){
+    if ( registerForm.userName.value === '' ){
+      alert ( '用户名不能为空' );
+      return false;
+    }
+    if ( registerForm.password.value.length < 6 ){
+      alert ( '密码长度不能少于 6 位' );
+      return false;
+    }
+    if ( !/(^1[3|5|8][0-9]{9}$)/.test( registerForm.phoneNumber.value ) ){
+      alert ( '手机号码格式不正确' );
+      return false;
+  }
+}
+
+</script>
+```
+
+这是一种很常见的代码编写方式，它的缺点跟计算奖金的最初版本一模一样。 
+- registerForm.onsubmit 函数比较庞大，包含了很多 if-else 语句，这些语句需要覆盖所有 的校验规则。 
+- registerForm.onsubmit 函数缺乏弹性，如果增加了一种新的校验规则，或者想把密码的长 度校验从 6 改成 8，我们都必须深入 registerForm.onsubmit 函数的内部实现，这是违反开 放—封闭原则的。 
+- 算法的复用性差，如果在程序中增加了另外一个表单，这个表单也需要进行一些类似的 校验，那我们很可能将这些校验逻辑复制得漫天遍野。
+
+#### 用策略模式重构表单校验
+
+下面我们将用策略模式来重构表单校验的代码，很显然第一步我们要把这些校验逻辑都封装成策略对象：
+
+```js
+var strategies={
+  isNonEmpty:function(value,errorMessage){
+    if (value==="") {
+      return errorMessage;
+    }
+  },
+  minLength:function(value,length,errorMessage){
+    if (value.length<length) {
+      return errorMessage;
+    }
+  },
+  isMobile:function(value,errorMessage){
+    if (!/(^1[3|5|8][0-9]{9}$)/.test(value)) {
+      return errorMessage;
+    }
+  },
+};
+
+```
+
+接下来我们准备实现 Validator 类。Validator 类在这里作为 Context，负责接收用户的请求 并委托给 strategy 对象。在给出 Validator 类的代码之前，有必要提前了解用户是如何向 Validator 类发送请求的，这有助于我们知道如何去编写 Validator 类的代码。代码如下：
+
+```js
+var validateFunc=function(){
+  var validator=new Validator();  //创建一个 validator 对象
+  //添加一些校验规则
+  validator.add( registerForm.userName, 'isNonEmpty', '用户名不能为空' );
+  validator.add( registerForm.password, 'minLength:6', '密码长度不能少于 6 位' );
+  validator.add( registerForm.phoneNumber, 'isMobile', '手机号码格式不正确' );
+  var errorMsg = validator.start(); // 获得校验结果
+  return errorMsg; // 返回校验结果
+}
+
+var registerForm = document.getElementById( 'registerForm' );
+registerForm.onsubmit = function(){
+    var errorMsg = validateFunc(); // 如果 errorMsg 有确切的返回值，说明未通过校验
+    if ( errorMsg ){
+      alert ( errorMsg );
+      return false; // 阻止表单提交
+    }
+};
+```
+
+从这段代码中可以看到，我们先创建了一个 validator 对象，然后通过 validator.add 方法， 往 validator 对象中添加一些校验规则。validator.add 方法接受 3 个参数，以下面这句代码说明：
+
+```js
+validator.add( registerForm.password, 'minLength:6', '密码长度不能少于 6 位' );
+```
+
+- registerForm.password 为参与校验的 input 输入框。 
+- 'minLength:6'是一个以冒号隔开的字符串。冒号前面的 minLength代表客户挑选的 strategy 对象，冒号后面的数字 6 表示在校验过程中所必需的一些参数。'minLength:6'的意思就是 校验 registerForm.password 这个文本输入框的 value 最小长度为 6。如果这个字符串中不 包含冒号，说明校验过程中不需要额外的参数信息，比如'isNonEmpty'。 
+- 第 3 个参数是当校验未通过时返回的错误信息。
+
+当我们往 validator 对象里添加完一系列的校验规则之后，会调用 validator.start()方法来 启动校验。如果 validator.start()返回了一个确切的 errorMsg 字符串当作返回值，说明该次校验 没有通过，此时需让 registerForm.onsubmit 方法返回 false 来阻止表单的提交。
+
+最后是 Validator 类的实现：
+
+```js
+var Validator=function(){
+  this.cache=[];  //保存校验规则
+};
+
+Validator.prototype.add = function( dom, rule, errorMsg ){
+  var ary = rule.split( ':' ); // 把 strategy 和参数分开
+  this.cache.push(function(){ // 把校验的步骤用空函数包装起来，并且放入 cache
+    var strategy = ary.shift(); // 用户挑选的 strategy
+    ary.unshift( dom.value ); // 把 input 的 value 添加进参数列表
+    ary.push( errorMsg ); // 把 errorMsg 添加进参数列表
+    return strategies[ strategy ].apply( dom, ary );
+  });
+};
+Validator.prototype.start = function(){
+  for ( var i = 0, validatorFunc; validatorFunc = this.cache[ i++ ]; ){
+    var msg = validatorFunc(); // 开始校验，并取得校验后的返回信息
+    if ( msg ){ // 如果有确切的返回值，说明校验没有通过
+      return msg;
+    }
+  }
+};
+```
+
+使用策略模式重构代码之后，我们仅仅通过“配置”的方式就可以完成一个表单的校验， 这些校验规则也可以复用在程序的任何地方，还能作为插件的形式，方便地被移植到其他项 目中。 
+
+在修改某个校验规则的时候，只需要编写或者改写少量的代码。比如我们想将用户名输入框 的校验规则改成用户名不能少于 4 个字符。可以看到，这时候的修改是毫不费力的。代码如下：
+
+```js
+validator.add( registerForm.userName, 'isNonEmpty', '用户名不能为空' );
+// 改成：
+validator.add( registerForm.userName, 'minLength:10', '用户名长度不能小于 10 位' );
+```
+

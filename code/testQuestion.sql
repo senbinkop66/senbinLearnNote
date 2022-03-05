@@ -1,11 +1,30 @@
-select customers.name as 'Customers' from customers 
-where customers.id not in (
-	select customerid from orders
-);
+use databasesName;  //选择你的数据库
+set names utf8;
 
-delete p1 from Person p1,Person p2 
-where p1.Email=p2.Email and p1.Id>p2.Id;
+//创建表
+CREATE TABLE tableName(
+	//自己需要创建的字段
+   num INT UNSIGNED AUTO_INCREMENT,
+   species VARCHAR(100) NOT NULL,
+   sp VARCHAR(100) NOT NULL,
+   GI_A VARCHAR(100) NOT NULL,
+   Gene_A VARCHAR(100) NOT NULL,
+   GI_B VARCHAR(100) NOT NULL,
+   Gene_B VARCHAR(100) NOT NULL,
+   Type VARCHAR(100) NOT NULL,
+   PRIMARY KEY (num)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-select weather.id as 'Id' 
-from weather join weather w on DATEDIFF(weather.recordDate,w.recordDate)=1
- and weather.Temperature>w.Temperature;
+show tables;
+desc tableName;
+
+drop table tableName;  //删除数据表
+truncate table tableName;  //清空数据表
+
+//导入数据
+//
+LOAD DATA LOCAL INFILE 'filename.txt' INTO TABLE tableName LINES TERMINATED BY '\r\n';
+
+
+//导出数据表
+mysqldump -u root -p --databases microbe_sl_gene_db --tables tableName > tableName.sql

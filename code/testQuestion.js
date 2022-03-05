@@ -1,18 +1,22 @@
-var strategies={
-   "S":function(salary){
-      return salary*4;
+
+var tween={
+   linear:function(t,b,c,d){
+      return c*t/d+b;
    },
-   "A":function(salary){
-      return salary*3;
+   easeIn:function(t,b,c,d){
+      return c*(t/=d)*t+b;
    },
-   "B":function(salary){
-      return salary*2;
+   strongEaseIn: function(t, b, c, d){
+      return c * ( t /= d ) * t * t * t * t + b;
    },
+   strongEaseOut: function(t, b, c, d){
+      return c * ( ( t = t / d - 1) * t * t * t * t + 1 ) + b;
+   },
+   sineaseIn: function( t, b, c, d ){
+      return c * ( t /= d) * t * t + b;
+   },
+   sineaseOut: function(t,b,c,d){
+      return c * ( ( t = t / d - 1) * t * t + 1 ) + b;
+   }
 };
 
-var calculateBonus=function(level,salary){
-   return strategies[level](salary);
-}
-
-console.log( calculateBonus( 'S', 20000 ) ); // 输出：80000
-console.log( calculateBonus( 'A', 10000 ) ); // 输出：30000
