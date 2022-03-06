@@ -3419,3 +3419,350 @@ proxyImage.setSrc("https://v3.cn.vuejs.org/images/components_provide.png");
 ```
 
 现在我们通过 proxyImage 间接地访问 MyImage。proxyImage 控制了客户对 MyImage 的访问，并 且在此过程中加入一些额外的操作，比如在真正的图片加载好之前，先把 img 节点的 src 设置为 一张本地的 loading 图片。
+
+### 代理的意义
+
+也许读者会有疑问，不过是实现一个小小的图片预加载功能，即使不需要引入任何模式也能 办到，那么引入代理模式的好处究竟在哪里呢？下面我们先抛开代理，编写一个更常见的图片预 加载函数。
+
+ **不用代理的预加载图片函数**实现如下：
+
+```js
+var myImage=(function(){
+  var imgNode=document.createElement("img");
+  document.body.appendChild(imgNode);
+
+  var img=new Image;
+  img.onload=function(){
+    imgNode.src=img.src;
+  }
+  return {
+    setSrc:function(src){
+      imgNode.src="../image/CSS 轮廓.png";
+      img.src=src;
+    }
+  }
+})();
+
+
+myImage.setSrc("https://v3.cn.vuejs.org/images/components_provide.png");
+```
+
+为了说明代理的意义，下面我们引入一个面向对象设计的原则——单一职责原则。 
+
+**单一职责原则**指的是，就**一个类（通常也包括对象和函数等）而言，应该仅有一个引起它变 化的原因**。如果一个对象承担了多项职责，就意味着这个对象将变得巨大，引起它变化的原因可 能会有多个。**面向对象设计鼓励将行为分布到细粒度的对象之中**，如果一个对象承担的职责过多， 等于把这些职责耦合到了一起，这种耦合会导致脆弱和低内聚的设计。当变化发生时，设计可能 会遭到意外的破坏。 
+
+**职责被定义为“引起变化的原因**”。上段代码中的 MyImage 对象除了负责给 img 节点设置 src 外，还要负责预加载图片。我们在处理其中一个职责时，有可能因为其强耦合性影响另外一个职 责的实现。 
+
+另外，在面向对象的程序设计中，**大多数情况下，若违反其他任何原则，同时将违反开放— 封闭原则**。如果我们只是从网络上获取一些体积很小的图片，或者 5 年后的网速快到根本不再需 要预加载，我们可能希望把预加载图片的这段代码从 MyImage 对象里删掉。这时候就不得不改动 MyImage 对象了。 
+
+实际上，我们需要的只是给 img 节点设置 src，预加载图片只是一个锦上添花的功能。如果 能把这个操作放在另一个对象里面，自然是一个非常好的方法。于是代理的作用在这里就体现出 来了，**代理负责预加载图片，预加载的操作完成之后，把请求重新交给本体 MyImage**。
+
+纵观整个程序，我们并没有改变或者增加 MyImage 的接口，但是通过代理对象，实际上给系 统添加了新的行为。这是符合开放—封闭原则的。给 img 节点设置 src 和图片预加载这两个功能， 被隔离在两个对象里，它们可以各自变化而不影响对方。何况就算有一天我们不再需要预加载， 那么只需要改成请求本体而不是请求代理对象即可。
+
+```js
+//proxyImage.setSrc("https://v3.cn.vuejs.org/images/components_provide.png");
+myImage.setSrc("https://v3.cn.vuejs.org/images/components_provide.png");
+```
+
+### 代理和本体接口的一致性
+
+上一节说到，如果有一天我们不再需要预加载，那么就不再需要代理对象，可以选择直接请 求本体。其中关键是代理对象和本体都对外提供了 setSrc 方法，**在客户看来，代理对象和本体 是一致的， 代理接手请求的过程对于用户来说是透明的，用户并不清楚代理和本体的区别**，这 样做有两个好处。 
+- 用户可以放心地请求代理，他只关心是否能得到想要的结果。 
+- 在任何使用本体的地方都可以替换成使用代理。
+
+在 Java 等语言中，代理和本体都需要显式地实现同一个接口，一方面接口保证了它们会拥 有同样的方法，**另一方面，面向接口编程迎合依赖倒置原则，通过接口进行向上转型，从而避开 编译器的类型检查，代理和本体将来可以被替换使用。**
+
+在 JavaScript 这种动态类型语言中，我们有时通过鸭子类型来检测代理和本体是否都实现了 setSrc 方法，另外大多数时候甚至干脆不做检测，全部依赖程序员的自觉性，这对于程序的健壮 性是有影响的。不过对于一门快速开发的脚本语言，这些影响还是在可以接受的范围内，而且我 们也习惯了没有接口的世界。 
+
+另外值得一提的是，如果代理对象和本体对象都为一个函数（函数也是对象），函数必然都 能被执行，则可以认为它们也具有一致的“接口”。
+
+
+
+### 虚拟代理合并 HTTP 请求
+
+先想象这样一个场景：每周我们都要写一份工作周报，周报要交给总监批阅。总监手下管理 着 150 个员工，如果我们每个人直接把周报发给总监，那总监可能要把一整周的时间都花在查看 邮件上面。 
+
+现在我们把周报发给各自的组长，组长作为代理，把组内成员的周报合并提炼成一份后一次 性地发给总监。这样一来，总监的邮箱便清净多了。 
+
+这个例子在程序世界里很容易引起共鸣，在 Web 开发中，也许最大的开销就是网络请求。 假设我们在做一个文件同步的功能，当我们选中一个 checkbox 的时候，它对应的文件就会被同 步到另外一台备用服务器上面，如图 6-3 所示。
+
+我们先在页面中放置好这些 checkbox 节点：
+
+```html
+<div id="demo">
+  <input type="checkbox" id="1"></input>1
+  <input type="checkbox" id="2"></input>2
+  <input type="checkbox" id="3"></input>3
+  <input type="checkbox" id="4"></input>4
+  <input type="checkbox" id="5"></input>5
+  <input type="checkbox" id="6"></input>6
+  <input type="checkbox" id="7"></input>7
+  <input type="checkbox" id="8"></input>8
+  <input type="checkbox" id="9"></input>9
+</div>
+```
+
+接下来，给这些 checkbox 绑定点击事件，并且在点击的同时往另一台服务器同步文件：
+
+```js
+var synchronousFile=function(id){
+  console.log( '开始同步文件，id 为: ' + id );
+};
+
+var checkbox=document.getElementsByTagName("input");
+
+for ( var i = 0, c; c = checkbox[ i++ ]; ){
+  c.onclick = function(){
+    if ( this.checked === true ){
+      synchronousFile( this.id );
+    }
+  }
+};
+```
+
+当我们选中 3 个 checkbox 的时候，依次往服务器发送了 3 次同步文件的请求。而点击一个 checkbox 并不是很复杂的操作，作为 APM250+的资深 Dota 玩家，我有把握一秒钟之内点中 4 个 checkbox。可以预见，如此频繁的网络请求将会带来相当大的开销。 
+
+解决方案是，我们可以通过一个代理函数 proxySynchronousFile 来收集一段时间之内的请求， 最后一次性发送给服务器。比如我们等待 2 秒之后才把这 2 秒之内需要同步的文件 ID 打包发给 服务器，如果不是对实时性要求非常高的系统，2 秒的延迟不会带来太大副作用，却能大大减轻 服务器的压力。代码如下：
+
+```js
+var synchronousFile=function(id){
+  console.log( '开始同步文件，id 为: ' + id );
+};
+
+var proxySynchronousFile=(function(){
+  var cache=[];  //保存一段时间内需要同步的 ID
+  var timer;  //定时器
+  return function(id){
+    cache.push(id);
+    if (timer) {  //保证不会覆盖已经启动的定时器
+      return;
+    }
+    timer=setTimeout(function(){
+      synchronousFile(cache.join(","));  //2 秒后向本体发送需要同步的 ID 集合
+      clearTimeout(timer);  //清空定时器
+      timer=null;
+      cache.length=0;  //清空 ID 集合
+    },2000);
+  }
+})();
+
+var checkbox=document.getElementsByTagName("input");
+
+for ( var i = 0, c; c = checkbox[ i++ ]; ){
+  c.onclick = function(){
+    if ( this.checked === true ){
+      proxySynchronousFile( this.id );
+    }
+  }
+};
+
+```
+
+### 虚拟代理在惰性加载中的应用
+
+未加载真正的 miniConsole.js 之前的代码如下：
+
+```js
+var cache=[];
+var miniConsole={
+  log:function(){
+    var args=arguments;
+    cache.push(function(){
+      return miniConsole.log.apply(miniConsole,args);
+    });
+  }
+};
+
+miniConsole.log(1);
+```
+
+当用户按下 F2 时，开始加载真正的 miniConsole.js，代码如下：
+
+```js
+var handler=function(ev){
+  if (ev.keyCode=113) {
+    var script=document.createElement("script");
+    script.onload=function(){
+      for(var i=0,fn;fn=cache[i++];){
+        fn();
+      }
+    };
+    script.src="miniConsole.js";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  }
+};
+
+document.body.addEventListener("keydown",handler,false);
+```
+
+miniConsole.js 代码
+
+```js
+miniConsole={
+	log:function(){
+		//
+		console.log(Array.prototype.join.call(arguments));
+	}
+};
+```
+
+虽然我们没有给出 miniConsole.js 的真正代码，但这不影响我们理解其中的逻辑。当然这里 还要注意一个问题，就是**我们要保证在 F2 被重复按下的时候，miniConsole.js 只被加载一次。另外我们整理一下 miniConsole 代理对象的代码，使它成为一个标准的虚拟代理对象**，代码如下：
+
+```js
+var miniConsole=(function(){
+  var cache=[];
+  var handler=function(ev){
+    if (ev.keyCode=113) {
+      var script=document.createElement("script");
+      script.onload=function(){
+        for(var i=0,fn;fn=cache[i++];){
+          fn();
+        }
+      };
+      script.src="miniConsole.js";
+      document.getElementsByTagName("head")[0].appendChild(script);
+      document.body.removeEventListener("keydown",handler);  //只加载一次 miniConsole.js
+    }
+  };
+  document.body.addEventListener("keydown",handler,false);
+  return {
+    log:function(){
+      var args=arguments;
+      cache.push(function(){
+        return miniConsole.log.apply(miniConsole,args);
+      });
+    }
+  }
+  
+})();
+
+miniConsole.log(66);
+miniConsole.log(26);
+```
+
+
+
+### 缓存代理
+
+缓存代理可以为一些开销大的运算结果提供暂时的存储，在下次运算时，如果传递进来的参数跟之前一致，则可以直接返回前面存储的运算结果。
+
+#### 缓存代理的例子——计算乘积
+
+为了节省示例代码，以及让读者把注意力集中在代理模式上面，这里编写一个简单的求乘积的程序，请读者自行把它脑补为复杂的计算。
+
+先创建一个用于求乘积的函数：
+
+```js
+
+var mult = function(){
+   console.log( '开始计算乘积' );
+   var a = 1;
+   for ( var i = 0, l = arguments.length; i < l; i++ ){
+      a = a * arguments[i];
+   }
+   return a;
+};
+
+console.log(mult( 2, 3 ));
+console.log(mult( 2, 3 ,4));
+```
+
+现在加入缓存代理函数：
+
+```js
+var proxyMult = (function(){
+   var cache = {};
+   return function(){
+   var args = Array.prototype.join.call( arguments, ',' );
+   if ( args in cache ){
+      return cache[ args ];
+   }
+   return cache[ args ] = mult.apply( this, arguments );
+   }
+})();
+
+console.log(proxyMult( 1,2, 3,4 ));
+console.log(proxyMult( 1,2, 3 ,4));
+```
+
+当我们第二次调用 proxyMult( 1, 2, 3, 4 )的时候，本体 mult 函数并没有被计算，proxyMult 直接返回了之前缓存好的计算结果。 
+
+通过增加缓存代理的方式，mult 函数可以继续专注于自身的职责——计算乘积，缓存的功能 是由代理对象实现的。
+
+#### 缓存代理用于ajax异步请求数据
+
+我们在常常在项目中遇到分页的需求，同一页的数据理论上只需要去后台拉取一次，这些已 经拉取到的数据在某个地方被缓存之后，下次再请求同一页的时候，便可以直接使用之前的数据。
+
+ 显然这里也可以引入缓存代理，实现方式跟计算乘积的例子差不多，**唯一不同的是，请求数 据是个异步的操作，我们无法直接把计算结果放到代理对象的缓存中，而是要通过回调的方式。** 具体代码不再赘述，读者可以自行实现。
+
+
+
+### 用高阶函数动态创建代理
+
+通过传入高阶函数这种更加灵活的方式，可以为各种计算方法创建缓存代理。现在这些计算方法被当作参数传入一个专门用于创建缓存代理的工厂中， 这样一来，我们就可以为乘法、加 法、减法等创建缓存代理，代码如下：
+
+```js
+
+//计算乘积
+var mult = function(){
+   var a = 1;
+   for ( var i = 0, l = arguments.length; i < l; i++ ){
+      a = a * arguments[i];
+   }
+   return a;
+};
+//计算加和
+var plus = function(){
+   var a = 0;
+   for ( var i = 0, l = arguments.length; i < l; i++ ){
+      a = a + arguments[i];
+   }
+   return a;
+};
+
+//创建缓存代理的工厂
+var createProxyFactory = function( fn ){
+   var cache = {};
+   return function(){
+      var args = Array.prototype.join.call( arguments, ',' );
+      if ( args in cache ){
+         return cache[ args ];
+      }
+      return cache[ args ] = fn.apply( this, arguments );
+   }
+};
+
+
+var proxyMult = (function(){
+   var cache = {};
+   return function(){
+   var args = Array.prototype.join.call( arguments, ',' );
+   if ( args in cache ){
+      return cache[ args ];
+   }
+   return cache[ args ] = mult.apply( this, arguments );
+   }
+})();
+
+var proxyMult = createProxyFactory( mult ),
+proxyPlus = createProxyFactory( plus );
+
+console.log(proxyMult( 1, 2, 3, 4 ));
+console.log(proxyMult( 1, 2, 3, 4 ));
+console.log(proxyPlus( 1, 2, 3, 4 ));
+console.log(proxyPlus( 1, 2, 3, 4 ));
+```
+
+### 其他代理模式
+
+代理模式的变体种类非常多，限于篇幅及其在 JavaScript 中的适用性，本章只简约介绍一下 这些代理，就不一一详细展开说明了。 
+- 防火墙代理：控制网络资源的访问，保护主题不让“坏人”接近。 
+- 远程代理：为一个对象在不同的地址空间提供局部代表，在 Java 中，远程代理可以是另 一个虚拟机中的对象。
+- 保护代理：用于对象应该有不同访问权限的情况。 
+- 智能引用代理：取代了简单的指针，它在访问对象时执行一些附加操作，比如计算一个 对象被引用的次数。 
+- 写时复制代理：通常用于复制一个庞大对象的情况。写时复制代理延迟了复制的过程， 当对象被真正修改时，才对它进行复制操作。写时复制代理是虚拟代理的一种变体，DLL （操作系统中的动态链接库）是其典型运用场景。
+
+
+
+## 迭代器模式
+
