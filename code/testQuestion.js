@@ -1,49 +1,39 @@
-
-//计算乘积
-var mult = function(){
-   var a = 1;
-   for ( var i = 0, l = arguments.length; i < l; i++ ){
-      a = a * arguments[i];
-   }
-   return a;
-};
-//计算加和
-var plus = function(){
-   var a = 0;
-   for ( var i = 0, l = arguments.length; i < l; i++ ){
-      a = a + arguments[i];
-   }
-   return a;
-};
-
-//创建缓存代理的工厂
-var createProxyFactory = function( fn ){
-   var cache = {};
-   return function(){
-      var args = Array.prototype.join.call( arguments, ',' );
-      if ( args in cache ){
-         return cache[ args ];
+/**
+ * @param {number[]} security
+ * @param {number} time
+ * @return {number[]}
+ */
+var goodDaysToRobBank = function(security, time) {
+   let ans=[];
+   let n=security.length;
+   let notbigthanbefore=new Array(n).fill(0);  //存储紧挨着当前元素之前连续非递增的元素个数
+   let notsmallthanlater=new Array(n).fill(0);  //存储紧挨着当前元素之后连续非递减的元素个数
+   let addcount=0;
+   let minuscount=0;
+   for(let i=1;i<n;i++){
+      if (security[i]>security[i-1]) {
+         notbigthanbefore[i]=0;
+         notsmallthanlater[i]=++addcount;
+         minuscount=0;
+      }else if(security[i]<security[i-1]){
+         notbigthanbefore[i]=++minuscount;
+         notsmallthanlater[i]=0;
+         addcount=0;
+      }else{
+         notbigthanbefore[i]=++minuscount;
+         notsmallthanlater[i]=++addcount;
       }
-      return cache[ args ] = fn.apply( this, arguments );
    }
+   //console.log(notbigthanbefore);
+   //console.log(notsmallthanlater);
+   for(let i=time;i<n-time;i++){
+      if (notbigthanbefore[i]>=time && notsmallthanlater[i+time]>=time) {
+         ans.push(i);
+      }
+   }
+   return ans;
 };
 
-
-var proxyMult = (function(){
-   var cache = {};
-   return function(){
-   var args = Array.prototype.join.call( arguments, ',' );
-   if ( args in cache ){
-      return cache[ args ];
-   }
-   return cache[ args ] = mult.apply( this, arguments );
-   }
-})();
-
-var proxyMult = createProxyFactory( mult ),
-proxyPlus = createProxyFactory( plus );
-
-console.log(proxyMult( 1, 2, 3, 4 ));
-console.log(proxyMult( 1, 2, 3, 4 ));
-console.log(proxyPlus( 1, 2, 3, 4 ));
-console.log(proxyPlus( 1, 2, 3, 4 ));
+let security = [1,2,3,4,5,6], time = 2;
+let result=goodDaysToRobBank(security,time);
+console.log(result);
