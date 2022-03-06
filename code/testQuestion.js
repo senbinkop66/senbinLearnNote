@@ -1,23 +1,29 @@
-/**
- * @param {string} a
- * @param {string} b
- * @return {number}
- */
-var findLUSlength = function(a, b) {
-   let m=a.length;
-   let n=b.length;
-   if (m!==n) {
-      return Math.max(m,n);
+var Flower=function(){};
+
+var xiaoming={
+   sendFlower:function(target){
+      var flower=new Flower();
+      target.receiveFlower(flower);
    }
-   while(m>0){
-      m--;
-      if (a[m]!==b[m]) {
-         return Math.max(m+1,n-m-1);
-      }
-   }
-   return -1;
 };
 
-let a = "aba", b = "cdc";
-let result=findLUSlength(a,b);
-console.log(result);
+var B={
+   receiveFlower:function(flower){
+      A.listenGoodMood(function(){  // 监听 A 的好心情
+         var flower=new Flower();  //延迟创建 flower 对象
+         A.receiveFlower(flower);  //
+      });
+   }
+}
+var A={
+   receiveFlower:function(flower){
+      console.log( '收到花 ' + flower );
+   },
+   listenGoodMood:function(fn){
+      setTimeout(function(){
+         fn();  // 假设 10 秒之后 A 的心情变好
+      },10000);
+   }
+};
+
+xiaoming.sendFlower(B);

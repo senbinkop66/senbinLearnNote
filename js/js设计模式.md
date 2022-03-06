@@ -3256,3 +3256,166 @@ Peter Norvig 在他的演讲中曾说过：“**在函数作为一等对象的�
 
 ## 代理模式
 
+代理模式是为一个对象提供一个代用品或占位符，以便控制对它的访问。 
+
+代理模式是一种非常有意义的模式，在生活中可以找到很多代理模式的场景。比如，明星都 有经纪人作为代理。如果想请明星来办一场商业演出，只能联系他的经纪人。经纪人会把商业演 出的细节和报酬都谈好之后，再把合同交给明星签。 
+
+**代理模式的关键是，当客户不方便直接访问一个对象或者不满足需要的时候，提供一个替身 对象来控制对这个对象的访问，客户实际上访问的是替身对象。**替身对象对请求做出一些处理之 后，再把请求转交给本体对象。
+
+我们从一个小例子开始熟悉代理模式的结构。
+
+### 例子
+
+```js
+var Flower=function(){};
+
+var xiaoming={
+   sendFlower:function(target){
+      var flower=new Flower();
+      target.receiveFlower(flower);
+   }
+};
+
+var A={
+   receiveFlower:function(flower){
+      console.log( '收到花 ' + flower );
+   }
+}
+
+xiaoming.sendFlower(A);
+```
+
+接下来，我们引入代理 B，即小明通过 B 来给 A 送花：
+
+```js
+var Flower=function(){};
+
+var xiaoming={
+   sendFlower:function(target){
+      var flower=new Flower();
+      target.receiveFlower(flower);
+   }
+};
+
+var B={
+   receiveFlower:function(flower){
+      A.receiveFlower(flower);
+   }
+}
+var A={
+   receiveFlower:function(flower){
+      console.log( '收到花 ' + flower );
+   }
+}
+
+xiaoming.sendFlower(B);
+```
+
+此处的代理模式毫无用处，它所做的只是把请求简单地转交给本体。但不管怎样，我们开始引入了代理，这是一个不错的起点。
+
+```js
+var Flower=function(){};
+
+var xiaoming={
+   sendFlower:function(target){
+      var flower=new Flower();
+      target.receiveFlower(flower);
+   }
+};
+
+var B={
+   receiveFlower:function(flower){
+      A.listenGoodMood(function(){  // 监听 A 的好心情
+         A.receiveFlower(flower);  //
+      });
+   }
+}
+var A={
+   receiveFlower:function(flower){
+      console.log( '收到花 ' + flower );
+   },
+   listenGoodMood:function(fn){
+      setTimeout(function(){
+         fn();  // 假设 10 秒之后 A 的心情变好
+      },10000);
+   }
+};
+
+xiaoming.sendFlower(B);
+```
+
+
+
+### 保护代理和虚拟代理
+
+虽然这只是个虚拟的例子，但我们可以从中找到两种代理模式的身影。代理 B 可以帮助 A 过滤掉一些请求，比如送花的人中年龄太大的或者没有宝马的，这种请求就可以直接在代理 B 处被拒绝掉。这种代理叫作**保护代理**。A 和 B 一个充当白脸，一个充当黑脸。白脸 A 继续保持 良好的女神形象，不希望直接拒绝任何人，于是找了黑脸 B 来控制对 A 的访问。
+
+ 另外，假设现实中的花价格不菲，导致在程序世界里，new Flower 也是一个代价昂贵的操作， 那么我们可以把 new Flower 的操作交给代理 B 去执行，代理 B 会选择在 A 心情好时再执行 new Flower，这是代理模式的另一种形式，叫作**虚拟代理**。**虚拟代理把一些开销很大的对象，延迟到 真正需要它的时候才去创建**。代码如下：
+
+```js
+var B={
+   receiveFlower:function(flower){
+      A.listenGoodMood(function(){  // 监听 A 的好心情
+         var flower=new Flower();  //延迟创建 flower 对象
+         A.receiveFlower(flower);  //
+      });
+   }
+}
+```
+
+
+
+保护代理用于控制不同权限的对象对目标对象的访问，**但在 JavaScript 并不容易实现保护代 理**，因为我们无法判断谁访问了某个对象。**而虚拟代理是最常用的一种代理模式，本章主要讨论 的也是虚拟代理**。 当然上面只是一个虚拟的例子，我们无需在此投入过多近精力，接下来我们看另外一个真实 的示例。
+
+### 虚拟代理实现图片预加载
+
+在 Web 开发中，图片预加载是一种常用的技术，如果直接给某个 img 标签节点设置 src 属性， 由于图片过大或者网络不佳，图片的位置往往有段时间会是一片空白。**常见的做法是先用一张 loading 图片占位，然后用异步的方式加载图片，等图片加载好了再把它填充到 img 节点里**，这种 场景就很适合使用**虚拟代理**。 
+
+下面我们来实现这个虚拟代理，首先创建一个普通的本体对象，这个对象负责往页面中创建 一个 img 标签，并且提供一个对外的 setSrc 接口，外界调用这个接口，便可以给该 img 标签设置src 属性：
+
+```js
+var myImage=(function(){
+  var imgNode=document.createElement("img");
+  document.body.appendChild(imgNode);
+  return {
+    setSrc:function(src){
+      imgNode.src=src;
+    }
+  }
+})();
+
+myImage.setSrc("https://v3.cn.vuejs.org/images/components_provide.png")
+```
+
+我们把网速调至 5KB/s，然后通过 MyImage.setSrc 给该 img 节点设置 src，可以看到，在图片 被加载好之前，页面中有一段长长的空白时间。 
+
+现在开始引入代理对象 proxyImage，通过这个代理对象，在图片被真正加载好之前，页面中 将出现一张占位的菊花图 loading.gif, 来提示用户图片正在加载。代码如下：
+
+```js
+var myImage=(function(){
+  var imgNode=document.createElement("img");
+  document.body.appendChild(imgNode);
+  return {
+    setSrc:function(src){
+      imgNode.src=src;
+    }
+  }
+})();
+
+var proxyImage=(function(){
+  var img=new Image;
+  img.onload=function(){
+    myImage.setSrc(this.src);
+  }
+  return {
+    setSrc:function(src){
+      myImage.setSrc("../image/CSS 轮廓.png");
+      img.src=src;
+    }
+  }
+})();
+
+proxyImage.setSrc("https://v3.cn.vuejs.org/images/components_provide.png");
+```
+
+现在我们通过 proxyImage 间接地访问 MyImage。proxyImage 控制了客户对 MyImage 的访问，并 且在此过程中加入一些额外的操作，比如在真正的图片加载好之前，先把 img 节点的 src 设置为 一张本地的 loading 图片。
