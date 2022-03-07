@@ -4153,3 +4153,252 @@ todo-list v-slot="{ item }">
 
 # Provide / Inject
 
+通常，当我们需要从父组件向子组件传递数据时，我们使用 [props](https://v3.cn.vuejs.org/guide/component-props.html)。想象一下这样的结构：有一些深度嵌套的组件，而深层的子组件只需要父组件的部分内容。在这种情况下，如果仍然将 prop 沿着组件链逐级传递下去，可能会很麻烦。
+
+对于这种情况，我们可以使用一对 `provide` 和 `inject`。无论组件层次结构有多深，父组件都可以作为其所有子组件的依赖提供者。这个特性有两个部分：父组件有一个 `provide` 选项来提供数据，子组件有一个 `inject` 选项来开始使用这些数据。
+
+例如，我们有这样的层次结构：
+
+```text
+Root
+└─ TodoList
+   ├─ TodoItem
+   └─ TodoListFooter
+      ├─ ClearTodosButton
+      └─ TodoListStatistics
+```
+
+如果要将 todo-items 的长度直接传递给 `TodoListStatistics`，我们要将 prop 逐级传递下去：`TodoList` -> `TodoListFooter` -> `TodoListStatistics`。通过 provide/inject 的方式，我们可以直接执行以下操作：
+
+```js
+const app = Vue.createApp({})
+
+app.component('todo-list', {
+  data() {
+    return {
+      todos: ['Feed a cat', 'Buy tickets']
+    }
+  },
+  provide: {
+    user: 'John Doe'
+  },
+  template: `
+    <div>
+      {{ todos.length }}
+      <!-- 模板的其余部分 -->
+    </div>
+  `
+})
+
+app.component('todo-list-statistics', {
+  inject: ['user'],
+  created() {
+    console.log(`Injected property: ${this.user}`) // > 注入的 property: John Doe
+  }
+})
+```
+
+但是，如果我们尝试在此处 provide 一些组件的实例 property，这将是不起作用的：
+
+```js
+app.component('todo-list', {
+  data() {
+    return {
+      todos: ['Feed a cat', 'Buy tickets']
+    }
+  },
+  provide() {
+    return {
+      todoLength: this.todos.length
+    }
+  },
+  template: `
+    ...
+  `
+})
+```
+
+这使我们能够更安全地继续开发该组件，而不必担心可能会更改/删除子组件所依赖的某些内容。这些组件之间的接口仍然是明确定义的，就像 prop 一样。
+
+实际上，你可以将依赖注入看作是“长距离的 prop”，除了：
+
+- 父组件不需要知道哪些子组件使用了它 provide 的 property
+- 子组件不需要知道 inject 的 property 来自哪里
+
+## 处理响应性
+
+在上面的例子中，如果我们更改了 `todos` 的列表，**这个变化并不会反映在 inject 的 `todoLength` property 中。这是因为默认情况下，`provide/inject` 绑定*并不是*响应式的**。我们可以通过传递一个 `ref` property 或 `reactive` 对象给 `provide` 来改变这种行为。在我们的例子中，如果我们想对祖先组件中的更改做出响应，我们需要为 provide 的 `todoLength` 分配一个组合式 API `computed` property：
+
+```js
+app.component('todo-list', {
+  // ...
+  provide() {
+    return {
+      todoLength: Vue.computed(() => this.todos.length)
+    }
+  }
+})
+
+app.component('todo-list-statistics', {
+  inject: ['todoLength'],
+  created() {
+    console.log(`Injected property: ${this.todoLength.value}`) // > 注入的 property: 5
+  }
+})
+```
+
+在这种情况下，任何对 `todos.length` 的改变都会被正确地反映在注入 `todoLength` 的组件中。在[响应式计算和侦听章节](https://v3.cn.vuejs.org/guide/reactivity-computed-watchers.html#计算值)中阅读更多关于 `computed` 的信息，以及在[组合式 API 章节](https://v3.cn.vuejs.org/guide/composition-api-provide-inject.html#响应性)中阅读更多关于 `reactive` provide/inject 的信息。
+
+# 动态组件 & 异步组件
+
+## 在动态组件上使用 `keep-alive`
+
+我们之前曾经在一个多标签的界面中使用 `is` attribute 来切换不同的组件：
+
+```vue
+<component :is="currentTabComponent"></component>
+```
+
+当在这些组件之间切换的时候，你有时会想保持这些组件的状态，以避免反复渲染导致的性能问题。例如我们来展开说一说这个多标签界面：
+
+你会注意到，如果你选择了一篇文章，切换到 *Archive* 标签，然后再切换回 *Posts*，是不会继续展示你之前选择的文章的。这是因为你每次切换新标签的时候，Vue 都创建了一个新的 `currentTabComponent` 实例。
+
+重新创建动态组件的行为通常是非常有用的，但是在这个案例中，我们更希望那些标签的组件实例能够被在它们第一次被创建的时候缓存下来。为了解决这个问题，我们可以用一个 `<keep-alive>` 元素将其动态组件包裹起来。
+
+```vue
+<!-- 失活的组件将会被缓存！-->
+<keep-alive>
+  <component :is="currentTabComponent"></component>
+</keep-alive>
+```
+
+现在，这个 *Posts* 标签即使在未被渲染时也能保持它的状态 (被选中的文章) 。
+
+## 异步组件
+
+在大型应用中，我们可能需要将应用分割成小一些的代码块，并且只在需要的时候才从服务器加载一个模块。为了实现这个效果，Vue 有一个 `defineAsyncComponent` 方法：
+
+```js
+const { createApp, defineAsyncComponent } = Vue
+
+const app = createApp({})
+
+const AsyncComp = defineAsyncComponent(
+  () =>
+    new Promise((resolve, reject) => {
+      resolve({
+        template: '<div>I am async!</div>'
+      })
+    })
+)
+
+app.component('async-example', AsyncComp)
+```
+
+如你所见，此方法接受一个返回 `Promise` 的工厂函数。从服务器检索组件定义后，应调用 Promise 的 `resolve` 回调。你也可以调用 `reject(reason)`，来表示加载失败。
+
+你也可以在工厂函数中返回一个 `Promise`，把 webpack 2 及以上版本和 ES2015 语法相结合后，我们就可以这样使用动态地导入：
+
+```js
+import { defineAsyncComponent } from 'vue'
+
+const AsyncComp = defineAsyncComponent(() =>
+  import('./components/AsyncComponent.vue')
+)
+
+app.component('async-component', AsyncComp)
+```
+
+当[在局部注册组件](https://v3.cn.vuejs.org/guide/component-registration.html#局部注册)时，你也可以使用 `defineAsyncComponent`：
+
+```js
+import { createApp, defineAsyncComponent } from 'vue'
+
+createApp({
+  // ...
+  components: {
+    AsyncComponent: defineAsyncComponent(() =>
+      import('./components/AsyncComponent.vue')
+    )
+  }
+})
+```
+
+### 与 Suspense 一起使用
+
+异步组件在默认情况下是*可挂起*的。这意味着如果它在父链中有一个 `<Suspense>`，它将被视为该 `<Suspense>` 的异步依赖。在这种情况下，加载状态将由 `<Suspense>` 控制，组件自身的加载、错误、延迟和超时选项都将被忽略。
+
+通过在其选项中指定 `suspensible: false`，异步组件可以退出 `Suspense` 控制，并始终控制自己的加载状态。
+
+# 模板引用
+
+尽管存在 prop 和事件，但有时你可能仍然需要在 JavaScript 中直接访问子组件。为此，可以使用 `ref` attribute 为子组件或 HTML 元素指定引用 ID。例如：
+
+```html
+<input ref="input" />
+```
+
+例如，你希望在组件挂载时，以编程的方式 focus 到这个 input 上，这可能有用：
+
+```js
+const app = Vue.createApp({})
+
+app.component('base-input', {
+  template: `
+    <input ref="input" />
+  `,
+  methods: {
+    focusInput() {
+      this.$refs.input.focus()
+    }
+  },
+  mounted() {
+    this.focusInput()
+  }
+})
+```
+
+此外，还可以向组件本身添加另一个 `ref`，并使用它从父组件触发 `focusInput` 事件：
+
+```html
+<base-input ref="usernameInput"></base-input>
+```
+
+```js
+this.$refs.usernameInput.focusInput()
+```
+
+**`$refs` 只会在组件渲染完成之后生效。这仅作为一个用于直接操作子元素的“逃生舱”——你应该避免在模板或计算属性中访问 `$refs`。**
+
+# 处理边界情况
+
+这里记录的都是和处理边界情况有关的功能，即一些需要对 Vue 的规则做一些小调整的特殊情况。不过注意，这些功能都是有劣势或危险的场景的。我们会在每个案例中注明，所以当你使用每个功能的时候请稍加留意。
+
+## 控制更新
+
+得益于其响应性系统，Vue 总是知道何时更新 (如果你使用正确的话)。但是，在某些边缘情况下，你可能希望强制更新，尽管事实上没有任何响应式数据发生更改。还有一些情况下，你可能希望防止不必要的更新。
+
+### 强制更新
+
+如果你发现自己需要在 Vue 中强制更新，那么在 99.99% 的情况下，你已经在某个地方犯了错误。例如，你可能依赖于 Vue 响应性系统未跟踪的状态，比如在组件创建之后添加了 `data` 属性。
+
+但是，如果你已经排除了上述情况，并且发现自己处于这种非常罕见的情况下，必须手动强制更新，那么你可以使用 [`$forceUpdate`](https://v3.cn.vuejs.org/api/instance-methods.html#forceupdate)。
+
+### 低级静态组件与 `v-once`
+
+在 Vue 中渲染纯 HTML 元素的速度非常快，但有时你可能有一个包含**很多**静态内容的组件。**在这些情况下，可以通过向根元素添加 `v-once` 指令来确保只对其求值一次，然后进行缓存**，如下所示：
+
+```js
+app.component('terms-of-service', {
+  template: `
+    <div v-once>
+      <h1>Terms of Service</h1>
+      ... a lot of static content ...
+    </div>
+  `
+})
+```
+
+再次提醒，不要过度使用这种模式。虽然在需要渲染大量静态内容的极少数情况下使用这种模式会很方便，但除非你注意到先前的渲染速度很慢，否则就没有必要这样做——另外，过度使用这种模式可能会在以后引起很多混乱。例如，假设另一个开发人员不熟悉 `v-once` 或者没有在模板中发现它，他们可能会花上几个小时来弄清楚为什么模板没有正确更新。
+
+# 过渡 & 动画概述
