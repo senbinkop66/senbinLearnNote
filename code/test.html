@@ -41,11 +41,69 @@
 </style>
     <body>
 <div id="demo">
-  
+  <button id="count">点我</button>
+  <div id="show"></div>
 </div>
 
 <script type="text/javascript">
 
+  var Event=(function(){
+    var 
+   var clientList={},listen,trigger,remove;
+   listen=function(key,fn){
+      if (!clientList[key]) {
+         clientList[key]=[];
+      }
+      clientList[key].push(fn);  //订阅的消息添加进缓存列表
+   };
+   trigger=function(){  //发布消息
+      var key=Array.prototype.shift.call(arguments);  //取出消息类型
+      var fns=clientList[key];  //取出该消息对应的回调函数集合
+      if (!fns || fns.length===0) {
+         return false;  //如果没有订阅该消息，则返回
+      }
+      for(let i=0,fn;fn=fns[i++];){
+         fn.apply(this,arguments);  // arguments 是发布消息时带上的参数
+      }
+   };
+   remove=function(key,fn){
+      var fns=clientList[key];
+      if (!fns) {
+         return false;  //如果 key 对应的消息没有被人订阅，则直接返回
+      }
+      if (!fn) {
+         //如果没有传入具体的回调函数，表示需要取消 key 对应消息的所有订阅
+         fns && (fns.length=0);
+      }else{
+         for(let i=fns.length-1;i>=0;i--){  //反向遍历订阅的回调函数列表
+            let _fn=fns[i];
+            if (_fn===fn) {
+               fns.splice(i,1);  //删除订阅者的回调函数
+            }
+         }
+      }
+   };
+   return {
+      listen:listen,
+      trigger:trigger,
+      remove:remove
+   }
+})();
+
+  var a=(function(){
+    var count=0;
+    let button=document.getElementById("count");
+    button.onclick=function(){
+      Event.trigger("add",count++);
+    }
+  })();
+
+  var b=(function(){
+    var div=document.getElementById("show");
+    Event.listen("add",function(count){
+      div.innerHTML=count;
+    });
+  })();
 
 
 

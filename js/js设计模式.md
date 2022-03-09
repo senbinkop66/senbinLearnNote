@@ -4033,3 +4033,866 @@ var uploadObj = iteratorUploadObj( getActiveUploadObj, getWebkitUploadObj,getFla
 
 ## 发布—订阅模式
 
+发布—订阅模式又叫观察者模式，它定义对象间的一种一对多的依赖关系，当一个对象的状 态发生改变时，所有依赖于它的对象都将得到通知。在 JavaScript 开发中，我们一般用事件模型 来替代传统的发布—订阅模式。
+
+### 现实中的发布－订阅模式
+
+不论是在程序世界里还是现实生活中，发布—订阅模式的应用都非常之广泛。我们先看一个现实中的例子。
+
+### 发布－订阅模式的作用
+
+第一点说明**发布—订阅模式可以广泛应用于异步编程中，这是一种替代传递回调函数的方案**。 比如，我们可以订阅 ajax 请求的 error、succ 等事件。 或者如果想在动画的每一帧完成之后做一 些事情，那我们可以订阅一个事件，然后在动画的每一帧完成之后发布这个事件。在异步编程中 使用发布—订阅模式，我们就无需过多关注对象在异步运行期间的内部状态，而只需要订阅感兴 趣的事件发生点。 
+
+第二点说明**发布—订阅模式可以取代对象之间硬编码的通知机制，一个对象不用再显式地调 用另外一个对象的某个接口**。发布—订阅模式让两个对象松耦合地联系在一起，虽然不太清楚彼 此的细节，但这不影响它们之间相互通信。当有新的订阅者出现时，发布者的代码不需要任何修 改；同样发布者需要改变时，也不会影响到之前的订阅者。只要之前约定的事件名没有变化，就 可以自由地改变它们。
+
+### DOM 事件
+
+实际上，只要我们曾经在 DOM 节点上面绑定过事件函数，那我们就曾经使用过发布—订阅模式，来看看下面这两句简单的代码发生了什么事情：
+
+```js
+document.body.addEventListener( 'click', function(){
+	alert(2);
+}, false );
+document.body.click(); // 模拟用户点击
+```
+
+在这里需要监控用户点击 document.body 的动作，但是我们没办法预知用户将在什么时候点 击。所以我们订阅 document.body 上的 click 事件，当 body 节点被点击时，body 节点便会向订阅 者发布这个消息。这很像购房的例子，购房者不知道房子什么时候开售，于是他在订阅消息后等 待售楼处发布消息。 
+
+当然我们还可以随意增加或者删除订阅者，增加任何订阅者都不会影响发布者代码的编写：
+
+```js
+document.body.addEventListener( 'click', function(){
+	alert(2);
+}, false );
+
+document.body.addEventListener( 'click', function(){
+	alert(3);
+}, false );
+
+document.body.addEventListener( 'click', function(){
+	alert(4);
+}, false );
+
+document.body.click(); // 模拟用户点击
+```
+
+注意，手动触发事件更好的做法是 IE 下用 fireEvent，标准浏览器下用 dispatchEvent 实现。
+
+### 自定义事件
+
+除了 DOM 事件，我们还会经常实现一些自定义的事件，这种依靠自定义事件完成的发布— 订阅模式可以用于任何 JavaScript 代码中。 
+
+现在看看如何一步步实现发布—订阅模式。
+
+- 首先要指定好谁充当发布者（比如售楼处）；
+- 然后给发布者添加一个缓存列表，用于存放回调函数以便通知订阅者（售楼处的花名册）；
+- 最后发布消息的时候，发布者会遍历这个缓存列表，依次触发里面存放的订阅者回调函 数（遍历花名册，挨个发短信）。 
+
+另外，我们还可以往回调函数里填入一些参数，订阅者可以接收这些参数。这是很有必要的， 比如售楼处可以在发给订阅者的短信里加上房子的单价、面积、容积率等信息，订阅者接收到这 些信息之后可以进行各自的处理：
+
+```js
+var salesOffices={};  //定义售楼处
+salesOffices.clientList=[];  //缓存列表，存放订阅者的回调函数
+
+salesOffices.listen=function(fn){  //增加订阅者
+   this.salesOffices.push(fn);  //订阅的消息添加进缓存列表
+}
+
+salesOffices.trigger=function(){  //发布消息
+   for(let i=0,fn;fn=this.clientList[i++];){
+      fn.apply(this,arguments);  // arguments 是发布消息时带上的参数
+   }
+};
+
+```
+
+进行一些简单的测试：
+
+```js
+salesOffices.listen( function( price, squareMeter ){ // 小明订阅消息
+   console.log( '价格= ' + price );
+   console.log( 'squareMeter= ' + squareMeter );
+});
+
+salesOffices.listen( function( price, squareMeter ){ // 小红订阅消息
+   console.log( '价格= ' + price );
+   console.log( 'squareMeter= ' + squareMeter );
+});
+
+salesOffices.trigger( 2000000, 88 ); // 输出：200 万，88 平方米
+salesOffices.trigger( 3000000, 110 ); // 输出：300 万，110 平方米
+
+/*
+价格= 2000000
+squareMeter= 88
+价格= 2000000
+squareMeter= 88
+价格= 3000000
+squareMeter= 110
+价格= 3000000
+squareMeter= 110
+*/
+```
+
+至此，我们已经实现了一个最简单的发布—订阅模式，但这里还存在一些问题。我们看到订 阅者接收到了发布者发布的每个消息，虽然小明只想买 88 平方米的房子，但是发布者把 110 平 方米的信息也推送给了小明，这对小明来说是不必要的困扰。所以我们有必要增加一个标示 key， 让订阅者只订阅自己感兴趣的消息。改写后的代码如下：
+
+```js
+var salesOffices={};  //定义售楼处
+salesOffices.clientList={};  //缓存列表，存放订阅者的回调函数
+
+salesOffices.listen=function(key,fn){  //增加订阅者
+   if (!this.clientList[key]) {
+      this.clientList[key]=[];  //如果还没有订阅过此类消息，给该类消息创建一个缓存列表
+   }
+   this.clientList[key].push(fn);  //订阅的消息添加进缓存列表
+}
+
+salesOffices.trigger=function(){  //发布消息
+   var key=Array.prototype.shift.call(arguments);  //取出消息类型
+   var fns=this.clientList[key];  //取出该消息对应的回调函数集合
+   if (!fns || fns.length===0) {
+      return false;  //如果没有订阅该消息，则返回
+   }
+   for(let i=0,fn;fn=fns[i++];){
+      fn.apply(this,arguments);  // arguments 是发布消息时带上的参数
+   }
+};
+
+salesOffices.listen( 'squareMeter88', function( price ){ // 小明订阅 88 平方米房子的消息
+   console.log( '价格= ' + price ); // 输出： 2000000
+});
+
+salesOffices.listen( 'squareMeter110', function( price ){ // 小红订阅 110 平方米房子的消息
+   console.log( '价格= ' + price ); // 输出： 3000000
+});
+
+salesOffices.trigger( 'squareMeter88', 2000000 ); // 发布 88 平方米房子的价格
+salesOffices.trigger( 'squareMeter110', 3000000 ); // 发布 110 平方米房子的价格
+
+/*
+价格= 2000000
+价格= 3000000
+*/
+```
+
+很明显，现在订阅者可以只订阅自己感兴趣的事件了。
+
+### 发布－订阅模式的通用实现
+
+现在我们已经看到了如何让售楼处拥有接受订阅和发布事件的功能。假设现在小明又去另一个售楼处买房子，那么这段代码是否必须在另一个售楼处对象上重写一次呢，有没有办法可以让 所有对象都拥有发布—订阅功能呢？ 答案显然是有的，JavaScript 作为一门解释执行的语言，给对象动态添加职责是理所当然的 事情。 
+
+所以我们把发布—订阅的功能提取出来，放在一个单独的对象内：
+
+```js
+var event={
+   clientList:{},
+   listen:function(key,fn){
+      if (!this.clientList[key]) {
+         this.clientList[key]=[];
+      }
+      this.clientList[key].push(fn);  //订阅的消息添加进缓存列表
+   },
+   trigger:function(){  //发布消息
+      var key=Array.prototype.shift.call(arguments);  //取出消息类型
+      var fns=this.clientList[key];  //取出该消息对应的回调函数集合
+      if (!fns || fns.length===0) {
+         return false;  //如果没有订阅该消息，则返回
+      }
+      for(let i=0,fn;fn=fns[i++];){
+         fn.apply(this,arguments);  // arguments 是发布消息时带上的参数
+      }
+   },
+}
+```
+
+再定义一个 installEvent 函数，这个函数可以给所有的对象都动态安装发布—订阅功能：
+
+```js
+var installEvent=function(obj){
+   for (var i in event){
+      obj[i]=event[i];
+   }
+}
+```
+
+再来测试一番，我们给售楼处对象 salesOffices 动态增加发布—订阅功能：
+
+```js
+var salesOffices={};  //定义售楼处
+
+installEvent(salesOffices);
+
+
+salesOffices.listen( 'squareMeter88', function( price ){ // 小明订阅 88 平方米房子的消息
+   console.log( '价格= ' + price ); // 输出： 2000000
+});
+
+salesOffices.listen( 'squareMeter110', function( price ){ // 小红订阅 110 平方米房子的消息
+   console.log( '价格= ' + price ); // 输出： 3000000
+});
+
+salesOffices.trigger( 'squareMeter88', 2000000 ); // 发布 88 平方米房子的价格
+salesOffices.trigger( 'squareMeter110', 3000000 ); // 发布 110 平方米房子的价格
+```
+
+### 取消订阅的事件
+
+有时候，我们也许需要取消订阅事件的功能。比如小明突然不想买房子了，为了避免继续接收到售楼处推送过来的短信，小明需要取消之前订阅的事件。现在我们给 event 对象增加 remove方法：
+
+```js
+var event={
+   clientList:{},
+   listen:function(key,fn){
+      if (!this.clientList[key]) {
+         this.clientList[key]=[];
+      }
+      this.clientList[key].push(fn);  //订阅的消息添加进缓存列表
+   },
+   trigger:function(){  //发布消息
+      var key=Array.prototype.shift.call(arguments);  //取出消息类型
+      var fns=this.clientList[key];  //取出该消息对应的回调函数集合
+      if (!fns || fns.length===0) {
+         return false;  //如果没有订阅该消息，则返回
+      }
+      for(let i=0,fn;fn=fns[i++];){
+         fn.apply(this,arguments);  // arguments 是发布消息时带上的参数
+      }
+   },
+   remove:function(key,fn){
+      var fns=this.clientList[key];
+      if (!fns) {
+         return false;  //如果 key 对应的消息没有被人订阅，则直接返回
+      }
+      if (!fn) {
+         //如果没有传入具体的回调函数，表示需要取消 key 对应消息的所有订阅
+         fns && (fns.length=0);
+      }else{
+         for(let i=fns.length-1;i>=0;i--){  //反向遍历订阅的回调函数列表
+            let _fn=fns[i];
+            if (_fn===fn) {
+               fns.splice(i,1);  //删除订阅者的回调函数
+            }
+         }
+      }
+
+   }
+}
+
+
+var installEvent=function(obj){
+   for (var i in event){
+      obj[i]=event[i];
+   }
+}
+var salesOffices={};  //定义售楼处
+
+installEvent(salesOffices);
+
+var fn1=function( price ){ // 小明订阅 88 平方米房子的消息
+   console.log( '价格= ' + price ); // 输出： 2000000
+}
+var fn2=function( price ){ // 小红订阅 110 平方米房子的消息
+   console.log( '价格= ' + price ); // 输出： 3000000
+}
+
+salesOffices.listen( 'squareMeter88', fn1);
+
+salesOffices.listen( 'squareMeter110', fn2);
+salesOffices.remove("squareMeter88",fn1)
+salesOffices.trigger( 'squareMeter88', 2000000 ); // 发布 88 平方米房子的价格
+salesOffices.trigger( 'squareMeter110', 3000000 ); // 发布 110 平方米房子的价格
+```
+
+
+
+### 真实的例子——网站登录
+
+假如我们正在开发一个商城网站，网站里有 header 头部、nav 导航、消息列表、购物车等模块。这几个模块的渲染有一个共同的前提条件，就是必须先用 ajax 异步请求获取用户的登录信息。 这是很正常的，比如用户的名字和头像要显示在 header 模块里，而这两个字段都来自用户登录后 返回的信息。 
+
+至于 ajax 请求什么时候能成功返回用户信息，这点我们没有办法确定。现在的情节看起来像 极了售楼处的例子，小明不知道什么时候开发商的售楼手续能够成功办下来。 但现在还不足以说服我们在此使用发布—订阅模式，因为异步的问题通常也可以用回调函数 来解决。更重要的一点是，我们不知道除了 header 头部、nav 导航、消息列表、购物车之外，**将 来还有哪些模块需要使用这些用户信息**。如果它们和用户信息模块产生了强耦合，比如下面这样 的形式：
+
+```js
+login.succ(function(data){
+    header.setAvatar( data.avatar); // 设置 header 模块的头像
+    nav.setAvatar( data.avatar ); // 设置导航模块的头像
+    message.refresh(); // 刷新消息列表
+    cart.refresh(); // 刷新购物车列表
+});
+```
+
+现在登录模块是我们负责编写的，但我们还必须了解 header 模块里设置头像的方法叫 setAvatar、购物车模块里刷新的方法叫 refresh，这种耦合性会使程序变得僵硬，header 模块不 能随意再改变 setAvatar 的方法名，它自身的名字也不能被改为 header1、header2。 这是针对具 体实现编程的典型例子，针对具体实现编程是不被赞同的。 
+
+等到有一天，项目中又新增了一个收货地址管理的模块，这个模块本来是另一个同事所写的， 而此时你正在马来西亚度假，但是他却不得不给你打电话：“Hi，登录之后麻烦刷新一下收货地 址列表。”于是你又翻开你 3 个月前写的登录模块，在最后部分加上这行代码：
+
+```js
+login.succ(function( data ){
+    header.setAvatar( data.avatar);
+    nav.setAvatar( data.avatar );
+    message.refresh();
+    cart.refresh();
+    address.refresh(); // 增加这行代码
+});
+```
+
+用**发布—订阅模式**重写之后，对用户信息感兴趣的业务模块将自行订阅登录成功的消息事件。 当登录成功时，登录模块只需要发布登录成功的消息，而业务方接受到消息之后，就会开始进行 各自的业务处理，**登录模块并不关心业务方究竟要做什么，也不想去了解它们的内部细节**。改善 后的代码如下：
+
+```js
+$.ajax( 'http:// xxx.com?login', function(data){ // 登录成功
+	login.trigger( 'loginSucc', data); // 发布登录成功的消息
+});
+```
+
+各模块监听登录成功的消息：
+
+```js
+var header = (function(){ // header 模块
+	login.listen( 'loginSucc', function( data){
+		header.setAvatar( data.avatar );
+	});
+    return {
+        setAvatar: function( data ){
+        	console.log( '设置 header 模块的头像' );
+        }	
+    }
+})();
+var nav = (function(){ // nav 模块
+    login.listen( 'loginSucc', function( data ){
+    	nav.setAvatar( data.avatar );
+	});
+    return {
+        setAvatar: function( avatar ){
+        	console.log( '设置 nav 模块的头像' );
+        }
+    }
+})();
+```
+
+如上所述，我们随时可以把 setAvatar 的方法名改成 setTouxiang。如果有一天在登录完成之 后，又增加一个刷新收货地址列表的行为，那么只要在收货地址模块里加上监听消息的方法即可， 而这可以让开发该模块的同事自己完成，你作为登录模块的开发者，永远不用再关心这些行为了。 代码如下：
+
+```js
+var address = (function(){ // nav 模块
+    login.listen( 'loginSucc', function( obj ){
+    	address.refresh( obj );
+    });
+    return {
+        refresh: function( avatar ){
+        	console.log( '刷新收货地址列表' );
+        }
+    }
+})();
+```
+
+### 全局的发布－订阅对象
+
+回想下刚刚实现的发布—订阅模式，我们给售楼处对象和登录对象都添加了订阅和发布的功 能，这里还存在两个小问题。
+- 我们给每个发布者对象都添加了 listen 和 trigger 方法，以及一个缓存列表 clientList， 这其实是一种资源浪费。
+- 小明跟售楼处对象还是存在一定的耦合性，小明至少要知道售楼处对象的名字是 salesOffices，才能顺利的订阅到事件。见如下代码：
+
+```js
+salesOffices.listen( 'squareMeter100', function( price ){ // 小明订阅消息
+	console.log( '价格= ' + price );
+});
+```
+
+如果小明还关心 300 平方米的房子，而这套房子的卖家是 salesOffices2，这意味着小明要开始订阅 salesOffices2 对象。见如下代码：
+
+```js
+salesOffices2.listen( 'squareMeter300', function( price ){ // 小明订阅消息
+	console.log( '价格= ' + price );
+});
+```
+
+其实在现实中，买房子未必要亲自去售楼处，我们只要把订阅的请求交给中介公司，而各大 房产公司也只需要通过中介公司来发布房子信息。这样一来，我们不用关心消息是来自哪个房产 公司，我们在意的是能否顺利收到消息。当然，为了保证订阅者和发布者能顺利通信，订阅者和 发布者都必须知道这个中介公司。 
+
+同样在程序中，发布—订阅模式可以用一个全局的 Event 对象来实现，**订阅者不需要了解消 息来自哪个发布者，发布者也不知道消息会推送给哪些订阅者，Event 作为一个类似“中介者” 的角色**，把订阅者和发布者联系起来。见如下代码：
+
+```javascript
+var Event=(function(){
+   var clientList={},listen,trigger,remove;
+   listen=function(key,fn){
+      if (!clientList[key]) {
+         clientList[key]=[];
+      }
+      clientList[key].push(fn);  //订阅的消息添加进缓存列表
+   };
+   trigger=function(){  //发布消息
+      var key=Array.prototype.shift.call(arguments);  //取出消息类型
+      var fns=clientList[key];  //取出该消息对应的回调函数集合
+      if (!fns || fns.length===0) {
+         return false;  //如果没有订阅该消息，则返回
+      }
+      for(let i=0,fn;fn=fns[i++];){
+         fn.apply(this,arguments);  // arguments 是发布消息时带上的参数
+      }
+   };
+   remove=function(key,fn){
+      var fns=clientList[key];
+      if (!fns) {
+         return false;  //如果 key 对应的消息没有被人订阅，则直接返回
+      }
+      if (!fn) {
+         //如果没有传入具体的回调函数，表示需要取消 key 对应消息的所有订阅
+         fns && (fns.length=0);
+      }else{
+         for(let i=fns.length-1;i>=0;i--){  //反向遍历订阅的回调函数列表
+            let _fn=fns[i];
+            if (_fn===fn) {
+               fns.splice(i,1);  //删除订阅者的回调函数
+            }
+         }
+      }
+   };
+   return {
+      listen:listen,
+      trigger:trigger,
+      remove:remove
+   }
+})();
+
+
+var fn1=function( price ){ // 小明订阅 88 平方米房子的消息
+   console.log( '价格= ' + price ); // 输出： 2000000
+}
+var fn2=function( price ){ // 小红订阅 110 平方米房子的消息
+   console.log( '价格= ' + price ); // 输出： 3000000
+}
+
+Event.listen( 'squareMeter88', fn1);
+
+Event.listen( 'squareMeter110', fn2);
+Event.remove("squareMeter88",fn1)
+
+Event.trigger( 'squareMeter88', 2000000 ); // 售楼处发布 88 平方米房子的价格
+Event.trigger( 'squareMeter110', 3000000 ); // 售楼处发布 110 平方米房子的价格
+```
+
+
+
+### 模块间通信
+
+上一节中实现的发布—订阅模式的实现，是基于一个全局的 Event 对象，我们利用它可以在 两个封装良好的模块中进行通信，这两个模块可以完全不知道对方的存在。就如同有了中介公司 之后，我们不再需要知道房子开售的消息来自哪个售楼处。 
+
+比如现在有两个模块，a 模块里面有一个按钮，每次点击按钮之后，b 模块里的 div 中会显示 按钮的总点击次数，我们用全局发布—订阅模式完成下面的代码，使得 a 模块和 b 模块可以在保 持封装性的前提下进行通信。
+
+```html
+<div id="demo">
+  <button id="count">点我</button>
+  <div id="show"></div>
+</div>
+```
+
+```js
+  var a=(function(){
+    var count=0;
+    let button=document.getElementById("count");
+    button.onclick=function(){
+      Event.trigger("add",count++);
+    }
+  })();
+
+  var b=(function(){
+    var div=document.getElementById("show");
+    Event.listen("add",function(count){
+      div.innerHTML=count;
+    });
+  })();
+
+```
+
+但在这里我们要留意另一个问题，**模块之间如果用了太多的全局发布—订阅模式来通信，那 么模块与模块之间的联系就被隐藏到了背后**。我们最终会搞不清楚消息来自哪个模块，或者消息 会流向哪些模块，这又会给我们的维护带来一些麻烦，也许某个模块的作用就是暴露一些接口给 其他模块调用。
+
+### 必须先订阅再发布吗
+
+我们所了解到的发布—订阅模式，都是订阅者必须先订阅一个消息，随后才能接收到发布者 发布的消息。如果把顺序反过来，发布者先发布一条消息，而在此之前并没有对象来订阅它，这 条消息无疑将消失在宇宙中。 
+
+在某些情况下，我们需要先将这条消息保存下来，等到有对象来订阅它的时候，再重新把消 息发布给订阅者。就如同 QQ 中的离线消息一样，离线消息被保存在服务器中，接收人下次登录 上线之后，可以重新收到这条消息。 
+
+这种需求在实际项目中是存在的，比如在之前的商城网站中，获取到用户信息之后才能渲染 用户导航模块，而获取用户信息的操作是一个 ajax 异步请求。当 ajax 请求成功返回之后会发布 一个事件，在此之前订阅了此事件的用户导航模块可以接收到这些用户信息。 
+
+但是这只是理想的状况，因为异步的原因，我们不能保证 ajax 请求返回的时间，有时候它返 回得比较快，而此时用户导航模块的代码还没有加载好（还没有订阅相应事件），特别是在用了 一些模块化惰性加载的技术后，这是很可能发生的事情。
+
+也许我们还需要一个方案，使得我们的 发布—订阅对象**拥有先发布后订阅**的能力。 
+
+为了满足这个需求，我们要建立一个存放离线事件的堆栈，**当事件发布的时候，如果此时还 没有订阅者来订阅这个事件，我们暂时把发布事件的动作包裹在一个函数里，这些包装函数将被 存入堆栈中**，等到终于有对象来订阅此事件的时候，我们将遍历堆栈并且依次执行这些包装函数， 也就是重新发布里面的事件。**当然离线事件的生命周期只有一次**，就像 QQ 的未读消息只会被重 新阅读一次，所以刚才的操作我们只能进行一次。
+
+### 全局事件的命名冲突
+
+全局的发布—订阅对象里只有一个 clinetList 来存放消息名和回调函数，大家都通过它来订 阅和发布各种消息，久而久之，难免会出现事件名冲突的情况，**所以我们还可以给 Event 对象提 供创建命名空间的功能。**
+
+```js
+var Event=(function(){
+   var global=this,Event,_default="default";
+
+   Event=function(){
+      var _listen,_trigger,_remove,
+         _slice=Array.prototype.slice,
+         _shift=Array.prototype.shift,
+         _unshift=Array.prototype.unshift,
+         namespaceCache={},
+         _create,
+         find,
+         each=function(arr,fn){
+            var ret;
+            for (let i=0;i<arr.length;i++){
+               let n=arr[i];
+               ret=fn.call(n,i,n);
+            }
+            return ret;
+         };
+         _listen=function(key,fn,cache){
+            if (!cache[key]) {
+               cache[key]=[];
+            }
+            cache[key].push(fn);  //订阅的消息添加进缓存列表
+         };
+         _remove=function(key,cache,fn){
+            if (cache[key]) {
+              if(fn){
+                  for(let i=cache[key].length-1;i>=0;i--){  //反向遍历订阅的回调函数列表
+                     if (cache[key][i]===fn) {
+                        cache[key].splice(i,1);  //删除订阅者的回调函数
+                     }
+                  }
+               }else{
+                  cache[key]=[];
+               }
+            }
+         };
+         _trigger=function(){  //发布消息
+            var cache=_shift.call(arguments),
+               key=_shift.call(arguments),
+               args=arguments,
+               _self=this,
+               ret,
+               stack=cache[key];
+            if (!stack || stack.length===0) {
+               return;  //如果没有订阅该消息，则返回
+            }
+            return each(stack,function(){
+               return this.apply(_self,args);
+            });
+         };
+         _create=function(namespace){
+            var namespace=namespace || _default;
+            var cache={};
+            var offlineStack=[];//离线事件
+            var ret={
+               listen:function(key,fn,last){
+                  _listen(key,fn,cache);
+                  if (offlineStack===null) {
+                     return;
+                  }
+                  if (last==="last") {
+                     offlineStack.length && offlineStack.pop()();
+                  }else{
+                     each(offlineStack,function(){
+                        this();
+                     });
+                  }
+                  offlineStack=null;
+               },
+               one:function(key,fn,last){
+                  _remove(key,cache);
+                  this.listen(key,fn,last);
+               },
+               remove:function(key,fn){
+                  _remove(key,cache,fn);
+               },
+               trigger:function(){
+                  var fn,args,_self=this;
+                  _unshift.call(arguments,cache);
+                  args=arguments;
+                  fn=function(){
+                     return _trigger.apply(_self,args);
+                  };
+                  if (offlineStack) {
+                     return offlineStack.push(fn);
+                  }
+                  return fn();
+               },
+            };
+            return namespace ? (namespaceCache[namespace] ? namespaceCache[namespace] : namespaceCache[namespace]=ret) : ret;
+         };
+      return {
+         create:_create,
+         one:function(key,fn,last){
+            var event=this.create();
+            event.one(key,fn,last);
+         },
+         remove:function(key,fn){
+            var event=this.create();
+            event.remove(key,fn);
+         },
+         listen:function(key,fn,last){
+            var event=this.create();
+            event.listen(key,fn,last);
+         },
+         trigger:function(){
+            var event=this.create();
+            event.trigger.apply(this,arguments);
+         }
+      };
+   }();
+   return Event;
+})();
+
+
+
+/************** 先发布后订阅 ********************/
+Event.trigger( 'click', 1 );
+
+Event.listen( 'click', function( a ){
+   console.log( a ); // 输出：1
+});
+
+/************** 使用命名空间 ********************/
+Event.create( 'namespace1' ).listen( 'click', function( a ){
+   console.log( a ); // 输出：1
+});
+
+Event.create( 'namespace1' ).trigger( 'click', 1 );
+
+Event.create( 'namespace2' ).listen( 'click', function( a ){
+   console.log( a ); // 输出：2
+});
+Event.create( 'namespace2' ).trigger( 'click', 2 );
+```
+
+### JavaScript 实现发布－订阅模式的便利性
+
+这里要提出的是，我们一直讨论的发布—订阅模式，跟一些别的语言（比如 Java）中的实现 还是有区别的。在 Java 中实现一个自己的发布—订阅模式，通常会把订阅者对象自身当成引用传 入发布者对象中，同时订阅者对象还需提供一个名为诸如 update 的方法，供发布者对象在适合的 时候调用。**而在 JavaScript 中，我们用注册回调函数的形式来代替传统的发布—订阅模式，显得更 加优雅和简单。** 
+
+另外，在 JavaScript 中，我们无需去选择使用推模型还是拉模型。**推模型**是指在事件发生时， 发布者一次性把所有更改的状态和数据都推送给订阅者。**拉模型**不同的地方是，发布者仅仅通知 订阅者事件已经发生了，此外发布者要提供一些公开的接口供订阅者来主动拉取数据。拉模型的 好处是可以让订阅者“按需获取”，但同时有可能让发布者变成一个“门户大开”的对象，同时 增加了代码量和复杂度。 
+
+刚好在 JavaScript 中，arguments 可以很方便地表示参数列表，所以我们一般都会选择推模型， 使用 Function.prototype.apply 方法把所有参数都推送给订阅者。
+
+### 发布－订阅模式的优缺点
+
+发布—订阅模式的**优点**非常明显，一为时间上的解耦，二为对象之间的解耦。它的应用非常 广泛，既可以用在异步编程中，也可以帮助我们完成更松耦合的代码编写。发布—订阅模式还可 以用来帮助实现一些别的设计模式，比如中介者模式。 从架构上来看，无论是 MVC 还是 MVVM， 都少不了发布—订阅模式的参与，而且 JavaScript 本身也是一门基于事件驱动的语言。 
+
+当然，发布—订阅模式也不是完全没有**缺点**。创建订阅者本身要消耗一定的时间和内存，而 且当你订阅一个消息后，也许此消息最后都未发生，但这个订阅者会始终存在于内存中。另外， 发布—订阅模式虽然可以弱化对象之间的联系，但如果过度使用的话，对象和对象之间的必要联 系也将被深埋在背后，会导致程序难以跟踪维护和理解。特别是有多个发布者和订阅者嵌套到一 起的时候，要跟踪一个 bug 不是件轻松的事情。
+
+
+
+## 命令模式
+
+
+
+
+
+# 设计原则和编程技巧
+
+
+
+## 单一职责原则
+
+就一个类而言，应该仅有一个引起它变化的原因。在 JavaScript 中，需要用到类的场景并不 太多，单一职责原则更多地是被运用在对象或者方法级别上，因此本节我们的讨论大多基于对象 和方法。 
+
+单一职责原则（SRP）的**职责**被定义为“引起变化的原因”。如果我们有两个动机去改写一 个方法，那么这个方法就具有两个职责。**每个职责都是变化的一个轴线，如果一个方法承担了过 多的职责，那么在需求的变迁过程中，需要改写这个方法的可能性就越大。** 
+
+此时，这个方法通常是一个不稳定的方法，修改代码总是一件危险的事情，特别是当两个职 责耦合在一起的时候，一个职责发生变化可能会影响到其他职责的实现，造成意想不到的破坏， 这种耦合性得到的是低内聚和脆弱的设计。 
+
+因此，SRP 原则体现为：**一个对象（方法）只做一件事情**。
+
+### 设计模式中的 SRP 原则
+
+SRP 原则在很多设计模式中都有着广泛的运用，例如代理模式、迭代器模式、单例模式和装饰者模式。
+
+#### 代理模式
+
+我们在第 6 章中已经见过这个图片预加载的例子了。通过增加虚拟代理的方式，把预加载图 片的职责放到代理对象中，而本体仅仅负责往页面中添加 img 标签，这也是它最原始的职责。
+
+myImage 负责往页面中添加 img 标签：
+
+```js
+var myImage=(function(){
+  var imgNode=document.createElement("img");
+  document.body.appendChild(imgNode);
+  return {
+    setSrc:function(src){
+      imgNode.src=src;
+    }
+  }
+})();
+
+myImage.setSrc("https://v3.cn.vuejs.org/images/components_provide.png")
+```
+
+proxyImage 负责预加载图片，并在预加载完成之后把请求交给本体 myImage：
+
+```js
+var proxyImage=(function(){
+  var img=new Image;
+  img.onload=function(){
+    myImage.setSrc(this.src);
+  }
+  return {
+    setSrc:function(src){
+      myImage.setSrc("../image/CSS 轮廓.png");
+      img.src=src;
+    }
+  }
+})();
+
+proxyImage.setSrc("https://v3.cn.vuejs.org/images/components_provide.png");
+```
+
+把添加 img 标签的功能和预加载图片的职责分开放到两个对象中，这两个对象各自都只有一个被修改的动机。在它们各自发生改变的时候，也不会影响另外的对象。
+
+#### 迭代器模式
+
+我们有这样一段代码，先遍历一个集合，然后往页面中添加一些 div，这些 div 的 innerHTML分别对应集合里的元素：
+
+```js
+var appendDiv = function( data ){
+    for ( var i = 0, l = data.length; i < l; i++ ){
+    	var div = document.createElement( 'div' );
+    	div.innerHTML = data[ i ];
+    	document.body.appendChild( div );
+    }
+};
+appendDiv( [ 1, 2, 3, 4, 5, 6 ] );
+```
+
+这其实是一段很常见的代码，经常用于 ajax 请求之后，在回调函数中遍历 ajax 请求返回的 数据，然后在页面中渲染节点。 
+
+**appendDiv 函数本来只是负责渲染数据，但是在这里它还承担了遍历聚合对象 data 的职责**。 我们想象一下，如果有一天 cgi 返回的 data 数据格式从 array 变成了 object，那我们遍历 data 的 代码就会出现问题，必须改成 for ( var i in data )的方式，这时候必须去修改 appendDiv 里的 代码，否则因为遍历方式的改变，导致不能顺利往页面中添加 div 节点。 
+
+我们有必要把遍历 data 的职责提取出来，这正是迭代器模式的意义，**迭代器模式提供了一 种方法来访问聚合对象，而不用暴露这个对象的内部表示**。
+
+当把迭代聚合对象的职责单独封装在 each 函数中后，即使以后还要增加新的迭代方式，我们只需要修改 each 函数即可，appendDiv 函数不会受到牵连，代码如下：
+
+```js
+var each = function( obj, callback ) {
+   var value,
+   i = 0,
+   length = obj.length,
+   isArray = isArraylike( obj ); // isArraylike 函数未实现，可以翻阅 jQuery 源代码
+   if ( isArray ) { // 迭代类数组
+      for ( ; i < length; i++ ) {
+         callback.call( obj[ i ], i, obj[ i ] );
+      }
+   } else {
+      for ( i in obj ) { // 迭代 object 对象
+         value = callback.call( obj[ i ], i, obj[ i ] );
+      }
+   }
+   return obj;
+};
+var appendDiv = function( data ){
+   each( data, function( i, n ){
+      var div = document.createElement( 'div' );
+      div.innerHTML = n;
+      document.body.appendChild( div );
+   });
+};
+
+appendDiv( [ 1, 2, 3, 4, 5, 6 ] );
+appendDiv({a:1,b:2,c:3,d:4} );
+```
+
+#### 单例模式
+
+第 4 章曾实现过一个惰性单例，最开始的代码是这样的：
+
+```js
+var createLoginLayer=(function(){
+    var div;
+    return function(){
+        if (!div) {
+            div=document.createElement("div");
+            div.innerHTML='我是登录浮窗';
+            div.style.display="none";
+            document.body.appendChild(div);
+        }
+        return div;
+    }
+})();
+```
+
+现在我们把管理单例的职责和创建登录浮窗的职责分别封装在两个方法里，这两个方法可以 独立变化而互不影响，当它们连接在一起的时候，就完成了创建唯一登录浮窗的功能，下面的代 码显然是更好的做法：
+
+```js
+var getSingle=function(fn){
+    var result;
+    return function(){
+        return result || (result=fn.apply(this,arguments));
+    }
+};
+var createLoginLayer=function(){
+    var div=document.createElement("div");
+    div.innerHTML='我是登录浮窗';
+    div.style.display="none";
+    document.body.appendChild(div);
+    return div;
+};
+
+var createSingleLoginLayer=getSingle(createLoginLayer);
+
+var loginLayer1 = createSingleLoginLayer();
+var loginLayer2 = createSingleLoginLayer();
+alert ( loginLayer1 === loginLayer2 ); // 输出： true
+```
+
+#### 装饰者模式
+
+使用装饰者模式的时候，我们通常让类或者对象一开始只具有一些基础的职责，更多的职责 在代码运行时被动态装饰到对象上面。装饰者模式可以为对象动态增加职责，从另一个角度来看， 这也是分离职责的一种方式。 
+
+下面是第 15 章曾提到的例子，我们把数据上报的功能单独放在一个函数里，然后把这个函 数动态装饰到业务函数上面：
+
+```html
+<html>
+<body>
+<button tag="login" id="button">点击打开登录浮层</button>
+</body>
+<script>
+    Function.prototype.after = function( afterfn ){
+        var __self = this;
+        return function(){
+            var ret = __self.apply( this, arguments );
+            afterfn.apply( this, arguments );
+            return ret;
+    	}
+    };
+    var showLogin = function(){
+    	console.log( '打开登录浮层' );
+    };
+    var log = function(){
+    	console.log( '上报标签为: ' + this.getAttribute( 'tag' ) );
+    };
+    document.getElementById( 'button' ).onclick = showLogin.after( log );
+    // 打开登录浮层之后上报数据
+</script>
+</html>
+```
+
+SRP 原则的应用难点就是如何去分离职责，下面的小节我们将开始讨论这点。
+
+### 何时应该分离职责
+
+SRP 原则是所有原则中最简单也是最难正确运用的原则之一。 
+
+要明确的是，**并不是所有的职责都应该一一分离。** 
+
+**一方面，如果随着需求的变化，有两个职责总是同时变化，那就不必分离他们**。比如在 ajax 请求的时候，创建 xhr 对象和发送 xhr 请求几乎总是在一起的，那么创建 xhr 对象的职责和发送 xhr 请求的职责就没有必要分开。 
+
+**另一方面，职责的变化轴线仅当它们确定会发生变化时才具有意义**，即使两个职责已经被耦 合在一起，但它们还没有发生改变的征兆，那么也许没有必要主动分离它们，在代码需要重构的 时候再进行分离也不迟。
+
+### 违反 SRP 原则
+
+在人的常规思维中，总是习惯性地把一组相关的行为放到一起，如何正确地分离职责不是一 件容易的事情。 
+
+我们也许从来没有考虑过如何分离职责，但这并不妨碍我们编写代码完成需求。对于 SRP 原则，许多专家委婉地表示“This is sometimes hard to see.”。 
+
+一方面，我们受设计原则的指导，另一方面，我们未必要在任何时候都一成不变地遵守原则。 
+
+在实际开发中，因为种种原因违反 SRP 的情况并不少见。比如 jQuery 的 attr 等方法，就是明显 违反 SRP 原则的做法。jQuery 的 attr 是个非常庞大的方法，既负责赋值，又负责取值，这对于 jQuery 的维护者来说，会带来一些困难，但对于 jQuery 的用户来说，却简化了用户的使用。
+
+ **在方便性与稳定性之间要有一些取舍。具体是选择方便性还是稳定性，并没有标准答案，而 是要取决于具体的应用环境。**比如如果一个电视机内置了 DVD 机，当电视机坏了的时候，DVD 机也没法正常使用，那么一个 DVD 发烧友通常不会选择这样的电视机。但如果我们的客厅本来 就小得夸张，或者更在意 DVD 在使用上的方便，那让电视机和 DVD 机耦合在一起就是更好的 选择。
+
+### SRP 原则的优缺点
+
+SRP 原则的**优点**是降低了单个类或者对象的复杂度，按照职责把对象分解成更小的粒度， 这有助于代码的复用，也有利于进行单元测试。当一个职责需要变更的时候，不会影响到其他 的职责。 
+
+但 SRP 原则也有一些**缺点**，最明显的是会增加编写代码的复杂度。当我们按照职责把对象 分解成更小的粒度之后，实际上也增大了这些对象之间相互联系的难度。
+
