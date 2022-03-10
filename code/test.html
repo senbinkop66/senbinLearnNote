@@ -41,70 +41,49 @@
 </style>
     <body>
 <div id="demo">
-  <button id="count">点我</button>
-  <div id="show"></div>
+  <button id="replay">播放录像</button>
 </div>
 
 <script type="text/javascript">
+var Ryu = {
+  attack: function(){
+    console.log( '攻击' );
+  },
+  defense: function(){
+    console.log( '防御' );
+  },
+  jump: function(){
+    console.log( '跳跃' );
+  },
+  crouch: function(){
+    console.log( '蹲下' );
+  }
+};
+var makeCommand = function( receiver, state ){ // 创建命令
+  return  receiver[ state ];
+};
+var commands = {
+  "119": "jump", // W
+  "115": "crouch", // S
+  "97": "defense", // A
+  "100": "attack" // D
+};
 
-  var Event=(function(){
-    var 
-   var clientList={},listen,trigger,remove;
-   listen=function(key,fn){
-      if (!clientList[key]) {
-         clientList[key]=[];
-      }
-      clientList[key].push(fn);  //订阅的消息添加进缓存列表
-   };
-   trigger=function(){  //发布消息
-      var key=Array.prototype.shift.call(arguments);  //取出消息类型
-      var fns=clientList[key];  //取出该消息对应的回调函数集合
-      if (!fns || fns.length===0) {
-         return false;  //如果没有订阅该消息，则返回
-      }
-      for(let i=0,fn;fn=fns[i++];){
-         fn.apply(this,arguments);  // arguments 是发布消息时带上的参数
-      }
-   };
-   remove=function(key,fn){
-      var fns=clientList[key];
-      if (!fns) {
-         return false;  //如果 key 对应的消息没有被人订阅，则直接返回
-      }
-      if (!fn) {
-         //如果没有传入具体的回调函数，表示需要取消 key 对应消息的所有订阅
-         fns && (fns.length=0);
-      }else{
-         for(let i=fns.length-1;i>=0;i--){  //反向遍历订阅的回调函数列表
-            let _fn=fns[i];
-            if (_fn===fn) {
-               fns.splice(i,1);  //删除订阅者的回调函数
-            }
-         }
-      }
-   };
-   return {
-      listen:listen,
-      trigger:trigger,
-      remove:remove
-   }
-})();
-
-  var a=(function(){
-    var count=0;
-    let button=document.getElementById("count");
-    button.onclick=function(){
-      Event.trigger("add",count++);
-    }
-  })();
-
-  var b=(function(){
-    var div=document.getElementById("show");
-    Event.listen("add",function(count){
-      div.innerHTML=count;
-    });
-  })();
-
+var commandStack = []; // 保存命令的堆栈
+document.onkeypress = function( ev ){
+  var keyCode = ev.keyCode,
+  command = makeCommand( Ryu, commands[ keyCode ] );
+  if ( command ){
+    command(); // 执行命令
+    commandStack.push( command ); // 将刚刚执行过的命令保存进堆栈
+  }
+};
+document.getElementById( 'replay' ).onclick = function(){ // 点击播放录像
+  var command;
+  while( command = commandStack.shift() ){ // 从堆栈里依次取出命令并执行
+    command();
+  }
+};
 
 
 </script>
