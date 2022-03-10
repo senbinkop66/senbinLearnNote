@@ -5132,7 +5132,84 @@ document.getElementById( 'replay' ).onclick = function(){ // 点击播放录像
 
 ### 宏命令
 
+**宏命令是一组命令的集合，通过执行宏命令的方式，可以一次执行一批命令。**想象一下，家 里有一个万能遥控器，每天回家的时候，只要按一个特别的按钮，它就会帮我们关上房间门，顺 便打开电脑并登录 QQ。 
 
+下面我们看看如何逐步创建一个宏命令。首先，我们依然要创建好各种 Command：
+
+```js
+var closeDoorCommand = {
+   execute: function(){
+      console.log( '关门' );
+   }
+};
+var openPcCommand = {
+   execute: function(){
+      console.log( '开电脑' );
+   }
+};
+var openQQCommand = {
+   execute: function(){
+      console.log( '登录 QQ' );
+   }
+};
+
+```
+
+接下来定义宏命令 MacroCommand，它的结构也很简单。macroCommand.add 方法表示把子命令添 加进宏命令对象，当调用宏命令对象的 execute 方法时，会迭代这一组子命令对象，并且依次执 行它们的 execute 方法：
+
+```js
+var MacroCommand=function(){
+   return {
+      commandList:[],
+      add:function(command){
+         this.commandList.push(command);
+      },
+      execute:function(){
+         for (let i=0;i<this.commandList.length;i++){
+            this.commandList[i].execute()
+         }
+      }
+   }
+};
+
+var macroCommand = MacroCommand();
+macroCommand.add( closeDoorCommand );
+macroCommand.add( openPcCommand );
+macroCommand.add( openQQCommand );
+macroCommand.execute();
+```
+
+当 然 我 们 还 可 以 为 宏 命 令 添 加 撤 销 功 能 ， 跟 macroCommand.execute 类 似 ， 当 调 用macroCommand.undo 方法时，宏命令里包含的所有子命令对象要依次执行各自的 undo 操作。
+
+**宏命令是命令模式与组合模式的联用产物**
+
+### 智能命令与傻瓜命令
+
+```js
+var closeDoorCommand = {
+    execute: function(){
+    	console.log( '关门' );
+    }
+};
+```
+
+很奇怪，closeDoorCommand 中没有包含任何 receiver 的信息，它本身就包揽了执行请求的行 为，这跟我们之前看到的命令对象都包含了一个 receiver 是矛盾的。 
+
+一般来说，命令模式都会在 command 对象中保存一个接收者来负责真正执行客户的请求，**这种情况下命令对象是“傻瓜式”的**，它只负责把客户的请求转交给接收者来执行，**这种模式的好 处是请求发起者和请求接收者之间尽可能地得到了解耦**。 
+
+但是我们也可以定义一些更“聪明”的命令对象，“聪明”的命令对象可以直接实现请求， 这样一来就不再需要接收者的存在，**这种“聪明”的命令对象也叫作智能命令**。没有接收者的智 能命令，退化到和策略模式非常相近，从代码结构上已经无法分辨它们，能分辨的只有它们意图 的不同。
+
+**策略模式指向的问题域更小，所有策略对象的目标总是一致的**，它们只是达到这个目标 的不同手段，它们的内部实现是针对“算法”而言的。
+
+而智能命令模式指向的问题域更广，**command 对象解决的目标更具发散性**。命令模式还可以完成撤销、排队等功能。
+
+
+
+跟许多其他语言不同，JavaScript 可以用高阶函数非常方便地实现命令模式。命令模式在 JavaScript 语言中是一种隐形的模式。
+
+
+
+## 组合模式
 
 
 
