@@ -1,33 +1,39 @@
-abstract class Animal{
-  abstract void makeSound();  //抽象方法
+abstract class Component{
+  //add 方法，参数为 Component 类型
+  public void add( Component child ){}
+  //remove 方法，参数为 Component 类型
+  public void remove( Component child ){}
 }
 
-class Duck extends Animal{ // 鸭子类
-  public void makeSound(){
-    System.out.println("嘎嘎嘎");
+class Composite extends Component{
+  //add 方法，参数为 Component 类型
+  public void add( Component child ){}
+  //remove 方法，参数为 Component 类型
+  public void remove( Component child ){}
+}
+
+class Leaf extends Component{
+  //add 方法，参数为 Component 类型
+  public void add( Component child ){
+    throw new UnsupportedOperationException() // 叶对象不能再添加子节点
   }
-}
-class Chicken extends Animal{ // 鸡类
-  public void makeSound(){
-    System.out.println("咯咯咯");
-  }
-}
-
-//现在剩下的就是让 AnimalSound 类的 makeSound 方法接受 Animal 类型的参数，而不是具体的Duck 类型或者 Chicken 类型：
-
-class AnimalSound {
-  public void makeSound(Animal animal){
-    animal.makeSound();
+  //remove 方法，参数为 Component 类型
+  public void remove( Component child ){
   }
 }
 
 public class TestJava {
   public static void main( String args[] ){
-    AnimalSound animalSound = new AnimalSound();
-    Animal duck=new Duck();
-    Animal chicken=new Chicken();
+    Component root = new Composite();
+    Component c1 = new Composite();
+    Component c2 = new Composite();
 
-    animalSound.makeSound(chicken);
-    animalSound.makeSound(duck);
+    Component leaf1 = new Leaf();
+    Component leaf2 = new Leaf();
+    root.add(c1);
+    root.add(c2);
+    c1.add(leaf1);
+    c1.add(leaf2);
+    root.remove();
   }
 }

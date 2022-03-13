@@ -5362,17 +5362,280 @@ macroCommand.add( macroCommand2 );
 )( macroCommand );
 ```
 
-从这个例子中可以看到，基本对象可以被组合成更复杂的组合对象，组合对象又可以被组合， 这样不断递归下去，这棵树的结构可以支持任意多的复杂度。在树最终被构造完成之后，让整颗 树最终运转起来的步骤非常简单，只需要调用最上层对象的 execute 方法。每当对最上层的对象 进行一次请求时，实际上是在对整个树进行深度优先的搜索，而创建组合对象的程序员并不关心 这些内在的细节，往这棵树里面添加一些新的节点对象是非常容易的事情。
+从这个例子中可以看到，**基本对象可以被组合成更复杂的组合对象，组合对象又可以被组合， 这样不断递归下去，这棵树的结构可以支持任意多的复杂度**。在树最终被构造完成之后，让整颗 树最终运转起来的步骤非常简单，只需要调用最上层对象的 execute 方法。每当对最上层的对象 进行一次请求时，实际上是在对整个树进行深度优先的搜索，而创建组合对象的程序员并不关心 这些内在的细节，往这棵树里面添加一些新的节点对象是非常容易的事情。
 
 ### 抽象类在组合模式中的作用
 
+前面说到，组合模式最大的优点在于可以一致地对待组合对象和基本对象。客户不需要知道 当前处理的是宏命令还是普通命令，只要它是一个命令，并且有 execute 方法，这个命令就可以 被添加到树中。 
+
+这种透明性带来的便利，在静态类型语言中体现得尤为明显。比如在 Java 中，实现组合模 式的关键是 Composite 类和 Leaf 类都必须继承自一个 Compenent 抽象类。这个 Compenent 抽象类既 代表组合对象，又代表叶对象，它也能够保证组合对象和叶对象拥有同样名字的方法，从而可以 对同一消息都做出反馈。组合对象和叶对象的具体类型被隐藏在 Compenent 抽象类身后。 
+
+针对 Compenent 抽象类来编写程序，客户操作的始终是 Compenent 对象，而不用去区分到底是 组合对象还是叶对象。所以我们往同一个对象里的 add 方法里，既可以添加组合对象，也可以添 加叶对象，代码如下：
+
+```java
+abstract class Component{
+  //add 方法，参数为 Component 类型
+  public void add( Component child ){}
+  //remove 方法，参数为 Component 类型
+  public void remove( Component child ){}
+}
+
+class Composite extends Component{
+  //add 方法，参数为 Component 类型
+  public void add( Component child ){}
+  //remove 方法，参数为 Component 类型
+  public void remove( Component child ){}
+}
+
+class Leaf extends Component{
+  //add 方法，参数为 Component 类型
+  public void add( Component child ){
+    throw new UnsupportedOperationException() // 叶对象不能再添加子节点
+  }
+  //remove 方法，参数为 Component 类型
+  public void remove( Component child ){
+  }
+}
+
+public class TestJava {
+  public static void main( String args[] ){
+    Component root = new Composite();
+    Component c1 = new Composite();
+    Component c2 = new Composite();
+
+    Component leaf1 = new Leaf();
+    Component leaf2 = new Leaf();
+    root.add(c1);
+    root.add(c2);
+    c1.add(leaf1);
+    c1.add(leaf2);
+    root.remove();
+  }
+}
+```
+
+然而在 JavaScript 这种动态类型语言中，对象的多态性是与生俱来的，也没有编译器去检查 变量的类型，所以我们通常不会去模拟一个“怪异”的抽象类，JavaScript 中实现组合模式的**难 点在于要保证组合对象和叶对象对象拥有同样的方法**，这通常需要用鸭子类型的思想对它们进行 接口检查。 
+
+在 JavaScript 中实现组合模式，看起来缺乏一些严谨性，我们的代码算不上安全，但能更快 速和自由地开发，这既是 JavaScript 的缺点，也是它的优点。
+
+### 透明性带来的安全问题
+
+组合模式的透明性使得发起请求的客户不用去顾忌树中组合对象和叶对象的区别，但它们在 本质上有是区别的。 
+
+组合对象可以拥有子节点，叶对象下面就没有子节点， 所以我们也许会发生一些误操作， 比如试图往叶对象中添加子节点。**解决方案通常是给叶对象也增加 add 方法，并且在调用这个方 法时，抛出一个异常来及时提醒客户**，代码如下：
+
+```js
+var openTvCommand = {
+   execute: function(){
+      console.log( '打开电视' );
+   },
+   add:function(){
+      throw new Error("叶对象不能添加子节点")
+   }
+};
+```
+
+### 组合模式的例子——扫描文件夹
+
+文件夹和文件之间的关系，非常适合用组合模式来描述。文件夹里既可以包含文件，又可以 包含其他文件夹，最终可能组合成一棵树，组合模式在文件夹的应用中有以下两层好处。
+- 例如，我在同事的移动硬盘里找到了一些电子书，想把它们复制到 F 盘中的学习资料文 件夹。在复制这些电子书的时候，我并不需要考虑这批文件的类型，不管它们是单独的 电子书还是被放在了文件夹中。组合模式让 Ctrl+V、Ctrl+C 成为了一个统一的操作。
+- 当我用杀毒软件扫描该文件夹时，往往不会关心里面有多少文件和子文件夹，**组合模式 使得我们只需要操作最外层的文件夹进行扫描。** 
+
+现在我们来编写代码，首先分别定义好文件夹 Folder 和文件 File 这两个类。见如下代码：
+
+```js
+var Folder=function(name){
+   this.name=name;
+   this.files=[];
+};
+
+Folder.prototype.add=function(file){
+   this.files.push(file);
+}
+
+Folder.prototype.scan=function(){
+   console.log( '开始扫描文件夹: ' + this.name );
+   for(let i=0;i<this.files.length;i++){
+      this.files[i].scan();
+   }
+};
+
+var File=function(name){
+   this.name=name;
+};
+
+File.prototype.add=function(){
+   throw new Error("文件下面不能再添加文件");
+}
+
+File.prototype.scan=function(){
+   console.log( '开始扫描文件: ' + this.name );
+}
+```
+
+接下来创建一些文件夹和文件对象， 并且让它们组合成一棵树，这棵树就是我们 F 盘里的现有文件目录结构：
+
+```js
+var folder = new Folder( '学习资料' );
+var folder1 = new Folder( 'JavaScript' );
+var folder2 = new Folder ( 'jQuery' );
+var file1 = new File( 'JavaScript 设计模式与开发实践' );
+var file2 = new File( '精通 jQuery' );
+var file3 = new File( '重构与模式' )
+folder1.add( file1 );
+folder2.add( file2 );
+folder.add( folder1 );
+folder.add( folder2 );
+folder.add( file3 );
+```
+
+现在的需求是把移动硬盘里的文件和文件夹都复制到这棵树中，假设我们已经得到了这些文件对象：
+
+```js
+var folder3 = new Folder( 'Nodejs' );
+var file4 = new File( '深入浅出 Node.js' );
+folder3.add( file4 );
+var file5 = new File( 'JavaScript 语言精髓与编程实践' );
+```
+
+接下来就是把这些文件都添加到原有的树中：
+
+```js
+folder.add( folder3 );
+folder.add( file5 );
+```
+
+通过这个例子，我们再次看到客户是如何同等对待组合对象和叶对象。**在添加一批文件的操 作过程中，客户不用分辨它们到底是文件还是文件夹。新增加的文件和文件夹能够很容易地添加 到原来的树结构中**，和树里已有的对象一起工作。 
+
+我们改变了树的结构，增加了新的数据，却不用修改任何一句原有的代码，这是符合开放- 封闭原则的。
+
+ 运用了组合模式之后，扫描整个文件夹的操作也是轻而易举的，我们只需要操作树的最顶端 对象：
+
+```js
+folder.scan();
+```
+
+### 一些值得注意的地方
+
+在使用组合模式的时候，还有以下几个值得我们注意的地方。
+
+#### 1.组合模式不是父子关系 
+
+组合模式的树型结构容易让人误以为组合对象和叶对象是父子关系，这是不正确的。 
+
+**组合模式是一种 HAS-A（聚合）的关系**，而不是 IS-A。组合对象包含一组叶对象，但 Leaf 并不是 Composite 的子类。组合对象把请求委托给它所包含的所有叶对象，它们能够合作的关键 是拥有相同的接口。 
+
+为了方便描述，本章有时候把上下级对象称为父子节点，但大家要知道，它们并非真正意义 上的父子关系。
+
+#### 2.对叶对象操作的一致性 
+
+组合模式除了要求组合对象和叶对象拥有相同的接口之外，还有一个必要条件，就是对一组 叶对象的操作必须具有一致性。 
+
+比如公司要给全体员工发放元旦的过节费 1000 块，这个场景可以运用组合模式，但如果公 司给今天过生日的员工发送一封生日祝福的邮件，组合模式在这里就没有用武之地了，除非先把 今天过生日的员工挑选出来。只有用一致的方式对待列表中的每个叶对象的时候，才适合使用组 合模式。
+
+#### 3. 双向映射关系 
+
+发放过节费的通知步骤是从公司到各个部门，再到各个小组，最后到每个员工的邮箱里。这 本身是一个组合模式的好例子，但要考虑的一种情况是，也许某些员工属于多个组织架构。比如 某位架构师既隶属于开发组，又隶属于架构组，对象之间的关系并不是严格意义上的层次结构， **在这种情况下，是不适合使用组合模式的**，该架构师很可能会收到两份过节费。
+
+这种复合情况下我们必须给父节点和子节点建立双向映射关系，一个简单的方法是给小组和员 工对象都增加集合来保存对方的引用。但是这种相互间的引用相当复杂，而且对象之间产生了过多 的耦合性，修改或者删除一个对象都变得困难，此时我们可以引入中介者模式来管理这些对象。
+
+#### 4.用职责链模式提高组合模式性能 
+
+在组合模式中，如果树的结构比较复杂，节点数量很多，在遍历树的过程中，性能方面也许 表现得不够理想。有时候我们确实可以借助一些技巧，在实际操作中避免遍历整棵树，有一种现 成的方案是借助职责链模式。**职责链模式**一般需要我们手动去设置链条，但在组合模式中，父对 象和子对象之间实际上形成了天然的职责链。**让请求顺着链条从父对象往子对象传递，或者是反 过来从子对象往父对象传递，直到遇到可以处理该请求的对象为止，这也是职责链模式的经典运 用场景之一**。
+
+#### 引用父对象
+
+在前面提到的例子中，组合对象保存了它下面的子节点的引用，这是组合模式的特点，此 时树结构是从上至下的。**但有时候我们需要在子节点上保持对父节点的引用，比如在组合模式中 使用职责链时，有可能需要让请求从子节点往父节点上冒泡传递**。还有**当我们删除某个文件的时 候，实际上是从这个文件所在的上层文件夹中删除该文件的**。 
+
+现在来改写扫描文件夹的代码，使得在扫描整个文件夹之前，我们可以先移除某一个具体的 文件。 首先改写 Folder 类和 File 类，在这两个类的构造函数中，增加 this.parent 属性，并且在调 用 add 方法的时候，正确设置文件或者文件夹的父节点：
+
+```js
+var Folder=function(name){
+   this.name=name;
+   this.parent = null; //增加 this.parent 属性
+   this.files=[];
+};
+
+Folder.prototype.add=function(file){
+   file.parent = this; //设置父对象
+   this.files.push(file);
+}
+
+Folder.prototype.scan=function(){
+   console.log( '开始扫描文件夹: ' + this.name );
+   for(let i=0;i<this.files.length;i++){
+      this.files[i].scan();
+   }
+};
+```
+
+接下来增加 Folder.prototype.remove 方法，表示移除该文件夹：
+
+```js
+Folder.prototype.remove=function(){
+   if (!this.parent) {
+      return;  //根节点或者树外的游离节点
+   }
+   for(let i=this.parent.files.length-1;i>=0;i--){
+      if (this===this.parent.files[i]) {
+         this.parent.files.splice(i,1);
+      }
+   }
+}
+```
+
+在 File.prototype.remove 方法里，首先会判断 this.parent，如果 this.parent 为 null，那么 这个文件夹要么是树的根节点，要么是还没有添加到树的游离节点，这时候没有节点需要从树中 移除，我们暂且让 remove 方法直接 return，表示不做任何操作。 
+
+如果 this.parent 不为 null，则说明该文件夹有父节点存在，此时遍历父节点中保存的子节 点列表，删除想要删除的子节点。 
+
+File 类的实现基本一致：
+
+```js
+var File=function(name){
+   this.name=name;
+   this.parent = null;
+};
+
+File.prototype.add=function(){
+   throw new Error("文件下面不能再添加文件");
+};
+
+File.prototype.scan=function(){
+   console.log( '开始扫描文件: ' + this.name );
+};
+
+File.prototype.remove=function(){
+   if (!this.parent) {
+      return;  //根节点或者树外的游离节点
+   }
+   for(let i=this.parent.files.length-1;i>=0;i--){
+      if (this===this.parent.files[i]) {
+         this.parent.files.splice(i,1);
+      }
+   }
+};
+```
+
+下面测试一下我们的移除文件功能：
+
+```
+folder.scan();
+
+folder1.remove()
+```
+
+### 何时使用组合模式
+
+组合模式如果运用得当，可以大大简化客户的代码。一般来说，组合模式适用于以下这两种 情况。
+- **表示对象的部分整体层次结构**。组合模式可以方便地构造一棵树来表示对象的部分整 体结构。特别是我们在开发期间不确定这棵树到底存在多少层次的时候。在树的构造最 终完成之后，只需要通过请求树的最顶层对象，便能对整棵树做统一的操作。在组合模 式中增加和删除树的节点非常方便，并且符合开放封闭原则。
+- **客户希望统一对待树中的所有对象**。组合模式使客户可以忽略组合对象和叶对象的区别， 客户在面对这棵树的时候，不用关心当前正在处理的对象是组合对象还是叶对象，也就 不用写一堆 if、else 语句来分别处理它们。组合对象和叶对象会各自做自己正确的事情， 这是组合模式最重要的能力。
+
+本章我们了解了组合模式在 JavaScript 开发中的应用。组合模式可以让我们使用树形方式创 建对象的结构。我们可以把相同的操作应用在组合对象和单个对象上。在大多数情况下，我们都 可以忽略掉组合对象和单个对象之间的差别，从而用一致的方式来处理它们。 
+然而，组合模式并不是完美的，它可能会产生一个这样的系统：系统中的每个对象看起来都 与其他对象差不多。它们的区别只有在运行的时候会才会显现出来，这会使代码难以理解。此外， 如果通过组合模式创建了太多的对象，那么这些对象可能会让系统负担不起。
 
 
 
-
-
-
-
+## 模板方法模式
 
 
 

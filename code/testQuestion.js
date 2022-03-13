@@ -1,67 +1,50 @@
-var MacroCommand=function(){
-   return {
-      commandList:[],
-      add:function(command){
-         this.commandList.push(command);
-      },
-      execute:function(){
-         for (let i=0;i<this.commandList.length;i++){
-            this.commandList[i].execute()
+/**
+ * @param {number[]} data
+ * @return {boolean}
+ */
+var validUtf8 = function(data) {
+   let n=data.length;
+   let m=0;  //1~4
+   let flag=true;
+   for(let i=0;i<n;i++){
+      let binary=("00000000"+data[i].toString(2)).slice(-8);
+      //console.log(binary);
+      if (flag) {
+         //每个字符的第一个字节
+         for(let j=0;j<8;j++){
+            if (binary[j]==="0") {
+               break;
+            }else{
+               m++;
+            }
+         }
+         if(m===1 || m>4){
+            //开始字节不能一个1开头,不能超过4
+            return false;
+         }else if (m!==0) {
+            flag=false;
+            m--;  //再遍历m-1个
+         }else{
+            //为0时代表一个字节的字符
+         }
+      }else{
+         //判断后续m-1个
+         if (binary.indexOf("10")!==0) {
+            return false;
+         }
+         m--;
+         if (m==0) {
+            flag=true;
          }
       }
    }
-};
-var openAcCommand = {
-   execute: function(){
-      console.log( '打开空调' );
+   if(m>0){
+      //判断最后是否满足
+      return false;
    }
-};
-
-//家里的电视和音响是连接在一起的，所以可以用一个宏命令来组合打开电视和打开音响的命令
-var openTvCommand = {
-   execute: function(){
-      console.log( '打开电视' );
-   }
-};
-var openSoundCommand = {
-   execute: function(){
-      console.log( '打开音响' );
-   }
-};
-var macroCommand1 = MacroCommand();
-macroCommand1.add( openTvCommand );
-macroCommand1.add( openSoundCommand );
-
-
-var closeDoorCommand = {
-   execute: function(){
-      console.log( '关门' );
-   }
-};
-var openPcCommand = {
-   execute: function(){
-      console.log( '开电脑' );
-   }
-};
-var openQQCommand = {
-   execute: function(){
-      console.log( '登录 QQ' );
-   }
+   return true;
 };
 
-var macroCommand2 = MacroCommand();
-macroCommand2.add( closeDoorCommand );
-macroCommand2.add( openPcCommand );
-macroCommand2.add( openQQCommand );
-
-//现在把所有的命令组合成一个“超级命令”
-
-var macroCommand = MacroCommand();
-macroCommand.add( openAcCommand );
-macroCommand.add( macroCommand1 );
-macroCommand.add( macroCommand2 );
-
-(function( command ){
-   command.execute();
-   }
-)( macroCommand );
+let data = [197,130,1];
+let result=validUtf8(data);
+console.log(result);
