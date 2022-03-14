@@ -5637,6 +5637,383 @@ folder1.remove()
 
 ## 模板方法模式
 
+在 JavaScript 开发中用到继承的场景其实并不是很多，很多时候我们都喜欢用 mix-in 的方式 给对象扩展属性。但这不代表继承在 JavaScript 里没有用武之地，虽然没有真正的类和继承机制， 但我们可以通过原型 prototype 来变相地实现继承。
+
+### 模板方法模式的定义和组成
+
+模板方法模式是一种**只需使用继承就可以实现的非常简单的模式**。 
+
+模板方法模式由两部分结构组成，第一部分是**抽象父类**，第二部分是**具体的实现子类**。通常 在抽象父类中封装了子类的算法框架，包括实现一些公共方法以及封装子类中所有方法的执行顺 序。子类通过继承这个抽象类，也继承了整个算法结构，并且可以选择重写父类的方法。 
+
+假如我们有一些平行的子类，各个子类之间有一些相同的行为，也有一些不同的行为。如果 相同和不同的行为都混合在各个子类的实现中，说明这些相同的行为会在各个子类中重复出现。 但实际上，相同的行为可以被搬移到另外一个单一的地方，模板方法模式就是为解决这个问题而 生的。**在模板方法模式中，子类实现中的相同部分被上移到父类中，而将不同的部分留待子类来 实现。这也很好地体现了泛化的思想。**
+
+### 第一个例子——Coffee or Tea
+
+#### 先泡一杯咖啡
+
+首先，我们先来泡一杯咖啡，如果没有什么太个性化的需求，泡咖啡的步骤通常如下：
+(1) 把水煮沸
+(2) 用沸水冲泡咖啡
+(3) 把咖啡倒进杯子
+(4) 加糖和牛奶
+通过下面这段代码，我们就能得到一杯香浓的咖啡：
+
+```js
+var Coffee = function(){};
+
+Coffee.prototype.boilWater = function(){
+   console.log( '把水煮沸' );
+};
+Coffee.prototype.brewCoffeeGriends = function(){
+   console.log( '用沸水冲泡咖啡' );
+};
+Coffee.prototype.pourInCup = function(){
+   console.log( '把咖啡倒进杯子' );
+};
+Coffee.prototype.addSugarAndMilk = function(){
+   console.log( '加糖和牛奶' );
+};
+
+Coffee.prototype.init = function(){
+   this.boilWater();
+   this.brewCoffeeGriends();
+   this.pourInCup();
+   this.addSugarAndMilk();
+};
+
+var coffee = new Coffee();
+coffee.init();
+```
+
+#### 泡一壶茶
+
+接下来，开始准备我们的茶，泡茶的步骤跟泡咖啡的步骤相差并不大：
+(1) 把水煮沸
+(2) 用沸水浸泡茶叶
+(3) 把茶水倒进杯子
+(4) 加柠檬
+同样用一段代码来实现泡茶的步骤：
+
+```js
+var Tea = function(){};
+
+Tea.prototype.boilWater = function(){
+   console.log( '把水煮沸' );
+};
+Tea.prototype.steepTeaBag = function(){
+   console.log( '用沸水浸泡茶叶' );
+};
+Tea.prototype.pourInCup = function(){
+   console.log( '把茶水倒进杯子' );
+};
+Tea.prototype.addLemon = function(){
+   console.log( '加柠檬' );
+};
+
+Tea.prototype.init = function(){
+   this.boilWater();
+   this.steepTeaBag();
+   this.pourInCup();
+   this.addLemon();
+};
+var tea = new Tea();
+tea.init();
+```
+
+#### 分离出共同点
+
+我们找到泡咖啡和泡茶主要有以下不同点。
+- 原料不同。一个是咖啡，一个是茶，但我们可以把它们都抽象为“饮料”。
+- 泡的方式不同。咖啡是冲泡，而茶叶是浸泡，我们可以把它们都抽象为“泡”。
+- 加入的调料不同。一个是糖和牛奶，一个是柠檬，但我们可以把它们都抽象为“调料”。
+
+经过抽象之后，不管是泡咖啡还是泡茶，我们都能整理为下面四步：
+
+(1) 把水煮沸
+(2) 用沸水冲泡饮料
+(3) 把饮料倒进杯子
+(4) 加调料
+
+所以，不管是冲泡还是浸泡，我们都能给它一个新的方法名称，比如说 brew()。同理，不管 是加糖和牛奶，还是加柠檬，我们都可以称之为 addCondiments()。 让我们忘记最开始创建的 Coffee 类和 Tea 类。 现在可以创建一个抽象父类来表示泡一杯饮 料的整个过程。不论是 Coffee，还是 Tea，都被我们用 Beverage 来表示，代码如下：
+
+```js
+var Beverage=function(){};
+
+Beverage.prototype.boilWater=function(){
+   console.log( '把水煮沸' );
+}
+Beverage.prototype.brew=function(){};  // 空方法，应该由子类重写
+Beverage.prototype.pourInCup = function(){}; // 空方法，应该由子类重写
+Beverage.prototype.addCondiments = function(){}; // 空方法，应该由子类重写
+
+Beverage.prototype.init=function(){
+   this.boilWater();
+   this.brew();
+   this.pourInCup();
+   this.addCondiments();
+};
+```
+
+#### 创建 Coffee 子类和 Tea 子类
+
+现在创建一个 Beverage 类的对象对我们来说没有意义，因为世界上能喝的东西没有一种真正叫“饮料”的，饮料在这里还只是一个抽象的存在。接下来我们要创建咖啡类和茶类，并让它们继承饮料类：
+
+```js
+var Coffee = function(){};
+Coffee.prototype=new Beverage();
+```
+
+接下来要重写抽象父类中的一些方法，只有“把水煮沸”这个行为可以直接使用父类 Beverage中的 boilWater 方法，其他方法都需要在 Coffee 子类中重写，代码如下：
+
+```js
+var Coffee = function(){};
+Coffee.prototype=new Beverage();
+
+Coffee.prototype.brew = function(){
+   console.log( '用沸水冲泡咖啡' );
+};
+Coffee.prototype.pourInCup = function(){
+   console.log( '把咖啡倒进杯子' );
+};
+Coffee.prototype.addCondiments = function(){
+   console.log( '加糖和牛奶' );
+};
+
+var coffee = new Coffee();
+coffee.init();
+```
+
+至此我们的 Coffee 类已经完成了，当调用 coffee 对象的 init 方法时，由于 coffee 对象和 Coffee 构造器的原型 prototype 上都没有对应的 init 方法，所以该请求会顺着原型链，被委托给 Coffee 的“父类”Beverage 原型上的 init 方法。 
+
+而 Beverage.prototype.init 方法中已经规定好了泡饮料的顺序，所以我们能成功地泡出一杯 咖啡，代码如下：
+
+```js
+Beverage.prototype.init=function(){
+   this.boilWater();
+   this.brew();
+   this.pourInCup();
+   this.addCondiments();
+};
+```
+
+接下来照葫芦画瓢，来创建我们的 Tea 类：
+
+```js
+var Tea = function(){};
+
+Tea.prototype = new Beverage();
+
+Tea.prototype.brew = function(){
+   console.log( '用沸水浸泡茶叶' );
+};
+Tea.prototype.pourInCup = function(){
+   console.log( '把茶水倒进杯子' );
+};
+Tea.prototype.addCondiments = function(){
+   console.log( '加柠檬' );
+};
+
+var tea = new Tea();
+tea.init();
+```
+
+本章一直讨论的是模板方法模式，那么在上面的例子中，到底谁才是所谓的模板方法呢？答 案是 Beverage.prototype.init。 
+
+Beverage.prototype.init 被称为模板方法的**原因是，该方法中封装了子类的算法框架，它作 为一个算法的模板，指导子类以何种顺序去执行哪些方法**。在 Beverage.prototype.init 方法中， 算法内的每一个步骤都清楚地展示在我们眼前。
+
+### 抽象类
+
+首先要说明的是，**模板方法模式是一种严重依赖抽象类的设计模式**。JavaScript 在语言层面 并没有提供对抽象类的支持，我们也很难模拟抽象类的实现。这一节我们将着重讨论 Java 中抽 象类的作用，以及 JavaScript 没有抽象类时所做出的让步和变通。
+
+#### 抽象类的作用
+
+在 Java 中，类分为两种，**一种为具体类，另一种为抽象类**。具体类可以被实例化，**抽象类 不能被实例化**。要了解抽象类不能被实例化的原因，我们可以思考“饮料”这个抽象类。
+
+ 想象这样一个场景：我们口渴了，去便利店想买一瓶饮料，我们不能直接跟店员说：“来一 瓶饮料。”如果我们这样说了，那么店员接下来肯定会问：“要什么饮料？”饮料只是一个抽象名 词，只有当我们真正明确了的饮料类型之后，才能得到一杯咖啡、茶、或者可乐。 
+
+**由于抽象类不能被实例化，如果有人编写了一个抽象类，那么这个抽象类一定是用来被某些 具体类继承的**。 
+
+**抽象类和接口一样可以用于向上转型**（可参考 1.3 节关于多态的内容），在静态类型语言中， 编译器对类型的检查总是一个绕不过的话题与困扰。虽然类型检查可以提高程序的安全性，但繁 琐而严格的类型检查也时常会让程序员觉得麻烦。把对象的真正类型隐藏在抽象类或者接口之 后，这些对象才可以被互相替换使用。这可以让我们的 Java 程序尽量遵守依赖倒置原则。 
+
+除了用于向上转型，抽象类也可以表示一种契约。继承了这个抽象类的所有子类都将拥有跟 抽象类一致的接口方法，**抽象类的主要作用就是为它的子类定义这些公共接口**。如果我们在子类 中删掉了这些方法中的某一个，那么将不能通过编译器的检查，这在某些场景下是非常有用的， 比如我们本章讨论的模板方法模式，Beverage 类的 init 方法里规定了冲泡一杯饮料的顺序如下：
+
+```js
+Beverage.prototype.init=function(){
+   this.boilWater();
+   this.brew();
+   this.pourInCup();
+   this.addCondiments();
+};
+```
+
+如果在 Coffee 子类中没有实现对应的 brew 方法，那么我们百分之百得不到一杯咖啡。既然父类规定了子类的方法和执行这些方法的顺序，子类就应该拥有这些方法，并且提供正确的实现。
+
+#### 抽象方法和具体方法
+
+**抽象方法被声明在抽象类中，抽象方法并没有具体的实现过程，是一些“哑”方法**。比如 Beverage 类中的 brew 方法、pourInCup 方法和 addCondiments 方法，都被声明为抽象方法。**当子类 继承了这个抽象类时，必须重写父类的抽象方法**。 
+
+除了抽象方法之外，**如果每个子类中都有一些同样的具体实现方法，那这些方法也可以选择放在抽象类中**，这可以节省代码以达到复用的效果，这些方法叫作**具体方法**。当代码需要改变时， 我们只需要改动抽象类里的具体方法就可以了。比如饮料中的 boilWater 方法，假设冲泡所有的 饮料之前，都要先把水煮沸，那我们自然可以把 boilWater 方法放在抽象类 Beverage 中。
+
+#### 用 Java 实现 Coffee or Tea 的例子
+
+```java
+abstract class Beverage{
+  final void init(){  //模板方法
+    boilWater();
+    brew();
+    pourInCup();
+    addCondiments();
+  }
+  void boilWater(){// 具体方法 boilWater
+    System.out.println("把水煮沸");
+  }
+  abstract void brew();  // 抽象方法 brew
+  abstract void addCondiments(); // 抽象方法 addCondiments
+  abstract void pourInCup(); // 抽象方法 pourInCup
+}
+
+class Coffee extends Beverage{// Coffee 类
+  @Override
+  void brew() { // 子类中重写 brew 方法
+    System.out.println( "用沸水冲泡咖啡" );
+  }
+  @Override
+  void pourInCup(){ // 子类中重写 pourInCup 方法
+    System.out.println( "把咖啡倒进杯子" );
+  }
+  @Override
+  void addCondiments() { // 子类中重写 addCondiments 方法
+    System.out.println( "加糖和牛奶" );
+  }
+}
+
+class Tea extends Beverage{ // Tea 类
+  @Override
+  void brew() { // 子类中重写 brew 方法
+    System.out.println( "用沸水浸泡茶叶" );
+  }
+  @Override
+  void pourInCup(){ // 子类中重写 pourInCup 方法
+    System.out.println( "把茶倒进杯子" );
+  }
+  @Override
+  void addCondiments() { // 子类中重写 addCondiments 方法
+    System.out.println( "加柠檬" );
+  }
+}
+
+public class TestJava {
+  private static void prepareRecipe(Beverage beverage){
+    beverage.init();
+  }
+  public static void main( String args[] ){
+    Beverage coffee = new Coffee(); // 创建 coffee 对象
+    prepareRecipe( coffee ); // 开始泡咖啡
+    // 把水煮沸
+    // 用沸水冲泡咖啡
+    // 把咖啡倒进杯子
+    // 加糖和牛奶
+    Beverage tea = new Tea(); // 创建 tea 对象
+    prepareRecipe( tea ); // 开始泡茶
+    // 把水煮沸
+    // 用沸水浸泡茶叶
+    // 把茶倒进杯子
+    // 加柠檬
+  }
+}
+```
+
+#### JavaScript 没有抽象类的缺点和解决方案
+
+JavaScript 并没有从语法层面提供对抽象类的支持。抽象类的第一个作用是隐藏对象的具 体类型，**由于 JavaScript 是一门“类型模糊”的语言，所以隐藏对象的类型在 JavaScript 中并 不重要。** 
+
+另一方面， 当我们在 JavaScript 中使用原型继承来模拟传统的类式继承时，**并没有编译器帮 助我们进行任何形式的检查，我们也没有办法保证子类会重写父类中的“抽象方法”。** 
+
+我们知道，Beverage.prototype.init 方法作为模板方法，已经规定了子类的算法框架，代码 如下：
+
+```js
+Beverage.prototype.init=function(){
+   this.boilWater();
+   this.brew();
+   this.pourInCup();
+   this.addCondiments();
+};
+```
+
+如果我们的 Coffee 类或者 Tea 类忘记实现这 4 个方法中的一个呢？拿 brew 方法举例，如果 我们忘记编写 Coffee.prototype.brew 方法，那么当请求 coffee 对象的 brew 时，请求会顺着原型 链找到 Beverage“父类”对应的 Beverage.prototype.brew 方法，而 Beverage.prototype.brew 方法 到目前为止是一个空方法，这显然是不能符合我们需要的。 
+
+在 Java 中编译器会保证子类会重写父类中的抽象方法，**但在 JavaScript 中却没有进行这些检 查工作。**我们在编写代码的时候得不到任何形式的警告，完全寄托于程序员的记忆力和自觉性是 很危险的，特别是当我们使用模板方法模式这种完全依赖继承而实现的设计模式时。
+
+下面提供两种变通的解决方案。 
+- **第 1 种方案是用鸭子类型来模拟接口检查，以便确保子类中确实重写了父类的方法**。但模 拟接口检查会带来不必要的复杂性，而且要求程序员主动进行这些接口检查，这就要求 我们在业务代码中添加一些跟业务逻辑无关的代码。 
+- **第 2 种方案是让 Beverage.prototype.brew 等方法直接抛出一个异常**，如果因为粗心忘记编 写 Coffee.prototype.brew 方法，那么至少我们会在程序运行时得到一个错误：
+
+```js
+Beverage.prototype.brew = function(){
+	throw new Error( '子类必须重写 brew 方法' );
+};
+Beverage.prototype.pourInCup = function(){
+	throw new Error( '子类必须重写 pourInCup 方法' );
+};
+Beverage.prototype.addCondiments = function(){
+	throw new Error( '子类必须重写 addCondiments 方法' );
+};
+```
+
+第 2 种解决方案的优点是实现简单，付出的额外代价很少；缺点是我们得到错误信息的时间 点太靠后。 
+
+**我们一共有 3 次机会得到这个错误信息，**第 1 次是在编写代码的时候，通过编译器的检查来 得到错误信息；第 2 次是在创建对象的时候用鸭子类型来进行“接口检查”；而目前我们不得不 利用最后一次机会，在程序运行过程中才知道哪里发生了错误。
+
+### 模板方法模式的使用场景
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
