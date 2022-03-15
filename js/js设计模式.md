@@ -5966,29 +5966,98 @@ Beverage.prototype.addCondiments = function(){
 
 ### 模板方法模式的使用场景
 
+**从大的方面来讲，模板方法模式常被架构师用于搭建项目的框架**，架构师定好了框架的骨架， 程序员继承框架的结构之后，负责往里面填空，比如 Java 程序员大多使用过 HttpServlet 技术来 开发项目。
 
+ 一个基于 HttpServlet 的程序包含 7 个生命周期，这 7 个生命周期分别对应一个 do 方法。
 
+```
+doGet()
+doHead()
+doPost()
+doPut()
+doDelete()
+doOption()
+doTrace()
+```
 
+HttpServlet 类还提供了一个 service 方法，它就是这里的模板方法，service 规定了这些 do 方法的执行顺序，而这些 do 方法的具体实现则需要 HttpServlet 的子类来提供。 
 
+在 Web 开发中也能找到很多模板方法模式的适用场景，比如我们在构建一系列的 UI 组件， 这些组件的构建过程一般如下所示：
 
+(1) 初始化一个 div 容器；
+(2) 通过 ajax 请求拉取相应的数据；
+(3) 把数据渲染到 div 容器里面，完成组件的构造；
+(4) 通知用户组件渲染完毕。
 
+我们看到，任何组件的构建都遵循上面的 4 步，其中第(1)步和第(4)步是相同的。第(2)步不 同的地方只是请求 ajax 的远程地址，第(3)步不同的地方是渲染数据的方式。 
 
+于是我们可以把这 4 个步骤都抽象到父类的模板方法里面，父类中还可以顺便提供第(1)步和 第(4)步的具体实现。当子类继承这个父类之后，会重写模板方法里面的第(2)步和第(3)步。
 
+### 钩子方法
 
+通过模板方法模式，我们在父类中封装了子类的算法框架。这些算法框架在正常状态下是适 用于大多数子类的，但如果有一些特别“个性”的子类呢？比如我们在饮料类 Beverage 中封装了 饮料的冲泡顺序：
 
+(1) 把水煮沸
+(2) 用沸水冲泡饮料
+(3) 把饮料倒进杯子
+(4) 加调料
 
+这 4 个冲泡饮料的步骤适用于咖啡和茶，在我们的饮料店里，根据这 4 个步骤制作出来的咖 啡和茶，一直顺利地提供给绝大部分客人享用。但有一些客人喝咖啡是不加调料（糖和牛奶）的。 既然 Beverage 作为父类，已经规定好了冲泡饮料的 4 个步骤，那么有什么办法可以让子类不受这 个约束呢？ 
 
+钩子方法（hook）可以用来解决这个问题，**放置钩子是隔离变化的一种常见手段**。我们在父 类中容易变化的地方放置钩子，钩子可以有一个默认的实现，究竟要不要“挂钩”，这由子类自 行决定。**钩子方法的返回结果决定了模板方法后面部分的执行步骤，也就是程序接下来的走向，这样一来，程序就拥有了变化的可能。** 
 
+在这个例子里，我们把挂钩的名字定为 customerWantsCondiments，接下来将挂钩放入 Beverage 类，看看我们如何得到一杯不需要糖和牛奶的咖啡，代码如下：
 
+```js
+var Beverage=function(){};
 
+Beverage.prototype.boilWater = function(){
+   console.log( '把水煮沸' );
+};
 
+Beverage.prototype.brew = function(){
+   throw new Error( '子类必须重写 brew 方法' );
+};
+Beverage.prototype.pourInCup = function(){
+   throw new Error( '子类必须重写 pourInCup 方法' );
+};
+Beverage.prototype.addCondiments = function(){
+   throw new Error( '子类必须重写 addCondiments 方法' );
+};
+Beverage.prototype.customerWantsCondiments=function(){
+   return true;  // 默认需要调料
+};
 
+Beverage.prototype.init=function(){
+   this.boilWater();
+   this.brew();
+   this.pourInCup();
+   if (this.customerWantsCondiments()) {
+      // 如果挂钩返回 true，则需要调料
+      this.addCondiments();
+   }
+};
 
+var CoffeeWithHook = function(){};
+CoffeeWithHook.prototype = new Beverage();
 
+CoffeeWithHook.prototype.brew = function(){
+   console.log( '用沸水冲泡咖啡' );
+};
+CoffeeWithHook.prototype.pourInCup = function(){
+   console.log( '把咖啡倒进杯子' );
+};
+CoffeeWithHook.prototype.addCondiments = function(){
+   console.log( '加糖和牛奶' );
+};
+CoffeeWithHook.prototype.customerWantsCondiments = function(){return window.confirm( '请问需要调料吗？' );
+};
 
+var coffeeWithHook = new CoffeeWithHook();
+coffeeWithHook.init();
+```
 
-
-
+### 好莱坞原则
 
 
 
