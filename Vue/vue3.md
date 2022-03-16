@@ -7513,5 +7513,175 @@ directives: {
 - `beforeUnmount`：在卸载绑定元素的父组件之前调用
 - `unmounted`：当指令与元素解除绑定且父组件已卸载时，只调用一次。
 
+接下来我们来看一下在[自定义指令 API](https://v3.cn.vuejs.org/api/application-api.html#directive) 钩子函数的参数 (即 `el`、`binding`、`vnode` 和 `prevVnode`)
+
 ### 动态指令参数
 
+指令的参数可以是动态的。例如，在 `v-mydirective:[argument]="value"` 中，`argument` 参数可以根据组件实例数据进行更新！这使得自定义指令可以在应用中被灵活使用。
+
+例如你想要创建一个自定义指令，用来通过固定布局将元素固定在页面上。我们可以创建一个自定义指令，它的值以像素为单位更新被固定元素的垂直位置，如下所示：
+
+```html
+<div id="demo" class="demo">
+  <p>Scroll down the page</p>
+  <p v-pin="200">Stick me 200px from the top of the page</p>
+</div>
+
+<script type="text/javascript">
+  const app=Vue.createApp({});
+  // 注册一个全局自定义指令 `v-focus`
+  app.directive('pin',{
+    //当被绑定的元素挂载到 DOM 中时
+    mounted(el,binding){
+      el.style.position="fixed";
+      // binding.value 是我们传递给指令的值——在这里是 200
+      el.style.top=binding.value+"px";
+    }
+  });
+  app.mount("#demo");
+
+</script>
+```
+
+这会把该元素固定在距离页面顶部 200 像素的位置。但如果场景是我们需要把元素固定在左侧而不是顶部又该怎么办呢？这时使用动态参数就可以非常方便地根据每个组件实例来进行更新。
+
+```html
+<div id="demo" class="demo">
+  <p>Scroll down inside this section ↓</p>
+  <p v-pin:[direction]="200">I am pinned onto the page at 200px to the left.</p>
+</div>
+
+<script type="text/javascript">
+  const app=Vue.createApp({
+    data(){
+      return {
+        direction:"right",
+      }
+    },
+  });
+  // 注册一个全局自定义指令 `v-focus`
+  app.directive('pin',{
+    //当被绑定的元素挂载到 DOM 中时
+    mounted(el,binding){
+      el.style.position="fixed";
+      // binding.value 是我们传递给指令的值——在这里是 200
+      let s=binding.arg || "top";
+      el.style[s]=binding.value+"px";
+    }
+  });
+  app.mount("#demo");
+</script>
+```
+
+我们的自定义指令现在已经足够灵活，可以支持一些不同的用例。为了使其更具动态性，我们还可以允许修改绑定值。让我们创建一个附加属性 `pinPadding`，并将其绑定到 `<input type="range">`。
+
+让我们扩展指令逻辑以在组件更新后重新计算固定的距离。
+
+```html
+<div id="demo" class="demo">
+  <p>Scroll down inside this section ↓</p>
+  <input type="range" min="0" max="500" v-model="pinPadding">
+  <p v-pin:[direction]="pinPadding">Stick me {{ pinPadding + 'px' }} from the {{ direction || 'top' }} of the page</p>
+</div>
+
+<script type="text/javascript">
+  const app=Vue.createApp({
+    data(){
+      return {
+        direction:"right",
+        pinPadding:200,
+      }
+    },
+  });
+  // 注册一个全局自定义指令 `v-focus`
+  app.directive('pin',{
+    //当被绑定的元素挂载到 DOM 中时
+    mounted(el,binding){
+      el.style.position="fixed";
+      // binding.value 是我们传递给指令的值——在这里是 200
+      let s=binding.arg || "top";
+      el.style[s]=binding.value+"px";
+    },
+    updated(el,binding){
+      let s=binding.arg || "top";
+      el.style[s]=binding.value+"px";
+    }
+  });
+  app.mount("#demo");
+
+</script>
+```
+
+## 函数简写
+
+在前面的例子中，你可能想在 `mounted` 和 `updated` 时触发相同行为，而不关心其他的钩子函数。那么你可以通过将这个回调函数传递给指令来实现：
+
+```js
+app.directive('pin', (el, binding) => {
+  el.style.position = 'fixed'
+  const s = binding.arg || 'top'
+  el.style[s] = binding.value + 'px'
+})
+```
+
+## 对象字面量
+
+如果指令需要多个值，可以传入一个 JavaScript 对象字面量。记住，指令函数能够接受所有合法的 JavaScript 表达式。
+
+```vue
+<div v-demo="{ color: 'white', text: 'hello!' }"></div>
+```
+
+```js
+app.directive('demo', (el, binding) => {
+  console.log(binding.value.color) // => "white"
+  console.log(binding.value.text) // => "hello!"
+})
+```
+
+## 在组件中使用
+
+和[非 prop 的 attribute](https://v3.cn.vuejs.org/guide/component-attrs.html) 类似，当在组件中使用时，自定义指令总是会被应用在组件的根节点上。
+
+```vue
+<my-component v-demo="test"></my-component>
+```
+
+```js
+app.component('my-component', {
+  template: `
+    <div> // v-demo 指令将会被应用在这里
+      <span>My component content</span>
+    </div>
+  `
+})
+```
+
+和 attribute 不同，指令不会通过 `v-bind="$attrs"` 被传入另一个元素。
+
+有了[片段](https://v3.cn.vuejs.org/guide/migration/fragments.html#概览)支持以后，组件可能会有多个根节点。当被应用在一个多根节点的组件上时，指令会被忽略，并且会抛出一个警告。
+
+
+
+# Teleport
+
+Vue 鼓励我们通过将 UI 和相关行为封装到组件中来构建 UI。我们可以将它们嵌套在另一个内部，以构建一个组成应用程序 UI 的树。
+
+然而，有时组件模板的一部分逻辑上属于该组件，而从技术角度来看，最好将模板的这一部分移动到 DOM 中 Vue app 之外的其他位置。
+
+一个常见的场景是创建一个包含全屏模式的组件。在大多数情况下，你希望模态框的逻辑存在于组件中，但是模态框的快速定位就很难通过 CSS 来解决，或者需要更改组件组合。
+
+考虑下面的 HTML 结构。
+
+```html
+<body>
+  <div style="position: relative;">
+    <h3>Tooltips with Vue 3 Teleport</h3>
+    <div>
+      <modal-button></modal-button>
+    </div>
+  </div>
+</body>
+```
+
+让我们来看看 `modal-button` 组件：
