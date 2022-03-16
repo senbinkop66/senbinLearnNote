@@ -11,33 +11,28 @@ body {
   margin: 30px;
 }
 
-
 </style>
 
 <body>
-<div id="demo" class="demo">
-  <p>Scroll down inside this section ↓</p>
-  <input type="range" min="0" max="500" v-model="pinPadding">
-  <p v-pin:[direction]="pinPadding">Stick me {{ pinPadding + 'px' }} from the {{ direction || 'top' }} of the page</p>
+<div id="app" style="position: relative;">
+    <my-component :text="good">{{text}}</my-component>
 </div>
 
 <script type="text/javascript">
-  const app=Vue.createApp({
-    data(){
-      return {
-        direction:"right",
-        pinPadding:200,
-      }
+  const {createApp,h,resolveComponent}=Vue;
+  app=createApp({});
+  app.component("my-component",{
+    props:[{text}],
+    render() {
+      return h('div', [
+          h(resolveComponent("child"),
+            {},{
+              default:(props)=>h('span',props.text)
+            })
+        ])
     },
   });
-  // 注册一个全局自定义指令 `v-focus`
-  app.directive('pin',(el,binding)=>{
-      el.style.position="fixed";
-      // binding.value 是我们传递给指令的值——在这里是 200
-      let s=binding.arg || "top";
-      el.style[s]=binding.value+"px";
-  });
-  app.mount("#demo");
+  app.mount("#app");
 
 
 
