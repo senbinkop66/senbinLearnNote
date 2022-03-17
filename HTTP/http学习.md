@@ -188,3 +188,278 @@ lots of text...<p><a name="bottom">bottom</a>?arg=val
 
 # MIME 类型
 
+**媒体类型**（通常称为 **Multipurpose Internet Mail Extensions** 或 **MIME** 类型 ）是一种标准，用来表示文档、文件或字节流的性质和格式。它在[IETF RFC 6838](https://tools.ietf.org/html/rfc6838)中进行了定义和标准化。
+
+互联网号码分配机构（[IANA](https://www.iana.org/)）是负责跟踪所有官方MIME类型的官方机构，您可以在[媒体类型](https://www.iana.org/assignments/media-types/media-types.xhtml)页面中找到最新的完整列表。
+
+**重要：**浏览器通常使用MIME类型（而不是文件扩展名）来确定如何处理URL，因此Web服务器在响应头中添加正确的MIME类型非常重要。如果配置不正确，浏览器可能会曲解文件内容，网站将无法正常工作，并且下载的文件也会被错误处理。
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#语法)
+
+### [通用结构](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#通用结构)
+
+```
+type/subtype
+```
+
+MIME的组成结构非常简单；由类型与子类型两个字符串中间用`'/'`分隔而组成。**不允许空格存在**。*type* 表示可以被分多个子类的独立类别。*subtype 表示细分后的每个类型。*
+
+MIME类型对大小写不敏感，但是**传统写法都是小写**。
+
+
+IN THIS ARTICLE[语法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#语法)[重要的MIME类型](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#重要的mime类型)[设置正确的MIME类型的重要性](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#设置正确的mime类型的重要性)[MIME 嗅探](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#mime_嗅探)[其他传送文件类型的方法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#其他传送文件类型的方法)[其他](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#其他)
+
+# MIME 类型
+
+**媒体类型**（通常称为 **Multipurpose Internet Mail Extensions** 或 **MIME** 类型 ）是一种标准，用来表示文档、文件或字节流的性质和格式。它在[IETF RFC 6838](https://tools.ietf.org/html/rfc6838)中进行了定义和标准化。
+
+互联网号码分配机构（[IANA](https://www.iana.org/)）是负责跟踪所有官方MIME类型的官方机构，您可以在[媒体类型](https://www.iana.org/assignments/media-types/media-types.xhtml)页面中找到最新的完整列表。
+
+**重要：**浏览器通常使用MIME类型（而不是文件扩展名）来确定如何处理URL，因此Web服务器在响应头中添加正确的MIME类型非常重要。如果配置不正确，浏览器可能会曲解文件内容，网站将无法正常工作，并且下载的文件也会被错误处理。
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#语法)
+
+### [通用结构](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#通用结构)
+
+```
+type/subtype
+```
+
+MIME的组成结构非常简单；由类型与子类型两个字符串中间用`'/'`分隔而组成。不允许空格存在。*type* 表示可以被分多个子类的独立类别。*subtype 表示细分后的每个类型。*
+
+MIME类型对大小写不敏感，但是传统写法都是小写。
+
+### [独立类型](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#独立类型)
+
+```
+text/plain
+text/html
+image/jpeg
+image/png
+audio/mpeg
+audio/ogg
+audio/*
+video/mp4
+application/*
+application/json
+application/javascript
+application/ecmascript
+application/octet-stream
+…
+```
+
+*独立*类型表明了对文件的分类，可以是如下之一：
+
+| 类型          | 描述                                                         | 典型示例                                                     |
+| :------------ | :----------------------------------------------------------- | :----------------------------------------------------------- |
+| `text`        | 表明文件是普通文本，理论上是人类可读                         | `text/plain`, `text/html`, `text/css, text/javascript`       |
+| `image`       | 表明是某种图像。不包括视频，但是动态图（比如动态gif）也使用image类型 | `image/gif`, `image/png`, `image/jpeg`, `image/bmp`, `image/webp`, `image/x-icon`, `image/vnd.microsoft.icon` |
+| `audio`       | 表明是某种音频文件                                           | `audio/midi`, `audio/mpeg, audio/webm, audio/ogg, audio/wav` |
+| `video`       | 表明是某种视频文件                                           | `video/webm`, `video/ogg`                                    |
+| `application` | 表明是某种二进制数据                                         | `application/octet-stream`, `application/pkcs12`, `application/vnd.mspowerpoint`, `application/xhtml+xml`, `application/xml`, `application/pdf` |
+
+对于text文件类型若没有特定的subtype，就使用 `text/plain`。类似的，二进制文件没有特定或已知的 subtype，即使用 `application/octet-stream`。
+
+### [Multipart 类型](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#multipart_类型)
+
+```
+multipart/form-data
+multipart/byteranges
+```
+
+*Multipart* 类型表示细分领域的文件类型的种类，经常对应不同的 MIME 类型。这是*复合*文件的一种表现方式。`multipart/form-data` 可用于联系 [HTML Forms](https://developer.mozilla.org/en-US/docs/Learn/Forms) 和 [`POST`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST) 方法，此外 `multipart/byteranges`使用状态码[`206`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/206) `Partial Content`来发送整个文件的子集，**而HTTP对不能处理的复合文件使用特殊的方式：将信息直接传送给浏览器**（这时可能会建立一个“另存为”窗口，但是却不知道如何去显示内联文件。）
+
+## [重要的MIME类型](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#重要的mime类型)
+
+### [application/octet-stream](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#applicationoctet-stream)
+
+这是应用程序文件的默认值。意思是 *未知的应用程序文件 ，*浏览器一般不会自动执行或询问执行。浏览器会像对待 设置了HTTP头[`Content-Disposition`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Disposition) 值为 `attachment` 的文件一样来对待这类文件。
+
+### [text/plain](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#textplain)
+
+**文本文件默认值。**即使它*意味着未知的文本文件*，但浏览器认为是可以直接展示的。
+
+`text/plain`并不是意味着某种文本数据。如果浏览器想要一个文本文件的明确类型，浏览器并不会考虑他们是否匹配。比如说，如果通过一个表明是下载CSS文件的[``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/link)链接下载了一个 `text/plain` 文件。如果提供的信息是text/plain，浏览器并不会认出这是有效的CSS文件。CSS类型需要使用text/css。
+
+### [text/css](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#textcss)
+
+在网页中要被解析为CSS的任何CSS文件必须指定MIME为`text/css`。通常，服务器不识别以.css为后缀的文件的MIME类型，而是将其以MIME为`text/plain` 或 `application/octet-stream` 来发送给浏览器：在这种情况下，大多数浏览器不识别其为CSS文件，直接忽略掉。特别要注意为CSS文件提供正确的MIME类型。
+
+### [text/html](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#texthtml)
+
+所有的HTML内容都应该使用这种类型。XHTML的其他MIME类型（如`application/xml+html`）现在基本不再使用（HTML5统一了这些格式）。
+
+注意：如果您打算使用 XML 的严格解析规则，您仍然需要使用 application/xml 或 application/xhtml+xml，使用 <![CDATA[…]]> 或来自非 HTML、非 SVG 或非 ‑MathML XML 命名空间，因为 text/html 的解析语义与 application/xml 的解析语义略有不同。
+
+### [text/javascript](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#textjavascript)
+
+据 HTML 标准，应该总是使用 MIME 类型 `text/javascript` 服务 JavaScript 文件。其他值不被认为有效，使用那些值可能会导致脚本不被载入或运行。
+
+历史原因，[MIME 嗅探标准](https://mimesniff.spec.whatwg.org/)（定义浏览器应该如何解释媒体类型和如何处理无有效媒体类型的内容）允许使用匹配以下任意的 MIME 类型服务 JavaScript：
+
+- `application/javascript`
+- `application/ecmascript`
+- `application/x-ecmascript` 
+- `application/x-javascript` 
+- `text/javascript`
+- `text/ecmascript`
+- `text/javascript1.0` 
+- `text/javascript1.1` 
+- `text/javascript1.2` 
+- `text/javascript1.3` 
+- `text/javascript1.4` 
+- `text/javascript1.5` 
+- `text/jscript` 
+- `text/livescript` 
+- `text/x-ecmascript` 
+- `text/x-javascript` 
+
+**注意：**即便任何给定的 [user agent](https://developer.mozilla.org/zh-CN/docs/Glossary/User_agent) 可能支持这些中的任意或所有，你只应该使用 `text/javascript`。它是唯一确保能在目前和以后正常工作的 MIME 类型。
+
+你可能发现某些内容在 `text/javascript` 媒体类型末尾有一个 `charset` 参数，指定用于表示代码内容的字符集。这不是合法的，而且在大多数场景下会导致脚本不被载入。
+
+### [图片类型](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#图片类型)
+
+只有一小部分图片类型是被广泛支持的，Web安全的，可随时在Web页面中使用的：
+
+| MIME 类型       | 图片类型                             |
+| :-------------- | :----------------------------------- |
+| `image/gif`     | GIF 图片 (无损耗压缩方面被PNG所替代) |
+| `image/jpeg`    | JPEG 图片                            |
+| `image/png`     | PNG 图片                             |
+| `image/svg+xml` | SVG图片 (矢量图)                     |
+
+此处的类型划分有一定的争议，有人认为此处应该增加 WebP（`image/webp`），但是每个新增的图片类型都会增加代码的数量，这会带来一些新的安全问题，所以浏览器供应商对于添加类型非常小心。
+
+另外的一些图片种类可以在Web文档中找到。比如很多浏览器支持 *icon 类型的图标作为* favicons或者类似的图标，并且浏览器在MIME类型中的 `image/x-icon` 支持ICO图像。
+
+Footnote 1
+
+尽管 `image/vnd.microsoft.icon` [在ANA注册](https://www.iana.org/assignments/media-types/image/vnd.microsoft.icon), 它仍然不被广泛支持，`image/x-icon` 被作为替代品使用。
+
+### [音频与视频类型](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#音频与视频类型)
+
+HTML并没有明确定义被用于[``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/audio)和[``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/video)元素所支持的文件类型，所以在web上使用的只有相对较小的一组类型。[ ](https://developer.mozilla.org/en-US/docs/Web/Media/Formats)文章 [Media formats supported by the HTML audio and video elements](https://developer.mozilla.org/en-US/docs/Web/HTML/Supported_media_formats) 解释了可以被使用的解码器或视频文件格式。
+
+在web环境最常用的视频文件的格式，是以下这些这些文件类型：
+
+| MIME 类型                                               | 音频或视频类型                                               |
+| :------------------------------------------------------ | :----------------------------------------------------------- |
+| `audio/wave` `audio/wav` `audio/x-wav` `audio/x-pn-wav` | 音频流媒体文件。一般支持PCM音频编码 (WAVE codec "1") ，其他解码器有限支持（如果有的话）。 |
+| `audio/webm`                                            | WebM 音频文件格式。Vorbis 和 Opus 是其最常用的解码器。       |
+| `video/webm`                                            | 采用WebM视频文件格式的音视频文件。VP8 和 VP9是其最常用的视频解码器。Vorbis 和 Opus 是其最常用的音频解码器。 |
+| `audio/ogg`                                             | 采用OGG多媒体文件格式的音频文件。 Vorbis 是这个多媒体文件格式最常用的音频解码器。 |
+| `video/ogg`                                             | 采用OGG多媒体文件格式的音视频文件。常用的视频解码器是 Theora；音频解码器为Vorbis 。 |
+| `application/ogg`                                       | 采用OGG多媒体文件格式的音视频文件。常用的视频解码器是 Theora；音频解码器为Vorbis 。 |
+| `application/json`                                      | application/json (MIME_type)                                 |
+
+### [multipart/form-data](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#multipartform-data)
+
+`multipart/form-data` 可用于[HTML表单](https://developer.mozilla.org/en-US/docs/Learn/Forms)从浏览器发送信息给服务器。作为多部分文档格式，它由边界线（一个由`'--'`开始的字符串）划分出的不同部分组成。每一部分有自己的实体，以及自己的 HTTP 请求头，[`Content-Disposition`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Disposition)和 [`Content-Type`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Type) 用于文件上传领域，最常用的 ([`Content-Length`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Length) 因为边界线作为分隔符而被忽略）。
+
+```http
+Content-Type: multipart/form-data; boundary=aBoundaryString
+(other headers associated with the multipart document as a whole)
+
+--aBoundaryString
+Content-Disposition: form-data; name="myFile"; filename="img.jpg"
+Content-Type: image/jpeg
+
+(data)
+--aBoundaryString
+Content-Disposition: form-data; name="myField"
+
+(data)
+--aBoundaryString
+(more subparts)
+--aBoundaryString--
+```
+
+如下所示的表单:
+
+```html
+<form action="http://localhost:8000/" method="post" enctype="multipart/form-data">
+  <input type="text" name="myTextField">
+  <input type="checkbox" name="myCheckBox">Check</input>
+  <input type="file" name="myFile">
+  <button>Send the file</button>
+</form>
+```
+
+Copy to Clipboard
+
+会发送这样的请求:
+
+```http
+POST / HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:50.0) Gecko/20100101 Firefox/50.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Content-Type: multipart/form-data; boundary=---------------------------8721656041911415653955004498
+Content-Length: 465
+
+-----------------------------8721656041911415653955004498
+Content-Disposition: form-data; name="myTextField"
+
+Test
+-----------------------------8721656041911415653955004498
+Content-Disposition: form-data; name="myCheckBox"
+
+on
+-----------------------------8721656041911415653955004498
+Content-Disposition: form-data; name="myFile"; filename="test.txt"
+Content-Type: text/plain
+
+Simple file.
+-----------------------------8721656041911415653955004498--
+```
+
+### [multipart/byteranges](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#multipartbyteranges)
+
+`multipart/byteranges` 用于把部分的响应报文发送回浏览器。当发送状态码[`206`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/206)`Partial Content` 时，这个MIME类型用于指出这个文件由若干部分组成，每一个都有其请求范围。就像其他很多类型[`Content-Type`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Type)使用分隔符来制定分界线。每一个不同的部分都有[`Content-Type`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Type)这样的HTTP头来说明文件的实际类型，以及 [`Content-Range`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Range)来说明其范围。
+
+```http
+HTTP/1.1 206 Partial Content
+Accept-Ranges: bytes
+Content-Type: multipart/byteranges; boundary=3d6b6a416f9b5
+Content-Length: 385
+
+--3d6b6a416f9b5
+Content-Type: text/html
+Content-Range: bytes 100-200/1270
+
+eta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta name="vieport" content
+--3d6b6a416f9b5
+Content-Type: text/html
+Content-Range: bytes 300-400/1270
+
+-color: #f0f0f2;
+        margin: 0;
+        padding: 0;
+        font-family: "Open Sans", "Helvetica
+--3d6b6a416f9b5--
+```
+
+## [设置正确的MIME类型的重要性](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#设置正确的mime类型的重要性)
+
+很多web服务器使用默认的 `application/octet-stream` 来发送未知类型。出于一些安全原因，对于这些资源浏览器不允许设置一些自定义默认操作，导致用户必须存储到本地以使用。常见的导致服务器配置错误的文件类型如下所示：
+
+- RAR编码文件。在这种情况，理想状态是，设置真实的编码文件类型；但这通常不可能（可能是服务器所未知的类型或者这个文件包含许多其他的不同的文件类型）。这这种情况服务器将发送 `application/x-rar-compressed` 作为MIME类型，用户不会将其定义为有用的默认操作。
+- 音频或视频文件。只有正确设置了MIME类型的文件才能被 <vedio>或<audio>别和播放。 可参照  [use the correct type for audio and video](https://developer.mozilla.org/En/Media_formats_supported_by_the_audio_and_video_elements)。
+- 专有文件类型。是专有文件时需要特别注意。使用 `application/octet-stream` 作为特殊处理是不被允许的：对于一般的MIME类型浏览器不允许定义默认行为（比如“在Word中打开”）
+
+## [MIME 嗅探](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#mime_嗅探)
+
+在缺失 MIME 类型或客户端认为文件设置了错误的 MIME 类型时，浏览器可能会通过查看资源来进行MIME嗅探。每一个浏览器在不同的情况下会执行不同的操作。因为这个操作会有一些安全问题，有的 MIME 类型表示可执行内容而有些是不可执行内容。浏览器可以通过请求头 [`Content-Type`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Type) 来设置 [`X-Content-Type-Options`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/X-Content-Type-Options) 以阻止MIME嗅探。
+
+## [其他传送文件类型的方法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_Types#其他传送文件类型的方法)
+
+MIME类型不是传达文档类型信息的唯一方式：
+
+- 有时会使用名称后缀，特别是在Microsoft Windows系统上。并非所有的操作系统都认为这些后缀是有意义的（特别是Linux和Mac OS），并且像外部MIME类型一样，不能保证它们是正确的。
+- 魔术数字。不同类型的文件的语法通过查看结构来允许文件类型推断。例如，每个GIF文件以47 49 46 38十六进制值[GIF89]或89 50 4E 47 [.PNG]的PNG文件开头。 并非所有类型的文件都有幻数，所以这也不是100％可靠的方式。
