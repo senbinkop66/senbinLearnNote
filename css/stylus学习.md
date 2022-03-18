@@ -1798,3 +1798,424 @@ stop(50%, orange)
 # Stylus 其余参数
 
 ## 其余参数
+
+Stylus支持`name...`形式的其余参数。这些参数可以消化传递给混写或函数的参数们。这在处理浏览器私有属性，如`-moz`或`-webkit`的时候很管用。
+
+下面这个例子中，所有的参数们(1px, 2px, …)都被一个`args`参数给简单消化了：
+
+```stylus
+box-shadow(args...)
+  -webkit-box-shadow args
+  -moz-box-shadow args
+  box-shadow args
+
+#logo
+  box-shadow 1px 2px 5px #eee
+```
+
+```css
+#logo{-webkit-box-shadow:1px 2px 5px #eee;-moz-box-shadow:1px 2px 5px #eee;box-shadow:1px 2px 5px #eee}
+```
+
+我们想指定特定的参数，如`x-offset`，我们可以使用`args[0]`, 或者，我们可能希望重新定义混入。
+
+```stylus
+box-shadow(offset-x,args...)
+  got-offset-x offset-x
+  -webkit-box-shadow offset-x args
+  -moz-box-shadow offset-x args
+  box-shadow offset-x args
+
+#logo
+  box-shadow 1px 2px 5px #eee
+```
+
+```css
+#logo{got-offset-x:1px;-webkit-box-shadow:1px 2px 5px #eee;-moz-box-shadow:1px 2px 5px #eee;box-shadow:1px 2px 5px #eee}
+```
+
+## 参数们
+
+`arguments`变量可以实现表达式的精确传递，包括逗号等等。这可以弥补`args...`参数的一些不足，见下面的例子：
+
+```stylus
+box-shadow(args...)
+  -webkit-box-shadow args
+  -moz-box-shadow args
+  box-shadow args
+#login
+  box-shadow #ddd 1px 1px, #eee 2px 2px 
+```
+
+结果
+
+```css
+#login{-webkit-box-shadow:#ddd 1px 1px,#eee 2px 2px;-moz-box-shadow:#ddd 1px 1px,#eee 2px 2px;box-shadow:#ddd 1px 1px,#eee 2px 2px}
+```
+
+我们现在使用`arguments`重新定义这个混合书写。
+
+```stylus
+box-shadow()
+  -webkit-box-shadow arguments
+  -moz-box-shadow arguments
+  box-shadow arguments
+body
+  box-shadow #ddd 1px 1px, #eee 2px 2px
+```
+
+```css
+body{-webkit-box-shadow:#ddd 1px 1px,#eee 2px 2px;-moz-box-shadow:#ddd 1px 1px,#eee 2px 2px;box-shadow:#ddd 1px 1px,#eee 2px 2px}
+```
+
+# Stylus 注释
+
+## 注释
+
+Stylus支持三种注释，单行注释，多行注释，以及多行缓冲注释。
+
+## 单行注释
+
+跟JavaScript一样，双斜杠，CSS中不输出。
+
+```stylus
+// 我是注释!
+body
+  padding 5px // 蛋疼的padding
+```
+
+```css
+body{padding:5px}
+```
+
+## 多行注释
+
+多行注释看起来有点像CSS的常规注释。然而，**它们只有在`compress`选项未启用的时候才会被输出。**
+
+```stylus
+/*
+ * 多行注释,它们只有在compress选项未启用的时候才会被输出。
+ */
+add(a, b)
+  a + b
+body
+  padding add(3,2)
+```
+
+```sh
+ stylus --compress src/
+```
+
+```css
+body{padding:5}
+```
+
+```bash
+stylus src/
+```
+
+```css
+/*
+ * 多行注释,它们只有在compress选项未启用的时候才会被输出。
+ */
+body {
+  padding: 5;
+}
+
+```
+
+## 多行缓冲注释
+
+跟多行注释类似，不同之处在于开始的时候，**这里是`/*!`. 这个相当于告诉Stylus压缩的时候这段无视直接输出。**
+
+```stylus
+/*!
+ * 多行缓冲注释,告诉Stylus压缩的时候这段无视直接输出。
+ */
+add(a, b)
+  a + b
+body
+  padding add(3,2)
+```
+
+```css
+/*
+ * 多行缓冲注释,告诉Stylus压缩的时候这段无视直接输出。
+ */
+body{padding:5}
+```
+
+# Stylus 条件 
+
+## 条件
+
+条件提供了语言的流控制，否则就是纯粹的静态语言。提供的条件有导入、混入、函数以及更多。
+
+## if / else if / else
+
+跟一般的语言一致，`if`表达式满足(`true`)的时候执行后面语句块，否则，继续后面的`else if`或`else`.
+
+下面这个例子，根据overload的条件，决定是使用`padding`还是`margin`.
+
+```stylus
+overload-padding = true
+if overload-padding
+  padding(y, x)
+    margin y x
+body
+  padding 5px 10px
+```
+
+另外的`box()`帮手：
+
+```stylus
+box(x, y, margin-only = false)
+  if margin-only
+    margin y x
+  else
+    padding y x
+```
+
+## 除非(unless)
+
+熟悉Ruby程序语言的用户应该都知道`unless`条件，**其基本上与`if`相反**，本质上是`(!(expr))`.
+
+下面这个例子中，如果`disable-padding-override`是`undefined`或`false`, `padding`将被干掉，显示`margin`代替之。但是，如果是`true`, `padding`将会如期继续输出`padding 5px 10px`.
+
+```stylus
+disable-padding-override = false
+unless disable-padding-override is defined and disable-padding-override
+  padding(x, y)
+    margin y x
+body
+  padding 5px 10px
+```
+
+```css
+body{margin:10px 5px}
+```
+
+## 后缀条件
+
+Stylus支持后缀条件，这就意味着`if`和`unless`可以当作操作符；当右边表达式为真的时候执行左边的操作对象。
+
+例如，我们定义`negative()`来执行一些基本的检查。下面我们使用块式条件：
+
+```stylus
+negative(n)
+  unless n is a 'unit'
+    error('无效数值')
+  if n < 0
+    yes
+  else
+    no
+```
+
+接下来，我们利用后缀条件让我们的方法简洁。
+
+```stylus
+negative(n)
+  error('无效数值') unless n is a 'unit'
+  return yes if n < 0
+  no
+```
+
+当然，我们可以更进一步。如这个`n < 0 ? yes : no`可以用布尔代替：`n < 0`.
+
+后缀条件适用于大多数的单行语句。如，`@import`, `@charset`, 混合书写等。当然，下面所示的属性也是可以的：
+
+```stylus
+pad(types = margin padding, n = 5px)
+  padding unit(n, px) if padding in types
+  margin unit(n, px) if margin in types
+body
+  pad()
+body
+  pad(margin)
+body
+  apply-mixins = true
+  pad(padding, 10) if apply-mixins
+```
+
+```css
+body{padding:5px;margin:5px}body{margin:5px}body{padding:10px}
+```
+
+# Stylus 迭代
+
+## 迭代
+
+Stylus允许你通过`for/in`对表达式进行迭代形式如下：
+
+```
+for <val-name> [, <key-name>] in <expression>
+```
+
+```stylus
+body
+  for num in 1 2 3
+    foo num
+```
+
+```css
+body{foo:1;foo:2;foo:3}
+```
+
+```stylus
+body
+  fonts = Impact Arial sans-serif
+  for font, i in fonts
+    foo i font
+```
+
+```css
+body{foo:0 Impact;foo:1 Arial;foo:2 sans-serif}
+```
+
+## 混合书写(Mixins)
+
+我们可以在混写中使用循环实现更强大的功能，例如，我们可以把表达式对作为使用插值和循环的属性。
+
+下面，我们定义`apply()`, 利用所有的`arguments`，这样逗号分隔以及表达式列表都会支持。
+
+```stylus
+apply(props)
+  props=arguments if length(arguments)>1
+  for prop in props
+    {prop[0]} prop[1]
+
+body
+  apply(one 1, two 2, three 3)
+body
+  list = (A 1) (B 2) (C 3)
+  apply(list)
+```
+
+```css
+body{one:1;two:2;three:3}
+body{A:1;B:2;C:3}
+```
+
+## 函数(Functions)
+
+Stylus函数同样可以包含for循环。下面就是简单使用示例：
+
+```stylus
+join(delim, args)
+  buf = ''
+  for arg, index in args
+    if index
+      buf += delim + arg
+    else
+      buf += arg
+join(', ', foo bar baz)
+// => "foo, bar, baz"
+```
+
+## 后缀(Postfix)
+
+就跟`if`/`unless`可以利用后面语句一样，`for`也可以。如下后缀解析的例子：
+
+```stylus
+sum(nums)
+  sum = 0
+  sum += n for n in nums
+join(delim, args)
+  buf = ''
+  buf += i ? delim + arg : arg for arg, i in args
+```
+
+我们也可以从循环返回，下例子就是`n % 2 == 0`为`true`的时候返回数值。
+
+```stylus
+first-even(nums)
+  return n if n % 2 == 0 for n in nums
+first-even(1 3 5 5 6 3 2)
+// => 6
+```
+
+# Stylus @import
+
+## 导入
+
+Stylus支持字面@import CSS, 也支持其他Stylus样式的动态导入。
+
+## 字面CSS
+
+任何`.css`扩展的文件名将作为字面量。例如：
+
+```stylus
+@import "reset.css"
+```
+
+```css
+@import "reset.css";
+```
+
+## Stylus导入
+
+当使用@import没有`.css`扩展，会被认为是Stylus片段（如：`@import "mixins/border-radius"`）。
+
+@import工作原理为：遍历目录队列，并检查任意目录中是否有该文件（类似node的`require.paths`）。该队列默认为单一路径，从`filename`选项的`dirname`衍生而来。 因此，如果你的文件名是`/tmp/testing/stylus/main.styl`，导入将显现为`/tmp/testing/stylus/`。
+
+@import也支持索引形式。这意味着当你`@import blueprint`, 则会理解成`blueprint.styl`或`blueprint/index.styl`. 对于库而言，这很有用，既可以展示所有特征与功能，同时又能导入特征子集。
+
+如下很常见的库结构：
+
+```
+./tablet
+  |-- index.styl 
+  |-- vendor.styl 
+  |-- buttons.styl 
+  |-- images.styl 
+```
+
+下面这个例子中，我们设置`paths`选项用来为Stylus提供额外路径。在`./test.styl`中，我们可以`@import "mixins/border-radius"`或`@import "border-radius"`（因为`./mixins` 暴露给了Stylus）。
+
+```js
+/**
+  * 依赖模块
+  */
+var stylus = require('../')
+  , str = require('fs').readFileSync(__dirname + '/test.styl', 'utf8');
+var paths = [
+    __dirname
+  , __dirname + '/mixins'
+];
+stylus(str)
+  .set('filename', __dirname + '/test.styl')
+  .set('paths', paths)
+  .render(function(err, css){
+    if (err) throw err;
+    console.log(css);
+  });
+```
+
+## JavaScript导入API
+
+当使用`.import(path)`方法，这些导入是被推迟的，直到赋值。
+
+```js
+var stylus = require('../')
+  , str = require('fs').readFileSync(__dirname + '/test.styl', 'utf8');
+stylus(str)
+  .set('filename', __dirname + '/test.styl')
+  .import('mixins/vendor')
+  .render(function(err, css){
+  if (err) throw err;
+  console.log(css);
+});
+```
+
+下面语句：
+
+```stylus
+@import 'mixins/vendor'
+```
+
+等同于：
+
+```stylus
+.import('mixins/vendor')
+```
+
