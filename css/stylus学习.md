@@ -1237,3 +1237,564 @@ get(hash, something)
 ```
 
 # Stylus 关键字参数
+
+Stylus支持关键字参数，或"kwargs". 允许你根据相关参数名引用参数。
+
+下面这些例子功能上都是一样的。但是，我们可以在列表中的任何地方放置关键字参数。其余不键入参数将适用于尚未得到满足的参数。
+
+```stylus
+body {
+  color: rgba(255, 200, 100, 0.5);
+  color: rgba(red: 255, green: 200, blue: 100, alpha: 0.5);
+  color: rgba(alpha: 0.5, blue: 100, red: 255, 200);
+  color: rgba(alpha: 0.5, blue: 100, 255, 200);
+}
+```
+
+```css
+body{color:rgba(255,200,100,0.5);color:rgba(255,200,100,0.5);color:rgba(255,200,100,0.5);color:rgba(255,200,100,0.5)}
+```
+
+查看函数或混合书写中接受的参数，可以使用`p()`方法。
+
+```stylus
+p(rgba)
+```
+
+生成：
+
+```stylus
+inspect: rgba(red, green, blue, alpha)
+```
+
+# Stylus 内置方法
+
+## 颜色方法
+
+| 函数              | 作用                        | 例子                                              |
+| ----------------- | --------------------------- | ------------------------------------------------- |
+| red(color)        | 返回`color`中的红色比重。   | `red(#c00)` `// => 204`                           |
+| green(color)      | 返回`color`中的绿色比重。   | `green(#0c0)` `// => 204`                         |
+| blue(color)       | 返回`color`中的蓝色比重。   | `red(#00c)` `// => 204`                           |
+| alpha(color)      | 返回`color`中的透明度比重。 | `alpha(#fff)` `// => 1`                           |
+| dark(color)       | 检查`color`是否是暗色。     | `dark(black)` `// => true`                        |
+| light(color)      | 检查`color`是否是亮色。     | `light(#00FF40)` `// => true`                     |
+| hue(color)        | 返回给定`color`的色调。     | `hue(hsla(50deg, 100%, 80%))` `// => 50deg`       |
+| saturation(color) | 返回给定`color`的饱和度。   | `saturation(hsla(50deg, 100%, 80%))` `// => 100%` |
+| lightness(color)  | 返回给定`color`的亮度。     | `lightness(hsla(50deg, 100%, 80%))` `// => 80%`   |
+|                   |                             |                                                   |
+|                   |                             |                                                   |
+|                   |                             |                                                   |
+|                   |                             |                                                   |
+|                   |                             |                                                   |
+|                   |                             |                                                   |
+|                   |                             |                                                   |
+|                   |                             |                                                   |
+|                   |                             |                                                   |
+|                   |                             |                                                   |
+
+## push(expr, args…)
+
+后面推送给定的`args`给`expr`.  别名为`append()`.
+
+```stylus
+nums = 1 2
+push(nums, 3, 4, 5)
+nums
+// => 1 2 3 4 5
+```
+
+## unshift(expr, args…)
+
+起始位置插入给定的`args`给`expr`.  别名为`prepend()`.
+
+```stylus
+nums = 4 5
+unshift(nums, 3, 2, 1)
+nums
+// => 1 2 3 4 5
+```
+
+## keys(pairs)
+
+返回给定`pairs`中的键。
+
+```stylus
+pairs = (one 1) (two 2) (three 3)
+keys(pairs)
+// => one two three
+```
+
+## values(pairs)
+
+返回给定`pairs`中的值。
+
+```stylus
+pairs = (one 1) (two 2) (three 3)
+values(pairs)
+// => 1 2 3
+```
+
+## typeof(node)
+
+字符串形式返回`node`类型。 别名有`type-of`和`type`.
+
+```stylus
+type(12)
+// => 'unit'
+typeof(12)
+// => 'unit'
+typeof(#fff)
+// => 'rgba'
+type-of(#fff)
+// => 'rgba'
+```
+
+## unit(unit[, type])
+
+**返回`unit`类型的字符串或空字符串**，或者赋予`type`值而无需单位转换。
+
+```stylus
+unit(10)
+// => ''
+unit(15in)
+// => 'in'
+unit(15%, 'px')
+// => 15px
+unit(15%, px)
+// => 15px
+```
+
+## match(pattern, string)
+
+检测`string`是否匹配给定的`pattern`.
+
+```stylus
+match('^foo(bar)?', 'foo')
+match('^foo(bar)?', 'foobar')
+// => true
+match('^foo(bar)?', 'bar')
+// => false
+```
+
+## 数学方法
+
+| 函数        | 作用           | 例子                                                     |
+| ----------- | -------------- | -------------------------------------------------------- |
+| abs(unit)   | 绝对值。       | `abs(-5px)` `// => 5px`                                  |
+| ceil(unit)  | 向上取整。     | `ceil(5.5in)` `// => 6in`                                |
+| floor(unit) | 向下取整。     | `floor(5.6px)` `// => 5px`                               |
+| round(unit) | 四舍五入取整。 | `round(5.5px)` `// => 6px` `` `round(5.4px)` `// => 5px` |
+| min(a, b)   | 取较小值。     | `min(1, 5)` `// => 1`                                    |
+| max(a, b)   | 取较大值。     | `max(1, 5)` `// => 5`                                    |
+| even(unit)  | 是否为偶数。   | `even(6px)` `// => true`                                 |
+| add(unit)   | 是否为奇数。   | `odd(5mm)` `// => true`                                  |
+| sum(nums)   | 求和。         | `sum(1 2 3)` `// => 6`                                   |
+| avg(nums)   | 求平均数。     | `avg(1 2 3)` `// => 2`                                   |
+
+## join(delim, vals…)
+
+给定`vals`使用`delim`连接。
+
+```stylus
+join(' ', 1 2 3)
+// => "1 2 3"
+join(',', 1 2 3)
+// => "1,2,3"
+join(', ', foo bar baz)
+// => "foo, bar, baz"
+join(', ', foo, bar, baz)
+// => "foo, bar, baz"
+join(', ', 1 2, 3 4, 5 6)
+// => "1 2, 3 4, 5 6"
+```
+
+## hsla(color | h,s,l,a)
+
+转换给定`color`为`HSLA`节点，或h,s,l,a比重值。
+
+```stylus
+body
+  color hsla(10deg, 50%, 30%, 0.5)
+  background-color hsla(#ffcc00)
+```
+
+```css
+body{color:rgba(115,51,38,0.5);background-color:#fc0}
+```
+
+## hsl(color | h,s,l)
+
+转换给定`color`为`HSLA`节点，或h,s,l比重值。
+
+```stylus
+body
+  color hsl(10, 50, 30)
+  background-color hsl(#ffcc00)
+  border-color rgba(#ffcc00, 0.5)
+```
+
+```css
+body{color:#733326;background-color:#fc0;border-color:rgba(255,204,0,0.5)}
+```
+
+
+
+## rgba(color | r,g,b,a)
+
+从r,g,b,a通道返回`RGBA`, 或提供`color`来调整透明度。
+
+```stylus
+body
+  color rgba(255,0,0,0.5)
+  background-color rgba(255,0,0,1)
+  border-color rgba(#ffcc00, 0.5)
+```
+
+```css
+body{color:rgba(255,0,0,0.5);background-color:#f00;border-color:rgba(255,204,0,0.5)}
+```
+
+另外，stylus支持`#rgba`以及`#rrggbbaa`符号。
+
+```stylus
+#fc08
+// => rgba(255,204,0,0.5)
+#ffcc00ee
+// => rgba(255,204,0,0.9)
+```
+
+## rgb(color | r,g,b)
+
+从r,g,b通道返回`RGBA`或生成一个`RGBA`节点。
+
+```stylus
+rgb(255,204,0)
+// => #ffcc00
+rgb(#fff)
+// => #fff
+```
+
+## lighten(color, amount)
+
+给定`color`增亮`amount`值。该方法单位敏感，例如，支持百分比，如下：
+
+```stylus
+body
+  color lighten(#2c2c2c, 30)
+  background-color lighten(#2c2c2c, 30%)
+  border-color black
+```
+
+```css
+body{color:#787878;background-color:#6b6b6b;border-color:#000}
+```
+
+## darken(color, amount)
+
+给定`color`变暗`amount`值。该方法单位敏感，例如，支持百分比，如下：
+
+
+
+```stylus
+body
+  color darken(#D62828, 30)
+  background-color darken(#D62828, 30%)
+  border-color black
+```
+
+```css
+body{color:#551010;background-color:#961c1c;border-color:#000}
+```
+
+## desaturate(color, amount)
+
+给定`color`饱和度减小`amount`.
+
+```stylus
+desaturate(#f00, 40%)
+// => #c33
+```
+
+## saturate(color, amount)
+
+给定`color`饱和度增加`amount`.
+
+```stylus
+body
+  color saturate(#c33, 40%)
+  background-color desaturate(#f00, 40%)
+  border-color black
+```
+
+```css
+body{color:#eb1414;background-color:#c33;border-color:#000}
+```
+
+## invert(color)
+
+颜色反相。红绿蓝颜色反转，透明度不变。
+
+```stylus
+body
+  color invert(#00eeff)
+  background-color invert(#ff00ee)
+  border-color black
+```
+
+```css
+body{color:#f10;background-color:#0f1;border-color:#000}
+```
+
+## unquote(str | ident)
+
+给定`str`引号去除，返回`Literal`节点。
+
+```stylus
+unquote("sans-serif")
+// => sans-serif
+unquote(sans-serif)
+// => sans-serif
+unquote('1px / 2px')
+// => 1px / 2px
+```
+
+## s(fmt, …)
+
+`s()`方法类似于`unquote()`，不过后者返回的是`Literal`节点，而这里起接受一个格式化的字符串，非常像C语言的`sprintf()`. **目前，唯一标识符是`%s`**.
+
+```stylus
+s('bar()');
+// => bar()
+s('bar(%s)', 'baz');
+// => bar("baz")
+s('bar(%s)', baz);
+// => bar(baz)
+s('bar(%s)', 15px);
+// => bar(15px)
+s('rgba(%s, %s, %s, 0.5)', 255, 100, 50);
+// => rgba(255, 100, 50, 0.5)
+s('bar(%Z)', 15px);
+// => bar(%Z)
+s('bar(%s, %s)', 15px);
+// => bar(15px, null)
+```
+
+## operate(op, left, right)
+
+在`left`和`right`操作对象上执行给定的`op`.
+
+```stylus
+op = '+'
+operate(op, 15, 5)
+// => 20
+```
+
+## length([expr])
+
+括号表达式扮演元组，`length()`方法返回该表达式的长度。
+
+```stylus
+length((1 2 3 4))
+// => 4
+length((1 2))
+// => 2
+length((1))
+// => 1
+length(())
+// => 0
+length(1 2 3)
+// => 3
+length(1)
+// => 1
+length()
+// => 0
+```
+
+## warn(msg)
+
+使用给定的`error`警告，并不退出。
+
+```stylus
+warn("oh noes!")
+```
+
+## error(msg)
+
+伴随着给定的错误`msg`退出。
+
+```stylus
+add(a, b)
+  unless a is a 'unit' and b is a 'unit'
+    error('add() expects units')
+  a + b
+```
+
+## last(expr)
+
+返回给定`expr`的最后一个值。
+
+```stylus
+nums = 1 2 3
+last(nums)
+last(1 2 3)
+// => 3
+list = (one 1) (two 2) (three 3)
+last(list)
+// => (three 3)
+```
+
+## p(expr)
+
+```stylus
+fonts = Arial, sans-serif
+p('test')
+p(123)
+p((1 2 3))
+p(fonts)
+p(#fff)
+p(rgba(0,0,0,0.2))
+add(a, b)
+  a + b
+p(add)
+```
+
+标准输出：
+
+```stylus
+inspect: 'test'
+inspect: 123
+inspect: 1 2 3
+inspect: (Arial), (sans-serif)
+inspect: #fff
+inspect: rgba(0,0,0,0.2)
+inspect: add(a, b)
+```
+
+## opposite-position(positions)
+
+返回给定`positions`相反内容。
+
+```stylus
+opposite-position(right)
+// => left
+opposite-position(top left)
+// => bottom right
+opposite-position('top' 'left')
+// => bottom right
+```
+
+## image-size(path)
+
+返回指定`path`图片的`width`和`height`. 向上查找路径的方法和`@import`一样，`paths`设置的时候改变。
+
+```stylus
+width(img)
+  return image-size(img)\[0\]
+height(img)
+  return image-size(img)\[1\]
+image-size('tux.png')
+// => 405px 250px
+image-size('tux.png')\[0\] == width('tux.png')
+// => true
+```
+
+## add-property(name, expr)
+
+使用给定的`expr`**为最近的块域添加属性`name`**。
+
+```stylus
+something()
+  add-property('bar', 1 2 3)
+  s('baz')
+
+body
+  foo: something()
+
+```
+
+```css
+body{bar:1 2 3;foo:baz}
+```
+
+接下来，“神奇”的`current-property`局部变量将大放异彩，这个变量自动提供给函数体，且包含当前属性名和值的表达式。
+
+例如，我们使用`p()`检查这个局部变量，我们可以得到：
+
+```stylus
+p(current-property)
+// => "foo" (foo __CALL__ bar baz)
+p(current-property[0])
+// => "foo"
+p(current-property[1])
+// => foo __CALL__ bar baz
+```
+
+使用`current-property`我们可以让例子走得更远点，使用新值复制该属性，且确保功能的条件仅在属性值中使用。
+
+```stylus
+something(n)
+  if current-property
+    add-property(current-property[0], s('-webkit-something(%s)', n))
+    add-property(current-property[0], s('-moz-something(%s)', n))
+    s('something(%s)', n)
+  else
+    error('something() must be used within a property')
+body {
+  foo: something(15px) bar;
+}
+```
+
+```css
+body{foo:-webkit-something(15px);foo:-moz-something(15px);foo:something(15px) bar}
+```
+
+如果你注意上面这个例子，会发现`bar`只在一开始调用的时候出现，因为我们返回`something(15px)`, 其仍留在表达式里，然而，其他人并不重视其余的表达式。
+
+更强大的解决方案如下，定义一个名为`replace()`的函数，其克隆表达式，以防止出现变化，用另外一个替换表达式的字符串值，并返回克隆的表达式。然后我们继续在表达式中替换`__CALL__`，表示循环调用`something()`.
+
+```stylus
+replace(expr, str, val)
+  expr = clone(expr)
+  for e, i in expr
+    if str == e
+      expr[i] = val
+  expr
+something(n)
+  if current-property
+    val = current-property[1]
+    webkit = replace(val, '__CALL__', s('-webkit-something(%s)', n))
+    moz = replace(val, '__CALL__', s('-moz-something(%s)', n))
+    add-property(current-property[0], webkit)
+    add-property(current-property[0], moz)
+    s('something(%s)', n)
+  else
+    error('something() 必须在属性中使用')
+
+body {
+  foo: something(15px) bar baz;
+}
+```
+
+```css
+body{foo:-webkit-something(15px) bar baz;foo:-moz-something(15px) bar baz;foo:something(15px) bar baz}
+```
+
+无论是内部调用的使用还是调用的位置上，我们实现的方法现在是完全透明的了。这个强大概念有助于在一些私有属性使用时调用，例如渐变。
+
+## 未定义方法
+
+未定义方法一字面量形式输出。例如，我们可以在CSS中调用`rgba-stop(50%, #fff)`, 其会按照你所期望的显示，我们也可以使用这些内部助手。
+
+下面这个例子中我们简单定义了方法`stop()`, 其返回了字面上`rgba-stop()`调用。
+
+```stylus
+stop(pos, rgba)
+  rgba-stop(pos, rgba)
+stop(50%, orange)
+// => rgba-stop(50%, #ffa500)
+```
+
+# Stylus 其余参数
+
+## 其余参数
