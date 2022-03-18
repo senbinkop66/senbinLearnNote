@@ -837,3 +837,403 @@ body
 
 # Stylus  Mixins
 
+## 混入
+
+混入和函数定义方法一致，但是应用却大相径庭。
+
+例如，下面有定义的`border-radius(n)`方法，其却作为一个_mixin_（如，作为状态调用，而非表达式）调用。
+
+当`border-radius()`选择器中调用时候，属性会被扩展并复制在选择器中。
+
+```stylus
+border-radius(n)
+  -webkit-border-radius n
+  -moz-border-radius n
+  border-radius n
+from input[type=button]
+  border-radius(5px)
+```
+
+```css
+from input[type=button]{-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px}
+```
+
+使用**混入书写**，你可以完全忽略括号，提供梦幻般私有属性的支持。
+
+```stylus
+border-radius(n)
+  -webkit-border-radius n
+  -moz-border-radius n
+  border-radius n
+from input[type=button]
+  border-radius 5px
+```
+
+注意到我们混合书写中的`border-radius`当作了属性，而不是一个递归函数调用。
+
+更进一步，我们可以**利用`arguments`这个局部变量**，传递可以包含多值的表达式。
+
+```stylus
+border-radius()
+  -webkit-border-radius arguments
+  -moz-border-radius arguments
+  border-radius arguments
+from input[type=button]
+  border-radius 5px
+```
+
+现在，我们可以像这样子传值：`border-radius 1px 2px / 3px 4px`!
+
+另外一个很赞的应用是特定的私有前缀支持——例如IE浏览器的透明度：
+
+```stylus
+support-for-ie ?= true
+
+opacity(n)
+  opacity n
+  if support-for-ie
+    filter unquote('progid:DXImageTransform.Microsoft.Alpha(Opacity=' + round(n * 100) + ')')
+
+#logo
+  background-color blue
+  width 200px
+  height 200px
+  &:hover
+    opacity 0.5
+```
+
+```css
+#logo{background-color:#00f;width:200px;height:200px}#logo:hover{opacity:.5;filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50)}
+```
+
+## 父级引用
+
+混合书写可以利用父级引用字符`&`, 继承父业而不是自己筑巢。
+
+例如，我们要用`stripe(even, odd)`创建一个条纹表格。`even`和`odd`均提供了默认颜色值，每行也指定了`background-color`属性。我们可以在`tr`嵌套中使用`&`来引用`tr`，以提供`even`颜色。
+
+```stylus
+stripe(even = #fff, odd = #eee)
+  tr
+    background-color odd
+    &.even
+    &:nth-child(even)
+      background-color even
+
+table
+  stripe()
+  td
+    padding 4px 10px
+
+table#users
+  stripe(#303030, #494848)
+  td
+    color white
+```
+
+```css
+table tr{background-color:#eee}table tr.even,table tr:nth-child(even){background-color:#fff}table td{padding:4px 10px}
+
+table#users tr{background-color:#494848}table#users tr.even,table#users tr:nth-child(even){background-color:#303030}table#users td{color:#fff}
+```
+
+```html
+<div>
+	<table id="users">
+		<tr><td>A</td><td>1</td></tr>
+		<tr><td>A</td><td>2</td></tr>
+		<tr><td>A</td><td>3</td></tr>
+		<tr><td>A</td><td>4</td></tr>
+		<tr><td>A</td><td>5</td></tr>
+		<tr><td>A</td><td>6</td></tr>
+	</table>
+</div>
+```
+
+另外，`stripe()`的定义无需父引用：
+
+```stylus
+stripe(even = #fff, odd = #eee)
+  tr
+    background-color odd
+  tr.even
+  tr:nth-child(even)
+    background-color even
+```
+
+如果你愿意，你可以把`stripe()`当作属性调用。
+
+```stylus
+stripe #fff #000
+```
+
+## 混合书写中的混合书写
+
+自然，混合书写可以利用其它混合书写，建立在它们自己的属性和选择器上。
+
+例如，下面我们创建内联`comma-list()`（通过`inline-list()`）以及逗号分隔的无序列表。
+
+```stylus
+inline-list()
+  li
+    display inline
+
+comma-list()
+  inline-list()
+  li
+    &:after
+      content ", "
+    &:last-child:after
+      content ""
+
+ul
+  comma-list()
+```
+
+```css
+ul li{display:inline}ul li:after{content:", "}ul li:last-child:after{content:""}
+```
+
+```html
+<div>
+	<ul>
+		<li>A</li>
+		<li>B</li>
+		<li>C</li>
+		<li>D</li>
+	</ul>
+</div>
+```
+
+# Stylus函数
+
+## 函数
+
+Stylus强大之处就在于其内置的语言函数定义。其定义与混入(mixins)一致；却可以返回值。
+
+## 返回值
+
+很简单的例子，两数值相加的方法：
+
+```stylus
+add(a, b)
+  a + b
+```
+
+我们可以在特定条件下使用该方法，如在属性值中：
+
+```stylus
+body 
+  padding add(10px, 5)
+```
+
+```css
+body{padding:15px}
+```
+
+## 默认参数
+
+可选参数往往有个默认的给定表达。在Stylus中，我们甚至可以**超越默认参数**。
+
+```stylus
+add(a,b=a)
+  a+b
+
+body
+  padding add(10px,5)
+  margin add(10px)
+```
+
+```css
+body{padding:15px;margin:20px}
+```
+
+注意：因为参数默认是赋值，我们可可以使用函数调用作为默认值。
+
+```stylus
+add(a,b=unit(a,px))
+  a+b
+
+body
+  padding add(10px,5)
+  margin add(10)
+```
+
+## 函数体
+
+我们可以把简单的`add()`方法更进一步。**通过内置`unit()`把单位都变成`px`**, 因为赋值在每个参数上，因此，我们可以无视单位换算。
+
+```stylus
+add(a,b=a)
+  a=unit(a,px)
+  b=unit(b,px)
+  a+b
+
+body
+  padding add(15%,10deg)
+  margin add(10em)
+```
+
+```css
+body{padding:25px;margin:20px}
+```
+
+## 多个返回值
+
+Stylus的函数可以返回多个值，就像你给变量赋多个值一样。
+
+例如，下面就是一个有效赋值：
+
+```stylus
+sizes = 15px 10px
+sizes[0]
+// => 15px
+```
+
+类似的，我们可以在函数中返回多个值：
+
+```stylus
+sizes()
+ 15px 10px
+sizes()[0]
+// => 15px
+```
+
+有个小小的例外就是返回值是标识符。例如，下面看上去像一个属性赋值给Stylus（因为没有操作符）。
+
+```stylus
+swap(a, b)
+  b a
+```
+
+为避免歧义，我们可以使用括号，或是`return`关键字。
+
+```stylus
+swap(a, b)
+  (b a)
+swap(a, b)
+  return b a
+```
+
+## 条件
+
+比方说，我们想要创建一个名为`stringish()`的函数，用来决定参数是否是字符串。我们检查`val`是否是字符串或缩进（类似字符）。如下，使用`yes`和`no`代替`true`和`false`.
+
+```stylus
+stringish(val)
+  if val is a 'string' or val is a 'ident'
+    yes
+  else
+    no
+
+stringish('yay') == yes
+// => true
+stringish(yay) == yes
+// => true
+stringish(0) == no
+// => true
+```
+
+注意：`yes`和`no`并不是布尔值。本例中，它们只是简单的未定义标识符。
+
+另外一个例子：
+
+```stylus
+compare(a, b)
+  if a > b
+    higher
+  else if a < b
+    lower
+  else
+    equal
+
+compare(5, 2)
+// => higher
+compare(1, 5)
+// => lower
+compare(10, 10)
+// => equal
+```
+
+## 别名
+
+给函数起个别名，和简单，直接等于就可以了。例如上面的`add()`弄个别名`plus()`, 如下：
+
+```stylus
+plus = add
+plus(1, 2)
+// => 3
+```
+
+## 变量函数
+
+我们可以把函数当作变量传递到新的函数中。例如，`invoke()`接受函数作为参数，因此，我们可以传递`add()`以及`sub()`.
+
+```stylus
+invoke(a, b, fn)
+  fn(a, b)
+add(a, b)
+  a + b
+sub(a, b)
+  a - b
+
+body
+  padding invoke(5, 10, add)
+  padding invoke(5, 10, sub)
+```
+
+```css
+body{padding:15;padding:-5}
+```
+
+## 参数
+
+`arguments`是所有函数体都有的局部变量，包含传递的所有参数。
+
+```stylus
+sum()
+  n=0
+  for num in arguments
+    n=n + num
+
+body
+  padding sum(1,2,3,4,5)
+  margin sum(2,3,4)
+```
+
+```css
+body{padding:15;margin:9}
+```
+
+## 哈希示例
+
+下面，我们定义`get(hash, key)`方法，用来返回`key`值或`null`. 我们遍历每个键值对，如果键值匹配，返回对应的值。
+
+```stylus
+get(hash,key)
+  return pair[1] if pair[0]==key for pair in hash
+
+```
+
+下面例子可以证明，语言函数模样的Stylus表达式具有更大的灵活性。
+
+```stylus
+get(hash,key)
+  return pair[1] if pair[0]==key for pair in hash
+
+hash=(one 1) (two 2) (three 3)
+body
+  padding get(hash,one) get(hash,two) get(hash,three) 5
+  margin get(hash,one) get(hash,two) get(hash,three) 0
+```
+
+```css
+body{padding:1 2 3 5;margin:1 2 3 0}
+```
+
+```stylus
+get(hash, something)
+// => null
+```
+
+# Stylus 关键字参数
