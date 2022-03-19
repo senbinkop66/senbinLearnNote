@@ -2219,3 +2219,160 @@ stylus(str)
 .import('mixins/vendor')
 ```
 
+# Stylus @media
+
+`@media`工作原理和在常规CSS中一样，但是，要使用Stylus的块状符号。
+
+```stylus
+@media print
+  #header
+  #footer
+    display none
+```
+
+```css
+@media print{#header,#footer{display:none}}
+```
+
+# Stylus @font-face
+
+`@font-face`跟其在CSS中作用表现一样，在后面简单地添加个块状属性即可，类似下面：
+
+```stylus
+@font-face
+  font-family Geo
+  font-style normal
+  src url(fonts/geo_sans_light/GensansLight.ttf)
+
+.ingeo
+  font-family Geo
+```
+
+```css
+@font-face{font-family:Geo;font-style:normal;src:url("fonts/geo_sans_light/GensansLight.ttf")}.ingeo{font-family:Geo}
+```
+
+# Stylus @keyframes
+
+## @keyframes
+
+Stylus支持`@keyframes`规则，当编译的时候转换成`@-webkit-keyframes`：
+
+```stylus
+@keyframes pulse{
+  0% {
+    background-color red
+    opacity 1.0
+    -webkit-transform scale(1.0) rotate(0deg)
+  }
+  33% {
+    background-color blue
+    opacity 0.75
+    -webkit-transform scale(1.1) rotate(-5deg)
+  }
+  67% {
+    background-color green
+    opacity 0.5
+    -webkit-transform scale(1.1) rotate(5deg)
+  }
+  100% {
+    background-color red
+    opacity 1.0
+    -webkit-transform scale(1.0) rotate(0deg)
+  }
+}
+```
+
+```css
+@-moz-keyframes pulse{
+	0%{background-color:#f00;opacity:1;-webkit-transform:scale(1) rotate(0deg)}
+	33%{background-color:#00f;opacity:.75;-webkit-transform:scale(1.1) rotate(-5deg)}
+	67%{background-color:#008000;opacity:.5;-webkit-transform:scale(1.1) rotate(5deg)}
+	100%{background-color:#f00;opacity:1;-webkit-transform:scale(1) rotate(0deg)}}
+@-webkit-keyframes pulse{0%{background-color:#f00;opacity:1;-webkit-transform:scale(1) rotate(0deg)}33%{background-color:#00f;opacity:.75;-webkit-transform:scale(1.1) rotate(-5deg)}67%{background-color:#008000;opacity:.5;-webkit-transform:scale(1.1) rotate(5deg)}100%{background-color:#f00;opacity:1;-webkit-transform:scale(1) rotate(0deg)}}
+@-o-keyframes pulse{0%{background-color:#f00;opacity:1;-webkit-transform:scale(1) rotate(0deg)}33%{background-color:#00f;opacity:.75;-webkit-transform:scale(1.1) rotate(-5deg)}67%{background-color:#008000;opacity:.5;-webkit-transform:scale(1.1) rotate(5deg)}100%{background-color:#f00;opacity:1;-webkit-transform:scale(1) rotate(0deg)}}
+@keyframes pulse{0%{background-color:#f00;opacity:1;-webkit-transform:scale(1) rotate(0deg)}33%{background-color:#00f;opacity:.75;-webkit-transform:scale(1.1) rotate(-5deg)}67%{background-color:#008000;opacity:.5;-webkit-transform:scale(1.1) rotate(5deg)}100%{background-color:#f00;opacity:1;-webkit-transform:scale(1) rotate(0deg)}}
+```
+
+## 扩展
+
+使用`@keyframes`，通过`vendors`变量，会自动添加私有前缀(`webkit moz official`)。这意味着你可以子啊任意时候立即高效地做修改。
+
+```stylus
+@keyframes foo {
+  from {
+    color: black
+  }
+  to {
+    color: white
+  }
+}
+```
+
+```css
+@-moz-keyframes foo{from{color:#000}to{color:#fff}}@-webkit-keyframes foo{from{color:#000}to{color:#fff}}@-o-keyframes foo{from{color:#000}to{color:#fff}}@keyframes foo{from{color:#000}to{color:#fff}}
+```
+
+扩增两个默认前缀，官方解析：
+
+```stylus
+@-moz-keyframes foo {
+  0% {
+    color: #000;
+  }
+  100% {
+    color: #fff;
+  }
+}
+@-webkit-keyframes foo {
+  0% {
+    color: #000;
+  }
+  100% {
+    color: #fff;
+  }
+}
+@keyframes foo {
+  0% {
+    color: #000;
+  }
+  100% {
+    color: #fff;
+  }
+}
+```
+
+如果我们只想有标准解析，很简单，修改`vendors`：
+
+```stylus
+vendors = official
+@keyframes foo {
+  from {
+    color: black
+  }
+  to {
+    color: white
+  }
+}
+```
+
+```css
+@keyframes foo{from{color:#000}to{color:#fff}}
+```
+
+# Stylus @extend
+
+## 继承
+
+Stylus的@extend指令受 [SASS](https://www.axihe.com/edu/sass/edu/sass-tutorial.html) 的启发，基本一致，除了些轻微差异。此功能大大简化了继承其他语义规则集的语义规则集的维护。
+
+## 混合书写下的“继承”
+
+尽管你可以使用混写实现类似效果，但会导致重复的CSS. 典型的模式式定义如下的几个类名，然后归结到一个元素中，例如"warning message".
+
+该技术实现是没什么问题，但是维护就比较麻烦了。
+
+```
+
+```
+
