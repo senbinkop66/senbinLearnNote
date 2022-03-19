@@ -2372,7 +2372,818 @@ Stylus的@extend指令受 [SASS](https://www.axihe.com/edu/sass/edu/sass-tutoria
 
 该技术实现是没什么问题，但是维护就比较麻烦了。
 
+```stylus
+message,
+.warning {
+  padding: 10px;
+  border: 1px solid #eee;
+}
+.warning {
+  color: #E2E21E;
+}
 ```
 
+```css
+message,.warning{padding:10px;border:1px solid #eee}.warning{color:#e2e21e}
+```
+
+## 使用`__@extend__`
+
+使用`__@extend__`得到同样的输出，只要把对应的选择器传给`@extend`即可。然后`.warning`选择器就会继承已经存在的`.message`规则。
+
+```stylus
+message{
+  padding: 10px;
+  border: 1px solid #eee;
+}
+.warning {
+  @extends .message
+  color: #E2E21E;
+}
+```
+
+这儿是个更复杂的例子，演示了`__@extend__`如何级联。
+
+```stylus
+red = #E33E1E
+yellow = #E2E21E
+.message
+  padding: 10px
+  font: 14px Helvetica
+  border: 1px solid #eee
+.warning
+  @extends .message
+  border-color: yellow
+  background: yellow + 70%
+.error
+  @extends .message
+  border-color: red
+  background: red + 70%
+.fatal
+  @extends .error
+  font-weight: bold
+  color: red
+```
+
+```css
+.message,.warning,.error,.fatal{padding:10px;font:14px Helvetica;border:1px solid #eee}.warning{border-color:#e2e21e;background:#f6f6bc}.error,.fatal{border-color:#e33e1e;background:#f7c5bc}.fatal{font-weight:bold;color:#e33e1e}
+```
+
+目前**Stylus与SASS不同之处在于SASS不允许`__@extend__`嵌套选择器。**
+
+```SAS
+form
+  button
+    padding: 10px
+a.button
+  @extend form button 
+Syntax error: Can't extend form button: can't extend nested selectors
+// 解析错误： 无法继承自 button: 不能继承嵌套选择器
+        on line 6 of standard input
+  Use --trace for backtrace.
+```
+
+Stylus中，只要选择器匹配，就可以生效：
+
+```stylus
+form
+ input[type=text]
+   padding: 5px
+   border: 1px solid #eee
+   color: #ddd
+textarea
+ @extends form input[type=text]
+ padding: 10px
+```
+
+```css
+form input[type=text],textarea{padding:5px;border:1px solid #eee;color:#ddd}textarea{padding:10px}
+```
+
+# Stylus url() 函数
+
+## 函数之url()
+
+### 内联Data URI图像
+
+Stylus捆绑了一个可选函数，名叫url()，其替换了字面上的url()调用（且使用base64 Data URIs有条件地内联它们）。
+
+通过require(‘stylus’).url该函数本身是可用的，其接受一个options对象，当看到url()时候，返回Stylus内部调用的函数。
+
+.define(name, callback)方法指定了一个可被调用的JavaScript函数。在这种情况下，因为我们图片在./css/images中，我们可以忽视paths选项（默认情况下，会查找相关要呈现的图像文件）。如果愿意，该行为时可以改变的。
+
+```js
+stylus(str)
+  .set('filename', __dirname + '/css/test.styl')
+  .define('url', stylus.url())
+  .render(function(err, css){
+  });
+```
+
+例如，想象图片在 `./public/images` , 我们想要使用 `url(images/tobi.png)` , 我们可以传递paths公共目录。这样，它就成为了向上查找进程的一部分。
+
+同样，如果我们想替换为 `url(tobi.png)`, 我们可以传递 `paths: [__dirname + '/public/images']`.
+
+```js
+stylus(str)
+  .set('filename', __dirname + '/css/test.styl')
+  .define('url', stylus.url({ paths: [__dirname + '/public'] }))
+  .render(function(err, css){
+  });
+```
+
+### 选项(Options)
+
+- limit 大小默认限制30Kb(30000)
+- paths 图像解析路径
+
+# Stylus CSS字面量
+
+## 字面量CSS
+
+不管什么原因，如果遇到Stylus搞不定的特殊需求，你可以使用`@css`使其作为CSS字面量解决之。
+
+```stylus
+@css{
+  body{
+    color:gray;
+  }
+}
+```
+
+```css
+body{
+  color:gray;
+}
+
+```
+
+# Stylus CSS样式解析
+
+## CSS样式
+
+Stylus完全支持常规的CSS样式解析，这意味着你无需寻求其它解析器，或指定特别的文件使用特别的样式。
+
+使用缩进方法的小样式：
+
+```stylus
+border-radius()
+  -webkit-border-radius arguments
+  -moz-border-radius arguments
+  border-radius arguments
+body a
+  font 12px/1.4 "Lucida Grande", Arial, sans-serif
+  background black
+  color #ccc
+form input
+  padding 5px
+  border 1px solid
+  border-radius 5px
+```
+
+因为括号，冒号及分号都是可选的，因此上面的例子我们可以按照正常的CSS书写：
+
+```stylus
+border-radius() {
+  -webkit-border-radius: arguments;
+  -moz-border-radius: arguments;
+  border-radius: arguments;
+}
+body a {
+  font: 12px/1.4 "Lucida Grande", Arial, sans-serif;
+  background: black;
+  color: #ccc;
+}
+form input {
+  padding: 5px;
+  border: 1px solid;
+  border-radius: 5px;
+}
+```
+
+因为我们可以混合和匹配的两个变体，因此下面也是有效的：
+
+```stylus
+border-radius()
+  -webkit-border-radius: arguments;
+  -moz-border-radius: arguments;
+  border-radius: arguments;
+body a {
+  font: 12px/1.4 "Lucida Grande", Arial, sans-serif;
+  background: black;
+  color: #ccc;
+}
+form input
+  padding: 5px;
+  border: 1px solid;
+  border-radius: 5px;
+```
+
+Stylus支持的变量，函数，混写以及其他特征也可以使之按预期工作：
+
+```stylus
+main-color = white
+main-hover-color = black
+body a {
+  color: main-color;
+  &:hover { color: main-hover-color; }
+}
+body a { color: main-color; &:hover { color: main-hover-color; }}
+```
+
+```css
+body a{color:#fff}body a:hover{color:#000}
+body a{color:#fff}body a:hover{color:#000}
+```
+
+此规则有一些注意事项：因为这两种风格可以混合和匹配，一些缩进规则仍然适用。所以，虽然不是每一个普通的CSS样式零修改都起作用，此功能仍然允许那些喜欢CSS语法的同学们继续这样做，同时又可以利用Stylus的强大功能。
+
+# Stylus 字符转码
+
+## 转码
+
+Stylus可以字符转码。这可以让字符变成标识符，或是渲染成字面量。
+
+```stylus
+body
+  padding 1 \+ 2
+```
+
+```css
+body{padding:1 + 2}
+```
+
+注意Stylus中`/`**当作为属性使用的时候需要用括号括起来**：
+
+```stylus
+body
+  padding 14px/1.4
+  font-size (14px/1.4)
+```
+
+```css
+body{padding:14px/1.4;font-size:10px}
+```
+
+# Stylus 可执行性 
+
+## Stylus可执行代码
+
+正因有`stylus`可执行性，Stylus才能将自身转换成CSS.
+
+```bash
+$ stylus --help
+
+  Usage: stylus [options] [command] [< in [> out]]
+                [file|dir ...]
+
+  Commands:
+
+    help [<type>:]<prop> Opens help info at MDN for <prop> in
+                         your default browser. Optionally
+                         searches other resources of <type>:
+                         safari opera w3c ms caniuse quirksmode
+
+  Options:
+
+    -i, --interactive       Start interactive REPL
+    -u, --use <path>        Utilize the Stylus plugin at <path>
+    -U, --inline            Utilize image inlining via data URI support
+    -w, --watch             Watch file(s) for changes and re-compile
+    -o, --out <dir>         Output to <dir> when passing files
+    -C, --css <src> [dest]  Convert CSS input to Stylus
+    -I, --include <path>    Add <path> to lookup paths
+    -c, --compress          Compress CSS output
+    -d, --compare           Display input along with output
+    -f, --firebug           Emits debug infos in the generated CSS that
+                            can be used by the FireStylus Firebug plugin
+    -l, --line-numbers      Emits comments in the generated CSS
+                            indicating the corresponding Stylus line
+    -m, --sourcemap         Generates a sourcemap in sourcemaps v3 format
+    -q, --quiet                                  Less noisy output
+    --sourcemap-inline      Inlines sourcemap with full source text in base64 format
+    --sourcemap-root <url>  "sourceRoot" property of the generated sourcemap
+    --sourcemap-base <path> Base <path> from which sourcemap and all sources are relative
+    -P, --prefix [prefix]   prefix all css classes
+    -p, --print             Print out the compiled CSS
+    --import <file>         Import stylus <file>
+    --include-css           Include regular CSS on @import
+         --ext                   Specify custom file extension for compiled file, default .css
+    -D, --deps              Display dependencies of the compiled file
+    --disable-cache         Disable caching
+    --hoist-atrules         Move @import and @charset to the top
+    -r, --resolve-url       Resolve relative urls inside imports
+    --resolve-url-nocheck   Like --resolve-url but without file existence check
+    -V, --version           Display the version of Stylus
+    -h, --help              Display help information
+
+```
+
+## STDIO编译范例
+
+`stylus`读取自_stdin_输出到_stdout_, 因此，如下例：
+
+```bash
+stylus --compress < some.styl > some.css
+```
+
+## 编译文件范例
+
+`stylus`亦接受文件和目录。例如，一个目录名为`css`将在同一目录编译并输出`.css`文件。
+
+```bash
+stylus css
+```
+
+下面的将会输出到`./public/stylesheets`:
+
+```bash
+stylus css --out public/stylesheets
+```
+
+或一些文件：
+
+```bash
+stylus one.styl two.styl
+```
+
+为了开发的目的，你可以使用`linenos`选项发出指令在生成的CSS中显示Stylus文件名以及行数。
+
+```bash
+stylus --line-numbers <path>
+```
+
+或是`firebug`选项，如果你想使用firebug的 FireStylus扩展
+
+```bash
+stylus --firebug <path>
+```
+
+## 转换CSS
+
+如果你想把CSS转换成简洁的Stylus语法，可以使用`--css`标志。
+
+通过标准输入输出：
+
+```bash
+stylus --css < test.css > test.styl
+```
+
+输出基本名一致的`.styl`文件。
+
+```bash
+stylus --css test.css
+```
+
+输出特定的目标：
+
+```bash
+stylus --css test.css /tmp/out.styl
+```
+
+## CSS属性的帮助
+
+在OS X上，`stylus help` 会打开你默认浏览器并显示给定的属性的帮助文档。
+
+```bash
+stylus help box-shadow
+```
+
+## 壳层交互(Interactive Shell)
+
+Stylus REPL (Read-Eval-Print-Loop)或“壳层交互(Interactive Shell)”允许你直接在终端机上把玩Stylus的表达式。
+
+注意只有表达式可以生效，而不是选择器之类。为了简单，我们添加`-i`或`--interactive`标志：
+
+```bash
+$ stylus -i
+> color = white
+=> #fff
+> color - rgb(200,50,0)
+=> #37cdff
+> color
+=> #fff
+> color -= rgb(200,50,0)
+=> #37cdff
+> color
+=> #37cdff
+> rgba(color, 0.5)
+=> rgba(55,205,255,0.5)
+```
+
+## 利用插件
+
+本例我们将使用nibStylus插件来说明它的CLI使用。
+
+假设我们有如下的Stylus, 其导入nib并使用nib的linear-gradient()方法：
+
+```stylus
+@import 'nib'
+body
+  background: linear-gradient(20px top, white, black)
+```
+
+我们是使用`stylus(1)`通过标准输入输出试图渲染的第一个东西可能就像下面这样：
+
+```bash
+$ stylus < ./src/example.styl
+```
+
+这可能会生成如下的错误，因为Stylus不知道去哪里找到nib.
+
+```bash
+$ stylus < ./src/example.styl
+C:\Users\zhusenbin\AppData\Roaming\npm\node_modules\stylus\bin\stylus:615
+      if (err) throw err;
+               ^
+
+Error: stdin:1:9
+   1| @import 'nib'
+--------------^
+   2| body
+   3|   background: linear-gradient(20px top, white, black)
+
+failed to locate @import file nib.styl
+
+```
+
+对于简单应用Stylus API们的插件，我们可以添加查找路径。通过使用`--include`或`-I`标志：
+
+```bash
+stylus < ./src/example.styl --include ../nib/lib
+```
+
+现在生成内容如下。您可能注意到了，`gradient-data-uri()`以及`create-gradient-image()`以字面量形式输出了。这是因为，当插件提供JavaScript API的时候，光暴露插件的路径是不够的。但是，如果我们仅仅想要的是纯粹Stylus nib函数，则足够了。
+
+```css
+body {
+  background: url(gradient-data-uri(create-gradient-image(20px, top)));
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff), color-stop(1, #000));
+  background: -webkit-linear-gradient(top, #fff 0%, #000 100%);
+  background: -moz-linear-gradient(top, #fff 0%, #000 100%);
+  background: linear-gradient(top, #fff 0%, #000 100%);
+}
+```
+
+因此，我们需要做的是使用`--use`或`-u`标志。其会找寻node模块（有或者没有`.js`扩展名）路径，这里的`require()`模块或调用`style.use(fn())`来暴露该插件（定义js函数等）。
+
+```bash
+$ stylus < test.styl --use ../nib/lib/nib
+```
+
+生成为：
+
+```css
+body {
+  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAUCAYAAABMDlehAAAABmJLR0QA/wD/AP+gvaeTAAAAI0lEQVQImWP4+fPnf6bPnz8zMH358oUBwkIjKJBgYGNj+w8Aphk4blt0EcMAAAAASUVORK5CYII=");
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff), color-stop(1, #000));
+  background: -webkit-linear-gradient(top, #fff 0%, #000 100%);
+  background: -moz-linear-gradient(top, #fff 0%, #000 100%);
+  background: linear-gradient(top, #fff 0%, #000 100%);
+}
+```
+
+# Stylus 错误报告
+
+## 错误报告
+
+Stylus内置梦幻般的错误报告，针对语法、解析以及计算错误，完整的堆栈跟踪，行号和文件名。
+
+## 解析错误
+
+解析错误例子：
+
+```stylus
+body
+  form input
+    == padding 5px
+```
+
+```bash
+C:\Users\sss\AppData\Roaming\npm\node_modules\stylus\bin\stylus:684
+              throw err;
+              ^
+ParseError: src\example.styl:3:15
+   1| body
+   2|   form input
+   3|     == padding 5px
+--------------------^
+
+illegal unary "==", missing left-hand operand
+
+```
+
+## 计算错误
+
+这种“运行”或计算错误类似于传递字符串给`border-radius()`，而不是单位值。
+
+```stylus
+ensure(val, type)
+  unless val is a type
+    error('expected a ' + type + ', but got ' + typeof(val))
+border-radius(n)
+  ensure(n, 'unit')
+  -webkit-border-radius n
+  -moz-border-radius n
+  border-radius n
+body
+  border-radius '5px'
+```
+
+```bash
+[Error: src\example.styl:3:5
+   1| ensure(val, type)
+   2|   unless val is a type
+   3|     error('expected a ' + type + ', but got ' + typeof(val))
+----------^
+   4| border-radius(n)
+   5|   ensure(n, 'unit')
+   6|   -webkit-border-radius n
+
+expected a unit, but got string
+
+```
+
+# Stylus 连接中间件
+
+## 连接中间件
+
+有了连接中间件，无论Stylus片段什么时候改变，这些片段都能够自动编译。
+
+## stylus.middleware(options)
+
+## 选项
+
+返回给定`options`下的连接中间件。
+
+```bash
+`serve`     Serve the stylus files from `dest` [true]
+`force`     Always re-compile
+`src`       Source directory used to find .styl files
+`dest`      Destination directory used to output .css files
+            when undefined defaults to `src`.
+`compile`   Custom compile function, accepting the arguments
+           `(str, path)`.
+`compress`  Whether the output .css files should be 
+            compressed
+`firebug`   Emits debug infos in the generated css that can
+            be used by the FireStylus Firebug plugin
+`linenos`   Emits comments in the generated css indicating 
+            the corresponding stylus line
+```
+
+```bash
+`serve`     从 `dest` 提供stylus文件 [true]
+`force`     总是重新编译
+`src`       资源目录用来查找 .styl 文件
+`dest`      `src`默认为undefined时，用来输出 .css 文件的目标目录
+`compile`   自定义编译函数，接受参数`(str, path)`.
+`compress`  是否输出的 .css 文件要被压缩
+`firebug`   生成的CSS中发出调试信息，可被Firebug插件FireStylus使
+            用
+`linenos`   生成的CSS中发出注解，表明响应的stylus行
+```
+
+## 例子
+
+从`./public`提供`.styl`文件。
+
+```js
+var app = connect();
+app.middleware(__dirname + '/public');
+```
+
+改变`src`以及`dest`项来修改`.styl`文件哪里被加载，哪里被保存。
+
+```js
+var app = connect();
+app.middleware({
+  src: __dirname + '/stylesheets',
+  dest: __dirname + '/public'
+});
+```
+
+这里我们建立自定义的编译函数，这样，我们就能设置`compress`项，或是定义附加的函数。
+
+默认情况下，编译函数是简单地设置`filename`以及渲染CSS. 在下面这个例子中，我们压缩输出内容，使用"nib"库插件，以及自动导入。
+
+```js
+function compile(str, path) {
+  return stylus(str)
+    .set('filename', path)
+    .set('compress', true)
+    .use(nib())
+    .import('nib');
+}
+```
+
+作为选项传递应该像这样：
+
+```js
+var app = connect();
+app.middleware({
+    src: __dirname
+  , dest: __dirname + '/public'
+  , compile: compile
+})
+```
+
+# Stylus 自检API 
+
+## 自检API
+
+Stylus支持自我检测的API, 这允许混写以及函数反应调用者的相关性。
+
+## 混写(mixin)
+
+`mixin`这个局部变量在函数体内自动赋值。如果调用的函数在根级别，则`mixin`包含字符串`root`, 如果其他情况，则是`block`, 如果调用函数有返回值，最终为`false`.
+
+下面这个例子中，我们定义`reset()`, 根据其是混入了根部，还是混入块状域，还是混入返回值中，来修改其值，并作为`foo`属性的值呈现：
+
+```stylus
+reset()
+  if mixin == 'root'
+    got
+      root true
+  else if mixin
+    got 'a mixin'
+  else
+    'not a mixin'
+reset()
+body
+  reset()
+  foo reset()
+```
+
+```css
+got{root:true}
+body{got:'a mixin';foo:'not a mixin'}
+```
+
+# JavaScript API
+
+## JavaScript API
+
+`require`模块，用给定的Stylus代码字符串调用`render()`，以及（可选的）`optional`对象。
+
+传递`filename`参数可以利用Stylus框架提供更好的错误报告。
+
+```js
+var stylus = require('stylus');
+stylus.render(str, { filename: 'nesting.css' }, function(err, css){
+  if (err) throw err;
+  console.log(css);
+});
+```
+
+我们可以用更渐进的方式实现做一样的事：
+
+```js
+var stylus = require('stylus');
+stylus(str)
+  .set('filename', 'nesting.css')
+  .render(function(err, css){
+    // logic
+  });
+```
+
+## .set(setting, value)
+
+应用诸如`filename`的设置，或导入`paths`:
+
+```js
+.set('filename', __dirname + '/test.styl')
+ .set('paths', [__dirname, __dirname + '/mixins'])
+```
+
+## .include(path)
+
+渐进替换`.set('paths',...)`的就是`.include()`. 当其他Stylus库（已暴露路径）暴露的时候，这个是理想的选择。
+
+```js
+stylus(str)
+  .include(require('nib').path)
+  .include(process.env.HOME + '/mixins')
+  .render(...)
+```
+
+## .import(path)
+
+推迟给定`path`导入，直到计算被执行。下面这个例子基本上跟在Stylus片段中执行`@import 'mixins/vendor'`一样：
+
+```js
+var stylus = require('../')
+  , str = require('fs').readFileSync(__dirname + '/test.styl', 'utf8');
+stylus(str)
+  .set('filename', __dirname + '/test.styl')
+  .import('mixins/vendor')
+  .render(function(err, css){
+  if (err) throw err;
+  console.log(css);
+});
+```
+
+## .define(name, node)
+
+通过传递一个`Node`，我们可以定义一个全局变量。当库（该库依赖于其它库可用性）里面暴露某些条件特征的时候，这个就很有用。例如Nib扩展库条件支持node-canvas, 提供图片生成。
+
+但这并不是一直可用的，因此Nib可以定义：
+
+```js
+.define('has-canvas', stylus.nodes.false);
+ .define('some-setting', new stylus.nodes.String('some value'));
+```
+
+如果可能，Stylus也会转换JavaScript值为Stylus值。
+
+```js
+.define('string', 'some string')
+ .define('number', 15.5)
+ .define('some-bool', true)
+ .define('list', [1,2,3])
+ .define('list', [1,2,[3,4,[5,6]]])
+ .define('list', { foo: 'bar', bar: 'baz' })
+ .define('families', ['Helvetica Neue', 'Helvetica', 'sans-serif'])
+```
+
+下面是一些规则应用在js函数返回值上：
+
+```js
+.define('get-list', function(){
+  return ['foo', 'bar', 'baz'];
+})
+```
+
+## .define(name, fn)
+
+该方法允许你未Stylus提供JavaScript定义的函数。正如想到JavaScript用C++绑定。当有一些事情无法用Stylus完成的时候，就在JavaScript中定义它。
+
+下面这个例子，我们定义了4个函数：`add()`, `sub()`, `image-width()`, `image-height()`. 这些函数必须返回一个`Node`, 通过`stylus.nodes`该构造以及其它nodes都可以了。
+
+```js
+var stylus = require('../')
+    , nodes = stylus.nodes
+    , utils = stylus.utils
+    , fs = require('fs');
+  function add(a, b) {
+    return a.operate('+', b);
+  }
+  function sub(a, b) {
+    return a.operate('-', b);
+  }
+  function imageDimensions(img) {
+    // 宣告 node (img) 是一个 String 节点, 
+    // 为错误报告传递参数名
+    utils.assertType(img, 'string', 'img');
+    var path = img.val;
+    // 得到尺寸有必要取得字节数
+    // 如果这是真的，你会每种格式都处理下，
+    // 而不是读取整个图片 :)
+    var data = fs.readFileSync(__dirname + '/' + path);
+    // GIF
+    // 当然，你可以支持更多 :)
+    if ('GIF' == data.slice(0, 3).toString()) {
+      var w = data.slice(6, 8)
+        , h = data.slice(8, 10);
+      w = w[1] << 8 | w[0];
+      h = h[1] << 8 | h[0];
+    }
+    return [w, h];
+  }
+  function imageWidth(img) {
+    return new nodes.Unit(imageDimensions(img)[0]);
+  }
+  function imageHeight(img) {
+    return new nodes.Unit(imageDimensions(img)[1]);
+  }
+  stylus(str)
+    .set('filename', 'js-functions.styl')
+    .define('add', add)
+    .define('sub', sub)
+    .define('image-width', imageWidth)
+    .define('image-height', imageHeight)
+    .render(function(err, css){
+      if (err) throw err;
+      console.log(css);
+    });
+```
+
+为了进一步的参考（直到本文档全部结束），请看下面的文件：
+
+- `lib/nodes/*`
+- `lib/utils.js`
+
+## .use(fn)
+
+当被调用时，给定`fn`被渲染器调用，允许所有上面的方法被使用。这允许插件轻易地暴露自己，定义函数，路径等。
+
+```js
+var mylib = function(style){
+  style.define('add', add);
+  style.define('sub', sub);
+};
+stylus(str)
+  .use(mylib)
+  .render(...)
 ```
 

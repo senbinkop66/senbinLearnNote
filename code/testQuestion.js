@@ -1,67 +1,34 @@
 /**
- * @param {number[]} balance
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
  */
-var Bank = function(balance) {
-    this.balance=balance;
-    this.number=this.balance.length;
-};
-
-/** 
- * @param {number} account1 
- * @param {number} account2 
- * @param {number} money
- * @return {boolean}
- */
-Bank.prototype.transfer = function(account1, account2, money) {
-    if (account1<=this.number && account2<=this.number) {
-        if (this.balance[account1-1]>=money) {
-            this.balance[account1-1]-=money;
-            this.balance[account2-1]+=money;
-            return true;
-        }else{
-            return false;
-        }
-    }else{
-        return false;
-    }
-};
-
-/** 
- * @param {number} account 
- * @param {number} money
- * @return {boolean}
- */
-Bank.prototype.deposit = function(account, money) {
-    if (account<=this.number){
-        this.balance[account-1]+=money;
-        return true;
-    }else{
-        return false;
-    }
-};
-
-/** 
- * @param {number} account 
- * @param {number} money
- * @return {boolean}
- */
-Bank.prototype.withdraw = function(account, money) {
-    if (account<=this.number){
-        if (this.balance[account-1]>=money) {
-            this.balance[account-1]-=money;
-            return true;
-        }else{
-            return false;
-        }
-    }else{
-        return false;
-    }
-};
-
 /**
- * Your Bank object will be instantiated and called as such:
- * var obj = new Bank(balance)
- * var param_1 = obj.transfer(account1,account2,money)
- * var param_2 = obj.deposit(account,money)
- * var param_3 = obj.withdraw(account,money)
+ * @param {TreeNode} root
+ * @return {string}
  */
+var tree2str = function(root) {
+    if (root===null) {
+        return ""
+    }
+    let ans=[];
+    ans.push(root.val);
+    if (root.left!==null) {
+        ans.push("(");
+        ans=ans.concat(tree2str(root.left));
+        ans.push(")")
+    }
+    if (root.right!==null) {
+        if (root.left===null) {
+            ans.push("()")
+        }
+        ans.push("(");
+        ans=ans.concat(tree2str(root.right));
+        ans.push(")");
+    }
+    return ans.join("");
+
+};
