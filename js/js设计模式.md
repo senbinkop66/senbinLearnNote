@@ -6929,11 +6929,475 @@ console.log( getUploadObj() );
 
 ## 中介者模式
 
+在我们生活的世界中，每个人每个物体之间都会产生一些错综复杂的联系。在应用程序里也 是一样，程序由大大小小的单一对象组成，所有这些对象都按照某种关系和规则来通信。
+
+面向对象设计鼓励将行为分布到各个对象中，把对象划分成更小的粒度，有助于增强对象的 可复用性，但由于这些细粒度对象之间的联系激增，又有可能会反过来降低它们的可复用性。 
+
+中介者模式的**作用就是解除对象与对象之间的紧耦合关系**。增加一个中介者对象后，所有的 相关对象都通过中介者对象来通信，而不是互相引用，所以当一个对象发生改变时，只需要通知 中介者对象即可。**中介者使各对象之间耦合松散，而且可以独立地改变它们之间的交互。中介者模式使网状的多对多关系变成了相对简单的一对多关系**
+
+### 中介者模式的例子——泡泡堂游戏
+
+先定义一个玩家构造函数，它有 3 个简单的原型方法：Play.prototype.win、Play.prototype.lose以及表示玩家死亡的 Play.prototype.die。
+
+因为玩家的数目是 2，所以当其中一个玩家死亡的时候游戏便结束, 同时通知它的对手胜利。这段代码看起来很简单：
+
+```js
+function Player(name){
+    this.name=name;
+    this.enemy=null;  //敌人
+};
+Player.prototype.win=function(){
+    console.log(this.name+" won");
+};
+Player.prototype.lose=function(){
+    console.log(this.name+" lost");
+};
+Player.prototype.die=function(){
+    this.lose();
+    this.enemy.win();
+};
+
+var player1=new Player("mane");
+var player2=new Player("Alison");
+
+player1.enemy=player2;
+player2.enemy=player1;
+
+player1.die();
+```
+
+#### 为游戏增加队伍
+
+现在我们改进一下游戏。因为玩家数量变多，用下面的方式来设置队友和敌人无疑很低效：
+
+```js
+player1.partners= [player1,player2,player3,player4];
+player1.enemies = [player5,player6,player7,player8];
+Player5.partners= [player5,player6,player7,player8];
+Player5.enemies = [player1,player2,player3,player4];
+```
+
+再改写构造函数 Player，使每个玩家对象都增加一些属性，分别是队友列表、敌人列表 、玩家当前状态、角色名字以及玩家所在的队伍颜色：
+
+```javascript
+const players=[];  //所有玩家
+
+function Player(name,teamColor){
+    this.partners = []; // 队友列表
+    this.enemies = []; // 敌人列表
+    this.state = 'live'; // 玩家状态
+    this.name = name; // 角色名字
+    this.teamColor = teamColor; // 队伍颜色
+};
+Player.prototype.win=function(){
+    //玩家胜利和失败之后的展现依然很简单，只是在每个玩家的屏幕上简单地弹出提示
+    console.log( 'winner: ' + this.name );
+};
+Player.prototype.lose=function(){
+    console.log( 'loser: ' + this.name );
+};
+/*玩家死亡的方法要变得稍微复杂一点，我们需要在每个玩家死亡的时候，都遍历其他队友
+的生存状况，如果队友全部死亡，则这局游戏失败，同时敌人队伍的所有玩家都取得胜利*/
+Player.prototype.die=function(){
+    var all_dead=true;
+    this.state="dead";  //设置玩家状态为死亡
+    for (let i=0;i<this.partners.length;i++){
+        //遍历队友列表
+        if (this.partners[i].state!=="dead") {
+            //如果还有一个队友没有死亡，则游戏还未失败
+            all_dead=false;
+            break;
+        }
+    }
+    if (all_dead===true) {  // 如果队友全部死亡
+        this.lose();  // 通知自己游戏失败
+        for (let i=0;i<this.partners.length;i++){
+            // 通知所有队友玩家游戏失败
+            this.partners[i].lose();
+        }
+        for (let i=0;i<this.enemies.length;i++){
+            //  通知所有敌人游戏胜利
+            this.enemies[i].win();
+        }
+    }
+};
+
+//最后定义一个工厂来创建玩家：
+var playerFactory=function(name,teamColor){
+    var newPlayer=new Player(name,teamColor);  //创建新玩家
+    for (let i=0;i<players.length;i++){  // 通知所有的玩家，有新角色加入
+        if (players[i].teamColor===newPlayer.teamColor) {
+            // 如果是同一队的玩家
+            players[i].partners.push(newPlayer);
+            newPlayer.partners.push(players[i]);
+        }else{
+            players[i].enemies.push(newPlayer);
+            newPlayer.enemies.push(players[i]);
+        }
+    }
+    players.push(newPlayer);
+    return newPlayer;
+}
+
+var player1=new playerFactory("Mane","red");
+var player2=new playerFactory("Alison","red");
+var player3=new playerFactory("Arnold","red");
+var player4=new playerFactory("Salah","red");
+
+var player5=new playerFactory("mendy","blue");
+var player6=new playerFactory("kaipa","blue");
+var player7=new playerFactory("lukaku","blue");
+var player8=new playerFactory("mount","blue");
+
+player5.die();
+player6.die();
+player7.die();
+player8.die();
+
+```
+
+#### 玩家增多带来的困扰
+
+现在我们已经可以随意地为游戏增加玩家或者队伍，但问题是，每个玩家和其他玩家都是紧 紧耦合在一起的。在此段代码中，每个玩家对象都有两个属性，this.partners 和 this.enemies， 用来保存其他玩家对象的引用。当每个对象的状态发生改变，比如角色移动、吃到道具或者死亡 时，都必须要显式地遍历通知其他对象。 
+
+在这个例子中只创建了 8 个玩家，或许还没有对你产生足够多的困扰，而如果在一个大型网 络游戏中，画面里有成百上千个玩家，几十支队伍在互相厮杀。如果有一个玩家掉线，必须从所 有其他玩家的队友列表和敌人列表中都移除这个玩家。游戏也许还有解除队伍和添加到别的队伍 的功能，红色玩家可以突然变成蓝色玩家，这就不再仅仅是循环能够解决的问题了。面对这样的 需求，我们上面的代码可以迅速进入投降模式。
+
+#### 用中介者模式改造泡泡堂游戏
+
+首先仍然是定义 Player 构造函数和 player 对象的原型方法，在 player 对象的这些原型方法 中，不再负责具体的执行逻辑，而是把操作转交给中介者对象，我们把中介者对象命名为 playerDirector：
+
+我们需要实现这个中介者 playerDirector 对象，一般有以下两种方式。 
+
+- 利用发布—订阅模式。将 playerDirector 实现为订阅者，各 player 作为发布者，一旦 player 的状态发生改变，便推送消息给 playerDirector，playerDirector 处理消息后将反馈发送 给其他 player。 
+
+-  在 playerDirector 中开放一些接收消息的接口，各 player 可以直接调用该接口来给 playerDirector 发送消息，player 只需传递一个参数给 playerDirector，这个参数的目的 是使 playerDirector 可以识别发送者。同样，playerDirector 接收到消息之后会将处理结 果反馈给其他 player。
+
+这两种方式的实现没什么本质上的区别。在这里我们使用第二种方式，playerDirector 开放 一个对外暴露的接口 reciveMessage，负责接收 player 对象发送的消息，而 player 对象发送消息 的时候，总是把自身 this 作为参数发送给 playerDirector，以便 playerDirector 识别消息来自于 哪个玩家对象
+
+```js
+function Player(name,teamColor){
+    this.state = 'alive'; // 玩家状态
+    this.name = name; // 角色名字
+    this.teamColor = teamColor; // 队伍颜色
+};
+Player.prototype.win=function(){
+    console.log( this.name + ' won ' );
+};
+Player.prototype.lose=function(){
+    console.log( this.name +' lost' );
+};
+
+Player.prototype.die=function(){
+    this.state = 'dead';
+    playerDirector.reciveMessage('playerDead', this ); // 给中介者发送消息，玩家死亡
+};
+Player.prototype.remove=function(){
+    playerDirector.reciveMessage("removePlayer",this);  // 给中介者发送消息，移除一个玩家
+};
+Player.prototype.changeTeam=function(color){
+    playerDirector.reciveMessage("changeTeam",this,color);  //给中介者发送消息，玩家换队
+}
+
+//最后定义一个工厂来创建玩家：
+var playerFactory=function(name,teamColor){
+    var newPlayer=new Player(name,teamColor);  //创建新玩家
+    playerDirector.reciveMessage("addPlayer",newPlayer);  //给中介者发送消息，新增玩家
+    return newPlayer;
+}
+
+var playerDirector=(function(){
+    var players={};  //保存所有玩家
+    var operations={};  // 中介者可以执行的操作
+
+    operations.addPlayer=function(player){
+        //新增一个玩家
+        var teamColor=player.teamColor;  //玩家的队伍颜色
+        players[teamColor]=players[teamColor] || [];  // 如果该颜色的玩家还没有成立队伍，则新成立一个队伍
+        players[teamColor].push(player);  //添加玩家进队伍
+    };
+
+    operations.removePlayer=function(player){
+        //移除一个玩家
+        var teamColor=player.teamColor;
+        var teamPlayers=players[teamColor] || [];  //该队伍所有成员
+        for (let i=teamPlayers.length-1;i>=0;i--){
+            //遍历删除
+            if (teamPlayers[i]===player) {
+                teamPlayers.splice(i,1);
+            }
+        }
+    };
+
+    operations.changeTeam=function(player,newTeamColor){
+        //玩家换队
+        operations.removePlayer(player);  //从原队伍中删除
+        player.teamColor=newTeamColor;  //改变队伍颜色
+        operations.addPlayer(player);  //增加到新队伍中
+    };
+
+    operations.playerDead=function(player){
+        //玩家死亡
+        var teamColor=player.teamColor;
+        teamPlayers=players[teamColor];  //玩家所在队伍
+
+        var all_dead=true;
+
+        for (let i=0;i<teamPlayers.length;i++){
+            //遍历队友列表
+            if (teamPlayers[i].state!=="dead") {
+                //如果还有一个队友没有死亡，则游戏还未失败
+                all_dead=false;
+                break;
+            }
+        }
+        if (all_dead===true) {  // 如果队友全部死亡
+            for (let i=0;i<teamPlayers.length;i++){
+                // 通知所有队友玩家游戏失败
+                teamPlayers[i].lose();  //本队所有玩家 lose
+            }
+            for(let color in players){
+                if (color!==teamColor) {
+                    var teamPlayers = players[ color ];  // 其他队伍的玩家
+                    for (let i=0;i<teamPlayers.length;i++){
+                        teamPlayers[i].win();  // 其他队伍所有玩家 win
+                    }
+                }
+            }
+            
+        }
+    };
+
+    var reciveMessage=function(){
+        var message=Array.prototype.shift.call(arguments);  //arguments 的第一个参数为消息名称
+        operations[message].apply(this,arguments);
+    };
+
+    return {reciveMessage:reciveMessage}
+})();
 
 
 
+var player1=playerFactory("Mane","red");
+var player2=playerFactory("Alison","red");
+var player3=playerFactory("Arnold","red");
+var player4=playerFactory("Salah","red");
+
+var player5=playerFactory("mendy","blue");
+var player6=playerFactory("kaipa","blue");
+var player7=playerFactory("lukaku","blue");
+var player8=playerFactory("mount","blue");
+/*
+player5.die();
+player6.die();
+player7.die();
+player8.die();
+*/
+/*
+player1.remove();
+player2.remove();
+player3.die();
+player4.die()
+*/
+
+player1.changeTeam( 'blue' );
+player2.die();
+player3.die();
+player4.die();
+```
+
+可以看到，除了中介者本身，没有一个玩家知道其他任何玩家的存在，玩家与玩家之间的耦 合关系已经完全解除，某个玩家的任何操作都不需要通知其他玩家，而只需要给中介者发送一个 消息，中介者处理完消息之后会把处理结果反馈给其他的玩家对象。我们还可以继续给中介者扩 展更多功能，以适应游戏需求的不断变化。
+
+### 中介者模式的例子——购买商品
+
+假设我们正在编写一个手机购买的页面，在购买流程中，可以选择手机的颜色以及输入购买 数量，同时页面中有两个展示区域，分别向用户展示刚刚选择好的颜色和数量。还有一个按钮动 态显示下一步的操作，我们需要查询该颜色手机对应的库存，如果库存数量少于这次的购买数量， 按钮将被禁用并且显示库存不足，反之按钮可以点击并且显示放入购物车。 这个需求是非常容易实现的，假设我们已经提前从后台获取到了所有颜色手机的库存量：
+
+```js
+var goods = { // 手机库存
+    "red": 3,
+    "blue": 6
+};		
+```
+
+```html
+<body>
+  选择颜色: <select id="colorSelect">
+  <option value="">请选择</option>
+  <option value="red">红色</option>
+  <option value="blue">蓝色</option>
+  </select>
+  输入购买数量: <input type="text" id="numberInput"/>
+  您选择了颜色: <div id="colorInfo"></div><br/>
+  您输入了数量: <div id="numberInfo"></div><br/>
+  <button id="nextBtn" disabled="true">请选择手机颜色和购买数量</button>
+
+<script type="text/javascript">
+  var colorSelect = document.getElementById( 'colorSelect' ),
+    numberInput = document.getElementById( 'numberInput' ),
+    colorInfo = document.getElementById( 'colorInfo' ),
+    numberInfo = document.getElementById( 'numberInfo' ),
+    nextBtn = document.getElementById( 'nextBtn' );
+  var goods = { // 手机库存
+    "red": 3,
+    "blue": 6
+  };
+  
+  colorSelect.onchange = function(){
+    var color = this.value, // 颜色
+    number = numberInput.value, // 数量
+    stock = goods[ color ]; // 该颜色手机对应的当前库存
+    colorInfo.innerHTML = color;
+    if ( !color ){
+      nextBtn.disabled = true;
+      nextBtn.innerHTML = '请选择手机颜色';
+      return;
+    }
+    if ( ( ( number - 0 ) | 0 ) !== number - 0 ){ // 用户输入的购买数量是否为正整数
+      nextBtn.disabled = true;
+      nextBtn.innerHTML = '请输入正确的购买数量';
+      return;
+    }
+    if ( number > stock ){ // 当前选择数量没有超过库存量
+      nextBtn.disabled = true;
+      nextBtn.innerHTML = '库存不足';
+      return ;
+    }
+    nextBtn.disabled = false;
+    nextBtn.innerHTML = '放入购物车';
+  };
+    
+  numberInput.oninput = function(){
+    var color = colorSelect.value, // 颜色
+    number = this.value, // 数量
+    stock = goods[ color ]; // 该颜色手机对应的当前库存
+    numberInfo.innerHTML = number;
+    if ( !color ){
+      nextBtn.disabled = true;
+      nextBtn.innerHTML = '请选择手机颜色';
+      return;
+    }
+    if ( ( ( number - 0 ) | 0 ) !== number - 0 ){ // 输入购买数量是否为正整数
+      nextBtn.disabled = true;
+      nextBtn.innerHTML = '请输入正确的购买数量';
+      return;
+    }
+    if ( number > stock ){ // 当前选择数量没有超过库存量
+      nextBtn.disabled = true;
+      nextBtn.innerHTML = '库存不足';
+      return ;
+    }
+    nextBtn.disabled = false;
+    nextBtn.innerHTML = '放入购物车';
+  };
+</script>
+```
+
+#### 引入中介者
+
+现在我们来引入中介者对象，所有的节点对象只跟中介者通信。当下拉选择框 colorSelect、 memorySelect 和文本输入框 numberInput 发生了事件行为时，它们仅仅通知中介者它们被改变了， 同时把自身当作参数传入中介者，以便中介者辨别是谁发生了改变。剩下的所有事情都交给中介 者对象来完成，这样一来，无论是修改还是新增节点，都只需要改动中介者对象里的代码。
+
+```html
+<body>
+  选择颜色: 
+  <select id="colorSelect">
+  <option value="">请选择</option>
+  <option value="red">红色</option>
+  <option value="blue">蓝色</option>
+  </select>
+
+  选择内存: 
+  <select id="memorySelect">
+  <option value="">请选择</option>
+  <option value="32G">32G</option>
+  <option value="16G">16G</option>
+  </select>
+
+  输入购买数量: <input type="text" id="numberInput"/><br/>
+  您选择了颜色: <div id="colorInfo"></div><br/>
+  您选择了内存: <div id="memoryInfo"></div><br/>
+  您输入了数量: <div id="numberInfo"></div><br/>
+  <button id="nextBtn" disabled="true">请选择手机颜色和购买数量</button>
+
+<script type="text/javascript">
+  var goods={
+    "red|32G": 3,
+    "red|16G": 0,
+    "blue|32G": 1,
+    "blue|16G": 6
+  };
+
+var mediator=(function(){
+  var colorSelect = document.getElementById( 'colorSelect' ),
+      memorySelect = document.getElementById( 'memorySelect' ),
+      numberInput = document.getElementById( 'numberInput' ),
+      colorInfo = document.getElementById( 'colorInfo' ),
+      memoryInfo = document.getElementById( 'memoryInfo' ),
+      numberInfo = document.getElementById( 'numberInfo' ),
+      nextBtn = document.getElementById( 'nextBtn' );
+  
+  return{
+    changed:function(obj){
+      var color=colorSelect.value,
+        memory=memorySelect.value,
+        number=numberInput.value,
+        stock=goods[color+'|'+memory];  //颜色和内存对应的手机库存数量
+      if (obj===colorSelect) {
+        //如果改变的是选择颜色下拉框
+        colorInfo.innerHTML=color;
+      }else if(obj===memorySelect){
+        memoryInfo.innerHTML=memory;
+      }else{
+        numberInfo.innerHTML=number;
+      }
+
+      if (!color){
+        nextBtn.disabled=true;
+        nextBtn.innerHTML="请选择手机颜色";
+        return;
+      }
+      if (!memory) {
+        nextBtn.disabled = true;
+        nextBtn.innerHTML = '请选择内存大小';
+        return;
+      }
+      if ( ( ( number - 0 ) | 0 ) !== number - 0 ){ // 输入购买数量是否为正整数
+        nextBtn.disabled = true;
+        nextBtn.innerHTML = '请输入正确的购买数量';
+        return;
+      }
+      nextBtn.disabled = false;
+      nextBtn.innerHTML = '放入购物车';
+    }
+  }
+  })();
+ 
+  // 事件函数：
+colorSelect.onchange = function(){
+  mediator.changed( this );
+};
+memorySelect.onchange = function(){
+  mediator.changed( this );
+};
+numberInput.oninput = function(){
+  mediator.changed( this );
+};
 
 
+</script>
+```
+
+### 小结
+
+中介者模式是迎合迪米特法则的一种实现。**迪米特法则也叫最少知识原则，是指一个对象应 该尽可能少地了解另外的对象（类似不和陌生人说话）**。如果对象之间的耦合性太高，一个对象 发生改变之后，难免会影响到其他的对象，跟“城门失火，殃及池鱼”的道理是一样的。而在中 介者模式里，对象之间几乎不知道彼此的存在，它们只能通过中介者对象来互相影响对方。
+
+因此，中介者模式使各个对象之间得以解耦，以中介者和对象之间的一对多关系取代了对象 之间的网状多对多关系。各**个对象只需关注自身功能的实现，对象之间的交互关系交给了中介者 对象来实现和维护。** 
+
+不过，中介者模式也存在一些缺点。其中，**最大的缺点是系统中会新增一个中介者对象，因 为对象之间交互的复杂性，转移成了中介者对象的复杂性，使得中介者对象经常是巨大的。**中介 者对象自身往往就是一个难以维护的对象。
+
+中介者模式可以非常方便地对模块或者对象进行解耦，但对象之间并非一定需要解耦。**在实 际项目中，模块或对象之间有一些依赖关系是很正常的。毕竟我们写程序是为了快速完成项目交 付生产，而不是堆砌模式和过度设计**。关键就在于如何去衡量对象之间的耦合程度。一般来说， **如果对象之间的复杂耦合确实导致调用和维护出现了困难，而且这些耦合度随项目的变化呈指数 增长曲线，那我们就可以考虑用中介者模式来重构代码。**
+
+
+
+## 装饰者模式
 
 
 
