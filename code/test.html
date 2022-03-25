@@ -14,90 +14,37 @@ body {
 </style>
 
 <body>
-  选择颜色: 
-  <select id="colorSelect">
-  <option value="">请选择</option>
-  <option value="red">红色</option>
-  <option value="blue">蓝色</option>
-  </select>
 
-  选择内存: 
-  <select id="memorySelect">
-  <option value="">请选择</option>
-  <option value="32G">32G</option>
-  <option value="16G">16G</option>
-  </select>
-
-  输入购买数量: <input type="text" id="numberInput"/><br/>
-  您选择了颜色: <div id="colorInfo"></div><br/>
-  您选择了内存: <div id="memoryInfo"></div><br/>
-  您输入了数量: <div id="numberInfo"></div><br/>
-  <button id="nextBtn" disabled="true">请选择手机颜色和购买数量</button>
-
+<button id="button">click</button>
 <script type="text/javascript">
-  var goods={
-    "red|32G": 3,
-    "red|16G": 0,
-    "blue|32G": 1,
-    "blue|16G": 6
-  };
-
-var mediator=(function(){
-  var colorSelect = document.getElementById( 'colorSelect' ),
-      memorySelect = document.getElementById( 'memorySelect' ),
-      numberInput = document.getElementById( 'numberInput' ),
-      colorInfo = document.getElementById( 'colorInfo' ),
-      memoryInfo = document.getElementById( 'memoryInfo' ),
-      numberInfo = document.getElementById( 'numberInfo' ),
-      nextBtn = document.getElementById( 'nextBtn' );
-  
-  return{
-    changed:function(obj){
-      var color=colorSelect.value,
-        memory=memorySelect.value,
-        number=numberInput.value,
-        stock=goods[color+'|'+memory];  //颜色和内存对应的手机库存数量
-      if (obj===colorSelect) {
-        //如果改变的是选择颜色下拉框
-        colorInfo.innerHTML=color;
-      }else if(obj===memorySelect){
-        memoryInfo.innerHTML=memory;
-      }else{
-        numberInfo.innerHTML=number;
-      }
-
-      if (!color){
-        nextBtn.disabled=true;
-        nextBtn.innerHTML="请选择手机颜色";
-        return;
-      }
-      if (!memory) {
-        nextBtn.disabled = true;
-        nextBtn.innerHTML = '请选择内存大小';
-        return;
-      }
-      if ( ( ( number - 0 ) | 0 ) !== number - 0 ){ // 输入购买数量是否为正整数
-        nextBtn.disabled = true;
-        nextBtn.innerHTML = '请输入正确的购买数量';
-        return;
-      }
-      nextBtn.disabled = false;
-      nextBtn.innerHTML = '放入购物车';
-    }
+  Function.prototype.before=function(beforefn){
+  var __self=this;  //保存原函数的引用
+  return function(){  //返回包含了原函数和新函数的"代理"函数
+    beforefn.apply(this,arguments);  //执行新函数，且保证 this 不被劫持，新函数接受的参数;也会被原封不动地传入原函数，新函数在原函数之前执行
+    return __self.apply(this,arguments);  //执行原函数并返回原函数的执行结果，并且保证 this 不被劫持
   }
-  })();
- 
-  // 事件函数：
-colorSelect.onchange = function(){
-  mediator.changed( this );
-};
-memorySelect.onchange = function(){
-  mediator.changed( this );
-};
-numberInput.oninput = function(){
-  mediator.changed( this );
-};
+}
 
+Function.prototype.after=function(afterfn){
+  var __self=this;
+  return function(){
+    var ret=__self.apply(this,arguments);
+    afterfn.apply(this,arguments);
+    ret;
+  }
+}
+
+window.onload=function(){
+    console.log(1);
+  }
+window.onload=(window.onload || function(){})
+  .after(function(){
+    console.log(2);
+  }).after(function(){
+    console.log(3);
+  }).after(function(){
+    console.log(4);
+  });
 
 </script>
 

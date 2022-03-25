@@ -7469,6 +7469,227 @@ plane.fire();
 
 ### 装饰者也是包装器
 
+在《设计模式》成书之前，GoF 原想把装 饰者（decorator）模式称为包装器（wrapper） 模式。 
+
+从功能上而言，decorator 能很好地描述这 个模式，但从结构上看，wrapper 的说法更加 贴切。装饰者模式将一个对象嵌入另一个对象 之中，实际上相当于这个对象被另一个对象包 装起来，形成一条包装链。请求随着这条链依 次传递到所有的对象，每个对象都有处理这条 请求的机会
+
+### JavaScript 的装饰者
+
+JavaScript 语言动态改变对象相当容易，我们可以直接改写对象或者对象的某个方法，并不需要使用“类”来实现装饰者模式，代码如下：
+
+```js
+var plane = {
+    fire: function(){
+        console.log( '发射普通子弹' );
+    }
+}
+var missileDecorator = function(){
+    console.log( '发射导弹' );
+}
+var atomDecorator = function(){
+    console.log( '发射原子弹' );
+}
+
+var fire1 = plane.fire;
+plane.fire = function(){
+    fire1();
+    missileDecorator();
+}
+var fire2 = plane.fire;
+plane.fire = function(){
+    fire2();
+    atomDecorator();
+}
+
+plane.fire();
+```
+
+### 装饰函数
+
+在 JavaScript 中，几乎一切都是对象，其中函数又被称为一等对象。在平时的开发工作中， 也许大部分时间都在和函数打交道。在 JavaScript 中可以很方便地给某个对象扩展属性和方法， **但却很难在不改动某个函数源代码的情况下，给该函数添加一些额外的功能。在代码的运行期间， 我们很难切入某个函数的执行环境。** 
+
+要想为函数添加一些功能，最简单粗暴的方式就是直接改写该函数，但这是最差的办法，直 接违反了开放-封闭原则：
+
+```js
+var a=function(){
+    console.log(1);
+}
+
+//改成
+var a=function(){
+    console.log(1);
+    console.log(2);
+}
+```
+
+很多时候我们不想去碰原函数，也许原函数是由其他同事编写的，里面的实现非常杂乱。甚 至在一个古老的项目中，这个函数的源代码被隐藏在一个我们不愿碰触的阴暗角落里。现在需要 一个办法，在不改变函数源代码的情况下，能给函数增加功能，这正是开放封闭原则给我们指 出的光明道路。 
+
+通过**保存原引用的方式**就可以改写某个 函数：
+
+```js
+var a=function(){
+    console.log(1);
+}
+
+var _a=a;
+
+var a=function(){
+    _a();
+    console.log(2);
+}
+
+a();
+```
+
+这是实际开发中很常见的一种做法，比如我们想给 window 绑定 onload 事件，但是又不确定 这个事件是不是已经被其他人绑定过，为了避免覆盖掉之前的 window.onload 函数中的行为，我 们一般都会先保存好原先的 window.onload，把它放入新的 window.onload 里执行：
+
+```js
+  window.onload=function(){
+    console.log(1);
+  }
+  var _onload=window.onload || function(){};
+
+  window.onload=function(){
+    _onload();
+    console.log(2);
+  }
+```
+
+这样的代码当然是符合开放封闭原则的，我们在增加新功能的时候，确实没有修改原来的 window.onload 代码，但是这种方式存在以下两个问题。
+
+必须维护_onload 这个中间变量，虽然看起来并不起眼，**但如果函数的装饰链较长，或者 需要装饰的函数变多，这些中间变量的数量也会越来越多。**_
+
+
+**其实还遇到了 this 被劫持的问题**，在 window.onload 的例子中没有这个烦恼，是因为调用 普通函数_onload 时，this 也指向 window，跟调用 window.onload 时一样（函数作为对象的 方法被调用时，this 指向该对象，所以此处 this 也只指向 window）。现在把 window.onload 换成 document.getElementById，代码如下:
+
+```html
+<button id="button">click</button>
+<script type="text/javascript">
+  var _getElementById = document.getElementById;
+  document.getElementById = function( id ){
+    console.log(1);
+    return _getElementById( id ); // (1)
+  }
+  var button = document.getElementById( 'button' );
+
+</script>
+```
+
+执行这段代码，我们看到在弹出 alert(1)之后，紧接着控制台抛出了异常：
+
+```
+test.html:23 Uncaught TypeError: Illegal invocation at HTMLDocument.document.getElementById 
+```
+
+异常发生在(1) 处的_getElementById( id )这句代码上，此时_getElementById 是一个全局函数， 当调用一个全局函数时，this 是指向 window 的，而 document.getElementById 方法的内部实现需要 使用 this 引用，**this 在这个方法内预期是指向 document，而不是 window, 这是错误发生的原因， 所以使用现在的方式给函数增加功能并不保险**。 
+
+改进后的代码可以满足需求，我们**要手动把 document 当作上下文 this 传入_getElementById**：
+
+```js
+  var _getElementById = document.getElementById;
+  document.getElementById = function(){
+    console.log(1);
+    return _getElementById.apply(document,arguments);
+  }
+  var button = document.getElementById( 'button' );
+```
+
+但这样做显然很不方便，下面我们引入本书 3.7 节介绍过的 AOP，来提供一种完美的方法给函数动态增加功能。
+
+### 用 AOP 装饰函数
+
+首先给出 Function.prototype.before 方法和 Function.prototype.after 方法：
+
+```js
+Function.prototype.before=function(beforefn){
+	var __self=this;  //保存原函数的引用
+	return function(){  //返回包含了原函数和新函数的"代理"函数
+		beforefn.apply(this,arguments);  //执行新函数，且保证 this 不被劫持，新函数接受的参数;也会被原封不动地传入原函数，新函数在原函数之前执行
+		return __self.apply(this,arguments);  //执行原函数并返回原函数的执行结果，并且保证 this 不被劫持
+	}
+}
+
+Function.prototype.after=function(afterfn){
+	var __self=this;
+	return function(){
+		var ret=__self.apply(this,arguments);
+		afterfn.apply(this,arguments);
+		ret;
+	}
+}
+```
+
+Function.prototype.before 接受一个函数当作参数，这个函数即为新添加的函数，它装载了 新添加的功能代码。 
+
+接下来把当前的 this 保存起来，这个 this 指向原函数，然后返回一个“代理”函数，**这个 “代理”函数只是结构上像代理而已，并不承担代理的职责（比如控制对象的访问等）**。它的工作 是**把请求分别转发给新添加的函数和原函数，且负责保证它们的执行顺序**，让新添加的函数在原 函数之前执行（前置装饰），这样就实现了动态装饰的效果。 
+
+我们注意到，通过 Function.prototype.apply 来动态传入正确的 this，保证了函数在被装饰 之后，this 不会被劫持。 Function.prototype.after 的原理跟 Function.prototype.before 一模一样，**唯一不同的地方在 于让新添加的函数在原函数执行之后再执行**。 
+
+下面来试试用 Function.prototype.before 的威力：
+
+```js
+document.getElementById=document.getElementById.before(function(){
+  console.log(1);
+});
+
+var button1=document.getElementById("button");
+console.log(button);
+```
+
+再回到 window.onload 的例子，看看用 Function.prototype.before 来增加新的 window.onload事件是多么简单：
+
+```js
+window.onload=function(){
+    console.log(1);
+  }
+window.onload=(window.onload || function(){})
+  .after(function(){
+    console.log(2);
+  }).after(function(){
+    console.log(3);
+  }).after(function(){
+    console.log(4);
+  });
+```
+
+值得提到的是，上面的 AOP 实现是在 Function.prototype 上添加 before 和 after 方法，但许 多人不喜欢这种污染原型的方式，那么我们可以做一些变通，把原函数和新函数都作为参数传入 before 或者 after 方法：
+
+```js
+var before = function( fn, beforefn ){
+	return function(){
+		beforefn.apply( this, arguments );
+		return fn.apply( this, arguments );
+	}
+}
+var after=function(fn,afterfn){
+	return function(){
+		var ret=fn.apply(this,arguments);
+		afterfn.apply(this,arguments);
+		return ret;
+	}
+}
+
+var a = before(
+	function(){console.log (3)},
+	function(){console.log (2)}
+);
+
+a = before( a, function(){console.log (1);} );
+
+a=after(a,function(){console.log(4);});
+a();
+```
+
+### AOP 的应用实例
+
+
+
+
+
+
+
+
+
 
 
 

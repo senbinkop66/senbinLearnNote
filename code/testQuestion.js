@@ -1,26 +1,23 @@
-var Plane=function(){}
-
-Plane.prototype.fire=function(){
-    console.log( '发射普通子弹' );
+var before = function( fn, beforefn ){
+	return function(){
+		beforefn.apply( this, arguments );
+		return fn.apply( this, arguments );
+	}
+}
+var after=function(fn,afterfn){
+	return function(){
+		var ret=fn.apply(this,arguments);
+		afterfn.apply(this,arguments);
+		return ret;
+	}
 }
 
-//增加两个装饰类，分别是导弹和原子弹：
-var MissileDecorator=function(plane){
-    this.plane=plane;
-};
-MissileDecorator.prototype.fire=function(){
-    this.plane.fire();
-    console.log( '发射导弹' );
-};
-var AtomDecorator = function( plane ){
-    this.plane = plane;
-}
-AtomDecorator.prototype.fire = function(){
-    this.plane.fire();
-    console.log( '发射原子弹' );
-}
+var a = before(
+	function(){console.log (3)},
+	function(){console.log (2)}
+);
 
-var plane = new Plane();
-plane = new MissileDecorator( plane );
-plane = new AtomDecorator( plane );
-plane.fire();
+a = before( a, function(){console.log (1);} );
+
+a=after(a,function(){console.log(4);});
+a();
