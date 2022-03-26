@@ -15,36 +15,51 @@ body {
 
 <body>
 
-<button id="button">click</button>
+用户名：<input id="username" type="text"/>
+密码： <input id="password" type="password"/>
+<input id="submitBtn" type="button" value="提交">
+
 <script type="text/javascript">
-  Function.prototype.before=function(beforefn){
+
+var username = document.getElementById( 'username' ),
+  password = document.getElementById( 'password' ),
+  submitBtn = document.getElementById( 'submitBtn' );
+
+Function.prototype.before=function(beforefn){
   var __self=this;  //保存原函数的引用
   return function(){  //返回包含了原函数和新函数的"代理"函数
-    beforefn.apply(this,arguments);  //执行新函数，且保证 this 不被劫持，新函数接受的参数;也会被原封不动地传入原函数，新函数在原函数之前执行
-    return __self.apply(this,arguments);  //执行原函数并返回原函数的执行结果，并且保证 this 不被劫持
+    if(beforefn.apply(this,arguments)===false){
+      return;  //beforefn 返回 false 的情况直接 return，不再执行后面的原函数
+    };  
+    return __self.apply(this,arguments);  //(2)  执行原函数并返回原函数的执行结果，并且保证 this 不被劫持
   }
 }
 
-Function.prototype.after=function(afterfn){
-  var __self=this;
-  return function(){
-    var ret=__self.apply(this,arguments);
-    afterfn.apply(this,arguments);
-    ret;
+var validata=function(){
+  if ( username.value === '' ){
+    alert ( '用户名不能为空' );
+    return false;
+  }
+  if ( password.value === '' ){
+    alert ( '密码不能为空' );
+    return false;
   }
 }
 
-window.onload=function(){
-    console.log(1);
+var formSubmit = function(){
+  var param = {
+    username: username.value,
+    password: password.value
   }
-window.onload=(window.onload || function(){})
-  .after(function(){
-    console.log(2);
-  }).after(function(){
-    console.log(3);
-  }).after(function(){
-    console.log(4);
-  });
+  ajax( 'http:// xxx.com/login', param ); // ajax 具体实现略
+}
+
+formSubmit=formSubmit.before(validata);
+
+submitBtn.onclick = function(){
+  formSubmit();
+}
+
 
 </script>
 

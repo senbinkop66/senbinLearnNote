@@ -7682,11 +7682,289 @@ a();
 
 ### AOP 的应用实例
 
+用 AOP 装饰函数的技巧在实际开发中非常有用。不论是业务代码的编写，还是在框架层面， 我们都可以把行为依照职责分成粒度更细的函数，随后通过装饰把它们合并到一起，这有助于我 们编写一个松耦合和高复用性的系统。
+
+```
+
+```
+
+#### 数据统计上报
+
+分离业务代码和数据统计代码，无论在什么语言中，都是 AOP 的经典应用之一。在项目开发的结尾阶段难免要加上很多统计数据的代码，这些过程可能让我们被迫改动早已封装好的函数。 
+
+比如页面中有一个登录 button，点击这个 button 会弹出登录浮层，与此同时要进行数据上报， 来统计有多少用户点击了这个登录 button：
+
+```html
+<button tag="login" id="button">点击打开登录浮层</button>
+<script type="text/javascript">
+  var showLogin=function(){
+    console.log("打开登录浮层");
+    log(this.getAttribute("tag"));
+  }
+
+  var log=function(tag){
+    console.log("上报标签为:"+tag);
+    //上报的代码
+  }
+
+  document.getElementById("button").onclick=showLogin;
+</script>
+```
+
+我们看到在 showLogin 函数里，既要负责打开登录浮层，又要负责数据上报，这是两个层面的功能，在此处却被耦合在一个函数里。使用 AOP 分离之后，代码如下：
+
+```js
+Function.prototype.after=function(afterfn){
+  var __self=this;
+  return function(){
+    var ret=__self.apply(this,arguments);
+    afterfn.apply(this,arguments);
+    ret;
+  }
+}
+  var showLogin=function(){
+    console.log("打开登录浮层");
+  }
+
+  var log=function(){
+    console.log("上报标签为:"+this.getAttribute("tag"));
+    //上报的代码
+  }
+  showLogin=showLogin.after(log);  //打开登录浮层之后上报数据
+  document.getElementById("button").onclick=showLogin;
+```
+
+#### 用AOP动态改变函数的参数
+
+```js
+Function.prototype.before=function(beforefn){
+	var __self=this;  //保存原函数的引用
+	return function(){  //返回包含了原函数和新函数的"代理"函数
+		beforefn.apply(this,arguments);  //(1) 执行新函数，且保证 this 不被劫持，新函数接受的参数;也会被原封不动地传入原函数，新函数在原函数之前执行
+		return __self.apply(this,arguments);  //(2)  执行原函数并返回原函数的执行结果，并且保证 this 不被劫持
+	}
+}
+```
+
+从这段代码的(1)处和(2)处可以看到，beforefn 和原函数__self 共用一组参数列表 arguments，当我们在 beforefn 的函数体内改变 arguments 的时候，原函数__self 接收的参数列 表自然也会变化。 
+
+下面的例子展示了如何通过 Function.prototype.before 方法给函数 func 的参数 param 动态地 添加属性 b：
+
+```js
+var func=function(param){
+	console.log(param);
+}
+
+func=func.before(function(param){
+	param.b='b';
+});
+
+func({a:'a'});
+
+//{ a: 'a', b: 'b' }
+```
+
+现在有一个用于发起 ajax 请求的函数，这个函数负责项目中所有的 ajax 异步请求：
+
+```js
+var ajax = function( type, url, param ){
+	console.dir(param);
+	// 发送 ajax 请求的代码略
+};
+ajax( 'get', 'http:// xxx.com/userinfo', { name: 'sven' } );
+```
+
+上面的伪代码表示向后台 cgi 发起一个请求来获取用户信息，传递给 cgi 的参数是{ name: 'sven' }。 ajax 函数在项目中一直运转良好，跟 cgi 的合作也很愉快。直到有一天，我们的网站遭受了 CSRF 攻击。
+
+解决 CSRF 攻击最简单的一个办法就是在 HTTP 请求中带上一个 Token 参数。 假设我们已经有一个用于生成 Token 的函数：
+
+```js
+var getToken=function(){
+	return "Token";
+}
+```
+
+现在的任务是给每个 ajax 请求都加上 Token 参数：
+
+```js
+var getToken=function(){
+	return "Token";
+}
+
+var ajax=function(type,url,param){
+	param=param || {};
+	param.Token=getToken();  //// 发送 ajax 请求的代码略
+}
+```
+
+虽然已经解决了问题，但我们的 ajax 函数相对变得僵硬了，每个从 ajax 函数里发出的请求 都自动带上了 Token 参数，虽然在现在的项目中没有什么问题，但如果将来把这个函数移植到其 他项目上，或者把它放到一个开源库中供其他人使用，Token 参数都将是多余的。 也许另一个项目不需要验证 Token，或者是 Token 的生成方式不同，无论是哪种情况，都必 须重新修改 ajax 函数。 为了解决这个问题，先把 ajax 函数还原成一个干净的函数：
+
+```js
+var ajax=function(type,url,param){
+	console.log(param);
+}
+```
+
+然后把 Token 参数通过 Function.prototyte.before 装饰到 ajax 函数的参数 param 对象中：
+
+```js
+var ajax=function(type,url,param){
+	console.log(param);
+}
+
+ajax=ajax.before(function(type,url,param){
+	param.Token=getToken();
+});
+
+ajax('get','http:// xxx.com/userinfo', { name: 'sven' } )
+```
+
+从 ajax 函数打印的 log 可以看到，Token 参数已经被附加到了 ajax 请求的参数中
+
+明显可以看到，用 AOP 的方式给 ajax 函数动态装饰上 Token 参数，保证了 ajax 函数是一 个相对纯净的函数，提高了 ajax 函数的可复用性，它在被迁往其他项目的时候，不需要做任何 修改。
+
+#### 插件式的表单验证
+
+我们很多人都写过许多表单验证的代码，在一个 Web 项目中，可能存在非常多的表单，如 注册、登录、修改用户信息等。在表单数据提交给后台之前，常常要做一些校验，比如登录的时 候需要验证用户名和密码是否为空，代码如下：
+
+```html
+用户名：<input id="username" type="text"/>
+密码： <input id="password" type="password"/>
+<input id="submitBtn" type="button" value="提交">
+
+<script type="text/javascript">
+var username = document.getElementById( 'username' ),
+  password = document.getElementById( 'password' ),
+  submitBtn = document.getElementById( 'submitBtn' );
+
+var formSubmit = function(){
+  if ( username.value === '' ){
+    return alert ( '用户名不能为空' );
+  }
+  if ( password.value === '' ){
+    return alert ( '密码不能为空' );
+  }
+  var param = {
+    username: username.value,
+    password: password.value
+  }
+  ajax( 'http:// xxx.com/login', param ); // ajax 具体实现略
+}
+
+submitBtn.onclick = function(){
+  formSubmit();
+}
+
+</script>
+```
+
+formSubmit 函数在此处承担了两个职责，除了提交 ajax 请求之外，还要验证用户输入的合法 性。这种代码一来会造成函数臃肿，职责混乱，二来谈不上任何可复用性。 本节的目的是分离校验输入和提交 ajax 请求的代码，我们把校验输入的逻辑放到 validata 函数中，并且约定当 validata 函数返回 false 的时候，表示校验未通过，代码如下：
+
+```js
+var validata=function(){
+  if ( username.value === '' ){
+    alert ( '用户名不能为空' );
+    return false;
+  }
+  if ( password.value === '' ){
+    alert ( '密码不能为空' );
+    return false;
+  }
+}
+
+var formSubmit = function(){
+  if (validata()===false) {
+    return;  //校验未通过
+  }
+  var param = {
+    username: username.value,
+    password: password.value
+  }
+  ajax( 'http:// xxx.com/login', param ); // ajax 具体实现略
+}
+
+submitBtn.onclick = function(){
+  formSubmit();
+}
+```
+
+现在的代码已经有了一些改进，我们把校验的逻辑都放到了 validata 函数中，但 formSubmit 函数的内部还要计算 validata 函数的返回值，因为返回值的结果表明了是否通过校验。 
+
+接下来进一步优化这段代码，使 validata 和 formSubmit 完全分离开来。首先要改写 Function. prototype.before， 如果 beforefn 的执行结果返回 false，表示不再执行后面的原函数，代码如下：
+
+```js
+Function.prototype.before=function(beforefn){
+  var __self=this;  //保存原函数的引用
+  return function(){  //返回包含了原函数和新函数的"代理"函数
+    if(beforefn.apply(this,arguments)===false){
+      return;  //beforefn 返回 false 的情况直接 return，不再执行后面的原函数
+    };  
+    return __self.apply(this,arguments);  //(2)  执行原函数并返回原函数的执行结果，并且保证 this 不被劫持
+  }
+}
+
+var validata=function(){
+  if ( username.value === '' ){
+    alert ( '用户名不能为空' );
+    return false;
+  }
+  if ( password.value === '' ){
+    alert ( '密码不能为空' );
+    return false;
+  }
+}
+
+var formSubmit = function(){
+  var param = {
+    username: username.value,
+    password: password.value
+  }
+  ajax( 'http:// xxx.com/login', param ); // ajax 具体实现略
+}
+
+formSubmit=formSubmit.before(validata);
+
+submitBtn.onclick = function(){
+  formSubmit();
+}
+```
+
+在这段代码中，**校验输入和提交表单的代码完全分离开来，它们不再有任何耦合关系**， formSubmit = formSubmit.before( validata )这句代码，如同把校验规则动态接在 formSubmit 函数 之前，validata 成为一个即插即用的函数，它甚至可以被写成配置文件的形式，这有利于我们分 开维护这两个函数。**再利用策略模式稍加改造，我们就可以把这些校验规则都写成插件的形式， 用在不同的项目当中。** 
+
+值得注意的是，因为函数通过 Function.prototype.before 或者 Function.prototype.after 被装 饰之后，**返回的实际上是一个新的函数，如果在原函数上保存了一些属性，那么这些属性会丢失**。 代码如下：
+
+```js
+var func = function(){
+	alert( 1 );
+}
+func.a = 'a';
+func = func.after( function(){
+	alert( 2 );
+});
+alert ( func.a ); // 输出：undefined
+```
+
+另外，这种装饰方式也叠加了函数的作用域，如果装饰的链条过长，性能上也会受到一些影响。
+
+### 装饰者模式和代理模式
+
+装饰者模式和第 6 章代理模式的结构看起来非常相像，这两种模式**都描述了怎样为对象提供 一定程度上的间接引用**，它们的实现部分都保留了对另外一个对象的引用，并且向那个对象发送 请求。 
+
+代理模式和装饰者模式**最重要的区别在于它们的意图和设计目的**。
+
+代理模式的目的是，**当直 接访问本体不方便或者不符合需要时，为这个本体提供一个替代者**。本体定义了关键功能，而代 理提供或拒绝对它的访问，或者在访问本体之前做一些额外的事情。
+
+装饰者模式的**作用就是为对 象动态加入行为**。换句话说，**代理模式强调一种关系（Proxy 与它的实体之间的关系）**，这种关系 可以静态的表达，也就是说，这种关系在一开始就可以被确定。**而装饰者模式用于一开始不能确 定对象的全部功能时**。代理模式通常只有一层代理--本体的引用，而装饰者模式经常会形成一条 长长的装饰链。 
+
+在虚拟代理实现图片预加载的例子中，本体负责设置 img 节点的 src，代理则提供了预加载 的功能，这看起来也是“加入行为”的一种方式，但这种加入行为的方式和装饰者模式的偏重点 是不一样的。**装饰者模式是实实在在的为对象增加新的职责和行为**，而**代理做的事情还是跟本体 一样，最终都是设置 src**。但代理可以加入一些“聪明”的功能，比如在图片真正加载好之前，先使用一张占位的 loading 图片反馈给客户。
 
 
 
+装饰函数，它是 JavaScript 中独特的装饰者模式。这种模式在实际开发中非常 有用，除了上面提到的例子，它在框架开发中也十分有用。作为框架作者，我们希望框架里的函 数提供的是一些稳定而方便移植的功能，那些个性化的功能可以在框架之外动态装饰上去，**这可 以避免为了让框架拥有更多的功能，而去使用一些 if、else 语句预测用户的实际需要。**
 
 
+
+## 状态模式
 
 
 
