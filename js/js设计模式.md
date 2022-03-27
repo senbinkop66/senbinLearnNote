@@ -8660,21 +8660,212 @@ setTimeout(function(){
   light.init();
 ```
 
-接下来尝试另外一种方法，即利用下面的 delegate 函数来完成这个状态机编写。这是面向对 象设计和闭包互换的一个例子，前者把变量保存为对象的属性，而后者把变量封闭在闭包形成的 环境中：
+接下来尝试另外一种方法，**即利用下面的 delegate 函数来完成这个状态机编写**。这是面向对 象设计和闭包互换的一个例子，前者把变量保存为对象的属性，而后者把变量封闭在闭包形成的 环境中：
+
+```js
+  var delegate=function(client,delegation){
+    return {
+      buttonWasPressed:function(){  //将客户的操作委托给 delegation 对象
+        return delegation.buttonWasPressed.apply(client,arguments);
+      }
+    }
+  };
+  var FSM={
+    off:{
+      buttonWasPressed:function(){
+        console.log("关灯");
+        this.button.innerHTML = '下一次按我是开灯';
+        this.currState = this.onState;
+      }
+    },
+    on:{
+      buttonWasPressed:function(){
+        console.log( '开灯' );
+        this.button.innerHTML = '下一次按我是关灯';
+        this.currState = this.offState;
+      }
+    }
+  };
+  var Light=function(){
+    this.offState=delegate(this,FSM.off);
+    this.onState=delegate(this,FSM.on);
+    this.currState=this.offState;  //设置当前状态
+    this.button=null;
+  };
+  Light.prototype.init=function(){
+    var button=document.createElement("button");
+    var self=this;
+    button.innerHTML="已关灯";
+    this.button=document.body.appendChild(button);
+    this.button.onclick=function(){
+      self.currState.buttonWasPressed();  // 把请求委托给 FSM 状态机
+    }
+  };
+
+  var light=new Light();
+  light.init();
+```
+
+### 表驱动的有限状态机
+
+其实还有另外一种实现状态机的方法，这种方法的核心是基于表驱动的。我们可以在表中很 清楚地看到下一个状态是由当前状态和行为共同决定的。这样一来，我们就可以在表中查找状态， 而不必定义很多条件分支
+
+刚好 GitHub 上有一个对应的库实现，通过这个库，可以很方便地创建出 FSM：
+
+```js
+var fsm = StateMachine.create({
+  initial: 'off',
+  events: [
+    { name: 'buttonWasPressed', from: 'off', to: 'on' },
+    { name: 'buttonWasPressed', from: 'on', to: 'off' }
+  ],
+  callbacks: {
+    onbuttonWasPressed: function( event, from, to ){
+      console.log( arguments );
+    }
+  },
+  error: function( eventName, from, to, args, errorCode, errorMessage ) {
+      console.log( arguments ); // 从一种状态试图切换到一种不可能到达的状态的时候
+    }
+});
+
+button.onclick = function(){
+  fsm.buttonWasPressed();
+}
+```
+
+关于这个库的更多内容这里不再赘述，有兴趣的同学可以前往：https:// github.com/jakesgordon/javascript-state-machine学习。
+
+### 实际项目中的其他状态机
+
+在实际开发中，很多场景都可以用状态机来模拟， 比如一个下拉菜单在 hover 动作下有显示、 悬浮、隐藏等状态；一次 TCP 请求有建立连接、监听、关闭等状态；一个格斗游戏中人物有攻 击、防御、跳跃、跌倒等状态。 
+
+状态机在游戏开发中也有着广泛的用途，特别是游戏 AI 的逻辑编写。在我曾经开发的 HTML5 版街头霸王游戏里，游戏主角 Ryu 有走动、攻击、防御、跌倒、跳跃等多种状态。这些 状态之间既互相联系又互相约束。比如 Ryu 在走动的过程中如果被攻击，就会由走动状态切换为 跌倒状态。在跌倒状态下，Ryu 既不能攻击也不能防御。同样，Ryu 也不能在跳跃的过程中切换 到防御状态，但是可以进行攻击。这种场景就很适合用状态机来描述。代码如下：
+
+```js
+var FSM = {
+    walk: {
+        attack: function(){
+        	console.log( '攻击' );
+        },
+        defense: function(){
+            console.log( '防御' );
+        },
+        jump: function(){
+            console.log( '跳跃' );
+        }
+    },
+    attack: {
+        walk: function(){
+        	console.log( '攻击的时候不能行走' );
+        },
+        defense: function(){
+        	console.log( '攻击的时候不能防御' );
+        },
+        jump: function(){
+        	console.log( '攻击的时候不能跳跃' );
+        }
+    }
+}
+```
 
 
 
+## 适配器模式
+
+适配器模式的作用是**解决两个软件实体间的接口不兼容的问题**。使用适配器模式之后，原本 由于接口不兼容而不能工作的两个软件实体可以一起工作。 
+
+适配器的别名是包装器（wrapper），这是一个相对简单的模式。在程序开发中有许多这样的 场景：当我们试图调用模块或者对象的某个接口时，却发现这个接口的格式并不符合目前的需求。 这时候有两种解决办法，**第一种是修改原来的接口实现**，但如果原来的模块很复杂，或者我们拿 到的模块是一段别人编写的经过压缩的代码，修改原接口就显得不太现实了。**第二种办法是创建 一个适配器**，将原接口转换为客户希望的另一个接口，客户只需要和适配器打交道。
+
+### 适配器模式的应用
+
+如果现有的接口已经能够正常工作，那我们就永远不会用上适配器模式。适配器模式是一种 “亡羊补牢”的模式，没有人会在程序的设计之初就使用它。因为没有人可以完全预料到未来的 事情，也许现在好好工作的接口，未来的某天却不再适用于新系统，那么我们可以用适配器模式 把旧接口包装成一个新的接口，使它继续保持生命力。比如在 JSON 格式流行之前，很多 cgi 返回的都是 XML 格式的数据，如果今天仍然想继续使用这些接口，显然我们可以创造一个 XML-JSON 的适配器。
+
+这段程序得以顺利运行的关键是 googleMap 和 baiduMap 提供了一致的 show 方法，但第三方的 接口方法并不在我们自己的控制范围之内，假如 baiduMap 提供的显示地图的方法不叫 show 而叫 display 呢？ baiduMap 这个对象来源于第三方，正常情况下我们都不应该去改动它。此时我们可以通过增 加 baiduMapAdapter 来解决问题：
+
+```js
+var googleMap={
+   show:function(){
+      console.log( '开始渲染谷歌地图' );
+   }
+};
+var baiduMap={
+   display:function(){
+      console.log( '开始渲染百度地图' );
+   }
+};
+
+var baiduMapAdapter={
+	show:function(){
+		return baiduMap.display();
+	}
+}
+var renderMap=function(map){
+   if (map.show instanceof Function) {
+      map.show();
+   }
+}
+
+renderMap(googleMap);
+renderMap(baiduMapAdapter);
+```
+
+再来看看另外一个例子。假设我们正在编写一个渲染广东省地图的页面。目前从第三方资源 里获得了广东省的所有城市以及它们所对应的 ID，并且成功地渲染到页面中：
+
+```js
+var getGuangdongCity = function(){
+	var guangdongCity = [
+	{
+		name: 'shenzhen',
+		id: 11,
+	}, {
+		name: 'guangzhou',
+		id: 12,
+	}
+	];
+	return guangdongCity;
+};
+var render = function( fn ){
+	console.log( '开始渲染广东省地图' );
+	document.write( JSON.stringify( fn() ) );
+};
+render( getGuangdongCity );
+```
+
+利用这些数据，我们编写完成了整个页面，并且在线上稳定地运行了一段时间。但后来发现 这些数据不太可靠，里面还缺少很多城市。于是我们又在网上找到了另外一些数据资源，这次的 数据更加全面，但遗憾的是，数据结构和正运行在项目中的并不一致。新的数据结构如下：
+
+```js
+var guangdongCity = {
+    shenzhen: 11,
+    guangzhou: 12,
+    zhuhai: 13
+};
+```
+
+除了大动干戈地改写渲染页面的前端代码之外，另外一种更轻便的解决方式就是新增一个数据格式转换的适配器：
+
+```js
+var addressAdapter = function( oldAddressfn ){
+	var address = {},
+	oldAddress = oldAddressfn();
+	for ( var i = 0, c; c = oldAddress[ i++ ]; ){
+		address[ c.name ] = c.id;
+	}
+	return function(){
+		return address;
+	}
+};
+render( addressAdapter( getGuangdongCity ) );
+```
+
+那么接下来需要做的，就是把代码中调用 getGuangdongCity 的地方，用经过 addressAdapter适配器转换之后的新函数来代替。
 
 
 
-
-
-
-
-
-
-
-
+适配器模式是一对相对简单的模式。在本书提到的设计模式中，有一些模式跟适配器模式的 结构非常相似，比如装饰者模式、代理模式和外观模式（参见第 19 章）。这几种模式都属于“包 装模式”，都是由一个对象来包装另一个对象。区别它们的关键仍然是模式的意图。 
+- **适配器模式主要用来解决两个已有接口之间不匹配的问题**，它不考虑这些接口是怎样实 现的，也不考虑它们将来可能会如何演化。适配器模式不需要改变已有的接口，就能够 使它们协同作用。 
+- 装饰者模式和代理模式也不会改变原有对象的接口，但**装饰者模式的作用是为了给对象 增加功能**。装饰者模式常常形成一条长的装饰链，而适配器模式通常只包装一次。**代理 模式是为了控制对对象的访问，通常也只包装一次**。 
+- 外观模式的作用倒是和适配器比较相似，有人把外观模式看成一组对象的适配器，**但外 观模式最显著的特点是定义了一个新的接口**。
 
 
 
@@ -8904,3 +9095,14 @@ SRP 原则的**优点**是降低了单个类或者对象的复杂度，按照职
 
 但 SRP 原则也有一些**缺点**，最明显的是会增加编写代码的复杂度。当我们按照职责把对象 分解成更小的粒度之后，实际上也增大了这些对象之间相互联系的难度。
 
+
+
+## 最少知识原则
+
+**最少知识原则（LKP）说的是一个软件实体应当尽可能少地与其他实体发生相互作用**。这 里的软件实体是一个广义的概念，不仅包括对象，还包括系统、类、模块、函数、变量等。
+
+### 减少对象之间的联系
+
+**单一职责原则指导我们把对象划分成较小的粒度，这可以提高对象的可复用性**。但越来越 多的对象之间可能会产生错综复杂的联系，如果修改了其中一个对象，很可能会影响到跟它相 互引用的其他对象。**对象和对象耦合在一起，有可能会降低它们的可复用性**。在程序中，对象 的“朋友”太多并不是一件好事，“城门失火，殃及池鱼”和“一人犯法，株连九族”的故事 时有发生。
+
+最少知识原则要求我们在设计程序时，应当尽量减少对象之间的交互。**如果两个对象之间不 必彼此直接通信，那么这两个对象就不要发生直接的相互联系。**常见的做法是引入一个第三者对 象，来承担这些对象之间的通信作用。如果一些对象需要向另一些对象发起请求，可以通过第三 者对象来转发这些请求。
