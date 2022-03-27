@@ -2248,3 +2248,243 @@ let data = [197,130,1];
 let result=validUtf8(data);
 console.log(result);
 
+var OffLightState=function(light){
+  this.light=light;
+};
+OffLightState.prototype.buttonWasPressed=function(){
+  console.log( '弱光' ); // offLightState 对应的行为
+  this.light.setState(this.light.weakLightState);  //切换状态到 weakLightState
+};
+
+var WeakLightState=function(light){
+  this.light=light;
+};
+WeakLightState.prototype.buttonWasPressed=function(){
+  console.log( '强光' ); // weakLightState 对应的行为
+  this.light.setState( this.light.strongLightState ); // 切换状态到 strongLightState
+};
+
+var StrongLightState = function( light ){
+  this.light = light;
+};
+StrongLightState.prototype.buttonWasPressed = function(){
+  console.log( '超强光' ); // strongLightState 对应的行为
+  this.light.setState( this.light.superStrongLightState ); // 切换状态到 superStrongLightState
+};
+
+var State=function(){};
+State.prototype.buttonWasPressed=function(){
+  throw new Error("父类的 buttonWasPressed 方法必须被重写");
+}
+
+var SuperStrongLightState = function( light ){
+  this.light = light;
+};
+SuperStrongLightState.prototype=new State();  //// 继承抽象父类
+
+SuperStrongLightState.prototype.buttonWasPressed = function(){
+  // 重写 buttonWasPressed 方法
+  console.log( '关灯' );
+  this.light.setState( this.light.offLightState );
+};
+
+var Light=function(){
+  this.offLightState=new OffLightState(this);
+  this.weakLightState=new WeakLightState(this);
+  this.strongLightState=new StrongLightState(this);
+  this.superStrongLightState=new SuperStrongLightState(this);
+  this.button=null;
+};
+
+Light.prototype.init=function(){
+  var button=document.createElement("button");
+  var self=this;
+  button.innerHTML="开关";
+  this.button=document.body.appendChild(button);
+  this.currentState=this.offLightState;  //设置当前状态
+  this.button.onclick=function(){
+    self.currentState.buttonWasPressed();
+  }
+};
+
+Light.prototype.setState=function(newState){
+  this.currentState=newState;
+};
+
+var light=new Light();
+light.init();
+
+window.external.upload=function(state){
+  console.log(state);  //可能为 sign、uploading、done、error
+};
+
+var plugin=(function(){
+  var plugin=document.createElement("embed");
+  plugin.style.display="none";
+
+  plugin.type="application/txftn-webkit";
+  
+  plugin.sign = function(){
+    console.log( '开始文件扫描' );
+  }
+  plugin.pause = function(){
+    console.log( '暂停文件上传' );
+  };
+  plugin.uploading = function(){
+    console.log( '开始文件上传' );
+  };
+  plugin.del = function(){
+    console.log( '删除文件上传' );
+  }
+  plugin.done = function(){
+    console.log( '文件上传完成' );
+  }
+  document.body.appendChild( plugin );
+
+  return plugin;
+})();
+
+var Upload=function(fileName){
+  this.plugin=plugin;
+  this.fileName=fileName;
+  this.button1=null;
+  this.button2=null;
+  this.signState=new SignState(this);  //设置初始状态为 waiting
+  this.uploadingState = new UploadingState( this );
+  this.pauseState = new PauseState( this );
+  this.doneState = new DoneState( this );
+  this.errorState = new ErrorState( this );
+  this.currState = this.signState; // 设置当前状态
+};
+
+Upload.prototype.init=function(){
+  var that=this;
+  this.dom=document.createElement("div");
+  this.dom.innerHTML=
+  '<span>文件名称:'+ this.fileName +'</span>'+
+  '<button data-action="button1">扫描中</button>'+
+  '<button data-action="button2">删除</button>';
+
+  document.body.appendChild( this.dom );
+  this.button1 = this.dom.querySelector( '[data-action="button1"]' ); // 第一个按钮
+  this.button2 = this.dom.querySelector( '[data-action="button2"]' ); // 第二个按钮
+  this.bindEvent();
+};
+
+Upload.prototype.bindEvent=function(){
+  var self=this;
+  this.button1.onclick=function(){
+    self.currState.clickHandle1();
+  };
+  this.button2.onclick=function(){
+    self.currState.clickHandle2();
+  };
+};
+
+Upload.prototype.sign=function(){
+  this.plugin.sign();
+  this.currState=this.signState;
+};
+Upload.prototype.uploading=function(){
+  this.button1.innerHTML = '正在上传，点击暂停';
+  this.plugin.uploading();
+  this.currState=this.uploadingState;
+};
+Upload.prototype.pause = function(){
+  this.button1.innerHTML = '已暂停，点击继续上传';
+  this.plugin.pause();
+  this.currState = this.pauseState;
+};
+Upload.prototype.done = function(){
+  this.button1.innerHTML = '上传完成';
+  this.plugin.done();
+  this.currState = this.doneState;
+};
+Upload.prototype.error = function(){
+  this.button1.innerHTML = '上传失败';
+  this.currState = this.errorState;
+};
+Upload.prototype.del = function(){
+  this.plugin.del();
+  this.dom.parentNode.removeChild( this.dom );
+};
+
+var StateFactory=(function(){
+  var State=function(){};
+  State.prototype.clickHandle1=function(){
+    throw new Error( '子类必须重写父类的 clickHandler1 方法' );
+  }
+  State.prototype.clickHandler2 = function(){
+    throw new Error( '子类必须重写父类的 clickHandler2 方法' );
+  }
+  return function(param){
+    var F=function(uploadObj){
+      this.uploadObj=uploadObj;
+    };
+    F.prototype=new State();
+    for(var i in param){
+      F.prototype[i]=param[i];
+    }
+    return F;
+  }
+})();
+
+var SignState=StateFactory({
+  clickHandle1:function(){
+    console.log( '扫描中，点击无效...' );
+  },
+  clickHandler2:function(){
+    console.log( '文件正在上传中，不能删除' );
+  }
+});
+var UploadingState = StateFactory({
+  clickHandler1: function(){
+    this.uploadObj.pause();
+  },
+  clickHandler2: function(){
+    console.log( '文件正在上传中，不能删除' );
+  }
+});
+var PauseState = StateFactory({
+  clickHandler1: function(){
+    this.uploadObj.uploading();
+  },
+  clickHandler2: function(){
+    this.uploadObj.del();
+  }
+});
+var DoneState = StateFactory({
+  clickHandler1: function(){
+    console.log( '文件已完成上传, 点击无效' );
+  },
+  clickHandler2: function(){
+    this.uploadObj.del();
+  }
+});
+var ErrorState = StateFactory({
+  clickHandler1: function(){
+    console.log( '文件上传失败, 点击无效' );
+  },
+  clickHandler2: function(){
+    this.uploadObj.del();
+  }
+});
+
+var uploadObj=new Upload("计算机药物设计");
+uploadObj.init();
+
+window.external.upload=function(state){
+  //// 插件调用 JavaScript 的方法
+  uploadObj[state]();
+};
+
+window.external.upload("sign");  //// 文件开始扫描
+
+setTimeout(function(){
+  window.external.upload("uploading");  // 1 秒后开始上传
+},1000);
+
+setTimeout(function(){
+  window.external.upload("done");  // 5 秒后上传完成
+},5000);
+
