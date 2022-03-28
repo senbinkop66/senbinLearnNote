@@ -1,29 +1,28 @@
-var getGuangdongCity = function(){
-	var guangdongCity = [
-	{
-		name: 'shenzhen',
-		id: 11,
-	}, {
-		name: 'guangzhou',
-		id: 12,
+class RefreshMenuBarCommand implements Command{
+	constructor (){
 	}
-	];
-	return guangdongCity;
-};
-var render = function( fn ){
-	console.log( '开始渲染广东省地图' );
-	document.write( JSON.stringify( fn() ) );
-};
+	execute(){
+		console.log( '刷新菜单界面' );
+	}
+}
 
+class AddSubMenuCommand implements Command{
+	constructor (){
+	}
+	execute(){
+		console.log( '增加子菜单' );
+	}
+}
+class DelSubMenuCommand implements Command{
+	constructor (){
+	}
+	// 忘记重写 execute 方法
+}
 
-var addressAdapter = function( oldAddressfn ){
-	var address = {},
-	oldAddress = oldAddressfn();
-	for ( var i = 0, c; c = oldAddress[ i++ ]; ){
-		address[ c.name ] = c.id;
-	}
-	return function(){
-		return address;
-	}
-};
-render( addressAdapter( getGuangdongCity ) );
+var refreshMenuBarCommand = new RefreshMenuBarCommand(),
+addSubMenuCommand = new AddSubMenuCommand(),
+delSubMenuCommand = new DelSubMenuCommand();
+
+refreshMenuBarCommand.execute(); // 输出：刷新菜单界面
+addSubMenuCommand.execute(); // 输出：增加子菜单
+delSubMenuCommand.execute(); // 输出：Uncaught TypeError: undefined is not a function
