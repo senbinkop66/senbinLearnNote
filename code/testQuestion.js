@@ -1,11 +1,17 @@
-var func = function(){
-	outerloop:
-	for ( var i = 0; i < 10; i++ ){
-		innerloop:
-		for ( var j = 0; j < 10; j++ ){
-			if ( i * j >30 ){
-				break outerloop;
-			}
+/**
+ * @param {number} n
+ * @return {boolean}
+ */
+var hasAlternatingBits = function(n) {
+	n=n.toString(2);
+	for(let i=0;i<n.length;i++){
+		if (n[i]==n[i-1]) {
+			return false;
 		}
 	}
+	return true;
 };
+
+let n=7;
+let result=hasAlternatingBits(n);
+console.log(result);
