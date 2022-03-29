@@ -685,3 +685,1622 @@ DOCTYPE声明新增的结构元素、功能元素
 3. 没有语意
 ```
 
+
+
+## 如何实现浏览器内多个标签页之间的通信?
+
+调用 localstorge、cookies 等本地存储方式
+
+```
+
+使用本地存储方法
+
+1.cookie
+        
+ （1）客户端和服务器端都会请求服务器，性能下降
+
+ （2）存储限制，4kb
+
+ （3）页面的cookie是共享的
+
+
+storage
+    只是在客户端使用，不会请求服务器处理,存储量比较大,只能存储字符串，非字符串的数据在存储之前会被转换为字符串
+   1. seessionStorage
+        临时性的，页面打开有，页面关闭没有
+        数据不共享
+   2.localStorage
+        永久性的存储
+        数据共享
+   3.api
+        clear（）删除所有值，ff中没有实现
+        getItem（）根据指定的名字name获取对应的值
+        key（index）获得index处的值
+        removeItem（name）删除由name指定的明值对
+        setItem(name，value)
+        
+
+
+3.postMessage
+        html5新特性，专门设计出来用于跨页面脚本通信
+        有浏览器兼容问题
+        需要相同的的协议，端口号，以及域名
+
+4.SharedWorker
+        使用SharedWorked可以创建一个多页面共享的进程，通过这种方式来实现多页面之间的消息互通
+        html5新特性，有浏览器兼容问题
+        需要相同的的协议，端口号，以及域名
+
+5.websocket
+        websocket长连接，全双工通讯
+        相当于后端做一个信息中转站，信息从第一个标签，传到后端，再传到第二个标签
+        需要后端支持
+        有浏览器兼容问题
+
+6.轮询模式
+        相当于后端做一个信息中转站，信息从第一个标签，传到后端，再传到第二个标签
+         需要后端支持
+        无浏览器兼容问题   
+```
+
+
+
+## webSocket 如何兼容低浏览器？
+
+Adobe Flash Socket 、 ActiveX HTMLFile (IE) 、 基于 multipart 编码发送 XHR 、 基于长轮询的 XHR
+
+```
+websocket 是什么？
+简单说，WebSocket 不是 HTTP 协议，HTTP 只负责建立 WebSocket 连接。
+
+websocket 的原理自然就是 socket，即 tcp/ip 通讯
+
+http 也是基于 tcp/ip 通讯，只不过包了一层，加了限制并简化了使用
+
+在线聊天目前一般还是用 ajax 做的，html5 毕竟还不算全面普及；
+
+你可以把 WebSocket 看成是 HTTP 协议为了支持长连接所打的一个大补丁，它和 HTTP 有一些共性，是为了解决 HTTP 本身无法解决的某些问题而做出的一个改良设计。
+
+在以前 HTTP 协议中所谓的 keep-alive connection 是指在一次 TCP 连接中完成多个 HTTP 请求，但是对每个请求仍然要单独发 header；所谓的 polling 是指从客户端（一般就是浏览器）不断主动的向服务器发 HTTP 请求查询是否有新数据。
+
+这两种模式有一个共同的缺点，就是除了真正的数据部分外，服务器和客户端还要大量交换 HTTP header，信息交换效率很低。
+
+它们建立的“长连接”都是伪。长连接，只不过好处是不需要对现有的 HTTP server 和浏览器架构做修改就能实现。
+
+WebSocket 解决的第一个问题是，通过第一个 HTTP request 建立了 TCP 连接之后，之后的交换数据都不需要再发 HTTP request 了，使得这个长连接变成了一个真。长连接。
+
+但是不需要发送 HTTP header 就能交换数据显然和原有的 HTTP 协议是有区别的，所以它需要对服务器和客户端都进行升级才能实现。
+
+在此基础上 WebSocket 还是一个双通道的连接，在同一个 TCP 连接上既可以发也可以收信息。此外还有 multiplexing 功能，几个不同的 URI 可以复用同一个 WebSocket 连接。
+
+这些都是原来的 HTTP 不能做到的。
+```
+
+
+
+## 线程与进程的区别
+
+```
+线程具有许多传统进程所具有的特征，故又称为轻型进程(Light—Weight Process)或进程元；而把传统的进程称为重型进程(Heavy—Weight Process)，它相当于只有一个线程的任务。在引入了线程的操作系统中，通常一个进程都有若干个线程，至少包含一个线程。
+
+根本区别：进程是操作系统资源分配的基本单位，而线程是处理器任务调度和执行的基本单位
+
+资源开销：每个进程都有独立的代码和数据空间（程序上下文），程序之间的切换会有较大的开销；线程可以看做轻量级的进程，同一类线程共享代码和数据空间，每个线程都有自己独立的运行栈和程序计数器（PC），线程之间切换的开销小。
+
+包含关系：如果一个进程内有多个线程，则执行过程不是一条线的，而是多条线（线程）共同完成的；线程是进程的一部分，所以线程也被称为轻权进程或者轻量级进程。
+
+内存分配：同一进程的线程共享本进程的地址空间和资源，而进程之间的地址空间和资源是相互独立的
+
+影响关系：一个进程崩溃后，在保护模式下不会对其他进程产生影响，但是一个线程崩溃整个进程都死掉。所以多进程要比多线程健壮。
+
+执行过程：每个独立的进程有程序运行的入口、顺序执行序列和程序出口。但是线程不能独立执行，必须依存在应用程序中，由应用程序提供多个线程执行控制，两者均可并发执行
+
+```
+
+
+
+## 如何对网站的文件和资源进行优化？
+
+```
+
+1.尽可能减少http请求次数，将css, js, 图片各自合并 
+2.使用CDN，降低通信距离 
+3.添加Expire/Cache-Control头 
+4.启用Gzip压缩文件 
+5.将css放在页面最上面 
+6.将script放在页面最下面 
+7.避免在css中使用表达式 
+8.将css, js都放在外部文件中 
+9.减少DNS查询 
+10.最小化css, js，减小文件体积 
+11.避免重定向 
+12.移除重复脚本 
+13.配置实体标签ETag 
+14.使用AJAX缓存，让网站内容分批加载，局部更新
+```
+
+
+
+## 请说出三种减少页面加载时间的方法
+
+```
+1、优化图片 2、选择图片格式（GIF：提供的颜色较少，可用在一些对颜色要求不高的地方）  3、最好设置宽高，在页面加载不成功时，可以先留出位置来 4、减少http请求次数 5、背景图片合并 6、对代码进行压缩 7、正确书写代码格式 8、采用外部导入 9、调整兼容性 10、 优化CSS（压缩合并css，如 margin-top, margin-left...) 
+11、 网址后加斜杠（如www.campr.com/目录，会判断这个目录是什么文件类型，或者是目录。）
+```
+
+```
+3. 标明高度和宽度（如果浏览器没有找到这两个参数，它需要一边下载图片一边计算大小，如果图片很多，浏览器需要不断地调整页面。这不但影响速度，也影响浏览体验。  当浏览器知道了高度和宽度参数后，即使图片暂时无法显示，页面上也会腾出图片的空位，然后继续加载后面的内容。从而加载时间快了，浏览体验也更好了）
+```
+
+
+
+## 你都使用哪些工具来测试代码的性能？
+
+```
+1. Profiler
+2. JSPerf（http://jsperf.com/nexttick-vs-setzerotimeout-vs-settimeout）
+3. Dromaeo
+```
+
+[8 种用于前端性能分析工具](https://segmentfault.com/a/1190000039227668)
+
+
+
+## 什么是 FOUC（无样式内容闪烁）？你如何来避免 FOUC？
+
+```
+什么是FOUC？
+FOUC - Flash Of Unstyled Content 文档样式闪烁 即 文档样式短暂失效
+如果使用 import 引入 css 文件会导致某些页面在IE下出现一些奇怪的现象：
+
+以无样式显示页面内容的瞬间闪烁
+
+形成原因
+通过 @import 引入 css 样式
+
+<style>
+    @import "../fouc.css";
+</style> 
+样式表放在页面底部
+有多个样式表，放在 html 不同位置
+原理：IE会先加载整个HTML文档的DOM，然后再去导入外部的CSS文件，因此，在页面DOM加载完成到CSS导入完成中间会有一段时间页面上的内容是没有样式的，这段时间的长短跟网速，电脑速度都有关系。
+
+解决方法：
+在head里面加入一个link或者script标签
+```
+
+
+
+## null和undefined的区别？
+
+值 `null` 特指对象的值未设置。它是 JavaScript [基本类型](https://developer.mozilla.org/zh-CN/docs/Glossary/Primitive) 之一，在布尔运算中被认为是[falsy](https://developer.mozilla.org/en-US/docs/Glossary/Falsy)。
+
+值 `null` 是一个字面量，不像 [`undefined`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/undefined)，它不是全局对象的一个属性。`null` 是表示缺少的标识，指示变量未指向任何对象。把 `null` 作为尚未创建的对象，也许更好理解。在 API 中，`null` 常在返回类型应是一个对象，但没有关联的值的地方使用。
+
+当检测 `null` 或 `undefined` 时，注意[相等（==）与全等（===）两个操作符的区别](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators) ，前者会执行类型转换：
+
+```js
+typeof null        // "object" (因为一些以前的原因而不是'null')
+typeof undefined   // "undefined"
+null === undefined // false
+null  == undefined // true
+null === null // true
+null == null // true
+!null //true
+isNaN(1 + null) // false
+isNaN(1 + undefined) // true
+```
+
+
+
+全局属性`**undefined**`表示原始值`undefined。`它是一个JavaScript的 [原始数据类型](https://developer.mozilla.org/zh-CN/docs/Glossary/Primitive) 。
+
+`undefined`是*全局对象*的一个属性。也就是说，它是全局作用域的一个变量。`undefined`的最初值就是原始数据类型`undefined`。
+
+在现代浏览器（JavaScript 1.8.5/Firefox 4+），自ECMAscript5标准以来undefined是一个不能被配置（non-configurable），不能被重写（non-writable）的属性。即便事实并非如此，也要避免去重写它。
+
+一个没有被赋值的变量的类型是undefined。如果方法或者是语句中**操作的变量没有被赋值，则会返回undefined**
+
+一个函数如果没有使用return语句指定[`返回`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/return)值，就会返回一个undefined值。
+
+```
+null是一个表示"无"的对象，转为数值时为0
+undefined是一个表示"无"的原始值，转为数值时为NaN
+
+当声明的变量还未被初始化时，变量的默认值为undefined
+null用来表示尚未存在的对象，常用来表示函数企图返回一个不存在的对象
+
+undefined表示 “缺少值”，就是此处应该有一个值，但是还没有定义。典型用法是：
+1. 变量被声明了，但没有赋值时，就等于 undefined
+2. 调用函数时，应该提供的参数没有提供，该参数等于 undefined
+3. 对象没有赋值的属性，该属性的值为 undefined
+4. 函数没有返回值时，默认返回 undefined
+
+null表示“没有对象”，即该处不应该有值。典型用法是：
+1. 作为函数的参数，表示该函数的参数不是对象
+2. 作为对象原型链的终点
+```
+
+
+
+## new操作符具体干了什么呢?
+
+```
+1. 创建一个空对象，并且 this 变量引用该对象，同时还继承了该函数的原型
+2. 属性和方法被加入到 this 引用的对象中
+3. 新创建的对象由 this 所引用，并且最后隐式的返回 this
+```
+
+```js
+var obj  = {};
+obj.__proto__ = Base.prototype;
+Base.call(obj); 
+```
+
+**`new` 运算符**创建一个用户定义的对象类型的实例或具有构造函数的内置对象的实例。
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new#语法)
+
+```
+new constructor[([arguments])]
+```
+
+### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new#参数)
+
+- `constructor`
+
+  一个指定对象实例的类型的类或函数。
+
+- `arguments`
+
+  一个用于被 `constructor` 调用的参数列表。
+
+## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new#描述)
+
+**`new`** 关键字会进行如下的操作：
+
+1. 创建一个空的简单JavaScript对象（即`**{}**`）；
+2. 为步骤1新创建的对象添加属性`**__proto__**`，将该属性链接至构造函数的原型对象 ；
+3. 将步骤1新创建的对象作为`**this**`的上下文 ；
+4. 如果该函数没有返回对象，则返回`**this**`。
+
+创建一个用户自定义的对象需要两步：
+
+1. 通过编写函数来定义对象类型。
+2. 通过 `new` 来创建对象实例。
+
+创建一个对象类型，需要创建一个指定其名称和属性的函数；对象的属性可以指向其他对象，看下面的例子：
+
+当代码 `new *Foo*(...)` 执行时，会发生以下事情：
+
+1. 一个继承自 `*Foo*.prototype` 的新对象被创建。
+2. 使用指定的参数调用构造函数 *`Foo`*，并将 `this` 绑定到新创建的对象。`new *Foo*` 等同于 *`new Foo`*`()`，也就是没有指定参数列表，*`Foo`* 不带任何参数调用的情况。
+3. 由构造函数返回的对象就是 `new` 表达式的结果。如果构造函数没有显式返回一个对象，则使用步骤1创建的对象。（一般情况下，构造函数不返回值，但是用户可以选择主动返回对象，来覆盖正常的对象创建步骤）
+
+你始终可以对已定义的对象添加新的属性。例如，`car1.color = "black"` 语句给 `car1` 添加了一个新的属性 `color`，并给这个属性赋值 "`black`"。但是，这不会影响任何其他对象。要将新属性添加到相同类型的所有对象，你必须将该属性添加到 `Car` 对象类型的定义中。
+
+你可以使用 `Function.prototype` 属性将共享属性添加到以前定义的对象类型。这定义了一个由该函数创建的所有对象共享的属性，而不仅仅是对象类型的其中一个实例。下面的代码将一个值为 `null` 的 `color` 属性添加到 `car` 类型的所有对象，然后仅在实例对象 `car1` 中用字符串 "`black`" 覆盖该值。详见 [prototype (en-US)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function)。
+
+
+
+## 对JSON 的了解？
+
+**JSON** 是一种语法，用来序列化对象、数组、数值、字符串、布尔值和 [`null`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/null) 。它基于 JavaScript 语法，但与之不同：**JavaScript不是JSON，JSON也不是JavaScript**。
+
+JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。
+
+它是基于JavaScript的一个子集。
+
+数据格式简单, 易于读写, 传输占用带宽小。
+
+```
+{  "age":"12",   "name":"back"}
+```
+
+JSON对象包含两个方法: 用于解析 JSON 的 `parse()` 方法，以及将对象/值转换为 JSON字符串的 `stringify()` 方法。
+
+除了这两个方法, JSON这个对象本身并没有其他作用，也不能被调用或者作为构造函数调用。
+
+
+
+## js延迟加载的方式有哪些？
+
+JS延迟加载：也就是**等页面加载完成之后再加载 JavaScript 文件。**  
+
+js的延迟加载有助与提高页面的加载速度。
+
+一般有以下几种方式：
+
+- defer 属性
+- async属性
+- 动态创建DOM方式
+- 使用jquery的getScript方法
+- 使用settimeout延迟方法
+- 让js最后加载。
+
+### 1、defer属性
+
+用途：表明脚本在执行时不会影响页面的构造。也就是说，**脚本会被延迟到整个页面都解析完毕之后再执行。**
+
+HTML 4.01 为`<script>`标签定义了`defer`属性。标签定义了defer属性元素中设置defer属性。
+
+在`<script>` 元素中设置 `defer` 属性，等于**告诉浏览器立即下载**，但**延迟执行**。
+
+```html
+ 	<script src="test1.js" defer="defer"></script>
+    <script src="test2.js" defer="defer"></script>
+```
+
+`HTML5`规范要求脚本按照它们出现的先后顺序执行。在现实当中，**延迟脚本并不一定会按照顺序执行。**
+
+`defer`属性**只适用于外部脚本文件**。支持 HTML5 的实现会忽略嵌入脚本设置的 `defer`属性。
+
+### 2. async 属性
+
+目的：**不让页面等待脚本下载和执行**，从而**异步加载页面其他内容**。
+
+HTML5 为 `<script>`标签定义了 `async`属性。与`defer`属性类似，都用于改变处理脚本的行为。同样，**只适用于外部脚本文件**。
+
+异步脚本**一定会在页面 load 事件前执行**。
+ **不能保证脚本会按顺序执行。**
+
+```html
+    <script src="test1.js" async></script>
+    <script src="test2.js" async></script>
+```
+
+注意：async和defer一样，都不会阻塞其他资源下载，所以不会影响页面的加载。
+缺点：**不能控制加载的顺序**
+
+### 3、动态创建DOM方式
+
+将创建DOM的script脚本放置在标签前， 接近页面底部
+
+```html
+<script type="text/javascript">  
+   (function(){     var scriptEle = document.createElement("script");
+     scriptEle.type = "text/javasctipt";
+     scriptEle.async = true;
+     scriptEle.src = "http://cdn.bootcss.com/jquery/3.0.0-beta1/jquery.min.js";
+     var x = document.getElementsByTagName("head")[0];
+     x.insertBefore(scriptEle, x.firstChild);
+ })();</script>  
+
+```
+
+### 4、使用jQuery的getScript()方法
+
+```js
+$.getScript("outer.js",function(){//回调函数，成功获取文件后执行的函数  
+      console.log("脚本加载完成")  
+});
+```
+
+### 5、使用setTimeout延迟方法
+
+延迟加载js代码，给网页加载留出更多时间
+
+```js
+<script type="text/javascript">  
+   function testLoad() {  
+       console.log("11");
+        //.....这里可以写向后端的请求
+   }  
+   (function(){
+        setTimeote(function(){           
+            testLoad();
+        }, 1000); //延迟一秒加载    })()
+</script>  
+```
+
+### 6.让JS最后加载
+
+把js外部引入的文件放到页面底部，来让js最后引入，从而加快页面加载速度
+
+
+
+## 如何解决跨域问题?
+
+```
+1. jsonp（jsonp 的原理是动态插入 script 标签）
+2. document.domain + iframe
+3. window.name、window.postMessage
+4. 服务器上设置代理页面
+```
+
+### **什么是跨域？**
+
+跨域是指一个域下的文档或脚本试图去请求另一个域下的资源，这里跨域是广义的。
+
+广义的跨域：
+
+```xml
+1.) 资源跳转： A链接、重定向、表单提交
+2.) 资源嵌入： <link>、<script>、<img>、<frame>等dom标签，还有样式中background:url()、@font-face()等文件外链
+3.) 脚本请求： js发起的ajax请求、dom和js对象的跨域操作等
+```
+
+其实我们通常所说的跨域是狭义的，是由浏览器同源策略限制的一类请求场景。
+
+**什么是同源策略？**
+同源策略/SOP（Same origin policy）是一种约定，由Netscape公司1995年引入浏览器，它是浏览器最核心也最基本的安全功能，如果缺少了同源策略，浏览器很容易受到XSS、CSFR等攻击。所谓同源是指"协议+域名+端口"三者相同，即便两个不同的域名指向同一个ip地址，也非同源。
+
+同源策略限制以下几种行为：
+
+```mipsasm
+1.) Cookie、LocalStorage 和 IndexDB 无法读取
+2.) DOM 和 Js对象无法获得
+3.) AJAX 请求不能发送
+```
+
+### **常见跨域场景**
+
+```awk
+URL                                      说明                    是否允许通信
+http://www.domain.com/a.js
+http://www.domain.com/b.js         同一域名，不同文件或路径           允许
+http://www.domain.com/lab/c.js
+
+http://www.domain.com:8000/a.js
+http://www.domain.com/b.js         同一域名，不同端口                不允许
+ 
+http://www.domain.com/a.js
+https://www.domain.com/b.js        同一域名，不同协议                不允许
+ 
+http://www.domain.com/a.js
+http://192.168.4.12/b.js           域名和域名对应相同ip              不允许
+ 
+http://www.domain.com/a.js
+http://x.domain.com/b.js           主域相同，子域不同                不允许
+http://domain.com/c.js
+ 
+http://www.domain1.com/a.js
+http://www.domain2.com/b.js        不同域名                         不允许
+```
+
+### **跨域解决方案**
+
+1、 通过jsonp跨域
+2、 document.domain + iframe跨域
+3、 location.hash + iframe
+4、 window.name + iframe跨域
+5、 postMessage跨域
+6、 跨域资源共享（CORS）
+7、 nginx代理跨域
+8、 nodejs中间件代理跨域
+9、 WebSocket协议跨域
+
+#### **一、 通过jsonp跨域**
+
+通常为了减轻web服务器的负载，我们把js、css，img等静态资源分离到另一台独立域名的服务器上，在html页面中再通过相应的标签从不同域名下加载静态资源，而被浏览器允许，基于此原理，我们可以通过动态创建script，再请求一个带参网址实现跨域通信。
+
+1.）原生实现：
+
+```xml
+ <script>
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+
+    // 传参一个回调函数名给后端，方便后端返回时执行这个在前端定义的回调函数
+    script.src = 'http://www.domain2.com:8080/login?user=admin&callback=handleCallback';
+    document.head.appendChild(script);
+
+    // 回调执行函数
+    function handleCallback(res) {
+        alert(JSON.stringify(res));
+    }
+ </script>
+```
+
+服务端返回如下（返回时即执行全局函数）：
+
+```javascript
+handleCallback({"status": true, "user": "admin"})
+```
+
+2.）jquery ajax：
+
+```javascript
+$.ajax({
+    url: 'http://www.domain2.com:8080/login',
+    type: 'get',
+    dataType: 'jsonp',  // 请求方式为jsonp
+    jsonpCallback: "handleCallback",    // 自定义回调函数名
+    data: {}
+});
+```
+
+3.）vue.js：
+
+```javascript
+this.$http.jsonp('http://www.domain2.com:8080/login', {
+    params: {},
+    jsonp: 'handleCallback'
+}).then((res) => {
+    console.log(res); 
+})
+```
+
+后端node.js代码示例：
+
+```javascript
+var querystring = require('querystring');
+var http = require('http');
+var server = http.createServer();
+
+server.on('request', function(req, res) {
+    var params = qs.parse(req.url.split('?')[1]);
+    var fn = params.callback;
+
+    // jsonp返回设置
+    res.writeHead(200, { 'Content-Type': 'text/javascript' });
+    res.write(fn + '(' + JSON.stringify(params) + ')');
+
+    res.end();
+});
+
+server.listen('8080');
+console.log('Server is running at port 8080...');
+```
+
+jsonp缺点：只能实现get一种请求。
+
+#### **二、 document.domain + iframe跨域**
+
+此方案仅限主域相同，子域不同的跨域应用场景。
+
+实现原理：两个页面都通过js强制设置document.domain为基础主域，就实现了同域。
+
+1.）父窗口：([http://www.domain.com/a.html)](https://link.segmentfault.com/?enc=fDwSoIM%2FAoXpG8DGtzU6NA%3D%3D.TdqK9TxrnxOQk0qPZ2pxf7cwsHqxbZOoAOQbj%2Be28nQ%3D)
+
+```xml
+<iframe id="iframe" src="http://child.domain.com/b.html"></iframe>
+<script>
+    document.domain = 'domain.com';
+    var user = 'admin';
+</script>
+```
+
+2.）子窗口：([http://child.domain.com/b.html)](https://link.segmentfault.com/?enc=oGaDY0jMJLcxEdzF0vb7fA%3D%3D.Z0dNL9NxCliHsWOaC3ENw1UgS7sL%2FtYW%2BJvNvNYgOWU%3D)
+
+```xml
+<script>
+    document.domain = 'domain.com';
+    // 获取父窗口中变量
+    alert('get js data from parent ---> ' + window.parent.user);
+</script>
+```
+
+#### **三、 location.hash + iframe跨域**
+
+实现原理： a欲与b跨域相互通信，通过中间页c来实现。 三个页面，不同域之间利用iframe的location.hash传值，相同域之间直接js访问来通信。
+
+具体实现：A域：a.html -> B域：b.html -> A域：c.html，a与b不同域只能通过hash值单向通信，b与c也不同域也只能单向通信，但c与a同域，所以c可通过parent.parent访问a页面所有对象。
+
+1.）a.html：([http://www.domain1.com/a.html)](https://link.segmentfault.com/?enc=GdBMqptjr8%2BA8BuF8z4P%2Fg%3D%3D.HmTo5Q8x2k%2BGXaQoJfIkMjouF%2F7JlpiikcOYPPxvhSI%3D)
+
+```xml
+<iframe id="iframe" src="http://www.domain2.com/b.html" style="display:none;"></iframe>
+<script>
+    var iframe = document.getElementById('iframe');
+
+    // 向b.html传hash值
+    setTimeout(function() {
+        iframe.src = iframe.src + '#user=admin';
+    }, 1000);
+    
+    // 开放给同域c.html的回调方法
+    function onCallback(res) {
+        alert('data from c.html ---> ' + res);
+    }
+</script>
+```
+
+2.）b.html：([http://www.domain2.com/b.html)](https://link.segmentfault.com/?enc=dupmnpmFadNUL%2BYdhZCFbA%3D%3D.pSO8elebFUgsVLO0D2i34bnWJ%2FyFMGWY%2BuQGJfgNEUE%3D)
+
+```xml
+<iframe id="iframe" src="http://www.domain1.com/c.html" style="display:none;"></iframe>
+<script>
+    var iframe = document.getElementById('iframe');
+
+    // 监听a.html传来的hash值，再传给c.html
+    window.onhashchange = function () {
+        iframe.src = iframe.src + location.hash;
+    };
+</script>
+```
+
+3.）c.html：([http://www.domain1.com/c.html)](https://link.segmentfault.com/?enc=CSSUdV%2FLR7Wm%2BCmRhYgsgg%3D%3D.Pp2jN710pgeHkU7tFauGfXGu9uwSoNBfO11Ql22v6pM%3D)
+
+```xml
+<script>
+    // 监听b.html传来的hash值
+    window.onhashchange = function () {
+        // 再通过操作同域a.html的js回调，将结果传回
+        window.parent.parent.onCallback('hello: ' + location.hash.replace('#user=', ''));
+    };
+</script>
+```
+
+#### **四、 window.name + iframe跨域**
+
+window.name属性的独特之处：name值在不同的页面（甚至不同域名）加载后依旧存在，并且可以支持非常长的 name 值（2MB）。
+
+1.）a.html：([http://www.domain1.com/a.html)](https://link.segmentfault.com/?enc=b6YPf0ouHYlw%2Bq2nPvsfsg%3D%3D.yygrwMcWtNXoeVX1oaWKp6rS3sAHB4x3nj9JdCUJxvk%3D)
+
+```javascript
+var proxy = function(url, callback) {
+    var state = 0;
+    var iframe = document.createElement('iframe');
+
+    // 加载跨域页面
+    iframe.src = url;
+
+    // onload事件会触发2次，第1次加载跨域页，并留存数据于window.name
+    iframe.onload = function() {
+        if (state === 1) {
+            // 第2次onload(同域proxy页)成功后，读取同域window.name中数据
+            callback(iframe.contentWindow.name);
+            destoryFrame();
+
+        } else if (state === 0) {
+            // 第1次onload(跨域页)成功后，切换到同域代理页面
+            iframe.contentWindow.location = 'http://www.domain1.com/proxy.html';
+            state = 1;
+        }
+    };
+
+    document.body.appendChild(iframe);
+
+    // 获取数据以后销毁这个iframe，释放内存；这也保证了安全（不被其他域frame js访问）
+    function destoryFrame() {
+        iframe.contentWindow.document.write('');
+        iframe.contentWindow.close();
+        document.body.removeChild(iframe);
+    }
+};
+
+// 请求跨域b页面数据
+proxy('http://www.domain2.com/b.html', function(data){
+    alert(data);
+});
+```
+
+2.）proxy.html：([http://www.domain1.com/proxy....](https://link.segmentfault.com/?enc=dQmQm1eylxl72xNb12uzxA%3D%3D.u71VYTGRN4pNU%2Bu6sMchhU5qKSbmSV7bs84MCTK5LY4seg3xRooqk%2F7h8eLsaza5)
+中间代理页，与a.html同域，内容为空即可。
+
+3.）b.html：([http://www.domain2.com/b.html)](https://link.segmentfault.com/?enc=dYWH%2B8KXDd3xI1sAzG9KkQ%3D%3D.fGwaZ9qTu2PP4rl%2BgzFIRn%2BmZQaNDQhsrTRGdF4YHgc%3D)
+
+```xml
+<script>
+    window.name = 'This is domain2 data!';
+</script>
+```
+
+总结：通过iframe的src属性由外域转向本地域，跨域数据即由iframe的window.name从外域传递到本地域。这个就巧妙地绕过了浏览器的跨域访问限制，但同时它又是安全操作。
+
+#### **五、 postMessage跨域**
+
+postMessage是HTML5 XMLHttpRequest Level 2中的API，且是为数不多可以跨域操作的window属性之一，它可用于解决以下方面的问题：
+a.） 页面和其打开的新窗口的数据传递
+b.） 多窗口之间消息传递
+c.） 页面与嵌套的iframe消息传递
+d.） 上面三个场景的跨域数据传递
+
+用法：postMessage(data,origin)方法接受两个参数
+data： html5规范支持任意基本类型或可复制的对象，但部分浏览器只支持字符串，所以传参时最好用JSON.stringify()序列化。
+origin： 协议+主机+端口号，也可以设置为"*"，表示可以传递给任意窗口，如果要指定和当前窗口同源的话设置为"/"。
+
+1.）a.html：([http://www.domain1.com/a.html)](https://link.segmentfault.com/?enc=OHl47SW178lf%2BSCCg1dzeA%3D%3D.C9DNYBG5dPkeambKs3oCkBuCZ1t7maUebWz03WJmWX0%3D)
+
+```xml
+<iframe id="iframe" src="http://www.domain2.com/b.html" style="display:none;"></iframe>
+<script>       
+    var iframe = document.getElementById('iframe');
+    iframe.onload = function() {
+        var data = {
+            name: 'aym'
+        };
+        // 向domain2传送跨域数据
+        iframe.contentWindow.postMessage(JSON.stringify(data), 'http://www.domain2.com');
+    };
+
+    // 接受domain2返回数据
+    window.addEventListener('message', function(e) {
+        alert('data from domain2 ---> ' + e.data);
+    }, false);
+</script>
+```
+
+2.）b.html：([http://www.domain2.com/b.html)](https://link.segmentfault.com/?enc=2RQMB61YEjQ%2BkGgYTANs7w%3D%3D.l2uyampgp2S5UjzRko1YwL00%2B%2B8D5OizOeP4WODN%2BEM%3D)
+
+```xml
+<script>
+    // 接收domain1的数据
+    window.addEventListener('message', function(e) {
+        alert('data from domain1 ---> ' + e.data);
+
+        var data = JSON.parse(e.data);
+        if (data) {
+            data.number = 16;
+
+            // 处理后再发回domain1
+            window.parent.postMessage(JSON.stringify(data), 'http://www.domain1.com');
+        }
+    }, false);
+</script>
+```
+
+#### **六、 跨域资源共享（CORS）**
+
+普通跨域请求：只服务端设置Access-Control-Allow-Origin即可，前端无须设置，若要带cookie请求：前后端都需要设置。
+
+需注意的是：由于同源策略的限制，所读取的cookie为跨域请求接口所在域的cookie，而非当前页。如果想实现当前页cookie的写入，可参考下文：七、nginx反向代理中设置proxy_cookie_domain 和 八、NodeJs中间件代理中cookieDomainRewrite参数的设置。
+
+目前，所有浏览器都支持该功能(IE8+：IE8/9需要使用XDomainRequest对象来支持CORS）)，CORS也已经成为主流的跨域解决方案。
+
+##### **1、 前端设置：**
+
+1.）原生ajax
+
+```javascript
+// 前端设置是否带cookie
+xhr.withCredentials = true;
+```
+
+示例代码：
+
+```javascript
+var xhr = new XMLHttpRequest(); // IE8/9需用window.XDomainRequest兼容
+
+// 前端设置是否带cookie
+xhr.withCredentials = true;
+
+xhr.open('post', 'http://www.domain2.com:8080/login', true);
+xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+xhr.send('user=admin');
+
+xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+        alert(xhr.responseText);
+    }
+};
+```
+
+2.）jQuery ajax
+
+```javascript
+$.ajax({
+    ...
+   xhrFields: {
+       withCredentials: true    // 前端设置是否带cookie
+   },
+   crossDomain: true,   // 会让请求头中包含跨域的额外信息，但不会含cookie
+    ...
+});
+```
+
+3.）vue框架
+
+a.) axios设置：
+
+```javascript
+axios.defaults.withCredentials = true
+```
+
+b.) vue-resource设置：
+
+```javascript
+Vue.http.options.credentials = true
+```
+
+##### **2、 服务端设置：**
+
+若后端设置成功，前端浏览器控制台则不会出现跨域报错信息，反之，说明没设成功。
+
+1.）Java后台：
+
+```java
+/*
+ * 导入包：import javax.servlet.http.HttpServletResponse;
+ * 接口参数中定义：HttpServletResponse response
+ */
+
+// 允许跨域访问的域名：若有端口需写全（协议+域名+端口），若没有端口末尾不用加'/'
+response.setHeader("Access-Control-Allow-Origin", "http://www.domain1.com"); 
+
+// 允许前端带认证cookie：启用此项后，上面的域名不能为'*'，必须指定具体的域名，否则浏览器会提示
+response.setHeader("Access-Control-Allow-Credentials", "true"); 
+
+// 提示OPTIONS预检时，后端需要设置的两个常用自定义头
+response.setHeader("Access-Control-Allow-Headers", "Content-Type,X-Requested-With");
+```
+
+2.）Nodejs后台示例：
+
+```javascript
+var http = require('http');
+var server = http.createServer();
+var qs = require('querystring');
+
+server.on('request', function(req, res) {
+    var postData = '';
+
+    // 数据块接收中
+    req.addListener('data', function(chunk) {
+        postData += chunk;
+    });
+
+    // 数据接收完毕
+    req.addListener('end', function() {
+        postData = qs.parse(postData);
+
+        // 跨域后台设置
+        res.writeHead(200, {
+            'Access-Control-Allow-Credentials': 'true',     // 后端允许发送Cookie
+            'Access-Control-Allow-Origin': 'http://www.domain1.com',    // 允许访问的域（协议+域名+端口）
+            /* 
+             * 此处设置的cookie还是domain2的而非domain1，因为后端也不能跨域写cookie(nginx反向代理可以实现)，
+             * 但只要domain2中写入一次cookie认证，后面的跨域接口都能从domain2中获取cookie，从而实现所有的接口都能跨域访问
+             */
+            'Set-Cookie': 'l=a123456;Path=/;Domain=www.domain2.com;HttpOnly'  // HttpOnly的作用是让js无法读取cookie
+        });
+
+        res.write(JSON.stringify(postData));
+        res.end();
+    });
+});
+
+server.listen('8080');
+console.log('Server is running at port 8080...');
+```
+
+#### **七、 nginx代理跨域**
+
+##### **1、 nginx配置解决iconfont跨域**
+
+浏览器跨域访问js、css、img等常规静态资源被同源策略许可，但iconfont字体文件(eot|otf|ttf|woff|svg)例外，此时可在nginx的静态资源服务器中加入以下配置。
+
+```crmsh
+location / {
+  add_header Access-Control-Allow-Origin *;
+}
+```
+
+##### **2、 nginx反向代理接口跨域**
+
+跨域原理： 同源策略是浏览器的安全策略，不是HTTP协议的一部分。服务器端调用HTTP接口只是使用HTTP协议，不会执行JS脚本，不需要同源策略，也就不存在跨越问题。
+
+实现思路：通过nginx配置一个代理服务器（域名与domain1相同，端口不同）做跳板机，反向代理访问domain2接口，并且可以顺便修改cookie中domain信息，方便当前域cookie写入，实现跨域登录。
+
+nginx具体配置：
+
+```nginx
+#proxy服务器
+server {
+    listen       81;
+    server_name  www.domain1.com;
+
+    location / {
+        proxy_pass   http://www.domain2.com:8080;  #反向代理
+        proxy_cookie_domain www.domain2.com www.domain1.com; #修改cookie里域名
+        index  index.html index.htm;
+
+        # 当用webpack-dev-server等中间件代理接口访问nignx时，此时无浏览器参与，故没有同源限制，下面的跨域配置可不启用
+        add_header Access-Control-Allow-Origin http://www.domain1.com;  #当前端只跨域不带cookie时，可为*
+        add_header Access-Control-Allow-Credentials true;
+    }
+}
+```
+
+1.) 前端代码示例：
+
+```javascript
+var xhr = new XMLHttpRequest();
+
+// 前端开关：浏览器是否读写cookie
+xhr.withCredentials = true;
+
+// 访问nginx中的代理服务器
+xhr.open('get', 'http://www.domain1.com:81/?user=admin', true);
+xhr.send();
+```
+
+2.) Nodejs后台示例：
+
+```javascript
+var http = require('http');
+var server = http.createServer();
+var qs = require('querystring');
+
+server.on('request', function(req, res) {
+    var params = qs.parse(req.url.substring(2));
+
+    // 向前台写cookie
+    res.writeHead(200, {
+        'Set-Cookie': 'l=a123456;Path=/;Domain=www.domain2.com;HttpOnly'   // HttpOnly:脚本无法读取
+    });
+
+    res.write(JSON.stringify(params));
+    res.end();
+});
+
+server.listen('8080');
+console.log('Server is running at port 8080...');
+```
+
+#### **八、 Nodejs中间件代理跨域**
+
+node中间件实现跨域代理，原理大致与nginx相同，都是通过启一个代理服务器，实现数据的转发，也可以通过设置cookieDomainRewrite参数修改响应头中cookie中域名，实现当前域的cookie写入，方便接口登录认证。
+
+##### **1、 非vue框架的跨域（2次跨域）**
+
+利用node + express + http-proxy-middleware搭建一个proxy服务器。
+
+1.）前端代码示例：
+
+```javascript
+var xhr = new XMLHttpRequest();
+
+// 前端开关：浏览器是否读写cookie
+xhr.withCredentials = true;
+
+// 访问http-proxy-middleware代理服务器
+xhr.open('get', 'http://www.domain1.com:3000/login?user=admin', true);
+xhr.send();
+```
+
+2.）中间件服务器：
+
+```javascript
+var express = require('express');
+var proxy = require('http-proxy-middleware');
+var app = express();
+
+app.use('/', proxy({
+    // 代理跨域目标接口
+    target: 'http://www.domain2.com:8080',
+    changeOrigin: true,
+
+    // 修改响应头信息，实现跨域并允许带cookie
+    onProxyRes: function(proxyRes, req, res) {
+        res.header('Access-Control-Allow-Origin', 'http://www.domain1.com');
+        res.header('Access-Control-Allow-Credentials', 'true');
+    },
+
+    // 修改响应信息中的cookie域名
+    cookieDomainRewrite: 'www.domain1.com'  // 可以为false，表示不修改
+}));
+
+app.listen(3000);
+console.log('Proxy server is listen at port 3000...');
+```
+
+3.）Nodejs后台同（六：nginx）
+
+##### **2、 vue框架的跨域（1次跨域）**
+
+利用node + webpack + webpack-dev-server代理接口跨域。在开发环境下，由于vue渲染服务和接口代理服务都是webpack-dev-server同一个，所以页面与代理接口之间不再跨域，无须设置headers跨域信息了。
+
+webpack.config.js部分配置：
+
+```javascript
+module.exports = {
+    entry: {},
+    module: {},
+    ...
+    devServer: {
+        historyApiFallback: true,
+        proxy: [{
+            context: '/login',
+            target: 'http://www.domain2.com:8080',  // 代理跨域目标接口
+            changeOrigin: true,
+            secure: false,  // 当代理某些https服务报错时用
+            cookieDomainRewrite: 'www.domain1.com'  // 可以为false，表示不修改
+        }],
+        noInfo: true
+    }
+}
+```
+
+#### 九、 WebSocket协议跨域
+
+WebSocket protocol是HTML5一种新的协议。它实现了浏览器与服务器全双工通信，同时允许跨域通讯，是server push技术的一种很好的实现。
+原生WebSocket API使用起来不太方便，我们使用Socket.io，它很好地封装了webSocket接口，提供了更简单、灵活的接口，也对不支持webSocket的浏览器提供了向下兼容。
+
+1.）前端代码：
+
+```xml
+<div>user input：<input type="text"></div>
+<script src="https://cdn.bootcss.com/socket.io/2.2.0/socket.io.js"></script>
+<script>
+var socket = io('http://www.domain2.com:8080');
+
+// 连接成功处理
+socket.on('connect', function() {
+    // 监听服务端消息
+    socket.on('message', function(msg) {
+        console.log('data from server: ---> ' + msg); 
+    });
+
+    // 监听服务端关闭
+    socket.on('disconnect', function() { 
+        console.log('Server socket has closed.'); 
+    });
+});
+
+document.getElementsByTagName('input')[0].onblur = function() {
+    socket.send(this.value);
+};
+</script>
+```
+
+2.）Nodejs socket后台：
+
+```javascript
+var http = require('http');
+var socket = require('socket.io');
+
+// 启http服务
+var server = http.createServer(function(req, res) {
+    res.writeHead(200, {
+        'Content-type': 'text/html'
+    });
+    res.end();
+});
+
+server.listen('8080');
+console.log('Server is running at port 8080...');
+
+// 监听socket连接
+socket.listen(server).on('connection', function(client) {
+    // 接收信息
+    client.on('message', function(msg) {
+        client.send('hello：' + msg);
+        console.log('data from client: ---> ' + msg);
+    });
+
+    // 断开处理
+    client.on('disconnect', function() {
+        console.log('Client socket has closed.'); 
+    });
+```
+
+
+
+## document.write和 innerHTML 的区别
+
+```
+document.write是直接写入到页面的内容流，如果在写之前没有调用document.open,  浏览器会自动调用open。每次写完关闭之后重新调用该函数，会导致页面被重写。 
+document.write是直接将内容写入页面的内容流，会致使页面所有重绘，innerHTML将内容写入某个DOM节点，不会致使页面所有重绘。
+
+innerHTML则是DOM页面元素的一个属性，代表该元素的html内容。你可以精确到某一个具体的元素来进行更改。如果想修改document的内容，则需要修改document.documentElement.innerElement。 
+
+innerHTML很多情况下都优于document.write，其原因在于其允许更精确的控制要刷新页面的那一个部分。
+```
+
+
+
+## .call() 和 .apply() 的作用？
+
+改变上下文，即改变this指向，劫持另一个对象的属性方法供自己使用
+
+```
+apply:方法能劫持另外一个对象的方法，继承另外一个对象的属性.
+
+Function.apply(obj,args)方法能接收两个参数
+obj：这个对象将代替Function类里this对象
+args：这个是数组，它将作为参数传给Function（args-->arguments）
+
+call:和apply的意思一样,只不过是参数列表不一样.
+
+Function.call(obj,[param1[,param2[,…[,paramN]]]])
+obj：这个对象将代替Function类里this对象
+params：这个是一个参数列表
+```
+
+
+
+## 哪些操作会造成内存泄漏？
+
+```
+内存泄漏指任何对象在您不再拥有或需要它之后仍然存在。
+垃圾回收器定期扫描对象，并计算引用了每个对象的其他对象的数量。如果一个对象的引用数量为 0（没有其他对象引用过该对象），或对该对象的惟一引用是循环的，那么该对象的内存即可回收。
+
+1. setTimeout 的第一个参数使用字符串而非函数的话，会引发内存泄漏。
+2. 闭包
+3. 控制台日志
+4. 循环（在两个对象彼此引用且彼此保留时，就会产生一个循环）
+```
+
+### 引起内存泄漏的原因
+
+#### 1、意外的全局变量
+
+由于 js 对未声明变量的处理方式是在全局对象上创建该变量的引用。如果在浏览器中，全局对象就是 window 对象。变量在窗口关闭或重新刷新页面之前都不会被释放，如果未声明的变量缓存大量的数据，就会导致内存泄露。
+
+- 未声明变量
+
+```javascript
+function fn() {
+  a = 'global variable'
+}
+fn()
+```
+
+- 使用 this 创建的变量(this 的指向是 window)。
+
+```javascript
+function fn() {
+  this.a = 'global variable'
+}
+fn()
+```
+
+解决方法：
+
+- 避免创建全局变量
+- 使用严格模式,在 JavaScript 文件头部或者函数的顶部加上 `use strict`。
+
+#### 2、闭包引起的内存泄漏
+
+原因：闭包可以读取函数内部的变量，然后让这些变量始终保存在内存中。如果在使用结束后没有将局部变量清除，就可能导致内存泄露。
+
+```javascript
+function fn () {
+  var a = "I'm a";
+  return function () {
+    console.log(a);
+  };
+}
+```
+
+解决：将事件处理函数定义在外部，解除闭包，或者在定义事件处理函数的外部函数中。
+
+比如：在循环中的函数表达式，能复用最好放到循环外面。
+
+```javascript
+// bad
+for (var k = 0; k < 10; k++) {
+  var t = function (a) {
+    // 创建了10次  函数对象。
+    console.log(a)
+  }
+  t(k)
+}
+
+// good
+function t(a) {
+  console.log(a)
+}
+for (var k = 0; k < 10; k++) {
+  t(k)
+}
+t = null
+```
+
+#### 3、没有清理的 DOM 元素引用
+
+原因：虽然别的地方删除了，但是对象中还存在对 dom 的引用。
+
+```javascript
+// 在对象中引用DOM
+var elements = {
+  btn: document.getElementById('btn'),
+}
+function doSomeThing() {
+  elements.btn.click()
+}
+
+function removeBtn() {
+  // 将body中的btn移除, 也就是移除 DOM树中的btn
+  document.body.removeChild(document.getElementById('button'))
+  // 但是此时全局变量elements还是保留了对btn的引用, btn还是存在于内存中,不能被GC回收
+}
+```
+
+解决方法：手动删除，`elements.btn = null`。
+
+#### 4、被遗忘的定时器或者回调
+
+定时器中有 dom 的引用，即使 dom 删除了，但是定时器还在，所以内存中还是有这个 dom。
+
+```javascript
+// 定时器
+var serverData = loadData()
+setInterval(function () {
+  var renderer = document.getElementById('renderer')
+  if (renderer) {
+    renderer.innerHTML = JSON.stringify(serverData)
+  }
+}, 5000)
+
+// 观察者模式
+var btn = document.getElementById('btn')
+function onClick(element) {
+  element.innerHTMl = "I'm innerHTML"
+}
+btn.addEventListener('click', onClick)
+```
+
+解决方法：
+
+- 手动删除定时器和 dom。
+- removeEventListener 移除事件监听
+
+
+
+## 如何判断当前脚本运行在浏览器还是node环境中？
+
+```
+通过判断 Global 对象是否为window，如果不为window，当前脚本没有运行在浏览器中。即在node中的全局变量是global ,浏览器的全局变量是window。 可以通过该全局变量是否定义来判断宿主环境
+```
+
+```js
+exports = typeof window === 'undefined' ? global : window ;
+//获取全局对象的方式
+//同理可得，typeof window可以用来判断是不是在浏览器环境中
+```
+
+
+
+## 什么叫优雅降级和渐进增强？
+
+```
+1. 优雅降级：Web站点在所有新式浏览器中都能正常工作，如果用户使用的是老式浏览器，则代码会检查以确认它们是否能正常工作。由于IE独特的盒模型布局问题，针对不同版本的IE的hack实践过优雅降级了,为那些无法支持功能的浏览器增加候选方案，使之在旧式浏览器上以某种形式降级体验却不至于完全失效。
+
+2. 渐进增强：从被所有浏览器支持的基本功能开始，逐步地添加那些只有新式浏览器才支持的功能,向页面增加无害于基础浏览器的额外样式和功能的。当浏览器支持时，它们会自动地呈现出来并发挥作用。
+```
+
+渐进增强和优雅降级这两个概念是在 CSS3 出现之后火起来的。由于低级浏览器不支持 CSS3，但是 CSS3 特效太优秀不忍放弃，所以在高级浏览器中使用CSS3，而在低级浏览器只保证最基本的功能。二者的目的都是关注不同浏览器下的不同体验，但是它们侧重点不同，所以导致了工作流程上的不同。
+
+```
+渐进增强（Progressive Enhancement）：一开始就针对**低版本浏览器**进行构建页面，完成基本的功能，然后再针对高级浏览器进行效果、交互、追加功能达到更好的体验。
+渐进增强的观点：应关注于内容本身。内容是我们建立网站的诱因。有的网站展示它，有的则收集它，有的寻求，有的操作，还有的网站甚至会包含以上的种种，但相同点是它们全都涉及到内容。这使得渐进增强成为一种更为合理的设计范例。
+```
+
+```
+优雅降级（Graceful Degradation）：一开始就构建站点的**完整功能**，然后再针对低版本浏览器进行兼容。比如一开始使用 CSS3 的特性构建了一个应用，然后逐步针对各大浏览器进行 hack 使其可以在低版本浏览器上正常浏览。
+优雅降级的观点：应针对最高级、最完善的浏览器来开发网站。而将那些被认为“过时”或有功能缺失的浏览器下的测试工作安排在开发周期的最后阶段，并把测试对象限定为主流浏览器（如 IE、Mozilla 等）的前一个版本。在这种设计范例下，旧版的浏览器被认为仅能提供“简陋却无妨 (poor, but passable)” 的浏览体验。你可以做一些小的调整来适应某个特定的浏览器。但由于它们并非我们所关注的焦点，因此除了修复较大的错误之外，其它的差异将被直接忽略。
+```
+
+```
+渐进增强的写法，优先考虑老版本浏览器的可用性，最后才考虑新版本的可用性。而在现在前缀CSS3和正常CSS3都可用的情况下，**正常CSS3会覆盖前缀CSS3。**
+
+优雅降级的写法，优先考虑新版本浏览器的可用性，最后才考虑老版本的可用性。而在现在前缀CSS3和正常CSS3都可用的情况下，**前缀CSS3会覆盖正常的CSS3。**
+```
+
+
+
+## 对Node的优点和缺点提出了自己的看法？
+
+```
+链接：https://www.nowcoder.com/questionTerminal/bcc28350c5174ab3a56c34dd45f1bd29
+来源：牛客网
+
+node优点：node是基于事件驱动和无阻塞的 所以适合高并发操作 node.js的客户端和服务端代码语言相同 都是js
+
+缺点：node.js更新很快 会出现版本兼容问题 并且也缺少足够多第三方库支持
+
+node.js的适用场景：聊天 实时消息推送 高并发
+```
+
+
+
+## 对前端界面工程师这个职位是怎么样理解的？它的前景会怎么样？
+
+```
+前端是最贴近用户的程序员，比后端、数据库、产品经理、运营、安全都近。
+1. 实现界面交互
+2. 提升用户体验
+3. 有了Node.js，前端可以实现服务端的一些事情
+
+前景：
+1. 前端是最贴近用户的程序员，前端的能力就是能让产品从 90分进化到 100 分，甚至更好
+2. 参与项目，快速高质量完成实现效果图，精确到1px；
+3. 与团队成员，UI设计，产品经理的沟通；
+4. 做好的页面结构，页面重构和用户体验；
+5. 处理hack，兼容、写出优美的代码格式；
+6. 针对服务器的优化、拥抱最新前端技术。
+```
+
+
+
+## 你有哪些性能优化的方法？
+
+```
+1. 减少http请求次数：CSS Sprites, JS、CSS 源码压缩、图片大小控制合适；网页 Gzip，CDN 托管，data 缓存 ，图片服务器
+2. 前端模板 JS + 数据，减少由于HTML标签导致的带宽浪费，前端用变量保存 AJAX 请求结果，每次操作本地变量，不用请求，减少请求次数
+3. 用 innerHTML 代替 DOM 操作，减少 DOM 操作次数，优化 javascript 性能
+4. 当需要设置的样式很多时设置 className 而不是直接操作 style
+5. 少用全局变量、缓存DOM节点查找的结果。减少 IO 读取操作
+6. 避免使用 CSS Expression（css表达式)又称 Dynamic properties(动态属性)
+7. 图片预加载，将样式表放在顶部，将脚本放在底部，加上时间戳
+```
+
+
+
+## http状态码有那些？分别代表是什么意思？
+
+1.背景介绍
+
+当浏览者访问一个网页时，浏览者的浏览器会向网页所在服务器发出请求。
+
+ 当浏览器接收并显示网页前，此网页所在的服务器会返回一个包含HTTP状态码的信息头（server header）用以响应浏览器的请求。
+
+ HTTP状态码由三个十进制数字组成，三位数字代码分别代表着不同的请求状态，**第一个十进制数字定义了状态码的类型**，后两个数字没有分类的作用。
+
+
+
+2.HTTP状态码分类
+
+HTTP状态码共分为5种类型：
+
+```
+1开头：（被接受，需要继续处理。）这一类型的状态码，代表请求已被接受，需要继续处理。这类响应是临时响应，只包含状态行和某些可选的响应头信息，并以空行结束。
+
+2开头 （请求成功）这一类型的状态码，代表请求已成功被服务器接收、理解、并接受
+
+3开头 （请求被重定向）这类状态码代表需要客户端采取进一步的操作才能完成请求。通常，这些状态码用来重定向，后续的请求地址（重定向目标）在本次响应的 location 域中指明。
+
+4开头：（请求错误）这类的状态码代表了客户端看起来可能发生了错误，妨碍了服务器的处理。除非响应的是一个 HEAD 请求，否则服务器就应该返回一个解释当前错误状况的实体，以及这是临时的还是永久性的状况。这些状态码适用于任何请求方法。浏览器应当向用户显示任何包含在此类错误响应中的实体内容。
+
+5开头：（服务器错误）这类状态码代表了服务器在处理请求的过程中有错误或者异常状态发生，也有可能是服务器意识到以当前的软硬件资源无法完成对请求的处理。除非这是一个HEAD 请求，否则服务器应当包含一个解释当前错误状态以及这个状况是临时的还是永久的解释信息实体。浏览器应当向用户展示任何在当前响应中被包含的实体。
+```
+
+如何记忆这些状态码
+
+Http 状态码是做Web开发的必备的基础知识，面试中也会经常出现这方面的考题。但是要记住全部的状态码不是一件容易的事，部分状态码记忆：
+
+```
+1. 100-199 用于指定客户端应响应的某些动作
+2. 200-299 用于表示请求成功
+3. 300-399 用于已经移动的文件并且常被包含在定位头信息中指定新的地址信息
+4. 400-499 用于指出客户端的错误
+400：语义有误，当前请求无法被服务器理解
+401：当前请求需要用户验证
+403：服务器已经理解请求，但是拒绝执行它
+5. 500-599 用于指出服务器错误
+503：服务不可用
+```
+
+3 常见问题
+有哪些常见的状态码？
+
+一般只需要了解以下常见的状态码就够了：
+
+```
+200 OK：服务器成功处理了请求（这个是我们见到最多的）
+
+301 Moved Permanently：资源移动。所请求资源自动到新的URL，浏览器自动跳转到新的URL
+
+304 Not Modified：服务端的资源与客户端上一次请求的一致，不需要重新传输，客户端使用本地缓存的即可
+
+400 Bad Request：用于告诉客户端它发送了一个错误的请求
+
+404 Not Found：(页面丢失)未找到资源
+
+500 Internal Server Error：服务器内部出现了错误
+
+501 Internal Server Error：服务器遇到一个错误，使其无法对请求提供服务
+```
+
+
+
+## 一个页面从输入 URL 到页面加载显示完成，这个过程中都发生了什么？
+
+```
+分为4个步骤：
+1. 当发送一个 URL 请求时，不管这个 URL 是 Web 页面的 URL 还是 Web 页面上每个资源的 URL，浏览器都会开启一个线程来处理这个请求，同时在远程 DNS 服务器上启动一个 DNS 查询。这能使浏览器获得请求对应的 IP 地址。
+2. 浏览器与远程 Web 服务器通过 TCP 三次握手协商来建立一个 TCP/IP 连接。该握手包括一个同步报文，一个同步-应答报文和一个应答报文，这三个报文在 浏览器和服务器之间传递。该握手首先由客户端尝试建立起通信，而后服务器应答并接受客户端的请求，最后由客户端发出该请求已经被接受的报文。
+3. 一旦 TCP/IP 连接建立，浏览器会通过该连接向远程服务器发送 HTTP 的 GET 请求。远程服务器找到资源并使用 HTTP 响应返回该资源，值为 200 的 HTTP 响应状态表示一个正确的响应。
+4. 此时，Web 服务器提供资源服务，客户端开始下载资源。
+
+请求返回后，便进入了我们关注的前端模块
+简单来说，浏览器会解析 HTML 生成 DOM Tree，其次会根据 CSS 生成 CSS Rule Tree，而 javascript 又可以根据 DOM API 操作 DOM
+```
+
+总体来说分为以下几个过程:
+
+1. DNS解析
+2. TCP连接
+3. 发送HTTP请求
+4. 服务器处理请求并返回HTTP报文
+5. 浏览器解析渲染页面
+6. 连接结束
+
+
+
+## 平时如何管理你的项目？
+
+```
+1. 先期团队必须确定好全局样式（globe.css），编码模式(utf-8) 等
+2. 编写习惯必须一致（例如都是采用继承式的写法，单样式都写成一行）
+3. 标注样式编写人，各模块都及时标注（标注关键样式调用的地方）
+4. 页面进行标注（例如 页面 模块 开始和结束）
+5. CSS 跟 HTML 分文件夹并行存放，命名都得统一（例如 style.css）
+6. JS 分文件夹存放 命名以该 JS 功能为准的英文翻译
+7. 图片采用整合的 images.png png8 格式文件使用 尽量整合在一起使用方便将来的管理 
+```
+
+
+
+## 说说最近最流行的一些东西吧？常去的哪些网站？
+
+```
+最流行的一些东西：
+1. Node.js
+2. Mongodb
+3. npm
+4. MVVM
+5. MEAN
+6. three.js
+7. React
+
+常去的网站：
+1. 牛客网
+2. Github
+3. CSDN
+```
+
+
+
+## javascript继承的 6 种方法
+
+```
+1. 原型链继承
+2. 借用构造函数继承
+3. 组合继承(原型+借用构造)
+4. 原型式继承
+5. 寄生式继承
+6. 寄生组合式继承
+```
+
+### 1、原型链继承
+
+**核心：** 将父类的实例作为子类的原型
+
+### 2、构造继承
+
+**核心：**使用父类的构造函数来增强子类实例，等于是复制父类的实例属性给子类（没用到原型）
+
+### 3、实例继承
+
+**核心：**为父类实例添加新特性，作为子类实例返回
+
+### 4、拷贝继承
+
+### 5、组合继承
+
+**核心：**通过调用父类构造，继承父类的属性并保留传参的优点，然后通过将父类实例作为子类原型，实现函数复用
+
+### 6、寄生组合继承
+
+**核心：**通过寄生方式，砍掉父类的实例属性，这样，在调用两次父类的构造的时候，就不会初始化两次实例方法/属性，避免的组合继承的缺点
+
+
+
+## ajax 的过程是怎样的
+
+```
+1. 创建XMLHttpRequest对象,也就是创建一个异步调用对象
+2. 创建一个新的HTTP请求,并指定该HTTP请求的方法、URL及验证信息
+3. 设置响应HTTP请求状态变化的函数
+4. 发送HTTP请求
+5. 获取异步调用返回的数据
+6. 使用JavaScript和DOM实现局部刷新
+```
+
+ AJAX全称为“Asynchronous JavaScript and XML”（异步JavaScript和XML），是一种创建交互式网页应用的网页开发技术。Ajax的工作原理相当于在用户和服务器之间加了—个中间层(AJAX引擎),使用户操作与服务器响应异步化。并不是所有的用户请求都提交给服务器,像—些数据验证和数据处理等都交给Ajax引擎自己来做, 只有确定需要从服务器读取新数据时再由Ajax引擎代为向服务器提交请求。
+
+实现一个AJAX异步调用和局部刷新,通常需要以下几个步骤:
+
+       创建XMLHttpRequest对象,也就是创建一个异步调用对象.
+       创建一个新的HTTP请求,并指定该HTTP请求的方法、URL及验证信息.
+       设置响应HTTP请求状态变化的函数.
+       发送HTTP请求.
+       获取异步调用返回的数据.
+       使用JavaScript和DOM实现局部刷新.
+
+
+
+## 异步加载和延迟加载
+
+```
+   1. 异步加载的方案: 动态插入script标签
+   2. 通过ajax去获取js代码，然后通过eval执行
+   3. script标签上添加defer或者async属性
+   4. 创建并插入iframe，让它异步执行js
+   5. 延迟加载：有些 js 代码并不是页面初始化的时候就立刻需要的，而稍后的某些情况才需要的。
+```
+
+   
+
+## 前端的安全问题？
+
+```
+1. XSS
+	XSS指cross-site-scripting, 跨站脚本攻击，指通过存在web安全漏洞的web网站注册的用户的浏览器内运行非法的html标签或者js而进行的攻击。用户通过在自己的浏览器上运行这些脚本就会被攻击。
+	
+2. sql注入
+	指的是针对web应用使用的数据库，通过运行非法的SQL而产生的攻击。
+	
+3. CSRF：是跨站请求伪造，很明显根据刚刚的解释，他的核心也就是请求伪造，通过伪造身份提交POST和GET请求来进行跨域的攻击
+	跨站点请求伪造攻击，指的是攻击者通过设置好的陷阱，强制对已完成认证的用户进行非预期的个人信息或设定信息等某些状态更新，属于被动攻击。
+完成CSRF需要两个步骤：
+	1. 登陆受信任的网站A，在本地生成 COOKIE
+	2. 在不登出A的情况下，或者本地 COOKIE 没有过期的情况下，访问危险网站B。
+
+4. OS命令注入攻击，指的是通过web应用，执行非法的操作系统命令达到非法攻击的目的。
+5. HTTP首部注入攻击，指攻击者通过在相应首部字段内插入换行，然后添加任意响应首部过主体的攻击。 
+6. 邮件首部注入攻击，指攻击者通过向邮件首部to或subject内任意添加非法内容引起的攻击。
+7. 会话劫持，指攻击者通过某种手段拿到了用户的会话id，并非法使用此会话id伪装成用户达到攻击的目的。
+8. DDoS，一种让运行中的服务成停止状态的攻击。
+```
+
+```
+8大典型的前端安全问题，它们分别是：
+
+老生常谈的XSS 
+警惕iframe带来的风险
+别被点击劫持了
+错误的内容推断
+防火防盗防猪队友：不安全的第三方依赖包
+用了HTTPS也可能掉坑里
+本地存储数据泄露
+缺失静态资源完整性校验
+```
+
+
+
+## ie 各版本和 chrome 可以并行下载多少个资源
+
+```
+IE6：2个；
+
+IE7：4个；
+
+IE8+：6个
+
+FireFox，Chrome：6个。
+```
+
+同一时间针对同一域名下的请求有一定数量限制，超过限制数目的请求会被阻塞。大多数浏览器的并发数量都控制在6以内。有些资源的请求时间很长，因而会阻塞其他资源的请求。因此，对于一些静态资源，如果放到不同的域名下面就能实现与其他资源的并发请求。
+
+
+
+## javascript里面的继承怎么实现，如何避免原型链上面的对象共享
+
+用构造函数和原型链的混合模式去实现继承，避免对象共享可以参考经典的extend()函数，很多前端框架都有封装的，就是用一个空函数当做中间变量
+
+1.利用原型来继承,通过增加一个空的函数来避免[原型链](https://so.csdn.net/so/search?q=原型链&spm=1001.2101.3001.7020)上的对象共享
+
+```js
+ var a = {name：“小明”}；
+        var b = cloneObj(a);
+         function cloneObj(obj){undefined
+                var f = function(）{}；
+                f.prototype = obj;
+                return new f();
+        }
+}
+```
+
+2.使用extend，多用于插件封装
+
+```javascript
+Var item={name:”olive”,age:23};
+
+Var item1={name:”Momo”,sex:”gril”};
+
+Var result=$.extend({},item,item1);
+
+//结果：
+
+Result={name:”Momo”,age:23,sex:”gril”};
+
+```
+
+
+
+## grunt， YUI compressor 和 google clojure用来进行代码压缩的用法。
