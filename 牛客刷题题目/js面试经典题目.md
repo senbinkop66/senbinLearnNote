@@ -2304,3 +2304,385 @@ Result={name:”Momo”,age:23,sex:”gril”};
 
 
 ## grunt， YUI compressor 和 google clojure用来进行代码压缩的用法。
+
+grunt：
+UglifyJS 是基于 NodeJS 的 Javascript 语法解析/压缩/格式化工具
+官网：http://lisperator.net/uglifyjs/ 或者 https://github.com/mishoo/UglifyJS2
+安装：
+
+```bash
+$ npm install uglify-js -g
+使用方法见官网 demo
+```
+
+YUI compressor：
+
+YUI Compressor 是一个用来压缩 JS 和 CSS 文件的工具，采用Java开发。
+
+使用方法：
+
+```bash
+// 压缩JS
+java -jar yuicompressor-2.4.2.jar --type js --charset utf-8 -v src.js > packed.js
+// 压缩CSS
+java -jar yuicompressor-2.4.2.jar --type css --charset utf-8 -v src.css > packed.css
+```
+
+
+Google Closure Compiler：
+
+官网：https://developers.google.com/closure/compiler/
+
+使用方法：
+
+```
+1. 在命令行下使用一个google编译好的java程序
+
+2. 使用google提供的在线服务
+
+3. 使用google提供的RESTful API
+```
+
+
+
+## Flash、Ajax各自的优缺点，在使用中如何取舍？
+
+```
+Flash：
+1. Flash适合处理多媒体、矢量图形、访问机器
+2. 对CSS、处理文本上不足，不容易被搜索
+
+Ajax：
+1. Ajax对CSS、文本支持很好，支持搜索
+2. 多媒体、矢量图形、机器访问不足
+
+共同点：
+1. 与服务器的无刷新传递消息
+2. 可以检测用户离线和在线状态
+2. 操作DOM
+```
+
+
+
+## 请解释一下 JavaScript 的同源策略。
+
+概念：
+
+同源策略是客户端脚本（尤其是Javascript）的重要的安全度量标准。它最早出自Netscape Navigator2.0，其目的是防止某个文档或脚本从多个不同源装载。
+
+这里的同源策略指的是：协议，域名，端口相同，同源策略是一种安全协议，指一段脚本只能读取来自同一来源的窗口和文档的属性。
+
+为什么要有同源限制：
+
+我们举例说明：比如一个黑客程序，他利用Iframe把真正的银行登录页面嵌到他的页面上，当你使用真实的用户名，密码登录时，他的页面就可以通过Javascript读取到你的表单中input中的内容，这样用户名，密码就轻松到手了。
+
+
+
+## 什么是 "use strict"; ? 使用它的好处和坏处分别是什么？
+
+```
+ECMAscript 5添加了第二种运行模式："严格模式"（strict mode）。顾名思义，这种模式使得Javascript在更严格的条件下运行。
+
+设立"严格模式"的目的，主要有以下几个：
+1. 消除Javascript语法的一些不合理、不严谨之处，减少一些怪异行为;
+2. 消除代码运行的一些不安全之处，保证代码运行的安全；
+3. 提高编译器效率，增加运行速度；
+4. 为未来新版本的Javascript做好铺垫。
+注：经过测试 IE6,7,8,9 均不支持严格模式。
+
+缺点：
+现在网站的 JS 都会进行压缩，一些文件用了严格模式，而另一些没有。这时这些本来是严格模式的文件，被 merge 后，这个串就到了文件的中间，不仅没有指示严格模式，反而在压缩后浪费了字节。
+```
+
+
+
+## GET和POST的区别，何时使用POST？
+
+GET和POST的区别　　
+
+```
+	（1）get是从服务器上获取数据，post是向服务器传送数据。
+
+　　（2）get是将参数数据加到URL中，用户可以看到。post是将内容放置在http请求信息体内传送，用户看不到这个过程。
+
+　　（3）对于get方法，服务器端是用Request.QueryString获取变量的值，对于post方法，服务器端用Request.Form获取提交的数据。
+
+　　（4）get传送的数据量较小，不能大于2kb。post传送的数据量较大，一般被默认为不受限制。但理论上，IIS4中最大量为80kb，IIS5中为100kb。
+
+　　（5）get安全性非常低，post安全性较高。但是执行效率却比post方法好。
+```
+
+仅用于POST请求  **在以下情况只能用POST请求**
+
+```
+1.无法使用缓存文件；
+2.向服务器发送大量数据；
+3.发送包含未知字符的用户输入时，post比get更稳定也更可靠
+```
+
+**建议使用get方法的情况**：
+
+```
+1、get方式的安全性较Post方式要差些，包含机密信息的话，建议用Post数据提交方式
+2、在做数据查询时，建议用Get方式；而在做数据添加、修改或删除时，建议用Post方式；
+```
+
+
+
+## 哪些地方会出现css阻塞，哪些地方会出现js阻塞？
+
+js 的阻塞特性：所有浏览器在下载 JS 的时候，会阻止一切其他活动，比如其他资源的下载，内容的呈现等等。直到 JS 下载、解析、执行完毕后才开始继续并行下载其他资源并呈现内容。为了提高用户体验，新一代浏览器都支持并行下载 JS，但是 JS 下载仍然会阻塞其它资源的下载（例如.图片，css文件等）。
+
+由于浏览器为了防止出现 JS 修改 DOM 树，需要重新构建 DOM 树的情况，所以就会阻塞其他的下载和呈现。
+
+嵌入 JS 会阻塞所有内容的呈现，而外部 JS 只会阻塞其后内容的显示，2 种方式都会阻塞其后资源的下载。也就是说外部样式不会阻塞外部脚本的加载，但会阻塞外部脚本的执行。
+
+CSS 怎么会阻塞加载了？CSS 本来是可以并行下载的，在什么情况下会出现阻塞加载了(在测试观察中，IE6 下 CSS 都是阻塞加载）
+
+当 CSS 后面跟着嵌入的 JS 的时候，该 CSS 就会出现阻塞后面资源下载的情况。而当把嵌入 JS 放到 CSS 前面，就不会出现阻塞的情况了。
+
+根本原因：因为浏览器会维持 html 中 css 和 js 的顺序，样式表必须在嵌入的 JS 执行前先加载、解析完。而嵌入的 JS 会阻塞后面的资源加载，所以就会出现上面 CSS 阻塞下载的情况。
+
+嵌入JS应该放在什么位置？
+
+```
+\1. 放在底部，虽然放在底部照样会阻塞所有呈现，但不会阻塞资源下载。
+
+\2. 如果嵌入JS放在head中，请把嵌入JS放在CSS头部。
+
+\3. 使用 defer（只支持IE）
+
+\4. 不要在嵌入的JS中调用运行时间较长的函数，如果一定要用，可以用 setTimeout 来调用
+```
+
+Javascript无阻塞加载具体方式：
+
+```
+\1. 将脚本放在底部。<link>还是放在head中，用以保证在js加载前，能加载出正常显示的页面。<script>标签放在</body>前。
+
+\2. 阻塞脚本：由于每个<script>标签下载时阻塞页面解析过程，所以限制页面的<script>总数也可以改善性能。适用于内联脚本和外部脚本。
+
+\3. 非阻塞脚本：等页面完成加载后，再加载js代码。也就是，在 window.onload 事件发出后开始下载代码。
+
+\4. defer属性：支持IE4和fierfox3.5更高版本浏览器
+
+\5. 动态脚本元素：文档对象模型（DOM）允许你使用js动态创建HTML的几乎全部文档内容。代码如下：
+```
+
+```html
+<script>
+    var script=document.createElement("script");
+    script.type="text/javascript";
+    script.src="file.js";
+    document.getElementsByTagName("head")[0].appendChild(script);
+</script>
+```
+
+此技术的重点在于：无论在何处启动下载，文件额下载和运行都不会阻塞其他页面处理过程，即使在head里（除了用于下载文件的 http 链接）。
+
+
+
+## eval是做什么的？
+
+```
+1. 它的功能是把对应的字符串解析成JS代码并运行
+2. 应该避免使用eval，不安全，非常耗性能（2次，一次解析成js语句，一次执行）
+```
+
+`**eval()**` 函数会将传入的字符串当做 JavaScript 代码进行执行。
+
+```js
+console.log(eval('2 + 2'));
+// expected output: 4
+
+console.log(eval(new String('2 + 2')));
+// expected output: 2 + 2
+
+console.log(eval('2 + 2') === eval('4'));
+// expected output: true
+
+console.log(eval('2 + 2') === eval(new String('2 + 2')));
+// expected output: false
+```
+
+```
+
+```
+
+eval(string)
+
+### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/eval#参数)
+
+- `string`
+
+  一个表示 JavaScript 表达式、语句或一系列语句的字符串。表达式可以包含变量与已存在对象的属性。
+
+### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/eval#返回值)
+
+返回字符串中代码的返回值。如果返回值为空，则返回 [`undefined`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/undefined)。
+
+
+
+`eval()` 是全局对象的一个函数属性。
+
+`eval()` 的参数是一个字符串。如果字符串表示的是表达式，`eval()` 会对表达式进行求值。如果参数表示一个或多个 JavaScript 语句，那么`eval()` 就会执行这些语句。不需要用 `eval()` 来执行一个算术表达式：因为 JavaScript 可以自动为算术表达式求值。
+
+如果你以字符串的形式构造了算术表达式，那么可以在后面用 `eval()`对它求值。例如，假设你有一个变量 `x`，您可以通过将表达式的字符串值（例如 `3 * x + 2`）赋值给一个变量，然后在你的代码后面的其他地方调用 `eval()`，来推迟涉及 `x` 的表达式的求值。
+
+如果 `eval()` 的参数不是字符串， `eval()` 会将参数原封不动地返回。在下面的例子中，`String` 构造器被指定，而 `eval()` 返回了 `String` 对象而不是执行字符串。
+
+### [永远不要使用 `eval`！](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/eval#don.27t_use_eval.21)
+
+`eval()` 是一个危险的函数， 它使用与调用者相同的权限执行代码。如果你用 `eval()` 运行的字符串代码被恶意方（不怀好意的人）修改，您最终可能会在您的网页/扩展程序的权限下，在用户计算机上运行恶意代码。更重要的是，第三方代码可以看到某一个 `eval()` 被调用时的作用域，这也有可能导致一些不同方式的攻击。相似的 [`Function`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function) 就不容易被攻击。
+
+`eval()` 通常比其他替代方法更慢，因为它必须调用 JS 解释器，而许多其他结构则可被现代 JS 引擎进行优化。
+
+此外，现代JavaScript解释器将javascript转换为机器代码。 这意味着任何变量命名的概念都会被删除。 因此，任意一个eval的使用都会强制浏览器进行冗长的变量名称查找，以确定变量在机器代码中的位置并设置其值。 另外，新内容将会通过 `eval()` 引进给变量， 比如更改该变量的类型，因此会强制浏览器重新执行所有已经生成的机器代码以进行补偿。 但是，（谢天谢地）存在一个非常好的eval替代方法：只需使用 [window.Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function)。 这有个例子方便你了解如何将`eval()`的使用转变为`Function()`。
+
+使用eval的糟糕代码:
+
+```js
+function looseJsonParse(obj){
+    return eval("(" + obj + ")");
+}
+console.log(looseJsonParse(
+   "{a:(4-1), b:function(){}, c:new Date()}"
+))
+```
+
+
+
+ 不用eval的更好的代码:
+
+```js
+function looseJsonParse(obj){
+    return Function('"use strict";return (' + obj + ')')();
+}
+console.log(looseJsonParse(
+   "{a:(4-1), b:function(){}, c:new Date()}"
+))
+```
+
+
+
+## 写一个通用的事件侦听器函数
+
+```js
+// event(事件)工具集，来源：github.com/markyun
+markyun.Event = {
+    // 页面加载完成后
+    readyEvent : function(fn) {
+        if (fn==null) {
+            fn=document;
+        }
+        var oldonload = window.onload;
+        if (typeof window.onload != 'function') {
+            window.onload = fn;
+        } else {
+            window.onload = function() {
+                oldonload();
+                fn();
+            };
+        }
+    },
+    // 视能力分别使用dom0||dom2||IE方式 来绑定事件
+    // 参数： 操作的元素,事件名称 ,事件处理程序
+    addEvent : function(element, type, handler) {
+        if (element.addEventListener) {
+            //事件类型、需要执行的函数、是否捕捉
+            element.addEventListener(type, handler, false);
+        } else if (element.attachEvent) {
+            element.attachEvent('on' + type, function() {
+                handler.call(element);
+            });
+        } else {
+            element['on' + type] = handler;
+        }
+    },
+    // 移除事件
+    removeEvent : function(element, type, handler) {
+        if (element.removeEnentListener) {
+            element.removeEnentListener(type, handler, false);
+        } else if (element.detachEvent) {
+            element.detachEvent('on' + type, handler);
+        } else {
+            element['on' + type] = null;
+        }
+    }, 
+    // 阻止事件 (主要是事件冒泡，因为IE不支持事件捕获)
+    stopPropagation : function(ev) {
+        if (ev.stopPropagation) {
+            ev.stopPropagation();
+        } else {
+            ev.cancelBubble = true;
+        }
+    },
+    // 取消事件的默认行为
+    preventDefault : function(event) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        } else {
+            event.returnValue = false;
+        }
+    },
+    // 获取事件目标
+    getTarget : function(event) {
+        return event.target || event.srcElement;
+    },
+    // 获取event对象的引用，取到事件的所有信息，确保随时能使用event；
+    getEvent : function(e) {
+        var ev = e || window.event;
+        if (!ev) {
+            var c = this.getEvent.caller;
+            while (c) {
+                ev = c.arguments[0];
+                if (ev && Event == ev.constructor) {
+                    break;
+                }
+                c = c.caller;
+            }
+        }
+        return ev;
+    }
+};
+```
+
+
+
+## Node.js 的适用场景
+
+```
+1. 高并发
+2. 聊天
+3. 实时消息推送   
+```
+
+### Node特点
+
+**1.异步I/O**
+在Node中，绝大多数的操作都以异步的方式进行调用，从文件读取到网络请求，均是如此，异步I/O意味着每个调用之间无须等待之前的I/O调用结束，在编程模型上可以提升效率，如果存在两个文件读取任务，最终的耗时只取决于最慢的那个文件读取耗时，对于同步I/O而言，他的耗时是两个任务之和。
+
+**2.事件与回调**
+在Node中事件得到了广泛的应用，如创建一个服务器，我们会为器其绑定request对象，对于请求对象绑定data和end事件，同时在前端我们通常也是为Ajax请求绑定success事件、error事件等。同样，在Node中回调也是无处不在的，事件的处理基本都是依赖回调来实现的，在JavaScript中，可以将函数作为对象传递给方法作为实参进行调用。
+
+**3.单线程**
+Node保持了JavaScript在浏览器中单线程的特点，而且在Node中，JavaScript与其余线程是无法共享任何状态的。JavaScript采用单线程的原因和他最早的用途有关，最早在Web浏览器中，JavaScript主要做的是响应用户DOM操作以及做表单校验，这些功能使用单线程来处理完全够了，而且对于DOM操作来说，使用多线程的话还将造成线程安全问题，同时多线程还将给浏览器带来更大的内存消耗并降低CPU的使用率。
+
+单就单线程本身来说，存在如下几个弱点：
+
+1、无法利用多核CPU
+2、错误会引起整个应用退出，应用的健壮性需要考虑
+3、大量计算占用CPU将使阻塞程序的运行
+严格来说，Node并非真正的单线程架构，Node自身还有一定的I/O线程存在，这些I/O线程由底层libuv处理，这就意味着Node在访问系统I/O时还是多线程的，对于文件读取、SQL查询、网路请求这些具体操作，Node还是使用多线程来进行处理从而保证Node的处理效率。
+
+**4.跨平台**
+Node刚发布的时候，只能在Linux平台上运行，后来Node在架构层面进行了改动，在Node和操作系统之间引入了一层libuv，从而实现跨平台。
+
+### Node适合的应用场景
+
+**1.I/O密集型**
+Node异步I/O的特点使得他可以轻松面对I/O密集型的业务场景，处理效率将比同步I/O高，虽然同步I/O可以采用多线程或者多进程的方式进行，但是相比Node自带异步I/O的特性来说，将增加对内存和CPU的开销。
+
+**2.高并发场景**
+针对高并发请求场景，Node的异步I/O以及事件回调特点可以高效的处理并发请求
+
