@@ -3199,3 +3199,37 @@ console.log('$foo%foo$ foo'.replace(reg4,"bar"));  //$foo%bar$ bar
 
 ## 10 Unicode 属性类
 
+ES2018 [引入](https://github.com/tc39/proposal-regexp-unicode-property-escapes)了 Unicode 属性类，允许使用`\p{...}`和`\P{...}`（`\P`是`\p`的否定形式）代表一类 Unicode 字符，匹配满足条件的所有字符。
+
+```javascript
+let regexGreekSybol=/\p{Script=Greek}/u;
+console.log(regexGreekSybol.test("π"));  //true
+```
+
+上面代码中，`\p{Script=Greek}`表示匹配一个希腊文字母，所以匹配`π`成功。
+
+Unicode 属性类的标准形式，需要同时指定属性名和属性值。
+
+```javascript
+\p{UnicodePropertyName=UnicodePropertyValue}
+```
+
+但是，对于某些属性，可以只写属性名，或者只写属性值。
+
+```javascript
+\p{UnicodePropertyName}
+\p{UnicodePropertyValue}
+```
+
+`\P{…}`是`\p{…}`的反向匹配，即匹配不满足条件的字符。
+
+注意，这两种类只对 Unicode 有效，所以**使用的时候一定要加上`u`修饰符**。如果不加`u`修饰符，正则表达式使用`\p`和`\P`会报错。
+
+由于 Unicode 的各种属性非常多，所以这种新的类的表达能力非常强。
+
+```javascript
+const regex = /^\p{Decimal_Number}+$/u;
+regex.test('𝟏𝟐𝟑𝟜𝟝𝟞𝟩𝟪𝟫𝟬𝟭𝟮𝟯𝟺𝟻𝟼') // true
+```
+
+上面代码中，属性类指定匹配所有十进制字符，可以看到各种字型的十进制字符都会匹配成功。
