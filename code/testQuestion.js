@@ -3,6 +3,8 @@
  * @param {number} right
  * @return {number[]}
  */
+
+let reg=/a\|\/ds/
 var selfDividingNumbers = function(left, right) {
 	let ans=[];
 	for (let i=left;i<=right;i++){
