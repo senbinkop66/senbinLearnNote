@@ -1,30 +1,42 @@
 /**
- * @param {number} left
- * @param {number} right
- * @return {number[]}
+ * @param {number[]} arr
+ * @return {boolean}
  */
-
-let reg=/a\|\/ds/
-var selfDividingNumbers = function(left, right) {
-	let ans=[];
-	for (let i=left;i<=right;i++){
-		let n=i.toString();
-		if (n.indexOf("0")===-1) {
-			let flag=true;
-			for (let j=0;j<n.length;j++){
-				if (i%Number(n[j])!==0) {
-					flag=false;
-					break;
+var canReorderDoubled = function(arr) {
+	let n=arr.length;
+	if (n===0) {
+		return false;
+	}
+	arr.sort((a,b)=>b-a);
+	//console.log(arr);
+	let m=new Map();
+	m.set(arr[0],1);
+	for (let i=1;i<n;i++){
+		//console.log(s);
+		if (arr[i]>=0) {
+			if (m.has(arr[i]*2)) {
+				m.set(arr[i]*2,m.get(arr[i]*2)-1);
+				if (m.get(arr[i]*2)===0) {
+					m.delete(arr[i]*2);
 				}
+			}else{
+				m.set(arr[i],m.has(arr[i]) ? m.get(arr[i])+1 : 1);
 			}
-			if (flag) {
-				ans.push(i);
+		}else{
+			if (m.has(arr[i]/2)) {
+				m.set(arr[i]/2,m.get(arr[i]/2)-1);
+				if (m.get(arr[i]/2)===0) {
+					m.delete(arr[i]/2);
+				}
+			}else{
+				m.set(arr[i],m.has(arr[i]) ? m.get(arr[i])+1 : 1);
 			}
 		}
 	}
-	return ans;
+	//console.log(m);
+	return m.size===0;
 };
 
-let left = 1, right = 22;
-let result=selfDividingNumbers(left,right);
+let arr = [2,1,2,1,1,1,2,2];
+let result=canReorderDoubled(arr);
 console.log(result);
