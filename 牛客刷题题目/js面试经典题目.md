@@ -285,7 +285,7 @@ W3C CSS 2.1 规范中的一个概念，它决定了元素如何对其内容进�
 
 块格式化上下文对浮动定位（参见 [`float`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/float)）与清除浮动（参见 [`clear`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/clear)）都很重要。浮动定位和清除浮动时只会应用于同一个BFC内的元素。浮动不会影响其它BFC中元素的布局，而清除浮动只能清除同一BFC中在它前面的元素的浮动。外边距折叠（[Margin collapsing](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Box_Model/Mastering_margin_collapsing)）也只会发生在属于同一BFC的块级元素之间。
 
-##  CSS sprites
+## CSS sprites
 
 CSS Sprites 其实就是把网页中一些背景图片整合到一张图片文件中，再利用 CSS 的"background-image"，"background-repeat"，"background-position" 的组合进行背景定位，background-position 可以用数字能精确的定位出背景图片的位置。这样可以减少很多图片请求的开销，因为请求耗时比较长；请求虽然可以并发，但是也有限制，一般浏览器都是6个。对于未来而言，就不需要这样做了，因为有了 http2。
 
@@ -565,9 +565,7 @@ position 为 absolute | fixed
 浮动元素引起的问题：
 
 1. 父元素的高度无法被撑开，影响与父元素同级的元素
-
 2. 与浮动元素同级的非浮动元素会跟随其后
-
 3. 若非第一个元素浮动，则该元素之前的元素也需要浮动，否则会影响页面显示的结构
 
 解决方法：
@@ -583,7 +581,6 @@ position 为 absolute | fixed
 清除浮动的几种方法：
 
 1. 额外标签法，<div style="clear:both;"></div>（缺点：不过这个办法会增加额外的标签使HTML结构看起来不够简洁。）
-
 2. 使用after伪元素
 
 ```css
@@ -597,7 +594,6 @@ position 为 absolute | fixed
 ```
 
 3. 浮动外部元素
-
 4. 设置 overflow 为 hidden 或者 auto
 
 ## IE 8以下版本的浏览器中的盒模型有什么不同
@@ -692,7 +688,6 @@ DOCTYPE声明新增的结构元素、功能元素
 调用 localstorge、cookies 等本地存储方式
 
 ```
-
 使用本地存储方法
 
 1.cookie
@@ -802,7 +797,6 @@ WebSocket 解决的第一个问题是，通过第一个 HTTP request 建立了 T
 ## 如何对网站的文件和资源进行优化？
 
 ```
-
 1.尽可能减少http请求次数，将css, js, 图片各自合并 
 2.使用CDN，降低通信距离 
 3.添加Expire/Cache-Control头 
@@ -2195,12 +2189,14 @@ Http 状态码是做Web开发的必备的基础知识，面试中也会经常出
 
 实现一个AJAX异步调用和局部刷新,通常需要以下几个步骤:
 
-       创建XMLHttpRequest对象,也就是创建一个异步调用对象.
-       创建一个新的HTTP请求,并指定该HTTP请求的方法、URL及验证信息.
-       设置响应HTTP请求状态变化的函数.
-       发送HTTP请求.
-       获取异步调用返回的数据.
-       使用JavaScript和DOM实现局部刷新.
+```
+   创建XMLHttpRequest对象,也就是创建一个异步调用对象.
+   创建一个新的HTTP请求,并指定该HTTP请求的方法、URL及验证信息.
+   设置响应HTTP请求状态变化的函数.
+   发送HTTP请求.
+   获取异步调用返回的数据.
+   使用JavaScript和DOM实现局部刷新.
+```
 
 
 
@@ -2327,7 +2323,6 @@ java -jar yuicompressor-2.4.2.jar --type js --charset utf-8 -v src.js > packed.j
 // 压缩CSS
 java -jar yuicompressor-2.4.2.jar --type css --charset utf-8 -v src.css > packed.css
 ```
-
 
 Google Closure Compiler：
 
@@ -2685,4 +2680,520 @@ Node异步I/O的特点使得他可以轻松面对I/O密集型的业务场景，�
 
 **2.高并发场景**
 针对高并发请求场景，Node的异步I/O以及事件回调特点可以高效的处理并发请求
+
+
+
+## JavaScript 原型，原型链 ? 有什么特点？
+
+- 原型对象也是普通的对象，是对象一个自带隐式的 `__proto__` 属性，原型也有可能有自己的原型，如果一个原型对象的原型不为null的话，我们就称之为原型链
+- 原型链是由一些用来继承和共享属性的对象组成的（有限的）对象链
+
+```
+JavaScript对象是通过引用来传递的，我们创建的每个新对象实体中并没有一份属于自己的原型副本。
+
+当我们修改原型时，与之相关的对象也会继承这一改变。
+
+当我们需要一个属性的时，Javascript引擎会先看当前对象中是否有这个属性， 如果没有的话，
+
+就会查找他的prototype对象是否有这个属性，如此递推下去，一直检索到 Object 内建对象。
+```
+
+什么是原型，原型有什么特点
+
+```
+链接：https://www.nowcoder.com/questionTerminal/dafdf862d4614009a9eab014a157dd83
+来源：牛客网
+
+JavaScript 的每个对象都继承另一个对象，后者称为“原型”（prototype）对象。只有null除外，它没有自己的原型对象。
+
+使用原型的好处是：原型对象上的所有属性和方法，都能被对应的构造函数创建的实例对象共享（这就是 JavaScript 继承机制的基本设计），也就是说，不必在构造函数中定义对象实例的信息，而是可以将这些信息直接添加到原型对象中。
+
+每一个构造函数都有一个prototype（原型）属性，这个属性就是使用构造函数创建出来的实例对象的原型对象。
+```
+
+什么是原型链，原型链有什么特点
+
+```
+链接：https://www.nowcoder.com/questionTerminal/dafdf862d4614009a9eab014a157dd83
+来源：牛客网
+
+对象的属性和方法，有可能是定义在自身，也有可能是定义在它的原型对象上。由于原型本身也是对象，又有自己的原型，所以形成了一条原型链（prototype chain）。
+
+如果一层层地上溯，所有对象的原型最终都可以上溯到Object.prototype，即Object构造函数的prototype属性指向的那个对象。而Object.prototype对象的原型就是没有任何属性和方法的null对象，而null对象没有自己的原型。
+
+“原型链”的作用是，读取对象的某个属性时，JavaScript 引擎先寻找对象本身的属性，如果找不到，就到它的原型去找，如果还是找不到，就到原型的原型去找。如果直到最顶层的Object.prototype还是找不到，则返回undefined。
+
+如果对象自身和它的原型，都定义了一个同名属性，那么优先读取对象自身的属性，这叫做“覆盖”（overriding）。
+
+需要注意的是，一级级向上，在原型链寻找某个属性，对性能是有影响的。所寻找的属性在越上层的原型对象，对性能的影响越大。如果寻找某个不存在的属性，将会遍历整个原型链。
+```
+
+
+
+## 怎么重构页面？对网站重构的理解
+
+页面重构就是根据原有页面内容和结构的基础上 通过div+css写出符合web标准的页面结构 结构完整 可通过标准验证 标签语义化 结构合理 充分考虑到页面在站点中的
+
+```
+1. 编写 CSS
+2. 让页面结构更合理化，提升用户体验
+3. 实现良好的页面效果和提升性能
+```
+
+```
+网站重构：在不改变外部行为的前提下，简化结构、添加可读性，而在网站前端保持一致的行为。也就是说是在不改变 UI 的情况下，对网站进行优化，在扩展的同时保持一致的 UI。
+
+对于传统的网站来说重构通常是：
+1. 表格(table)布局改为 DIV + CSS
+2. 使网站前端兼容于现代浏览器(针对于不合规范的CSS、如对 IE6 有效的)
+3. 对于移动平台的优化
+4. 针对于 SEO 进行优化
+5. 深层次的网站重构应该考虑的方面
+6. 减少代码间的耦合
+7. 让代码保持弹性
+8. 严格按规范编写代码
+9. 设计可扩展的API
+10. 代替旧有的框架、语言(如VB)
+11. 增强用户体验
+12. 通常来说对于速度的优化也包含在重构中
+13. 压缩JS、CSS、image等前端资源(通常是由服务器来解决)
+14. 程序的性能优化(如数据读写)
+15. 采用CDN来加速资源加载
+16. 对于JS DOM的优化
+17. HTTP服务器的文件缓存
+```
+
+
+
+## WEB应用从服务器主动推送Data到客户端有那些方式？
+
+```
+1. html5 websocket
+2. WebSocket 通过 Flash
+3. XHR长时间连接
+4. XHR Multipart Streaming
+5. 不可见的Iframe
+6. <script>标签的长时间连接(可跨域)
+```
+
+
+
+## 事件、IE与火狐的事件机制有什么区别？ 如何阻止冒泡？
+
+```
+1. 我们在网页中的某个操作（有的操作对应多个事件）。例如：当我们点击一个按钮就会产生一个事件。是可以被 JavaScript 侦测到的行为
+2. 事件处理机制：IE是事件冒泡、firefox同时支持两种事件模型，也就是：捕获型事件和冒泡型事件
+3. ev.stopPropagation();
+注意旧ie的方法：ev.cancelBubble = true;
+```
+
+
+
+## Ajax 是什么？Ajax 的交互模型？同步和异步的区别？如何解决跨域问题？
+
+```
+Ajax 是什么：
+1. 通过异步模式，提升了用户体验
+2. 优化了浏览器和服务器之间的传输，减少不必要的数据往返，减少了带宽占用
+3. Ajax 在客户端运行，承担了一部分本来由服务器承担的工作，减少了大用户量下的服务器负载。
+
+Ajax 的最大的特点：
+1. Ajax可以实现动态不刷新（局部刷新）
+2. readyState 属性 状态 有5个可取值： 0 = 未初始化，1 = 启动， 2 = 发送，3 = 接收，4 = 完成
+
+Ajax 同步和异步的区别:
+1. 同步：提交请求 -> 等待服务器处理 -> 处理完毕返回，这个期间客户端浏览器不能干任何事
+2. 异步：请求通过事件触发 -> 服务器处理（这是浏览器仍然可以作其他事情）-> 处理完毕
+ajax.open方法中，第3个参数是设同步或者异步。
+
+Ajax 的缺点：
+1. Ajax 不支持浏览器 back 按钮
+2. 安全问题 Ajax 暴露了与服务器交互的细节
+3. 对搜索引擎的支持比较弱
+4. 破坏了程序的异常机制
+5. 不容易调试
+
+解决跨域问题：
+1. jsonp
+2. iframe
+3. window.name、window.postMessage
+4. 服务器上设置代理页面
+```
+
+
+
+## js对象的深度克隆代码实现
+
+```js
+function clone(Obj) {
+    var buf;   
+    if (Obj instanceof Array) {
+        buf = [];  // 创建一个空的数组
+        var i = Obj.length;
+        while (i--) {
+            buf[i] = clone(Obj[i]);
+        }
+        return buf;
+    } else if (Obj instanceof Object){
+        buf = {};  // 创建一个空对象
+        for (var k in Obj) {  // 为这个对象添加新的属性
+            buf[k] = clone(Obj[k]);
+        }
+        return buf;
+    }else{
+        return Obj;
+    }
+}
+```
+
+
+
+## JS获取浏览器UA(User Agent 用户代理)方法
+
+获取用户浏览器/代理设备，这个是属于BOM部分的
+
+主要考察对 `navigator` 的理解
+
+```
+封装一个 browser() 方法
+
+为了方便使用，这里创建一个方法来返回浏览器的检查结果。返回结果包含有如下属性：
+
+webkit：webkit 版本号。如果浏览器为非 webkit 内核，此属性为 undefined。
+chrome：chrome 浏览器版本号。如果浏览器为 chrome，此属性为 undefined。
+ie：ie 浏览器版本号。如果浏览器为非 ie，此属性为 undefined。暂不支持 ie10+
+firefox：firefox 浏览器版本号。如果浏览器为非 firefox，此属性为 undefined。
+safari：safari 浏览器版本号。如果浏览器为非 safari，此属性为 undefined。
+opera：opera 浏览器版本号。如果浏览器为非 opera，此属性为 undefined。
+```
+
+
+
+```html
+<script> 
+function whatBrowser() {  
+    document.Browser.Name.value=navigator.appName;  
+    document.Browser.Version.value=navigator.appVersion;  
+    document.Browser.Code.value=navigator.appCodeName;  
+    document.Browser.Agent.value=navigator.userAgent;  
+}
+</script>
+```
+
+
+
+## js 数组去重
+
+### 1.利用ES6 Set去重（ES6中最常用）
+
+```js
+function unique (arr) {
+  return Array.from(new Set(arr))
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr))
+//[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {}, {}]
+```
+
+不考虑兼容性，这种去重的方法代码最少。这种方法还无法去掉“{}”空对象，后面的高阶方法会添加去掉重复“{}”的方法。
+
+### 2.利用for嵌套for，然后splice去重（ES5中最常用）
+
+双层循环，外层循环元素，内层循环时比较值。值相同时，则删去这个值。
+
+```js
+function unique(arr){            
+        for(var i=0; i<arr.length; i++){
+            for(var j=i+1; j<arr.length; j++){
+                if(arr[i]==arr[j]){         //第一个等同于第二个，splice方法删除第二个
+                    arr.splice(j,1);
+                    j--;
+                }
+            }
+        }
+return arr;
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr))
+//[1, "true", 15, false, undefined, NaN, NaN, "NaN", "a", {…}, {…}]     //NaN和{}没有去重，两个null直接消失了
+```
+
+双层循环，外层循环元素，内层循环时比较值。值相同时，则删去这个值。
+
+### 3.利用indexOf去重
+
+新建一个空的结果数组，for 循环原数组，判断结果数组是否存在当前元素，如果有相同的值则跳过，不相同则push进数组
+
+```js
+function unique(arr) {
+    if (!Array.isArray(arr)) {
+        console.log('type error!')
+        return
+    }
+    var array = [];
+    for (var i = 0; i < arr.length; i++) {
+        if (array .indexOf(arr[i]) === -1) {
+            array .push(arr[i])
+        }
+    }
+    return array;
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr))
+// [1, "true", true, 15, false, undefined, null, NaN, NaN, "NaN", 0, "a", {…}, {…}]  //NaN、{}没有去重
+```
+
+### 4.利用sort()
+
+利用sort()排序方法，然后根据排序后的结果进行遍历及相邻元素比对。
+
+```js
+function unique(arr) {
+    if (!Array.isArray(arr)) {
+        console.log('type error!')
+        return;
+    }
+    arr = arr.sort()
+    var arrry= [arr[0]];
+    for (var i = 1; i < arr.length; i++) {
+        if (arr[i] !== arr[i-1]) {
+            arrry.push(arr[i]);
+        }
+    }
+    return arrry;
+}
+     var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+        console.log(unique(arr))
+// [0, 1, 15, "NaN", NaN, NaN, {…}, {…}, "a", false, null, true, "true", undefined]      //NaN、{}没有去重
+```
+
+### 5.利用对象的属性不能相同的特点进行去重（这种数组去重的方法有问题，不建议用，有待改进）
+
+```js
+function unique(arr) {
+    if (!Array.isArray(arr)) {
+        console.log('type error!')
+        return
+    }
+    var arrry= [];
+     var  obj = {};
+    for (var i = 0; i < arr.length; i++) {
+        if (!obj[arr[i]]) {
+            arrry.push(arr[i])
+            obj[arr[i]] = 1
+        } else {
+            obj[arr[i]]++
+        }
+    }
+    return arrry;
+}
+    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+        console.log(unique(arr))
+//[1, "true", 15, false, undefined, null, NaN, 0, "a", {…}]    //两个true直接去掉了，NaN和{}去重
+```
+
+### 6.利用includes
+
+```js
+function unique(arr) {
+    if (!Array.isArray(arr)) {
+        console.log('type error!')
+        return
+    }
+    var array =[];
+    for(var i = 0; i < arr.length; i++) {
+            if( !array.includes( arr[i]) ) {//includes 检测数组是否有某个值
+                    array.push(arr[i]);
+              }
+    }
+    return array
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+    console.log(unique(arr))
+    //[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}, {…}]     //{}没有去重
+```
+
+### 7.利用hasOwnProperty
+
+利用hasOwnProperty 判断是否存在对象属性
+
+```js
+function unique(arr) {
+    var obj = {};
+    return arr.filter(function(item, index, arr){
+        return obj.hasOwnProperty(typeof item + item) ? false : (obj[typeof item + item] = true)
+    })
+}
+    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+        console.log(unique(arr))
+//[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}]   //所有的都去重了
+```
+
+### 8.利用filter
+
+```js
+function unique(arr) {
+  return arr.filter(function(item, index, arr) {
+    //当前元素，在原始数组中的第一个索引==当前索引值，否则返回当前元素
+    return arr.indexOf(item, 0) === index;
+  });
+}
+    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+        console.log(unique(arr))
+//[1, "true", true, 15, false, undefined, null, "NaN", 0, "a", {…}, {…}]
+```
+
+### 9.利用递归去重
+
+```js
+function unique(arr) {
+        var array= arr;
+        var len = array.length;
+
+    array.sort(function(a,b){   //排序后更加方便去重
+        return a - b;
+    })
+
+    function loop(index){
+        if(index >= 1){
+            if(array[index] === array[index-1]){
+                array.splice(index,1);
+            }
+            loop(index - 1);    //递归loop，然后数组去重
+        }
+    }
+    loop(len-1);
+    return array;
+}
+ var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr))
+//[1, "a", "true", true, 15, false, 1, {…}, null, NaN, NaN, "NaN", 0, "a", {…}, undefined]
+```
+
+### 10.利用Map数据结构去重
+
+创建一个空Map数据结构，遍历需要去重的数组，把数组的每一个元素作为key存到Map中。由于Map中不会出现相同的key值，所以最终得到的就是去重后的结果
+
+```js
+function arrayNonRepeatfy(arr) {
+  let map = new Map();
+  let array = new Array();  // 数组用于返回结果
+  for (let i = 0; i < arr.length; i++) {
+    if(map .has(arr[i])) {  // 如果有该key值
+      map .set(arr[i], true); 
+    } else { 
+      map .set(arr[i], false);   // 如果没有该key值
+      array .push(arr[i]);
+    }
+  } 
+  return array ;
+}
+ var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+    console.log(unique(arr))
+//[1, "a", "true", true, 15, false, 1, {…}, null, NaN, NaN, "NaN", 0, "a", {…}, undefined]
+```
+
+### 11.利用reduce+includes
+
+```js
+function unique(arr){
+    return arr.reduce((prev,cur) => prev.includes(cur) ? prev : [...prev,cur],[]);
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr));
+// [1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}, {…}]
+```
+
+### 12. [...new Set(arr)]
+
+```js
+[...new Set(arr)] 
+//代码就是这么少----（其实，严格来说并不算是一种，相对于第一种方法来说只是简化了代码）
+```
+
+
+
+## HTTP状态码
+
+```
+100 Continue  继续，一般在发送post请求时，已发送了http header之后服务端将返回此信息，表示确认，之后发送具体参数信息
+200 OK   正常返回信息
+201 Created  请求成功并且服务器创建了新的资源
+202 Accepted  服务器已接受请求，但尚未处理
+301 Moved Permanently  请求的网页已永久移动到新位置
+302 Found  临时性重定向
+303 See Other  临时性重定向，且总是使用 GET 请求新的 URI
+304 Not Modified  自从上次请求后，请求的网页未修改过
+400 Bad Request  服务器无法理解请求的格式，客户端不应当尝试再次使用相同的内容发起请求
+401 Unauthorized  请求未授权
+403 Forbidden  禁止访问
+404 Not Found  找不到如何与 URI 相匹配的资源
+500 Internal Server Error  最常见的服务器端错误
+503 Service Unavailable 服务器端暂时无法处理请求（可能是过载或维护）
+```
+
+
+
+## cache-control
+
+```
+网页的缓存是由HTTP消息头中的“Cache-control”来控制的，常见的取值有private、no-***、max-age、must-revalidate等，默认为private。
+
+Expires 头部字段提供一个日期和时间，响应在该日期和时间后被认为失效。允许客户端在这个时间之前不去检查（发请求），等同max-age的效果。但是如果同时存在，则被Cache-Control的max-age覆盖。
+
+Expires = "Expires" ":" HTTP-date
+例如：
+Expires: Thu, 01 Dec 1994 16:00:00 GMT （必须是GMT格式）
+如果把它设置为-1，则表示立即过期
+
+Expires 和 max-age 都可以用来指定文档的过期时间，但是二者有一些细微差别
+1. Expires在HTTP/1.0中已经定义，Cache-Control:max-age在HTTP/1.1中才有定义，为了向下兼容，仅使用max-age不够
+2. Expires指定一个绝对的过期时间(GMT格式),这么做会导致至少2个问题：
+    2.1客户端和服务器时间不同步导致Expires的配置出现问题。 
+    2.2很容易在配置后忘记具体的过期时间，导致过期来临出现浪涌现象
+3. max-age 指定的是从文档被访问后的存活时间，这个时间是个相对值(比如:3600s)，相对的是文档第一次被请求时服务器记录的Request_time(请求时间)
+4. Expires 指定的时间可以是相对文件的最后访问时间(Atime)或者修改时间(MTime)，而max-age相对对的是文档的请求时间(Atime)
+5. 如果值为 no-***,那么每次都会访问服务器。如果值为max-age，则在过期之前不会重复访问服务器。
+```
+
+
+
+## js 操作获取和设置 cookie
+
+```js
+// 创建cookie
+function setCookie(name, value, expires, path, domain, secure) {
+    var cookieText = encodeURIComponent(name) + '=' + encodeURIComponent(value);
+    if (expires instanceof Date) {
+        cookieText += '; expires=' + expires;
+    }
+    if (path) {
+        cookieText += "; path=" + path     }
+    if (domain) {
+        cookieText += '; domain=' + domain;
+    }
+    if (secure) {
+        cookieText += '; secure';
+    }
+    document.cookie = cookieText;
+}
+// 获取cookie
+function getCookie(name) {
+    var cookieName = encodeURIComponent(name) + '=';
+    var cookieStart = document.cookie.indexOf(cookieName);
+    var cookieValue = null;
+    if (cookieStart > -1) {
+        var cookieEnd = document.cookie.indexOf(';', cookieStart);
+        if (cookieEnd == -1) {
+            cookieEnd = document.cookie.length;
+        }
+        cookieValue = decodeURIComponent(document.cookie.substring(cookieStart + cookieName.length, cookieEnd));
+    }
+    return cookieValue;
+}
+// 删除cookie
+function unsetCookie(name) {
+    document.cookie = name + "= ; expires=" + new Date(0);
+}
+```
 

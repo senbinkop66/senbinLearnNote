@@ -1,14 +1,14 @@
-function currying(fn, n) {
-  return function (m) {
-    return fn.call(this, m, n);
-  };
-}
+let arrayLike = {
+    '0': 'a',
+    '1': 'b',
+    '2': 'c',
+    length: 3
+};
 
-function tailFactorial(n, total) {
-  if (n === 1) return total;
-  return tailFactorial(n - 1, n * total);
-}
+let arr=[].slice.call(arrayLike);
 
-const factorial = currying(tailFactorial, 1);
+console.log(arr);
 
-console.log(factorial(5)); // 120
+let arr2=Array.from(arrayLike);
+
+console.log(arr2)
