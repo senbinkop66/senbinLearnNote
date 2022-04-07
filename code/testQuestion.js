@@ -1,24 +1,28 @@
-const _counter = new WeakMap();
-const _action = new WeakMap();
-
-class Countdown {
-  constructor(counter, action) {
-    _counter.set(this, counter);
-    _action.set(this, action);
-  }
-  dec() {
-    let counter = _counter.get(this);
-    if (counter < 1) return;
-    counter--;
-    _counter.set(this, counter);
-    if (counter === 0) {
-      _action.get(this)();
+/**
+ * @param {string} s
+ * @param {string} goal
+ * @return {boolean}
+ */
+var rotateString = function(s, goal) {
+    if (s.length!==goal.length) {
+        return false;
     }
-  }
-}
+    let index0=0;
+    while(index0<s.length){
+        index0=s.indexOf(goal[0],index0);
+        if (index0===-1) {
+            return false;
+        }else{
+            if (s.slice(index0)+s.slice(0,index0)===goal) {
+                return true;
+            }else{
+                index0++;
+            }
+        }
+    }
+    return false;
+};
 
-const c = new Countdown(2, () => console.log('DONE'));
-
-c.dec()
-c.dec()
-// DONE
+let  s = "abcde", goal = "cdeab";
+let result=rotateString(s,goal);
+console.log(result);
