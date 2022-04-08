@@ -1648,3 +1648,462 @@ origin  git@github.com:senbinkop66/jQuery.git (push)
 
 
 
+# Git 服务器搭建
+
+我们远程仓库使用了 Github，Github 公开的项目是免费的，但是如果你不想让其他人看到你的项目就需要收费。
+
+这时我们就需要自己搭建一台Git服务器作为私有仓库使用。
+
+接下来我们将以 Centos 为例搭建 Git 服务器。
+
+### 1、安装Git
+
+```bash
+$ yum install curl-devel expat-devel gettext-devel openssl-devel zlib-devel perl-devel
+$ yum install git
+```
+
+接下来我们 创建一个git用户组和用户，用来运行git服务：
+
+```bash
+$ groupadd git
+$ adduser git -g git
+```
+
+### 2、创建证书登录
+
+收集所有需要登录的用户的公钥，公钥位于id_rsa.pub文件中，把我们的公钥导入到/home/git/.ssh/authorized_keys文件里，一行一个。
+
+如果没有该文件创建它：
+
+```bash
+$ cd /home/git/
+$ mkdir .ssh
+$ chmod 700 .ssh
+$ touch .ssh/authorized_keys
+$ chmod 600 .ssh/authorized_keys
+```
+
+
+
+### 3、初始化Git仓库
+
+首先我们选定一个目录作为Git仓库，假定是/home/gitrepo/w3cschoolcn.git，在/home/gitrepo目录下输入命令：
+
+```bash
+$ cd /home
+$ mkdir gitrepo
+$ chown git:git gitrepo/
+$ cd gitrepo
+
+$ git init --bare w3cschoolcn.git
+Initialized empty Git repository in /home/gitrepo/w3cschoolcn.git/
+```
+
+以上命令Git创建一个空仓库，服务器上的Git仓库通常都以.git结尾。然后，把仓库所属用户改为git：
+
+```bash
+$ chown -R git:git w3cschoolcn.git
+```
+
+### 4、克隆仓库
+
+```bash
+$ git clone git@192.168.45.4:/home/gitrepo/w3cschoolcn.git
+Cloning into 'w3cschoolcn'...
+warning: You appear to have cloned an empty repository.
+Checking connectivity... done.
+```
+
+192.168.45.4 为 Git 所在服务器 ip ，你需要将其修改为你自己的 Git 服务 ip。
+
+这样我们的 Git 服务器安装就完成了，接下来我们可以禁用 git 用户通过shell登录，可以通过编辑/etc/passwd文件完成。找到类似下面的一行：
+
+```
+git:x:503:503::/home/git:/bin/bash
+```
+
+改为：
+
+```
+git:x:503:503::/home/git:/sbin/nologin
+```
+
+
+
+# Git 常用命令速查表
+
+## 创建 | CREATE
+
+------
+
+```bash
+$ git clone ssh://user@domain.com/xx.git 克隆远程仓库
+$ git init 初始化本地 git 仓库（新建仓库）
+```
+
+
+
+## 本地更改 | LOCAL CHANGES
+
+------
+
+```bash
+$ git status 查看当前版本状态（是否修改）
+
+$ git diff 显示所有未添加至 index 的变更
+$ git diff HEAD 查看已缓存的与未缓存的所有改动
+
+$ git add <path> 将该文件添加到缓存
+
+$ git commit -m ‘xxx’ 提交
+$ git commit --amend -m ‘xxx’ 合并上一次提交（用于反复修改）
+$ git commit -am ‘xxx’ 将 add 和 commit 合为一步
+```
+
+
+
+## 提交历史记录 | COMMIT HISTORY
+
+------
+
+```bash
+$ git log 显示日志
+
+$ git show <commit> 显示某个提交的详细内容
+
+$ git blame <file> 在每一行显示 commit 号,提交者,最早提交日期
+```
+
+
+
+## 分支机构和标签 | BRANCHES & TAGS
+
+------
+
+```bash
+$ git branch 显示本地分支
+$ git checkout <branch> 切换分支
+$ git branch <new-branch> 新建分支
+$ git branch --track <new> <remote> 创建新分支跟踪远程分支
+$ git branch -d <branch> 删除本地分支
+
+$ git tag <tag-name> 给当前分支打标签
+```
+
+
+
+## 更新和发布 | UPDATE & PUBLISH
+
+------
+
+```bash
+$ git remote -v 列出远程分支详细信息
+$ git remote show <remote> 显示某个分支信息
+$ git remote add <remote> <url> 添加一个新的远程仓库
+
+$ git fetch <remote> 获取远程分支，但不更新本地分支，另需 merge
+
+$ git pull <remote> <branch> 获取远程分支，并更新本地分支
+
+$ git push <remote> <branch> 推送本地更新到远程分支
+$ git push <remote> --delete <branch> 删除一个远程分支
+$ git push --tags 推送本地标签
+```
+
+
+
+## 合并与衍合 | MERGE & REBASE
+
+------
+
+```bash
+$ git merge <branch> 合并分支到当前分支，存在两个
+
+$ git rebase <branch> 合并分支到当前分支，存在一个
+$ git rebase --abort 回到执行 rebase 之前
+$ git rebase --continue 解决矛盾后继续执行 rebase
+
+$ git mergetool 使用 mergetool 解决冲突
+
+$ git add <resolve-file> 使用冲突文件解决冲突
+
+$ git rm <resolved-file>
+```
+
+
+
+## 撤消 | UNDO
+
+------
+
+```bash
+$ git reset --hard HEAD 将当前版本重置为 HEAD（用于 merge 失败）
+
+$ git reset --hard <commit> 将当前版本重置至某一个提交状态(慎用!)
+
+$ git reset <commit> 将当前版本重置至某一个提交状态，代码不变
+
+$ git reset --merge <commit> 重置至某一状态,保留版本库中不同的文件
+
+$ git reset --keep <commit> 重置至某一状态,重置变化的文件,代码改变
+
+$ git checkout HEAD <file> 丢弃本地更改信息并将其存入特定文件
+
+$ git revert <commit> 撤消提交
+```
+
+
+
+## 帮助 | HELP帮助 | HELP
+
+------
+
+```bash
+$ git help <command>  获取命令行上的帮助
+```
+
+
+
+# Git 常用命令
+
+## Git clone命令用法
+
+**git clone命令的作用是将存储库克隆到新目录中，为克隆的存储库中的每个分支创建远程跟踪分支(**使用git branch -r可见)，**并从克隆检出的存储库作为当前活动分支的初始分支**。
+
+在克隆之后，没有参数的普通git提取将更新所有远程跟踪分支，并且没有参数的git pull将另外将远程主分支合并到当前主分支(如果有的话)。
+
+此默认配置通过在refs/remotes/origin下创建对远程分支头的引用，并通过初始化remote.origin.url和remote.origin.fetch配置变量来实现。
+
+执行远程操作的第一步，通常是从远程主机克隆一个版本库，这时就要用到git clone命令。
+
+```bash
+$ git clone <版本库的网址>
+```
+
+比如，克隆jQuery的版本库。
+
+```bash
+$ git clone http://github.com/jquery/jquery.git
+```
+
+该命令会在本地主机生成一个目录，与远程主机的版本库同名。如果要指定不同的目录名，可以将目录名作为git clone命令的第二个参数。
+
+```bash
+$ git clone <版本库的网址> <本地目录名>
+```
+
+git clone支持多种协议，除了HTTP(s)以外，还支持SSH、Git、本地文件协议等。
+
+  **在默认情况下，Git会把"Git URL"里最后一级目录名的'.git'的后辍去掉,做为新克隆(clone)项目的目录名**: (例如. git clone http://git.kernel.org/linux/kernel/git/torvalds/linux-2.6.git 会建立一个目录叫'linux-2.6')
+
+```bash
+$ git clone http[s]://example.com/path/to/repo.git
+$ git clone http://git.oschina.net/yiibai/sample.git
+$ git clone ssh://example.com/path/to/repo.git
+$ git clone git://example.com/path/to/repo.git
+$ git clone /opt/git/project.git 
+$ git clone file:///opt/git/project.git
+$ git clone ftp[s]://example.com/path/to/repo.git
+$ git clone rsync://example.com/path/to/repo.git
+```
+
+
+
+SSH协议还有另一种写法。
+
+```bash
+$ git clone [user@]example.com:path/to/repo.git
+```
+
+通常来说，Git协议下载速度最快，**SSH协议用于需要用户认证的场合**。
+
+
+
+**应用场景示例**
+
+从上游克隆下来：
+
+```bash
+$ git clone git://git.kernel.org/pub/scm/.../linux.git mydir
+$ cd mydir
+$ make # 执行代码或其它命令
+```
+
+在当前目录中使用克隆，而无需检出：
+
+```bash
+$ git clone -l -s -n . ../copy
+$ cd ../copy
+$ git show-branch
+```
+
+从现有本地目录借用从上游克隆：
+
+```bash
+$ git clone --reference /git/linux.git 
+    git://git.kernel.org/pub/scm/.../linux.git 
+    mydir
+$ cd mydir
+```
+
+创建一个裸存储库以将您的更改发布给公众：
+
+```bash
+$ git clone --bare -l /home/proj/.git /pub/scm/proj.git
+```
+
+
+
+## Git push命令用法
+
+git push是Git中常用的命令，其作用是将本地分支的更新推送到远程主机。
+
+**git push格式：**
+
+git push的格式和git pull类似：
+
+```bash
+$ git push <远程主机名> <本地分支名>:<远程分支名>
+```
+
+注意：
+
+分支推送顺序的写法是<来源地>:<目的地>，所以git pull是<远程分支>:<本地分支>，而git push是<本地分支>:<远程分支>。如果省略远程分支名，则表示将本地分支推送与之存在”追踪关系”的远程分支(通常两者同名)，**如果该远程分支不存在，则会被新建。**
+
+
+
+**git push常见用法：**
+
+```bash
+$ git push origin master
+```
+
+该命令的作用是将本地的master分支推送到origin主机的master分支。如果后者不存在，则会被新建。**如果省略本地分支名，则表示删除指定的远程分支，因为这等同于推送一个空的本地分支到远程分支。**
+
+```bash
+$ git push origin :master
+# 等同于
+$ git push origin --delete master
+```
+
+上面命令表示删除origin主机的master分支。**如果当前分支与远程分支之间存在追踪关系，则本地分支和远程分支都可以省略。**
+
+```bash
+$ git push origin
+```
+
+上面命令表示，将当前分支推送到origin主机的对应分支。**如果当前分支只有一个追踪分支，那么主机名都可以省略。**
+
+```bash
+$ git push
+```
+
+**如果当前分支与多个主机存在追踪关系，则可以使用-u选项指定一个默认主机**，这样后面就可以不加任何参数使用git push。
+
+```bash
+$ git push -u origin master
+```
+
+**上面命令将本地的master分支推送到origin主机，同时指定origin为默认主机**，后面就可以不加任何参数使用git push了。
+
+**不带任何参数的git push，默认只推送当前分支**，这叫做**simple方式**。此外，还有一种**matching方式**，**会推送所有有对应的远程分支的本地分支**。Git 2.0版本之前，默认采用matching方法，**现在改为默认采用simple方式**。如果要修改这个设置，可以采用git config命令。
+
+```bash
+$ git config --global push.default matching
+# 或者
+$ git config --global push.default simple
+```
+
+还有一种情况，就是不管是否存在对应的远程分支，将本地的所有分支都推送到远程主机，这时需要使用–all选项。
+
+```bash
+$ git push --all origin
+```
+
+上面命令表示，将所有本地分支都推送到origin主机。
+
+如果远程主机的版本比本地版本更新，推送时Git会报错，要求先在本地做git pull合并差异，然后再推送到远程主机。这时，**如果你一定要推送，可以使用–force选项**。
+
+```bash
+$ git push --force origin
+```
+
+上面命令使用–force选项，结果导致在远程主机产生一个”非直进式”的合并(non-fast-forward merge)。**除非你很确定要这样做，否则应该尽量避免使用–force选项。**
+
+最后，**git push不会推送标签(tag)，除非使用–tags选项。**
+
+```bash
+$ git push origin --tags
+```
+
+有时候当远程xxx分支被删掉了后，用git branch -a 你还可以看到本地还有remote/origin/xxx这个分支，那么你可以使用
+
+```bash
+git fetch -p
+```
+
+ 这个命令可以帮你同步最新的远程分支，并删掉本地被删了的远程分支。
+
+## Git merge命令用法
+
+git merge 是在 Git 中使用比较频繁的一个命令，其主要用于**将两个或两个以上的开发历史加入(合并)一起**。本文就为大家带来 git merge 命令的常见用法。
+
+
+
+**git merge三种语法：**
+
+```bash
+git merge [-n] [--stat] [--no-commit] [--squash] [--[no-]edit]
+    [-s <strategy>] [-X <strategy-option>] [-S[<keyid>]]
+    [--[no-]allow-unrelated-histories]
+    [--[no-]rerere-autoupdate] [-m <msg>] [<commit>…?]
+git merge --abort
+git merge --continue
+```
+
+
+
+**git merge用途**
+
+git-merge 命令是用于**从指定的 commit(s) 合并到当前分支的操作**。
+
+> 注：这里的指定 commit(s) 是指从这些历史 commit 节点开始，一直到当前分开的时候。
+
+1、用于 git-pull 中，来整合另一代码仓库中的变化（即：git pull = git fetch + git merge）
+
+2、用于从一个分支到另一个分支的合并
+
+
+
+假设下图中的历史节点存在，并且当前所在的分支为“master”：
+
+![1](https://atts.w3cschool.cn/attachments/image/20180514/1526277109168159.png)
+
+那么 `git merge topic` 命令将会把在 master 分支上二者共同的节点（E节点）之后分离的节点（即 topic 分支的A B C节点）重现在 master 分支上，直到topic分支当前的 commit 节点（C节点），并位于master分支的顶部。并且沿着 master 分支和 topic 分支创建一个记录合并结果的新节点，该节点带有用户描述合并变化的信息。
+
+即下图中的H节点，C 节点和 G 节点都是 H 节点的父节点。
+
+![2](https://atts.w3cschool.cn/attachments/image/20180514/1526277117447233.png)
+
+
+
+**git merge <msg> HEAD <commit>...命令**
+
+该命令的存在是由于历史原因，**在新版本中不应该使用它**，应该使用
+
+```bash
+git merge -m <msg> <commit>....
+```
+
+进行替代
+
+**git merge --abort命令**
+
+该命令仅仅在合并后导致冲突时才使用。git merge --abort **将会抛弃合并过程并且尝试重建合并前的状态**。但是，当合并开始时如果存在未 commit 的文件，git merge --abort在某些情况下将无法重现合并前的状态。（特别是这些未 commit 的文件在合并的过程中将会被修改时）
+
+警告：
+
+运行 git-merge 时含有大量的未 commit 文件很容易让你陷入困境，这将使你在冲突中难以回退。因此**非常不鼓励在使用 git-merge 时存在未 commit 的文件**，
+
+建议使用 **git-stash** 命令将这些未 commit 文件暂存起来，并在解决冲突以后使用 **git stash pop** 把这些未 commit 文件还原出来。
