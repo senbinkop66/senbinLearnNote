@@ -32,28 +32,38 @@ body {
   // 指定图表的配置项和数据
 
 var option = {
-  xAxis: {
-    data: ['A', 'B', 'C', 'D', 'E']
+  legend:{
+    orient:"vertical",
+    x:"left",
+    data:['A', 'B', 'C', 'D', 'E'],
   },
-  yAxis: {},
   series: [
     {
-      type:"line",
-      data: [10, 22, "-", 23, 19],
-      lineStyle:{
-        normal:{
-          color:"#329876",
-          width:4,
-          type:"dashed",
-        }
-      },
+      type:"pie",
+      radius:["30%","50%"],
+      avoidLabelOverlap:false,
       label:{
+        show:false,
+        position:"center",
+        emphasis:{
+          show:true,
+        },
+      },
+      labelLine:{
+        show:false,
+      },
+      emphasis:{
         show:true,
-        position:"bottom",
-        textStyle:{
-          fontSize:20,
-        }
-      }
+        fontSize:"30",
+        fontWeight:"bold",
+      },
+      data:[
+        { value: 335, name: 'A' },
+        { value: 310, name: 'B' },
+        { value: 234, name: 'C' },
+        { value: 135, name: 'D' },
+        { value: 1548, name: 'E' }
+      ],
     },
     ],
 };

@@ -3684,3 +3684,363 @@ option = {
 ```
 
 注意区别这个例子中，“空”数据与取值为 0 的数据。
+
+## 堆叠折线图
+
+与[堆叠柱状图](https://echarts.apache.org/handbook/zh/application/chart-types/bar/stacked-bar)类似，堆叠折线图也是用系列的 `stack` 设置哪些系列堆叠在一起。
+
+```js
+option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      data: [10, 22, 28, 43, 49],
+      type: 'line',
+      stack: 'x'
+    },
+    {
+      data: [5, 4, 3, 5, 10],
+      type: 'line',
+      stack: 'x'
+    }
+  ]
+};
+```
+
+但是不同的是，如果不加说明的话，我们很难判断出这是一个堆叠折线图，还是一个普通的折线图。所以，**对于堆叠折线图而言，一般建议使用区域填充色以表明堆叠的情况。**
+
+```js
+option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      data: [10, 22, 28, 43, 49],
+      type: 'line',
+      stack: 'x',
+      areaStyle: {}
+    },
+    {
+      data: [5, 4, 3, 5, 10],
+      type: 'line',
+      stack: 'x',
+      areaStyle: {}
+    }
+  ]
+};
+```
+
+## 区域面积图
+
+区域面积图将折线到坐标轴的空间设置背景色，**用区域面积表达数据**。相比普通的折线图，**区域面积图的视觉效果更加饱满丰富**，在系列不多的场景下尤其适用。
+
+```js
+option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      data: [10, 22, 28, 23, 19],
+      type: 'line',
+      areaStyle: {}
+    },
+    {
+      data: [25, 14, 23, 35, 10],
+      type: 'line',
+      areaStyle: {
+        color: '#ff0',
+        opacity: 0.5
+      }
+    }
+  ]
+};
+```
+
+通过 [`areaStyle`](https://echarts.apache.org/option.html#series-line.areaStyle) 设置折线图的填充区域样式，**将其设为为 `{}` 表示使用默认样式**，即使用系列的颜色以半透明的方式填充区域。如果想指定特定的样式，可以通过设置 `areaStyle` 下的配置项覆盖，如第二个系列将填充区域的颜色设为不透明度为 0.5 的黄色。
+
+## 平滑曲线图
+
+平滑曲线图也是折线图的一种变形，这种更柔和的样式也是一种不错的视觉选择。使用时，**只需要将折线图系列的 `smooth` 属性设置为 `true` 即可**。
+
+```js
+option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      data: [10, 22, 28, 23, 19],
+      type: 'line',
+      smooth: true
+    }
+  ]
+};
+```
+
+## 阶梯线图
+
+阶梯线图又称**方波图**，它**使用水平和垂直的线来连接两个数据点**，而普通折线图则直接将两个点连接起来。**阶梯线图能够很好地表达数据的突变**。
+
+在 ECharts 中，**系列的 `step` 属性用来表征阶梯线图的连接类型**，它共有**三种取值：`'start'`、`'middle'` 和 `'end'`**，分别表示在当前点，当前点与下个点的中间点，下个点拐弯。
+
+```js
+option = {
+  xAxis: {
+    type: 'category',
+    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  },
+  yAxis: {
+    type: 'value'
+  },
+  series: [
+    {
+      name: 'Step Start',
+      type: 'line',
+      step: 'start',
+      data: [120, 132, 101, 134, 90, 230, 210]
+    },
+    {
+      name: 'Step Middle',
+      type: 'line',
+      step: 'middle',
+      data: [220, 282, 201, 234, 290, 430, 410]
+    },
+    {
+      name: 'Step End',
+      type: 'line',
+      step: 'end',
+      data: [450, 432, 401, 454, 590, 530, 510]
+    }
+  ]
+};
+```
+
+请注意这个例子中不同的 `step` 取值对应的数据点和连线的区别。
+
+
+
+# 饼图
+
+## 基础饼图
+
+饼图主要用于表现不同类目的数据在总和中的占比。每个的弧度表示数据数量的比例。
+
+### 最简单的饼图
+
+饼图的配置和折线图、柱状图略有不同，**不再需要配置坐标轴，而是把数据名称和值都写在系列中**。以下是一个最简单的饼图的例子。
+
+```js
+option = {
+  series: [
+    {
+      type: 'pie',
+      data: [
+        {
+          value: 335,
+          name: '直接访问'
+        },
+        {
+          value: 234,
+          name: '联盟广告'
+        },
+        {
+          value: 1548,
+          name: '搜索引擎'
+        }
+      ]
+    }
+  ]
+};
+```
+
+需要注意的是，这里是 `value` 不需要是百分比数据，ECharts 会根据所有数据的 `value` ，按比例分配它们在饼图中对应的弧度。
+
+### 饼图样式设置
+
+#### 饼图的半径
+
+饼图的半径可以通过 [`series.radius`](https://echarts.apache.org/option.html#series-pie.radius) 设置，可以是诸如 `'60%'` 这样相对的百分比字符串，或是 `200` 这样的绝对像素数值。**当它是百分比字符串时，它是相对于容器宽高中较小的一条边的。**也就是说，如果宽度大于高度，则百分比是相对于高度的，反之则反；**当它是数值型时，它表示绝对的像素大小**。
+
+```js
+option = {
+  series: [
+    {
+      type: 'pie',
+      data: [
+        {
+          value: 335,
+          name: '直接访问'
+        },
+        {
+          value: 234,
+          name: '联盟广告'
+        },
+        {
+          value: 1548,
+          name: '搜索引擎'
+        }
+      ],
+      radius: '50%'
+    }
+  ]
+};
+```
+
+### 如果数据和为 0，不显示饼图
+
+在默认情况下，如果数据值和为 0，会显示平均分割的扇形。比如，如果有 4 个数据项，并且每个数据项都是 0，则每个扇形都是 90°。**如果我们希望在这种情况下不显示任何扇形**，可以将 [`series.stillShowZeroSum`](https://echarts.apache.org/option.html#series-pie.stillShowZeroSum) 设为 `false`。
+
+```js
+option = {
+  series: [
+    {
+      type: 'pie',
+      stillShowZeroSum: false,
+      data: [
+        {
+          value: 0,
+          name: '直接访问'
+        },
+        {
+          value: 0,
+          name: '联盟广告'
+        },
+        {
+          value: 0,
+          name: '搜索引擎'
+        }
+      ]
+    }
+  ]
+};
+```
+
+**如果希望扇形对应的标签也不显示**，可以将 [`series.label.show`](https://echarts.apache.org/option.html#series-pie.label.show) 设为 `false`。
+
+```js
+option = {
+  series: [
+    {
+      type: 'pie',
+      stillShowZeroSum: false,
+      label: {
+        show: false
+      },
+      data: [
+        {
+          value: 0,
+          name: '直接访问'
+        },
+        {
+          value: 0,
+          name: '联盟广告'
+        },
+        {
+          value: 0,
+          name: '搜索引擎'
+        }
+      ]
+    }
+  ]
+};
+```
+
+## 圆环图
+
+圆环图同样可以用来表示数据占总体的比例，相比于饼图，它中间空余的部分可以用来显示一些额外的文字等信息，因而也是一种常用的图表类型。
+
+### 基础圆环图
+
+在 ECharts 中，饼图的半径除了上一小节提到的，可以是一个数值或者字符串之外，**还可以是一个包含两个元素的数组**，每个元素可以为数值或字符串。当它是一个数组时，**它的前一项表示内半径，后一项表示外半径**，这样就形成了一个圆环图。
+
+从这个角度上来说，**可以认为饼图是一个内半径为 0 的圆环图**，也就是说，饼图是圆环图的特例。
+
+```js
+option = {
+  title: {
+    text: '圆环图的例子',
+    left: 'center',
+    top: 'center'
+  },
+  series: [
+    {
+      type: 'pie',
+      data: [
+        {
+          value: 335,
+          name: 'A'
+        },
+        {
+          value: 234,
+          name: 'B'
+        },
+        {
+          value: 1548,
+          name: 'C'
+        }
+      ],
+      radius: ['40%', '70%']
+    }
+  ]
+};
+```
+
+如果半径是数组，其中的两项也可以一项是数值，另一项是百分比形式的字符串。但是这样可能导致在某些分辨率下，内半径小于外半径。**ECharts 会自动使用小的一项作为内半径，**但是仍应小心这样可能会导致的非预期效果。
+
+### 在圆环图中间显示高亮扇形对应的文字
+
+上面的例子展现了在圆环图中间显示固定文字的例子，下面我们要介绍，如何在圆环图中间显示鼠标高亮的扇形对应的文字。实现这一效果的思路是，利用系列的 `label`（默认用扇形颜色显示数据的 `name`），显示在圆环图中间。**在默认情况下不显示系列的 `label`，在高亮时显示**。具体的代码如下：
+
+```js
+option = {
+  legend: {
+    orient: 'vertical',
+    x: 'left',
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  series: [
+    {
+      type: 'pie',
+      radius: ['50%', '70%'],
+      avoidLabelOverlap: false,
+      label: {
+        show: false,
+        position: 'center',
+        emphasis: {
+          show: true
+        }
+      },
+      labelLine: {
+        show: false
+      },
+      emphasis: {
+        label: {
+          show: true,
+          fontSize: '30',
+          fontWeight: 'bold'
+        }
+      },
+      data: [
+        { value: 335, name: 'A' },
+        { value: 310, name: 'B' },
+        { value: 234, name: 'C' },
+        { value: 135, name: 'D' },
+        { value: 1548, name: 'E' }
+      ]
+    }
+  ]
+};
+```
+
+其中，`avoidLabelOverlap` 是用来控制是否由 ECharts 调整标签位置以实现防止标签重叠。**它的默认值是 `true`，而在这里，我们不希望标签位置调整到不是中间的位置，因此我们需要将其设为 `false`。**
+
+这样，圆环图中间会显示高亮数据的 `name` 值。
+
