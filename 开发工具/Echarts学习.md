@@ -2284,3 +2284,509 @@ option = {
 
 
 
+# 坐标轴
+
+## x 轴、y 轴
+
+x 轴和 y 轴都由轴线、刻度、刻度标签、轴标题四个部分组成。部分图表中还会有网格线来帮助查看和计算数据
+
+普通的二维数据坐标系都有 x 轴和 y 轴，通常情况下，x 轴显示在图表的底部，y 轴显示在左侧，一般配置如下：
+
+```js
+option = {
+  xAxis: {
+    // ...
+  },
+  yAxis: {
+    // ...
+  }
+};
+```
+
+x 轴常用来标示数据的维度，维度一般用来指数据的类别，是观察数据的角度，例如“销售时间” “销售地点” “产品名称”等。y 轴常常用来标示数据的数值，数值是用来具体考察某一类数据的数量值，也是我们需要分析的指标，例如“销售数量”和“销售金额”等。
+
+```js
+option = {
+  xAxis: {
+    type: 'time',
+    name: '销售时间'
+    // ...
+  },
+  yAxis: {
+    type: 'value',
+    name: '销售数量'
+    // ...
+  }
+  // ...
+};
+```
+
+当 x 轴（水平坐标轴）跨度很大，可以采用区域缩放方式灵活显示数据内容。
+
+```js
+option = {
+  xAxis: {
+    type: 'time',
+    name: '销售时间'
+    // ...
+  },
+  yAxis: {
+    type: 'value',
+    name: '销售数量'
+    // ...
+  },
+  dataZoom: [
+    // ...
+  ]
+  // ...
+};
+```
+
+在二维数据中，轴也可以有多个。ECharts 中一般情况下单个 grid 组件最多只能放两个 x/y 轴，多于两个 x/y 轴需要通过配置 [offset](https://echarts.apache.org/option.html#xAxis.offset) 属性防止同个位置多个轴的重叠。两个 x 轴显示在上下，两个 y 轴显示在左右两侧。
+
+```js
+option = {
+  xAxis: {
+    type: 'time',
+    name: '销售时间'
+    // ...
+  },
+  yAxis: [
+    {
+      type: 'value',
+      name: '销售数量'
+      // ...
+    },
+    {
+      type: 'value',
+      name: '销售金额'
+      // ...
+    }
+  ]
+  // ...
+};
+```
+
+## 轴线
+
+ECharts 提供了轴线 [axisLine](https://echarts.apache.org/option.html#xAxis.axisLine) 相关的配置，我们可以根据实际情况调整，例如轴线两端的箭头，轴线的样式等。
+
+```js
+option = {
+  xAxis: {
+    axisLine: {
+      symbol: 'arrow',
+      lineStyle: {
+        type: 'dashed'
+        // ...
+      }
+    }
+    // ...
+  },
+  yAxis: {
+    axisLine: {
+      symbol: 'arrow',
+      lineStyle: {
+        type: 'dashed'
+        // ...
+      }
+    }
+  }
+  // ...
+};
+```
+
+## 刻度
+
+ECharts 提供了轴线 [axisTick](https://echarts.apache.org/option.html#xAxis.axisTick) 相关的配置，我们可以根据实际情况调整，例如刻度线的长度，样式等。
+
+```js
+option = {
+  xAxis: {
+    axisTick: {
+      length: 6,
+      lineStyle: {
+        type: 'dashed'
+        // ...
+      }
+    }
+    // ...
+  },
+  yAxis: {
+    axisTick: {
+      length: 6,
+      lineStyle: {
+        type: 'dashed'
+        // ...
+      }
+    }
+  }
+  // ...
+};
+```
+
+## 刻度标签
+
+ECharts 提供了轴线 [axisLabel](https://echarts.apache.org/option.html#xAxis.axisLabel) 相关的配置，我们可以根据实际情况调整，例如文字对齐方式，自定义刻度标签内容等。
+
+```js
+option = {
+  xAxis: {
+    axisLabel: {
+      formatter: '{value} kg',
+      align: 'center'
+      // ...
+    }
+    // ...
+  },
+  yAxis: {
+    axisLabel: {
+      formatter: '{value} 元',
+      align: 'center'
+      // ...
+    }
+  }
+  // ...
+};
+```
+
+## 示例
+
+图左侧的 y 轴代表东京月平均气温，右侧的 y 轴表示东京降水量，x 轴表示时间。两组 y 轴在一起，反映了平均气温和降水量间的趋势关系。
+
+```js
+var option = {
+  tooltip:{
+    trigger:"axis",
+    axisPointer:{type:"cross"},
+  },
+  legend:{},
+  xAxis:[
+  {
+    type:"category",
+    axisTick:{
+      alignWithLable:true,
+    },
+    data:['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'] ,
+  }],
+  yAxis:[
+    {
+      type:"value",
+      name:"降水量",
+      min:0,
+      max:250,
+      position:"right",
+      axisLabel:{
+        formatter:"{value} ml",
+      }
+    },
+    {
+      type:"value",
+      name:"温度",
+      min:0,
+      max:25,
+      position:"left",
+      axisLabel:{
+        formatter:"{value} °C",
+      }
+    },
+  ],
+  series:[
+    {
+      name:"降水量",
+      type:"bar",
+      yAxisIndex:0,
+      data: [6, 32, 70, 86, 68.7, 100.7, 125.6, 112.2, 78.7, 48.8, 36.0, 19.3],
+    },
+    {
+      name:"温度",
+      type:"line",
+      smooth:true,
+      yAxisIndex:1,
+      data:[6.0, 10.2, 10.3, 11.5, 10.3, 13.2, 14.3, 16.4, 18.0, 16.5, 12.0, 5.2],
+    },
+  ],
+  
+};
+```
+
+# 数据的视觉映射
+
+数据可视化是**数据到视觉元素的映射过程**（这个过程也可称为**视觉编码**，视觉元素也可称为视觉通道）。
+
+**ECharts 的每种图表本身就内置了这种映射过程**，比如折线图把数据映射到“线”，柱状图把数据映射到“长度”。一些更复杂的图表，如关系图、事件河流图、树图也都会做出各自内置的映射。
+
+此外，ECharts 还提供了 [visualMap 组件](https://echarts.apache.org/option.html#visualMap) 来提供通用的视觉映射。`visualMap` 组件中可以使用的视觉元素有：
+
+- 图形类别（symbol）、图形大小（symbolSize）
+- 颜色（color）、透明度（opacity）、颜色透明度（colorAlpha）、
+- 颜色明暗度（colorLightness）、颜色饱和度（colorSaturation）、色调（colorHue）
+
+下面对 `visualMap` 组件的使用方式进行简要的介绍。
+
+## 数据和维度
+
+ECharts 中的数据，一般存放于 [`series.data`](https://echarts.apache.org/option.html#series.data) 中。根据图表类型不同，数据的具体形式也可能有些许差异。比如可能是“线性表“、“树“、“图“等。但他们都有个共性：都是“数据项（dataItem）“的集合。每个数据项含有“数据值（value）“和其他信息（如果需要的话）。每个数据值，可以是单一的数值（一维）或者一个数组（多维）。
+
+例如，[series.data](https://echarts.apache.org/option.html#series.data) 最常见的形式，是“线性表“，即一个普通数组：
+
+```js
+series: {
+  data: [
+    {
+      // 这里每一个项就是数据项（dataItem）
+      value: 2323, // 这是数据项的数据值（value）
+      itemStyle: {}
+    },
+    1212, // 也可以直接是 dataItem 的 value，这更常见。
+    2323, // 每个 value 都是“一维“的。
+    4343,
+    3434
+  ];
+}
+```
+
+```js
+series: {
+  data: [
+    {
+      // 这里每一个项就是数据项（dataItem）
+      value: [3434, 129, '圣马力诺'], // 这是数据项的数据值（value）
+      itemStyle: {}
+    },
+    [1212, 5454, '梵蒂冈'], // 也可以直接是 dataItem 的 value，这更常见。
+    [2323, 3223, '瑙鲁'], // 每个 value 都是“三维“的，每列是一个维度。
+    [4343, 23, '图瓦卢'] // 假如是“气泡图“，常见第一维度映射到x轴，
+    // 第二维度映射到y轴，
+    // 第三维度映射到气泡半径（symbolSize）
+  ];
+}
+```
+
+在图表中，往往默认把 value 的前一两个维度进行映射，比如取第一个维度映射到 x 轴，取第二个维度映射到 y 轴。如果想要把更多的维度展现出来，可以借助 `visualMap`。最常见的情况，[散点图（scatter）](https://echarts.apache.org/option.html#series-scatter) 使用半径展现了第三个维度。
+
+## visualMap 组件
+
+visualMap 组件定义了把数据的*哪个维度*映射到*什么视觉元素上*。
+
+现在提供如下两种类型的 visualMap 组件，通过 [visualMap.type](https://echarts.apache.org/option.html#visualMap.type) 来区分。
+
+其定义结构例如：
+
+```js
+option = {
+  visualMap: [
+    // 可以同时定义多个 visualMap 组件。
+    {
+      // 第一个 visualMap 组件
+      type: 'continuous' // 定义为连续型 visualMap
+      // ...
+    },
+    {
+      // 第二个 visualMap 组件
+      type: 'piecewise' // 定义为分段型 visualMap
+      // ...
+    }
+  ]
+  // ...
+};
+```
+
+## 连续型与分段型视觉映射组件
+
+ECharts 的视觉映射组件分为连续型（[visualMapContinuous](https://echarts.apache.org/option.html#visualMap-continuous)）与分段型（[visualMapPiecewise](https://echarts.apache.org/option.html#visualMap-piecewise)）。
+
+连续型的意思是，进行视觉映射的数据维度是连续的数值；而分段型则是数据被分成了多段或者是离散型的数据。
+
+### 连续型视觉映射
+
+连续型视觉映射通过指定最大值、最小值，就可以确定视觉映射的范围。
+
+```js
+option = {
+  visualMap: [
+    {
+      type: 'continuous',
+      min: 0,
+      max: 5000,
+      dimension: 3, // series.data 的第四个维度（即 value[3]）被映射
+      seriesIndex: 4, // 对第四个系列进行映射。
+      inRange: {
+        // 选中范围中的视觉配置
+        color: ['blue', '#121122', 'red'], // 定义了图形颜色映射的颜色列表，
+        // 数据最小值映射到'blue'上，
+        // 最大值映射到'red'上，
+        // 其余自动线性计算。
+        symbolSize: [30, 100] // 定义了图形尺寸的映射范围，
+        // 数据最小值映射到30上，
+        // 最大值映射到100上，
+        // 其余自动线性计算。
+      },
+      outOfRange: {
+        // 选中范围外的视觉配置
+        symbolSize: [30, 100]
+      }
+    }
+    //    ...
+  ]
+};
+```
+
+其中，[visualMap.inRange](https://echarts.apache.org/option.html#visualMap.inRange) 表示在数据映射范围内的数据采用的样式；而 [visualMap.outOfRange](https://echarts.apache.org/option.html#visualMap.outOfRange) 则指定了超出映射范围外的数据的样式。
+
+[visualMap.dimension](https://echarts.apache.org/handbook/~visualMap.dimension) 则指定了将数据的哪个维度做视觉映射。
+
+### 分段型视觉映射
+
+分段型视觉映射组件有三种模式：
+
+- 连续型数据平均分段：依据 [visualMap-piecewise.splitNumber](https://echarts.apache.org/option.html#visualMap-piecewise.splitNumber) 来自动平均分割成若干块。
+- 连续型数据自定义分段：依据 [visualMap-piecewise.pieces](https://echarts.apache.org/option.html#visualMap-piecewise.pieces) 来定义每块范围。
+- 离散数据（类别性数据）：类别定义在 [visualMap-piecewise.categories](https://echarts.apache.org/option.html#visualMap-piecewise.categories) 中。
+
+使用分段型视觉映射时，需要将 `type` 设为 `'piecewise'`，并且将上面的三个配置项选其一配置即可，其他配置项类似连续型视觉映射。
+
+
+
+# 图例
+
+**图例是图表中对内容区元素的注释**、用不同形状、颜色、文字等来标示不同数据列，通过点击对应数据列的标记，可以显示或隐藏该数据列。图例虽然不是图表中的主要信息、却是了解图表信息的钥匙。
+
+## 布局
+
+图例一般放在图表的右上角、也可以放在图表的底部、同一页面中的所有图例位置保持一致，可以横排对齐也可以纵排对齐。还要综合考虑整体的图表空间是适合哪种摆放方式。当图表纵向空间紧张或者内容区量过大的时候、建议摆放在图表的下方。下面是几种图例的摆放方式：
+
+```js
+option = {
+  legend: {
+    // Try 'horizontal'
+    orient: 'vertical',
+    right: 10,
+    top: 'center'
+  },
+  dataset: {
+    source: [
+      ['product', '2015', '2016', '2017'],
+      ['Matcha Latte', 43.3, 85.8, 93.7],
+      ['Milk Tea', 83.1, 73.4, 55.1],
+      ['Cheese Cocoa', 86.4, 65.2, 82.5],
+      ['Walnut Brownie', 72.4, 53.9, 39.1]
+    ]
+  },
+  xAxis: { type: 'category' },
+  yAxis: {},
+  series: [{ type: 'bar' }, { type: 'bar' }, { type: 'bar' }]
+};
+```
+
+对于图例较多时，可以使用可滚动翻页的图例
+
+```js
+option = {
+  legend: {
+    type: 'scroll',
+    orient: 'vertical',
+    right: 10,
+    top: 20,
+    bottom: 20,
+    data: ['图例一', '图例二', '图例三' /* ... */, , '图例n']
+    // ...
+  }
+  // ...
+};
+```
+
+## 样式
+
+在深色系背景下、为了方便阅读，建议给图例加上半透明的浅色背景层，文字颜色设置为浅色。
+
+```js
+option = {
+  legend: {
+    data: ['图例一', '图例二', '图例三'],
+    backgroundColor: '#ccc',
+    textStyle: {
+      color: '#ccc'
+      // ...
+    }
+    // ...
+  }
+  // ...
+};
+```
+
+图例的颜色标签有很多种设计方式、针对不同的图表、图例样式也会有所不同。
+
+```js
+option = {
+  legend: {
+    data: ['图例一', '图例二', '图例三'],
+    icon: 'rect'
+    // ...
+  }
+  // ...
+};
+```
+
+## 交互
+
+根据场景需要，图例可支持交互操作，点击控制显示或隐藏对应的数据列；
+
+```js
+option = {
+  legend: {
+    data: ['图例一', '图例二', '图例三'],
+    selected: {
+      图例一: true,
+      图例二: true,
+      图例三: false
+    }
+    // ...
+  }
+  // ...
+};
+```
+
+## 图例注意事项
+
+图例要要注意视情况使用，有些双轴图包含了多种图表类型，不同类型的图例样式要有所区分。
+
+```js
+option = {
+  legend: {
+    data: [
+      {
+        name: '图例一',
+        icon: 'rect'
+      },
+      {
+        name: '图例二',
+        icon: 'circle'
+      },
+      {
+        name: '图例三',
+        icon: 'pin'
+      }
+    ]
+    // ...
+  },
+  series: [
+    {
+      name: '图例一'
+      // ...
+    },
+    {
+      name: '图例二'
+      // ...
+    },
+    {
+      name: '图例三'
+      // ...
+    }
+  ]
+  // ...
+};
+```
+
+当图表只有一种数据信息时，用图表标题说明数据信息即可。建议此时不要加上图例。
+
