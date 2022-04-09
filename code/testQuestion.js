@@ -1,34 +1,30 @@
 /**
- * // Definition for a Node.
- * function Node(val,children) {
- *    this.val = val;
- *    this.children = children;
- * };
+ * @param {number} sx
+ * @param {number} sy
+ * @param {number} tx
+ * @param {number} ty
+ * @return {boolean}
  */
-
-/**
- * @param {Node|null} root
- * @return {number[][]}
- */
-var levelOrder = function(root) {
-    if (root===null) {
-        return [];
-    }
-    let ans=[[root.val]];
-    let arr=root.children;
-    let len;
-    while(arr.length>0){
-        len=arr.length;
-        let temp=[];
-        while(len>0){
-            len--;
-            let node=arr.shift();
-            temp.push(node.val);
-            if (node.children) {
-                arr=arr.concat(node.children);
-            }
+var reachingPoints = function(sx, sy, tx, ty) {
+    while(tx>sx && ty>sy && tx!==ty){
+        if (tx>ty) {
+            tx%=ty;
+        }else{
+            ty%=tx;
         }
-        ans.push(temp);
     }
-    return ans;
+    if (tx===sx && ty===sy) {
+        return true;
+    }else if(tx===sx){
+        return ty>sy && (ty-sy)%tx===0;
+    }else if(ty===sy){
+        return tx>sx && (tx-sx)%sy===0;
+    }else{
+        return false;
+    }
+    
 };
+
+let sx = 1, sy = 1, tx = 3, ty = 5;
+let result=reachingPoints(sx, sy, tx, ty);
+console.log(result);

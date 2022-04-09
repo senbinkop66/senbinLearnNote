@@ -2551,3 +2551,166 @@ var option = {
 
 myChart.setOption(option);
 
+var option = {
+  title: {
+    text: '饼图程序调用高亮示例',
+    left: 'center'
+  },
+  tooltip: {
+    trigger: 'item',
+    formatter: '{a} <br/>{b} : {c} ({d}%)'
+  },
+  legend: {
+    orient: 'vertical',
+    left: 'left',
+    data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+  },
+  series: [
+    {
+      name: '访问来源',
+      type: 'pie',
+      radius: '55%',
+      center: ['50%', '60%'],
+      data: [
+        { value: 335, name: '直接访问' },
+        { value: 310, name: '邮件营销' },
+        { value: 234, name: '联盟广告' },
+        { value: 135, name: '视频广告' },
+        { value: 1548, name: '搜索引擎' }
+      ],
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }
+  ]
+};
+
+let currentIndex=-1;
+setInterval(function(){
+  var dataLen=option.series[0].data.length;
+  myChart.dispatchAction({
+    type:"downplay",
+    seriesIndex:0,
+    dataIndex:currentIndex,
+  });
+  currentIndex=(currentIndex+1)%dataLen;
+  myChart.dispatchAction({
+    type:"highlight",
+    seriesIndex:0,
+    dataIndex:currentIndex,
+  });
+  myChart.dispatchAction({
+    type:"showTip",
+    seriesIndex:0,
+    dataIndex:currentIndex,
+  });
+},1500);
+
+  // 指定图表的配置项和数据
+var data = [900, 345, 393, -108, -154, 135, 178, 286, -119, -361, -203];
+var help = [];
+var positive = [];
+var negative = [];
+for (var i = 0, sum = 0; i < data.length; ++i) {
+  if (data[i] >= 0) {
+    positive.push(data[i]);
+    negative.push('-');
+  } else {
+    positive.push('-');
+    negative.push(-data[i]);
+  }
+
+  if (i === 0) {
+    help.push(0);
+  } else {
+    sum += data[i - 1];
+    if (data[i] < 0) {
+      help.push(sum + data[i]);
+    } else {
+      help.push(sum);
+    }
+  }
+}
+var option = {
+  title:{
+    text:"Waterfall",
+  },
+  grid:{
+    left:"3%",
+    right:"4%",
+    bottom:"3%",
+    containLabel:true,
+  },
+  xAxis:{
+    type:"category",
+    splitLine:{show:false},
+    data:(function(){
+      var list=[];
+      for(let i=1;i<=11;i++){
+        list.push("Oct/"+i);
+      }
+      return list;
+    })(),
+  },
+  yAxis:{
+    type:"value",
+  },
+  series:[
+      {
+        type:"bar",
+        stack:"all",
+        itemStyle:{
+          normal:{
+            barBorderColor:"#fff",
+            color:"#fff"
+          },
+          emphasis:{
+            barBorderColor:"#fff",
+            color:"#fff",
+          }
+        },
+        data:help,
+      },
+      {
+        name:"positive",
+        type:"bar",
+        stack:"all",
+        data:positive
+      },
+      {
+        name:"negative",
+        type:"bar",
+        stack:"all",
+        data:negative,
+        itemStyle:{
+          color:"#f33"
+        }
+      },
+    ],
+};
+
+var option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      type:"line",
+      data: [10, 22, 28, 23, 19],
+      lineStyle:{
+        normal:{
+          color:"#329876",
+          width:4,
+          type:"dashed",
+        }
+      }
+    },
+    ],
+};
+
+

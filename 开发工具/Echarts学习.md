@@ -2790,3 +2790,897 @@ option = {
 
 当图表只有一种数据信息时，用图表标题说明数据信息即可。建议此时不要加上图例。
 
+
+
+# 事件与行为
+
+在 Apache ECharts 的图表中用户的操作将会触发相应的事件。开发者可以监听这些事件，然后通过回调函数做相应的处理，比如跳转到一个地址，或者弹出对话框，或者做数据下钻等等。
+
+ECharts 中的事件名称对应 DOM 事件名称，均为小写的字符串，如下是一个绑定点击操作的示例。
+
+```js
+myChart.on('click', function(params) {
+  // 控制台打印数据的名称
+  console.log(params.name);
+});
+```
+
+在 ECharts 中事件分为两种类型，一种是**用户鼠标操作点击，或者 hover 图表的图形时触发的事件**，还有一种是用户**在使用可以交互的组件后触发的行为事件**，例如在切换图例开关时触发的 ['legendselectchanged'](https://echarts.apache.org/api.html#events.legendselectchanged) 事件（这里需要注意切换图例开关是不会触发 `'legendselected'` 事件的），数据区域缩放时触发的 ['datazoom'](https://echarts.apache.org/api.html#events.legendselectchanged) 事件等等。
+
+## 鼠标事件的处理
+
+ECharts 支持常规的鼠标事件类型，包括 `'click'`、 `'dblclick'`、 `'mousedown'`、 `'mousemove'`、 `'mouseup'`、 `'mouseover'`、 `'mouseout'`、 `'globalout'`、 `'contextmenu'` 事件。下面先来看一个简单的点击柱状图后打开相应的百度搜索页面的示例。
+
+```js
+// 基于准备好的dom，初始化ECharts实例
+// var myChart = echarts.init(document.getElementById('main'));
+
+// 指定图表的配置项和数据
+var option = {
+  xAxis: {
+    data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+  },
+  yAxis: {},
+  series: [
+    {
+      name: '销量',
+      type: 'bar',
+      data: [5, 20, 36, 10, 10, 20]
+    }
+  ]
+};
+// 使用刚指定的配置项和数据显示图表。
+myChart.setOption(option);
+// 处理点击事件并且跳转到相应的百度搜索页面
+myChart.on('click', function(params) {
+  window.open('https://www.baidu.com/s?wd=' + encodeURIComponent(params.name));
+});
+```
+
+所有的鼠标事件包含参数 `params`，**这是一个包含点击图形的数据信息的对象**，如下格式：
+
+```ts
+type EventParams = {
+ 
+  componentType: string; // 当前点击的图形元素所属的组件名称， 其值如 'series'、'markLine'、'markPoint'、'timeLine' 等。
+ 
+  seriesType: string; // 系列类型。值可能为：'line'、'bar'、'pie' 等。当 componentType 为 'series' 时有意义。
+ 
+  seriesIndex: number; // 系列在传入的 option.series 中的 index。当 componentType 为 'series' 时有意义。
+ 
+  seriesName: string; // 系列名称。当 componentType 为 'series' 时有意义。
+  
+  name: string;// 数据名，类目名
+  
+  dataIndex: number;// 数据在传入的 data 数组中的 index
+  
+  data: Object;// 传入的原始数据项
+  
+  dataType: string;// sankey、graph 等图表同时含有 nodeData 和 edgeData 两种 data，
+  // dataType 的值会是 'node' 或者 'edge'，表示当前点击在 node 还是 edge 上。
+  // 其他大部分图表中只有一种 data，dataType 无意义。
+ 
+  value: number | Array; // 传入的数据值
+  
+  color: string;// 数据图形的颜色。当 componentType 为 'series' 时有意义。
+};
+```
+
+如何区分鼠标点击到了哪里：
+
+```js
+myChart.on('click', function(params) {
+  if (params.componentType === 'markPoint') {
+    // 点击到了 markPoint 上
+    if (params.seriesIndex === 5) {
+      // 点击到了 index 为 5 的 series 的 markPoint 上。
+    }
+  } else if (params.componentType === 'series') {
+    if (params.seriesType === 'graph') {
+      if (params.dataType === 'edge') {
+        // 点击到了 graph 的 edge（边）上。
+      } else {
+        // 点击到了 graph 的 node（节点）上。
+      }
+    }
+  }
+});
+```
+
+使用 `query` **只对指定的组件的图形元素的触发回调**：
+
+```js
+chart.on(eventName, query, handler);
+```
+
+`query` 可为 `string` 或者 `Object`。
+
+如果为 `string` 表示组件类型。格式可以是 'mainType' 或者 'mainType.subType'。例如：
+
+```js
+chart.on('click', 'series', function() {});
+chart.on('click', 'series.line', function() {});
+chart.on('click', 'dataZoom', function() {});
+chart.on('click', 'xAxis.category', function() {});
+```
+
+如果为 `Object`，可以包含以下一个或多个属性，每个属性都是可选的：
+
+```ts
+{
+  ${mainType}Index: number // 组件 index
+  ${mainType}Name: string // 组件 name
+  ${mainType}Id: string // 组件 id
+  dataIndex: number // 数据项 index
+  name: string // 数据项 name
+  dataType: string // 数据项 type，如关系图中的 'node', 'edge'
+  element: string // 自定义系列中的 el 的 name
+}
+```
+
+例如：
+
+```js
+chart.setOption({
+  // ...
+  series: [
+    {
+      name: 'uuu'
+      // ...
+    }
+  ]
+});
+chart.on('mouseover', { seriesName: 'uuu' }, function() {
+  // series name 为 'uuu' 的系列中的图形元素被 'mouseover' 时，此方法被回调。
+});
+```
+
+例如：
+
+```js
+chart.setOption({
+  // ...
+  series: [
+    {
+      // ...
+    },
+    {
+      // ...
+      data: [
+        { name: 'xx', value: 121 },
+        { name: 'yy', value: 33 }
+      ]
+    }
+  ]
+});
+chart.on('mouseover', { seriesIndex: 1, name: 'xx' }, function() {
+  // series index 1 的系列中的 name 为 'xx' 的元素被 'mouseover' 时，此方法被回调。
+});
+```
+
+例如：
+
+```js
+chart.setOption({
+  // ...
+  series: [
+    {
+      type: 'graph',
+      nodes: [
+        { name: 'a', value: 10 },
+        { name: 'b', value: 20 }
+      ],
+      edges: [{ source: 0, target: 1 }]
+    }
+  ]
+});
+chart.on('click', { dataType: 'node' }, function() {
+  // 关系图的节点被点击时此方法被回调。
+});
+chart.on('click', { dataType: 'edge' }, function() {
+  // 关系图的边被点击时此方法被回调。
+});
+```
+
+例如：
+
+```js
+chart.setOption({
+  // ...
+  series: {
+    // ...
+    type: 'custom',
+    renderItem: function(params, api) {
+      return {
+        type: 'group',
+        children: [
+          {
+            type: 'circle',
+            name: 'my_el'
+            // ...
+          },
+          {
+            // ...
+          }
+        ]
+      };
+    },
+    data: [[12, 33]]
+  }
+});
+chart.on('mouseup', { element: 'my_el' }, function() {
+  // name 为 'my_el' 的元素被 'mouseup' 时，此方法被回调。
+});
+```
+
+你**可以在回调函数中获得这个对象中的数据名、系列名称后在自己的数据仓库中索引得到其它的信息后更新图表，显示浮层等等**，如下示例代码：
+
+```js
+myChart.on('click', function(parmas) {
+  $.get('detail?q=' + params.name, function(detail) {
+    myChart.setOption({
+      series: [
+        {
+          name: 'pie',
+          // 通过饼图表现单个柱子中的数据分布
+          data: [detail.data]
+        }
+      ]
+    });
+  });
+});
+```
+
+## 组件交互的行为事件
+
+在 ECharts 中基本上所有的组件交互行为都会触发相应的事件，常用的事件和事件对应参数在 [events](https://echarts.apache.org//api.html#events) 文档中有列出。
+
+下面是监听一个图例开关的示例：
+
+```js
+// 图例开关的行为只会触发 legendselectchanged 事件
+myChart.on('legendselectchanged', function(params) {
+  // 获取点击图例的选中状态
+  var isSelected = params.selected[params.name];
+  // 在控制台中打印
+  console.log((isSelected ? '选中了' : '取消选中了') + '图例' + params.name);
+  // 打印所有图例的状态
+  console.log(params.selected);
+});
+```
+
+## 代码触发 ECharts 中组件的行为
+
+上面提到诸如 `'legendselectchanged'` 事件会由组件交互的行为触发，**那除了用户的交互操作，有时候也会有需要在程序里调用方法触发图表的行为，诸如显示 tooltip，选中图例。**
+
+在 ECharts 通过调用 `myChart.dispatchAction({ type: '' })` 触发图表行为，统一管理了所有动作，也可以方便地根据需要去记录用户的行为路径。
+
+常用的动作和动作对应参数在 [action](https://echarts.apache.org//api.html#action) 文档中有列出。
+
+下面示例演示了如何通过 `dispatchAction` 去轮流高亮饼图的每个扇形。
+
+```js
+option = {
+  title: {
+    text: '饼图程序调用高亮示例',
+    left: 'center'
+  },
+  tooltip: {
+    trigger: 'item',
+    formatter: '{a} <br/>{b} : {c} ({d}%)'
+  },
+  legend: {
+    orient: 'vertical',
+    left: 'left',
+    data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+  },
+  series: [
+    {
+      name: '访问来源',
+      type: 'pie',
+      radius: '55%',
+      center: ['50%', '60%'],
+      data: [
+        { value: 335, name: '直接访问' },
+        { value: 310, name: '邮件营销' },
+        { value: 234, name: '联盟广告' },
+        { value: 135, name: '视频广告' },
+        { value: 1548, name: '搜索引擎' }
+      ],
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }
+  ]
+};
+
+let currentIndex = -1;
+
+setInterval(function() {
+  var dataLen = option.series[0].data.length;
+  // 取消之前高亮的图形
+  myChart.dispatchAction({
+    type: 'downplay',
+    seriesIndex: 0,
+    dataIndex: currentIndex
+  });
+  currentIndex = (currentIndex + 1) % dataLen;
+  // 高亮当前图形
+  myChart.dispatchAction({
+    type: 'highlight',
+    seriesIndex: 0,
+    dataIndex: currentIndex
+  });
+  // 显示 tooltip
+  myChart.dispatchAction({
+    type: 'showTip',
+    seriesIndex: 0,
+    dataIndex: currentIndex
+  });
+}, 1000);
+```
+
+## 监听“空白处”的事件
+
+有时候，开发者需要监听画布的“空白处”所触发的事件。比如，当需要在用户点击“空白处”的时候重置图表时。
+
+在讨论这个功能之前，我们需要先明确两种事件。zrender 事件和 echarts 事件。
+
+```js
+myChart.getZr().on('click', function(event) {
+  // 该监听器正在监听一个`zrender 事件`。
+});
+myChart.on('click', function(event) {
+  // 该监听器正在监听一个`echarts 事件`。
+});
+```
+
+
+
+zrender 事件与 echarts 事件不同。**前者是当鼠标在任何地方都会被触发**，而后者是只有当鼠标在图形元素上时才能被触发。**事实上，echarts 事件是在 zrender 事件的基础上实现的**，也就是说，当一个 zrender 事件在图形元素上被触发时，echarts 将触发一个 echarts 事件给开发者。
+
+有了 zrender 事件，我们就可以实现监听空白处的事件，具体如下：
+
+```js
+myChart.getZr().on('click', function(event) {
+  // 没有 target 意味着鼠标/指针不在任何一个图形元素上，它是从“空白处”触发的。
+  if (!event.target) {
+    // 点击在了空白处，做些什么。
+  }
+});
+```
+
+
+
+# 柱状图 
+
+## 基本柱状图
+
+柱状图（或称条形图）是一种通过柱形的长度来表现数据大小的一种常用图表类型。
+
+设置柱状图的方式，是将 `series` 的 `type` 设为 `'bar'`。
+
+[[配置项手册\]](https://echarts.apache.org/option.html#series-bar)
+
+### 最简单的柱状图
+
+最简单的柱状图可以这样设置：
+
+```js
+option = {
+  xAxis: {
+    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  },
+  yAxis: {},
+  series: [
+    {
+      type: 'bar',
+      data: [23, 24, 18, 25, 27, 28, 25]
+    }
+  ]
+};
+```
+
+在这个例子中，横坐标是类目型的，因此需要在 `xAxis` 中指定对应的值；而纵坐标是数值型的，可以根据 `series` 中的 `data`，自动生成对应的坐标范围。
+
+### 多系列的柱状图
+
+我们可以用一个系列表示一组相关的数据，**如果需要实现多系列的柱状图，只需要在 `series` 多添加一项就可以了**——
+
+```js
+option = {
+  xAxis: {
+    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  },
+  yAxis: {},
+  series: [
+    {
+      type: 'bar',
+      data: [23, 24, 18, 25, 27, 28, 25]
+    },
+    {
+      type: 'bar',
+      data: [26, 24, 18, 22, 23, 20, 27]
+    }
+  ]
+};
+```
+
+### 柱状图样式设置
+
+#### 柱条样式
+
+柱条的样式可以通过 [`series.itemStyle`](https://echarts.apache.org/option.html#series-bar.itemStyle) 设置，包括：
+
+- 柱条的颜色（`color`）；
+- 柱条的描边颜色（`borderColor`）、宽度（`borderWidth`）、样式（`borderType`）；
+- 柱条圆角的半径（`barBorderRadius`）；
+- 柱条透明度（`opacity`）；
+- 阴影（`shadowBlur`、`shadowColor`、`shadowOffsetX`、`shadowOffsetY`）。
+
+```js
+option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      type: 'bar',
+      data: [
+        10,
+        22,
+        28,
+        {
+          value: 43,
+          // 设置单个柱子的样式
+          itemStyle: {
+            color: '#91cc75',
+            shadowColor: '#91cc75',
+            borderType: 'dashed',
+            opacity: 0.5
+          }
+        },
+        49
+      ],
+      itemStyle: {
+        barBorderRadius: 5,
+        borderWidth: 1,
+        borderType: 'solid',
+        borderColor: '#73c0de',
+        shadowColor: '#5470c6',
+        shadowBlur: 3
+      }
+    }
+  ]
+```
+
+在这个例子中，我们通过设置柱状图对应 `series` 的`itemStyle`，设置了柱条的样式。完整的配置项及其用法请参见配置项手册 [`series.itemStyle`](https://echarts.apache.org/option.html#series-bar.itemStyle)。
+
+#### 柱条宽度和高度
+
+柱条宽度可以通过 [`barWidth`](https://echarts.apache.org/option.html##series-bar.barWidth) 设置。比如在下面的例子中，将 `barWidth` 设为 `'20%'`，**表示每个柱条的宽度就是类目宽度的 20%**。由于这个例子中，**每个系列有 5 个数据，20% 的类目宽度也就是整个 x 轴宽度的 4%**。
+
+```js
+option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      type: 'bar',
+      data: [10, 22, 28, 43, 49],
+      barWidth: '20%'
+    }
+  ]
+};
+```
+
+另外，还可以设置 [`barMaxWidth`](https://echarts.apache.org/option.html#series-bar.barMaxWidth) 限制柱条的最大宽度。对于一些特别小的数据，我们也可以为柱条指定最小高度 [`barMinHeight`](https://echarts.apache.org/option.html#series-bar.barMinHeight)，当数据对应的柱条高度小于该值时，柱条高度将采用这个最小高度。
+
+#### 柱条间距
+
+柱条间距分为两种，一种是**不同系列在同一类目下的距离** [`barGap`](https://echarts.apache.org/option.html#series-bar.barGap)，另一种是**类目与类目的距离** [`barCategoryGap`](https://echarts.apache.org/option.html#series-bar.barCategoryGap)。
+
+```js
+option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      type: 'bar',
+      data: [23, 24, 18, 25, 18],
+      barGap: '20%',
+      barCategoryGap: '40%'
+    },
+    {
+      type: 'bar',
+      data: [12, 14, 9, 9, 11]
+    }
+  ]
+};
+```
+
+在这个例子中，`barGap` 被设为 `'20%'`，这**意味着每个类目（比如 `A`）下的两个柱子之间的距离，相对于柱条宽度的百分比**。而 `barCategoryGap` 是 `'40%'`，**意味着柱条每侧空余的距离，相对于柱条宽度的百分比**。
+
+通常而言，设置 `barGap` 及 `barCategoryGap` 后，就不需要设置 `barWidth` 了，这时候的宽度会自动调整。**如果有需要的话，可以设置 `barMaxWidth` 作为柱条宽度的上限**，当图表宽度很大的时候，柱条宽度也不会太宽。
+
+> 在同一坐标系上，此属性会被多个柱状图系列共享。**此属性应设置于此坐标系中最后一个柱状图系列上才会生效，并且是对此坐标系中所有柱状图系列生效。**
+
+#### 为柱条添加背景色
+
+有时，我们希望能够为柱条添加背景色。从 ECharts 4.7.0 版本开始，这一功能可以简单地用 [`showBackground`](https://echarts.apache.org/option.html#series-bar.showBackground) 开启，并且可以通过 [`backgroundStyle`](https://echarts.apache.org/option.html#series-bar.backgroundStyle) 配置。
+
+```js
+option = {
+  xAxis: {
+    type: 'category',
+    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  },
+  yAxis: {
+    type: 'value'
+  },
+  series: [
+    {
+      data: [120, 200, 150, 80, 70, 110, 130],
+      type: 'bar',
+      showBackground: true,
+      backgroundStyle: {
+        color: 'rgba(220, 220, 220, 0.8)'
+      }
+    }
+  ]
+};
+```
+
+## 堆叠柱状图
+
+有时候，我们不仅希望知道不同系列各自的数值，还希望知道它们之和的变化，这时候通常使用堆积柱状图图来表现。顾名思义，**堆积柱状图就是一个系列的数值“堆积”在另一个系列上，因而从他们的高度总和就能表达总量的变化**。
+
+使用 EChart 实现堆积折线图的方法非常简单，**只需要给一个系列的 `stack` 值设置一个字符串类型的值，这一个值表示该系列堆积的类别**。也就是说，**拥有同样 `stack` 值的系列将堆积在一组**。
+
+```js
+option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      data: [10, 22, 28, 43, 49],
+      type: 'bar',
+      stack: 'x'
+    },
+    {
+      data: [5, 4, 3, 5, 10],
+      type: 'bar',
+      stack: 'x'
+    }
+  ]
+```
+
+在这个例子中，第二个系列所在的位置是在第一个系列的位置的基础上，上升了第二个系列数值对应的高度。因此，从第二个系列的位置，就能看出这两者总和的变化趋势。
+
+> `stack` 的取值用来表明哪些系列将被堆积在一起，**理论上只要取值相同即可**，具体的取值并没有什么区别。**但在实际的应用中，我们建议使用一些有意义的字符串方便阅读**。
+>
+> 比如，在一个统计男女人数的图中，有四个系列，“成年男性”和“男孩”系列需要进行堆积，“成年女性”和“女孩”系列需要堆积。这时，这两组的的 `stack` 值就建议分别设为 `'男'` 和 `'女'`。虽然使用 `'a'` 和 `'b'` 这样没有意义的字符串也能实现同样的效果，但是代码的可阅读性就差了。
+
+## 动态排序柱状图
+
+### 基本设置
+
+动态排序柱状图**是一种展示随时间变化的数据排名变化的图表**，从 ECharts 5 开始内置支持。
+
+> 动态排序柱状图通常是横向的柱条，**如果想要采用纵向的柱条，只要把本教程中的 X 轴和 Y 轴相反设置即可**。
+
+1. 柱状图系列的 `realtimeSort` 设为 `true`，表示开启该系列的动态排序效果
+2. `yAxis.inverse` 设为 `true`，表示 Y 轴从下往上是从小到大的排列
+3. `yAxis.animationDuration` 建议设为 `300`，表示第一次柱条排序动画的时长
+4. `yAxis.animationDurationUpdate` 建议设为 `300`，表示第一次后柱条排序动画的时长
+5. 如果想**只显示前 *n* 名**，将 `yAxis.max` 设为 *n - 1*，否则显示所有柱条
+6. `xAxis.max` 建议设为 `'dataMax'` **表示用数据的最大值作为 X 轴最大值**，视觉效果更好
+7. 如果想要**实时改变标签**，需要将 `series.label.valueAnimation` 设为 `true`
+8. `animationDuration` 设为 `0`，**表示第一份数据不需要从 `0` 开始动画**（如果希望从 `0` 开始则设为和 `animationDurationUpdate` 相同的值）
+9. `animationDurationUpdate` 建议设为 `3000` **表示每次更新动画时长**，这一数值应与调用 `setOption` 改变数据的频率相同
+10. 以 `animationDurationUpdate` 的频率调用 `setInterval`，更新数据值，显示下一个时间点对应的柱条排序
+
+完整的例子如下：
+
+```js
+var data = [];
+for (let i = 0; i < 5; ++i) {
+  data.push(Math.round(Math.random() * 200));
+}
+
+option = {
+  xAxis: {
+    max: 'dataMax'
+  },
+  yAxis: {
+    type: 'category',
+    data: ['A', 'B', 'C', 'D', 'E'],
+    inverse: true,
+    animationDuration: 300,
+    animationDurationUpdate: 300,
+    max: 2 // only the largest 3 bars will be displayed
+  },
+  series: [
+    {
+      realtimeSort: true,
+      name: 'X',
+      type: 'bar',
+      data: data,
+      label: {
+        show: true,
+        position: 'right',
+        valueAnimation: true
+      }
+    }
+  ],
+  legend: {
+    show: true
+  },
+  animationDuration: 3000,
+  animationDurationUpdate: 3000,
+  animationEasing: 'linear',
+  animationEasingUpdate: 'linear'
+};
+
+function update() {
+  var data = option.series[0].data;
+  for (var i = 0; i < data.length; ++i) {
+    if (Math.random() > 0.9) {
+      data[i] += Math.round(Math.random() * 2000);
+    } else {
+      data[i] += Math.round(Math.random() * 200);
+    }
+  }
+  myChart.setOption(option);
+}
+
+setInterval(function() {
+  update();
+}, 3000);
+```
+
+## 阶梯瀑布图
+
+Apache ECharts 中并没有单独的瀑布图类型，但是我们**可以使用堆叠的柱状图模拟该效果**。
+
+假设数据数组中的值是表示对前一个值的增减：
+
+```js
+var data = [900, 345, 393, -108, -154, 135, 178, 286, -119, -361, -203];
+```
+
+也就是第一个数据是 `900`，第二个数据 `345` 表示的是在 `900` 的基础上增加了 `345`……将这个数据展示为阶梯瀑布图时，我们可以使用三个系列：第一个是不可交互的透明系列，用来实现“悬空”的柱状图效果；第二个系列用来表示正数；第三个系列用来表示负数。
+
+```js
+var data = [900, 345, 393, -108, -154, 135, 178, 286, -119, -361, -203];
+var help = [];
+var positive = [];
+var negative = [];
+for (var i = 0, sum = 0; i < data.length; ++i) {
+  if (data[i] >= 0) {
+    positive.push(data[i]);
+    negative.push('-');
+  } else {
+    positive.push('-');
+    negative.push(-data[i]);
+  }
+
+  if (i === 0) {
+    help.push(0);
+  } else {
+    sum += data[i - 1];
+    if (data[i] < 0) {
+      help.push(sum + data[i]);
+    } else {
+      help.push(sum);
+    }
+  }
+}
+
+option = {
+  title: {
+    text: 'Waterfall'
+  },
+  grid: {
+    left: '3%',
+    right: '4%',
+    bottom: '3%',
+    containLabel: true
+  },
+  xAxis: {
+    type: 'category',
+    splitLine: { show: false },
+    data: (function() {
+      var list = [];
+      for (var i = 1; i <= 11; i++) {
+        list.push('Oct/' + i);
+      }
+      return list;
+    })()
+  },
+  yAxis: {
+    type: 'value'
+  },
+  series: [
+    {
+      type: 'bar',
+      stack: 'all',
+      itemStyle: {
+        normal: {
+          barBorderColor: 'rgba(0,0,0,0)',
+          color: 'rgba(0,0,0,0)'
+        },
+        emphasis: {
+          barBorderColor: 'rgba(0,0,0,0)',
+          color: 'rgba(0,0,0,0)'
+        }
+      },
+      data: help
+    },
+    {
+      name: 'positive',
+      type: 'bar',
+      stack: 'all',
+      data: positive
+    },
+    {
+      name: 'negative',
+      type: 'bar',
+      stack: 'all',
+      data: negative,
+      itemStyle: {
+        color: '#f33'
+      }
+    }
+  ]
+};
+```
+
+
+
+# 折线图
+
+## 基础折线图
+
+折线图主要用来展示数据项随着时间推移的趋势或变化。
+
+### 最简单的折线图
+
+如果我们想建立一个横坐标是类目型（category）、纵坐标是数值型（value）的折线图，我们可以使用这样的方式：
+
+```js
+option = {
+  xAxis: {
+    type: 'category',
+    data: ['A', 'B', 'C']
+  },
+  yAxis: {
+    type: 'value'
+  },
+  series: [
+    {
+      data: [120, 200, 150],
+      type: 'line'
+    }
+  ]
+}
+```
+
+在这个例子中，我们通过 `xAxis` 将横坐标设为**类目型**，并指定了对应的值；通过 `type` 将 `yAxis` 的类型设定为**数值型**。在 `series` 中，我们将系列类型设为 `line`，并且通过 `data` 指定了折线图三个点的取值。这样，就能得到一个最简单的折线图了。
+
+> 这里 `xAxis` 和 `yAxis` 的 `type` 属性都可以隐去不写。因为坐标轴的默认类型是数值型，而 `xAxis` 指定了类目型的 `data`，所以 `ECharts` 也能识别出这是类目型的坐标轴。为了让大家更容易理解，我们特意写了 `type`。**在实际的应用中，如果是 `'value'` 类型，也可以省略不写。**
+
+### 笛卡尔坐标系中的折线图
+
+如果我们希望折线图在横坐标和纵坐标上都是连续的，即在笛卡尔坐标系中，应该如何实现呢？答案也很简单，**只要把 `series` 的 `data` 每个数据用一个包含两个元素的数组表示就行了。**
+
+```js
+option = {
+  xAxis: {},
+  yAxis: {},
+  series: [
+    {
+      data: [
+        [20, 120],
+        [50, 200],
+        [40, 50]
+      ],
+      type: 'line'
+    }
+  ]
+};
+```
+
+### 折线图样式设置
+
+#### 折线的样式
+
+折线图中折线的样式可以通过 `lineStyle` 设置。可以为其指定颜色、线宽、折线类型、阴影、不透明度等等，具体的可以参考配置项手册 [`series.lineStyle`](https://echarts.apache.org/option.html#series-line.lineStyle) 了解。这里，我们以设置颜色（color）、线宽（width）和折线类型（type）为例说明。
+
+```js
+var option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      type:"line",
+      data: [10, 22, 28, 23, 19],
+      lineStyle:{
+        normal:{
+          color:"#329876",
+          width:4,
+          type:"dashed",
+        }
+      }
+    },
+    ],
+};
+```
+
+这里设置折线宽度时，**数据点描边的宽度是不会跟着改变的**，而应该在数据点的配置项中另外设置。
+
+#### 数据点的样式
+
+数据点的样式可以通过 [`series.itemStyle`](https://echarts.apache.org/option.html#series-line.itemStyle) 指定填充颜色（color）、描边颜色（borderColor）、描边宽度（borderWidth）、描边类型（borderType）、阴影（shadowColor）、不透明度（opacity）等。与折线样式的设置十分相似，这里不再展开说明。
+
+### 在数据点处显示数值
+
+在系列中，这数据点的标签通过 [`series.label`](https://echarts.apache.org/option.html#series-line.label) 属性指定。如果将 `label` 下的 `show` 指定为`true`，则表示该数值默认时就显示；如果为 `false`，**而 [`series.emphasis.label.show`](https://echarts.apache.org/option.html#series-line.emphasis.label.show) 为 `true`，则表示只有在鼠标移动到该数据时，才显示数值。**
+
+```js
+option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      data: [10, 22, 28, 23, 19],
+      type: 'line',
+      label: {
+        show: true,
+        position: 'bottom',
+        textStyle: {
+          fontSize: 20
+        }
+      }
+    }
+  ]
+};
+```
+
+### 空数据
+
+在一个系列中，可能一个横坐标对应的取值是“空”的，将其设为 0 有时并不能满足我们的期望--**空数据不应被其左右的数据连接**。
+
+在 ECharts 中，**我们使用字符串 `'-'` 表示空数据**，这对其他系列的数据也是适用的。
+
+```js
+option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      data: [0, 22, '-', 23, 19],
+      type: 'line'
+    }
+  ]
+};
+```
+
+注意区别这个例子中，“空”数据与取值为 0 的数据。
