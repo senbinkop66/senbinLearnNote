@@ -4044,3 +4044,681 @@ option = {
 
 这样，圆环图中间会显示高亮数据的 `name` 值。
 
+
+
+## 南丁格尔图（玫瑰图）
+
+南丁格尔图又称玫瑰图，**通常用弧度相同但半径不同的扇形表示各个类目。**
+
+ECharts 可以通过将饼图的 [`series.roseType`](https://echarts.apache.org/option.html#series-pie.roseType) 值设为 `'area'` 实现南丁格尔图，其他配置项和饼图是相同的。
+
+```js
+option = {
+  series: [
+    {
+      type: 'pie',
+      data: [
+        {
+          value: 100,
+          name: 'A'
+        },
+        {
+          value: 200,
+          name: 'B'
+        },
+        {
+          value: 300,
+          name: 'C'
+        },
+        {
+          value: 400,
+          name: 'D'
+        },
+        {
+          value: 500,
+          name: 'E'
+        }
+      ],
+      roseType: 'area'
+    }
+  ]
+};
+```
+
+# 散点图
+
+散点图，也是一种常见的图表类型。散点图由许多“点”组成，有时，这些点用来表示数据在坐标系中的位置（比如在笛卡尔坐标系下，表示数据在 x 轴和 y 轴上的坐标；在地图坐标系下，表示数据在地图上的某个位置等）；有时，这些点的大小、颜色等属性也可以映射到数据值，用以表现高维数据。
+
+## 最简单的散点图
+
+下面是一个横坐标为类目轴、纵坐标为数值轴的最简单的散点图配置：
+
+```js
+option = {
+  xAxis: {
+    data: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  },
+  yAxis: {},
+  series: [
+    {
+      type: 'scatter',
+      data: [220, 182, 191, 234, 290, 330, 310]
+    }
+  ]
+}
+```
+
+## 笛卡尔坐标系下的散点图
+
+在上文的例子中，散点图的横坐标都是离散的类目轴，而纵坐标都是连续的数值轴。而对于散点图而言，另一种常见的场景是，**两个坐标轴均为连续的数值轴，也就是笛卡尔坐标系**。这时的系列形式略有不同，数据的横坐标和纵坐标一同写在 `data` 中，而非坐标轴中。
+
+```js
+option = {
+  xAxis: {},
+  yAxis: {},
+  series: [
+    {
+      type: 'scatter',
+      data: [
+        [10, 5],
+        [0, 8],
+        [6, 10],
+        [2, 12],
+        [8, 9]
+      ]
+    }
+  ]
+};
+```
+
+## 散点图样式设置
+
+### 图形的形状
+
+图形（symbol）**指的是散点图中数据“点”的形状**。有三类图形可选，一种是 **ECharts 内置形状**，第二种是**图片**，第三种是 **SVG 的路径**。
+
+ECharts 内置形状包括：圆形、矩形、圆角矩形、三角形、菱形、大头针形、箭头形，分别对应`'circle'`、`'rect'`、`'roundRect'`、`'triangle'`、`'diamond'`、`'pin'`、`'arrow'`。**使用内置形状时，只要将 `symbol` 属性指定为形状名称对应的字符串即可。**
+
+**如果想要将图形指定为任意的图片，以 `'image://'` 开头，后面跟图片的绝对或相对地址**。形如：`'image://http://example.com/xxx.png'` 或 `'image://./xxx.png'`。
+
+除此之外，**还支持 SVG 的路径作为矢量图形，将 `symbol` 设置为以 `'path://'` 开头的 SVG 路径即可**。使用矢量图形的好处是，图片不会因为缩放而产生锯齿或模糊，并且通常而言比图片形式的文件大小更小。**路径的查看方法为，打开一个 `SVG` 文件，找到形如 `<path d="M… L…"></path>` 的路径，将 `d` 的值添加在 `'path://'` 后即可。**
+
+下面，我们展示一个将图形设置为矢量爱心形状的方式。
+
+首先，我们需要一个爱心的 SVG 文件，可以使用矢量编辑软件绘制，或者从网上下载到相关资源。其内容如下：
+
+```html
+<?xml version="1.0" encoding="iso-8859-1"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 51.997 51.997" style="enable-background:new 0 0 51.997 51.997;" xml:space="preserve">
+    <path d="M51.911,16.242C51.152,7.888,45.239,1.827,37.839,1.827c-4.93,0-9.444,2.653-11.984,6.905 c-2.517-4.307-6.846-6.906-11.697-6.906c-7.399,0-13.313,6.061-14.071,14.415c-0.06,0.369-0.306,2.311,0.442,5.478 c1.078,4.568,3.568,8.723,7.199,12.013l18.115,16.439l18.426-16.438c3.631-3.291,6.121-7.445,7.199-12.014 C52.216,18.553,51.97,16.611,51.911,16.242z"/>
+</svg>
+```
+
+在 ECharts 的 `symbol` 配置项中，我们使用 `d` 的值作为路径。
+
+```js
+option = {
+  xAxis: {
+    data: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  },
+  yAxis: {},
+  series: [
+    {
+      type: 'scatter',
+      data: [220, 182, 191, 234, 290, 330, 310],
+      symbolSize: 20,
+      symbol:
+        'path://M51.911,16.242C51.152,7.888,45.239,1.827,37.839,1.827c-4.93,0-9.444,2.653-11.984,6.905 c-2.517-4.307-6.846-6.906-11.697-6.906c-7.399,0-13.313,6.061-14.071,14.415c-0.06,0.369-0.306,2.311,0.442,5.478 c1.078,4.568,3.568,8.723,7.199,12.013l18.115,16.439l18.426-16.438c3.631-3.291,6.121-7.445,7.199-12.014 C52.216,18.553,51.97,16.611,51.911,16.242z'
+    }
+  ]
+};
+```
+
+这样，就能得到爱心形状的图形作为点的形状了。
+
+### 图形的大小
+
+图形大小可以使用 [`series.symbolSize`](https://echarts.apache.org/option.html#series-scatter.symbolSize) 控制。它既可以是一个表示图形大小的像素值，也可以是一个包含两个 number 元素的数组，分别表示图形的宽和高。
+
+除此之外，它还可以是一个回调函数，其参数格式为：
+
+```ts
+(value: Array | number, params: Object) => number | Array;
+```
+
+第一个参数为数据值，第二个参数是数据项的其他参数。
+
+在下面的例子中，我们将散点图点的大小设置为与其数据值成正比。
+
+```js
+option = {
+  xAxis: {
+    data: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  },
+  yAxis: {},
+  series: [
+    {
+      type: 'scatter',
+      data: [220, 182, 191, 234, 290, 330, 310],
+      symbolSize: function(value) {
+        return value / 10;
+      }
+    }
+  ]
+};
+```
+
+
+
+# 跨平台方案 
+
+## 服务端渲染
+
+### 服务端渲染 ECharts 图表
+
+通常情况下，Apache EChartsTM 会在浏览器中动态的渲染图表，并且根据用户的交互来更新渲染。但是在下面这些比较特殊的场景，我们也需要在服务端中渲染图表并且输出到浏览器中：
+
+- 需要缩短前端的渲染时间，保证第一时间显示图表
+- 需要在 Markdown, PDF 等不支持动态运行脚本的环境中嵌入图表
+
+在这些场景下，ECharts 也提供了多种服务端渲染的方案：
+
+### 服务端 SVG 字符串渲染
+
+如果你在使用 5.3.0 以及更新的版本，我们强烈推荐你使用 5.3.0 里新引入的零依赖的服务端 SVG 字符串渲染方案：
+
+```ts
+const echarts = require('echarts');
+
+// 在 SSR 模式下第一个参数不需要再传入 DOM 对象
+const chart = echarts.init(null, null, {
+  renderer: 'svg', // 必须使用 SVG 模式
+  ssr: true, // 开启 SSR
+  width: 400, // 需要指明高和宽
+  height: 300
+});
+
+// 像正常使用一样 setOption
+chart.setOption({
+  //...
+});
+
+// 输出字符串
+const svgStr = chart.renderToSVGString();
+```
+
+
+
+整体使用的代码结构跟在浏览器中使用一样，首先是`init`初始化一个图表实例，然后通过`setOption`设置图表的配置项。但是`init`传入的参数会跟在跟浏览器中使用有所不同：
+
+- 首先因为在服务端会采用字符串拼接的方式来渲染得到 SVG，我们**并不需要容器来展示渲染的内容**，所以我们可以在`init`的时候第一个`container`参数传入`null`或者`undefined`。
+- 然后我们在`init`的第三个参数中，我们**需要通过显示指定`ssr: true`来告诉 ECharts 我们需要开启服务端渲染的模式**，该模式下 ECharts 会关闭动画循环的模块以及事件交互的模块。
+- 在服务端渲染中我们也**必须要通过`width`和`height`显示的指定图表的高和宽**，因此如果你的图表是需要根据容器大小自适应的话，可能需要思考一下服务端渲染是否适合你的场景了。
+
+在浏览器中我们在`setOption`完之后 ECharts 就会自动进行渲染将结果绘制到页面中，后续也会在每一帧判断是否有动画需要进行重绘。NodeJS 中我们在设置了`ssr: true`后则没有这个过程。取而代之我们使用了`renderToSVGString`，**将当前的图表渲染到 SVG 字符串，进一步得再通过 HTTP Response 返回给前端或者缓存到本地。**
+
+HTTP Response 返回给前端：
+
+```ts
+res.writeHead(200, {
+  'Content-Type': 'application/xml'
+});
+res.write(chart.renderToSVGString());
+res.end();
+```
+
+或者保存到本地：
+
+```ts
+fs.writeFile('bar.svg', chart.renderToSVGString(), 'utf-8');
+```
+
+
+
+下面是一个完整的在 CodeSandbox 中搭建一个最简单的 NodeJS 服务器然后使用 ECharts 服务端 SVG 渲染的效果：
+
+```js
+
+const http=require('http');
+const echarts=require("echarts");
+
+function renderChart(){
+	const chart=echarts.init(null,null,{
+		renderer:"svg",
+		ssr:true,
+		width:400,
+		height:300,
+	});
+	chart.setOption({
+		xAxis:{
+			type: "category",
+			data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+		},
+		yAxis:{
+			type:"value",
+		},
+		series:[
+			{
+				data:[120, 200, 150, 80, 70, 110, 130],
+				type:'bar',
+				animationDelay:(idx)=>{
+					return idx+100;
+				},
+			}
+		],
+	});
+	return chart.renderToSVGString();
+}
+
+http.createServer(function(req,res){
+	res.writeHead(200,{
+		"Content-Type":"application/xml"
+	});
+	res.write(renderChart());
+	res.end();
+}).listen(8080);
+```
+
+### 服务端渲染中的动画效果
+
+上面的例子中可以看到，就算是服务端渲染 ECharts 也可以提供动画效果，这个动画效果是通过在输出的 SVG 字符串中嵌入 CSS 动画实现的。并不需要额外的 JavaScript 再去控制动画。
+
+但是，也因为 CSS 动画的局限性，我们没法在服务端渲染中实现一些更灵活的动画功能，诸如柱状图排序动画，标签动画，路径图的特效动画等。部分系列诸如饼图的动画效果也为服务端渲染做了特殊的优化。
+
+如果你不希望有这个动画效果，可以在`setOption`的时候通过`animation: false`关闭动画。
+
+```ts
+setOption({
+  animation: false
+});
+```
+
+### 服务端 Canvas 渲染
+
+如果你希望输出的是一张图片而非 SVG 字符串，或者你还在使用更老的版本，我们会推荐使用 [node-canvas](https://github.com/Automattic/node-canvas) 来实现 ECharts 的服务渲染，[node-canvas](https://github.com/Automattic/node-canvas) 是在 NodeJS 上的一套 Canvas 实现，它提供了跟浏览器中 Canvas 几乎一致的接口。
+
+下面是一个简单的例子
+
+```js
+var echarts = require('echarts');
+const { createCanvas } = require('canvas');
+
+// 在 5.3.0 之前的版本中，你必须要通过该接口注册 canvas 实例创建方法。
+// 从 5.3.0 开始就不需要了
+echarts.setCanvasCreator(() => {
+  return createCanvas();
+});
+
+const canvas = createCanvas(800, 600);
+// ECharts 可以直接使用 node-canvas 创建的 Canvas 实例作为容器
+const chart = echarts.init(canvas);
+
+// 像正常使用一样 setOption
+chart.setOption({
+  //...
+});
+
+// 通过 Response 输出 PNG 图片
+res.writeHead(200, {
+  'Content-Type': 'image/png'
+});
+res.write(renderChart().toBuffer('image/png'));
+res.end();
+```
+
+### 图片的加载
+
+[node-canvas](https://github.com/Automattic/node-canvas) 提供了图片加载的`Image`实现，如果你在图表中使用了到了图片，我们可以使用`5.3.0`新增的`setPlatformAPI`接口来适配。
+
+```ts
+echarts.setPlatformAPI({
+  // 同老版本的 setCanvasCreator
+  createCanvas() {
+    return createCanvas();
+  },
+  loadImage(src, onload, onerror) {
+    const img = new Image();
+    // 必须要绑定 this context.
+    img.onload = onload.bind(img);
+    img.onerror = onerror.bind(img);
+    img.src = src;
+    return img;
+  }
+});
+```
+
+
+
+如果你的图片是需要远程获取的，我们建议你通过 http 请求先预取该图片得到`base64`之后再作为图片的 URL 传入，这样可以保证在 Response 输出的时候图片是加载完成的。
+
+## 在微信小程序中使用 ECharts
+
+[echarts-for-weixin](https://github.com/ecomfe/echarts-for-weixin) 项目提供了一个小程序组件，用这种方式可以方便地使用 ECharts。
+
+### 使用方式
+
+1. 下载该项目
+2. 如有必要，将 `ec-canvas` 目录下的 `echarts.js` 替换为最新版的 ECharts。如果希望减小包体积大小，可以使用[自定义构建](https://echarts.apache.org//builder.html)生成并替换 `echarts.js`
+3. `pages` 目录下是使用的示例文件，可以作为参考，或者删除不需要的页面。
+
+更详细的说明请参见 [echarts-for-weixin](https://github.com/ecomfe/echarts-for-weixin) 项目。
+
+### 注意事项
+
+最新版的 ECharts 微信小程序支持微信 Canvas 2d，当用户的基础库版本 >= 2.9.0 且没有设置 `force-use-old-canvas="true"` 的情况下，使用新的 Canvas 2d（默认）。
+
+使用新的 Canvas 2d 可以提升渲染性能，解决非同层渲染问题，强烈建议开启。
+
+更详细的说明请参见 [Canvas 2d 版本要求](https://github.com/ecomfe/echarts-for-weixin#canvas-2d-版本要求)。
+
+
+
+# 数据处理
+
+## 异步加载
+
+[入门示例](https://echarts.apache.org/handbook/zh/get-started)中的数据是在初始化后`setOption`中直接填入的，但是很多时候可能数据需要异步加载后再填入。`ECharts` 中实现异步数据的更新非常简单，在图表初始化后不管任何时候只要通过 jQuery 等工具异步获取数据后通过 `setOption` 填入数据和配置项就行。
+
+```js
+var myChart = echarts.init(document.getElementById('main'));
+
+$.get('data.json').done(function(data) {
+  // data 的结构:
+  // {
+  //     categories: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"],
+  //     values: [5, 20, 36, 10, 10, 20]
+  // }
+  myChart.setOption({
+    title: {
+      text: '异步数据加载示例'
+    },
+    tooltip: {},
+    legend: {},
+    xAxis: {
+      data: data.categories
+    },
+    yAxis: {},
+    series: [
+      {
+        name: '销量',
+        type: 'bar',
+        data: data.values
+      }
+    ]
+  });
+});
+```
+
+或者先设置完其它的样式，显示一个空的直角坐标轴，然后获取数据后填入数据。
+
+```js
+var myChart = echarts.init(document.getElementById('main'));
+// 显示标题，图例和空的坐标轴
+myChart.setOption({
+  title: {
+    text: '异步数据加载示例'
+  },
+  tooltip: {},
+  legend: {
+    data: ['销量']
+  },
+  xAxis: {
+    data: []
+  },
+  yAxis: {},
+  series: [
+    {
+      name: '销量',
+      type: 'bar',
+      data: []
+    }
+  ]
+});
+
+// 异步加载数据
+$.get('data.json').done(function(data) {
+  // 填入数据
+  myChart.setOption({
+    xAxis: {
+      data: data.categories
+    },
+    series: [
+      {
+        // 根据名字对应到相应的系列
+        name: '销量',
+        data: data.data
+      }
+    ]
+  });
+});
+```
+
+ECharts 中在更新数据的时候需要通过`name`属性对应到相应的系列，上面示例中如果`name`不存在也可以根据系列的顺序正常更新，但是更多时候推荐更新数据的时候加上系列的`name`数据。
+
+## loading 动画
+
+如果数据加载时间较长，一个空的坐标轴放在画布上也会让用户觉得是不是产生 bug 了，因此需要一个 loading 的动画来提示用户数据正在加载。
+
+ECharts 默认有提供了一个简单的加载动画。只需要调用 [showLoading](https://echarts.apache.org//api.html#echartsInstance.showLoading) 方法显示。数据加载完成后再调用 [hideLoading](https://echarts.apache.org//api.html#echartsInstance.hideLoading) 方法隐藏加载动画。
+
+```js
+myChart.showLoading();
+$.get('data.json').done(function (data) {
+    myChart.hideLoading();
+    myChart.setOption(...);
+});
+```
+
+## 数据的动态更新
+
+ECharts 由数据驱动，数据的改变驱动图表展现的改变，因此动态数据的实现也变得异常简单。
+
+所有数据的更新都通过 [setOption](https://echarts.apache.org//api.html#echartsInstance.setOption)实现，你只需要定时获取数据，[setOption](https://echarts.apache.org/handbook/~api.html#echartsInstance.setOption) 填入数据，而不用考虑数据到底产生了那些变化，ECharts 会找到两组数据之间的差异然后通过合适的动画去表现数据的变化。
+
+```js
+var base = +new Date(2014, 9, 3);
+var oneDay = 24 * 3600 * 1000;
+var date = [];
+var data = [Math.random() * 150];
+var now = new Date(base);
+function addData(shift) {
+  now = [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/');
+  date.push(now);
+  data.push((Math.random() - 0.4) * 10 + data[data.length - 1]);
+  if (shift) {
+    date.shift();
+    data.shift();
+  }
+  now = new Date(+new Date(now) + oneDay);
+}
+for (var i = 1; i < 100; i++) {
+  addData();
+}
+option = {
+  xAxis: {
+    type: 'category',
+    boundaryGap: false,
+    data: date
+  },
+  yAxis: {
+    boundaryGap: [0, '50%'],
+    type: 'value'
+  },
+  series: [
+    {
+      name: '成交',
+      type: 'line',
+      smooth: true,
+      symbol: 'none',
+      stack: 'a',
+      areaStyle: {
+        normal: {}
+      },
+      data: data
+    }
+  ]
+};
+myChart.setOption(option);
+setInterval(function () {
+  addData(true);
+  myChart.setOption({
+    xAxis: {
+      data: date
+    },
+    series: [
+      {
+        name: '成交',
+        data: data
+      }
+    ]
+  });
+}, 500);
+```
+
+
+
+# 标签
+
+Apache EChartsTM 中的文本标签从 v3.7 开始支持富文本模式，能够：
+
+- 定制文本块整体的样式（如背景、边框、阴影等）、位置、旋转等。
+- 对文本块中个别片段定义样式（如颜色、字体、高宽、背景、阴影等）、对齐方式等。
+- 在文本中使用图片做小图标或者背景。
+- 特定组合以上的规则，可以做出简单表格、分割线等效果。
+
+开始下面的介绍之前，先说明一下下面会使用的两个名词的含义：
+
+- 文本块（Text Block）：文本标签块整体。
+- 文本片段（Text fragment）：文本标签块中的部分文本。
+
+## 文本样式相关的配置项
+
+echarts 提供了丰富的文本标签配置项，包括：
+
+- 字体基本样式设置：`fontStyle`、`fontWeight`、`fontSize`、`fontFamily`。
+- 文字颜色：`color`。
+- 文字描边：`textBorderColor`、`textBorderWidth`。
+- 文字阴影：`textShadowColor`、`textShadowBlur`、`textShadowOffsetX`、`textShadowOffsetY`。
+- 文本块或文本片段大小：`lineHeight`、`width`、`height`、`padding`。
+- 文本块或文本片段的对齐：`align`、`verticalAlign`。
+- 文本块或文本片段的边框、背景（颜色或图片）：`backgroundColor`、`borderColor`、`borderWidth`、`borderRadius`。
+- 文本块或文本片段的阴影：`shadowColor`、`shadowBlur`、`shadowOffsetX`、`shadowOffsetY`。
+- 文本块的位置和旋转：`position`、`distance`、`rotate`。
+
+可以在各处的 `rich` 属性中定义文本片段样式。例如 [series-bar.label.rich](https://echarts.apache.org/handbook/option.html#series-bar.label.rich)
+
+例如：
+
+```js
+labelOption = {
+  // 在文本中，可以对部分文本采用 rich 中定义样式。
+  // 这里需要在文本中使用标记符号：
+  // `{styleName|text content text content}` 标记样式名。
+  // 注意，换行仍是使用 '\n'。
+  formatter: [
+    '{a|这段文本采用样式a}',
+    '{b|这段文本采用样式b}这段用默认样式{x|这段用样式x}'
+  ].join('\n'),
+
+  // 这里是文本块的样式设置：
+  color: '#333',
+  fontSize: 5,
+  fontFamily: 'Arial',
+  borderWidth: 3,
+  backgroundColor: '#984455',
+  padding: [3, 10, 10, 5],
+  lineHeight: 20,
+
+  // rich 里是文本片段的样式设置：
+  rich: {
+    a: {
+      color: 'red',
+      lineHeight: 10
+    },
+    b: {
+      backgroundColor: {
+        image: 'xxx/xxx.jpg'
+      },
+      height: 40
+    },
+    x: {
+      fontSize: 18,
+      fontFamily: 'Microsoft YaHei',
+      borderColor: '#449933',
+      borderRadius: 4
+    }
+  }
+};
+```
+
+```js
+var option = {
+  series: [
+    {
+      type: 'scatter',
+      data: [[0, 0]],
+      symbolSize: 1,
+      label: {
+        normal: {
+          show: true,
+          formatter: [
+            'The whole box is a {term|Text Block}, with',
+            'red border and grey background.',
+            '{fragment1|A Text Fragment} {fragment2|Another Text Fragment}',
+            'Text fragments can be customized.'
+          ].join('\n'),
+          backgroundColor: '#eee',
+          // borderColor: '#333',
+          borderColor: 'rgb(199,86,83)',
+          borderWidth: 2,
+          borderRadius: 5,
+          padding: 10,
+          color: '#000',
+          fontSize: 14,
+          shadowBlur: 3,
+          shadowColor: '#888',
+          shadowOffsetX: 0,
+          shadowOffsetY: 3,
+          lineHeight: 30,
+          rich: {
+            term: {
+              fontSize: 18,
+              color: 'rgb(199,86,83)'
+            },
+            fragment1: {
+              backgroundColor: '#000',
+              color: 'yellow',
+              padding: 5
+            },
+            fragment2: {
+              backgroundColor: '#339911',
+              color: '#fff',
+              borderRadius: 15,
+              padding: 5
+            }
+          }
+        }
+      }
+    }
+  ],
+  xAxis: {
+    axisLabel: { show: false },
+    axisLine: { show: false },
+    splitLine: { show: false },
+    axisTick: { show: false },
+    min: -1,
+    max: 1
+  },
+  yAxis: {
+    axisLabel: { show: false },
+    axisLine: { show: false },
+    splitLine: { show: false },
+    axisTick: { show: false },
+    min: -1,
+    max: 1
+  }
+};
+```
+
+## 文本、文本框、文本片段的基本样式和装饰
+

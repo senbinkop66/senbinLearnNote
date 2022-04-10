@@ -7,6 +7,7 @@
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
         <!-- 引入 echarts.js -->
         <script src="https://cdn.staticfile.org/echarts/5.3.2/echarts.min.js"></script>
+        <script src="./jquery-3.6.0.js"></script>
     </head>
 <style type="text/css">
 body {
@@ -32,45 +33,74 @@ body {
   // 指定图表的配置项和数据
 
 var option = {
-  legend:{
-    orient:"vertical",
-    x:"left",
-    data:['A', 'B', 'C', 'D', 'E'],
-  },
   series: [
     {
-      type:"pie",
-      radius:["30%","50%"],
-      avoidLabelOverlap:false,
-      label:{
-        show:false,
-        position:"center",
-        emphasis:{
-          show:true,
-        },
-      },
-      labelLine:{
-        show:false,
-      },
-      emphasis:{
-        show:true,
-        fontSize:"30",
-        fontWeight:"bold",
-      },
-      data:[
-        { value: 335, name: 'A' },
-        { value: 310, name: 'B' },
-        { value: 234, name: 'C' },
-        { value: 135, name: 'D' },
-        { value: 1548, name: 'E' }
-      ],
-    },
-    ],
+      type: 'scatter',
+      data: [[0, 0]],
+      symbolSize: 1,
+      label: {
+        normal: {
+          show: true,
+          formatter: [
+            'The whole box is a {term|Text Block}, with',
+            'red border and grey background.',
+            '{fragment1|A Text Fragment} {fragment2|Another Text Fragment}',
+            'Text fragments can be customized.'
+          ].join('\n'),
+          backgroundColor: '#eee',
+          // borderColor: '#333',
+          borderColor: 'rgb(199,86,83)',
+          borderWidth: 2,
+          borderRadius: 5,
+          padding: 10,
+          color: '#000',
+          fontSize: 14,
+          shadowBlur: 3,
+          shadowColor: '#888',
+          shadowOffsetX: 0,
+          shadowOffsetY: 3,
+          lineHeight: 30,
+          rich: {
+            term: {
+              fontSize: 18,
+              color: 'rgb(199,86,83)'
+            },
+            fragment1: {
+              backgroundColor: '#000',
+              color: 'yellow',
+              padding: 5
+            },
+            fragment2: {
+              backgroundColor: '#339911',
+              color: '#fff',
+              borderRadius: 15,
+              padding: 5
+            }
+          }
+        }
+      }
+    }
+  ],
+  xAxis: {
+    axisLabel: { show: false },
+    axisLine: { show: false },
+    splitLine: { show: false },
+    axisTick: { show: false },
+    min: -1,
+    max: 1
+  },
+  yAxis: {
+    axisLabel: { show: false },
+    axisLine: { show: false },
+    splitLine: { show: false },
+    axisTick: { show: false },
+    min: -1,
+    max: 1
+  }
 };
+  
 
 myChart.setOption(option);
-
-
 
 
 </script>
