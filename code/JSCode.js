@@ -2713,4 +2713,630 @@ var option = {
     ],
 };
 
+var option = {
+  series: [
+    {
+      type: 'scatter',
+      symbolSize: 1,
+      data:[
+        {
+          value:[0,0],
+          label: {
+            normal: {
+              show: true,
+              formatter: [
+                'Plain text',
+                  '{textBorder|textBorderColor + textBorderWidth}',
+                  '{textShadow|textShadowColor + textShadowBlur + textShadowOffsetX + textShadowOffsetY}',
+                  '{bg|backgroundColor + borderRadius + padding}',
+                  '{border|borderColor + borderWidth + borderRadius + padding}',
+                  '{shadow|shadowColor + shadowBlur + shadowOffsetX + shadowOffsetY}'
+                ].join('\n'),
+              backgroundColor: '#eee',
+              borderColor: '#333',
+              borderWidth: 2,
+              borderRadius: 5,
+              padding: 10,
+              color: '#000',
+              fontSize: 14,
+              shadowBlur: 3,
+              shadowColor: '#888',
+              shadowOffsetX: 0,
+              shadowOffsetY: 3,
+              lineHeight: 30,
+              rich: {
+                textBorder:{
+                  fontSize:20,
+                  textBorderCorlor:"#000",
+                  textBorderWidth:3,
+                  color:"#fff",
+                },
+                textShadow:{
+                  fontSize:16,
+                  textShadowBlur:5,
+                  textShadowColor:"#000",
+                  textShadowOffsetX:3,
+                  textShadowOffsetY:3,
+                  color:"#fff",
+                },
+                bg:{
+                  backgroundColor:"#339911",
+                  color:"#fff",
+                  borderRadius:15,
+                  padding:5,
+                },
+                border:{
+                  color:"#000",
+                  borderColor:"#449911",
+                  borderWidth:1,
+                  borderRadius:3,
+                  padding:5,
+                },
+                shadow:{
+                  backgroundColor:"#992233",
+                  padding:5,
+                  color:"#fff",
+                  shadowBlur:5,
+                  shadowColor:"#336699",
+                  shadowOffsetX:6,
+                  shadowOffsetY:6,
+                },
+              },
+            }
+          }
+        }
+      ]
+    }
+  ],
+   xAxis: {
+    show: false,
+    min: -1,
+    max: 1
+  },
+  yAxis: {
+    show: false,
+    min: -1,
+    max: 1
+  },
+};
+
+const labelOption={
+  show:true,
+  rotate:90,
+  formatter:"{c} {name|{a}}",
+  fontSize:16,
+  rich:{
+    name:{},
+  }
+};
+
+var option = {
+  xAxis: [
+    {
+      type: 'category',
+      data: ['2012', '2013', '2014', '2015', '2016']
+    }
+  ],
+  yAxis: [
+    {
+      type: 'value'
+    }
+  ],
+  series: [
+    {
+      name:"Forest",
+      type:"bar",
+      barGap:0,
+      label:labelOption,
+      emphasis:{
+        focus:"series",
+      },
+      data:[320, 332, 301, 334, 390],
+    },
+     {
+      name: 'Steppe',
+      type: 'bar',
+      label: labelOption,
+      emphasis: {
+        focus: 'series'
+      },
+      data: [220, 182, 191, 234, 290]
+    },
+  ],
+  
+};
+
+
+const weatherIcons = {
+  Sunny: ROOT_PATH + '/data/asset/img/weather/sunny_128.png',
+  Cloudy: ROOT_PATH + '/data/asset/img/weather/cloudy_128.png',
+  Showers: ROOT_PATH + '/data/asset/img/weather/showers_128.png'
+};
+option = {
+  title: {
+    text: 'Weather Statistics',
+    subtext: 'Fake Data',
+    left: 'center'
+  },
+  tooltip: {
+    trigger: 'item',
+    formatter: '{a} <br/>{b} : {c} ({d}%)'
+  },
+  legend: {
+    bottom: 10,
+    left: 'center',
+    data: ['CityA', 'CityB', 'CityD', 'CityC', 'CityE']
+  },
+  series: [
+    {
+      type: 'pie',
+      radius: '65%',
+      center: ['50%', '50%'],
+      selectedMode: 'single',
+      data: [
+        {
+          value: 1548,
+          name: 'CityE',
+          label: {
+            formatter: [
+              '{title|{b}}{abg|}',
+              '  {weatherHead|Weather}{valueHead|Days}{rateHead|Percent}',
+              '{hr|}',
+              '  {Sunny|}{value|202}{rate|55.3%}',
+              '  {Cloudy|}{value|142}{rate|38.9%}',
+              '  {Showers|}{value|21}{rate|5.8%}'
+            ].join('\n'),
+            backgroundColor: '#eee',
+            borderColor: '#777',
+            borderWidth: 1,
+            borderRadius: 4,
+            rich: {
+              title: {
+                color: '#eee',
+                align: 'center'
+              },
+              abg: {
+                backgroundColor: '#333',
+                width: '100%',
+                align: 'right',
+                height: 25,
+                borderRadius: [4, 4, 0, 0]
+              },
+              Sunny: {
+                height: 30,
+                align: 'left',
+                backgroundColor: {
+                  image: weatherIcons.Sunny
+                }
+              },
+              Cloudy: {
+                height: 30,
+                align: 'left',
+                backgroundColor: {
+                  image: weatherIcons.Cloudy
+                }
+              },
+              Showers: {
+                height: 30,
+                align: 'left',
+                backgroundColor: {
+                  image: weatherIcons.Showers
+                }
+              },
+              weatherHead: {
+                color: '#333',
+                height: 24,
+                align: 'left'
+              },
+              hr: {
+                borderColor: '#777',
+                width: '100%',
+                borderWidth: 0.5,
+                height: 0
+              },
+              value: {
+                width: 20,
+                padding: [0, 20, 0, 30],
+                align: 'left'
+              },
+              valueHead: {
+                color: '#333',
+                width: 20,
+                padding: [0, 20, 0, 30],
+                align: 'center'
+              },
+              rate: {
+                width: 40,
+                align: 'right',
+                padding: [0, 10, 0, 0]
+              },
+              rateHead: {
+                color: '#333',
+                width: 40,
+                align: 'center',
+                padding: [0, 10, 0, 0]
+              }
+            }
+          }
+        },
+        { value: 735, name: 'CityC' },
+        { value: 510, name: 'CityD' },
+        { value: 434, name: 'CityB' },
+        { value: 335, name: 'CityA' }
+      ],
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }
+  ]
+};
+
+function makeRandomData() {
+  return [
+    {
+      value: Math.random(),
+      name: 'A'
+    },
+    {
+      value: Math.random(),
+      name: 'B'
+    },
+    {
+      value: Math.random(),
+      name: 'C'
+    }
+  ];
+}
+option = {
+  series: [
+    {
+      type: 'pie',
+      radius: [0, '50%'],
+      data: makeRandomData()
+    }
+  ]
+};
+myChart.setOption(option);
+setInterval(() => {
+  myChart.setOption({
+    series: {
+      data: makeRandomData()
+    }
+  });
+}, 2000);
+
+const easingFuncs = {
+  linear: function (k) {
+    return k;
+  },
+  quadraticIn: function (k) {
+    return k * k;
+  },
+  quadraticOut: function (k) {
+    return k * (2 - k);
+  },
+  quadraticInOut: function (k) {
+    if ((k *= 2) < 1) {
+      return 0.5 * k * k;
+    }
+    return -0.5 * (--k * (k - 2) - 1);
+  },
+  cubicIn: function (k) {
+    return k * k * k;
+  },
+  cubicOut: function (k) {
+    return --k * k * k + 1;
+  },
+  cubicInOut: function (k) {
+    if ((k *= 2) < 1) {
+      return 0.5 * k * k * k;
+    }
+    return 0.5 * ((k -= 2) * k * k + 2);
+  },
+  quarticIn: function (k) {
+    return k * k * k * k;
+  },
+  quarticOut: function (k) {
+    return 1 - --k * k * k * k;
+  },
+  quarticInOut: function (k) {
+    if ((k *= 2) < 1) {
+      return 0.5 * k * k * k * k;
+    }
+    return -0.5 * ((k -= 2) * k * k * k - 2);
+  },
+  quinticIn: function (k) {
+    return k * k * k * k * k;
+  },
+  quinticOut: function (k) {
+    return --k * k * k * k * k + 1;
+  },
+  quinticInOut: function (k) {
+    if ((k *= 2) < 1) {
+      return 0.5 * k * k * k * k * k;
+    }
+    return 0.5 * ((k -= 2) * k * k * k * k + 2);
+  },
+  sinusoidalIn: function (k) {
+    return 1 - Math.cos((k * Math.PI) / 2);
+  },
+  sinusoidalOut: function (k) {
+    return Math.sin((k * Math.PI) / 2);
+  },
+  sinusoidalInOut: function (k) {
+    return 0.5 * (1 - Math.cos(Math.PI * k));
+  },
+  exponentialIn: function (k) {
+    return k === 0 ? 0 : Math.pow(1024, k - 1);
+  },
+  exponentialOut: function (k) {
+    return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+  },
+  exponentialInOut: function (k) {
+    if (k === 0) {
+      return 0;
+    }
+    if (k === 1) {
+      return 1;
+    }
+    if ((k *= 2) < 1) {
+      return 0.5 * Math.pow(1024, k - 1);
+    }
+    return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
+  },
+  circularIn: function (k) {
+    return 1 - Math.sqrt(1 - k * k);
+  },
+  circularOut: function (k) {
+    return Math.sqrt(1 - --k * k);
+  },
+  circularInOut: function (k) {
+    if ((k *= 2) < 1) {
+      return -0.5 * (Math.sqrt(1 - k * k) - 1);
+    }
+    return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+  },
+  elasticIn: function (k) {
+    var s;
+    var a = 0.1;
+    var p = 0.4;
+    if (k === 0) {
+      return 0;
+    }
+    if (k === 1) {
+      return 1;
+    }
+    if (!a || a < 1) {
+      a = 1;
+      s = p / 4;
+    } else {
+      s = (p * Math.asin(1 / a)) / (2 * Math.PI);
+    }
+    return -(
+      a *
+      Math.pow(2, 10 * (k -= 1)) *
+      Math.sin(((k - s) * (2 * Math.PI)) / p)
+    );
+  },
+  elasticOut: function (k) {
+    var s;
+    var a = 0.1;
+    var p = 0.4;
+    if (k === 0) {
+      return 0;
+    }
+    if (k === 1) {
+      return 1;
+    }
+    if (!a || a < 1) {
+      a = 1;
+      s = p / 4;
+    } else {
+      s = (p * Math.asin(1 / a)) / (2 * Math.PI);
+    }
+    return (
+      a * Math.pow(2, -10 * k) * Math.sin(((k - s) * (2 * Math.PI)) / p) + 1
+    );
+  },
+  elasticInOut: function (k) {
+    var s;
+    var a = 0.1;
+    var p = 0.4;
+    if (k === 0) {
+      return 0;
+    }
+    if (k === 1) {
+      return 1;
+    }
+    if (!a || a < 1) {
+      a = 1;
+      s = p / 4;
+    } else {
+      s = (p * Math.asin(1 / a)) / (2 * Math.PI);
+    }
+    if ((k *= 2) < 1) {
+      return (
+        -0.5 *
+        (a *
+          Math.pow(2, 10 * (k -= 1)) *
+          Math.sin(((k - s) * (2 * Math.PI)) / p))
+      );
+    }
+    return (
+      a *
+        Math.pow(2, -10 * (k -= 1)) *
+        Math.sin(((k - s) * (2 * Math.PI)) / p) *
+        0.5 +
+      1
+    );
+  },
+  // 在某一动画开始沿指示的路径进行动画处理前稍稍收回该动画的移动
+  backIn: function (k) {
+    var s = 1.70158;
+    return k * k * ((s + 1) * k - s);
+  },
+  backOut: function (k) {
+    var s = 1.70158;
+    return --k * k * ((s + 1) * k + s) + 1;
+  },
+  backInOut: function (k) {
+    var s = 1.70158 * 1.525;
+    if ((k *= 2) < 1) {
+      return 0.5 * (k * k * ((s + 1) * k - s));
+    }
+    return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+  },
+  // 创建弹跳效果
+  bounceIn: function (k) {
+    return 1 - easingFuncs.bounceOut(1 - k);
+  },
+  bounceOut: function (k) {
+    if (k < 1 / 2.75) {
+      return 7.5625 * k * k;
+    } else if (k < 2 / 2.75) {
+      return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
+    } else if (k < 2.5 / 2.75) {
+      return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
+    } else {
+      return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
+    }
+  },
+  bounceInOut: function (k) {
+    if (k < 0.5) {
+      return easingFuncs.bounceIn(k * 2) * 0.5;
+    }
+    return easingFuncs.bounceOut(k * 2 - 1) * 0.5 + 0.5;
+  }
+};
+const N_POINT = 30;
+const grids = [];
+const xAxes = [];
+const yAxes = [];
+const series = [];
+const titles = [];
+let count = 0;
+Object.keys(easingFuncs).forEach(function (easingName) {
+  var easingFunc = easingFuncs[easingName];
+  var data = [];
+  for (var i = 0; i <= N_POINT; i++) {
+    var x = i / N_POINT;
+    var y = easingFunc(x);
+    data.push([x, y]);
+  }
+  grids.push({
+    show: true,
+    borderWidth: 0,
+    shadowColor: 'rgba(0, 0, 0, 0.3)',
+    shadowBlur: 2
+  });
+  xAxes.push({
+    type: 'value',
+    show: false,
+    min: 0,
+    max: 1,
+    gridIndex: count
+  });
+  yAxes.push({
+    type: 'value',
+    show: false,
+    min: -0.4,
+    max: 1.4,
+    gridIndex: count
+  });
+  series.push({
+    name: easingName,
+    type: 'line',
+    xAxisIndex: count,
+    yAxisIndex: count,
+    data: data,
+    showSymbol: false,
+    animationEasing: easingName,
+    animationDuration: 1000
+  });
+  titles.push({
+    textAlign: 'center',
+    text: easingName,
+    textStyle: {
+      fontSize: 12,
+      fontWeight: 'normal'
+    }
+  });
+  count++;
+});
+var rowNumber = Math.ceil(Math.sqrt(count));
+grids.forEach(function (grid, idx) {
+  grid.left = ((idx % rowNumber) / rowNumber) * 100 + 0.5 + '%';
+  grid.top = (Math.floor(idx / rowNumber) / rowNumber) * 100 + 0.5 + '%';
+  grid.width = (1 / rowNumber) * 100 - 1 + '%';
+  grid.height = (1 / rowNumber) * 100 - 1 + '%';
+  titles[idx].left = parseFloat(grid.left) + parseFloat(grid.width) / 2 + '%';
+  titles[idx].top = parseFloat(grid.top) + '%';
+});
+option = {
+  title: titles.concat([
+    {
+      text: 'Different Easing Functions',
+      top: 'bottom',
+      left: 'center'
+    }
+  ]),
+  grid: grids,
+  xAxis: xAxes,
+  yAxis: yAxes,
+  series: series
+};
+
+var xAxisData = [];
+var data1 = [];
+var data2 = [];
+for (var i = 0; i < 100; i++) {
+  xAxisData.push('A' + i);
+  data1.push((Math.sin(i / 5) * (i / 5 - 10) + i / 6) * 5);
+  data2.push((Math.cos(i / 5) * (i / 5 - 10) + i / 6) * 5);
+}
+option = {
+  legend: {
+    data: ['bar', 'bar2']
+  },
+  xAxis: {
+    data: xAxisData,
+    splitLine: {
+      show: false
+    }
+  },
+  yAxis: {},
+  series: [
+    {
+      name: 'bar',
+      type: 'bar',
+      data: data1,
+      emphasis: {
+        focus: 'series'
+      },
+      animationDelay: function(idx) {
+        return idx * 10;
+      }
+    },
+    {
+      name: 'bar2',
+      type: 'bar',
+      data: data2,
+      emphasis: {
+        focus: 'series'
+      },
+      animationDelay: function(idx) {
+        return idx * 10 + 100;
+      }
+    }
+  ],
+  animationEasing: 'elasticOut',
+  animationDelayUpdate: function(idx) {
+    return idx * 5;
+  }
+};
+
 

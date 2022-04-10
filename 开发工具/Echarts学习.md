@@ -4720,5 +4720,1068 @@ var option = {
 };
 ```
 
+> 注意：如果不定义 `rich`，不能指定文字块的 `width` 和 `height`。
+
 ## 文本、文本框、文本片段的基本样式和装饰
 
+每个文本可以设置基本的字体样式：`fontStyle`、`fontWeight`、`fontSize`、`fontFamily`。
+
+可以设置文字的颜色 `color` 和边框的颜色 `textBorderColor`、`textBorderWidth`。
+
+文本框可以设置边框和背景的样式：`borderColor`、`borderWidth`、`backgroundColor`、`padding`。
+
+文本片段也可以设置边框和背景的样式：`borderColor`、`borderWidth`、`backgroundColor`、`padding`。
+
+例如：
+
+```js
+option = {
+  series: [
+    {
+      type: 'scatter',
+      symbolSize: 1,
+      data: [
+        {
+          value: [0, 0],
+          label: {
+            normal: {
+              show: true,
+              formatter: [
+                'Plain text',
+                '{textBorder|textBorderColor + textBorderWidth}',
+                '{textShadow|textShadowColor + textShadowBlur + textShadowOffsetX + textShadowOffsetY}',
+                '{bg|backgroundColor + borderRadius + padding}',
+                '{border|borderColor + borderWidth + borderRadius + padding}',
+                '{shadow|shadowColor + shadowBlur + shadowOffsetX + shadowOffsetY}'
+              ].join('\n'),
+              backgroundColor: '#eee',
+              borderColor: '#333',
+              borderWidth: 2,
+              borderRadius: 5,
+              padding: 10,
+              color: '#000',
+              fontSize: 14,
+              shadowBlur: 3,
+              shadowColor: '#888',
+              shadowOffsetX: 0,
+              shadowOffsetY: 3,
+              lineHeight: 30,
+              rich: {
+                textBorder: {
+                  fontSize: 20,
+                  textBorderColor: '#000',
+                  textBorderWidth: 3,
+                  color: '#fff'
+                },
+                textShadow: {
+                  fontSize: 16,
+                  textShadowBlur: 5,
+                  textShadowColor: '#000',
+                  textShadowOffsetX: 3,
+                  textShadowOffsetY: 3,
+                  color: '#fff'
+                },
+                bg: {
+                  backgroundColor: '#339911',
+                  color: '#fff',
+                  borderRadius: 15,
+                  padding: 5
+                },
+                border: {
+                  color: '#000',
+                  borderColor: '#449911',
+                  borderWidth: 1,
+                  borderRadius: 3,
+                  padding: 5
+                },
+                shadow: {
+                  backgroundColor: '#992233',
+                  padding: 5,
+                  color: '#fff',
+                  shadowBlur: 5,
+                  shadowColor: '#336699',
+                  shadowOffsetX: 6,
+                  shadowOffsetY: 6
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  xAxis: {
+    show: false,
+    min: -1,
+    max: 1
+  },
+  yAxis: {
+    show: false,
+    min: -1,
+    max: 1
+  }
+};
+```
+
+## 标签的位置
+
+对于折线图、柱状图、散点图等，均可以使用 `label` 来设置标签。标签的相对于图形元素的位置，一般使用 [label.position](https://echarts.apache.org/handbook/option.html#series-scatter.label.position)、[label.distance](https://echarts.apache.org/handbook/option.html#series-scatter.label.distance) 来配置。
+
+试试在下面例子中修改`position`和`distance` 属性：
+
+```js
+option = {
+  series: [
+    {
+      type: 'scatter',
+      symbolSize: 160,
+      symbol: 'roundRect',
+      data: [[1, 1]],
+      label: {
+        normal: {
+          // 修改 position 和 distance 的值试试
+          // 支持：'left', 'right', 'top', 'bottom', 'inside', 'insideTop', 'insideLeft', 'insideRight', 'insideBottom', 'insideTopLeft', 'insideTopRight', 'insideBottomLeft', 'insideBottomRight'
+          position: 'top',
+          distance: 10,
+
+          show: true,
+          formatter: ['Label Text'].join('\n'),
+          backgroundColor: '#eee',
+          borderColor: '#555',
+          borderWidth: 2,
+          borderRadius: 5,
+          padding: 10,
+          fontSize: 18,
+          shadowBlur: 3,
+          shadowColor: '#888',
+          shadowOffsetX: 0,
+          shadowOffsetY: 3,
+          textBorderColor: '#000',
+          textBorderWidth: 3,
+          color: '#fff'
+        }
+      }
+    }
+  ],
+  xAxis: {
+    max: 2
+  },
+  yAxis: {
+    max: 2
+  }
+};
+```
+
+注意：`position` 在不同的图中可取值有所不同。`distance` 并不是在每个图中都支持。详情请参见 [option 文档](https://echarts.apache.org/option.html)。
+
+## 标签的旋转
+
+某些图中，为了能有足够长的空间来显示标签，需要对标签进行旋转。例如：
+
+```js
+const labelOption = {
+  show: true,
+  rotate: 90,
+  formatter: '{c}  {name|{a}}',
+  fontSize: 16,
+  rich: {
+    name: {}
+  }
+};
+
+option = {
+  xAxis: [
+    {
+      type: 'category',
+      data: ['2012', '2013', '2014', '2015', '2016']
+    }
+  ],
+  yAxis: [
+    {
+      type: 'value'
+    }
+  ],
+  series: [
+    {
+      name: 'Forest',
+      type: 'bar',
+      barGap: 0,
+      label: labelOption,
+      emphasis: {
+        focus: 'series'
+      },
+      data: [320, 332, 301, 334, 390]
+    },
+    {
+      name: 'Steppe',
+      type: 'bar',
+      label: labelOption,
+      emphasis: {
+        focus: 'series'
+      },
+      data: [220, 182, 191, 234, 290]
+    }
+  ]
+};
+```
+
+这种场景下，可以结合 [align](https://echarts.apache.org/handbook/option.html#series-bar.label.align) 和 [verticalAlign](https://echarts.apache.org/handbook/option.html#series-bar.label.verticalAlign) 来调整标签位置。
+
+注意，逻辑是，**先使用 `align` 和 `verticalAlign` 定位，再旋转。**
+
+## 文本片段的排版和对齐
+
+关于排版方式，每个文本片段，可以想象成 CSS 中的 `inline-block`，在文档流中按行放置。
+
+每个文本片段的内容盒尺寸（`content box size`），默认是根据文字大小决定的。但是，**也可以设置 `width`、`height` 来强制指定**，虽然一般不会这么做（参见下文）。文本片段的边框盒尺寸（`border box size`），由上述本身尺寸，加上文本片段的 `padding` 来得到。
+
+**只有 `'\n'` 是换行符，能导致换行。**
+
+一行内，会有多个文本片段。每行的实际高度，由 `lineHeight` 最大的文本片段决定。**文本片段的 `lineHeight` 可直接在 `rich` 中指定**，也可以在 `rich` 的父层级中统一指定而采用到 `rich` 的所有项中，如果都不指定，则取文本片段的边框盒尺寸（`border box size`）。
+
+在一行的 `lineHeight` 被决定后，**一行内，文本片段的竖直位置，由文本片段的 `verticalAlign` 来指定**（这里和 CSS 中的规则稍有不同）：
+
+- `'bottom'`：文本片段的盒的底边贴住行底。
+- `'top'`：文本片段的盒的顶边贴住行顶。
+- `'middle'`：居行中。
+
+**文本块的宽度**，可以直接由文本块的 `width` 指定，否则，由最长的行决定。宽度决定后，在一行中进行文本片段的放置。文本片段的 `align` 决定了文本片段在行中的水平位置：
+
+- 首先，从左向右连续紧靠放置 `align` 为 `'left'` 的文本片段盒。
+- 然后，从右向左连续紧靠放置 `align` 为 `'right'` 的文本片段盒。
+- 最后，剩余的没处理的文本片段盒，紧贴着，在中间剩余的区域中居中放置。
+
+**关于文字在文本片段盒中的位置：**
+
+- 如果 `align` 为 `'center'`，则文字在文本片段盒中是居中的。
+- 如果 `align` 为 `'left'`，则文字在文本片段盒中是居左的。
+- 如果 `align` 为 `'right'`，则文字在文本片段盒中是居右的。
+
+## 特殊效果：图标、分割线、标题块、简单表格
+
+看下面的例子：
+
+```js
+option = {
+  series: [
+    {
+      type: 'scatter',
+      data: [
+        {
+          value: [0, 0],
+          label: {
+            normal: {
+              formatter: [
+                '{tc|Center Title}{titleBg|}',
+                '  Content text xxxxxxxx {sunny|} xxxxxxxx {cloudy|}  ',
+                '{hr|}',
+                '  xxxxx {showers|} xxxxxxxx  xxxxxxxxx  '
+              ].join('\n'),
+              rich: {
+                titleBg: {
+                  align: 'right'
+                }
+              }
+            }
+          }
+        },
+        {
+          value: [0, 1],
+          label: {
+            normal: {
+              formatter: [
+                '{titleBg|Left Title}',
+                '  Content text xxxxxxxx {sunny|} xxxxxxxx {cloudy|}  ',
+                '{hr|}',
+                '  xxxxx {showers|} xxxxxxxx  xxxxxxxxx  '
+              ].join('\n')
+            }
+          }
+        },
+        {
+          value: [0, 2],
+          label: {
+            normal: {
+              formatter: [
+                '{titleBg|Right Title}',
+                '  Content text xxxxxxxx {sunny|} xxxxxxxx {cloudy|}  ',
+                '{hr|}',
+                '  xxxxx {showers|} xxxxxxxx  xxxxxxxxx  '
+              ].join('\n'),
+              rich: {
+                titleBg: {
+                  align: 'right'
+                }
+              }
+            }
+          }
+        }
+      ],
+      symbolSize: 1,
+      label: {
+        normal: {
+          show: true,
+          backgroundColor: '#ddd',
+          borderColor: '#555',
+          borderWidth: 1,
+          borderRadius: 5,
+          color: '#000',
+          fontSize: 14,
+          rich: {
+            titleBg: {
+              backgroundColor: '#000',
+              height: 30,
+              borderRadius: [5, 5, 0, 0],
+              padding: [0, 10, 0, 10],
+              width: '100%',
+              color: '#eee'
+            },
+            tc: {
+              align: 'center',
+              color: '#eee'
+            },
+            hr: {
+              borderColor: '#777',
+              width: '100%',
+              borderWidth: 0.5,
+              height: 0
+            },
+            sunny: {
+              height: 30,
+              align: 'left',
+              backgroundColor: {
+                image:
+                  'https://echarts.apache.org/examples/data/asset/img/weather/sunny_128.png'
+              }
+            },
+            cloudy: {
+              height: 30,
+              align: 'left',
+              backgroundColor: {
+                image:
+                  'https://echarts.apache.org/examples/data/asset/img/weather/cloudy_128.png'
+              }
+            },
+            showers: {
+              height: 30,
+              align: 'left',
+              backgroundColor: {
+                image:
+                  'https://echarts.apache.org/examples/data/asset/img/weather/showers_128.png'
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  xAxis: {
+    show: false,
+    min: -1,
+    max: 1
+  },
+  yAxis: {
+    show: false,
+    min: 0,
+    max: 2,
+    inverse: true
+  }
+};
+```
+
+文本片段的 `backgroundColor` 可以指定为图片后，就可以在文本中使用图标了：
+
+```js
+labelOption = {
+  rich: {
+    Sunny: {
+      // 这样设定 backgroundColor 就可以是图片了。
+      backgroundColor: {
+        image: './data/asset/img/weather/sunny_128.png'
+      },
+      // 可以只指定图片的高度，从而图片的宽度根据图片的长宽比自动得到。
+      height: 30
+    }
+  }
+};
+```
+
+分割线实际是用 border 实现的：
+
+```js
+labelOption = {
+  rich: {
+    hr: {
+      borderColor: '#777',
+      // 这里把 width 设置为 '100%'，表示分割线的长度充满文本块。
+      // 注意，这里是文本块内容盒（content box）的 100%，而不包含 padding。
+      // 虽然这和 CSS 相关的定义有所不同，但是在这类场景中更加方便。
+      width: '100%',
+      borderWidth: 0.5,
+      height: 0
+    }
+  }
+};
+```
+
+
+
+标题块是使用 `backgroundColor` 实现的：
+
+```js
+labelOption = {
+  // 标题文字居左
+  formatter: '{titleBg|Left Title}',
+  rich: {
+    titleBg: {
+      backgroundColor: '#000',
+      height: 30,
+      borderRadius: [5, 5, 0, 0],
+      padding: [0, 10, 0, 10],
+      width: '100%',
+      color: '#eee'
+    }
+  }
+};
+
+// 标题文字居中。
+// 这个实现有些 tricky，但是，能够不引入更复杂的排版规则而实现这个效果。
+labelOption = {
+  formatter: '{tc|Center Title}{titleBg|}',
+  rich: {
+    titleBg: {
+      align: 'right',
+      backgroundColor: '#000',
+      height: 30,
+      borderRadius: [5, 5, 0, 0],
+      padding: [0, 10, 0, 10],
+      width: '100%',
+      color: '#eee'
+    }
+  }
+};
+```
+
+
+
+简单表格的设定，其实就是给不同行上纵向对应的文本片段设定同样的宽度就可以了。见 [该例子](https://echarts.apache.org/examples/zh/editor.html?c=pie-rich-text)
+
+```js
+const weatherIcons = {
+  Sunny: ROOT_PATH + '/data/asset/img/weather/sunny_128.png',
+  Cloudy: ROOT_PATH + '/data/asset/img/weather/cloudy_128.png',
+  Showers: ROOT_PATH + '/data/asset/img/weather/showers_128.png'
+};
+option = {
+  title: {
+    text: 'Weather Statistics',
+    subtext: 'Fake Data',
+    left: 'center'
+  },
+  tooltip: {
+    trigger: 'item',
+    formatter: '{a} <br/>{b} : {c} ({d}%)'
+  },
+  legend: {
+    bottom: 10,
+    left: 'center',
+    data: ['CityA', 'CityB', 'CityD', 'CityC', 'CityE']
+  },
+  series: [
+    {
+      type: 'pie',
+      radius: '65%',
+      center: ['50%', '50%'],
+      selectedMode: 'single',
+      data: [
+        {
+          value: 1548,
+          name: 'CityE',
+          label: {
+            formatter: [
+              '{title|{b}}{abg|}',
+              '  {weatherHead|Weather}{valueHead|Days}{rateHead|Percent}',
+              '{hr|}',
+              '  {Sunny|}{value|202}{rate|55.3%}',
+              '  {Cloudy|}{value|142}{rate|38.9%}',
+              '  {Showers|}{value|21}{rate|5.8%}'
+            ].join('\n'),
+            backgroundColor: '#eee',
+            borderColor: '#777',
+            borderWidth: 1,
+            borderRadius: 4,
+            rich: {
+              title: {
+                color: '#eee',
+                align: 'center'
+              },
+              abg: {
+                backgroundColor: '#333',
+                width: '100%',
+                align: 'right',
+                height: 25,
+                borderRadius: [4, 4, 0, 0]
+              },
+              Sunny: {
+                height: 30,
+                align: 'left',
+                backgroundColor: {
+                  image: weatherIcons.Sunny
+                }
+              },
+              Cloudy: {
+                height: 30,
+                align: 'left',
+                backgroundColor: {
+                  image: weatherIcons.Cloudy
+                }
+              },
+              Showers: {
+                height: 30,
+                align: 'left',
+                backgroundColor: {
+                  image: weatherIcons.Showers
+                }
+              },
+              weatherHead: {
+                color: '#333',
+                height: 24,
+                align: 'left'
+              },
+              hr: {
+                borderColor: '#777',
+                width: '100%',
+                borderWidth: 0.5,
+                height: 0
+              },
+              value: {
+                width: 20,
+                padding: [0, 20, 0, 30],
+                align: 'left'
+              },
+              valueHead: {
+                color: '#333',
+                width: 20,
+                padding: [0, 20, 0, 30],
+                align: 'center'
+              },
+              rate: {
+                width: 40,
+                align: 'right',
+                padding: [0, 10, 0, 0]
+              },
+              rateHead: {
+                color: '#333',
+                width: 40,
+                align: 'center',
+                padding: [0, 10, 0, 0]
+              }
+            }
+          }
+        },
+        { value: 735, name: 'CityC' },
+        { value: 510, name: 'CityD' },
+        { value: 434, name: 'CityB' },
+        { value: 335, name: 'CityA' }
+      ],
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }
+  ]
+};
+```
+
+
+
+# 动画
+
+## 基础的过渡动画
+
+Apache EChartsTM 中使用了平移，缩放，变形等形式的过渡动画让数据的添加更新删除，以及用户的交互变得更加顺滑。通常情况下开发者不需要操心该如何去使用动画，只需要按自己的需求使用`setOption`更新数据，ECharts 就会找出跟上一次数据之间的区别，然后自动应用最合适的过渡动画。
+
+比如下面例子就是定时更新饼图数据（随机）的过渡动画效果。
+
+```js
+function makeRandomData() {
+  return [
+    {
+      value: Math.random(),
+      name: 'A'
+    },
+    {
+      value: Math.random(),
+      name: 'B'
+    },
+    {
+      value: Math.random(),
+      name: 'C'
+    }
+  ];
+}
+option = {
+  series: [
+    {
+      type: 'pie',
+      radius: [0, '50%'],
+      data: makeRandomData()
+    }
+  ]
+};
+myChart.setOption(option);
+setInterval(() => {
+  myChart.setOption({
+    series: {
+      data: makeRandomData()
+    }
+  });
+}, 2000);
+```
+
+## 过渡动画的配置
+
+因为数据添加和数据更新往往会需要不一样的动画效果，比如我们会期望数据更新动画的时长更短，因此 ECharts 区分了这两者的动画配置：
+
+- 对于新添加的数据，我们会应用入场动画，通过`animationDuration`, `animationEasing`, `animationDelay`三个配置项分别配置动画的时长，缓动以及延时。
+- 对于数据更新，我们会应用更新动画，通过`animationDurationUpdate`, `animationEasingUpdate`, `animationDelayUpdate`三个配置项分别配置动画的时长，缓动以及延时。
+
+可以看到，更新动画配置是入场动画配置加上了`Update`的后缀。
+
+> 在 ECharts 中每次 setOption 的更新，数据会跟上一次更新的数据做对比，然后根据对比结果分别为数据执行三种状态：添加，更新以及移除。这个比对是根据数据的`name`来决定的，例如上一次更新数据有三个`name`为`'A'`, `'B'`, `'C'`的数据，而新更新的数据变为了`'B'`, `'C'`, `'D'`的数据，则数据`'B'`, `'C'`会被执行更新，数据`'A'`会被移除，而数据`'D'`会被添加。如果是第一次更新因为没有旧数据，所以所有数据都会被执行添加。根据这三种状态 ECharts 会分别应用相应的入场动画，更新动画以及移除动画。
+
+所有这些配置都可以分别设置在`option`最顶层对所有系列和组件生效，也可以分别为每个系列配置。
+
+**如果我们想要关闭动画，可以直接设置`option.animation`为`false`。**
+
+### 动画时长
+
+`animationDuration`和`animationDurationUpdate`用于设置动画的时长，单位为`ms`，设置较长的动画时长可以让用户更清晰的看到过渡动画的效果，但是我们也需要小心过长的时间会让用户再等待的过程中失去耐心。
+
+设置为`0`会关闭动画，在我们只想要单独关闭入场动画或者更新动画的时候可以通过单独将相应的配置设置为`0`来实现。
+
+### 动画缓动
+
+`animationEasing`和`animationEasingUpdate`两个配置项用于设置动画的缓动函数，缓动函数是一个输入动画时间，输出动画进度的函数：
+
+```ts
+(t: number) => number;
+```
+
+
+
+在 ECharts 里内置了缓入`'cubicIn'`，缓出`'cubicOut'`等常见的动画缓动函数，我们可以直接通过名字来声明使用这些缓动函数。
+
+内置缓动函数：
+
+```js
+const easingFuncs = {
+  linear: function (k) {
+    return k;
+  },
+  quadraticIn: function (k) {
+    return k * k;
+  },
+  quadraticOut: function (k) {
+    return k * (2 - k);
+  },
+  quadraticInOut: function (k) {
+    if ((k *= 2) < 1) {
+      return 0.5 * k * k;
+    }
+    return -0.5 * (--k * (k - 2) - 1);
+  },
+  cubicIn: function (k) {
+    return k * k * k;
+  },
+  cubicOut: function (k) {
+    return --k * k * k + 1;
+  },
+  cubicInOut: function (k) {
+    if ((k *= 2) < 1) {
+      return 0.5 * k * k * k;
+    }
+    return 0.5 * ((k -= 2) * k * k + 2);
+  },
+  quarticIn: function (k) {
+    return k * k * k * k;
+  },
+  quarticOut: function (k) {
+    return 1 - --k * k * k * k;
+  },
+  quarticInOut: function (k) {
+    if ((k *= 2) < 1) {
+      return 0.5 * k * k * k * k;
+    }
+    return -0.5 * ((k -= 2) * k * k * k - 2);
+  },
+  quinticIn: function (k) {
+    return k * k * k * k * k;
+  },
+  quinticOut: function (k) {
+    return --k * k * k * k * k + 1;
+  },
+  quinticInOut: function (k) {
+    if ((k *= 2) < 1) {
+      return 0.5 * k * k * k * k * k;
+    }
+    return 0.5 * ((k -= 2) * k * k * k * k + 2);
+  },
+  sinusoidalIn: function (k) {
+    return 1 - Math.cos((k * Math.PI) / 2);
+  },
+  sinusoidalOut: function (k) {
+    return Math.sin((k * Math.PI) / 2);
+  },
+  sinusoidalInOut: function (k) {
+    return 0.5 * (1 - Math.cos(Math.PI * k));
+  },
+  exponentialIn: function (k) {
+    return k === 0 ? 0 : Math.pow(1024, k - 1);
+  },
+  exponentialOut: function (k) {
+    return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+  },
+  exponentialInOut: function (k) {
+    if (k === 0) {
+      return 0;
+    }
+    if (k === 1) {
+      return 1;
+    }
+    if ((k *= 2) < 1) {
+      return 0.5 * Math.pow(1024, k - 1);
+    }
+    return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
+  },
+  circularIn: function (k) {
+    return 1 - Math.sqrt(1 - k * k);
+  },
+  circularOut: function (k) {
+    return Math.sqrt(1 - --k * k);
+  },
+  circularInOut: function (k) {
+    if ((k *= 2) < 1) {
+      return -0.5 * (Math.sqrt(1 - k * k) - 1);
+    }
+    return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+  },
+  elasticIn: function (k) {
+    var s;
+    var a = 0.1;
+    var p = 0.4;
+    if (k === 0) {
+      return 0;
+    }
+    if (k === 1) {
+      return 1;
+    }
+    if (!a || a < 1) {
+      a = 1;
+      s = p / 4;
+    } else {
+      s = (p * Math.asin(1 / a)) / (2 * Math.PI);
+    }
+    return -(
+      a *
+      Math.pow(2, 10 * (k -= 1)) *
+      Math.sin(((k - s) * (2 * Math.PI)) / p)
+    );
+  },
+  elasticOut: function (k) {
+    var s;
+    var a = 0.1;
+    var p = 0.4;
+    if (k === 0) {
+      return 0;
+    }
+    if (k === 1) {
+      return 1;
+    }
+    if (!a || a < 1) {
+      a = 1;
+      s = p / 4;
+    } else {
+      s = (p * Math.asin(1 / a)) / (2 * Math.PI);
+    }
+    return (
+      a * Math.pow(2, -10 * k) * Math.sin(((k - s) * (2 * Math.PI)) / p) + 1
+    );
+  },
+  elasticInOut: function (k) {
+    var s;
+    var a = 0.1;
+    var p = 0.4;
+    if (k === 0) {
+      return 0;
+    }
+    if (k === 1) {
+      return 1;
+    }
+    if (!a || a < 1) {
+      a = 1;
+      s = p / 4;
+    } else {
+      s = (p * Math.asin(1 / a)) / (2 * Math.PI);
+    }
+    if ((k *= 2) < 1) {
+      return (
+        -0.5 *
+        (a *
+          Math.pow(2, 10 * (k -= 1)) *
+          Math.sin(((k - s) * (2 * Math.PI)) / p))
+      );
+    }
+    return (
+      a *
+        Math.pow(2, -10 * (k -= 1)) *
+        Math.sin(((k - s) * (2 * Math.PI)) / p) *
+        0.5 +
+      1
+    );
+  },
+  // 在某一动画开始沿指示的路径进行动画处理前稍稍收回该动画的移动
+  backIn: function (k) {
+    var s = 1.70158;
+    return k * k * ((s + 1) * k - s);
+  },
+  backOut: function (k) {
+    var s = 1.70158;
+    return --k * k * ((s + 1) * k + s) + 1;
+  },
+  backInOut: function (k) {
+    var s = 1.70158 * 1.525;
+    if ((k *= 2) < 1) {
+      return 0.5 * (k * k * ((s + 1) * k - s));
+    }
+    return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+  },
+  // 创建弹跳效果
+  bounceIn: function (k) {
+    return 1 - easingFuncs.bounceOut(1 - k);
+  },
+  bounceOut: function (k) {
+    if (k < 1 / 2.75) {
+      return 7.5625 * k * k;
+    } else if (k < 2 / 2.75) {
+      return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
+    } else if (k < 2.5 / 2.75) {
+      return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
+    } else {
+      return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
+    }
+  },
+  bounceInOut: function (k) {
+    if (k < 0.5) {
+      return easingFuncs.bounceIn(k * 2) * 0.5;
+    }
+    return easingFuncs.bounceOut(k * 2 - 1) * 0.5 + 0.5;
+  }
+};
+const N_POINT = 30;
+const grids = [];
+const xAxes = [];
+const yAxes = [];
+const series = [];
+const titles = [];
+let count = 0;
+Object.keys(easingFuncs).forEach(function (easingName) {
+  var easingFunc = easingFuncs[easingName];
+  var data = [];
+  for (var i = 0; i <= N_POINT; i++) {
+    var x = i / N_POINT;
+    var y = easingFunc(x);
+    data.push([x, y]);
+  }
+  grids.push({
+    show: true,
+    borderWidth: 0,
+    shadowColor: 'rgba(0, 0, 0, 0.3)',
+    shadowBlur: 2
+  });
+  xAxes.push({
+    type: 'value',
+    show: false,
+    min: 0,
+    max: 1,
+    gridIndex: count
+  });
+  yAxes.push({
+    type: 'value',
+    show: false,
+    min: -0.4,
+    max: 1.4,
+    gridIndex: count
+  });
+  series.push({
+    name: easingName,
+    type: 'line',
+    xAxisIndex: count,
+    yAxisIndex: count,
+    data: data,
+    showSymbol: false,
+    animationEasing: easingName,
+    animationDuration: 1000
+  });
+  titles.push({
+    textAlign: 'center',
+    text: easingName,
+    textStyle: {
+      fontSize: 12,
+      fontWeight: 'normal'
+    }
+  });
+  count++;
+});
+var rowNumber = Math.ceil(Math.sqrt(count));
+grids.forEach(function (grid, idx) {
+  grid.left = ((idx % rowNumber) / rowNumber) * 100 + 0.5 + '%';
+  grid.top = (Math.floor(idx / rowNumber) / rowNumber) * 100 + 0.5 + '%';
+  grid.width = (1 / rowNumber) * 100 - 1 + '%';
+  grid.height = (1 / rowNumber) * 100 - 1 + '%';
+  titles[idx].left = parseFloat(grid.left) + parseFloat(grid.width) / 2 + '%';
+  titles[idx].top = parseFloat(grid.top) + '%';
+});
+option = {
+  title: titles.concat([
+    {
+      text: 'Different Easing Functions',
+      top: 'bottom',
+      left: 'center'
+    }
+  ]),
+  grid: grids,
+  xAxis: xAxes,
+  yAxis: yAxes,
+  series: series
+};
+```
+
+### 延时触发
+
+`animationDelay`和`animationDelayUpdate`用于设置动画延迟开始的时间，通常我们会使用回调函数将不同数据设置不同的延时来实现交错动画的效果：
+
+```js
+var xAxisData = [];
+var data1 = [];
+var data2 = [];
+for (var i = 0; i < 100; i++) {
+  xAxisData.push('A' + i);
+  data1.push((Math.sin(i / 5) * (i / 5 - 10) + i / 6) * 5);
+  data2.push((Math.cos(i / 5) * (i / 5 - 10) + i / 6) * 5);
+}
+option = {
+  legend: {
+    data: ['bar', 'bar2']
+  },
+  xAxis: {
+    data: xAxisData,
+    splitLine: {
+      show: false
+    }
+  },
+  yAxis: {},
+  series: [
+    {
+      name: 'bar',
+      type: 'bar',
+      data: data1,
+      emphasis: {
+        focus: 'series'
+      },
+      animationDelay: function(idx) {
+        return idx * 10;
+      }
+    },
+    {
+      name: 'bar2',
+      type: 'bar',
+      data: data2,
+      emphasis: {
+        focus: 'series'
+      },
+      animationDelay: function(idx) {
+        return idx * 10 + 100;
+      }
+    }
+  ],
+  animationEasing: 'elasticOut',
+  animationDelayUpdate: function(idx) {
+    return idx * 5;
+  }
+};
+```
+
+## 动画的性能优化
+
+在数据量特别大的时候，为图形应用动画可能会导致应用的卡顿，这个时候我们可以设置`animation: false`关闭动画。
+
+对于数据量会动态变化的图表，我们**更推荐使用`animationThreshold`这个配置项，当画布中图形数量超过这个阈值的时候，ECharts 会自动关闭动画来提升绘制性能**。这个配置往往是一个经验值，通常 ECharts 的性能足够实时渲染上千个图形的动画（我们**默认值也是给了 2000**），但是如果你的图表很复杂，或者你的用户环境比较恶劣，页面中又同时会运行很多其它复杂的代码，也可以适当的下调这个值保证整个应用的流畅性。
+
+## 监听动画结束
+
+有时候我们想要获取当前渲染的结果，如果没有使用动画，我们在`setOption`之后 ECharts 就会直接执行渲染，**我们可以同步的通过`getDataURL`方法获取渲染得到的结果。**
+
+```ts
+const chart = echarts.init(dom);
+chart.setOption({
+  animation: false
+  //...
+});
+// 可以直接同步执行
+const dataUrl = chart.getDataURL();
+```
+
+
+
+但是如果图表中有动画，马上执行`getDataURL`得到的是动画刚开始的画面，而非最终展示的结果。因此我们需要知道动画结束然后再执行`getDataURL`得到结果。
+
+假如你确定动画的时长，**一种比较简单粗暴的方式是根据动画时长来执行`setTimeout`延迟执行**：
+
+```ts
+chart.setOption({
+  animationDuration: 1000
+  //...
+});
+setTimeout(() => {
+  const dataUrl = chart.getDataURL();
+}, 1000);
+```
+
+
+
+或者我们**也可以使用 ECharts 提供的`rendered`事件来判断 ECharts 已经动画结束停止了渲染**
+
+```ts
+chart.setOption({
+  animationDuration: 1000
+  //...
+});
+
+function onRendered() {
+  const dataUrl = chart.getDataURL();
+  // ...
+  // 后续如果有交互，交互发生重绘也会触发该事件，因此使用完就需要移除
+  chart.off('rendered', onRendered);
+}
+chart.on('rendered', onRendered);
+```
+
+
+
+# 交互
+
+## 拖拽的实现
+
+本篇通过介绍一个实现拖拽的小例子来介绍如何在 Apache EChartsTM 中实现复杂的交互。
+
+```
+
+```
+
+这个例子主要做到了这样一件事，用鼠标可以拖拽曲线的点，从而改变曲线的形状。例子很简单，但是有了这个基础我们还可以做更多的事情，比如在图中进行可视化得编辑。所以我们从这个简单的例子开始。
+
+echarts 本身没有提供封装好的“拖拽改变图表”这样比较业务定制的功能。但是这个功能开发者可以通过 API 扩展实现。
