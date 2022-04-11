@@ -8,6 +8,11 @@
         <!-- 引入 echarts.js -->
         <script src="https://cdn.staticfile.org/echarts/5.3.2/echarts.min.js"></script>
         <script src="./jquery-3.6.0.js"></script>
+
+        <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+        <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+        <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+
     </head>
 <style type="text/css">
 body {
@@ -21,11 +26,24 @@ body {
 
 <body>
 
-<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-<div id="main"></div>
+<div id="example"></div>
 
-<script type="text/javascript">
-
+<script type="text/babel">
+class HelloMessage extends React.Component {
+  render() {
+    return (
+      <h1>Hello, {this.props.name}</h1>
+    );
+  }
+}
+HelloMessage.defaultProps = {
+  name: 'kop'
+};
+const element = <HelloMessage/>;
+ReactDOM.render(
+  element,
+  document.getElementById('example')
+);
 
 </script>
 
