@@ -25,68 +25,6 @@ body {
 <div id="main"></div>
 
 <script type="text/javascript">
-  // 基于准备好的dom，初始化echarts实例
-  var myChart=echarts.init(document.getElementById("main"));
-  window.onresize=function(){
-    myChart.resize();
-  }
-  // 指定图表的配置项和数据
-
-var xAxisData = [];
-var data1 = [];
-var data2 = [];
-for (var i = 0; i < 100; i++) {
-  xAxisData.push('A' + i);
-  data1.push((Math.sin(i / 5) * (i / 5 - 10) + i / 6) * 5);
-  data2.push((Math.cos(i / 5) * (i / 5 - 10) + i / 6) * 5);
-}
-var option = {
-  legend: {
-    data: ['bar', 'bar2']
-  },
-  xAxis: {
-    data: xAxisData,
-    splitLine: {
-      show: false
-    }
-  },
-  yAxis: {},
-  series: [
-    {
-      name: 'bar',
-      type: 'bar',
-      data: data1,
-      emphasis: {
-        focus: 'series'
-      },
-      animationDelay: function(idx) {
-        return idx * 10;
-      }
-    },
-    {
-      name: 'bar2',
-      type: 'bar',
-      data: data2,
-      emphasis: {
-        focus: 'series'
-      },
-      animationDelay: function(idx) {
-        return idx * 10 + 100;
-      }
-    }
-  ],
-  animationEasing: 'elasticOut',
-  animationDelayUpdate: function(idx) {
-    return idx * 5;
-  }
-};
-
-
-myChart.setOption(option);
-
-
-
-//
 
 
 </script>

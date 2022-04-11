@@ -5778,10 +5778,389 @@ chart.on('rendered', onRendered);
 
 本篇通过介绍一个实现拖拽的小例子来介绍如何在 Apache EChartsTM 中实现复杂的交互。
 
-```
+```js
+const symbolSize = 20;
+const data = [
+  [40, -10],
+  [-30, -5],
+  [-76.5, 20],
+  [-63.5, 40],
+  [-22.1, 50]
+];
+option = {
+  title: {
+    text: 'Try Dragging these Points',
+    left: 'center'
+  },
+  tooltip: {
+    triggerOn: 'none',
+    formatter: function (params) {
+      return (
+        'X: ' +
+        params.data[0].toFixed(2) +
+        '<br>Y: ' +
+        params.data[1].toFixed(2)
+      );
+    }
+  },
+  grid: {
+    top: '8%',
+    bottom: '12%'
+  },
+  xAxis: {
+    min: -100,
+    max: 70,
+    type: 'value',
+    axisLine: { onZero: false }
+  },
+  yAxis: {
+    min: -30,
+    max: 60,
+    type: 'value',
+    axisLine: { onZero: false }
+  },
+  dataZoom: [
+    {
+      type: 'slider',
+      xAxisIndex: 0,
+      filterMode: 'none'
+    },
+    {
+      type: 'slider',
+      yAxisIndex: 0,
+      filterMode: 'none'
+    },
+    {
+      type: 'inside',
+      xAxisIndex: 0,
+      filterMode: 'none'
+    },
+    {
+      type: 'inside',
+      yAxisIndex: 0,
+      filterMode: 'none'
+    }
+  ],
+  series: [
+    {
+      id: 'a',
+      type: 'line',
+      smooth: true,
+      symbolSize: symbolSize,
+      data: data
+    }
+  ]
+};
+setTimeout(function () {
+  // Add shadow circles (which is not visible) to enable drag.
+  myChart.setOption({
+    graphic: data.map(function (item, dataIndex) {
+      return {
+        type: 'circle',
+        position: myChart.convertToPixel('grid', item),
+        shape: {
+          cx: 0,
+          cy: 0,
+          r: symbolSize / 2
+        },
+        invisible: true,
+        draggable: true,
+        ondrag: function (dx, dy) {
+          onPointDragging(dataIndex, [this.x, this.y]);
+        },
+        onmousemove: function () {
+          showTooltip(dataIndex);
+        },
+        onmouseout: function () {
+          hideTooltip(dataIndex);
+        },
+        z: 100
+      };
+    })
+  });
+}, 0);
+window.addEventListener('resize', updatePosition);
+myChart.on('dataZoom', updatePosition);
+function updatePosition() {
+  myChart.setOption({
+    graphic: data.map(function (item, dataIndex) {
+      return {
+        position: myChart.convertToPixel('grid', item)
+      };
+    })
+  });
+}
+function showTooltip(dataIndex) {
+  myChart.dispatchAction({
+    type: 'showTip',
+    seriesIndex: 0,
+    dataIndex: dataIndex
+  });
+}
+function hideTooltip(dataIndex) {
+  myChart.dispatchAction({
+    type: 'hideTip'
+  });
+}
+function onPointDragging(dataIndex, pos) {
+  data[dataIndex] = myChart.convertFromPixel('grid', pos);
+  // Update data
+  myChart.setOption({
+    series: [
+      {
+        id: 'a',
+        data: data
+      }
+    ]
+  });
+}
 
+myChart.setOption(option);
 ```
 
 这个例子主要做到了这样一件事，用鼠标可以拖拽曲线的点，从而改变曲线的形状。例子很简单，但是有了这个基础我们还可以做更多的事情，比如在图中进行可视化得编辑。所以我们从这个简单的例子开始。
 
 echarts 本身没有提供封装好的“拖拽改变图表”这样比较业务定制的功能。但是这个功能开发者可以通过 API 扩展实现。
+
+## 实现基本的拖拽功能
+
+在这个例子中，基础的图表是一个 [折线图 (series-line)](https://echarts.apache.org/option.html#series-line)。参见如下配置：
+
+```js
+var symbolSize = 20;
+
+// 这个 data 变量在这里单独声明，在后面也会用到。
+var data = [
+  [15, 0],
+  [-50, 10],
+  [-56.5, 20],
+  [-46.5, 30],
+  [-22.1, 40]
+];
+
+myChart.setOption({
+  xAxis: {
+    min: -100,
+    max: 80,
+    type: 'value',
+    axisLine: { onZero: false }
+  },
+  yAxis: {
+    min: -30,
+    max: 60,
+    type: 'value',
+    axisLine: { onZero: false }
+  },
+  series: [
+    {
+      id: 'a',
+      type: 'line',
+      smooth: true,
+      symbolSize: symbolSize, // 为了方便拖拽，把 symbolSize 尺寸设大了。
+      data: data
+    }
+  ]
+});
+```
+
+
+
+**既然折线中原生的点没有拖拽功能，我们就为它加上拖拽功能**：用 [graphic](https://echarts.apache.org/option.html#graphic) 组件，**在每个点上面，覆盖一个隐藏的可拖拽的圆点**。
+
+```js
+myChart.setOption({
+  // 声明一个 graphic component，里面有若干个 type 为 'circle' 的 graphic elements。
+  // 这里使用了 echarts.util.map 这个帮助方法，其行为和 Array.prototype.map 一样，但是兼容 es5 以下的环境。
+  // 用 map 方法遍历 data 的每项，为每项生成一个圆点。
+  graphic: echarts.util.map(data, function(dataItem, dataIndex) {
+    return {
+      // 'circle' 表示这个 graphic element 的类型是圆点。
+      type: 'circle',
+
+      shape: {
+        // 圆点的半径。
+        r: symbolSize / 2
+      },
+      // 用 transform 的方式对圆点进行定位。position: [x, y] 表示将圆点平移到 [x, y] 位置。
+      // 这里使用了 convertToPixel 这个 API 来得到每个圆点的位置，下面介绍。
+      position: myChart.convertToPixel('grid', dataItem),
+
+      // 这个属性让圆点不可见（但是不影响他响应鼠标事件）。
+      invisible: true,
+      // 这个属性让圆点可以被拖拽。
+      draggable: true,
+      // 把 z 值设得比较大，表示这个圆点在最上方，能覆盖住已有的折线图的圆点。
+      z: 100,
+      // 此圆点的拖拽的响应事件，在拖拽过程中会不断被触发。下面介绍详情。
+      // 这里使用了 echarts.util.curry 这个帮助方法，意思是生成一个与 onPointDragging
+      // 功能一样的新的函数，只不过第一个参数永远为此时传入的 dataIndex 的值。
+      ondrag: echarts.util.curry(onPointDragging, dataIndex)
+    };
+  })
+});
+```
+
+
+
+上面的代码中，使用 [convertToPixel](https://echarts.apache.org/handbook/api.html#echartsInstance.convertToPixel) 这个 API，**进行了从 data 到“像素坐标”的转换，从而得到了每个圆点应该在的位置，从而能绘制这些圆点**。`myChart.convertToPixel('grid', dataItem)` 这句话中，第一个参数 `'grid'` 表示 `dataItem` 在 [grid](https://echarts.apache.org/option.html#grid) 这个组件中（即直角坐标系）中进行转换。所谓“像素坐标”，就是以 echarts 容器 dom element 的左上角为零点的以像素为单位的坐标系中的坐标。
+
+**注意这件事需要在第一次 setOption 后再进行**，也就是说，**须在坐标系（[grid](https://echarts.apache.org/option.html#grid)）初始化后才能调用** `myChart.convertToPixel('grid', dataItem)`。
+
+有了这段代码后，就有了诸个能拖拽的点。接下来要为每个点，加上拖拽响应的事件：
+
+```js
+// 拖拽某个圆点的过程中会不断调用此函数。
+// 此函数中会根据拖拽后的新位置，改变 data 中的值，并用新的 data 值，重绘折线图，从而使折线图同步于被拖拽的隐藏圆点。
+function onPointDragging(dataIndex) {
+  // 这里的 data 就是本文最初的代码块中声明的 data，在这里会被更新。
+  // 这里的 this 就是被拖拽的圆点。this.position 就是圆点当前的位置。
+  data[dataIndex] = myChart.convertFromPixel('grid', this.position);
+  // 用更新后的 data，重绘折线图。
+  myChart.setOption({
+    series: [
+      {
+        id: 'a',
+        data: data
+      }
+    ]
+  });
+}
+```
+
+
+
+上面的代码中，使用了 [convertFromPixel](https://echarts.apache.org//api.html#echartsInstance.convertFromPixel) 这个 API。它是 [convertToPixel](https://echarts.apache.org//api.html#echartsInstance.convertToPixel) 的逆向过程。`myChart.convertFromPixel('grid', this.position)` **表示把当前像素坐标转换成 [grid](https://echarts.apache.org/option.html#grid) 组件中直角坐标系的 dataItem 值。**
+
+最后，为了使 dom 尺寸改变时，图中的元素能自适应得变化，加上这些代码：
+
+```js
+window.addEventListener('resize', function() {
+  // 对每个拖拽圆点重新计算位置，并用 setOption 更新。
+  myChart.setOption({
+    graphic: echarts.util.map(data, function(item, dataIndex) {
+      return {
+        position: myChart.convertToPixel('grid', item)
+      };
+    })
+  });
+});
+```
+
+## 添加 tooltip 组件
+
+到此，拖拽的基本功能就完成了。但是想要更进一步得实时看到拖拽过程中，被拖拽的点的 data 值的变化状况，我们可以使用 [tooltip](https://echarts.apache.org/option.html#tooltip) 组件来实时显示这个值。但是，tooltip 有其默认的“显示”“隐藏”触发规则，在我们拖拽的场景中并不适用，所以我们还要手动定制 tooltip 的“显示”“隐藏”行为。
+
+在上述代码中分别添加如下定义：
+
+```js
+myChart.setOption({
+  // ...,
+  tooltip: {
+    // 表示不使用默认的“显示”“隐藏”触发规则。
+    triggerOn: 'none',
+    formatter: function(params) {
+      return (
+        'X: ' +
+        params.data[0].toFixed(2) +
+        '<br>Y: ' +
+        params.data[1].toFixed(2)
+      );
+    }
+  }
+});
+```
+
+
+
+```js
+myChart.setOption({
+  graphic: data.map(function(item, dataIndex) {
+    return {
+      type: 'circle',
+      // ...,
+      // 在 mouseover 的时候显示，在 mouseout 的时候隐藏。
+      onmousemove: echarts.util.curry(showTooltip, dataIndex),
+      onmouseout: echarts.util.curry(hideTooltip, dataIndex)
+    };
+  })
+});
+
+function showTooltip(dataIndex) {
+  myChart.dispatchAction({
+    type: 'showTip',
+    seriesIndex: 0,
+    dataIndex: dataIndex
+  });
+}
+
+function hideTooltip(dataIndex) {
+  myChart.dispatchAction({
+    type: 'hideTip'
+  });
+}
+```
+
+
+
+这里使用了 [dispatchAction](https://echarts.apache.org/handbook/api.html#echartsInstance.dispatchAction) 来显示隐藏 tooltip。用到了 [showTip](https://echarts.apache.org/handbook/api.html#action.tooltip.showTip)、[hideTip](https://echarts.apache.org/handbook/api.html#action.tooltip.hideTip)。
+
+有了这些基础，就可以定制更多的功能了。可以加 [dataZoom](https://echarts.apache.org/option.html#dataZoom) 组件，可以制作一个直角坐标系上的绘图板等等。可以发挥想象力。
+
+
+
+# 使用 Canvas 或者 SVG 渲染
+
+浏览器端图表库大多会选择 SVG 或者 Canvas 进行渲染。对于绘制图表来说，这两种技术往往是可替换的，效果相近。但是在一些场景中，他们的表现和能力又有一定差异。于是，对它们的选择取舍，就成为了一个一直存在的不易有标准答案的话题。
+
+ECharts 从初始一直使用 Canvas 绘制图表。而 [ECharts v4.0](https://github.com/apache/echarts/releases) 发布了 SVG 渲染器，从而提供了一种新的选择。只须在初始化一个图表实例时，设置 [renderer 参数](https://echarts.apache.org//api.html#echarts.init) 为 `'canvas'` 或 `'svg'` 即可指定渲染器，比较方便。
+
+> SVG 和 Canvas 这两种使用方式差异很大的技术，能够做到同时被透明支持，主要归功于 ECharts 底层库 [ZRender](https://github.com/ecomfe/zrender) 的抽象和实现，形成可互换的 SVG 渲染器和 Canvas 渲染器。
+
+## 选择哪种渲染器
+
+一般来说，Canvas 更适合绘制图形元素数量较多（这一般是由数据量大导致）的图表（如热力图、地理坐标系或平行坐标系上的大规模线图或散点图等），也利于实现某些视觉 [特效](https://echarts.apache.org//examples/editor.html?c=lines-bmap-effect)。但是，在不少场景中，SVG 具有重要的优势：它的内存占用更低（这对移动端尤其重要）、并且用户使用浏览器内置的缩放功能时不会模糊。
+
+选择哪种渲染器，我们可以根据软硬件环境、数据量、功能需求综合考虑。
+
+- 在软硬件环境较好，数据量不大的场景下，两种渲染器都可以适用，并不需要太多纠结。
+- 在环境较差，出现性能问题需要优化的场景下，可以通过试验来确定使用哪种渲染器。比如有这些经验：
+  - 在须要创建很多 ECharts 实例且浏览器易崩溃的情况下（可能是因为 Canvas 数量多导致内存占用超出手机承受能力），可以使用 SVG 渲染器来进行改善。大略得说，如果图表运行在低端安卓机，或者我们在使用一些特定图表如 [水球图](https://ecomfe.github.io/echarts-liquidfill/example/) 等，SVG 渲染器可能效果更好。
+  - 数据量较大（经验判断 > 1k）、较多交互时，建议选择 Canvas 渲染器。
+
+我们强烈欢迎开发者们[反馈](https://github.com/apache/echarts/issues/new)给我们使用的体验和场景，帮助我们更好的做优化。
+
+注：当前某些特殊的渲染依然需要依赖 Canvas：如[炫光尾迹特效](https://echarts.apache.org/option.html#series-lines.effect)、[带有混合效果的热力图](https://echarts.apache.org//examples/editor.html?c=heatmap-bmap)等。
+
+## 如何使用渲染器
+
+如果是用如下的方式完整引入`echarts`，代码中已经包含了 SVG 渲染器和 Canvas 渲染器
+
+```js
+import * as echarts from 'echarts';
+```
+
+
+
+如果你是按照 [在项目中引入 Apache ECharts](https://echarts.apache.org/handbook/zh/basics/import) 一文中的介绍使用按需引入，则需要手动引入需要的渲染器
+
+```js
+import * as echarts from 'echarts/core';
+// 可以根据需要选用只用到的渲染器
+import { SVGRenderer, CanvasRenderer } from 'echarts/renderers';
+
+echarts.use([SVGRenderer, CanvasRenderer]);
+```
+
+
+
+然后，我们就可以在代码中，初始化图表实例时，[传入参数](https://echarts.apache.org//api.html#echarts.init) 选择渲染器类型：
+
+```js
+// 使用 Canvas 渲染器（默认）
+var chart = echarts.init(containerDom, null, { renderer: 'canvas' });
+// 等价于：
+var chart = echarts.init(containerDom);
+
+// 使用 SVG 渲染器
+var chart = echarts.init(containerDom, null, { renderer: 'svg' });
+```

@@ -3339,18 +3339,143 @@ option = {
   }
 };
 
-                exportResult(){
-                //导出查询后的结果
-                    if (confirm("Are you sure to export the result?")) {
-                        const titles2=["abbreviation","fullName","chargeFormula","charge","avgmolweight","monoisotopicweight","keggId","pubChemId","cheBlId","hmdb","pdmapName","reconMap","reconMap3","food_db","chemspider","biocyc","biggId","wikipedia","drugbank","seed","metanetx","knapsack","metlin"];
-                        let result_content="";
-                        result_content+=titles2.join("\t")+"\n";
-                        for (let result2 of this.resultData){
-                            result_content+=Object.values(result2).join("\t")+"\n";
-                        }
+const symbolSize = 20;
+const data = [
+  [40, -10],
+  [-30, -5],
+  [-76.5, 20],
+  [-63.5, 40],
+  [-22.1, 50]
+];
+option = {
+  title: {
+    text: 'Try Dragging these Points',
+    left: 'center'
+  },
+  tooltip: {
+    triggerOn: 'none',
+    formatter: function (params) {
+      return (
+        'X: ' +
+        params.data[0].toFixed(2) +
+        '<br>Y: ' +
+        params.data[1].toFixed(2)
+      );
+    }
+  },
+  grid: {
+    top: '8%',
+    bottom: '12%'
+  },
+  xAxis: {
+    min: -100,
+    max: 70,
+    type: 'value',
+    axisLine: { onZero: false }
+  },
+  yAxis: {
+    min: -30,
+    max: 60,
+    type: 'value',
+    axisLine: { onZero: false }
+  },
+  dataZoom: [
+    {
+      type: 'slider',
+      xAxisIndex: 0,
+      filterMode: 'none'
+    },
+    {
+      type: 'slider',
+      yAxisIndex: 0,
+      filterMode: 'none'
+    },
+    {
+      type: 'inside',
+      xAxisIndex: 0,
+      filterMode: 'none'
+    },
+    {
+      type: 'inside',
+      yAxisIndex: 0,
+      filterMode: 'none'
+    }
+  ],
+  series: [
+    {
+      id: 'a',
+      type: 'line',
+      smooth: true,
+      symbolSize: symbolSize,
+      data: data
+    }
+  ]
+};
+setTimeout(function () {
+  // Add shadow circles (which is not visible) to enable drag.
+  myChart.setOption({
+    graphic: data.map(function (item, dataIndex) {
+      return {
+        type: 'circle',
+        position: myChart.convertToPixel('grid', item),
+        shape: {
+          cx: 0,
+          cy: 0,
+          r: symbolSize / 2
+        },
+        invisible: true,
+        draggable: true,
+        ondrag: function (dx, dy) {
+          onPointDragging(dataIndex, [this.x, this.y]);
+        },
+        onmousemove: function () {
+          showTooltip(dataIndex);
+        },
+        onmouseout: function () {
+          hideTooltip(dataIndex);
+        },
+        z: 100
+      };
+    })
+  });
+}, 0);
+window.addEventListener('resize', updatePosition);
+myChart.on('dataZoom', updatePosition);
+function updatePosition() {
+  myChart.setOption({
+    graphic: data.map(function (item, dataIndex) {
+      return {
+        position: myChart.convertToPixel('grid', item)
+      };
+    })
+  });
+}
+function showTooltip(dataIndex) {
+  myChart.dispatchAction({
+    type: 'showTip',
+    seriesIndex: 0,
+    dataIndex: dataIndex
+  });
+}
+function hideTooltip(dataIndex) {
+  myChart.dispatchAction({
+    type: 'hideTip'
+  });
+}
+function onPointDragging(dataIndex, pos) {
+  data[dataIndex] = myChart.convertFromPixel('grid', pos);
+  // Update data
+  myChart.setOption({
+    series: [
+      {
+        id: 'a',
+        data: data
+      }
+    ]
+  });
+}
 
-                        let result=new Blob([result_content],{type: 'text/plain;charset=utf-8'});
-                        saveAs(result,this.run_type+"result.txt");
-                    }
-                },
+myChart.setOption(option);
+
+
 
