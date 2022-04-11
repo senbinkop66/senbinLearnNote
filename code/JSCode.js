@@ -3339,4 +3339,18 @@ option = {
   }
 };
 
+                exportResult(){
+                //导出查询后的结果
+                    if (confirm("Are you sure to export the result?")) {
+                        const titles2=["abbreviation","fullName","chargeFormula","charge","avgmolweight","monoisotopicweight","keggId","pubChemId","cheBlId","hmdb","pdmapName","reconMap","reconMap3","food_db","chemspider","biocyc","biggId","wikipedia","drugbank","seed","metanetx","knapsack","metlin"];
+                        let result_content="";
+                        result_content+=titles2.join("\t")+"\n";
+                        for (let result2 of this.resultData){
+                            result_content+=Object.values(result2).join("\t")+"\n";
+                        }
+
+                        let result=new Blob([result_content],{type: 'text/plain;charset=utf-8'});
+                        saveAs(result,this.run_type+"result.txt");
+                    }
+                },
 
