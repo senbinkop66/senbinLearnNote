@@ -1078,3 +1078,675 @@ class Popper extends React.Component{
     }
 }
 ```
+
+
+
+# React 条件渲染
+
+在 React 中，你可以创建不同的组件来封装各种你需要的行为。然后还可以根据应用的状态变化只渲染其中的一部分。
+
+React 中的条件渲染和 JavaScript 中的一致，使用 JavaScript 操作符 if 或条件运算符来创建表示当前状态的元素，然后让 React 根据它们来更新 UI。
+
+先来看两个组件：
+
+```js
+function UserGreeting(props){
+    return "欢迎回来!";
+}
+function GuestGreeting(props){
+    return "请先注册。";
+}
+```
+
+我们将创建一个 Greeting 组件，它会根据用户是否登录来显示其中之一：
+
+```jsx
+function Greeting(props){
+    const isLoggedIn=props.isLoggedIn;
+    if (isLoggedIn) {
+        return <UserGreeting />;
+    }
+    return <GuestGreeting />;
+}
+
+ReactDOM.render(
+    <Greeting isLoggedIn={false} />,
+    document.getElementById("example")
+);
+```
+
+## 元素变量
+
+你可以使用变量来储存元素。它可以帮助你有条件的渲染组件的一部分，而输出的其他部分不会更改。
+
+在下面的例子中，我们将要创建一个名为 LoginControl 的有状态的组件。
+
+它会根据当前的状态来渲染 或 ，它也将渲染前面例子中的 。
+
+```jsx
+class LoginControl extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleLoginClick = this.handleLoginClick.bind(this);
+    this.handleLogoutClick = this.handleLogoutClick.bind(this);
+    this.state = {isLoggedIn: false};
+  }
+  handleLoginClick() {
+    this.setState({isLoggedIn: true});
+  }
+  handleLogoutClick() {
+    this.setState({isLoggedIn: false});
+  }
+  render() {
+    const isLoggedIn = this.state.isLoggedIn;
+    let button = null;
+    if (isLoggedIn) {
+      button = <LogoutButton onClick={this.handleLogoutClick} />;
+    } else {
+      button = <LoginButton onClick={this.handleLoginClick} />;
+    }
+    return (
+      <div>
+        <Greeting isLoggedIn={isLoggedIn} />
+        {button}
+      </div>
+    );
+  }
+}
+ReactDOM.render(
+  <LoginControl />,
+  document.getElementById('example')
+);
+```
+
+## 与运算符 &&
+
+你可以通过用花括号包裹代码在 JSX 中嵌入任何表达式 ，也包括 JavaScript 的逻辑与 &&，它可以方便地条件渲染一个元素。
+
+```jsx
+function Mailbox(props) {
+  const unreadMessages = props.unreadMessages;
+  return (
+    <div>
+      <h1>Hello!</h1>
+      {unreadMessages.length > 0 &&
+        <h2>
+          您有 {unreadMessages.length} 条未读信息。
+        </h2>
+      }
+    </div>
+  );
+}
+const messages = ['React', 'Re: React', 'Re:Re: React'];
+ReactDOM.render(
+  <Mailbox unreadMessages={messages} />,
+  document.getElementById('example')
+);
+```
+
+在 JavaScript 中，true && expression 总是返回 **expression**，而 false && expression 总是返回 **false**。
+
+因此，如果条件是 **true**，&& 右侧的元素就会被渲染，如果是 **false**，React 会忽略并跳过它。
+
+## 三目运算符
+
+条件渲染的另一种方法是使用 JavaScript 的条件运算符：
+
+```js
+condition ? true : false。
+```
+
+在下面的例子中，我们用它来有条件的渲染一小段文本。
+
+```jsx
+render() { 
+    const isLoggedIn = this.state.isLoggedIn; 
+    return (
+
+		The user is **{isLoggedIn ? ‘currently’ : ‘not’}** logged in.
+); } 
+```
+
+同样它也可以用在较大的表达式中，虽然不太直观：
+
+```jsx
+render() {
+  const isLoggedIn = this.state.isLoggedIn;
+  return (
+    <div>
+      {isLoggedIn ? (
+        <LogoutButton onClick={this.handleLogoutClick} />
+      ) : (
+        <LoginButton onClick={this.handleLoginClick} />
+      )}
+    </div>
+  );
+}
+```
+
+## 阻止组件渲染
+
+在极少数情况下，你可能希望隐藏组件，即使它被其他组件渲染。让 render 方法返回 null 而不是它的渲染结果即可实现。
+
+在下面的例子中， `<WarningBanner />`根据属性 warn 的值条件渲染。如果 warn 的值是 false，则组件不会渲染：
+
+```jsx
+function WarningBanner(props) {
+  if (!props.warn) {
+    return null;
+  }
+  return (
+    <div className="warning">
+      警告!
+    </div>
+  );
+}
+class Page extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {showWarning: true}
+    this.handleToggleClick = this.handleToggleClick.bind(this);
+  }
+  handleToggleClick() {
+    this.setState(prevState => ({
+      showWarning: !prevState.showWarning
+    }));
+  }
+  render() {
+    return (
+      <div>
+        <WarningBanner warn={this.state.showWarning} />
+        <button onClick={this.handleToggleClick}>
+          {this.state.showWarning ? '隐藏' : '显示'}
+        </button>
+      </div>
+    );
+  }
+}
+ReactDOM.render(
+  <Page />,
+  document.getElementById('example')
+);
+```
+
+组件的 render 方法返回 null 并不会影响该组件生命周期方法的回调。例如，componentWillUpdate 和 componentDidUpdate 依然可以被调用。
+
+
+
+# React 列表 & Keys
+
+我们可以使用 JavaScript 的 map() 方法 来创建列表。
+
+使用 map() 方法遍历数组生成了一个 1 到 5 的数字列表：
+
+```jsx
+const numbers = [1, 2, 3, 4, 5];
+const listItems = numbers.map((numbers) =>
+  <li>{numbers}</li>
+);
+ReactDOM.render(
+  <ul>{listItems}</ul>,
+  document.getElementById('example')
+);
+```
+
+我们可以将以上实例重构成一个组件，组件接收数组参数，每个列表元素分配一个 key，不然会出现警告 a key should be provided for list items，**意思就是需要包含 key**：
+
+```jsx
+function NumberList(props){
+  const numbers=props.numbers;
+  const listItems=numbers.map((number)=>
+    <li key={number.toString()}>{number}</li>
+    );
+    return (
+      <ul>{listItems}</ul>
+    );
+}
+
+const numbers = [1, 2, 3, 4, 5];
+ReactDOM.render(
+  <NumberList numbers={numbers} />,
+  document.getElementById('example')
+);
+```
+
+## Keys
+
+Keys 可以在 DOM 中的某些元素被增加或删除的时候帮助 React 识别哪些元素发生了变化。因此你应当给数组中的每一个元素赋予一个确定的标识。
+
+```jsx
+const numbers = [1, 2, 3, 4, 5];
+const listItems = numbers.map((number) =>
+    {number}
+);
+```
+
+一个元素的 key 最好是这个元素在列表中拥有的一个独一无二的字符串。**通常，我们使用来自数据的 id 作为元素的 key**:
+
+```jsx
+const todoItems = todos.map((todo) =>
+  <li key={todo.id}>
+    {todo.text}
+  </li>
+);
+```
+
+当元素没有确定的 id 时，你可以使用他的序列号索引 index 作为 key：
+
+```jsx
+const todoItems = todos.map((todo, index) =>
+  // 只有在没有确定的 id 时使用
+  <li key={index}>
+    {todo.text}
+  </li>
+);
+```
+
+如果列表可以重新排序，我们不建议使用索引来进行排序，因为这会导致渲染变得很慢。
+
+## 用 keys 提取组件
+
+元素的 key 只有在它和它的兄弟节点对比时才有意义。
+
+比方说，如果你提取出一个 ListItem 组件，你应该把 key 保存在数组中的这个 元素上，而不是放在 ListItem 组件中的 li 元素上。
+
+### 错误的示范
+
+```jsx
+function ListItem(props) {
+  const value = props.value;
+  return (
+    // 错啦！你不需要在这里指定key:
+    <li key={value.toString()}>
+      {value}
+    </li>
+  );
+}
+function NumberList(props) {
+  const numbers = props.numbers;
+  const listItems = numbers.map((number) =>
+    //错啦！元素的key应该在这里指定：
+    <ListItem value={number} />
+  );
+  return (
+    <ul>
+      {listItems}
+    </ul>
+  );
+}
+const numbers = [1, 2, 3, 4, 5];
+ReactDOM.render(
+  <NumberList numbers={numbers} />,
+  document.getElementById('example')
+);
+```
+
+### key 的正确使用方式
+
+```jsx
+function ListItem(props) {
+  // 对啦！这里不需要指定key:
+  return <li>{props.value}</li>;
+}
+function NumberList(props) {
+  const numbers = props.numbers;
+  const listItems = numbers.map((number) =>
+    // 又对啦！key应该在数组的上下文中被指定
+    <ListItem key={number.toString()}
+              value={number} />
+  );
+  return (
+    <ul>
+      {listItems}
+    </ul>
+  );
+}
+const numbers = [1, 2, 3, 4, 5];
+ReactDOM.render(
+  <NumberList numbers={numbers} />,
+  document.getElementById('example')
+);
+```
+
+当你在 map() 方法的内部调用元素时，你最好随时记得为每一个元素加上一个独一无二的 key。
+
+## 元素的 key 在他的兄弟元素之间应该唯一
+
+数组元素中使用的 key 在其兄弟之间应该是独一无二的。然而，它们不需要是全局唯一的。当我们生成两个不同的数组时，我们可以使用相同的键。
+
+```jsx
+function Blog(props) {
+  const sidebar = (
+    <ul>
+      {props.posts.map((post) =>
+        <li key={post.id}>
+          {post.title}
+        </li>
+      )}
+    </ul>
+  );
+  const content = props.posts.map((post) =>
+    <div key={post.id}>
+      <h3>{post.title}</h3>
+      <p>{post.content}</p>
+    </div>
+  );
+  return (
+    <div>
+      {sidebar}
+      <hr />
+      {content}
+    </div>
+  );
+}
+const posts = [
+  {id: 1, title: 'Hello World', content: 'Welcome to learning React!'},
+  {id: 2, title: 'Installation', content: 'You can install React from npm.'}
+];
+ReactDOM.render(
+  <Blog posts={posts} />,
+  document.getElementById('example')
+);
+```
+
+key 会作为给 React 的提示，但不会传递给你的组件。如果您的组件中需要使用和 key 相同的值，请将其作为属性传递：
+
+```jsx
+const content = posts.map((post) =>
+  <Post
+    key={post.id}
+    id={post.id}
+    title={post.title} />
+);
+```
+
+## 在 jsx 中嵌入 map()
+
+在上面的例子中，我们声明了一个单独的 listItems 变量并将其包含在 JSX 中：
+
+```jsx
+function NumberList(props) {
+  const numbers = props.numbers;
+  const listItems = numbers.map((number) =>
+    <ListItem key={number.toString()}
+              value={number} />
+  );
+  return (
+    <ul>
+      {listItems}
+    </ul>
+  );
+}
+```
+
+JSX 允许在大括号中嵌入任何表达式，所以我们可以在 map() 中这样使用：
+
+```jsx
+function NumberList(props) {
+  const numbers = props.numbers;
+  return (
+    <ul>
+      {numbers.map((number) =>
+        <ListItem key={number.toString()}
+                  value={number} />
+      )}
+    </ul>
+  );
+}
+```
+
+这么做有时可以使你的代码更清晰，但有时这种风格也会被滥用。就像在 JavaScript 中一样，何时需要为了可读性提取出一个变量，这完全取决于你。但请记住，如果一个 map() 嵌套了太多层级，那你就可以提取出组件。
+
+
+
+# React 组件 API
+
+## React 组件 API
+
+在本章节中我们将讨论 React 组件 API。我们将讲解以下 7 个方法：
+
+- 设置状态：setState
+- 替换状态：replaceState
+- 设置属性：setProps
+- 替换属性：replaceProps
+- 强制更新：forceUpdate
+- 获取 DOM 节点：findDOMNode
+- 判断组件挂载状态：isMounted
+
+## 设置状态：setState
+
+```js
+setState(object nextState[, function callback])
+```
+
+### 参数说明
+
+- **nextState**，将要设置的新状态，该状态会和当前的**state**合并
+- **callback**，可选参数，回调函数。该函数会在**setState**设置成功，且组件重新渲染后调用。
+
+合并 nextState 和当前 state，并重新渲染组件。setState 是 React 事件处理函数中和请求回调函数中触发 UI 更新的主要方法。
+
+### 关于 setState
+
+不能在组件内部通过 this.state 修改状态，因为该状态会在调用 setState() 后被替换。
+
+setState() 并不会立即改变 this.state，而是创建一个即将处理的 state。setState() 并不一定是同步的，为了提升性能 React 会批量执行 state 和 DOM 渲染。
+
+setState() 总是会触发一次组件重绘，除非在 shouldComponentUpdate() 中实现了一些条件渲染逻辑。
+
+```jsx
+class Counter extends React.Component{
+  constructor(props) {
+      super(props);
+      this.state = {clickCount: 0};
+      this.handleClick = this.handleClick.bind(this);
+  }
+  handleClick() {
+    this.setState(function(state) {
+      return {clickCount: state.clickCount + 1};
+    });
+  }
+  render () {
+    return (<h2 onClick={this.handleClick}>点我！点击次数为: {this.state.clickCount}</h2>);
+  }
+}
+ReactDOM.render(
+  <Counter />,
+  document.getElementById('example')
+);
+
+```
+
+实例中通过点击 h2 标签来使得点击计数器加 1。
+
+## 替换状态：replaceState
+
+```
+replaceState(object nextState[, function callback])
+```
+
+- **nextState**，将要设置的新状态，该状态会替换当前的**state**。
+- **callback**，可选参数，回调函数。该函数会在**replaceState**设置成功，且组件重新渲染后调用。
+
+**replaceState()\**方法与\**setState()\**类似，但是方法只会保留\**nextState**中状态，原**state**不在**nextState**中的状态都会被删除。
+
+## 设置属性：setProps
+
+```
+setProps(object nextProps[, function callback])
+```
+
+- **nextProps**，将要设置的新属性，该状态会和当前的**props**合并
+- **callback**，可选参数，回调函数。该函数会在**setProps**设置成功，且组件重新渲染后调用。
+
+设置组件属性，并重新渲染组件。
+
+**props**相当于组件的数据流，它总是会从父组件向下传递至所有的子组件中。当和一个外部的 JavaScript 应用集成时，我们可能会需要向组件传递数据或通知**React.render()\**组件需要重新渲染，可以使用\**setProps()**。
+
+更新组件，我可以在节点上再次调用**React.render()**，也可以通过**setProps()**方法改变组件属性，触发组件重新渲染。
+
+## 替换属性：replaceProps
+
+```
+replaceProps(object nextProps[, function callback])
+```
+
+- **nextProps**，将要设置的新属性，该属性会替换当前的**props**。
+- **callback**，可选参数，回调函数。该函数会在**replaceProps**设置成功，且组件重新渲染后调用。
+
+**replaceProps()\**方法与\**setProps**类似，但它会删除原有 props。
+
+## 强制更新：forceUpdate
+
+```
+forceUpdate([function callback])
+```
+
+### 参数说明
+
+- **callback**，可选参数，回调函数。该函数会在组件**render()**方法调用后调用。
+
+forceUpdate() 方法会使组件调用自身的 render() 方法重新渲染组件，组件的子组件也会调用自己的 render()。但是，组件重新渲染时，依然会读取 this.props 和 this.state，如果状态没有改变，那么 React 只会更新 DOM。
+
+forceUpdate() 方法适用于 this.props 和 this.state 之外的组件重绘（如：修改了 this.state 后），通过该方法通知 React 需要调用 render()
+
+一般来说，**应该尽量避免使用 forceUpdate()**，而**仅从 this.props 和 this.state 中读取状态并由 React 触发 render() 调用**。
+
+## 获取 DOM 节点：findDOMNode
+
+```
+DOMElement findDOMNode()
+```
+
+- 返回值：DOM 元素 DOMElement
+
+如果组件已经挂载到 DOM 中，该方法返回对应的本地浏览器 DOM 元素。当**render**返回**null** 或 **false**时，**this.findDOMNode()\**也会返回\**null**。从 DOM 中读取值的时候，该方法很有用，如：获取表单字段的值和做一些 DOM 操作。
+
+## 判断组件挂载状态：isMounted
+
+```
+bool isMounted()
+```
+
+- 返回值：**true**或**false**，表示组件是否已挂载到 DOM 中
+
+**isMounted()**方法用于判断组件是否已挂载到 DOM 中。可以使用该方法保证了**setState()**和**forceUpdate()**在异步场景下的调用不会出错。
+
+# React 组件生命周期
+
+组件的生命周期可分成三个状态：
+
+- Mounting：已插入真实 DOM
+- Updating：正在被重新渲染
+- Unmounting：已移出真实 DOM
+
+生命周期的方法有：
+
+- **componentWillMount** 在渲染前调用，在客户端也在服务端。
+- **componentDidMount** : 在第一次渲染后调用，只在客户端。**之后组件已经生成了对应的 DOM 结构，可以通过 this.getDOMNode() 来进行访问。** 如果你想和其他 JavaScript 框架一起使用，可以在这个方法中调用 setTimeout, setInterval 或者发送 AJAX 请求等操作（防止异步操作阻塞 UI)。
+- **componentWillReceiveProps** **在组件接收到一个新的 prop （更新后）时被调用**。这个方法在初始化 render 时不会被调用。
+- **shouldComponentUpdate** 返回一个布尔值。**在组件接收到新的 props 或者 state 时被调用**。在初始化时或者使用 forceUpdate 时不被调用。 可以在你确认不需要更新组件时使用。
+- **componentWillUpdate**在组件接收到新的 props 或者 state **但还没有 render 时被调用**。在初始化时不会被调用。
+- **componentDidUpdate** **在组件完成更新后立即调用**。在初始化时不会被调用。
+- **componentWillUnmount**在组件从 DOM 中移除之前立刻被调用。
+
+这些方法的详细说明，可以参考[官方文档](http://facebook.github.io/react/docs/component-specs.html#lifecycle-methods)。
+
+
+
+## React 实例
+
+以下实例在 Hello 组件加载以后，通过 componentDidMount 方法设置一个定时器，每隔 100 毫秒重新设置组件的透明度，并重新渲染：
+
+```jsx
+class Hello extends React.Component{
+  constructor(props){
+    super(props);
+    this.state={opacity:1.0};
+  }
+  componentDidMount(){
+    this.timer=setInterval(function(){
+      var opacity=this.state.opacity;
+      opacity-=.05;
+      if (opacity<0.1) {
+        opacity=1.0;
+      }
+      this.setState({
+        opacity:opacity
+      });
+    }.bind(this),100);
+  }
+  render(){
+    return (
+      <div style={{opacity:this.state.opacity}}>
+        Hello {this.props.name}
+      </div>
+      );
+  }
+}
+ReactDOM.render(
+  <Hello name="senbin" />,
+  document.getElementById('example')
+  );
+```
+
+以下实例初始化 **state** ， **setNewnumber** 用于更新 **state**。所有生命周期在 **Content** 组件中。
+
+```jsx
+class Button extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {data: 0};
+      this.setNewNumber = this.setNewNumber.bind(this);
+  }
+  setNewNumber() {
+    this.setState({data: this.state.data + 1})
+  }
+  render() {
+      return (
+         <div>
+            <button onClick = {this.setNewNumber}>INCREMENT</button>
+            <Content myNumber = {this.state.data}></Content>
+         </div>
+      );
+    }
+}
+class Content extends React.Component {
+  componentWillMount() {
+      console.log('Component WILL MOUNT!')
+  }
+  componentDidMount() {
+       console.log('Component DID MOUNT!')
+  }
+  componentWillReceiveProps(newProps) {
+        console.log('Component WILL RECEIVE PROPS!')
+  }
+  shouldComponentUpdate(newProps, newState) {
+        return true;
+  }
+  componentWillUpdate(nextProps, nextState) {
+        console.log('Component WILL UPDATE!');
+  }
+  componentDidUpdate(prevProps, prevState) {
+        console.log('Component DID UPDATE!')
+  }
+  componentWillUnmount() {
+         console.log('Component WILL UNMOUNT!')
+  }
+    render() {
+      return (
+        <div>
+          <h3>{this.props.myNumber}</h3>
+        </div>
+      );
+    }
+}
+ReactDOM.render(
+   <div>
+      <Button />
+   </div>,
+  document.getElementById('example')
+);
+```
+
+# React AJAX
