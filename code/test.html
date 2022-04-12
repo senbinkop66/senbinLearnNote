@@ -28,36 +28,30 @@ body {
 
 <div id="example"></div>
 <script type="text/babel">
-class UserGist extends React.Component {
+
+class HelloMessage extends React.Component {
   constructor(props) {
       super(props);
-      this.state = {username: '', lastGistUrl: ''};
+      this.state = {value: 'Hello axihe!'};
+      this.handleChange = this.handleChange.bind(this);
   }
-  componentDidMount() {
-    this.serverRequest = $.get(this.props.source, function (result) {
-      var lastGist = result[0];
-      this.setState({
-        username: lastGist.owner.login,
-        lastGistUrl: lastGist.html_url
-      });
-    }.bind(this));
-  }
-  componentWillUnmount() {
-    this.serverRequest.abort();
+  handleChange(event) {
+    this.setState({value: '阿西河前端教程'})
   }
   render() {
-    return (
-      <div>
-        {this.state.username} 用户最新的 Gist 共享地址：
-        <a href={this.state.lastGistUrl}>{this.state.lastGistUrl}</a>
-      </div>
-    );
+    var value = this.state.value;
+    return <div>
+            <button onClick={this.handleChange}>点我</button>
+            <h4>{value}</h4>
+           </div>;
   }
 }
 ReactDOM.render(
-  <UserGist source="https://api.github.com/users/octocat/gists" />,
+  <HelloMessage />,
   document.getElementById('example')
 );
+
+
 </script>
 
     </body>

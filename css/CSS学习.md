@@ -1688,7 +1688,7 @@ ul {
 
 ### list-style-type 属性
 
-ist-style-type 属性设置列表项标记的类型。
+list-style-type 属性设置列表项标记的类型。
 
 属性值
 

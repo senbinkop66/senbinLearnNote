@@ -793,7 +793,7 @@ class WebSite extends React.Component {
       super();
       this.state = {
         name: "阿西河前端教程",
-        site: "https://www.axihe.com"
+        site: "https://www.kop.com"
       }
     }
   render() {
@@ -1750,3 +1750,341 @@ ReactDOM.render(
 ```
 
 # React AJAX
+
+React 组件的数据可以通过 componentDidMount 方法中的 Ajax 来获取，当从服务端获取数据时可以将数据存储在 state 中，再用 this.setState 方法重新渲染 UI。
+
+当使用异步加载数据时，在组件卸载前使用 componentWillUnmount 来取消未完成的请求。
+
+以下实例演示了获取 Github 用户最新 gist 共享描述：
+
+```jsx
+        <script src="./jquery-3.6.0.js"></script>
+
+        <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+        <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+        <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+<
+
+div id="example"></div>
+<script type="text/babel">
+class UserGist extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {username: '', lastGistUrl: ''};
+  }
+  componentDidMount() {
+    this.serverRequest = $.get(this.props.source, function (result) {
+      var lastGist = result[0];
+      console.log(lastGist);
+      this.setState({
+        username: lastGist.owner.login,
+        lastGistUrl: lastGist.html_url
+      });
+    }.bind(this));
+  }
+  componentWillUnmount() {
+    this.serverRequest.abort();
+  }
+  render() {
+    return (
+      <div>
+        {this.state.username} 用户最新的 Gist 共享地址：
+        <a href={this.state.lastGistUrl}>{this.state.lastGistUrl}</a>
+      </div>
+    );
+  }
+}
+ReactDOM.render(
+  <UserGist source="https://api.github.com/users/octocat/gists" />,
+  document.getElementById('example')
+);
+</script>
+```
+
+# React 表单与事件
+
+HTML 表单元素与 React 中的其他 DOM 元素有所不同，因为表单元素生来就保留一些内部状态。
+
+在 HTML 当中，像 `<input>`, `<textarea>`, 和 `<select>` 这类表单元素会维持自身状态，并根据用户输入进行更新。但在 React 中，可变的状态通常保存在组件的状态属性中，并且只能用 setState() 方法进行更新。
+
+## 一个简单的实例
+
+在实例中我们设置了输入框 input 值 value = {this.state.data}。在输入框值发生变化时我们可以更新 state。我们可以使用 onChange 事件来监听 input 的变化，并修改 state。
+
+```jsx
+class HelloMessage extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {value: 'Hello kop!'};
+      this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+  render() {
+    var value = this.state.value;
+    return <div>
+            <input type="text" value={value} onChange={this.handleChange} />
+            <h4>{value}</h4>
+           </div>;
+  }
+}
+ReactDOM.render(
+  <HelloMessage />,
+  document.getElementById('example')
+);
+```
+
+上面的代码将渲染出一个值为 Hello kop! 的 input 元素，并通过 onChange 事件响应更新用户输入的值。
+
+
+
+在以下实例中我们将为大家演示如何在子组件上使用表单。 onChange 方法将触发 state 的更新并将更新的值传递到子组件的输入框的 value 上来重新渲染界面。
+
+你**需要在父组件通过创建事件句柄** (handleChange) ，**并作为 prop (updateStateProp) 传递到你的子组件上**。
+
+```jsx
+class Content extends React.Component {
+  render() {
+    return  <div>
+            <input type="text" value={this.props.myDataProp} onChange={this.props.updateStateProp} />
+            <h4>{this.props.myDataProp}</h4>
+            </div>;
+  }
+}
+class HelloMessage extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {value: 'Hello axihe!'};
+      this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+  render() {
+    var value = this.state.value;
+    return <div>
+            <Content myDataProp = {value}
+              updateStateProp = {this.handleChange}></Content>
+           </div>;
+  }
+}
+ReactDOM.render(
+  <HelloMessage />,
+  document.getElementById('example')
+);
+
+```
+
+## Select 下拉菜单
+
+在 React 中，不使用 selected 属性，而在根 select 标签上用 value 属性来表示选中项。
+
+```jsx
+class FlavorForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {value: 'coconut'};
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+  handleSubmit(event) {
+    alert('Your favorite flavor is: ' + this.state.value);
+    event.preventDefault();
+  }
+  render() {
+    return (
+      <form onSubmit={this.handleSubmit}>
+        <label>
+          选择您最喜欢的网站
+          <select value={this.state.value} onChange={this.handleChange}>
+            <option value="gg">Google</option>
+            <option value="rn">axihe</option>
+            <option value="tb">Taobao</option>
+            <option value="fb">Facebook</option>
+          </select>
+        </label>
+        <input type="submit" value="提交" />
+      </form>
+    );
+  }
+}
+ReactDOM.render(
+  <FlavorForm />,
+  document.getElementById('example')
+);
+```
+
+## 多个表单
+
+当你有处理多个 input 元素时，你可以通过给每个元素添加一个 name 属性，来让处理函数根据 event.target.name 的值来选择做什么。
+
+```jsx
+class Reservation extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isGoing: true,
+      numberOfGuests: 2
+    };
+    this.handleInputChange = this.handleInputChange.bind(this);
+  }
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+    this.setState({
+      [name]: value
+    });
+  }
+  render() {
+    return (
+      <form>
+        <label>
+          是否离开：
+          <input
+            name="isGoing"
+            type="checkbox"
+            checked={this.state.isGoing}
+            onChange={this.handleInputChange} />
+        </label>
+        <br />
+        <label>
+          访客数：
+          <input
+            name="numberOfGuests"
+            type="number"
+            value={this.state.numberOfGuests}
+            onChange={this.handleInputChange} />
+        </label>
+      </form>
+    );
+  }
+}
+ReactDOM.render(
+  <Reservation />,
+  document.getElementById('example')
+);
+
+```
+
+## React 事件
+
+以下实例演示通过 onClick 事件来修改数据：
+
+```jsx
+class HelloMessage extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {value: 'Hello axihe!'};
+      this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(event) {
+    this.setState({value: '阿西河前端教程'})
+  }
+  render() {
+    var value = this.state.value;
+    return <div>
+            <button onClick={this.handleChange}>点我</button>
+            <h4>{value}</h4>
+           </div>;
+  }
+}
+ReactDOM.render(
+  <HelloMessage />,
+  document.getElementById('example')
+);
+```
+
+当你需要从子组件中更新父组件的 state 时，你需要在父组件通过创建事件句柄 (handleChange) ，并作为 prop (updateStateProp) 传递到你的子组件上。实例如下：
+
+```jsx
+class Content extends React.Component {
+  render() {
+    return  <div>
+              <button onClick = {this.props.updateStateProp}>点我</button>
+              <h4>{this.props.myDataProp}</h4>
+           </div>
+  }
+}
+class HelloMessage extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {value: 'Hello axihe!'};
+      this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(event) {
+    this.setState({value: '阿西河前端教程'})
+  }
+  render() {
+    var value = this.state.value;
+    return <div>
+            <Content myDataProp = {value}
+              updateStateProp = {this.handleChange}></Content>
+           </div>;
+  }
+}
+ReactDOM.render(
+  <HelloMessage />,
+  document.getElementById('example')
+);
+```
+
+# React Refs
+
+React 支持一种非常特殊的属性 **Ref** ，你可以用来绑定到 render() 输出的任何组件上。
+
+这个特殊的属性允许你引用 render() 返回的相应的支撑实例（ backing instance ）。这样就可以确保在任何时间总是拿到正确的实例。
+
+### 使用方法
+
+绑定一个 ref 属性到 render 的返回值上：
+
+```html
+<input ref="myInput" />
+```
+
+在其它代码中，通过 this.refs 获取支撑实例：
+
+```js
+var input = this.refs.myInput;
+var inputValue = input.value;
+var inputRect = input.getBoundingClientRect();
+```
+
+### 完整实例
+
+你可以通过使用 this 来获取当前 React 组件，或使用 ref 来获取组件的引用，实例如下：
+
+```jsx
+class MyComponent extends React.Component {
+  handleClick() {
+    // 使用原生的 DOM API 获取焦点
+    this.refs.myInput.focus();
+  }
+  render() {
+    //  当组件插入到 DOM 后，ref 属性添加一个组件的引用于到 this.refs
+    return (
+      <div>
+        <input type="text" ref="myInput" />
+        <input
+          type="button"
+          value="点我输入框获取焦点"
+          onClick={this.handleClick.bind(this)}
+        />
+      </div>
+    );
+  }
+}
+ReactDOM.render(
+  <MyComponent />,
+  document.getElementById('example')
+);
+```
+
+实例中，我们获取了输入框的支撑实例的引用，子点击按钮后输入框获取焦点。
+
+我们也可以使用 getDOMNode() 方法获取 DOM 元素
