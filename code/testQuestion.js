@@ -1,18 +1,25 @@
-function UserGreeting(props){
-    return "欢迎回来!";
-}
-function GuestGreeting(props){
-    return "请先注册。";
-}
-function Greeting(props){
-    const isLoggedIn=props.isLoggedIn;
-    if (isLoggedIn) {
-        return <UserGreeting />;
+/**
+ * @param {number[]} widths
+ * @param {string} s
+ * @return {number[]}
+ */
+var numberOfLines = function(widths, s) {
+    let index;
+    let sum=0;
+    let line=0;
+    for (let c of s){
+        index=c.charCodeAt()-"a".charCodeAt();
+        if (sum+widths[index]>100) {
+            line++;
+            sum=0;
+        }
+        sum+=widths[index];
     }
-    return <GuestGreeting />;
-}
+    line++;
+    return [line,sum];
+};
 
-ReactDOM.render(
-    <Greeting isLoggedIn={false} />,
-    document.getElementById("example")
-);
+let widths = [10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10];
+let s = "abcdefghijklmnopqrstuvwxyz";
+let result=numberOfLines(widths,s);
+console.log(result);

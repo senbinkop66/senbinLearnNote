@@ -27,29 +27,8 @@ body {
 <body>
 
 <div id="example"></div>
-<script type="text/babel">
+<script type="text/script">
 
-class HelloMessage extends React.Component {
-  constructor(props) {
-      super(props);
-      this.state = {value: 'Hello axihe!'};
-      this.handleChange = this.handleChange.bind(this);
-  }
-  handleChange(event) {
-    this.setState({value: '阿西河前端教程'})
-  }
-  render() {
-    var value = this.state.value;
-    return <div>
-            <button onClick={this.handleChange}>点我</button>
-            <h4>{value}</h4>
-           </div>;
-  }
-}
-ReactDOM.render(
-  <HelloMessage />,
-  document.getElementById('example')
-);
 
 
 </script>
