@@ -3497,4 +3497,117 @@ ReactDOM.render(
 );
 
 
+const { series, parallel } = require('gulp');
+
+function clean(cb) {
+  // body omitted
+  cb();
+}
+
+function cssTranspile(cb) {
+  // body omitted
+  cb();
+}
+
+function cssMinify(cb) {
+  // body omitted
+  cb();
+}
+
+function jsTranspile(cb) {
+  // body omitted
+  cb();
+}
+
+function jsBundle(cb) {
+  // body omitted
+  cb();
+}
+
+function jsMinify(cb) {
+  // body omitted
+  cb();
+}
+
+function publish(cb) {
+  // body omitted
+  cb();
+}
+
+exports.build = series(
+  clean,
+  parallel(
+    cssTranspile,
+    series(jsTranspile, jsBundle)
+  ),
+  parallel(cssMinify, jsMinify),
+  publish
+);
+
+
+const { series, parallel } = require('gulp');
+
+function streamTask(){
+    return src("*.js").pipe(dest("output"));
+}
+exports.default=streamTask;
+
+function promiseTask(){
+    return Promise.resolve("the value is ignored");
+}
+exports.default=promiseTask;
+
+const {EventEmitter}=require("events");
+function eventEmitterTask(){
+    const emitter=new EventEmitter();
+    setTimeout(()=>emitter.emit("finish"),250);
+    return emitter;
+}
+exports.default=eventEmitterTask;
+
+
+const {exec}=require("child_process");
+function childProcessTask(){
+    return exec("date");
+}
+exports.default=childProcessTask;
+
+const {Observable}=require("rxjs");
+function observableTask(){
+    return Observable.of(1,2,3);
+}
+exports.default=observableTask;
+
+
+function callbackError(cb){
+    cb(new Error("error"));
+}
+
+const fs=require("fs");
+function passingCallback(cb){
+    fs.access("gulpfile.js",cb);
+}
+
+
+async function asyncAwaitTask(){
+    const {version}=fs.readFileSync("package.json");
+    console.log(version);
+    await Promise.resolve("some result");
+}
+
+exports.default=asyncAwaitTask;
+
+const {src,dest}=require("gulp");
+const babel=require("gulp-babel");
+const uglify=require("gulp-ugliffy");
+const rename=require("gulp-rename");
+
+exports.default=function(){
+    return src('src/*.js')
+        .pipe(babel())
+        .pipe(src('vendor/*.js'))
+        .pipe(uglify)
+        .pipe(rename({exname:'.min.js'}))
+        .pipe(dest('output/'));
+}
 
