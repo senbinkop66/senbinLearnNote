@@ -3611,3 +3611,46 @@ exports.default=function(){
         .pipe(dest('output/'));
 }
 
+ //在document上绑定事件处理器：
+  $(document).ajaxComplete(function(){
+    $(".log").text("Triggered ajaxComplete handler.");
+  });
+
+  //现在，我们可以使用任何的jQuery方法构建一个Ajax请求：
+  $(".trigger").click(function(){
+    $(".result").load("./ajax/testAjax.html");
+  });
+
+    //在document上绑定事件处理器：
+  $(document).ajaxError(function(event,jqxhr,settings,exception){
+     if (settings.url==="./ajax/missing.html") {
+      $(".log").text("Triggered ajaxError handler."+exception);
+    }
+  });
+
+  //现在，我们可以使用任何的jQuery方法构建一个Ajax请求：
+  $("button.trigger").click(function(){
+    $(".result").load("./ajax/missing.html");
+  });
+
+  $(document).ajaxSend(function(event,jqxhr,settings){
+     if (settings.url==="./ajax/testAjax.html") {
+      $(".log").text("Triggered ajaxSend handler.");
+    }
+  });
+
+var myObject = {
+  a: {
+    one: 1, 
+    two: 2, 
+    three: 3
+  }, 
+  b: [1,2,3]
+};
+
+var recursiveEncoded=$.param(myObject);
+var recursiveDecoded=decodeURIComponent($.param(myObject));
+
+console.log(recursiveEncoded);  //a%5Bone%5D=1&a%5Btwo%5D=2&a%5Bthree%5D=3&b%5B%5D=1&b%5B%5D=2&b%5B%5D=3
+console.log(recursiveDecoded);  //a[one]=1&a[two]=2&a[three]=3&b[]=1&b[]=2&b[]=3
+

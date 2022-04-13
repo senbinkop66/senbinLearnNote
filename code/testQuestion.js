@@ -1,25 +1,32 @@
-/**
- * @param {number[]} widths
- * @param {string} s
- * @return {number[]}
- */
-var numberOfLines = function(widths, s) {
-    let index;
-    let sum=0;
-    let line=0;
-    for (let c of s){
-        index=c.charCodeAt()-"a".charCodeAt();
-        if (sum+widths[index]>100) {
-            line++;
-            sum=0;
-        }
-        sum+=widths[index];
-    }
-    line++;
-    return [line,sum];
+var RandomizedSet = function() {
+    this.nums = [];
+    this.indices = new Map();
 };
 
-let widths = [10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10];
-let s = "abcdefghijklmnopqrstuvwxyz";
-let result=numberOfLines(widths,s);
-console.log(result);
+RandomizedSet.prototype.insert = function(val) {
+    if (this.indices.has(val)) {
+        return false;
+    }
+    let index = this.nums.length;
+    this.nums.push(val);
+    this.indices.set(val, index);
+    return true;
+};
+
+RandomizedSet.prototype.remove = function(val) {
+    if (!this.indices.has(val)) {
+        return false;
+    }
+    let id = this.indices.get(val);
+    this.nums[id] = this.nums[this.nums.length - 1];
+    this.indices.set(this.nums[id], id);
+    this.nums.pop();
+    this.indices.delete(val);
+    return true;
+};
+
+RandomizedSet.prototype.getRandom = function() {
+    const randomIndex = Math.floor(Math.random() * this.nums.length);
+    return this.nums[randomIndex];
+};
+

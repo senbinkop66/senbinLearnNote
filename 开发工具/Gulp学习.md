@@ -982,3 +982,54 @@ Gulp 由许多小模块组成，这些模块被拉到一起以实现内聚性工
 - [last-run](https://github.com/gulpjs/last-run) - tracks the last run time of a task
 - [vinyl-sourcemap](https://github.com/gulpjs/vinyl-sourcemap) - built-in sourcemap support
 - [gulp-cli](https://github.com/gulpjs/gulp-cli) - the command line interface for interacting with gulp
+
+
+
+# Gulp 压缩 HTML 代码
+
+```bash
+npm install --save gulp-htmlmin
+```
+
+```js
+const gulp = require('gulp');
+const htmlmin = require('gulp-htmlmin');
+exports.default = function () {
+    return gulp.src('src/*.html')
+        .pipe(htmlmin({ collapseWhitespace: true }))
+        .pipe(gulp.dest('dist'));
+};
+```
+
+# Gulp 压缩 CSS 代码
+
+```bash
+npm install gulp-clean-css --save-dev
+```
+
+```js
+const gulp = require('gulp');
+const cleanCSS = require('gulp-clean-css');
+exports.default = function () {
+    return gulp.src('styles/*.css')
+        .pipe(cleanCSS({ compatibility: 'ie8' }))
+        .pipe(gulp.dest('dist'));
+};
+```
+
+# Gulp 压缩 JavaScript 代码
+
+```js
+const { src, dest } = require('gulp');
+const uglify = require('gulp-uglify');
+const rename = require('gulp-rename');
+exports.default = function() {
+  return src('src/*.js')
+    // gulp-uglify 插件并不改变文件名
+    .pipe(uglify())
+    // 因此使用 gulp-rename 插件修改文件的扩展名
+    .pipe(rename({ extname: '.min.js' }))
+    .pipe(dest('output/'));
+}
+```
+

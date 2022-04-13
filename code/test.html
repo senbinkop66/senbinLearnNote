@@ -9,10 +9,6 @@
         <script src="https://cdn.staticfile.org/echarts/5.3.2/echarts.min.js"></script>
         <script src="./jquery-3.6.0.js"></script>
 
-        <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
-        <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
-        <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
-
     </head>
 <style type="text/css">
 body {
@@ -26,9 +22,19 @@ body {
 
 <body>
 
-<div id="example"></div>
-<script type="text/script">
+<div class="trigger">Trigger</div>
+<div class="result"></div>
+<div class="log"></div>
+<script type="text/javascript">
+  //在document上绑定事件处理器：
+  $(document).ajaxComplete(function(){
+    $(".log").text("Triggered ajaxComplete handler.");
+  });
 
+  //现在，我们可以使用任何的jQuery方法构建一个Ajax请求：
+  $(".trigger").click(function(){
+    $(".result").load("ajax/test.html");
+  });
 
 
 </script>
