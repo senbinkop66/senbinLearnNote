@@ -1392,3 +1392,593 @@ $("#feeds").load("feeds.php", {limit: 25}, function(){
 
 # jQuery 选择器
 
+jQuery 选择器允许您对 HTML 元素组或单个元素进行操作。
+
+jQuery 选择器基于元素的 id、类、类型、属性、属性值等"查找"（或选择）HTML 元素。 它基于已经存在的 [CSS 选择器](https://www.axihe.com/api/css/res/css-selectors.html)，除此之外，它还有一些自定义的选择器。
+
+jQuery 中所有选择器都以美元符号开头：`$()` 。
+
+## 元素选择器
+
+jQuery 元素选择器基于元素名选取元素。
+
+在页面中选取所有 `<p>`元素:
+
+```js
+$("p")
+```
+
+用户点击按钮后，所有p元素都隐藏
+
+```js
+$(document).ready(function(){
+  $("button").click(function(){
+    $("p").hide();
+  });
+});
+```
+
+## #id 选择器
+
+jQuery #id 选择器通过 HTML 元素的 id 属性选取指定的元素。
+
+页面中元素的 id 应该是唯一的，所以您要在页面中选取唯一的元素需要通过 #id 选择器。
+
+通过 id 选取元素语法如下：
+
+```js
+$("#test")
+```
+
+当用户点击按钮后，有 id=“test” 属性的元素将被隐藏：
+
+```js
+$(document).ready(function(){
+  $("button").click(function(){
+    $("#test").hide();
+  });
+});
+```
+
+## .class 选择器
+
+jQuery 类选择器可以通过指定的 class 查找元素。
+
+语法如下：
+
+```js
+$(".test")
+```
+
+用户点击按钮后所有带有 class=“test” 属性的元素都隐藏：
+
+```js
+$(document).ready(function(){
+  $("button").click(function(){
+    $(".test").hide();
+  });
+});
+```
+
+##  属性选择器
+
+jQuery 使用 XPath 表达式来选择带有给定属性的元素。
+
+```js
+$("[href]") 选取所有带有 href 属性的元素。
+
+$("[href='#']") 选取所有带有 href 值等于 "#" 的元素。
+
+$("[href!='#']") 选取所有带有 href 值不等于 "#" 的元素。
+
+$("[href$='.jpg']") 选取所有 href 值以 ".jpg" 结尾的元素。
+```
+
+## CSS 选择器
+
+CSS 选择器可用于改变 HTML 元素的 CSS 属性。
+
+下面的例子把所有 p 元素的背景颜色更改为红色：
+
+```
+$("p").css("background-color","red");
+```
+
+## jQuery 选择器
+
+| 选择器                 | 实例                       | 选取                                       |
+| :--------------------- | :------------------------- | :----------------------------------------- |
+| *                      | $("*")                     | 所有元素                                   |
+| #*id*                  | $("#lastname")             | id="lastname" 的元素                       |
+| .*class*               | $(".intro")                | 所有 class="intro" 的元素                  |
+| *element*              | $("p")                     | 所有 <p> 元素                              |
+| .*class*.*class*       | $(".intro.demo")           | 所有 class="intro" 且 class="demo" 的元素  |
+|                        |                            |                                            |
+| :first                 | $("p:first")               | 第一个 <p> 元素                            |
+| :last                  | $("p:last")                | 最后一个 <p> 元素                          |
+| :even                  | $("tr:even")               | 所有偶数 <tr> 元素                         |
+| :odd                   | $("tr:odd")                | 所有奇数 <tr> 元素                         |
+|                        |                            |                                            |
+| :eq(*index*)           | $("ul li:eq(3)")           | 列表中的第四个元素（index 从 0 开始）      |
+| :gt(*no*)              | $("ul li:gt(3)")           | 列出 index 大于 3 的元素                   |
+| :lt(*no*)              | $("ul li:lt(3)")           | 列出 index 小于 3 的元素                   |
+| :not(*selector*)       | $("input:not(:empty)")     | 所有不为空的 input 元素                    |
+|                        |                            |                                            |
+| :header                | $(":header")               | 所有标题元素 <h1> - <h6>                   |
+| :animated              |                            | 所有动画元素                               |
+|                        |                            |                                            |
+| :contains(*text*)      | $(":contains('nowcoder')") | 包含指定字符串的所有元素                   |
+| :empty                 | $(":empty")                | 无子（元素）节点的所有元素                 |
+| :hidden                | $("p:hidden")              | 所有隐藏的 <p> 元素                        |
+| :visible               | $("table:visible")         | 所有可见的表格                             |
+|                        |                            |                                            |
+| s1,s2,s3               | $("th,td,.intro")          | 所有带有匹配选择的元素                     |
+|                        |                            |                                            |
+| [*attribute*]          | $("[href]")                | 所有带有 href 属性的元素                   |
+| [*attribute*=*value*]  | $("[href='#']")            | 所有 href 属性的值等于 "#" 的元素          |
+| [*attribute*!=*value*] | $("[href!='#']")           | 所有 href 属性的值不等于 "#" 的元素        |
+| [*attribute*$=*value*] | $("[href$='.jpg']")        | 所有 href 属性的值包含以 ".jpg" 结尾的元素 |
+|                        |                            |                                            |
+| :input                 | $(":input")                | 所有 <input> 元素                          |
+| :text                  | $(":text")                 | 所有 type="text" 的 <input> 元素           |
+| :password              | $(":password")             | 所有 type="password" 的 <input> 元素       |
+| :radio                 | $(":radio")                | 所有 type="radio" 的 <input> 元素          |
+| :checkbox              | $(":checkbox")             | 所有 type="checkbox" 的 <input> 元素       |
+| :submit                | $(":submit")               | 所有 type="submit" 的 <input> 元素         |
+| :reset                 | $(":reset")                | 所有 type="reset" 的 <input> 元素          |
+| :button                | $(":button")               | 所有 type="button" 的 <input> 元素         |
+| :image                 | $(":image")                | 所有 type="image" 的 <input> 元素          |
+| :file                  | $(":file")                 | 所有 type="file" 的 <input> 元素           |
+|                        |                            |                                            |
+| :enabled               | $(":enabled")              | 所有激活的 input 元素                      |
+| :disabled              | $(":disabled")             | 所有禁用的 input 元素                      |
+| :selected              | $(":selected")             | 所有被选取的 input 元素                    |
+| :checked               | $(":checked")              | 所有被选中的 input 元素                    |
+
+# jQuery 事件
+
+事件方法会触发匹配元素的事件，或将函数绑定到所有匹配元素的某个事件。
+
+## 什么是事件？
+
+页面对不同访问者的响应叫做事件。
+
+事件处理程序指的是当 HTML 中发生某些事件时所调用的方法。
+
+实例：
+
+- 在元素上移动鼠标。
+- 选取单选按钮
+- 点击元素
+
+在事件中经常使用术语"触发"（或"激发"）例如： “当您按下按键时触发 keypress 事件”。
+
+## jQuery 事件方法语法
+
+在 jQuery 中，大多数 DOM 事件都有一个等效的 jQuery 方法。
+
+页面中指定一个点击事件：
+
+```
+$("p").click();
+```
+
+下一步是定义什么时间触发事件。您可以通过一个事件函数实现：
+
+```
+$("p").click(function(){    // 动作触发后执行的代码!!});
+```
+
+| 方法                       | 描述                                                         |
+| :------------------------- | :----------------------------------------------------------- |
+| bind()                     | 向匹配元素附加一个或更多事件处理器                           |
+| blur()                     | 触发、或将函数绑定到指定元素的 blur 事件                     |
+| change()                   | 触发、或将函数绑定到指定元素的 change 事件                   |
+| click()                    | 触发、或将函数绑定到指定元素的 click 事件                    |
+| dblclick()                 | 触发、或将函数绑定到指定元素的 double click 事件             |
+| delegate()                 | 向匹配元素的当前或未来的子元素附加一个或多个事件处理器       |
+| die()                      | 移除所有通过 live() 函数添加的事件处理程序。                 |
+| error()                    | 触发、或将函数绑定到指定元素的 error 事件                    |
+| event.isDefaultPrevented() | 返回 event 对象上是否调用了 event.preventDefault()。         |
+| event.pageX                | 相对于文档左边缘的鼠标位置。                                 |
+| event.pageY                | 相对于文档上边缘的鼠标位置。                                 |
+| event.preventDefault()     | 阻止事件的默认动作。                                         |
+| event.result               | 包含由被指定事件触发的事件处理器返回的最后一个值。           |
+| event.target               | 触发该事件的 DOM 元素。                                      |
+| event.timeStamp            | 该属性返回从 1970 年 1 月 1 日到事件发生时的毫秒数。         |
+| event.type                 | 描述事件的类型。                                             |
+| event.which                | 指示按了哪个键或按钮。                                       |
+| focus()                    | 触发、或将函数绑定到指定元素的 focus 事件                    |
+| keydown()                  | 触发、或将函数绑定到指定元素的 key down 事件                 |
+| keypress()                 | 触发、或将函数绑定到指定元素的 key press 事件                |
+| keyup()                    | 触发、或将函数绑定到指定元素的 key up 事件                   |
+| live()                     | 为当前或未来的匹配元素添加一个或多个事件处理器               |
+| load()                     | 触发、或将函数绑定到指定元素的 load 事件                     |
+| mousedown()                | 触发、或将函数绑定到指定元素的 mouse down 事件               |
+| mouseenter()               | 触发、或将函数绑定到指定元素的 mouse enter 事件              |
+| mouseleave()               | 触发、或将函数绑定到指定元素的 mouse leave 事件              |
+| mousemove()                | 触发、或将函数绑定到指定元素的 mouse move 事件               |
+| mouseout()                 | 触发、或将函数绑定到指定元素的 mouse out 事件                |
+| mouseover()                | 触发、或将函数绑定到指定元素的 mouse over 事件               |
+| mouseup()                  | 触发、或将函数绑定到指定元素的 mouse up 事件                 |
+| one()                      | 向匹配元素添加事件处理器。每个元素只能触发一次该处理器。     |
+| ready()                    | 文档就绪事件（当 HTML 文档就绪可用时）                       |
+| resize()                   | 触发、或将函数绑定到指定元素的 resize 事件                   |
+| scroll()                   | 触发、或将函数绑定到指定元素的 scroll 事件                   |
+| select()                   | 触发、或将函数绑定到指定元素的 select 事件                   |
+| submit()                   | 触发、或将函数绑定到指定元素的 submit 事件                   |
+| toggle()                   | 绑定两个或多个事件处理器函数，当发生轮流的 click 事件时执行。 |
+| trigger()                  | 所有匹配元素的指定事件                                       |
+| triggerHandler()           | 第一个被匹配元素的指定事件                                   |
+| unbind()                   | 从匹配元素移除一个被添加的事件处理器                         |
+| undelegate()               | 从匹配元素移除一个被添加的事件处理器，现在或将来             |
+| unload()                   | 触发、或将函数绑定到指定元素的 unload 事件                   |
+
+
+
+# jQuery 效果 
+
+##  隐藏和显示
+
+### hide() 和 show()
+
+```js
+$(selector).hide(speed,callback);
+$(selector).show(speed,callback);
+```
+
+- 可选的 speed 参数规定隐藏/显示的速度，可以取以下值：“slow”、“fast” 或毫秒。
+- 可选的 callback 参数是隐藏或显示完成后所执行的函数名称。
+
+通过 jQuery，您可以使用 hide() 和 show() 方法来隐藏和显示 HTML 元素：
+
+```js
+$("#hide").click(function(){
+  $("p").hide();
+});
+ 
+$("#show").click(function(){
+  $("p").show();
+});
+```
+
+### toggle()
+
+通过 jQuery，您可以使用 toggle() 方法来切换 hide() 和 show() 方法。
+
+显示被隐藏的元素，并隐藏已显示的元素：
+
+```js
+$(selector).toggle(speed,callback);
+
+$("button").click(function(){
+  $("p").toggle();
+});
+```
+
+## 淡入淡出
+
+### fadeIn() 方法
+
+jQuery fadeIn() 用于淡入已隐藏的元素。
+
+```js
+$(selector).fadeIn(speed,callback);
+
+$("button").click(function(){
+  $("#div1").fadeIn();
+  $("#div2").fadeIn("slow");
+  $("#div3").fadeIn(3000);
+});
+```
+
+### fadeOut() 方法
+
+jQuery fadeOut() 方法用于淡出可见元素。
+
+```js
+$(selector).fadeOut(speed,callback);
+
+$("button").click(function(){
+  $("#div1").fadeOut();
+  $("#div2").fadeOut("slow");
+  $("#div3").fadeOut(3000);
+});
+```
+
+### fadeToggle() 方法
+
+jQuery fadeToggle() 方法可以在 fadeIn() 与 fadeOut() 方法之间进行切换。
+
+如果元素已淡出，则 fadeToggle() 会向元素添加淡入效果。
+
+如果元素已淡入，则 fadeToggle() 会向元素添加淡出效果。
+
+```js
+$(selector).fadeToggle(speed,callback);
+
+$("button").click(function(){
+  $("#div1").fadeToggle();
+  $("#div2").fadeToggle("slow");
+  $("#div3").fadeToggle(3000);
+});
+```
+
+### fadeTo() 方法
+
+jQuery fadeTo() 方法允许渐变为给定的不透明度（值介于 0 与 1 之间）。
+
+```
+$(selector).fadeTo(speed,opacity,callback);
+```
+
+**必需的 speed 参数规定效果的时长**。它可以取以下值：“slow”、“fast” 或毫秒。
+
+fadeTo() 方法中**必需的 opacity 参数将淡入淡出效果设置为给定的不透明度**（值介于 0 与 1 之间）。
+
+可选的 callback 参数是该函数完成后所执行的函数名称。
+
+```js
+$("button").click(function(){
+  $("#div1").fadeTo("slow",0.15);
+  $("#div2").fadeTo("slow",0.4);
+  $("#div3").fadeTo("slow",0.7);
+});
+```
+
+## 滑动
+
+### slideDown() 方法
+
+jQuery slideDown() 方法用于向下滑动元素。
+
+```js
+$(selector).slideDown(speed,callback);
+
+$("#flip").click(function(){
+  $("#panel").slideDown();
+});
+```
+
+### slideUp() 方法
+
+jQuery slideUp() 方法用于向上滑动元素。
+
+```js
+$(selector).slideUp(speed,callback);
+
+$("#flip").click(function(){
+  $("#panel").slideUp();
+});
+```
+
+### slideToggle() 方法
+
+jQuery slideToggle() 方法可以在 slideDown() 与 slideUp() 方法之间进行切换。
+
+如果元素向下滑动，则 slideToggle() 可向上滑动它们。
+
+如果元素向上滑动，则 slideToggle() 可向下滑动它们。
+
+```js
+$(selector).slideToggle(speed,callback);
+
+$("#flip").click(function(){
+  $("#panel").slideToggle();
+});
+```
+
+## 动画
+
+###  animate() 方法
+
+jQuery animate() 方法用于创建自定义动画。
+
+```
+$(selector).animate({params},speed,callback);
+```
+
+必需的 params 参数定义形成动画的 CSS 属性。
+
+可选的 speed 参数规定效果的时长。它可以取以下值：“slow”、“fast” 或毫秒。
+
+可选的 callback 参数是动画完成后所执行的函数名称。
+
+**元素往右边移动了 250 像素：**
+
+```js
+$("button").click(function(){
+  $("div").animate({left:'250px'});
+});
+```
+
+默认情况下，所有 HTML 元素都有一个静态位置，且无法移动。
+如需对位置进行操作，要记得首先把元素的 CSS position 属性设置为 relative、fixed 或 absolute！
+
+### 操作多个属性
+
+请注意，生成动画的过程中可同时使用多个属性：
+
+```js
+$("button").click(function(){
+  $("div").animate({
+    left:'250px',
+    opacity:'0.5',
+    height:'150px',
+    width:'150px'
+  });
+});
+```
+
+**可以用 animate() 方法来操作所有 CSS 属性吗？**
+
+是的，几乎可以！不过，需要记住一件重要的事情：当使用 animate() 时，必须使用 Camel 标记法书写所有的属性名，比如，必须使用 paddingLeft 而不是 padding-left，使用 marginRight 而不是 margin-right，等等。
+
+同时，色彩动画并不包含在核心 jQuery 库中。
+
+如果需要生成颜色动画，您需要从 jquery.com 下载 [颜色动画](http://plugins.jquery.com/color/) 插件。
+
+### 使用相对值
+
+也可以定义相对值（该值相对于元素的当前值）。需要在值的前面加上 += 或 -=：
+
+```js
+$("button").click(function(){
+  $("div").animate({
+    left:'250px',
+    height:'+=150px',
+    width:'+=150px'
+  });
+});
+```
+
+### 使用预定义的值
+
+您甚至可以把属性的动画值设置为 “show”、“hide” 或 “toggle”：
+
+```js
+$("button").click(function(){
+  $("div").animate({
+    height:'toggle'
+  });
+});
+```
+
+### 使用队列功能
+
+默认地，jQuery 提供针对动画的队列功能。
+
+这意味着如果您在彼此之后编写多个 animate() 调用，jQuery 会创建包含这些方法调用的"内部"队列。然后逐一运行这些 animate 调用。
+
+```js
+$("button").click(function(){
+  var div=$("div");
+  div.animate({height:'300px',opacity:'0.4'},"slow");
+  div.animate({width:'300px',opacity:'0.8'},"slow");
+  div.animate({height:'100px',opacity:'0.4'},"slow");
+  div.animate({width:'100px',opacity:'0.8'},"slow");
+});
+```
+
+下面的例子把 div 元素往右边移动了 100 像素，然后增加文本的字号：
+
+```js
+$("button").click(function(){
+  var div=$("div");
+  div.animate({left:'100px'},"slow");
+  div.animate({fontSize:'3em'},"slow");
+});
+```
+
+## 停止动画
+
+### stop() 方法
+
+jQuery stop() 方法用于停止动画或效果，在它们完成之前。
+
+stop() 方法适用于所有 jQuery 效果函数，包括滑动、淡入淡出和自定义动画。
+
+**语法:**
+
+```
+$(selector).stop(stopAll,goToEnd);
+```
+
+可选的 stopAll 参数规定是否应该清除动画队列。默认是 false，即仅停止活动的动画，允许任何排入队列的动画向后执行。
+
+可选的 goToEnd 参数规定是否立即完成当前动画。默认是 false。
+
+因此，默认地，stop() 会清除在被选元素上指定的当前动画。
+
+下面的例子演示 stop() 方法，不带参数：
+
+```js
+$("#stop").click(function(){
+  $("#panel").stop();
+});
+```
+
+## Callback 方法
+
+### Callback 方法
+
+Callback 函数在当前动画 100% 完成之后执行。
+
+### 动画的问题
+
+许多 jQuery 函数涉及动画。这些函数也许会将 *speed* 或 *duration* 作为可选参数。
+
+例子： `$("p").hide("slow")`
+
+*speed* 或 *duration* 参数可以设置许多不同的值，比如 “slow”, “fast”, “normal” 或毫秒。
+
+
+
+### 使用 callback 实例
+
+以下实例在隐藏效果完全实现后回调函数:
+
+```js
+$("button").click(function(){
+  $("p").hide("slow",function(){
+    alert("段落现在被隐藏了");
+  });
+});
+```
+
+
+
+### 没有 callback(回调)
+
+以下实例没有回调函数，警告框会在隐藏效果完成前弹出：
+
+```js
+$("button").click(function(){
+  $("p").hide(1000);
+  alert("段落现在被隐藏了");
+});
+```
+
+## 链式写法
+
+### 链式写法(Chaining)
+
+通过 jQuery，可以把动作/方法链接在一起。
+
+Chaining 允许我们在一条语句中运行多个 jQuery 方法（在相同的元素上）。
+
+到现在，我们都是一次写一条 jQuery 语句（一条接着另一条）。
+
+不过，有一种名为链接（chaining）的技术，允许我们在相同的元素上运行多条 jQuery 命令，一条接着另一条。
+
+**提示：** 这样的话，浏览器就不必多次查找相同的元素。
+
+如需链接一个动作，您只需简单地把该动作追加到之前的动作上。
+
+下面的例子把 css()、slideUp() 和 slideDown() 链接在一起。“p1” 元素首先会变为红色，然后向上滑动，再然后向下滑动：
+
+```js
+$("#p1").css("color","red").slideUp(2000).slideDown(2000);
+```
+
+如果需要，我们也可以添加多个方法调用。
+
+**提示：**当进行链接时，代码行会变得很长。不过，jQuery 语法不是很严格；您可以按照希望的格式来写，包含换行和缩进。
+
+如下书写也可以很好地运行：
+
+```js
+$("#p1").css("color","red")
+  .slideUp(2000)
+  .slideDown(2000);
+```
+
+jQuery 会抛掉多余的空格，并当成一行长代码来执行上面的代码行。
+
+------
+
+
+
+# jQuery HTML
+
+## 获取内容和属性

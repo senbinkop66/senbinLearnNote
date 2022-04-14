@@ -1,32 +1,19 @@
-var RandomizedSet = function() {
-    this.nums = [];
-    this.indices = new Map();
-};
-
-RandomizedSet.prototype.insert = function(val) {
-    if (this.indices.has(val)) {
-        return false;
+/**
+ * @param {number[][]} accounts
+ * @return {number}
+ */
+var maximumWealth = function(accounts) {
+    let ans=0;
+    for (let i=0;i<accounts.length;i++){
+        let sum=0;
+        accounts[i].forEach((item)=>{
+            sum+=item;
+        });
+        ans=sum>ans ? sum : ans;
     }
-    let index = this.nums.length;
-    this.nums.push(val);
-    this.indices.set(val, index);
-    return true;
+    return ans;
 };
 
-RandomizedSet.prototype.remove = function(val) {
-    if (!this.indices.has(val)) {
-        return false;
-    }
-    let id = this.indices.get(val);
-    this.nums[id] = this.nums[this.nums.length - 1];
-    this.indices.set(this.nums[id], id);
-    this.nums.pop();
-    this.indices.delete(val);
-    return true;
-};
-
-RandomizedSet.prototype.getRandom = function() {
-    const randomIndex = Math.floor(Math.random() * this.nums.length);
-    return this.nums[randomIndex];
-};
-
+let test= [[1,2,3],[3,2,1]];
+let result=maximumWealth(test);
+console.log(result);
