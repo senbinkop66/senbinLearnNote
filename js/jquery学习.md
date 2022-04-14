@@ -769,7 +769,7 @@ $.get('ajax/test.html', function(data) {
 });
 ```
 
-#### The jqXHR Object（jqXHR 对象）
+The jqXHR Object（jqXHR 对象）
 
 **从jQuery 1.5开始**，所有jQuery的Ajax方法都返回一个`XMLHTTPRequest`对象的超集。这个通过`$.get()`方法返回的jQuery XHR对象，或“jqXHR，”实现了 Promise 接口，使它拥有 Promise 的所有属性，方法和行为（见[Deferred object](https://www.jquery123.com/category/deferred-object/)获取更多信息）。`jqXHR.done()` (表示成功), `jqXHR.fail() (表示错误)`, 和 `jqXHR.always()` (表示完成, 无论是成功或错误) 方法接受一个函数参数，用来请求终止时被调用。关于这个函数接收参数的详细信息，请参阅 [jqXHR Object](https://www.jquery123.com/jQuery.ajax/#jqXHR) 文档中的 $.ajax() 章节。
 
@@ -838,4 +838,557 @@ $.get("test.php",
 ```
 
 ------
+
+### jQuery.getJSON()
+
+```js
+jQuery.getJSON( url [, data ] [, success(data, textStatus, jqXHR) ] )
+//描述: 使用一个HTTP GET请求从服务器加载JSON编码的数据。
+```
+
+这是一个Ajax函数的缩写，这相当于:
+
+```js
+$.ajax({
+  dataType: "json",
+  url: url,
+  data: data,
+  success: success
+});
+```
+
+数据会被附加到一个查询字符串的URL中，发送到服务器。如果该值的`data`参数是一个普通的对象，它会转换为一个字符串并使用URL编码，然后才追加到URL中。
+
+大多数情况下都会指定一个请求成功后的回调函数：
+
+```js
+$.getJSON('ajax/test.json', function(data) {
+  var items = [];
+ 
+  $.each(data, function(key, val) {
+    items.push('<li id="' + key + '">' + val + '</li>');
+  });
+ 
+  $('<ul/>', {
+    'class': 'my-new-list',
+    html: items.join('')
+  }).appendTo('body');
+});
+```
+
+这个例子，当然遵循JSON文件的结构：
+
+```json
+{
+  "one": "Singular sensation",
+  "two": "Beady little eyes",
+  "three": "Little birds pitch by my doorstep"
+}
+```
+
+使用这种结构，这个例子遍历请求的数据，建立了一个无序列表，并追加到body。
+
+在`success`回调中传入返回的数据，通常是一个JavaScript对象或数组所定义的JSON结构，使用[`$.parseJSON()`](https://www.jquery123.com/jQuery.parseJSON)方法解析。它（`success`回调）也传入了响应状态文本。
+
+**在jQuery 1.5，**，在`success`回调函数接收一个[“jqXHR”对象](https://www.jquery123.com/jQuery.get/#jqxhr-object) （ 在**jQuery 1.4**中 ，它收到的是`XMLHttpRequest`对象）。然而，由于JSONP形式和跨域的GET请求不使用XHR，在这些情况下， `jqXHR`和`textStatus`参数传递给success（成功）回调是 undefined 。
+
+> **重要提示：** 从jQuery 1.4开始，如果JSON文件包含一个语法错误，该请求通常会静静的失败。因此应该避免频繁手工编辑JSON数据。JSON语法规则比JavaScript对象字面量表示法更加严格。例如，所有在JSON中的字符串，无论是属性或值，必须用双引号括起来，更多JSON细节信息请参阅http://json.org/ 。
+
+JSONP
+
+如果URL包含字符串“callback=?”（或类似的参数，取决于服务器端 API 是如何定义的），这个请求被视为JSONP形式请求。更多`jsonp`数据类型的细节讨论，请参阅[`$.ajax()`](https://www.jquery123.com/jQuery.ajax/)。
+
+Promise 接口也允许jQuery的Ajax方法, 包括 `$.getJSON()`, 在一个单独的请求中关联到 `.success()`, `.complete()`, 和 `.error()` 回调函数， 甚至允许你在请求已经结束后，指派回调函数。如果该请求已经完成，则回调函数会被立刻调用。
+
+```js
+// Assign handlers immediately after making the request,
+// and remember the jqxhr object for this request
+var jqxhr = $.getJSON("example.json", function() {
+  alert("success");
+})
+.success(function() { alert("second success"); })
+.error(function() { alert("error"); })
+.complete(function() { alert("complete"); });
+ 
+// perform other work here ...
+ 
+// Set another completion function for the request above
+jqxhr.complete(function(){ alert("second complete"); });
+```
+
+*从 Flickr JSONP API中加载最近的四张标签为猫的图片：*
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <style>img{ height: 100px; float: left; }</style>
+  <script src="https://code.jquery.com/jquery-latest.js"></script>
+</head>
+<body>
+  <div id="images">
+ 
+</div>
+<script>
+$.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?",
+  {
+    tags: "mount rainier",
+    tagmode: "any",
+    format: "json"
+  },
+  function(data) {
+    $.each(data.items, function(i,item){
+      $("<img/>").attr("src", item.media.m).appendTo("#images");
+      if ( i == 3 ) return false;
+    });
+  });</script>
+ 
+</body>
+</html>
+```
+
+*通过test.js加载这个JSON数据，并使用返回的JSON数据中的 name值：*
+
+```js
+$.getJSON("test.js", function(json) {
+   alert("JSON Data: " + json.users[3].name);
+ });
+```
+
+*通过额外的Key/value参数从test.js加载这个JSON数据,并使用返回的JSON数据中的 name值：.*
+
+```js
+$.getJSON("test.js", { name: "John", time: "2pm" }, function(json) {
+    alert("JSON Data: " + json.users[3].name);
+    });
+```
+
+------
+
+### jQuery.getScript()
+
+```js
+jQuery.getScript( url [, success(script, textStatus, jqXHR) ] )
+//使用一个HTTP GET请求从服务器加载并执行一个 JavaScript 文件
+```
+
+这是一个Ajax函数的缩写，这相当于:
+
+```js
+$.ajax({
+  url: url,
+  dataType: "script",
+  success: success
+});
+```
+
+这个脚本在全局环境中执行，所以指向其他变量和运行jQuery函数。被加载的脚本同样作用于当前页面：
+
+Success Callback（成功回调）
+
+一旦脚本已经被加载，将触发回调  但不一定执行。
+
+```js
+$(".result").html("<p>Lorem ipsum dolor sit amet.</p>");
+```
+
+通过引用这个文件名，脚本被包含进来并执行：
+
+```js
+$.getScript("./ajax/test.js", function(data, textStatus, jqxhr) {
+   console.log(data); //data returned
+   console.log(textStatus); //success
+   console.log(jqxhr.status); //200
+   console.log('Load was performed.');
+});
+
+/*
+0
+VM123:2 1
+VM123:2 2
+VM123:2 3
+VM123:2 4
+test.html:31 for (let i=0;i<5;i++){
+	console.log(i);
+}
+test.html:32 success
+test.html:33 200
+test.html:34 Load was performed.
+*/
+```
+
+```js
+//test.js
+for (let i=0;i<5;i++){
+	console.log(i);
+}
+```
+
+Handling Errors（错误处理）
+
+从jQuery 1.5开始，你可以用[`.fail()`](https://www.jquery123.com/deferred.fail)来处理错误:
+
+```js
+$.getScript("ajax/test.js")
+.done(function(script, textStatus) {
+  console.log( textStatus );
+})
+.fail(function(jqxhr, settings, exception) {
+  $( "div.log" ).text( "Triggered ajaxError handler." );
+});
+```
+
+jQuery1.5之前，不得不使用全局的`.ajaxError()`回调事件来处理`$.getScript()`错误：
+
+```js
+$( "div.log" ).ajaxError(function(e, jqxhr, settings, exception) {
+  if (settings.dataType=='script') {
+    $(this).text( "Triggered ajaxError handler." );
+  }
+});
+```
+
+Caching Responses（缓存响应）
+
+默认情况下，`$.getScript()` cache选项被设置为 `false`。这将在请求的URL的查询字符串中追加一个时间戳参数，以确保每次浏览器下载的脚本被重新请求。您可以全局的使用 [`$.ajaxSetup()`](https://www.jquery123.com/jquery.ajaxsetup)设置cache(缓存)属性覆盖该功能：
+
+```js
+$.ajaxSetup({
+  cache: true
+});
+```
+
+*定义了一个 $.cachedScript() 方法可以获取缓存的脚本：*
+
+```js
+jQuery.cachedScript = function(url, options) {
+ 
+  // allow user to set any option except for dataType, cache, and url
+  options = $.extend(options || {}, {
+    dataType: "script",
+    cache: true,
+    url: url
+  });
+ 
+  // Use $.ajax() since it is more flexible than $.getScript
+  // Return the jqXHR object so we can chain callbacks
+  return jQuery.ajax(options);
+};
+ 
+// Usage
+$.cachedScript("ajax/test.js").done(function(script, textStatus) {
+  console.log( textStatus );
+});
+```
+
+*动态加载新的[官方jQuery 颜色动画插件](http://github.com/jquery/jquery-color)，一旦该插件加载完成就会触发一些颜色动画。*
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+.block {
+   background-color: blue;
+   width: 150px;
+   height: 70px;
+   margin: 10px;
+}</style>
+  <script src="https://code.jquery.com/jquery-latest.js"></script>
+</head>
+<body>
+ 
+<button id="go">&raquo; Run</button>
+ 
+<div class="block"></div>
+ 
+<script>
+(function() {
+  var url = "https://raw.github.com/jquery/jquery-color/master/jquery.color.js";
+  $.getScript(url, function() {
+    $("#go").click(function(){
+      $(".block")
+        .animate( { backgroundColor: "rgb(255, 180, 180)" }, 1000 )
+        .delay(500)
+        .animate( { backgroundColor: "olive" }, 1000 )
+        .delay(500)
+        .animate( { backgroundColor: "#00f" }, 1000 );
+    });
+  });
+})();
+</script>
+ 
+</body>
+</html>
+```
+
+------
+
+### jQuery.post()
+
+```js
+jQuery.post( url [, data ] [, success(data, textStatus, jqXHR) ] [, dataType ] )
+//描述: 使用一个HTTP POST 请求从服务器加载数据。
+```
+
+这是一个 Ajax 函数的简写形式，这相当于：
+
+```js
+$.ajax({
+  type: "POST",
+  url: url,
+  data: data,
+  success: success,
+  dataType: dataType
+});
+```
+
+`success`回调函数会传入返回的数据，是根据MIME类型的响应，它可能返回的数据类型包括XML根节点, 字符串, JavaScript 文件, 或者 JSON 对象。 同时还会传入描述响应状态的字符串。
+
+大多数实现将指定一个成功的处理函数：
+
+```js
+$.post('ajax/test.html', function(data) {
+  $('.result').html(data);
+});
+```
+
+这个例子所请求的全部HTML代码片段插入到页面中。
+
+用 `POST` 获取的页面是从来不会被缓存, 所以这些请求中的 `cache` 和 `ifModified` 选项在 `jQuery.ajaxSetup()` 是无效的。
+
+*请求 test.php 页面, 但是忽略返回结果*
+
+```js
+$.post("test.php");
+```
+
+*请求 test.php 页面 并且发送url参数(虽然仍然忽视返回的结果)。*
+
+```js
+$.post("test.php", { name: "John", time: "2pm" } );
+```
+
+*传递数组形式data参数给服务器 (虽然仍然忽视返回的结果)。*
+
+```js
+$.post("test.php", { 'choices[]': ["Jon", "Susan"] });
+```
+
+*使用Ajax请求发送表单数据。*
+
+```js
+$.post("test.php", $("#testform").serialize());
+```
+
+*Alert 从 test.php请求的数据结果 (HTML 或者 XML,取决于返回的结果)。*
+
+```js
+$.post("test.php", function(data) {
+  alert("Data Loaded: " + data);
+});
+```
+
+*Alert 从 test.cgi请求并且发送url参数的数据结果 (HTML 或者 XML,取决于返回的结果)。*
+
+```js
+$.post("test.php", { name: "John", time: "2pm" },
+  function(data) {
+    alert("Data Loaded: " + data);
+  });
+```
+
+*得到test.php的内容，存储在一个 XMLHttpResponse 对象中并且运用 process() JavaScript函数。*
+
+```js
+$.post("test.php", { name: "John", time: "2pm" },
+  function(data) {
+    process(data);
+  },
+ "xml"
+);
+```
+
+*Posts to the test.php page and gets contents which has been returned in json format (<?php echo json_encode(array("name"=>"John","time"=>"2pm")); ?>).*
+
+```js
+$.post("test.php", { "func": "getNameAndTime" },
+  function(data){
+    console.log(data.name); // John
+    console.log(data.time); //  2pm
+  }, "json");
+```
+
+*用ajax传递一个表单并把结果在一个div中*
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-latest.js"></script>
+</head>
+<body>
+  <form action="/" id="searchForm">
+   <input type="text" name="s" placeholder="Search..." />
+   <input type="submit" value="Search" />
+  </form>
+  <!-- the result of the search will be rendered inside this div -->
+  <div id="result"></div>
+ 
+<script>
+/* attach a submit handler to the form */
+$("#searchForm").submit(function(event) {
+ 
+  /* stop form from submitting normally */
+  event.preventDefault();
+ 
+  /* get some values from elements on the page: */
+  var $form = $( this ),
+      term = $form.find( 'input[name="s"]' ).val(),
+      url = $form.attr( 'action' );
+ 
+  /* Send the data using post and put the results in a div */
+  $.post( url, { s: term },
+    function( data ) {
+        var content = $( data ).find( '#content' );
+        $( "#result" ).empty().append( content );
+    }
+  );
+});
+</script>
+ 
+</body>
+</html>
+```
+
+------
+
+### .load()
+
+```js
+.load( url [, data ] [, complete(responseText, textStatus, XMLHttpRequest) ] )
+//描述: 从服务器载入数据并且将返回的 HTML 代码并插入至 匹配的元素 中。
+```
+
+> *注意: 事件处理函数中也有一个方法叫* `.load()`*。  jQuery根据传递给它的参数设置来确定使用哪个方法执行。*
+
+这个方法是从服务器获取数据最简单的方法。除了不是全局函数，这个方法和`$.get(url, data, success)` 基本相同，它有一个隐含的回调函数。 当他检查到一个成功的请求(i.e. 当 `textStatus`是 "success" 或者 "notmodified")时，`.load()` 方法将返回的HTML 内容数据设置到相匹配的节点中。这就意味着大多数采用这个方法可以很简单:
+
+```js
+$('#result').load('ajax/test.html');
+```
+
+如果选择器没有匹配的元素——在这种情况下，如果document不包含id = "result" 的元素- 这个Ajax请求将*不会*被发送出去。
+
+如果提供回调,都将在执行后进行后处理:
+
+如果提供了 "complete" 回调函数，它将在函数处理完之后，并且 HTML 已经被插入完时被调用。回调函数会在每个匹配的元素上被调用一次，并且 `this`始终指向当前正在处理的 DOM 元素。
+
+```js
+$('#result').load('ajax/test.html', function() {
+  alert('Load was performed.');
+});
+```
+
+Request Method（请求方法）
+
+默认使用 GET 方式 ， 如果data参数提供一个对象，那么使用 POST 方式。
+
+Loading Page Fragments（加载页面片段）
+
+`.load()` 方法, 不像 `$.get()`那样，允许我们使用在 `url` 中添加特定参数的特殊语法，来实现可以指定要插入哪一部分远程文档。如果 `url` 参数的字符串中包含一个或多个空格，那么第一个空格后面的内容，会被当成是 jQuery 的选择器，从而决定应该加载返回结果中的哪部分内容。（译者注：第一个空格后面是一个jQuery选择器，返回的内容中匹配该选择器的内容将被载人到页面中。）
+
+我们可以修改上述例子中,只有#container的一部分被载人到文件中：
+
+```js
+$('#result').load('ajax/test.html #container');
+```
+
+当这种方法执行, 它将检索 `ajax/test.html` 返回的页面内容，jQuery会获取ID为 `container` 元素的内容，并且插入到ID为 `result` 元素，而其他未被检索到的元素将被废弃。
+
+jQuery使用浏览器的`.innerHTML`属性去解析检索到的文档，并将其插入到当前文档中。在此过程中，浏览器通常会过滤文档中的一些元素 ，比如`<html>`, `<title>`, 或者 `<head>` 元素。其结果是，由`.load()`方法返回的元素与从浏览器中直接获取到的文档内容，可能是并不完全一样的。
+
+Script Execution（脚本执行）
+
+当使用URL参数中没有后面跟选择器表达式时， 那么传递给 `.html()` 的返回内容中，是含有脚本的。在它们被丢弃之前，脚本是会被执行的。但如果调用 `.load()`时，即使在 url 参数中添加了选择器表达式，但在 DOM 被更新之前，脚本会被删除。因此脚本*不*会被执行。下面的例子分别演示了这两种情况：
+
+任何加载到 `#a` 中的 JavaScript 脚本，将会作为文档的一部分而被执行。
+
+```js
+$('#a').load('article.html');
+```
+
+然而，在以下情况下，脚本块将从被加载到`#b`的document中被剥离出来，而不执行：
+
+```js
+$('#b').load('article.html #target');
+```
+
+> 由于浏览器的安全限制，大多数“Ajax”的要求，均采用[同源的政策](http://en.wikipedia.org/wiki/Same_origin_policy) ;该请求不能成功地检索来自不同的域，子域或协议的数据。
+
+*在一个有序列表中，加载主页的页脚导航。*
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+ body{ font-size: 12px; font-family: Arial; }
+ </style>
+  <script src="https://code.jquery.com/jquery-latest.js"></script>
+</head>
+<body>
+ 
+<b>Footer navigation:</b>
+<ol id="new-nav"></ol>
+ 
+<script>
+  $("#new-nav").load("/ #jq-footerNavigation li");
+</script>
+ 
+</body>
+</html>
+```
+
+*显示一个信息如果Ajax请求遭遇一个错误*
+
+```html
+<b>Successful Response (should be blank):</b>
+<div id="success"></div>
+<b>Error Response:</b>
+<div id="error"></div>
+ 
+<script>
+$("#success").load("/not-here.php", function(response, status, xhr) {
+  if (status == "error") {
+    var msg = "Sorry but there was an error: ";
+    $("#error").html(msg + xhr.status + " " + xhr.statusText);
+  }
+});
+  </script>
+```
+
+*将feeds.html 文件载人到 ID为feeds的DIV.*
+
+```js
+$("#feeds").load("feeds.html");
+```
+
+*发送数组形式的data参数到服务器。*
+
+```js
+$("#objectID").load("test.php", { 'choices[]': ["Jon", "Susan"] } );
+```
+
+与上面相同，但会将附加参数 POST 到服务器，并在服务器完成响应时执行回调。
+
+```js
+$("#feeds").load("feeds.php", {limit: 25}, function(){
+	alert("The last 25 entries in the feed have been loaded");
+});
+```
+
+
+
+# jQuery 选择器
 

@@ -3654,3 +3654,16 @@ var recursiveDecoded=decodeURIComponent($.param(myObject));
 console.log(recursiveEncoded);  //a%5Bone%5D=1&a%5Btwo%5D=2&a%5Bthree%5D=3&b%5B%5D=1&b%5B%5D=2&b%5B%5D=3
 console.log(recursiveDecoded);  //a[one]=1&a[two]=2&a[three]=3&b[]=1&b[]=2&b[]=3
 
+$.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?",
+  {
+    tags: "mount rainier",
+    tagmode: "any",
+    format: "json"
+  },
+  function(data) {
+    $.each(data.items, function(i,item){
+      $("<img/>").attr("src", item.media.m).appendTo("#images");
+      if ( i == 3 ) return false;
+    });
+  });
+
