@@ -742,3 +742,535 @@ console.log(str2.replace(reg2,"X"));  // baz foo aX
 
 ```
 
+#### \cX
+
+**当X是处于A到Z之间的字符的时候，匹配字符串中的一个控制符**。
+
+例如，`/\cM/` 匹配字符串中的 control-M (U+000D)。
+
+```js
+let reg1=/\cM/g;
+
+let reg2=new RegExp("\\cM","g");
+
+let str1="baz\u000Dfoo";
+let str2=" baz foo\u000D";
+
+console.log(str1.match(reg1));  //[ '\r' ]
+console.log(str2.replace(reg2,"X"));  // baz fooX
+
+```
+
+#### \d
+
+**匹配一个数字**`。``等价于[0-9]`。
+
+例如， `/\d/` 或者 `/[0-9]/` 匹配"B2 is the suite number."中的'2'。
+
+```js
+let reg1=/\d/g;
+
+let reg2=new RegExp("\\d","g");
+
+let str1="12baz234foo";
+let str2=" 43baz4 5foo44";
+
+console.log(str1.match(reg1));  //[ '1', '2', '2', '3', '4' ]
+console.log(str2.replace(reg2,"X"));  // XXbazX XfooXX
+
+```
+
+#### \D
+
+**匹配一个非数字字符**`。``等价于[^0-9]`。
+
+例如， `/\D/` 或者 `/[^0-9]/` 匹配"B2 is the suite number."中的'B' 。
+
+```js
+let reg1=/\D/g;
+
+let reg2=new RegExp("\\D","g");
+
+let str1="12baz234foo";
+let str2=" 43baz4 5foo44";
+
+console.log(str1.match(reg1));  //[ 'b', 'a', 'z', 'f', 'o', 'o' ]
+console.log(str2.replace(reg2,"X"));  //X43XXX4X5XXX44
+
+```
+
+#### \f
+
+匹配一个换页符 (U+000C)。
+
+#### \n
+
+匹配一个换行符 (U+000A)。
+
+\r
+
+匹配一个回车符 (U+000D)。
+
+```js
+let reg1=/[\r\n\f]/g;
+
+let reg2=new RegExp("[\\r\\n\\f]","g");
+
+let str1="abc \u000a def \u000c ghi \u000d";
+let str2="";
+
+console.log(str1.match(reg1));  //[ '\n', '\f', '\r' ]
+console.log(str1.replace(reg2,"X"));  //abc X def X ghi X
+
+```
+
+#### \s
+
+**匹配一个空白字符**，包括空格、制表符、换页符和换行符。等价于[ \f\n\r\t\v\u00a0\u1680\u180e\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]。
+
+例如, `/\s\w*/` 匹配"foo bar."中的' bar'。
+
+经测试，\s不匹配"[\u180e](https://unicode-table.com/cn/180E/)"，在当前版本Chrome(v80.0.3987.122)和Firefox(76.0.1)控制台输入/\s/.test("\u180e")均返回false。
+
+```js
+let reg1=/\s/g;
+
+let reg2=new RegExp("\\s","g");
+
+let str1="abc\u000adef\u000cghi\u000d ";
+let str2="";
+
+console.log(str1.match(reg1));  //[ '\n', '\f', '\r',
+console.log(str1.replace(reg2,"X"));  //abcXdefXghiXX
+
+```
+
+#### \S
+
+ **匹配一个非空白字符**。等价于 `[^ `\f\n\r\t\v\u00a0\u1680\u180e\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff`]`。例如，`/\S\w*/` 匹配"foo bar."中的'foo'。
+
+```js
+let reg1=/\S/g;
+
+let reg2=new RegExp("\\S","g");
+
+let str1="a\u000a\u000c\u000db ";
+let str2="";
+
+console.log(str1.match(reg1));  //[ 'a', 'b' ]
+console.log(str1.replace(reg2,"X"));  //XX 
+
+```
+
+#### \t
+
+匹配一个水平制表符 (U+0009)。
+
+#### \v
+
+匹配一个垂直制表符 (U+000B)。
+
+#### \w
+
+**匹配一个单字字符**（字母、数字或者下划线）。等价于 `[A-Za-z0-9_]`。
+
+例如, `/\w/` 匹配 "apple," 中的 'a'，"$5.28,"中的 '5' 和 "3D." 中的 '3'。
+
+#### \W
+
+**匹配一个非单字字符**。等价于 `[^A-Za-z0-9_]`。
+
+例如, `/\W/` 或者 `/[^A-Za-z0-9_]/` 匹配 "50%." 中的 '%'。
+
+```js
+let reg1=/\w/g;
+
+let reg2=new RegExp("\\W","g");
+
+let str1="a_b.* ";
+let str2="";
+
+console.log(str1.match(reg1));  //[ 'a', '_', 'b' ]
+console.log(str1.replace(reg2,"X"));  //a_bXXX
+
+```
+
+#### \n
+
+在正则表达式中，它返回最后的第n个子捕获匹配的子字符串(捕获的数目以左括号计数)。
+
+比如 `/apple(,)\sorange\1/` 匹配"apple, orange, cherry, peach."中的'apple, orange,' 。
+
+```js
+let reg1=/apple(,)\sorange\1/g;
+
+let reg2=new RegExp("apple(,)\\sorange\\1","g");
+
+let str1="apple, orange, cherry, peach.";
+let str2="";
+
+console.log(str1.match(reg1));  //[ 'apple, orange,' ]
+console.log(str1.replace(reg2,"X"));  //X cherry, peach.
+
+```
+
+#### \0
+
+匹配 NULL（U+0000）字符， 不要在这后面跟其它小数，因为 `\0<digits>` 是一个八进制转义序列。
+
+```js
+let reg1=/\0/g;
+
+let reg2=new RegExp("\\0","g");
+
+let str1="abc\u0000abc";
+let str2="";
+
+console.log(str1.match(reg1));  //[ '\x00' ]
+console.log(str1.replace(reg2,"X"));  //abcXabc
+
+```
+
+#### \xhh
+
+匹配一个两位十六进制数（\x00-\xFF）表示的字符。
+
+#### \uhhhh
+
+匹配一个四位十六进制数表示的 UTF-16 代码单元。
+
+#### \u{hhhh}或\u{hhhhh}
+
+（仅当设置了u标志时）匹配一个十六进制数表示的 Unicode 字符。
+
+```js
+let reg1=/\xhh/g;
+
+let reg2=new RegExp("\\uhhhh","g");
+
+let str1="abc\xaa \ufd12 abc";
+let str2="";
+
+console.log(str1.match(reg1));  //null
+console.log(str1.replace(reg2,"X"));  //abcª ﴒ abc
+
+```
+
+
+
+### [Escaping](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#escaping)
+
+如果你需要使用任何特殊字符的字面值（例如，搜索字符'*'），**你必须通过在它前面放一个反斜杠来转义它**。 例如，要搜索'a'后跟'*'后跟'b'，你应该使用`/a\*b/`- 反斜杠“转义”字符'*'，使其成为文字而非特殊符号。
+
+类似地，如果您正在编写正则表达式文字并且需要匹配斜杠（'/'），那么需要转义它（否则，斜杠是正则终止符）。 例如，要搜索字符串“/ example /”后跟一个或多个字母字符，您需要使用`/\/example\/[a-z]+/i`——**每个斜杠之前使用反斜杠使它们成为普通字符**。
+
+**要匹配文本符号反斜杠，您需要转义反斜杠**。 例如，要匹配字符串“C:\”，其中“C”可以是任何字母，您将使用`/[A-Z]:\\/` —— 第一个反斜杠转义后面的那个反斜杠，因此表达式搜索单个普通字符反斜杠。
+
+如果将RegExp构造函数与字符串文字一起使用，请记住反斜杠是字符串文字中的转义，因此要在正则表达式中使用它，**您需要在字符串文字级别转义它**。 `/a\*b/` 和`new RegExp("a\\*b")`创建的表达式是相同的，搜索“a”后跟文字“*”后跟“b”。
+
+将用户输入转义为正则表达式中的一个字面字符串, 可以通过简单的替换来实现：
+
+```js
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  //$&表示整个被匹配的字符串
+}
+```
+
+正则表达式后的"g"是一个表示全局搜索选项或标记，将在整个字符串查找并返回所有匹配结果。这将在下面的[通过标志进行高级搜索](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#通过标志进行高级搜索)详述。
+
+为什么这个没有内建在JavaScript中？之前有计划在RegExp对象中添加一个Function，但在[TC39](https://github.com/benjamingr/RegExp.escape/issues/37)中被否决了。
+
+### [使用插入语](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#使用插入语)
+
+任何正则表达式的插入语都会使这部分匹配的副字符串被记忆。一旦被记忆，这个副字符串就可以被调用于其它用途，如同 [使用括号的子字符串匹配](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#使用括号的子字符串匹配)之中所述。
+
+比如， `/Chapter (\d+)\.\d*/` 解释了额外转义的和特殊的字符，并说明了这部分pattern应该被记忆。它精确地匹配后面跟着一个以上数字字符的字符 'Chapter ' (`\d` 意为任何数字字符，`+ 意为1次以上`)，跟着一个小数点（在这个字符中本身也是一个特殊字符；小数点前的 \ 意味着这个pattern必须寻找字面字符 '.')，跟着任何数字字符0次以上。 (`\d` 意为数字字符， `*` 意为0次以上)。另外，**插入语也用来记忆第一个匹配的数字字符。**
+
+此模式可以匹配字符串"Open Chapter 4.3, paragraph 6"，**并且'4'将会被记住**。此模式并不能匹配"Chapter 3 and 4"，因为在这个字符串中'3'的后面没有点号'.'。
+
+**括号中的"?:"，这种模式匹配的子字符串将不会被记住**。比如，(?:\d+)匹配一次或多次数字字符，但是不能记住匹配的字符。
+
+## [使用正则表达式](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#使用正则表达式)
+
+正则表达式可以被用于 `RegExp` 的 [`exec`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec) 和 [test (en-US)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test) 方法以及 [`String`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String) 的 [match (en-US)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/match)、[`replace`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String/replace)、[search (en-US)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/search) 和 [split (en-US)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/split) 方法。这些方法在 [JavaScript 手册](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference)中有详细的解释。
+
+| 方法                                                         | 描述                                                         |
+| :----------------------------------------------------------- | :----------------------------------------------------------- |
+| [`exec`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec) | 一个在字符串中执行查找匹配的RegExp方法，它返回一个数组（未匹配到则返回 null）。 |
+| [`test`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test) | 一个在字符串中测试是否匹配的RegExp方法，它返回 true 或 false。 |
+| [`match`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String/match) | 一个在字符串中执行查找匹配的String方法，它返回一个数组，在未匹配到时会返回 null。 |
+| [`matchAll`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String/matchAll) | 一个在字符串中执行查找所有匹配的String方法，它返回一个迭代器（iterator）。 |
+| [`search`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String/search) | 一个在字符串中测试匹配的String方法，它返回匹配到的位置索引，或者在失败时返回-1。 |
+| [`replace`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String/replace) | 一个在字符串中执行查找匹配的String方法，并且使用替换字符串替换掉匹配到的子字符串。 |
+| [`split`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String/split) | 一个使用正则表达式或者一个固定字符串分隔一个字符串，并将分隔后的子字符串存储到数组中的 `String` 方法。 |
+
+当你想要知道在一个字符串中的一个匹配是否被找到，你可以使用 test 或 search 方法；想得到更多的信息（但是比较慢）则可以使用 exec 或 match 方法。如果你使用exec 或 match 方法并且匹配成功了，那么这些方法将返回一个数组并且更新相关的正则表达式对象的属性和预定义的正则表达式对象（详见下）。如果匹配失败，那么 exec 方法返回 null（也就是false）。
+
+在接下来的例子中，脚本将使用exec方法在一个字符串中查找一个匹配。
+
+```js
+var myRe = /d(b+)d/g;
+var myArray = myRe.exec("cdbbdbsbz");
+```
+
+如果你不需要访问正则表达式的属性，这个脚本通过另一个方法来创建myArray：
+
+```js
+var myArray = /d(b+)d/g.exec("cdbbdbsbz");
+// 和 "cdbbdbsbz".match(/d(b+)d/g); 相似。
+// 但是 "cdbbdbsbz".match(/d(b+)d/g) 输出数组 [ "dbbd" ]，
+// 而 /d(b+)d/g.exec('cdbbdbsbz') 输出数组 [ "dbbd", "bb", index: 1, input: "cdbbdbsbz" ].
+```
+
+如果你想通过一个字符串构建正则表达式，那么这个脚本还有另一种方法：
+
+```js
+var myRe = new RegExp("d(b+)d", "g");
+var myArray = myRe.exec("cdbbdbsbz");
+```
+
+通过这些脚本，匹配成功后将返回一个数组并且更新正则表达式的属性，如下表所示。
+
+```js
+let reg1=/\d/g;
+
+let str1="1a2b3c";
+
+console.log(reg1.exec(str1));  //[ '1', index: 0, input: '1a2b3c', groups: undefined ]
+console.log(reg1.test(str1));  //true
+
+console.log(str1.match(reg1));  //[ '1', '2', '3' ]
+console.log(str1.matchAll(reg1));  //Object [RegExp String Iterator] {}
+
+console.log(str1.search(reg1));  //0
+console.log(str1.split(reg1));  //[ '', 'a', 'b', 'c' ]
+console.log(str1.replace(reg1,"X"));  //XaXbXc
+console.log(reg1.lastIndex);  //0
+```
+
+正则表达式执行后的返回信息
+
+| 对象      | 属性或索引                                     | 描述                                                         | 在例子中对应的值 |
+| :-------- | :--------------------------------------------- | :----------------------------------------------------------- | :--------------- |
+| `myArray` |                                                | 匹配到的字符串和所有被记住的子字符串。                       | `["dbbd", "bb"]` |
+| `index`   | 在输入的字符串中匹配到的以0开始的索引值。      | `1`                                                          |                  |
+| `input`   | 初始字符串。                                   | `"cdbbdbsbz"`                                                |                  |
+| `[0]`     | 最近一个匹配到的字符串。                       | `"dbbd"`                                                     |                  |
+| `myRe`    | `lastIndex`                                    | 开始下一个匹配的起始索引值。（这个属性只有在使用g参数时可用在 [通过参数进行高级搜索](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#.E9.80.9A.E8.BF.87.E5.8F.82.E6.95.B0.E8.BF.9B.E8.A1.8C.E9.AB.98.E7.BA.A7.E6.90.9C.E7.B4.A2) 一节有详细的描述.) | `5`              |
+| `source`  | 模式字面文本。在正则表达式创建时更新，不执行。 | `"d(b+)d"`                                                   |                  |
+
+如这个例子中的第二种形式所示，你可以使用对象初始器创建一个正则表达式实例，但不分配给变量。如果你这样做，那么，每一次使用时都会创建一个新的正则表达式实例。因此，如果你不把正则表达式实例分配给一个变量，你以后将不能访问这个正则表达式实例的属性。例如，假如你有如下脚本：
+
+```js
+var myRe = /d(b+)d/g;
+var myArray = myRe.exec("cdbbdbsbz");
+console.log("The value of lastIndex is " + myRe.lastIndex);
+```
+
+这个脚本输出如下：
+
+```js
+The value of lastIndex is 5
+```
+
+然而，如果你有如下脚本：
+
+```js
+var myArray = /d(b+)d/g.exec("cdbbdbsbz");
+console.log("The value of lastIndex is " + /d(b+)d/g.lastIndex);
+```
+
+它显示为：
+
+```js
+The value of lastIndex is 0
+```
+
+当发生/d(b+)d/g使用两个不同状态的正则表达式对象，lastIndex属性会得到不同的值。**如果你需要访问一个正则表达式的属性，则需要创建一个对象初始化生成器，你应该首先把它赋值给一个变量。**
+
+### [使用括号的子字符串匹配](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#使用括号的子字符串匹配_2)
+
+一个正则表达式模式使用括号，将导致相应的子匹配被记住。例如，/a(b)c /可以匹配字符串“abc”，并且记得“b”。回调这些括号中匹配的子串，使用数组元素[1],……[n]。
+
+**使用括号匹配的子字符串的数量是无限的**。返回的数组中保存所有被发现的子匹配。下面的例子说明了如何使用括号的子字符串匹配。
+
+下面的脚本使用replace()方法来转换字符串中的单词。在匹配到的替换文本中，脚本使用替代的$ 1,$ 2表示第一个和第二个括号的子字符串匹配。
+
+```js
+var re = /(\w+)\s(\w+)/;
+var str = "John Smith";
+var newstr = str.replace(re, "$2, $1");
+console.log(newstr);
+```
+
+这个表达式输出 "Smith, John"。
+
+### [通过标志进行高级搜索](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#通过标志进行高级搜索)
+
+正则表达式有六个可选参数 (`flags`) 允许全局和不分大小写搜索等。这些参数既可以单独使用也能以任意顺序一起使用, 并且被包含在正则表达式实例中。
+
+| 标志 | 描述                                                      |
+| :--- | :-------------------------------------------------------- |
+| `g`  | 全局搜索。                                                |
+| `i`  | 不区分大小写搜索。                                        |
+| `m`  | 多行搜索。                                                |
+| `s`  | 允许 `.` 匹配换行符。                                     |
+| `u`  | 使用unicode码的模式进行匹配。                             |
+| `y`  | 执行“粘性(`sticky`)”搜索,匹配从目标字符串的当前位置开始。 |
+
+为了在正则表达式中包含标志，请使用以下语法：
+
+```js
+var re = /pattern/flags;
+```
+
+或者
+
+```js
+var re = new RegExp("pattern", "flags");
+```
+
+值得注意的是，**标志是一个正则表达式的一部分**，它们**在接下来的时间将不能添加或删除**。
+
+例如，re = /\w+\s/g 将创建一个查找一个或多个字符后有一个空格的正则表达式，或者组合起来像此要求的字符串。
+
+```js
+var re = /\w+\s/g;
+var str = "fee fi fo fum";
+var myArray = str.match(re);
+console.log(myArray);
+
+// ["fee ", "fi ", "fo "]
+```
+
+这段代码将输出 ["fee ", "fi ", "fo "]。在这个例子中，你可以将：
+
+```js
+var re = /\w+\s/g;
+```
+
+替换成：
+
+```js
+var re = new RegExp("\\w+\\s", "g");
+```
+
+并且能获取到相同的结果。
+
+使用`.exec()`方法时，与'`g`'标志关联的行为是不同的。 （“class”和“argument”的作用相反：在`.match()`的情况下，字符串类（或数据类型）拥有该方法**，而正则表达式只是一个参数，而在`.exec()`的情况下，它是拥有该方法的正则表达式，其中字符串是参数**。对比*`str.match(re)`*与*`re.exec(str)`* ), '`g`'标志与`.exec()`方法一起使用获得迭代进展。
+
+```js
+var xArray; 
+while(xArray = re.exec(str)) console.log(xArray);
+// produces:
+// ["fee ", index: 0, input: "fee fi fo fum"]
+// ["fi ", index: 4, input: "fee fi fo fum"]
+// ["fo ", index: 7, input: "fee fi fo fum"]
+```
+
+m标志用于指定多行输入字符串应该被视为多个行。**如果使用m标志，^和$匹配的开始或结束输入字符串中的每一行，而不是整个字符串的开始或结束。**
+
+
+
+## [例子](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#例子)
+
+以下例子说明了一些正则表达式的用途。
+
+### [改变输入字符串的顺序](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#改变输入字符串的顺序)
+
+以下例子解释了正则表达式的构成和 `string.split()` 以及 `string.replace()`的用途。它会整理一个只有粗略格式的含有全名（名字首先出现）的输入字符串，这个字符串被空格、换行符和一个分号分隔。最终，它会颠倒名字顺序（姓氏首先出现）和list的类型。
+
+```js
+// 下面这个姓名字符串包含了多个空格和制表符，
+// 且在姓和名之间可能有多个空格和制表符。
+var names = "Orange Trump ;Fred Barney; Helen Rigby ; Bill Abel ; Chris Hand ";
+
+var output = ["---------- Original String\n", names + "\n"];
+
+// 准备两个模式的正则表达式放进数组里。
+// 分割该字符串放进数组里。
+
+// 匹配模式：匹配一个分号及紧接其前后所有可能出现的连续的不可见符号。
+var pattern = /\s*;\s*/;
+
+// 把通过上述匹配模式分割的字符串放进一个叫做nameList的数组里面。
+var nameList = names.split(pattern);
+
+// 新建一个匹配模式：匹配一个或多个连续的不可见字符及其前后紧接着由
+// 一个或多个连续的基本拉丁字母表中的字母、数字和下划线组成的字符串
+// 用一对圆括号来捕获该模式中的一部分匹配结果。
+// 捕获的结果稍后会用到。
+pattern = /(\w+)\s+(\w+)/;
+
+// 新建一个数组 bySurnameList 用来临时存放正在处理的名字。
+var bySurnameList = [];
+
+// 输出 nameList 的元素并且把 nameList 里的名字
+// 用逗号接空格的模式把姓和名分割开来然后存放进数组 bySurnameList 中。
+//
+// 下面的这个替换方法把 nameList 里的元素用 $2, $1 的模式
+// （第二个捕获的匹配结果紧接着一个逗号一个空格然后紧接着第一个捕获的匹配结果）替换了
+// 变量 $1 和变量 $2 是上面所捕获的匹配结果。
+
+output.push("---------- After Split by Regular Expression");
+
+var i, len;
+for (i = 0, len = nameList.length; i < len; i++) {
+  output.push(nameList[i]);
+  bySurnameList[i] = nameList[i].replace(pattern, "$2, $1");
+}
+
+// 输出新的数组
+output.push("---------- Names Reversed");
+for (i = 0, len = bySurnameList.length; i < len; i++){
+  output.push(bySurnameList[i]);
+}
+
+// 根据姓来排序，然后输出排序后的数组。
+bySurnameList.sort();
+output.push("---------- Sorted");
+for (i = 0, len = bySurnameList.length; i < len; i++){
+  output.push(bySurnameList[i]);
+}
+
+output.push("---------- End");
+
+console.log(output.join("\n"));
+```
+
+### [用特殊字符检验输入](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#用特殊字符检验输入)
+
+在以下例子中，我们期望用户输入一个电话号码。当用户点击“Check”按钮，我们的脚本开始检查这些数字是否合法。如果数字合法（匹配正则表达式所规定的字符序列），脚本显示一条感谢用户的信息并确认该数字。如果这串数字不合法，脚本提示用户电话号码不合法。.
+
+包含非捕获括号 `(?:` 这个正则表达式寻找三个数字字符`\d{3}` 或者 `|` 一个左半括号`\(`跟着三位数字`\d{3}`, 跟着一个封闭括号 `\)`, (结束非捕获括号 `)`)， 后跟着一个短破折号或正斜杠或小数点，随后跟随三个数字字符，当记忆字符 `([-\/\.])捕获并记住，后面跟着三位小数` `\d{3}，再后面跟随记住的破折号、正斜杠或小数点` `\1，最后跟着四位小数` `\d{4}。`
+
+当用户按下 Enter 设置 RegExp.input，这些变化也能被激活。
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <meta http-equiv="Content-Script-Type" content="text/javascript">
+    <script type="text/javascript">
+      var re = /(?:\d{3}|\(\d{3}\))([-\/\.])\d{3}\1\d{4}/;
+      function testInfo(phoneInput) {
+        var OK = re.exec(phoneInput.value);
+        if (!OK)
+          window.alert(phoneInput.value + ' isn\'t a phone number with area code!');
+        else
+          window.alert('Thanks, your phone number is ' + OK[0]);
+      }
+    </script>
+  </head>
+  <body>
+    <p>Enter your phone number (with area code) and then click "Check".
+        <br>The expected format is like ###-###-####.</p>
+    <form action="#">
+      <input id="phone"><button onclick="testInfo(document.getElementById('phone'));">Check</button>
+    </form>
+  </body>
+</html>
+```
+
