@@ -1,15 +1,27 @@
-let reg1=/\d/g;
+/**
+ * @param {string} paragraph
+ * @param {string[]} banned
+ * @return {string}
+ */
+var mostCommonWord = function(paragraph, banned) {
+    paragraph=paragraph.replace(/[!?',;.]/g," ");
+    paragraph=paragraph.toLowerCase().split(" ");
+    let m=new Map();
+    let max=0;
+    let ans="";
+    for (let word of paragraph){
+        if (word!=="" && banned.indexOf(word)===-1) {
+            m.set(word,m.has(word) ? m.get(word)+1 : 1);
+            if (m.get(word)>max){
+                max=m.get(word);
+                ans=word;
+            }
+        }
+    }
+    return ans;
+};
 
-let str1="1a2b3c";
-
-console.log(reg1.exec(str1));  //[ '1', index: 0, input: '1a2b3c', groups: undefined ]
-console.log(reg1.test(str1));  //true
-
-console.log(str1.match(reg1));  //[ '1', '2', '3' ]
-console.log(str1.matchAll(reg1));  //Object [RegExp String Iterator] {}
-
-console.log(str1.search(reg1));  //0
-console.log(str1.split(reg1));  //[ '', 'a', 'b', 'c' ]
-console.log(str1.replace(reg1,"X"));  //XaXbXc
-
-console.log(reg1.lastIndex);
+let paragraph = "Bob hit a ball, the hit BALL flew far after it was hit.";
+let banned = ["hit"]
+let result=mostCommonWord(paragraph,banned);
+console.log(result);
