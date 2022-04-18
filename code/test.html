@@ -21,20 +21,39 @@ body {
 </style>
 
 <body>
+<button id="btn">Make a promise!</button>
+<div id="log"></div>
 
-<div class="trigger">Trigger</div>
-<div class="result"></div>
-<div class="log"></div>
 <script type="text/javascript">
-  //在document上绑定事件处理器：
-  $(document).ajaxComplete(function(){
-    $(".log").text("Triggered ajaxComplete handler.");
-  });
+  "use strict";
+  var promiseCount=0;
+  function testPromise(){
+    let thisPromiseCount=++promiseCount;
+    let log=document.getElementById("log");
+    log.insertAdjacentHTML("beforeend",thisPromiseCount+") 开始 (<small>同步代码开始</small>)<br/>");
+    let p1=new Promise((resolve,reject)=>{
+      log.insertAdjacentHTML("beforeend",thisPromiseCount+") Promise 开始 (<small>异步代码开始</small>)<br/>");
+      window.setTimeout(function(){
+        resolve(thisPromiseCount);
+      },Math.random()*2000+1000);
+    });
 
-  //现在，我们可以使用任何的jQuery方法构建一个Ajax请求：
-  $(".trigger").click(function(){
-    $(".result").load("ajax/test.html");
-  });
+    p1.then(function(val){
+      log.insertAdjacentHTML("beforeend",val+") Promise 已填充完毕 (<small>异步代码结束</small>)<br/>");
+    }).catch((reason)=>{
+      console.log("处理失败的 promise ("+reason+")");
+    });
+
+    log.insertAdjacentHTML("beforeend",thisPromiseCount+") Promise made (<small>同步代码结束</small><br/>");
+  }
+
+  if ("Promise" in window) {
+    let btn=document.getElementById("btn");
+    btn.addEventListener("click",testPromise);
+  }else{
+    log=document.getElementById("log");
+    log.innerHTML="Live example not available as your browser doesn't support the <code>Promise</code> interface.";
+  }
 
 
 </script>

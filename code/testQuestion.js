@@ -1,12 +1,6 @@
-const Employee = {
-  firstname: 'John',
-  lastname: 'Doe'
-};
-
-console.log(Employee.firstname);
-// expected output: "John"
-
-delete Employee.firstname;
-
-console.log(Employee.firstname);
-// expected output: undefined
+new Promise((resolve, reject) => {
+  console.log('new Promise')
+  resolve('success')
+})
+console.log('end')
+// new Promise => end

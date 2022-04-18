@@ -540,3 +540,693 @@ window.onload = function(){
 #### 限制: 那些无法从根对象查询到的对象都将被清除
 
 尽管这是一个限制，但实践中我们很少会碰到类似的情况，所以开发者不太会去关心垃圾回收机制。
+
+
+
+# Promise
+
+
+
+**Promise** 对象用于表示一个异步操作的最终完成 (或失败)及其结果值。
+
+## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise#描述)
+
+一个 `Promise` 对象代表一个在这个 promise 被创建出来时不一定已知的值。它让您能够把异步操作最终的成功返回值或者失败原因和相应的处理程序关联起来。 这样使得异步方法可以像同步方法那样返回值：**异步方法并不会立即返回最终的值，而是会返回一个 *promise***，以便在未来某个时候把值交给使用者。
+
+一个 `Promise` 必然处于以下几种状态之一：
+
+- *待定（pending）*: 初始状态，既没有被兑现，也没有被拒绝。
+- *已兑现（fulfilled）*: 意味着操作成功完成。
+- *已拒绝（rejected）*: 意味着操作失败。
+
+待定状态的 Promise 对象要么会通过一个值*被兑现（fulfilled）*，要么会通过一个原因（错误）*被拒绝（rejected）*。当这些情况之一发生时，我们**用 promise 的 then 方法排列起来的相关处理程序就会被调用**。如果 promise 在一个相应的处理程序被绑定时就已经被兑现或被拒绝了，那么这个处理程序就会被调用，**因此在完成异步操作和绑定处理方法之间不会存在竞争状态**。
+
+因为 `Promise.prototype.then` 和 `Promise.prototype.catch` 方法返回的是 promise， 所以它们可以被链式调用。
+
+![promises过程](E:\pogject\学习笔记\image\js\promises过程.png)
+
+> **备注：** 有一些语言中有惰性求值和延时计算的特性，它们也被称为“promises”，例如 Scheme。JavaScript 中的 promise 代表的是已经正在发生的进程， 而且可以通过回调函数实现链式调用。 如果您想对一个表达式进行惰性求值，就考虑一下使用无参数的"[箭头函数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/Arrow_functions)": `f = () =>`*`表达式`* 来创建惰性求值的表达式*，*使用 `f()` 求值。
+
+> **备注：** 如果一个 promise 已经**被兑现**（fulfilled）或**被拒绝**（rejected），那么我们也可以说它处于***已敲定**（settled）*状态。您还会听到一个经常跟 promise 一起使用的术语：***已决议**（resolved）*，它表示 promise 已经处于已敲定(settled)状态，或者为了匹配另一个 promise 的状态被"锁定"了。Domenic Denicola 的 [States and fates](https://github.com/domenic/promises-unwrapping/blob/master/docs/states-and-fates.md) 中有更多关于 promise 术语的细节可以供您参考。
+
+### [Promise的链式调用](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise#promise的链式调用)
+
+我们可以用 `promise.then()`，`promise.catch()` 和 `promise.finally()` 这些方法将进一步的操作与一个变为已敲定状态的 promise 关联起来。这些方法还会返回一个新生成的 promise 对象，这个对象可以被非强制性的用来做链式调用，就像这样：
+
+```js
+const myPromise =
+  (new Promise(myExecutorFunc))
+  .then(handleFulfilledA,handleRejectedA)
+  .then(handleFulfilledB,handleRejectedB)
+  .then(handleFulfilledC,handleRejectedC);
+
+// 或者，这样可能会更好...
+
+const myPromise =
+  (new Promise(myExecutorFunc))
+  .then(handleFulfilledA)
+  .then(handleFulfilledB)
+  .then(handleFulfilledC)
+  .catch(handleRejectedAny);
+```
+
+**过早地处理被拒绝的 promise 会对之后 promise 的链式调用造成影响。**不过有时候我们因为需要马上处理一个错误也只能这样做。（有关应对影响的技巧，请参见下面示例中的 `throw -999` ）另一方面，在没有迫切需要的情况下，可以在最后一个.catch() 语句时再进行错误处理，这种做法更加简单。
+
+**这两个函数的签名很简单，它们只接受一个任意类型的参数。**这些函数由您（编程者）编写。这些函数的终止状态决定着链式调用中下一个promise的"已敲定 （settled）"状态是什么。任何不是 `throw` 的终止都会创建一个"已决议（resolved）"状态，而以 `throw` 终止则会创建一个"已拒绝"状态。
+
+```js
+handleFulfilled(value)       { /*...*/; return nextValue;  }
+handleRejection(reason)  { /*...*/; throw  nextReason; }
+handleRejection(reason)  { /*...*/; return nextValue;  }
+```
+
+被返回的 `nextValue` 可能是另一个promise对象，这种情况下这个promise会被动态地插入链式调用。 
+
+当 `.then()` 中缺少能够返回 promise 对象的函数时，链式调用就直接继续进行下一环操作。因此，链式调用可以在最后一个 `.catch()` 之前把所有的 `handleRejection` 都省略掉。类似地， `.catch()` 其实只是没有给 `handleFulfilled` 预留参数位置的 `.then()` 而已。
+
+链式调用中的 promise 们就像俄罗斯套娃一样，是嵌套起来的，但又像是一个栈，每个都必须从顶端被弹出。**链式调用中的第一个 promise 是嵌套最深的一个，也将是第一个被弹出的。**
+
+```js
+(promise D, (promise C, (promise B, (promise A) ) ) )
+```
+
+**当存在一个 `nextValue` 是 promise 时，就会出现一种动态的替换效果。**`return` 会导致一个 promise 被弹出，但这个 `nextValue` promise 则会被推入被弹出 promise 原来的位置。对于上面所示的嵌套场景，假设与 "promise B" 相关的 `.then()` 返回了一个值为 "promise X" 的 `nextValue` 。那么嵌套的结果看起来就会是这样：
+
+```js
+(promise D, (promise C, (promise X) ) )
+```
+
+**一个 promise 可能会参与不止一次的嵌套。**对于下面的代码，`promiseA` 向"已敲定"（"settled"）状态的过渡会导致两个实例的 `.then` 都被调用。
+
+```js
+const promiseA = new Promise(myExecutorFunc);
+const promiseB = promiseA.then(handleFulfilled1, handleRejected1);
+const promiseC = promiseA.then(handleFulfilled2, handleRejected2); 
+```
+
+一个已经处于"已敲定"（"settled"）状态的 promise 也可以接收操作。**在那种情况下，（如果没有问题的话，）这个操作会被作为第一个异步操作被执行。注意，所有的 promise 都一定是异步的。**因此，一个已经处于"已敲定"（"settled"）状态的 promise 中的操作只有 promise 链式调用的栈被清空了和一个事件循环过去了之后才会被执行。这种效果跟 `setTimeout(action, 10)` 特别相似。
+
+```js
+const promiseA = new Promise( (resolutionFunc,rejectionFunc) => {
+    resolutionFunc(777);
+});
+// 这时，"promiseA" 已经被敲定了。
+promiseA.then( (val) => console.log("asynchronous logging has val:",val) );
+console.log("immediate logging");
+
+// produces output in this order:
+// immediate logging
+// asynchronous logging has val: 777
+```
+
+## [构造函数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise#构造函数)
+
+- [`Promise()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/Promise)
+
+  创建一个新的 `Promise` 对象。该构造函数主要用于包装还没有添加 promise 支持的函数。
+
+## [静态方法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise#静态方法)
+
+- [`Promise.all(iterable)`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)
+
+  这个方法返回一个新的promise对象，该promise对象在iterable参数对象里所有的promise对象都成功的时候才会触发成功，一旦有任何一个iterable里面的promise对象失败则立即触发该promise对象的失败。这个新的promise对象在触发成功状态以后，会把一个包含iterable里所有promise返回值的数组作为成功回调的返回值，顺序跟iterable的顺序保持一致；如果这个新的promise对象触发了失败状态，它会把iterable里第一个触发失败的promise对象的错误信息作为它的失败错误信息。Promise.all方法常被用于处理多个promise对象的状态集合。（可以参考jQuery.when方法---译者注）
+
+- [`Promise.allSettled(iterable)`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled)
+
+  等到所有promises都已敲定（settled）（每个promise都已兑现（fulfilled）或已拒绝（rejected））。 返回一个promise，该promise在所有promise完成后完成。并带有一个对象数组，每个对象对应每个promise的结果。
+
+- [`Promise.any(iterable)`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/any)
+
+  接收一个Promise对象的集合，当其中的一个 promise 成功，就返回那个成功的promise的值。
+
+- [`Promise.race(iterable)`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race)
+
+  当iterable参数里的任意一个子promise被成功或失败后，父promise马上也会用子promise的成功返回值或失败详情作为参数调用父promise绑定的相应句柄，并返回该promise对象。
+
+- [`Promise.reject(reason)`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject)
+
+  返回一个状态为失败的Promise对象，并将给定的失败信息传递给对应的处理方法
+
+- [`Promise.resolve(value)`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve)
+
+  返回一个状态由给定value决定的Promise对象。如果该值是thenable(即，带有then方法的对象)，返回的Promise对象的最终状态由then方法执行决定；否则的话(该value为空，基本类型或者不带then方法的对象),返回的Promise对象状态为fulfilled，并且将该value传递给对应的then方法。通常而言，如果您不知道一个值是否是Promise对象，使用Promise.resolve(value) 来返回一个Promise对象,这样就能将该value以Promise对象形式使用。
+
+## [创建Promise](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise#创建promise)
+
+`Promise` 对象是由关键字 `new` 及其构造函数来创建的。该构造函数会把一个叫做“处理器函数”（executor function）的函数作为它的参数。这个“处理器函数”接受两个函数——`resolve` 和 `reject` ——作为其参数。当异步任务顺利完成且返回结果值时，会调用 `resolve` 函数；而当异步任务失败且返回失败原因（通常是一个错误对象）时，会调用`reject` 函数。
+
+```js
+const myFirstPromise = new Promise((resolve, reject) => {
+  // ?做一些异步操作，最终会调用下面两者之一:
+  //
+  //   resolve(someValue); // fulfilled
+  // ?或
+  //   reject("failure reason"); // rejected
+});
+```
+
+想要某个函数拥有promise功能，只需让其返回一个promise即可。
+
+```js
+function myAsyncFunction(url) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url);
+    xhr.onload = () => resolve(xhr.responseText);
+    xhr.onerror = () => reject(xhr.statusText);
+    xhr.send();
+  });
+};
+```
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise#示例)
+
+### [基础示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise#基础示例)
+
+```js
+let myFirstPromise = new Promise(function(resolve, reject){
+    //当异步代码执行成功时，我们才会调用resolve(...), 当异步代码失败时就会调用reject(...)
+    //在本例中，我们使用setTimeout(...)来模拟异步代码，实际编码时可能是XHR请求或是HTML5的一些API方法.
+    setTimeout(function(){
+        resolve("成功!"); //代码正常执行！
+    }, 250);
+});
+
+myFirstPromise.then(function(successMessage){
+    //successMessage的值是上面调用resolve(...)方法传入的值.
+    //successMessage参数不一定非要是字符串类型，这里只是举个例子
+    console.log("Yay! " + successMessage);  //Yay! 成功!
+});
+```
+
+### [高级示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise#高级示例)
+
+```html
+<button id="btn">Make a promise!</button>
+<div id="log"></div>
+```
+
+本例展示了 `Promise` 的一些机制。 `testPromise()` 方法在每次点击 button按钮时被调用，该方法会创建一个promise 对象，使用 [`window.setTimeout()`](https://developer.mozilla.org/zh-CN/docs/Web/API/setTimeout) 让Promise等待 1-3 秒不等的时间来填充数据（通过Math.random()方法）。
+
+Promise 的值的填充过程都被日志记录（logged）下来，这些日志信息展示了方法中的同步代码和异步代码是如何通过Promise完成解耦的。
+
+```js
+'use strict';
+var promiseCount = 0;
+
+function testPromise() {
+    let thisPromiseCount = ++promiseCount;
+
+    let log = document.getElementById('log');
+    log.insertAdjacentHTML('beforeend', thisPromiseCount +
+        ') 开始 (<small>同步代码开始</small>)<br/>');
+
+    // 新构建一个 Promise 实例：使用Promise实现每过一段时间给计数器加一的过程，每段时间间隔为1~3秒不等
+    let p1 = new Promise(
+        // resolver 函数在 Promise 成功或失败时都可能被调用
+       (resolve, reject) => {
+            log.insertAdjacentHTML('beforeend', thisPromiseCount +
+                ') Promise 开始 (<small>异步代码开始</small>)<br/>');
+            // 创建一个异步调用
+            window.setTimeout(
+                function() {
+                    // 填充 Promise
+                    resolve(thisPromiseCount);
+                }, Math.random() * 2000 + 1000);
+        }
+    );
+
+    // Promise 不论成功或失败都会调用 then
+    // catch() 只有当 promise 失败时才会调用
+    p1.then(
+        // 记录填充值
+        function(val) {
+            log.insertAdjacentHTML('beforeend', val +
+                ') Promise 已填充完毕 (<small>异步代码结束</small>)<br/>');
+        })
+    .catch(
+        // 记录失败原因
+       (reason) => {
+            console.log('处理失败的 promise ('+reason+')');
+        });
+
+    log.insertAdjacentHTML('beforeend', thisPromiseCount +
+        ') Promise made (<small>同步代码结束</small>)<br/>');
+}
+```
+
+
+
+```js
+if ("Promise" in window) {
+  let btn = document.getElementById("btn");
+  btn.addEventListener("click",testPromise);
+} else {
+  log = document.getElementById('log');
+  log.innerHTML = "Live example not available as your browser doesn't support the <code>Promise<code> interface.";
+}
+```
+
+```js
+/*
+1) 开始 (同步代码开始)
+1) Promise 开始 (异步代码开始)
+1) Promise made (同步代码结束
+1) Promise 已填充完毕 (异步代码结束)
+2) 开始 (同步代码开始)
+2) Promise 开始 (异步代码开始)
+2) Promise made (同步代码结束
+2) Promise 已填充完毕 (异步代码结束)
+3) 开始 (同步代码开始)
+3) Promise 开始 (异步代码开始)
+3) Promise made (同步代码结束
+3) Promise 已填充完毕 (异步代码结束)
+*/
+```
+
+## [使用 XHR 加载图像](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise#使用_xhr_加载图像)
+
+另一个用了 Promise 和[ XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) 加载一个图像的例子可在MDN GitHub[ promise-test](https://github.com/mdn/js-examples/tree/master/promises-test) 中找到。 您也可以[看这个实例](https://mdn.github.io/js-examples/promises-test/)。每一步都有注释可以让您详细的了解Promise和XHR架构。
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+
+    <title>Promise example</title>
+
+    <link rel="stylesheet" href="">
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <h1>Promise example</h1>
+
+   
+  </body>
+
+  <script>
+  function imgLoad(url) {
+    // Create new promise with the Promise() constructor;
+    // This has as its argument a function
+    // with two parameters, resolve and reject
+    return new Promise(function(resolve, reject) {
+      // Standard XHR to load an image
+      var request = new XMLHttpRequest();
+      request.open('GET', url);
+      request.responseType = 'blob';
+      // When the request loads, check whether it was successful
+      request.onload = function() {
+        if (request.status === 200) {
+        // If successful, resolve the promise by passing back the request response
+          resolve(request.response);
+        } else {
+        // If it fails, reject the promise with a error message
+          reject(Error('Image didn\'t load successfully; error code:' + request.statusText));
+        }
+      };
+      request.onerror = function() {
+      // Also deal with the case when the entire request fails to begin with
+      // This is probably a network error, so reject the promise with an appropriate message
+          reject(Error('There was a network error.'));
+      };
+      // Send the request
+      request.send();
+    });
+  }
+  // Get a reference to the body element, and create a new image object
+  var body = document.querySelector('body');
+  var myImage = new Image();
+  // Call the function with the URL we want to load, but then chain the
+  // promise then() method on to the end of it. This contains two callbacks
+  imgLoad('200w.webp').then(function(response) {
+    // The first runs when the promise resolves, with the request.response
+    // specified within the resolve() method.
+    var imageURL = window.URL.createObjectURL(response);
+    myImage.src = imageURL;
+    body.appendChild(myImage);
+    // The second runs when the promise
+    // is rejected, and logs the Error specified with the reject() method.
+  }, function(Error) {
+    console.log(Error);
+  });
+  </script>
+</html>
+```
+
+
+
+# async函数
+
+async函数是使用`async`关键字声明的函数。 async函数是[`AsyncFunction`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction)构造函数的实例， 并且其中允许使用`await`关键字。`async`和`await`关键字让我们可以用一种更简洁的方式写出基于[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)的异步行为，而无需刻意地链式调用`promise`。
+
+async函数还可以被[作为表达式](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/async_function)来定义。
+
+```js
+function resolveAfter2Seconds() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve('resolved');
+    }, 2000);
+  });
+}
+
+async function asyncCall() {
+  console.log('calling');
+  const result = await resolveAfter2Seconds();
+  console.log(result);
+  // expected output: "resolved"
+}
+
+asyncCall();
+
+```
+
+
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function#语法)
+
+```js
+async function name([param[, param[, ... param]]]) {
+    statements 
+}
+```
+
+### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function#参数)
+
+- `name`
+
+  函数名称。
+
+- `param`
+
+  要传递给函数的参数的名称。
+
+- `statements`
+
+  包含函数主体的表达式。可以使用`await`机制。
+
+### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function#返回值)
+
+一个[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)，这个promise要么会通过一个由async函数返回的值被解决，要么会通过一个从async函数中抛出的（或其中没有被捕获到的）异常被拒绝。
+
+
+
+## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function#描述)
+
+async函数可能包含0个或者多个[`await`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/await)表达式。**await表达式会暂停整个async函数的执行进程并出让其控制权，只有当其等待的基于promise的异步操作被兑现或被拒绝之后才会恢复进程**。promise的解决值会被当作该await表达式的返回值。使用`async` / `await`关键字就可以在异步代码中使用普通的`try` / `catch`代码块。
+
+> **备注：****`await`关键字只在async函数内有效**。如果你在async函数体之外使用它，就会抛出语法错误 [`SyntaxError`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError) 。
+
+> **备注：**`async`/`await`的目的为了简化使用基于promise的API时所需的语法。`async`/`await`的行为就好像搭配使用了生成器和promise。
+
+**async函数一定会返回一个promise对象**。如果一个async函数的返回值看起来不是promise，那么它将会被隐式地包装在一个promise中。
+
+例如，如下代码:
+
+```js
+async function foo() {
+   return 1
+}
+```
+
+等价于:
+
+```js
+function foo() {
+   return Promise.resolve(1)
+}
+```
+
+**async函数的函数体可以被看作是由0个或者多个await表达式分割开来的。**从第一行代码直到（并包括）第一个await表达式（如果有的话）都是同步运行的。这样的话，一个不含await表达式的async函数是会同步运行的。**然而，如果函数体内有一个await表达式，async函数就一定会异步执行。**
+
+例如：
+
+```js
+async function foo() {
+   await 1
+}
+```
+
+等价于
+
+```js
+function foo() {
+   return Promise.resolve(1).then(() => undefined)
+}
+```
+
+
+
+在await表达式之后的代码可以被认为是存在在链式调用的then回调中，**多个await表达式都将加入链式调用的then回调中**，返回值将作为最后一个then回调的返回值。
+
+在接下来的例子中，我们将使用await执行两次promise，整个`foo`函数的执行将会被分为**三个阶段**。
+
+1. `foo`函数的第一行将会同步执行，await将会等待promise的结束。然后暂停通过`foo`的进程，并将控制权交还给调用`foo`的函数。
+2. 一段时间后，当第一个promise完结的时候，控制权将重新回到foo函数内。示例中将会将`1`（promise状态为fulfilled）作为结果返回给await表达式的左边即`result1`。接下来函数会继续进行，到达第二个await区域，此时`foo`函数的进程将再次被暂停。
+3. 一段时间后，同样当第二个promise完结的时候，`result2`将被赋值为`2`，之后函数将会正常同步执行，将默认返回`undefined` 。
+
+```js
+async function foo() {
+   const result1 = await new Promise((resolve) => setTimeout(() => resolve('1')))
+   const result2 = await new Promise((resolve) => setTimeout(() => resolve('2')))
+}
+foo()
+```
+
+注意：promise链不是一次就构建好的，相反，**promise链是分阶段构造的**，因此在处理异步函数时必须注意对错误函数的处理。
+
+例如，在下面的代码中，在promise链上配置了`.catch`处理程序，将抛出未处理的promise错误。这是因为`p2`返回的结果不会被await处理。
+
+```js
+async function foo() {
+   const p1 = new Promise((resolve) => setTimeout(() => resolve('1'), 1000))
+   const p2 = new Promise((_,reject) => setTimeout(() => reject('2'), 500))
+   const results = [await p1, await p2] // 不推荐使用这种方式，请使用 Promise.all或者Promise.allSettled 
+}
+foo().catch(() => {}) // 捕捉所有的错误...
+```
+
+
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function#示例)
+
+### [简单例子](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function#简单例子)
+
+```js
+var resolveAfter2Seconds = function() {
+  console.log("starting slow promise");
+  return new Promise(resolve => {
+    setTimeout(function() {
+      resolve("slow");
+      console.log("slow promise is done");
+    }, 2000);
+  });
+};
+
+var resolveAfter1Second = function() {
+  console.log("starting fast promise");
+  return new Promise(resolve => {
+    setTimeout(function() {
+      resolve("fast");
+      console.log("fast promise is done");
+    }, 1000);
+  });
+};
+
+//在sequentialStart中，程序在第一个await停留了2秒，然后又在第二个await停留了1秒。直到第一个计时器结束后，第二个计时器才被创建。程序需要3秒执行完毕。
+var sequentialStart = async function() {
+  console.log('==SEQUENTIAL START==');
+
+  // 1. Execution gets here almost instantly
+  const slow = await resolveAfter2Seconds();
+  console.log(slow); // 2. this runs 2 seconds after 1.
+
+  const fast = await resolveAfter1Second();
+  console.log(fast); // 3. this runs 3 seconds after 1.
+}
+
+/*在 concurrentStart中，两个计时器被同时创建，然后执行await。这两个计时器同时运行，这意味着程序完成运行只需要2秒，而不是3秒,即最慢的计时器的时间。
+但是 await 仍旧是顺序执行的，第二个 await 还是得等待第一个执行完。在这个例子中，这使得先运行结束的输出出现在最慢的输出之后。
+*/
+var concurrentStart = async function() {
+  console.log('==CONCURRENT START with await==');
+  const slow = resolveAfter2Seconds(); // starts timer immediately
+  const fast = resolveAfter1Second(); // starts timer immediately
+
+  // 1. Execution gets here almost instantly
+  console.log(await slow); // 2. this runs 2 seconds after 1.
+  console.log(await fast); // 3. this runs 2 seconds after 1., immediately after 2., since fast is already resolved
+}
+
+var concurrentPromise = function() {
+  console.log('==CONCURRENT START with Promise.all==');
+  return Promise.all([resolveAfter2Seconds(), resolveAfter1Second()]).then((messages) => {
+    console.log(messages[0]); // slow
+    console.log(messages[1]); // fast
+  });
+}
+
+//如果你希望并行执行两个或更多的任务，你必须像在parallel中一样使用await Promise.all([job1(), job2()])。
+var parallel = async function() {
+  console.log('==PARALLEL with await Promise.all==');
+
+  // Start 2 "jobs" in parallel and wait for both of them to complete
+  await Promise.all([
+      (async()=>console.log(await resolveAfter2Seconds()))(),
+      (async()=>console.log(await resolveAfter1Second()))()
+  ]);
+}
+
+// This function does not handle errors. See warning below!
+var parallelPromise = function() {
+  console.log('==PARALLEL with Promise.then==');
+  resolveAfter2Seconds().then((message)=>console.log(message));
+  resolveAfter1Second().then((message)=>console.log(message));
+}
+
+sequentialStart(); // after 2 seconds, logs "slow", then after 1 more second, "fast"
+
+// wait above to finish
+setTimeout(concurrentStart, 4000); // after 2 seconds, logs "slow" and then "fast"
+
+// wait again
+setTimeout(concurrentPromise, 7000); // same as concurrentStart
+
+// wait again
+setTimeout(parallel, 10000); // truly parallel: after 1 second, logs "fast", then after 1 more second, "slow"
+
+// wait again
+setTimeout(parallelPromise, 13000); // same as parallel
+```
+
+### [使用async函数重写 promise 链](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function#使用async函数重写_promise_链)
+
+返回 [`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)的 API 将会产生一个 promise 链，它将函数肢解成许多部分。例如下面的代码：
+
+```js
+function getProcessedData(url) {
+  return downloadData(url) // 返回一个 promise 对象
+    .catch(e => {
+      return downloadFallbackData(url)  // 返回一个 promise 对象
+    })
+    .then(v => {
+      return processDataInWorker(v); // 返回一个 promise 对象
+    });
+}
+```
+
+可以重写为单个async函数：
+
+```js
+async function getProcessedData(url) {
+  let v;
+  try {
+    v = await downloadData(url);
+  } catch (e) {
+    v = await downloadFallbackData(url);
+  }
+  return processDataInWorker(v);
+}
+```
+
+注意，在上述示例中，`return` 语句中没有 `await` 操作符，因为 `async function` 的返回值将被隐式地传递给 `Promise.resolve`。
+
+> 返回值`隐式的传递给`[`Promise.resolve`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve)，并不意味着`return await promiseValue;和return promiseValue;`在功能上相同
+
+看下下面重写的上面代码，在`processDataInWorker`抛出异常时返回了null：
+
+```js
+async function getProcessedData(url) {
+  let v;
+  try {
+    v = await downloadData(url);
+  } catch(e) {
+    v = await downloadFallbackData(url);
+  }
+  try {
+    return await processDataInWorker(v); // 注意 `return await` 和单独 `return` 的比较
+  } catch (e) {
+    return null;
+  }
+}
+```
+
+简单地写上`return processDataInworker(v);将导致在processDataInWorker(v)`出错时function返回值为[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)`而不是`返回null。`return foo;`和`return await foo;`，有一些细微的差异:`return foo;`不管`foo`是promise还是rejects都将会直接返回`foo。相反地，`如果`foo`是一个[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)，`return await foo;`将等待`foo`执行(resolve)或拒绝(reject)，如果是拒绝，将会在返回前抛出异常。
+
+# await
+
+`await` 操作符用于等待一个[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise) 对象。它只能在异步函数 [`async function`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function) 中使用。
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/await#语法)
+
+```js
+[返回值] = await 表达式;
+```
+
+- 表达式
+
+  一个 [`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise) 对象或者任何要等待的值。
+
+- 返回值
+
+  返回 Promise 对象的处理结果。如果等待的不是 Promise 对象，则返回该值本身。
+
+## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/await#描述)
+
+await 表达式会暂停当前 [`async function`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function) 的执行，等待 Promise 处理完成。若 Promise 正常处理(fulfilled)，其回调的resolve函数参数作为 await 表达式的值，继续执行 [`async function`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function)。
+
+若 Promise 处理异常(rejected)，await 表达式会把 Promise 的异常原因抛出。
+
+另外，如果 await 操作符后的表达式的值不是一个 Promise，则返回该值本身。
+
+## [例子](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/await#例子)
+
+如果一个 Promise 被传递给一个 await 操作符，await 将等待 Promise 正常处理完成并返回其处理结果。
+
+```js
+function resolveAfter2Seconds(x) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(x);
+    }, 2000);
+  });
+}
+
+async function f1() {
+  var x = await resolveAfter2Seconds(10);
+  console.log(x); // 10
+}
+f1();
+```
+
+如果该值不是一个 Promise，await 会把该值转换为已正常处理的Promise，然后等待其处理结果。
+
+```js
+async function f2() {
+  var y = await 20;
+  console.log(y); // 20
+}
+f2();
+```
+
+如果 Promise 处理异常，则异常值被抛出。
+
+```js
+async function f3() {
+  try {
+    var z = await Promise.reject(30);
+  } catch (e) {
+    console.log(e); // 30
+  }
+}
+f3();
+```
+
+
+
