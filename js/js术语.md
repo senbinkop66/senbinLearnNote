@@ -1230,3 +1230,150 @@ f3();
 
 
 
+# window.setImmediate
+
+> **非标准:** 该特性是非标准的，请尽量不要在生产环境中使用它！
+>
+> **注意:** 该方法可能不会被批准成为标准，目前只有最新版本的 Internet Explorer 和Node.js 0.10+实现了该方法。它遇到了 [Gecko](https://bugzilla.mozilla.org/show_bug.cgi?id=686201)(Firefox) 和[Webkit](https://code.google.com/p/chromium/issues/detail?id=146172) (Google/Apple) 的阻力.
+
+该方法用来把一些需要长时间运行的操作放在一个回调函数里，在浏览器完成后面的其他语句后，就立刻执行这个回调函数。
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/setImmediate#语法)
+
+```js
+var immediateID = setImmediate(func, [param1, param2, ...]);
+var immediateID = setImmediate(func);
+```
+
+- `immediateID` 是这次setImmediate方法设置的唯一ID,可以作为 [`window.clearImmediate`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/clearImmediate) 的参数.
+- `func` 是将要执行的回调函数
+
+所有参数都会直接传给你的函数。
+
+## [备注](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/setImmediate#备注)
+
+[`window.clearImmediate`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/clearImmediate) 方法可以用来取消通过setImmediate设置的将要执行的语句, 就像 [`window.clearTimeout` (en-US)](https://developer.mozilla.org/en-US/docs/Web/API/clearTimeout) 对应于 [`window.setTimeout`](https://developer.mozilla.org/zh-CN/docs/Web/API/setTimeout)一样.
+
+该方法可以用来替代 `setTimeout(fn, 0)` 去执行[繁重的操作](https://www.nczonline.net/blog/2009/08/11/timed-array-processing-in-javascript/)([heavy operations](https://www.nczonline.net/blog/2009/08/11/timed-array-processing-in-javascript/)) 
+
+可以通过以下几种方式来模仿该功能:
+
+- [`window.postMessage`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/postMessage) 可以被用来触发一个 immediate 但会产生回调. 请注意, Internet Explorer 8包含postMessage的同步版本, 这意味着它不能被用来作为代替品.
+- [MessageChannel](https://developer.mozilla.org/en-US/docs/Web/API/MessageChannel) 可以在Web Workers 内部很好的被使用, 而postMessage 的语义意味着它不能在那使用.
+- `setTimeout(fn, 0)`*可以使用*, 然而按照[HTML规范](https://html.spec.whatwg.org/multipage/webappapis.html#timers), 嵌套深度超过5级的定时器, 会被限制在4ms , 他没有为setImmediate的天然及时性提供合适的polyfill.
+
+```js
+setImmediate(()=>{
+    console.log("21")
+});
+//21
+```
+
+
+
+# Console
+
+**`Console`** 对象提供了浏览器控制台调试的接口（如：Firefox 的 [Web Console](https://firefox-source-docs.mozilla.org/devtools-user/web_console/index.html)）。在不同浏览器上它的工作方式可能不一样，但通常都会提供一套共性的功能。
+
+`Console` 对象可以从任何全局对象中访问到，如 浏览器作用域上的 [`Window`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window)，以及通过属性控制台作为workers中的特定变体的 [`WorkerGlobalScope`](https://developer.mozilla.org/zh-CN/docs/Web/API/WorkerGlobalScope)。可以通过 [`Window.console`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/console) 引用，也可以简单的通过 `console` 引用。例：
+
+```js
+console.log("Failed to open the specified link")
+```
+
+> **提示**: 实际的 `console` 接口被定义为全小写的形式（比如不是这种形式 `Console` ），这是历史原因导致的。
+
+## [方法](https://developer.mozilla.org/zh-CN/docs/Web/API/Console#方法)
+
+- [`Console.assert()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/assert)
+
+  如果第一个参数为 `false` ，则将消息和堆栈跟踪记录到控制台。
+
+- [`Console.clear()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/clear)
+
+  清空控制台，并输出 `Console was cleared`。
+
+- [`Console.count()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/count)
+
+  以参数为标识记录调用的次数，调用时在控制台打印标识以及调用次数。
+
+- [`Console.countReset()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/countReset)
+
+  重置指定标签的计数器值。
+
+- [`Console.debug()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/debug)
+
+  在控制台打印一条 `"debug"` 级别的消息。
+
+- [`Console.dir()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/dir)
+
+  显示一个由特定的 Javascript 对象列表组成的可交互列表。这个列表可以使用三角形隐藏和显示来审查子对象的内容。.
+
+- [`Console.dirxml()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/dirxml)
+
+  打印 XML/HTML 元素表示的指定对象，否则显示 JavaScript 对象视图。
+
+- [`Console.error()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/error)
+
+  打印一条错误信息，使用方法可以参考 [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#using_string_substitutions)。
+
+- `Console.exception()` Non-Standard Deprecated
+
+  `error()` 方法的别称。
+
+- [`Console.group()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/group)
+
+  创建一个新的内联 [group](https://developer.mozilla.org/en-US/docs/Web/API/console#using_groups_in_the_console), 后续所有打印内容将会以子层级的形式展示。调用 `groupEnd()`来闭合组。
+
+- [`Console.groupCollapsed()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/groupCollapsed)
+
+  创建一个新的内联 [group](https://developer.mozilla.org/en-US/docs/Web/API/console#using_groups_in_the_console)。使用方法和 `group()` 相同，不同的是，`groupCollapsed()` 方法打印出来的内容默认是折叠的。调用`groupEnd()`来闭合组。
+
+- [`Console.groupEnd()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/groupEnd)
+
+  闭合当前内联 [group](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_groups_in_the_console)。
+
+- [`Console.info()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/info)
+
+  打印资讯类说明信息，使用方法可以参考 [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#using_string_substitutions)。
+
+- [`Console.log()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/log)
+
+  打印内容的通用方法，使用方法可以参考 [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#using_string_substitutions)。
+
+- [`Console.profile()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/profile) Non-Standard
+
+  Starts the browser's built-in profiler (for example, the [Firefox performance tool](https://firefox-source-docs.mozilla.org/devtools-user/performance/index.html)). You can specify an optional name for the profile.
+
+- [`Console.profileEnd()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/profileEnd) Non-Standard
+
+  Stops the profiler. You can see the resulting profile in the browser's performance tool (for example, the [Firefox performance tool](https://firefox-source-docs.mozilla.org/devtools-user/performance/index.html)).
+
+- [`Console.table()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/table)
+
+  将列表型的数据打印成表格。
+
+- [`Console.time()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/time)
+
+  启动一个以入参作为特定名称的[计时器](https://developer.mozilla.org/en-US/docs/Web/API/console#Timers)，在显示页面中可同时运行的计时器上限为10,000.
+
+- [`Console.timeEnd()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/timeEnd)
+
+  结束特定的 [计时器](https://developer.mozilla.org/en-US/docs/Web/API/console#Timers) 并以毫秒打印其从开始到结束所用的时间。
+
+- [`Console.timeLog()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/timeLog)
+
+  打印特定 [计时器](https://developer.mozilla.org/en-US/docs/Web/API/console#timers) 所运行的时间。
+
+- [`Console.timeStamp()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/timeStamp) Non-Standard
+
+  添加一个标记到浏览器的 [Timeline](https://developer.chrome.com/devtools/docs/timeline) 或 [Waterfall](https://developer.mozilla.org/en-US/docs/Tools/Performance/Waterfall) 工具。
+
+- [`Console.trace()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/trace)
+
+  输出一个 [stack trace](https://developer.mozilla.org/en-US/docs/Web/API/console#stack_traces)。
+
+- [`Console.warn()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Console/warn)
+
+  打印一个警告信息，可以使用 [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#using_string_substitutions) 和额外的参数。
+
