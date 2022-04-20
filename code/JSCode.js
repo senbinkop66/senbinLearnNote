@@ -3757,3 +3757,23 @@ events.emit("hello");
 events.emit("hello");
 
 
+function Parent(){
+    this.name="parent";
+    this.list=["a"];
+}
+Parent.prototype.sayHi=function(){
+    console.log("Hello!");
+}
+
+function Child(){}
+Child.prototype=new Parent();
+
+var child=new Child();
+console.log(child.name);  //parent
+child.sayHi();  //Hello!
+
+var a=new Child();
+var b=new Child();
+a.list.push("b");
+console.log(b.list);  //[ 'a', 'b' ]
+
