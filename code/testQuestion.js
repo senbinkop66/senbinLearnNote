@@ -1,24 +1,34 @@
-/**
- * @param {number[]} nums
- * @return {number}
- */
-var maxRotateFunction = function(nums) {
-    let n=nums.length;
-    let sum=0,numSum=0;
-    for(let i=0;i<n;i++){
-        sum+=i*nums[i];
-        numSum+=nums[i];
-        
+function mergeSort(arr){
+    //归并排序
+    let n=arr.length;
+    if(n<2){
+        return arr;
     }
-    let maxSum=sum;
-    for (let i=n-1;i>0;i--){
-        //找到迭代公式
-        sum+=numSum-n*nums[i];
-        maxSum=maxSum>sum ? maxSum : sum;
-    }
-    return maxSum;
-};
+    let middle=Math.floor(n/2);
+    let left=arr.slice(0,middle);
+    let right=arr.slice(middle);
 
-let data = [4,3,2,6];
-let result=maxRotateFunction(data);
+    return merge(mergeSort(left),mergeSort(right));
+}
+
+function merge(left,right){
+    let result=[];
+    while(left.length && right.length){
+        if (left[0]<=right[0]) {
+            result.push(left.shift());
+        }else{
+            result.push(right.shift());
+        }
+    }
+    while(left.length){
+        result.push(left.shift());
+    }
+    while(right.length){
+        result.push(right.shift());
+    }
+    return result;
+}
+
+let test=[2,4,1,6,5,8,9,3,7,0];
+let result=mergeSort(test);
 console.log(result);
