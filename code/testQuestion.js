@@ -1,30 +1,31 @@
-class EventEmitter{
-    constructor(){
-        this._events={};
-    }
-    on(event,callback){  //监听event事件，触发时调用callback函数
-        let callbacks=this._events[event] || [];
-        callbacks.push(callback);
-        return this;
-    }
-    off(event,callback){  //停止监听event事件
-        let callbacks=this._events[event];
-        this._events[event]=callbacks && callbacks.filter(fn=>fn!==callback);
-        return this;
-    }
-    emit(...args){  //触发事件，并把参数传给事件的处理函数
-        const event=args[0];
-        const params=[].slice.call(args,1);
-        const callbacks=this._events[event];
-        callbacks.forEach(fn=>fn.apply(this.params));
-        return this;
-    }
-    once(event,callback){  //为事件注册单次监听器
-        let wrapFanc=(...args)=>{
-            callback.apply(this.args);
-            this.off(event,wrapFanc);
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var binaryGap = function(n) {
+    n=n.toString(2);
+    let ans=0;
+    let count=0;
+    let flag=false;
+    for (let i=0;i<n.length;i++){
+        if (n[i]==="1") {
+            if (n[i-1]==="1") {
+                ans=Math.max(1,ans);
+            }else{
+                if (count>1) {
+                    ans=Math.max(ans,count);
+                }
+            }
+            count=1;
+        }else if (n[i]==="0") {
+            if (count>0) {
+                count++;
+            }
         }
-        this.on(event,wrapFanc);
-        return this;
     }
-}
+    return ans;
+};
+
+let test=22;
+let result=binaryGap(test);
+console.log(result);
