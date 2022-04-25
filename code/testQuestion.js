@@ -1,31 +1,28 @@
 /**
- * @param {number} n
- * @return {number}
+ * @param {number[]} nums
  */
-var binaryGap = function(n) {
-    n=n.toString(2);
-    let ans=0;
-    let count=0;
-    let flag=false;
-    for (let i=0;i<n.length;i++){
-        if (n[i]==="1") {
-            if (n[i-1]==="1") {
-                ans=Math.max(1,ans);
-            }else{
-                if (count>1) {
-                    ans=Math.max(ans,count);
-                }
-            }
-            count=1;
-        }else if (n[i]==="0") {
-            if (count>0) {
-                count++;
-            }
+var Solution = function(nums) {
+    this.pos = new Map();
+    for (let i = 0; i < nums.length; ++i) {
+        if (!this.pos.has(nums[i])) {
+            this.pos.set(nums[i], []);
         }
+        
+        this.pos.get(nums[i]).push(i);
     }
-    return ans;
 };
 
-let test=22;
-let result=binaryGap(test);
-console.log(result);
+/** 
+ * @param {number} target
+ * @return {number}
+ */
+Solution.prototype.pick = function(target) {
+    const indices = this.pos.get(target);
+    return indices[Math.floor(Math.random() * indices.length)];
+};
+
+/**
+ * Your Solution object will be instantiated and called as such:
+ * var obj = new Solution(nums)
+ * var param_1 = obj.pick(target)
+ */
