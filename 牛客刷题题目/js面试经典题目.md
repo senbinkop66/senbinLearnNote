@@ -1704,7 +1704,7 @@ WebSocket protocol是HTML5一种新的协议。它实现了浏览器与服务器
 
 1.）前端代码：
 
-```xml
+```html
 <div>user input：<input type="text"></div>
 <script src="https://cdn.bootcss.com/socket.io/2.2.0/socket.io.js"></script>
 <script>
