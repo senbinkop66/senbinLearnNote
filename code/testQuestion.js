@@ -1,29 +1,22 @@
 /**
  * @param {number[]} nums
- * @return {number[]}
+ * @param {number} k
+ * @return {number}
  */
-var sortArrayByParity = function(nums) {
-    let temp;
-    for (let i=0,j=nums.length-1;i<j;){
-        if (isEven(nums[i])) {  //左边位是偶数，不动
-            i++;
-        }else{
-            //左边位是奇数，与右边的偶数换位置
-            if(isEven(nums[j])){
-                temp=nums[i];
-                nums[i]=nums[j];
-                nums[j]=temp;
-            }else{
-                j--;
-            }
-        }
+var smallestRangeI = function(nums, k) {
+    let maxValue=nums[0];
+    let minValue=nums[0];
+    for (let i=1;i<nums.length;i++){
+        maxValue=Math.max(maxValue,nums[i]);
+        minValue=Math.min(minValue,nums[i]);
     }
-    return nums;
+    if (maxValue-minValue-2*k<=0) {
+        return 0;
+    }else{
+        return maxValue-minValue-2*k;
+    }
 };
-var isEven=function(num){
-    return num%2===0;
-}
 
-let test=[3,1,2,4]
-let result=sortArrayByParity(test);
+let nums = [1,3,6], k = 3;
+let result=smallestRangeI(nums,k);
 console.log(result);
