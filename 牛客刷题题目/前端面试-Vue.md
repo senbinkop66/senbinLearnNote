@@ -1172,3 +1172,6 @@ var app=new Vue({
 - 通过v-bind 绑定$attrs属性，C组件可以直接获取到A组件中传递下来的props(除了B组件中props声明的)
 
 ![img](https://uploadfiles.nowcoder.com/images/20220301/4107856_1646128655053/F98E288D764804F2354ED35EC26D637C)
+
+----
+
