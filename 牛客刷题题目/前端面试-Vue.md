@@ -1175,3 +1175,704 @@ var app=new Vue({
 
 ----
 
+#### 1.18 组建传值，事件总线是怎么用的
+
+**参考答案：**
+
+**中央事件总线**主要用来解决兄弟组件通信的问题。
+
+实现方式：新建一个Vue事件bus对象，bus.emit触发事件，bus.on监听触发的事件。
+
+```js
+Vue.component('brother1',{ 
+ data(){ 
+     return { 
+        myMessage:'Hello brother1' 
+     } 
+ }, 
+ template:` 
+     <div> 
+     	<p>this is brother1 compoent!</p> 
+     	<input type="text" v-model="myMessage" @input="passData(myMessage)"> 
+     </div> 
+ `, 
+ methods:{ 
+     passData(val){ 
+         //触发全局事件globalEvent 
+         bus.$emit('globalEvent',val) 
+     } 
+ } 
+}) 
+Vue.component('brother2',{ 
+ template:` 
+ <div> 
+ <p>this is brother2 compoent!</p> 
+ <p>brother1传递过来的数据：{{brothermessage}}</p> 
+ </div> 
+ `, 
+ data(){ 
+     return { 
+         myMessage:'Hello brother2', 
+         brothermessage:'' 
+     } 
+ }, 
+ mounted(){ 
+      //绑定全局事件globalEvent 
+     bus.$on('globalEvent',(val)=>{ 
+        this.brothermessage=val; 
+     }) 
+ } 
+}) 
+//中央事件总线 
+var bus=new Vue(); 
+var app=new Vue({ 
+ el:'#app', 
+ template:` 
+     <div> 
+        <brother1></brother1> 
+        <brother2></brother2> 
+     </div> 
+ ` 
+}) 
+
+```
+
+![img](https://uploadfiles.nowcoder.com/images/20220301/4107856_1646128668820/B30491C32F761B02007519727B8B2DF9)
+
+----
+
+#### 1.19 vue生命周期中异步加载在mouted还是create里实现
+
+**参考答案:**
+
+最常用的是在 created 钩子函数中调用异步请求
+
+**解析：**
+
+一般来说，可以在，created，mounted中都可以发送数据请求，但是，**大部分时候，会在created发送请求**。
+Created的使用场景：如果页面首次渲染的就来自后端数据。因为，此时data已经挂载到vue实例了。
+在 created（如果希望首次选的数据来自于后端，就在此处发请求）（只发了异步请求，渲染是在后端响应之后才进行的）、beforeMount、mounted（**在mounted中发请求会进行二次渲染**） 这三个钩子函数中进行调用。
+因为在这三个钩子函数中，data 已经创建，可以将服务端端返回的数据进行赋值。但是**最常用的是在 created 钩子函数中调用异步请求**，
+
+因为在 created 钩子函数中调用异步请求有两个优点：
+
+- 第一点：能更快获取到服务端数据，减少页面 loading 时间；
+
+- 第二点：放在 created 中有助于一致性，因为ssr 不支持 beforeMount 、mounted 钩子函数。
+
+----
+
+#### 1.20 vue钩子函数(重点问了keep-alive)
+
+**参考答案：**
+
+Vue生命周期经历哪些阶段：
+
+1. 总体来说：初始化、运行中、销毁
+2. 详细来说：开始创建、初始化数据、编译模板、挂载Dom、渲染→更新→渲染、销毁等一系列过程
+
+生命周期经历的阶段和钩子函数:
+
+1. 实例化vue(组件)对象：new Vue()
+
+2. 初始化事件和生命周期 init events 和 init cycle
+
+3. beforeCreate函数：
+
+   在实例初始化之后，数据观测 (data observer) 和 event/watcher 事件配置之前被调用。
+
+   即此时vue（组件）对象被创建了，但是vue对象的属性还没有绑定，如data属性，computed属性还没有绑定，即没有值。
+
+   此时还没有数据和真实DOM。
+
+   即：属性还没有赋值，也没有动态创建template属性对应的HTML元素（二阶段的createUI函数还没有执行）
+
+4. 挂载数据（属性赋值）
+
+   包括 属性和computed的运算
+
+5. Created函数：
+
+   vue对象的属性有值了，但是DOM还没有生成，$el属性还不存在。
+
+   此时有数据了，但是还没有真实的DOM
+
+   即：data，computed都执行了。属性已经赋值，但没有动态创建template属性对应的HTML元素，所以，此时如果更改数据不会触发updated函数
+
+   如果：数据的初始值就来自于后端，可以发送ajax，或者fetch请求获取数据，但是，此时不会触发updated函数
+
+6. 检查
+
+6.1 检查是否有el属性
+检查vue配置，即new Vue{}里面的el项是否存在，有就继续检查template项。没有则等到手动绑定调用 vm.mount()完成了全局变量el的绑定。
+
+6.2 检查是否有template属性
+
+检查配置中的template项，如果没有template进行填充被绑定区域，则被绑定区域的el对outerHTML（即 整个#app DOM对象，包括和标签）都作为被填充对象替换掉填充区域。即： 如果vue对象中有 template属性，那么，template后面的HTML会替换$el对应的内容。如果有render属 性，那么render就会替换template。 即：优先关系时： render > template > el
+
+
+
+1. beforeMount函数：
+
+   模板编译(template)、数据挂载(把数据显示在模板里)之前执行的钩子函数
+
+   此时 this.$el有值，但是数据还没有挂载到页面上。即此时页面中的{{}}里的变量还没有被数据替换
+
+2. 模板编译：用vue对象的数据（属性）替换模板中的内容
+
+3. Mounted函数：
+
+   模板编译完成，数据挂载完毕
+
+   即：此时已经把数据挂载到了页面上，所以，页面上能够看到正确的数据了。
+
+   一般来说，我们在此处发送异步请求（ajax，fetch，axios等），获取服务器上的数据，显示在DOM里。
+
+4. beforeUpdate函数：
+
+   组件更新之前执行的函数，只有数据更新后，才能调用（触发）beforeUpdate，注意：**此数据一定是在模板上出现的数据**，否则，不会，也没有必要触发组件更新（因为数据不出现在模板里，就没有必要再次渲染）
+
+   数据更新了，但是，vue（组件）对象对应的dom中的内部（innerHTML）没有变，所以叫作**组件更新前**
+
+5. updated函数：
+
+   组件更新之后执行的函数
+
+   vue（组件）对象对应的dom中的内部（innerHTML）改变了，所以，叫作**组件更新之后**
+
+6. activated函数：keep-alive组件激活时调用
+
+7. deactivated函数：keep-alive组件停用时调用
+
+8. beforeDestroy：vue（组件）对象销毁之前
+
+9. destroyed：vue组件销毁后
+
+keep-alive
+
+<keep-alive></keep-alive>包裹动态组件时，会缓存不活动的组件实例,主要用于保留组件状态或避免重新渲染。
+
+**解析：** 比如有一个列表和一个详情，那么用户就会经常执行打开详情=>返回列表=>打开详情…这样的话列表和详情都是一个频率很高的页面，那么就可以对列表组件使用<keep-alive></keep-alive>进行缓存，这样用户每次返回列表的时候，都能从缓存中快速渲染，而不是重新渲染
+
+-----
+
+#### 1.21 vue keep-alive
+
+**参考答案：**
+
+**keep-alive**：keep-alive可以实现组件缓存，是Vue.js的一个内置组件。
+
+作用：
+
+1. 它能够把不活动的组件实例保存在内存中，而不是直接将其销毁
+2. 它是一个抽象组件，**不会被渲染到真实DOM中**，也不会出现在父组件链中
+
+使用方式：
+
+1. 常用的两个属性include/exclude，允许组件有条件的进行缓存。
+2. 两个生命周期activated/deactivated，用来得知当前组件是否处于活跃状态。
+3. keep-alive的中还运用了LRU(Least Recently Used)算法。
+
+原理：Vue 的缓存机制并不是直接存储 DOM 结构，而是将 DOM 节点抽象成了一个个 VNode节点，所以，keep- alive的缓存也是基于VNode节点的而不是直接存储DOM结构。
+
+其实就是将需要缓存的VNode节点保存在this.cache中, 在render时,如果VNode的name符合在缓存条件（可以用include以及exclude控制），则会从this.cache中取出之前缓存的VNode实例进行渲染。
+
+---
+
+#### 1.22 既然函数是引用类型，为什么 vue 的 data 还是可以用函数
+
+**参考答案：**
+
+JavaScript只有函数构成作用域(注意理解作用域，**只有函数{}构成作用域**,对象的{}以及if(){}都不构成作用域),**data是一个函数时，每个组件实例都有自己的作用域，每个实例相互独立，不会相互影响**。
+
+---
+
+#### 1.23 vue 中 $nextTick 作用与原理
+
+**参考答案:**
+
+作用：是**为了可以获取更新后的DOM** 。
+
+由于Vue DOM更新是异步执行的，即修改数据时，视图不会立即更新，而是会监听数据变化，并缓存在同一事件循环中，等同一数据循环中的所有数据变化完成之后，再统一进行视图更新。为了确保得到更新后的DOM，所以设置了 Vue.nextTick()，就是在下次DOM更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的DOM。
+
+原理：
+
+在下次 DOM 更新循环结束之后执行延迟回调。nextTick主要使用了宏任务和微任务。根据执行环境分别尝试采用
+
+- Promise
+- MutationObserver
+- setImmediate
+- 如果以上都不行则采用setTimeout
+
+定义了一个异步方法，多次调用nextTick会将方法存入队列中，通过这个异步方法清空当前队列。
+
+---
+
+#### 1.24 vue的特性
+
+**参考答案：**
+
+- 表单操作
+- 自定义指令
+- 计算属性
+- 过滤器
+- 侦听器
+- 生命周期
+
+---
+
+#### 1.25 v-if v-show区别
+
+**参考答案：**
+
+v-show和v-if都是用来显示隐藏元素，v-if还有一个v-else配合使用，两者达到的效果都一样，但是v-if更消耗性能的，因为v-if在显示隐藏过程中有DOM的添加和删除，v-show就简单多了，只是操作css。
+
+**解析：**
+
+v-show
+
+v-show不管条件是真还是假，第一次渲染的时候都会编译出来，也就是标签都会添加到DOM中。之后切换的时候，通过display: none;样式来显示隐藏元素。可以说只是改变css的样式，几乎不会影响什么性能。
+
+v-if
+
+在首次渲染的时候，如果条件为假，什么也不操作，页面当作没有这些元素。当条件为真的时候，开始局部编译，动态的向DOM元素里面添加元素。当条件从真变为假的时候，开始局部编译，卸载这些元素，也就是删除。
+
+---
+
+#### 1.26 Vue 列表为什么加 key
+
+**参考答案：**
+
+vue中列表循环需加:key="唯一标识" 唯一标识且最好是静态的，因为vue组件高度复用增加Key可以标识组件的唯一性，为了更好地区别各个组件 key的作用主要是为了高效的更新虚拟DOM
+
+**解析：**
+
+vue和react的虚拟DOM的Diff算法大致相同，其核心是基于两个简单的假设
+首先讲一下diff算法的处理方法，对操作前后的dom树同一层的节点进行对比，一层一层对比，
+
+
+
+![img](https://uploadfiles.nowcoder.com/images/20220301/4107856_1646128744220/448BD33DD57542E1E6A5B03957CC7034)
+
+当某一层有很多相同的节点时，也就是列表节点时，Diff算法的更新过程默认情况下也是遵循以上原则。
+
+比如一下这个情况：
+
+
+
+![img](https://uploadfiles.nowcoder.com/images/20220301/4107856_1646128758816/EAA1B46F9F910D663C45A96D03B305C4)
+
+可以在B和C之间加一个F，Diff算法默认执行起来是这样的：
+
+![img](https://uploadfiles.nowcoder.com/images/20220301/4107856_1646128776932/CE0C377B5746FC3BE8D5C8466A40AA87)
+
+即把C更新成F，D更新成C，E更新成D，最后再插入E，是不是很没有效率？
+
+所以我们需要使用key来给每个节点做一个唯一标识，Diff算法就可以正确的识别此节点，找到正确的位置区插入新的节点。
+
+---
+
+#### 1.27 jquery 和 vue相比
+
+**参考答案：**
+
+1. jquery：轻量级的js库
+2. vue：前端js库，是一个精简的MVVM，它专注于MVVM模型的viewModel层，通过双向数据绑定把view和model层连接起来，通过对数据的操作就可以完成对页面视图的渲染。
+
+| **Vue**                                                      | **jQuery**                              |
+| :----------------------------------------------------------- | :-------------------------------------- |
+| 数据驱动视图(MVVM思想:数据视图完全分离；数据驱动、双向绑定；) | 直接操作DOM(获取、修改、赋值、事件绑定) |
+| 操作简单                                                     | 操作麻烦                                |
+| 模块化                                                       | x                                       |
+| 实现单页面                                                   | x                                       |
+| 组件复用                                                     | x                                       |
+| 性能高：使用的虚拟DOM，减少 dom的操作                        | x                                       |
+
+**扩展：**
+
+1. vue适用的场景：复杂数据操作的后台页面，表单填写页面
+   1. jquery适用的场景：比如说一些html5的动画页面，一些需要js来操作页面样式的页面
+   2. 二者也是可以结合起来一起使用的，vue侧重数据绑定，jquery侧重样式操作，动画效果等，则会更加高效率的完成业务需求
+
+----
+
+#### 1.28 为什么选择用vue做页面展示
+
+**参考答案：**
+
+- MVVM 框架：
+
+  Vue 正是使用了这种 MVVM 的框架形式，并且通过声明式渲染和响应式数据绑定的方式来帮助我们完全避免了对 DOM 的操作。
+
+- 单页面应用程序
+
+  Vue 配合生态圈中的 Vue-Router 就可以非常方便的开发复杂的单页应用
+
+- 轻量化与易学习
+
+  Vue 的生产版本只有 30.90KB 的大小，几乎不会对我们的网页加载速度产生影响。同时因为 Vue 只专注于视图层，单独的 Vue 就像一个库一样，所以使我们的学习成本变得非常低
+
+- 渐进式与兼容性
+
+  Vue 的核心库只关注视图层，不仅易于上手，还便于与第三方库或既有项目整合。Vue 只做界面，而把其他的一切都交给了它的周边生态（axios（Vue 官方推荐）、Loadsh.js、Velocity.js 等）来做处理，这就要求 Vue 必须要对其他的框架拥有最大程度的兼容性
+
+- 视图组件化
+
+  Vue 允许通过组件来去拼装一个页面，每个组件都是一个可复用的 Vue 实例，组件里面可以包含自己的数据，视图和代码逻辑。方便复用
+
+- 虚拟 DOM（Virtual DOM）
+
+  Vue 之所以可以完全避免对 DOM 的操作，就是因为 Vue 采用了虚拟 DOM 的方式，不但避免了我们对 DOM 的复杂操作，并且大大的加快了我们应用的运行速度。
+
+- 社区支持
+
+  得益于 Vue 的本土化身份（Vue 的作者为国人尤雨溪），再加上 Vue 本身的强大，所以涌现出了特别多的国内社区，这种情况在其他的框架身上是没有出现过的，这使得我们在学习或者使用 Vue 的时候，可以获得更多的帮助
+
+- 未来的 Vue 走向
+
+  Vue 是由国人尤雨溪在 Google 工作的时候，为了方便自己的工作而开发出来的一个库，而在 Vue 被使用的过程中，突然发现越来越多的人喜欢上了它。所以尤雨溪就进入了一个边工作、边维护的状态，在这种情况下 Vue 依然迅速的发展。
+
+  而现在尤雨溪已经正式辞去了 Google 的工作，开始专职维护 Vue，同时加入进来的还有几十位优秀的开发者，他们致力于把 Vue 打造为最受欢迎的前端框架。事实证明 Vue 确实在往越来越好的方向发展了（从 Angular、React、Vue 的对比图中可以看出 Vue 的势头）。所以我觉得完全不需要担心未来 Vue 的发展，至少在没有新的颠覆性创新出来之前，Vue 都会越做越好。
+
+---
+
+#### 1.29 vue/angular区别
+
+**参考答案：**
+
+1. 体积和性能
+
+   相较于vue，angular显得比较臃肿，比如一个包含了 Vuex + Vue Router 的 Vue 项目 (gzip 之后 30kB) ，而 angular-cli 生成的默认项目尺寸 (~65KB) 还是要小得多。
+
+   在性能上，AngularJS依赖对数据做脏检查，所以Watcher越多越慢。Vue.js使用基于依赖追踪的观察并且使用异步队列更新。所有的数据都是独立触发的。 对于庞大的应用来说，这个优化差异还是比较明显的
+
+2. Virtual DOM vs Incremental DOM
+
+   在底层渲染方面，vue 使用的虚拟dom，而angular 使用的是Incremental DOM，Incremental DOM的优势在于低内开销
+
+3. Vue 相比于 Angular 更加灵活，可以按照不同的需要去组织项目的应用代码。比如，甚至可以直接像引用jquery那样在HTML中引用vue，然后仅仅当成一个前端的模板引擎来用。
+
+4. es6支持
+
+   es6是新一代的javascript标准，对JavaScript进行了大量的改进，使用es6开发已是基本需求。虽然有部分十分老旧的浏览器不支持es6，但是可以利用现代开发工具将es6编译成es5。在对es6的支持上两者都做得很好，（TS本身就是es6的超集）
+
+5. 学习曲线
+
+   针对前端而言，angular的学习曲线相对较大，vue学习起来更容易一些。不过对java和c的使用者而言，angular的静态检查、依赖注入的特性，以及面向对象的编程风格，使得angular都要更亲切一些。
+
+6. 使用热度
+
+   在使用热度上，vue具有更大优势，主要原因是更受数量庞大的中国开发者欢迎。较低的上手难度，易懂的开发文档，以及国人主导开发的光环，都使得vue更为流行
+
+----
+
+#### 1.30 双向数据绑定原理
+
+**参考答案：**
+
+目前几种主流的mvc(vm)框架都实现了单向数据绑定，而我所理解的双向数据绑定无非就是在单向绑定的基础上给可输入元素（input、textare等）添加了change(input)事件，来动态修改model和 view，并没有多高深。所以无需太过介怀是实现的单向或双向绑定。
+
+实现数据绑定的做法有大致如下几种：
+
+**发布者-订阅者模式:** 一般通过sub, pub的方式实现数据和视图的绑定监听，更新数据方式通常做法是vm.set('property', value)
+
+这种方式现在毕竟太low了，我们更希望通过vm.property = value这种方式更新数据，同时自动更新视图，于是有了下面两种方式
+
+**脏值检查:** angular.js 是通过脏值检测的方式比对数据是否有变更，来决定是否更新视图，最简单的方式就是通过setInterval()定时轮询检测数据变动，当然Google不会这么low，angular只有在指定的事件触发时进入脏值检测，大致如下：
+
+- DOM事件，譬如用户输入文本，点击按钮等。( ng-click )
+- XHR响应事件 ( $http )
+- 浏览器Location变更事件 ( $location )
+- Timer事件( timeout，interval )
+- 执行 digest()或apply()
+
+**数据劫持:** vue.js 则是采用数据劫持结合发布者-订阅者模式的方式，通过Object.defineProperty()来劫持各个属性的setter，getter，在数据变动时发布消息给订阅者，触发相应的监听回调。
+
+----
+
+#### 1.31 既然 Vue 通过数据劫持可以精准探测数据在具体dom上的变化,为什么还需要虚拟 DOM diff 呢?
+
+**参考答案**：
+
+**前置知识:** 依赖收集、虚拟 DOM、响应式系统
+
+现代前端框架有两种方式侦测变化，一种是 **pull** ，一种是 **push**
+
+**pull:** 其代表为React，我们可以回忆一下React是如何侦测到变化的,我们通常会用setStateAPI显式更新，然后React会进行一层层的Virtual Dom Diff操作找出差异，然后Patch到DOM上，React从一开始就不知道到底是哪发生了变化，只是知道「有变化了」，然后再进行比较暴力的Diff操作查找「哪发生变化了」，另外一个代表就是Angular的脏检查操作。
+
+**push:** Vue的响应式系统则是push的代表，当Vue程序初始化的时候就会对数据data进行依赖的收集，一但数据发生变化,响应式系统就会立刻得知。因此Vue是一开始就知道是「在哪发生变化了」，但是这又会产生一个问题，如果你熟悉Vue的响应式系统就知道，通常一个绑定一个数据就需要一个Watcher
+
+**一但我们的绑定细粒度过高就会产生大量的Watcher，这会带来内存以及依赖追踪的开销**，而细粒度过低会无法精准侦测变化,因此Vue的设计是选择中等细粒度的方案,在组件级别进行push侦测的方式,也就是那套响应式系统,通常我们会第一时间侦测到发生变化的组件,然后在组件内部进行Virtual Dom Diff获取更加具体的差异，而Virtual Dom Diff则是pull操作，Vue是push+pull结合的方式进行变化侦测的。
+
+---
+
+#### 1.32 简单聊聊 new Vue 以后发生的事情
+
+**参考答案**：
+
+1. new Vue会调用 Vue 原型链上的_init方法对 Vue 实例进行初始化；
+2. 首先是initLifecycle初始化生命周期，对 Vue 实例内部的一些属性（如 children、parent、isMounted）进行初始化；
+3. initEvents，初始化当前实例上的一些自定义事件（Vue.$on）；
+4. initRender，解析slots绑定在 Vue 实例上，绑定createElement方法在实例上；
+5. 完成对生命周期、自定义事件等一系列属性的初始化后，触发生命周期钩子beforeCreate；
+6. initInjections，在初始化data和props之前完成依赖注入（类似于 React.Context）；
+7. initState，完成对data和props的初始化，同时对属性完成数据劫持内部，启用监听者对数据进行监听（更改）；
+8. initProvide，对依赖注入进行解析；
+9. 完成对数据（state 状态）的初始化后，触发生命周期钩子created；
+10. 进入挂载阶段，将 vue 模板语法通过vue-loader解析成虚拟 DOM 树，虚拟 DOM 树与数据完成双向绑定，触发生命周期钩子beforeMount；
+11. 将解析好的虚拟 DOM 树通过 vue 渲染成真实 DOM，触发生命周期钩子mounted；
+
+----
+
+#### 1.33 v-for中的key的理解？
+
+**参考答案**：
+
+需要使用key来给每个节点做一个唯一标识，Diff算法就可以正确的识别此节点。主要是为了高效的更新虚拟DOM。
+
+----
+
+#### 1.34 vue首屏白屏如何解决？
+
+**参考答案**：
+
+1. 路由懒加载
+2. vue-cli开启打包压缩 和后台配合 gzip访问
+3. 进行cdn加速
+4. 开启vue服务渲染模式
+5. 用webpack的externals属性把不需要打包的库文件分离出去，减少打包后文件的大小
+6. 在生产环境中删除掉不必要的console.log
+
+```web-idl
+  plugins: [
+    new webpack.optimize.UglifyJsPlugin({ //添加-删除console.log
+      compress: {
+        warnings: false,
+        drop_debugger: true,
+        drop_console: true
+      },
+      sourceMap: true
+    }),
+```
+
+7. 开启nginx的gzip ,在nginx.conf配置文件中配置
+
+```json
+http {  //在 http中配置如下代码，
+   gzip on;
+   gzip_disable "msie6"; 
+   gzip_vary on; 
+   gzip_proxied any;
+   gzip_comp_level 8; #压缩级别
+   gzip_buffers 16 8k;
+   #gzip_http_version 1.1;
+   gzip_min_length 100; #不压缩临界值
+   gzip_types text/plain application/javascript application/x-javascript text/css
+    application/xml text/javascript application/x-httpd-php image/jpeg image/gif image/png;
+ }
+```
+
+8. 添加loading效果，给用户一种进度感受
+
+---
+
+#### 1.35 vue单页面和传统的多页面区别？
+
+**参考答案**:
+
+单页面应用（SPA）
+
+通俗一点说就是指只有一个主页面的应用，浏览器一开始要加载所有必须的 html, js, css。所有的页面内容都包含在这个所谓的主页面中。但在写的时候，还是会分开写（页面片段），然后在交互的时候由路由程序动态载入，单页面的页面跳转，仅刷新局部资源。多应用于pc端。
+
+多页面（MPA）
+
+指一个应用中有多个页面，页面跳转时是整页刷新
+
+**单页面的优点：**
+
+用户体验好，快，内容的改变不需要重新加载整个页面，基于这一点spa对服务器压力较小；前后端分离；页面效果会比较炫酷（比如切换页面内容时的专场动画）。
+
+**单页面缺点：**
+
+不利于seo；导航不可用，如果一定要导航需要自行实现前进、后退。（由于是单页面不能用浏览器的前进后退功能，**所以需要自己建立堆栈管理**）；初次加载时耗时多；页面复杂度提高很多。
+
+---
+
+#### 1.36 root、refs、$parent的使用？
+
+**参考答案**：
+
+$root
+
+访问根元素。
+
+语法：
+this.$root.属性名。
+
+在普通html工程内的用法看官网即可。
+
+如果在vue-cli工程内使用$root:
+有人可能认为根元素是App.vue。但是其实是main.js中new Vue这个实例，在new Vue这个实例中定义data即可
+
+$root可以将根组件作为一个全局store来访问或使用。
+
+> 官网提示：对于这种在根组件定义data以实现全局数据来替换vuex的方式仅适用于demo或者非常小型的有少量组件的应用。但是对于中大型应用就很不适用了。强烈推荐适用Vuex
+> 
+
+$parent
+
+$parent属性可以用来从一个子组件访问父组件的实例，可以替代将数据以 prop 的方式传入子组件的方式；当变更父级组件的数据的时候，容易造成调试和理解难度增加；
+
+访问父元素。
+
+语法很简单：
+this.$parent.`属性名`。
+
+$refs
+$refs用来实现父组件对于特定子组件进行访问
+
+子组件标签需要添加ref属性值，父组件可通过this.$refs.ref属性值来访问实例
+举例：
+
+```vue
+<base-input ref="usernameInput"></base-input>
+
+this.$refs.usernameInput
+```
+
+> $refs 只会在组件渲染完成之后生效，并且它们不是响应式的。这仅作为一个用于直接操作子组件的“逃生舱”——你应该避免在模板或计算属性中访问 $refs。
+
+$children
+
+$children返回的是一个组件集合，如果你能清楚的知道子组件的顺序，你也可以使用下标来操作；
+this.$children[0]
+
+---
+
+#### 1.37 路由跳转和location.href的区别？
+
+**参考答案**：
+
+使用location.href='/url'来跳转，简单方便，但是刷新了页面；
+使用路由方式跳转，无刷新页面，静态跳转；
+
+---
+
+#### 1.38 scss是什么？在vue.cli中的安装使用步骤是？有哪几大特性？
+
+**参考答案**：
+
+css的预编译。
+
+使用步骤：
+
+1. 先装css-loader、node-loader、sass-loader等加载器模块
+2. 在build目录找到webpack.base.config.js，在那个extends属性中加一个拓展.scss
+3. 在同一个文件，配置一个module属性
+4. 然后在组件的style标签加上lang属性 ，例如：lang=”scss”
+
+特性:
+
+可以用变量，例如（$变量名称=值）；
+可以用混合器，例如（）
+可以嵌套
+
+----
+
+#### 1.39 delete与vue.delete区别?
+
+delte会删除数组的值，但是它依然会在内存中占位置
+而vue.delete会删除数组在内存中的占位
+
+```js
+let arr1 = [1,2,3]
+let arr2 = [1,2,3]
+delete arr1[1]
+this.$delete(arr2,2)
+console.log(arr1)    //【1, empty, 3】
+console.log(arr2)    //【1,2】
+```
+
+---
+
+#### 1.40 computed和watch的区别
+
+**参考答案**：
+
+computed
+
+计算结果并返回，只有当被计算的属性发生改变时才会触发（即：计算属性的结果会被缓存，除非依赖的响应属性变化才会重新计算）
+
+watch
+
+监听某一个值，当被监听的值发生变化时，执行相关操作。
+
+与computed的区别是，watch更加适用于监听某一个值的变化，并做对应操作，比如请求后的接口等。而computed适用于计算已有的值并返回结果。 监听简单数据类型：
+
+```js
+data(){      
+    return{        
+        'first':2     
+    }   
+},   
+ watch:{      
+     first(){        
+         console.log(this.first)    
+    }   
+ },
+```
+
+---
+
+#### 1.401Vue 为什么要用 vm.$set() 解决对象新增属性不能响应的问题 ？你能说说如下代码的实现原理么？
+
+**参考答案**：
+
+**1）Vue为什么要用vm.$set() 解决对象新增属性不能响应的问题**
+
+1. Vue使用了Object.defineProperty实现双向数据绑定
+2. 在初始化实例时对属性执行 getter/setter 转化
+3. 属性必须在data对象上存在才能让Vue将它转换为响应式的（这也就造成了Vue无法检测到对象属性的添加或删除）
+
+所以Vue提供了Vue.set (object, propertyName, value) / vm.$set (object, propertyName, value)
+
+**2）框架本身是如何实现的呢?**
+
+> Vue 源码位置：vue/src/core/instance/index.js
+
+```js
+export function set (target: Array<any> | Object, key: any, val: any): any {
+  // target 为数组  
+  if (Array.isArray(target) && isValidArrayIndex(key)) {
+    // 修改数组的长度, 避免索引>数组长度导致splcie()执行有误
+    target.length = Math.max(target.length, key)
+    // 利用数组的splice变异方法触发响应式  
+    target.splice(key, 1, val)
+    return val
+  }
+  // key 已经存在，直接修改属性值  
+  if (key in target && !(key in Object.prototype)) {
+    target[key] = val
+    return val
+  }
+  const ob = (target: any).__ob__
+  // target 本身就不是响应式数据, 直接赋值
+  if (!ob) {
+    target[key] = val
+    return val
+  }
+  // 对属性进行响应式处理
+  defineReactive(ob.value, key, val)
+  ob.dep.notify()
+  return val
+}
+```
+
+我们阅读以上源码可知，vm.$set 的实现原理是：
+
+1. 如果目标是数组，直接使用数组的 splice 方法触发相应式；
+2. 如果目标是对象，会先判读属性是否存在、对象是否是响应式，
+3. 最终如果要对属性进行响应式处理，则是通过调用 defineReactive 方法进行响应式处理
+
+---
+
