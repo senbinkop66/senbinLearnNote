@@ -1,22 +1,39 @@
 /**
- * @param {number[]} nums
- * @param {number} k
- * @return {number}
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
  */
-var smallestRangeI = function(nums, k) {
-    let maxValue=nums[0];
-    let minValue=nums[0];
-    for (let i=1;i<nums.length;i++){
-        maxValue=Math.max(maxValue,nums[i]);
-        minValue=Math.min(minValue,nums[i]);
-    }
-    if (maxValue-minValue-2*k<=0) {
-        return 0;
-    }else{
-        return maxValue-minValue-2*k;
-    }
-};
+/**
+ * @param {TreeNode} root1
+ * @param {TreeNode} root2
+ * @return {number[]}
+ */
+var getAllElements = function(root1, root2) {
+    let value1=[];
+    let value2=[]
+    //中序遍历
+    const inorder=(root,ret)=>{
+        if (root) {
+            inorder(root.left,ret);
+            ret.push(root.val);
+            inorder(root.right,ret);
+        }
+    };
 
-let nums = [1,3,6], k = 3;
-let result=smallestRangeI(nums,k);
-console.log(result);
+    inorder(root1,value1);
+    inorder(root2,value2);
+
+    let ans=[];
+    while(value1.length>0 && value2.length>0){
+        if (value1[0]<value2[0]) {
+            ans.push(value1.shift());
+        }else{
+            ans.push(value2.shift());
+        }
+    }
+    ans=ans.concat(value1).concat(value2);
+    return ans;
+};
