@@ -3438,6 +3438,8 @@ $ node client.js
 
 # Node.js Express 框架
 
+## Express 简介
+
 Express是一个简洁而灵活的node.js Web应用框架, 提供了一系列强大特性帮助你创建各种Web应用，和丰富的HTTP工具。
 
 使用Express可以快速地搭建一个完整功能的网站。
@@ -3447,3 +3449,919 @@ Express 框架核心特性包括：
 - 可以设置中间件来响应HTTP请求。
 - 定义了路由表用于执行不同的HTTP请求动作。
 - 可以通过向模板传递参数来动态渲染HTML页面。
+
+## 安装 Express
+
+安装Express并将其保存到依赖列表中：
+
+```bash
+$ npm install express --save
+```
+
+以上命令会将Express框架安装在当期目录的**node_modules**目录中， **node_modules**目录下会自动创建express目录。以下几个重要的模块是需要与express框架一起安装的：
+
+- **body-parser** - node.js中间件，用于处理JSON, Raw, Text和URL编码的数据。
+- **cookie-parser** - 这就是一个解析Cookie的工具。通过req.cookies可以取到传过来的cookie，并把它们转成对象。
+- **multer** - node.js中间件，用于处理enctype="multipart/form-data"（设置表单的MIME编码）的表单数据。
+
+```bash
+$ npm install body-parser --save
+$ npm install cookie-parser --save
+$ npm install multer --save
+```
+
+## Express 框架实例
+
+接下来我们使用Express框架来输出"Hello World"。
+
+以下实例中我们引入了express模块，并在客户端发起请求后，响应"Hello World"字符串。
+
+创建express_demo.js文件，代码如下所示：
+
+```js
+const express=require("express");
+
+var app=express();
+
+app.get("/",(req,res)=>{
+	res.send("Hello World");
+});
+
+var server=app.listen(8081,function(){
+	var host=server.address().address;
+	var port=server.address().port;
+	console.log("应用实例，访问地址为 http:\/\/%s:%s", host, port);
+});
+```
+
+```bash
+$ node main.js
+应用实例，访问地址为 http://:::8081
+```
+
+在浏览器中访问http://127.0.0.1:8081
+
+## 请求和响应
+
+Express应用使用回调函数的参数： **request**和**response**对象来处理请求和响应的数据。
+
+```
+app.get('/', function (req, res) {
+   // --
+})
+```
+
+**request**和**response**对象的具体介绍：
+
+**Request 对象** - request对象表示HTTP请求，包含了请求查询字符串，参数，内容，HTTP头部等属性。常见属性有：
+
+1. req.app：当callback为外部文件时，用req.app访问express的实例
+2. req.baseUrl：获取路由当前安装的URL路径
+3. req.body / req.cookies：获得「请求主体」/ Cookies
+4. req.fresh / req.stale：判断请求是否还「新鲜」
+5. req.hostname / req.ip：获取主机名和IP地址
+6. req.originalUrl：获取原始请求URL
+7. req.params：获取路由的parameters
+8. req.path：获取请求路径
+9. req.protocol：获取协议类型
+10. req.query：获取URL的查询参数串
+11. req.route：获取当前匹配的路由
+12. req.subdomains：获取子域名
+13. req.accpets（）：检查请求的Accept头的请求类型
+14. req.acceptsCharsets / req.acceptsEncodings / req.acceptsLanguages
+15. req.get（）：获取指定的HTTP请求头
+16. req.is（）：判断请求头Content-Type的MIME类型
+
+**Response 对象** - response对象表示HTTP响应，即在接收到请求时向客户端发送的HTTP响应数据。常见属性有：
+
+1. res.app：同req.app一样
+2. res.append（）：追加指定HTTP头
+3. res.set（）在res.append（）后将重置之前设置的头
+4. res.cookie（name，value [，option]）：设置Cookie
+5. opition: domain / expires / httpOnly / maxAge / path / secure / signed
+6. res.clearCookie（）：清除Cookie
+7. res.download（）：传送指定路径的文件
+8. res.get（）：返回指定的HTTP头
+9. res.json（）：传送JSON响应
+10. res.jsonp（）：传送JSONP响应
+11. res.location（）：只设置响应的Location HTTP头，不设置状态码或者close response
+12. res.redirect（）：设置响应的Location HTTP头，并且设置状态码302
+13. res.send（）：传送HTTP响应
+14. res.sendFile（path [，options] [，fn]）：传送指定路径的文件 -会自动根据文件extension设定Content-Type
+15. res.set（）：设置HTTP头，传入object可以一次设置多个头
+16. res.status（）：设置HTTP状态码
+17. res.type（）：设置Content-Type的MIME类型
+
+## 路由
+
+我们已经了解了HTTP请求的基本应用，而路由决定了由谁(指定脚本)去响应客户端请求。
+
+在HTTP请求中，我们可以通过路由提取出请求的URL以及GET/POST参数。
+
+接下来我们扩展Hello World，添加一些功能来处理更多类型的HTTP请求。
+
+创建express_demo2.js文件，代码如下所示：
+
+```js
+const express=require("express");
+
+var app=express();
+
+//  主页输出 "Hello World"
+app.get("/",(req,res)=>{
+	console.log("主页 GET 请求");
+	res.send("Hello GET");
+});
+
+//  POST 请求
+app.post("/",(req,res)=>{
+	console.log("主页 POST 请求");
+	res.send('Hello POST');
+});
+
+//  /del_user 页面响应
+app.delete("/del_user",(req,res)=>{
+	console.log("/del_user 响应 DELETE 请求");
+	res.send('删除页面');
+});
+
+//  /list_user 页面 GET 请求
+app.get("/list_user",(req,res)=>{
+	console.log("/list_user GET 请求");
+	res.send('用户列表页面');
+});
+
+// 对页面 abcd, abxcd, ab123cd, 等响应 GET 请求
+app.get("/ab*cd",(req,res)=>{
+	console.log("/ab*cd GET 请求");
+	res.send('正则匹配');
+});
+
+
+var server=app.listen(8081,function(){
+	var host=server.address().address;
+	var port=server.address().port;
+	console.log("应用实例，访问地址为 http:\/\/%s:%s", host, port);
+});
+```
+
+```
+在浏览器中访问http://127.0.0.1:8081/list_user
+http://127.0.0.1:8081/abgcd
+```
+
+## 静态文件
+
+Express提供了内置的中间件**express.static**来设置静态文件如：图片，CSS, JavaScript等。
+
+你可以使用**express.static**中间件来设置静态文件路径。例如，如果你将图片， CSS, JavaScript文件放在public目录下，你可以这么写：
+
+```js
+app.use(express.static('public'));
+```
+
+我们可以到public/images目录下放些图片,如下所示：
+
+```bash
+$ ls public/images/
+bg1.jpg  bg2.jpg  bg3.png  img1.png  img2.png  img3.png
+```
+
+让我们再修改下"Hello Word"应用添加处理静态文件的功能。
+
+创建express_demo3.js文件，代码如下所示：
+
+```js
+const express=require("express");
+
+var app=express();
+app.use(express.static("public"));
+
+//  主页输出 "Hello World"
+app.get("/",(req,res)=>{
+	console.log("主页 GET 请求");
+	res.send("Hello GET");
+});
+
+var server=app.listen(8081,function(){
+	var host=server.address().address;
+	var port=server.address().port;
+	console.log("应用实例，访问地址为 http:\/\/%s:%s", host, port);
+});
+```
+
+```
+http://127.0.0.1:8081/images/img1.png
+```
+
+## GET 方法
+
+以下实例演示了在表单中通过GET方法提交两个参数，我们可以使用server.js文件内的**process_get**路由器来处理输入：
+
+index.html文件代码如下：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>test</title>
+</head>
+<body>
+	<form action="http://127.0.0.1:8081/process_get" method="get">
+		First Name: <input type="text" name="first_name">  <br>
+		Last Name: <input type="text" name="last_name"><br>
+		<input type="submit" value="Submit">
+	</form>
+</body>
+</html>
+```
+
+server.js文件代码如下:
+
+```js
+const express=require("express");
+
+var app=express();
+app.use(express.static("public"));
+
+
+app.get("/index.html",(req,res)=>{
+	res.sendFile(__dirname+"/"+"index.html");
+});
+
+app.get("/process_get",(req,res)=>{
+	// 输出 JSON 格式
+	var response={
+		first_name:req.query.first_name,
+		last_name:req.query.last_name
+	};
+	console.log(response);
+	res.end(JSON.stringify(response));
+});
+
+var server=app.listen(8081,function(){
+	var host=server.address().address;
+	var port=server.address().port;
+	console.log("应用实例，访问地址为 http:\/\/%s:%s", host, port);
+});
+
+//http://127.0.0.1:8081/index.html
+```
+
+```bash
+$ node main.js
+应用实例，访问地址为 http://:::8081
+{ first_name: 'senbin', last_name: 'kop' }
+```
+
+## POST 方法
+
+以下实例演示了在表单中通过POST方法提交两个参数，我们可以使用server.js文件内的**process_post**路由器来处理输入：
+
+index.html文件代码修改如下：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>test</title>
+</head>
+<body>
+	<form action="http://127.0.0.1:8081/process_post" method="post">
+		First Name: <input type="text" name="first_name">  <br>
+		Last Name: <input type="text" name="last_name">
+		<input type="submit" value="Submit">
+	</form>
+</body>
+</html>
+```
+
+server.js文件代码修改如下:
+
+```js
+const express=require("express");
+const bodyParser=require("body-parser");
+
+var app=express();
+app.use(express.static("public"));
+
+// 创建 application/x-www-form-urlencoded 编码解析
+var urlencodedParser=bodyParser.urlencoded({extended:true});
+
+
+app.get("/index.html",(req,res)=>{
+	res.sendFile(__dirname+"/"+"index.html");
+});
+
+app.post("/process_post",urlencodedParser,(req,res)=>{
+	// 输出 JSON 格式
+	var response={
+		first_name:req.body.first_name,
+		last_name:req.body.last_name
+	};
+	console.log(response);
+	res.end(JSON.stringify(response));
+});
+
+var server=app.listen(8081,function(){
+	var host=server.address().address;
+	var port=server.address().port;
+	console.log("应用实例，访问地址为 http:\/\/%s:%s", host, port);
+});
+
+// http://127.0.0.1:8081/index.html
+```
+
+```bash
+$ node main.js
+应用实例，访问地址为 http://:::8081
+{ first_name: 'senbin', last_name: 'kop' }
+```
+
+---
+
+## 文件上传
+
+以下我们创建一个用于上传文件的表单，使用POST方法，表单enctype属性设置为multipart/form-data。
+
+index.html文件代码修改如下：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>test</title>
+</head>
+<body>
+	<h3>文件上传：</h3>
+	选择一个文件上传: <br />
+	<form action="/file_upload" method="post" enctype="multipart/form-data">
+		<input type="file" name="img" size="50">  <br>
+		<input type="submit" value="upload">
+	</form>
+</body>
+</html>
+```
+
+server.js文件代码修改如下:
+
+```js
+const fs=require("fs");
+const express=require("express");
+const multer=require("multer");
+const pathLib=require("path");
+const bodyParser=require("body-parser");
+
+var app=express();
+app.use(express.static("public"));
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(multer({dest:"/tmp/"}).any());
+
+
+
+app.get("/index.html",(req,res)=>{
+	res.sendFile(__dirname+"/"+"index.html");
+});
+
+app.post("/file_upload",(req,res)=>{
+	console.log(req.files[0]);  // 上传的文件信息
+	
+	var des_file = __dirname + "/" + req.files[0].originalname;
+	fs.readFile( req.files[0].path, function (err, data) {
+        fs.writeFile(des_file, data, function (err) {
+         if( err ){
+              console.log( err );
+         }else{
+               response = {
+                   message:'File uploaded successfully', 
+                   filename:req.files[0].originalname
+              };
+          }
+          console.log( response );
+          res.end( JSON.stringify( response ) );
+       });
+   });
+});
+var server=app.listen(8081,function(){
+	var host=server.address().address;
+	var port=server.address().port;
+	console.log("应用实例，访问地址为 http:\/\/%s:%s", host, port);
+});
+```
+
+```bash
+$ node main.js
+应用实例，访问地址为 http://:::8081
+{
+  fieldname: 'img',
+  originalname: 'bg3.png',
+  encoding: '7bit',
+  mimetype: 'image/png',
+  destination: '/tmp/',
+  filename: '8835bfd5046985703e9e88897ce2dbbb',
+  path: '\\tmp\\8835bfd5046985703e9e88897ce2dbbb',
+  size: 49367
+}
+{ message: 'File uploaded successfully', filename: 'bg3.png' }
+
+```
+
+## Cookie 管理
+
+我们可以使用中间件向Node.js服务器发送cookie信息，以下代码输出了客户端发送的cookie信息：
+
+```js
+const fs=require("fs");
+const express=require("express");
+const cookieParser=require("cookie-parser");
+
+var app=express();
+app.use(cookieParser);
+
+
+app.get("/",(req,res)=>{
+	console.log("Cookies:"+req.cookies);
+});
+
+app.listen(8081);
+
+// http://127.0.0.1:8081 
+```
+
+可以访问 http://127.0.0.1:8081 并查看终端信息的输出
+
+```bash
+$ node main.js
+Cookies:  [Object: null prototype] {}
+
+```
+
+---
+
+# Node.js RESTful API
+
+## 什么是 REST？
+
+REST中文解释为，表述性状态传递（英文：Representational State Transfer，简称REST），是Roy Fielding博士在2000年他的博士论文中提出来的一种软件架构风格。
+
+表述性状态转移是一组架构约束条件和原则。满足这些约束条件和原则的应用程序或设计就是RESTful。
+
+需要注意的是，REST是设计风格而不是标准。REST通常基于使用HTTP，URI和XML（标准通用标记语言下的一个子集）以及[HTML](https://www.w3cschool.cn/html/html-intro.html)（标准通用标记语言下的一个应用）这些现有的广泛流行的协议和标准。REST通常使用JSON数据格式。
+
+### HTTP 方法
+
+以下为REST基本架构的四个方法：
+
+- **GET** - 用于获取数据。
+- **PUT** - 用于添加数据。
+- **DELETE** - 用于删除数据。
+- **POST** - 用于更新或添加数据。
+
+## RESTful Web Services
+
+Web service是一个平台独立的，低耦合的，自包含的、基于可编程的web的应用程序，可使用开放的XML（标准通用标记语言下的一个子集）标准来描述、发布、发现、协调和配置这些应用程序，用于开发分布式的互操作的应用程序。
+
+RESTful是基于REST架构的Web Services。
+
+由于轻量级以及通过HTTP直接传输数据的特性，Web服务的RESTful方法已经成为最常见的替代方法。可以使用各种语言（比如，Java程序、Perl、Ruby、Python、PHP和Javascript[包括Ajax]）实现客户端。
+
+RESTful Web服务通常可以通过自动客户端或代表用户的应用程序访问。但是，这种服务的简便性让用户能够与之直接交互，使用它们的Web浏览器构建一个GET URL并读取返回的内容。
+
+更多介绍，可以查看：[RESTful 架构详解](https://www.w3cschool.cn/w3cnote/restful-architecture.html)
+
+## 创建 RESTful
+
+首先，创建一个json数据资源文件users.json，内容如下：
+
+```json
+{
+   "user1" : {
+      "name" : "mahesh",
+	  "password" : "password1",
+	  "profession" : "teacher",
+	  "id": 1
+   },
+   "user2" : {
+      "name" : "suresh",
+	  "password" : "password2",
+	  "profession" : "librarian",
+	  "id": 2
+   },
+   "user3" : {
+      "name" : "ramesh",
+	  "password" : "password3",
+	  "profession" : "clerk",
+	  "id": 3
+   }
+}
+```
+
+基于以上数据，我们创建以下RESTful API：
+
+| 序号 | URI        | HTTP 方法 | 发送内容    | 结果             |
+| :--- | :--------- | :-------- | :---------- | :--------------- |
+| 1    | listUsers  | GET       | 空          | 显示所有用户列表 |
+| 2    | addUser    | POST      | JSON 字符串 | 添加新用户       |
+| 3    | deleteUser | DELETE    | JSON 字符串 | 删除用户         |
+| 4    | :id        | GET       | 空          | 显示用户详细信息 |
+
+### 获取用户列表：
+
+以下代码，我们创建了RESTful API **listUsers**，用于读取用户的信息列表， server.js文件代码如下所示：
+
+```js
+const fs=require("fs");
+const express=require("express");
+
+var app = express()
+
+app.get('/listUsers', function(req, res) {
+	fs.readFile(__dirname+"/"+"users.json","utf8",(err,data)=>{
+		console.log(data);
+		res.end(data);
+	})
+})
+
+var server = app.listen(8081, function () {
+  var host = server.address().address
+  var port = server.address().port
+  console.log("应用实例，访问地址为 http:\/\/%s:%s", host, port)
+});
+
+// 在浏览器中访问 http://127.0.0.1:8081/listUsers
+```
+
+```bash
+$ node main.js
+应用实例，访问地址为 http://:::8081
+{
+   "user1" : {
+      "name" : "mahesh",
+          "password" : "password1",
+          "profession" : "teacher",
+          "id": 1
+   },
+   "user2" : {
+      "name" : "suresh",
+          "password" : "password2",
+          "profession" : "librarian",
+          "id": 2
+   },
+   "user3" : {
+      "name" : "ramesh",
+          "password" : "password3",
+          "profession" : "clerk",
+          "id": 3
+   }
+}
+
+```
+
+### 添加用户
+
+如果要添加新的用户数据，可以通过创建RESTful API **addUser实现**，server.js文件代码如下所示：
+
+```js
+const fs=require("fs");
+const express=require("express");
+
+var app = express()
+
+app.get('/listUsers', function(req, res) {
+	fs.readFile(__dirname+"/"+"users.json","utf8",(err,data)=>{
+		console.log(data);
+		res.end(data);
+	})
+});
+
+//添加的新用户数据
+var user = {
+   "user4" : {
+      "name" : "mohit",
+      "password" : "password4",
+      "profession" : "teacher",
+      "id": 4
+   }
+}
+app.get("/addUser",(req,res)=>{
+	// 读取已存在的数据
+	fs.readFile(__dirname+"/"+"users.json","utf8",(err,data)=>{
+		data=JSON.parse(data);
+		data["user4"]=users["users4"];
+		console.log(data);
+		res.end(JSON.stringify(data));
+	});
+})
+
+var server = app.listen(8081, function () {
+  var host = server.address().address
+  var port = server.address().port
+  console.log("应用实例，访问地址为 http:\/\/%s:%s", host, port)
+});
+
+// http://127.0.0.1:8081 
+```
+
+### 显示用户详情
+
+以下代码，我们创建了RESTful API **:id（用户id）**， 用于读取指定用户的详细信息，server.js文件代码如下所示：
+
+```js
+const fs=require("fs");
+const express=require("express");
+
+var app = express()
+
+app.get('/:id', function(req, res) {
+	// 首先我们读取已存在的用户
+	fs.readFile(__dirname+"/"+"users.json","utf8",(err,data)=>{
+		data=JSON.parse(data);
+		var user=data["user"+req.params.id];
+		console.log(user);
+		res.end(JSON.stringify(user));
+	})
+});
+
+
+var server = app.listen(8081, function () {
+  var host = server.address().address
+  var port = server.address().port
+  console.log("应用实例，访问地址为 http:\/\/%s:%s", host, port)
+});
+
+// http://127.0.0.1:8081/2
+```
+
+### 删除用户
+
+以下代码，我们创建了RESTful API **deleteUser**， 用于删除指定用户的详细信息，以下实例中，用户id为2，server.js文件代码如下所示：
+
+```js
+const fs=require("fs");
+const express=require("express");
+
+var app = express()
+
+var id=2;
+
+app.get('/deleteUser', function(req, res) {
+	// 首先我们读取已存在的用户
+	fs.readFile(__dirname+"/"+"users.json","utf8",(err,data)=>{
+		data=JSON.parse(data);
+		delete data["user"+2];
+		console.log(data);
+		res.end(JSON.stringify(data));
+	})
+});
+
+
+var server = app.listen(8081, function () {
+  var host = server.address().address
+  var port = server.address().port
+  console.log("应用实例，访问地址为 http:\/\/%s:%s", host, port)
+});
+
+// http://127.0.0.1:8081/2
+```
+
+----
+
+# Node.js 多进程
+
+Node.js本身是以单线程的模式运行的，但它使用的是事件驱动来处理并发，这样有助于我们在多核 cpu 的系统上创建多个子进程，从而提高性能。
+
+每个子进程总是带有三个流对象：child.stdin, child.stdout和child.stderr。他们可能会共享父进程的stdio流，或者也可以是独立的被导流的流对象。
+
+Node提供了child_process模块来创建子进程，方法有：
+
+- **exec** - child_process.exec使用子进程执行命令，缓存子进程的输出，并将子进程的输出以回调函数参数的形式返回。
+- **spawn** - child_process.spawn使用指定的命令行参数创建新进程。
+- **fork** - child_process.fork是spawn()的特殊形式，用于在子进程中运行的模块，如fork('./son.js')相当于spawn('node', ['./son.js']) 。与spawn方法不同的是，fork会在父进程与子进程之间，建立一个通信管道，用于进程之间的通信。
+
+## exec() 方法
+
+child_process.exec使用子进程执行命令，缓存子进程的输出，并将子进程的输出以回调函数参数的形式返回。
+
+语法如下所示：
+
+```
+child_process.exec(command[, options], callback)
+```
+
+参数说明如下：
+
+**command：** 字符串， 将要运行的命令，参数使用空格隔开
+
+**options ：对象，可以是：**
+
+- cwd，字符串，子进程的当前工作目录
+- env，对象，环境变量键值对
+- encoding，字符串，字符编码（默认： 'utf8'）
+- shell，字符串，将要执行命令的Shell（默认: 在UNIX中为`/bin/sh`， 在Windows中为`cmd.exe`， Shell应当能识别`-c`开关在UNIX中，或`/s /c`在 Windows中。 在Windows中，命令行解析应当能兼容`cmd.exe`）
+- timeout，数字，超时时间（默认： 0）
+- maxBuffer，数字， 在stdout或stderr中允许存在的最大缓冲（二进制），如果超出那么子进程将会被杀死（默认: 200*1024）
+- killSignal，字符串，结束信号（默认：'SIGTERM'）
+- uid，数字，设置用户进程的ID
+- gid，数字，设置进程组的ID
+
+**callback ：**回调函数，包含三个参数error, stdout和stderr。
+
+exec()方法返回最大的缓冲区，并等待进程结束，一次性返回缓冲区的内容。
+
+让我们创建两个js文件support.js和master.js。
+
+support.js文件代码：
+
+```js
+console.log("进程 " + process.argv[2] + " 执行。" );
+```
+
+master.js文件代码：
+
+```js
+const fs=require("fs");
+const child_process=require("child_process");
+
+for (let i=0;i<3;i++){
+	var workProcess=child_process.exec("node support.js "+i,(error,stdout,stderr)=>{
+		if (error) {
+			console.log(error.stack);
+			console.log("Error code: "+error.code);
+			console.log("Signal received: "+error.signal);
+		}
+		console.log("stdout: "+stdout);
+		console.log("stderr: "+stderr);
+	});
+	workProcess.on("exit",(code)=>{
+		console.log("子进程已退出，退出码 "+code);
+	});
+}
+```
+
+```bash
+$ node master.js
+子进程已退出，退出码 0
+stdout: 进程 0 执行。
+
+stderr:
+子进程已退出，退出码 0
+stdout: 进程 1 执行。
+
+stderr:
+子进程已退出，退出码 0
+stdout: 进程 2 执行。
+
+stderr:
+
+```
+
+## spawn() 方法
+
+child_process.spawn使用指定的命令行参数创建新进程，语法格式如下：
+
+```
+child_process.spawn(command[, args][, options])
+```
+
+参数说明如下：
+
+**command：** 将要运行的命令
+
+**args：** Array字符串参数数组
+
+**options Object**
+
+- cwd：String，子进程的当前工作目录
+- env：Object，环境变量键值对
+- stdio：Array|String，子进程的stdio配置
+- detached：Boolean，这个子进程将会变成进程组的领导
+- uid：Number，设置用户进程的ID
+- gid：Number，设置进程组的ID
+
+spawn()方法返回流 (stdout & stderr)，在进程返回大量数据时使用。进程开始执行spawn()时就开始接收响应。
+
+```js
+const fs=require("fs");
+const child_process=require("child_process");
+
+for (let i=0;i<3;i++){
+	var workProcess=child_process.spawn("node",["support.js",i]);
+	workProcess.stdout.on("data",(data)=>{
+		console.log("stdout: "+data);
+	});
+	workProcess.stderr.on("data",(data)=>{
+		console.log("stderr: "+data);
+	});
+	workProcess.on("close",(code)=>{
+		console.log("子进程已退出，退出码 "+code);
+	});
+}
+```
+
+```bash
+$ node master.js
+stdout: 进程 0 执行。
+
+stdout: 进程 1 执行。
+
+子进程已退出，退出码 0
+子进程已退出，退出码 0
+stdout: 进程 2 执行。
+
+子进程已退出，退出码 0
+
+```
+
+## fork 方法
+
+child_process.fork是spawn()方法的特殊形式，用于创建进程，语法格式如下：
+
+```
+child_process.fork(modulePath[, args][, options])
+```
+
+参数
+
+参数说明如下：
+
+**modulePath**： String，将要在子进程中运行的模块
+
+**args**： Array，字符串参数数组
+
+**options**：Object
+
+- cwd：String，子进程的当前工作目录
+- env：Object，环境变量键值对
+- execPath：String，创建子进程的可执行文件
+- execArgv：Array，子进程的可执行文件的字符串参数数组（默认： process.execArgv）
+- silent：Boolean，如果为`true`，子进程的`stdin`，`stdout`和`stderr`将会被关联至父进程，否则，它们将会从父进程中继承。（默认为：`false`）
+- uid：Number，设置用户进程的ID
+- gid：Number，设置进程组的ID
+
+返回的对象除了拥有ChildProcess实例的所有方法，还有一个内建的通信信道。
+
+```js
+const fs=require("fs");
+const child_process=require("child_process");
+
+for (let i=0;i<3;i++){
+	var workProcess=child_process.fork("support.js",[i]);
+	
+	workProcess.on("close",(code)=>{
+		console.log("子进程已退出，退出码 "+code);
+	});
+}
+```
+
+```bash
+$ node master.js
+进程 0 执行。
+进程 1 执行。
+子进程已退出，退出码 0
+进程 2 执行。
+子进程已退出，退出码 0
+子进程已退出，退出码 0
+
+```
+
+---
+
+# Node.js 连接 MySQL
+
+### 安装
+
+```bash
+$ cnpm i mysql
+√ Installed 1 packages
+√ Linked 5 latest versions
+√ Run 0 scripts
+√ All packages installed (3 packages installed from npm registry, used 1s(network 1s), speed 198.29KB/s, json 3(18.86KB), tarball 224.24KB, manifests cache hit 2, etag hit 2 / miss 0)
+```
+
+### 连接数据库
+
+在以下实例中根据你的实际配置修改数据库用户名、及密码及数据库名：
+
+```js
+var mysql      = require('mysql');
+var connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : '123456',
+  database : 'test'
+});
+ 
+connection.connect();
+ 
+connection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
+  if (error) throw error;
+  console.log('The solution is: ', results[0].solution);
+});
+```
+
