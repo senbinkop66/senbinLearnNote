@@ -2272,3 +2272,1178 @@ Node.js 沿用了这个标准，提供与习惯行为一致的 console 对象，
 
 向标准输出流打印字符并以换行符结束。该方法接收若干 个参数，如果只有一个参数，则输出这个参数的字符串形式。如果有多个参数，则 以类似于C 语言 printf() 命令的格式输出。
 
+```js
+console.log("5","1");  //5 1
+```
+
+### `console.info([data][, ...])`
+
+该命令的作用是返回信息性消息，这个命令与console.log差别并不大，除了在chrome中只会输出文字外，其余的会显示一个**蓝色**的惊叹号。
+
+```js
+console.info("5","1");  //5 1
+```
+
+### `console.error([data][, ...])`
+
+输出错误消息的。控制台在出现错误时会显示是**红色**的叉子。
+
+```js
+console.error("123");  // 123
+```
+
+### `console.warn([data][, ...])`
+
+输出警告消息。控制台出现有**黄色**的惊叹号。
+
+```js
+console.warn("123");  // 123
+```
+
+### `console.dir(obj[, options])`
+
+用来对一个对象进行检查（inspect），并以易于阅读和打印的格式显示。
+
+```js
+let obj={
+	a:10,
+	b:20
+};
+console.warn(obj);  // { a: 10, b: 20 }
+```
+
+### `console.time(label)`
+
+输出时间，表示计时开始。
+
+### `console.timeEnd(label)`
+
+结束时间，表示计时结束。
+
+```js
+
+console.time("t1");
+
+setTimeout(()=>{
+	console.timeEnd("t1");
+},2000);
+
+//t1: 2.005s
+```
+
+### `console.trace(message[, ...])`
+
+当前执行的代码在堆栈中的调用路径，这个测试函数运行很有帮助，只要给想测试的函数里面加入 console.trace 就行了。
+
+```js
+console.time("t1");
+
+setTimeout(()=>{
+	console.timeEnd("t1");
+	console.trace("end");
+},2000);
+
+/*
+t1: 2.015s
+Trace: end
+    at Timeout._onTimeout (E:\pogject\nodejs\main.js:6:10)
+    at listOnTimeout (node:internal/timers:559:17)
+    at processTimers (node:internal/timers:502:7)
+*/
+```
+
+
+
+### `console.assert(value[, message][, ...])`
+
+用于判断某个表达式或变量是否为真，接收两个参数，第一个参数是表达式，第二个参数是字符串。只有当第一个参数为false，才会输出第二个参数，否则不会有任何结果。
+
+```js
+let a=1;
+console.assert(a===undefined,"a已经定义");
+//Assertion failed: a已经定义
+```
+
+----
+
+## process
+
+process 是一个全局变量，即 global 对象的属性。
+
+它用于描述当前Node.js 进程状态的对象，提供了一个与操作系统的简单接口。通常在你写本地命令行程序的时候，少不了要 和它打交道。下面将会介绍 process 对象的一些最常用的成员方法。
+
+### exit
+
+当进程准备退出时触发。
+
+### beforeExit
+
+当 node 清空事件循环，并且没有其他安排时触发这个事件。通常来说，当没有进程安排时 node 退出，但是 'beforeExit' 的监听器可以异步调用，这样 node 就会继续执行。
+
+### uncaughtException 
+
+当一个异常冒泡回到事件循环，触发这个事件。如果给异常添加了监视器，默认的操作（打印堆栈跟踪信息并退出）就不会发生。
+
+### Signal 事件
+
+当进程接收到信号时就触发。信号列表详见标准的 POSIX 信号名，如 SIGINT、SIGUSR1 等。
+
+```js
+process.on("exit",function(code){
+	// 以下代码永远不会执行
+	setTimeout(function() {
+		console.log("该代码不会执行");
+	}, 0);
+
+	console.log('退出码为:', code);
+});
+
+console.log("程序运行结束");
+```
+
+```bash
+$ node main.js
+程序运行结束
+退出码为: 0
+```
+
+### Process 属性
+
+Process 提供了很多有用的属性，便于我们更好的控制系统的交互：
+
+```json
+> process
+process {
+  version: 'v16.14.2',
+  versions: {
+    node: '16.14.2',
+    v8: '9.4.146.24-node.20',
+    uv: '1.43.0',
+    zlib: '1.2.11',
+    brotli: '1.0.9',
+    ares: '1.18.1',
+    modules: '93',
+    nghttp2: '1.45.1',
+    napi: '8',
+    llhttp: '6.0.4',
+    openssl: '1.1.1n+quic',
+    cldr: '40.0',
+    icu: '70.1',
+    tz: '2021a3',
+    unicode: '14.0',
+    ngtcp2: '0.1.0-DEV',
+    nghttp3: '0.1.0-DEV'
+  },
+  arch: 'x64',
+  platform: 'win32',
+  release: {
+    name: 'node',
+    lts: 'Gallium',
+    sourceUrl: 'https://nodejs.org/download/release/v16.14.2/node-v16.14.2.tar.gz',
+    headersUrl: 'https://nodejs.org/download/release/v16.14.2/node-v16.14.2-headers.tar.gz',
+    libUrl: 'https://nodejs.org/download/release/v16.14.2/win-x64/node.lib'
+  },
+...
+```
+
+### Process方法
+
+Process 提供了很多有用的方法，便于我们更好的控制系统的交互
+
+---
+
+```js
+// 输出当前目录
+console.log('当前目录: ' + process.cwd());
+
+// 输出当前版本
+console.log('当前版本: ' + process.version);
+
+// 输出内存使用情况
+console.log(process.memoryUsage());
+```
+
+----
+
+# Node.js 常用工具util
+
+util 是一个Node.js 核心模块，提供常用函数的集合，用于弥补核心 JavaScript 的功能 过于精简的不足。
+
+使用方法如下：
+
+```js
+const util = require('util');
+```
+
+## util.callbackify
+
+util.callbackify(original) 将 async 异步函数（或者一个返回值为 Promise 的函数）转换成遵循异常优先的回调风格的函数，例如将 (err, value) => ... 回调作为最后一个参数。 在回调函数中，第一个参数为拒绝的原因（如果 Promise 解决，则为 null），第二个参数则是解决的值。
+
+```js
+const util=require("util");
+
+async function fn(){
+	return "Hello World!";
+}
+
+const callbackFunction=util.callbackify(fn);
+
+callbackFunction((err,ret)=>{
+	if (err) {
+		throw err;
+	}
+	console.log(ret);  //Hello World!
+});
+```
+
+回调函数是异步执行的，并且有异常堆栈错误追踪。 如果回调函数抛出一个异常，进程会触发一个 'uncaughtException' 异常，如果没有被捕获，进程将会退出。
+
+null 在回调函数中作为一个参数有其特殊的意义，如果回调函数的首个参数为 Promise 拒绝的原因且带有返回值，且值可以转换成布尔值 false，这个值会被封装在 Error 对象里，**可以通过属性 reason 获取**。
+
+```js
+const util=require("util");
+
+async function fn(){
+	return Promise.reject(null);
+}
+
+const callbackFunction=util.callbackify(fn);
+
+callbackFunction((err,ret)=>{
+	if (err) {
+		console.error(err.reason);  // null
+		return;
+        // 当 Promise 被以 `null` 拒绝时，它被包装为 Error 并且原始值存储在 `reason` 中。
+		err && err.hasOwnProperty('reason') && err.reason === null;  // true
+		//throw err;
+	}
+	console.log(ret);  //
+});
+```
+
+original 为 async 异步函数。该函数返回传统回调函数。
+
+## util.inherits
+
+util.inherits(constructor, superConstructor) 是一个实现对象间原型继承的函数。
+
+JavaScript 的面向对象特性是基于原型的，与常见的基于类的不同。JavaScript 没有提供对象继承的语言级别特性，而是通过原型复制来实现的。
+
+在这里我们只介绍 util.inherits 的用法，示例如下：
+
+```js
+const util=require("util");
+
+function Base(){
+	this.name="base";
+	this.base=1991;
+	this.sayHello=function(){
+		console.log("Hello "+this.name);
+	};
+}
+Base.prototype.showName=function(){
+	console.log(this.name);
+};
+
+function Sub(){
+	this.name="sub";
+}
+
+util.inherits(Sub,Base);
+
+var objBase=new Base();
+objBase.showName();
+objBase.sayHello();
+console.log(objBase);
+
+var objSub=new Sub();
+objSub.showName();
+//objSub.sayHello();  //TypeError: objSub.sayHello is not a function
+console.log(objSub);
+
+```
+
+我们定义了一个基础对象 Base 和一个继承自 Base 的 Sub，Base 有三个在构造函数内定义的属性和一个原型中定义的函数，通过util.inherits 实现继承。运行结果如下：
+
+```bash
+$ node main.js
+base
+Hello base
+Base { name: 'base', base: 1991, sayHello: [Function (anonymous)] }
+sub
+Sub { name: 'sub' }
+
+```
+
+注意：**Sub 仅仅继承了Base 在原型中定义的函数**，而构造函数内部创造的 base 属 性和 sayHello 函数都没有被 Sub 继承。
+
+同时，在原型中定义的属性不会被 console.log 作 为对象的属性输出。如果我们去掉 objSub.sayHello(); 这行的注释，将会看到：
+
+```js
+objSub.sayHello();  //TypeError: objSub.sayHello is not a function
+```
+
+## util.inspect
+
+util.inspect(object,[showHidden],[depth],[colors]) 是一个将任意对象转换 为字符串的方法，通常用于调试和错误输出。它至少接受一个参数 object，即要转换的对象。
+
+showHidden 是一个可选参数，如果值为 true，将会输出更多隐藏信息。
+
+depth 表示最大递归的层数，如果对象很复杂，你可以指定层数以控制输出信息的多 少。**如果不指定depth，默认会递归 2 层**，指定为 null 表示将不限递归层数完整遍历对象。 如果 colors 值为 true，输出格式将会以 ANSI 颜色编码，通常用于在终端显示更漂亮 的效果。
+
+特别要指出的是，util.inspect 并不会简单地直接把对象转换为字符串，即使该对 象定义了 toString 方法也不会调用。
+
+```js
+const util=require("util");
+
+function Person(){
+	this.name="base";
+	this.toString=function(){
+		return this.name;
+	}
+}
+
+var obj=new Person();
+console.log(util.inspect(obj));
+
+console.log(util.inspect(obj,true));
+
+```
+
+运行结果是：
+
+```bash
+$ node main.js
+Person { name: 'base', toString: [Function (anonymous)] }
+Person {
+  name: 'base',
+  toString: <ref *1> [Function (anonymous)] {
+    [length]: 0,
+    [name]: '',
+    [arguments]: null,
+    [caller]: null,
+    [prototype]: { [constructor]: [Circular *1] }
+  }
+}
+
+```
+
+## util.isArray(object)
+
+如果给定的参数 "object" 是一个数组返回 true，否则返回 false。
+
+```js
+var util = require('util');
+
+util.isArray([])
+  // true
+util.isArray(new Array)
+  // true
+util.isArray({})
+  // false
+```
+
+## util.isRegExp(object)
+
+如果给定的参数 "object" 是一个正则表达式返回true，否则返回false。
+
+```js
+var util = require('util');
+
+util.isRegExp(/some regexp/)
+  // true
+util.isRegExp(new RegExp('another regexp'))
+  // true
+util.isRegExp({})
+  // false
+```
+
+## util.isDate(object)
+
+如果给定的参数 "object" 是一个日期返回true，否则返回false。
+
+```js
+var util = require('util');
+
+util.isDate(new Date())
+  // true
+util.isDate(Date())
+  // false (without 'new' returns a String)
+util.isDate({})
+  // false
+```
+
+----
+
+# Node.js 文件系统
+
+Node.js 提供一组类似 UNIX（POSIX）标准的文件操作API。 Node 导入文件系统模块(fs)语法如下所示：
+
+```js
+var fs = require("fs")
+```
+
+## 异步和同步
+
+Node.js 文件系统（fs 模块）模块中的方法均有异步和同步版本，例如读取文件内容的函数有异步的 fs.readFile() 和同步的 fs.readFileSync()。
+
+异步的方法函数最后一个参数为回调函数，回调函数的第一个参数包含了错误信息(error)。
+
+建议大家使用异步方法，比起同步，异步方法性能更高，速度更快，而且没有阻塞。
+
+```js
+const fs=require("fs");
+
+// 异步读取
+fs.readFile("./data/input.txt",function(err,data){
+	if (err) {
+		console.error(err);
+	}
+	console.log(data.toString());
+});
+
+// 同步读取
+var data = fs.readFileSync('input.txt');
+console.log("同步读取: " + data.toString());
+
+console.log("程序执行结束!");
+```
+
+## 打开文件
+
+语法
+
+以下为在异步模式下打开文件的语法格式：
+
+```js
+fs.open(path, flags[, mode], callback)
+```
+
+参数
+
+参数使用说明如下：
+
+- path - 文件的路径。
+- flags - 文件打开的行为。具体值详见下文。
+- mode - 设置文件模式(权限)，文件创建默认权限为 0666(可读，可写)。
+- callback - 回调函数，带有两个参数如：callback(err, fd)。
+
+flags 参数可以是以下值：
+
+| Flag | 描述                                                   |
+| ---- | ------------------------------------------------------ |
+| r    | 以读取模式打开文件。如果文件不存在抛出异常。           |
+| r+   | 以读写模式打开文件。如果文件不存在抛出异常。           |
+| rs   | 以同步的方式读取文件。                                 |
+| rs+  | 以同步的方式读取和写入文件。                           |
+| w    | 以写入模式打开文件，如果文件不存在则创建。             |
+| wx   | 类似 'w'，但是如果文件路径存在，则文件写入失败。       |
+| w+   | 以读写模式打开文件，如果文件不存在则创建。             |
+| wx+  | 类似 'w+'， 但是如果文件路径存在，则文件读写失败。     |
+| a    | 以追加模式打开文件，如果文件不存在则创建。             |
+| ax   | 类似 'a'， 但是如果文件路径存在，则文件追加失败。      |
+| a+   | 以读取追加模式打开文件，如果文件不存在则创建。         |
+| ax+  | 类似 'a+'， 但是如果文件路径存在，则文件读取追加失败。 |
+
+实例
+
+接下来我们创建 file.js 文件，并打开 input.txt 文件进行读写，代码如下所示：
+
+```js
+const fs=require("fs");
+
+//异步打开文件
+console.log("准备打开文件！");
+fs.open("./data/input.txt","r+",function(err,fd){
+	if (err) {
+		return console.error(err);
+	}
+	console.log("文件打开成功！");
+});
+```
+
+## 获取文件信息
+
+以下为通过异步模式获取文件信息的语法格式：
+
+```
+fs.stat(path, callback)
+```
+
+参数使用说明如下：
+
+- path - 文件路径。
+- callback - 回调函数，带有两个参数如：(err, stats), stats 是 fs.Stats 对象。
+
+fs.stat(path)执行后，会将stats类的实例返回给其回调函数。可以通过stats类中的提供方法判断文件的相关属性。例如判断是否为文件：
+
+```js
+const fs=require("fs");
+
+
+fs.stat("./data/input.txt","r+",function(err,stats){
+	console.log(stats);
+	console.log(stats.isFile());  //true
+});
+/*
+Stats {
+  dev: 2811908584,
+  mode: 33206,
+  nlink: 1,
+  uid: 0,
+  gid: 0,
+  rdev: 0,
+  blksize: 4096,
+  ino: 562949953432560,
+  size: 34,
+  blocks: 0,
+  atimeMs: 1651501172864.2075,
+  mtimeMs: 1651501172864.2075,
+  ctimeMs: 1651501172864.2075,
+  birthtimeMs: 1648114041983.8635,
+  atime: 2022-05-02T14:19:32.864Z,
+  mtime: 2022-05-02T14:19:32.864Z,
+  ctime: 2022-05-02T14:19:32.864Z,
+  birthtime: 2022-03-24T09:27:21.984Z
+}
+*/
+```
+
+stats类中的方法有：
+
+| 方法                      | 描述                                                         |
+| ------------------------- | ------------------------------------------------------------ |
+| stats.isFile()            | 如果是文件返回 true，否则返回 false。                        |
+| stats.isDirectory()       | 如果是目录返回 true，否则返回 false。                        |
+| stats.isBlockDevice()     | 如果是块设备返回 true，否则返回 false。                      |
+| stats.isCharacterDevice() | 如果是字符设备返回 true，否则返回 false。                    |
+| stats.isSymbolicLink()    | 如果是软链接返回 true，否则返回 false。                      |
+| stats.isFIFO()            | 如果是FIFO，返回true，否则返回 false。FIFO是UNIX中的一种特殊类型的命令管道。 |
+| stats.isSocket()          | 如果是 Socket 返回 true，否则返回 false。                    |
+
+## 写入文件
+
+以下为异步模式下写入文件的语法格式：
+
+```
+fs.writeFile(file, data[, options], callback)
+```
+
+writeFile 直接打开文件默认是 w 模式，所以如果文件存在，该方法写入的内容会覆盖旧的文件内容。
+
+参数使用说明如下：
+
+- file - 文件名或文件描述符。
+- data - 要写入文件的数据，可以是 String(字符串) 或 Buffer(缓冲) 对象。
+- options - 该参数是一个对象，包含 {encoding, mode, flag}。默认编码为 utf8, 模式为 0666 ， flag 为 'w'
+- callback - 回调函数，回调函数只包含错误信息参数(err)，在写入失败时返回。
+
+```js
+const fs=require("fs");
+
+console.log("准备写入文件");
+fs.writeFile("./data/input.txt","通过fs.writeFile 写入文件的内容",function(err){
+	if (err) {
+       return console.error(err);
+   }
+   console.log("数据写入成功！");
+   console.log("--------我是分割线-------------")
+   console.log("读取写入的数据！");
+   fs.readFile("./data/input.txt",function(err,data){
+   	if (err) {
+   		return console.error(err);
+   	}
+   	console.log("异步读取文件数据: " + data.toString());
+   });
+});
+```
+
+## 读取文件
+
+以下为异步模式下读取文件的语法格式：
+
+```
+fs.read(fd, buffer, offset, length, position, callback)
+```
+
+该方法使用了文件描述符来读取文件。
+
+参数使用说明如下：
+
+- fd - 通过 fs.open() 方法返回的文件描述符。
+- buffer - 数据写入的缓冲区。
+- offset - 缓冲区写入的写入偏移量。
+- length - 要从文件中读取的字节数。
+- position - 文件读取的起始位置，如果 position 的值为 null，则会从当前文件指针的位置读取。
+- callback - 回调函数，有三个参数err, bytesRead, buffer，err 为错误信息， bytesRead 表示读取的字节数，buffer 为缓冲区对象。
+
+```js
+const fs=require("fs");
+
+var buf=new Buffer.alloc(1024);
+
+console.log("准备打开已存在的文件！");
+fs.open("./data/input.txt","r+",function(err,fd){
+	if (err) {
+       return console.error(err);
+   }
+   console.log("文件打开成功！");
+   console.log("准备读取文件：");
+   fs.read(fd,buf,0,buf.length,0,function(err,bytes){
+   	if (err) {
+   		return console.error(err);
+   	}
+   	console.log(bytes + "  字节被读取");
+    // 仅输出读取的字节
+    if (bytes>0) {
+    	console.log(buf.slice(0,bytes).toString());
+    }
+   });
+});
+```
+
+## 关闭文件
+
+以下为异步模式下关闭文件的语法格式：
+
+```
+fs.close(fd, callback)
+```
+
+该方法使用了文件描述符来读取文件。
+
+参数使用说明如下：
+
+- fd - 通过 fs.open() 方法返回的文件描述符。
+- callback - 回调函数，没有参数。
+
+```js
+const fs=require("fs");
+
+var buf=new Buffer.alloc(1024);
+
+console.log("准备打开已存在的文件！");
+fs.open("./data/input.txt","r+",function(err,fd){
+	if (err) {
+       return console.error(err);
+   }
+   console.log("文件打开成功！");
+   console.log("准备读取文件：");
+   fs.read(fd,buf,0,buf.length,0,function(err,bytes){
+   	if (err) {
+   		return console.error(err);
+   	}
+   	console.log(bytes + "  字节被读取");
+    // 仅输出读取的字节
+    if (bytes>0) {
+    	console.log(buf.slice(0,bytes).toString());
+    }
+    //关闭文件
+    fs.close(fd,function(err){
+    	if (err) {
+   			return console.error(err);
+   		}
+   		console.log("文件关闭成功");
+    });
+   });
+});
+```
+
+## 截取文件
+
+以下为异步模式下截取文件的语法格式：
+
+```
+fs.ftruncate(fd, len, callback)
+```
+
+该方法使用了文件描述符来读取文件。
+
+参数使用说明如下：
+
+- fd - 通过 fs.open() 方法返回的文件描述符。
+- len - 文件内容截取的长度。
+- callback - 回调函数，没有参数。
+
+```js
+const fs=require("fs");
+
+var buf=new Buffer.alloc(1024);
+
+console.log("准备打开已存在的文件！");
+fs.open("./data/input.txt","r+",function(err,fd){
+	if (err) {
+       return console.error(err);
+   }
+   console.log("文件打开成功！");
+   console.log("截取10字节内的文件内容，超出部分将被去除。");
+   // 截取文件
+   fs.truncate(fd,10,function(err){
+   	if (err) {
+   		return console.error(err);
+   	}
+   	 console.log("文件截取成功。");
+      console.log("读取相同的文件"); 
+	   fs.read(fd,buf,0,buf.length,0,function(err,bytes){
+	   	if (err) {
+	   		return console.error(err);
+	   	}
+	   	console.log(bytes + "  字节被读取");
+	    // 仅输出读取的字节
+	    if (bytes>0) {
+	    	console.log(buf.slice(0,bytes).toString());
+	    }
+	    //关闭文件
+	    fs.close(fd,function(err){
+	    	if (err) {
+	   			return console.error(err);
+	   		}
+	   		console.log("文件关闭成功");
+	    });
+	  });
+    });
+});
+```
+
+## 删除文件
+
+以下为删除文件的语法格式：
+
+```
+fs.unlink(path, callback)
+```
+
+参数使用说明如下：
+
+- path - 文件路径。
+- callback - 回调函数，没有参数。
+
+```js
+const fs=require("fs");
+
+console.log("准备删除文件！");
+
+fs.unlink("./data/input.txt",function(err){
+	if (err) {
+       return console.error(err);
+   }
+   console.log("文件删除成功");
+});
+
+```
+
+## 创建目录
+
+以下为创建目录的语法格式：
+
+```
+fs.mkdir(path[, options], callback)
+```
+
+参数使用说明如下：
+
+- path - 文件路径。
+- options 参数可以是：recursive - 是否以递归的方式创建目录，默认为 false。mode - 设置目录权限，默认为 0777。
+- callback - 回调函数，没有参数
+
+```js
+const fs=require("fs");
+
+// data 目录必须存在
+console.log("创建目录 /data/test/");
+
+fs.mkdir("./data/test/",function(err){
+	if (err) {
+       return console.error(err);
+   }
+   console.log("目录创建成功");
+});
+
+//可以添加 recursive: true 参数，不管创建的目录是否存在：
+fs.mkdir("./data/my/test",{recursive:true},(err)=>{
+	if (err) {
+       return console.error(err);
+   }
+   console.log("目录创建成功");
+});
+```
+
+```bash
+$ ls data
+input.txt.gz  input2.txt  ouput.txt  test/  test2.txt  text2.txt
+```
+
+## 读取目录
+
+以下为读取目录的语法格式：
+
+```
+fs.readdir(path, callback)
+```
+
+参数使用说明如下：
+
+- path - 文件路径。
+- callback - 回调函数，回调函数带有两个参数err, files，err 为错误信息，files 为 目录下的文件数组列表。
+
+```js
+const fs=require("fs");
+
+console.log("查看 /data 目录");
+
+fs.readdir("./data/",function(err,files){
+	if (err) {
+       return console.error(err);
+   }
+   files.forEach((file)=>{
+   	console.log(file);
+   });
+});
+
+```
+
+## 删除目录
+
+以下为删除目录的语法格式：
+
+```
+fs.rmdir(path, callback)
+```
+
+参数使用说明如下：
+
+- path - 文件路径。
+- callback - 回调函数，没有参数。
+
+```js
+const fs=require("fs");
+
+console.log("准备删除目录 /data/my");
+
+fs.rmdir("./data/my",function(err){
+	if (err) {
+       return console.error(err);
+   }
+   console.log("删除目录成功");
+});
+
+```
+
+---
+
+# Node.js GET/POST请求
+
+在很多场景中，我们的服务器都需要跟用户的浏览器打交道，如表单提交。
+
+表单提交到服务器一般都使用 GET/POST 请求。
+
+## 获取GET请求内容
+
+由于GET请求直接被嵌入在路径中，URL是完整的请求路径，包括了?后面的部分，因此你可以手动解析后面的内容作为GET请求的参数。
+
+node.js 中 url 模块中的 parse 函数提供了这个功能。
+
+```js
+const http=require("http");
+const url=require("url");
+const util=require("util");
+
+http.createServer((req,res)=>{
+	res.writeHead(200,{"Content-Type":"text/plain;charset=utf-8"});
+	res.end(util.inspect(url.parse(req.url,true)));
+}).listen(3000);
+
+// http://localhost:3000/user?name=senbin&age=10
+```
+
+```
+Url {
+  protocol: null,
+  slashes: null,
+  auth: null,
+  host: null,
+  port: null,
+  hostname: null,
+  hash: null,
+  search: '?name=senbin&age=10',
+  query: [Object: null prototype] { name: 'senbin', age: '10' },
+  pathname: '/user',
+  path: '/user?name=senbin&age=10',
+  href: '/user?name=senbin&age=10'
+}
+```
+
+### 获取 URL 的参数
+
+我们可以使用 url.parse 方法来解析 URL 中的参数，代码如下：
+
+```js
+const http=require("http");
+const url=require("url");
+const util=require("util");
+
+http.createServer((req,res)=>{
+	res.writeHead(200,{"Content-Type":"text/plain;charset=utf-8"});
+	//解析url参数
+	var params=url.parse(req.url,true).query;
+	res.write("网站名: "+params.name);
+	res.write("\n");
+	res.write("网站URL: "+params.url);
+	res.end();
+}).listen(3000);
+
+// http://localhost:3000/user?name=senbin&age=10
+```
+
+```
+网站名: senbin
+网站URL: undefined
+```
+
+## 获取 POST 请求内容
+
+POST 请求的内容全部的都在请求体中，http.ServerRequest 并没有一个属性内容为请求体，原因是等待请求体传输可能是一件耗时的工作。
+
+比如上传文件，而很多时候我们可能并不需要理会请求体的内容，恶意的POST请求会大大消耗服务器的资源，所以 node.js 默认是不会解析请求体的，当你需要的时候，需要手动来做。
+
+基本语法结构说明
+
+```js
+const http=require("http");
+const querystring=require("querystring");
+const util=require("util");
+
+http.createServer((req,res)=>{
+	// 定义了一个post变量，用于暂存请求体的信息
+	var post="";
+
+	// 通过req的data事件监听函数，每当接受到请求体的数据，就累加到post变量中
+	req.on("data",(chunk)=>{
+		post+=chunk;
+	});
+
+	// 在end事件触发后，通过querystring.parse将post解析为真正的POST请求格式，然后向客户端返回。
+	req.on("end",()=>{
+		post=querystring.parse(post);
+		res.end(util.inspect(post));
+	});
+}).listen(3000);
+```
+
+以下实例表单通过 POST 提交并输出数据：
+
+```js
+const http=require("http");
+const querystring=require("querystring");
+const util=require("util");
+
+var postHTML = `
+  <html><head><meta charset="utf-8"><title>编程狮 Node.js 实例</title></head>
+  <body>
+  <form method="post">
+  网站名： <input name="name"><br>
+  网站 URL： <input name="url"><br>
+  <input type="submit">
+  </form>
+  </body></html>`;
+
+http.createServer((req,res)=>{
+	// 定义了一个post变量，用于暂存请求体的信息
+	var post="";
+
+	// 通过req的data事件监听函数，每当接受到请求体的数据，就累加到post变量中
+	req.on("data",(chunk)=>{
+		post+=chunk;
+	});
+
+	// 在end事件触发后，通过querystring.parse将post解析为真正的POST请求格式，然后向客户端返回。
+	req.on("end",()=>{
+		// 解析参数
+		post=querystring.parse(post);
+		// 设置响应头部信息及编码
+		res.writeHead(200, {'Content-Type': 'text/html; charset=utf8'});
+		if (post.name && post.url) {
+			res.write("网站名：" + post.name);
+			res.write("\n");
+			res.write("网站 URL：" + post.url);
+		}else{
+			res.write(postHTML);
+		}
+		res.end();
+	});
+}).listen(3000);
+
+// http://localhost:3000/
+```
+
+
+
+----
+
+# Node.js Web 模块
+
+## 什么是 Web 服务器？
+
+Web服务器一般指网站服务器，是指驻留于因特网上某种类型计算机的程序。
+
+Web服务器的基本功能就是提供Web信息浏览服务。它只需支持HTTP协议、HTML文档格式及URL，与客户端的网络浏览器配合。
+
+大多数web服务器都支持服务端的脚本语言（php、python、ruby）等，并通过脚本语言从数据库获取数据，将结果返回给客户端浏览器。
+
+目前最主流的三个Web服务器是Apache、Nginx、IIS。
+
+## Web 应用架构
+
+![Web 应用架构](https://atts.w3cschool.cn/attachments/image/web_architecture.jpg)
+
+- **Client** - 客户端，一般指浏览器，浏览器可以通过HTTP协议向服务器请求数据。
+- **Server** - 服务端，一般指Web服务器，可以接收客户端请求，并向客户端发送响应数据。
+- **Business** - 业务层， 通过Web服务器处理应用程序，如与数据库交互，逻辑运算，调用外部程序等。
+- **Data** - 数据层，一般由数据库组成。
+
+## 使用 Node 创建 Web 服务器
+
+Node.js提供了http模块，http模块主要用于搭建HTTP服务端和客户端，如果要使用HTTP服务器或客户端功能，则必须调用http模块，代码如下：
+
+```js
+var http = require('http');
+```
+
+以下是演示一个最基本的HTTP服务器架构(使用8081端口)，创建server.js文件，代码如下所示：
+
+```js
+const http = require('http');
+const fs = require('fs');
+const url = require('url');
+
+
+// 创建服务器
+http.createServer( function (request, response) {  
+   // 解析请求，包括文件名
+   var pathname = url.parse(request.url).pathname;
+   
+   // 输出请求的文件名
+   console.log("Request for " + pathname + " received.");
+   
+   // 从文件系统中读取请求的文件内容
+   fs.readFile(pathname.substr(1), function (err, data) {
+      if (err) {
+         console.log(err);
+         // HTTP 状态码: 404 : NOT FOUND
+         // Content Type: text/plain
+         response.writeHead(404, {'Content-Type': 'text/html'});
+      }else{	         
+         // HTTP 状态码: 200 : OK
+         // Content Type: text/plain
+         response.writeHead(200, {'Content-Type': 'text/html'});	
+         
+         // 响应文件内容
+         response.write(data.toString());		
+      }
+      //  发送响应数据
+      response.end();
+   });   
+}).listen(8081);
+
+// 控制台会输出以下信息
+console.log('Server running at http://127.0.0.1:8081/');
+
+//在浏览器中输入并打开地址：http://127.0.0.1:8081/index.html
+```
+
+接下来我们在该目录下创建一个index.html文件，代码如下：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>test</title>
+</head>
+<body>
+	Hello World!
+</body>
+</html>
+```
+
+```bash
+$ node main.js
+Server running at http://127.0.0.1:8081/
+Request for /index.html received.
+Request for /favicon.ico received.
+[Error: ENOENT: no such file or directory, open 'E:\pogject\nodejs\favicon.ico'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'E:\\pogject\\nodejs\\favicon.ico'
+}
+```
+
+## 使用 Node 创建 Web 客户端
+
+使用Node创建Web客户端需要引入http模块，创建client.js文件，代码如下所示：
+
+```js
+const http=require("http");
+
+//用于请求的选项
+var options={
+	host:"localhost",
+	port:"8081",
+	path:"/index.html"
+};
+
+// 处理响应的回调函数
+var callback=function(response){
+	// 不断更新数据
+	var body="";
+	response.on("data",(data)=>{
+		body+=data;
+	});
+	response.on("end",()=>{
+		// 数据接收完成
+		console.log(body);
+	});
+}
+
+// 向服务端发送请求
+var req=http.request(options,callback);
+req.end();
+```
+
+```bash
+$ node main.js
+Server running at http://127.0.0.1:8081/
+Request for /index.html received.
+```
+
+```bash
+$ node client.js
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>test</title>
+</head>
+<body>
+	Hello World!
+</body>
+</html>
+```
+
+----
+
+# Node.js Express 框架
+
+Express是一个简洁而灵活的node.js Web应用框架, 提供了一系列强大特性帮助你创建各种Web应用，和丰富的HTTP工具。
+
+使用Express可以快速地搭建一个完整功能的网站。
+
+Express 框架核心特性包括：
+
+- 可以设置中间件来响应HTTP请求。
+- 定义了路由表用于执行不同的HTTP请求动作。
+- 可以通过向模板传递参数来动态渲染HTML页面。
