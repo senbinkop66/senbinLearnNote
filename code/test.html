@@ -1,45 +1,51 @@
 <!DOCTYPE html>
 <html>
     <head>
-<meta charset=utf-8>
-<title>test</title>
-<script src="https://unpkg.com/vue@3.2.31"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<!-- 引入 echarts.js -->
-<script src="https://cdn.staticfile.org/echarts/5.3.2/echarts.min.js"></script>
-<script src="./jquery-3.6.0.js"></script>
-
-      </head>
+    <meta charset=utf-8>
+    <title>test</title>
+    </head>
 <style type="text/css">
-.parent {
-    display: flex;
-    width: 600px;
-}
-.item-1 {
-    width: 140px;
-    flex: 2 1 0%;
-    background-color: red;
-    height: 50px;
-}
-.item-2 {
-    width: 100px;
-    flex: 2 1 auto;
-    background-color: green;
-    height: 50px;
-}
-.item-3 {
-    flex: 1 1 200px;
-    background-color: blue;
-    height: 50px;
-}
-</style>
+  .wrap{
+    padding: 0 400px 0 200px;
+  }
+  .center,.left,.right{
+    position: relative;
+    float: left;
+  }
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
 
+    margin-left: -100%;
+    left: -200px;
+  }
+  .right{
+    width: 400px;
+    height: 200px;
+    background-color: #9899ff;
+
+    margin-left: -400px;
+    right: -400px;
+  }
+  .center{
+    height: 200px;
+    background-color: #c0c0c0;
+
+    width: 100%;
+  }
+  .main{
+    
+  }
+</style>
 <body>
-<div class="parent">
-    <div class="item-1"></div>
-    <div class="item-2"></div>
-    <div class="item-3"></div> 
-</div>
+  <div class="wrap">
+    <div class="center">
+      <div class="main">中间宽度自适应</div>
+    </div>
+    <div class="left">左侧固定内容</div>
+    <div class="right">右侧宽度固定</div>
+  </div>
 </body>
 
 </html>

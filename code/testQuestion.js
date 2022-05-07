@@ -1,28 +1,51 @@
 /**
- * @param {number[]} nums
- * @param {number} k
+ * @param {string} start
+ * @param {string} end
+ * @param {string[]} bank
  * @return {number}
  */
-var numSubarrayProductLessThanK = function(nums, k) {
-    let ans=0;
-    let sum=1;  //连续子数组和
-    let i=0;
-    for (let j=0;j<nums.length;j++){
-        if (nums[j]<k) {
-            while (i<j && sum*nums[j]>=k){
-                sum/=nums[i];
-                i++;
-            }
-            sum*=nums[j];
-            ans+=(j-i+1);
-        }else{
-            i=j+1;
-            sum=1;
-        }
+var minMutation = function(start, end, bank) {
+    if (start===end) {
+        return 0;
     }
-    return ans;
+    const cnt=new Set();
+    const visited=new Set();
+    const keys=['A','G','C','T'];
+    for (let s of bank){
+        cnt.add(s);
+    }
+    if (!cnt.has(end)) {
+        return -1;
+    }
+    const queue=[start];
+    visited.add(start);
+    let step=1;
+    while(queue.length){
+        let sz=queue.length;
+        for(let i=0;i<sz;i++){
+            let curr=queue.shift();
+            for(let j=0;j<8;j++){
+                for(let k=0;k<4;k++){
+                    if (keys[k]!==curr[j]) {
+                        let sb=[...curr];
+                        sb[j]=keys[k];
+                        let next=sb.join("");
+                        if (!visited.has(next) && cnt.has(next)) {
+                            if (next===end) {
+                                return step;
+                            }
+                            queue.push(next);
+                            visited.add(next);
+                        }
+                    }
+                }
+            }
+        }
+        step++;
+    }
+    return -1;
 };
 
-let nums = [100,2,3,4,100,5,6,7,100], k = 100;
-let result=numSubarrayProductLessThanK(nums,k);
+let start = "AACCGGTT", end = "AAACGGTA", bank = ["AACCGGTA","AACCGCTA","AAACGGTA"];
+let result=minMutation(start,end,bank);
 console.log(result);
