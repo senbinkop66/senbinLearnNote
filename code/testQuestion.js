@@ -1,40 +1,27 @@
 /**
- * @param {number[]} nums
+ * @param {string} s
  * @return {number[]}
  */
-var findDuplicates = function(nums) {
-    let n=nums.length;
-    let ans=new Set();
-    let i=0;
-    while(i<n){
-        if(nums[i]!==i+1){
-            if (nums[i]>i+1) {
-                if (nums[nums[i]-1]==nums[i]) {
-                    ans.add(nums[i]);
-                    nums[i]=0
-                    i++;
-                }else{
-                    let temp=nums[i];
-                    nums[i]=nums[nums[i]-1];
-                    nums[temp-1]=temp;
-                }
-            }else{
-                if (nums[nums[i]-1]!==0) {
-                    ans.add(nums[i]);
-                    nums[i]=0;
-                }else{
-                    nums[nums[i]-1]=nums[i];
-                    nums[i]=0;
-                }
-                i++;
-            }
-        }else{
-            i++;
+var diStringMatch = function(s) {
+    let ans=[];
+    let n=s.length;
+    let left=0,right=n;
+    for (let i=0;i<n;i++){
+        if (s[i]==="I") {
+            //比后一个小则加入当前没有加入最小的的一个
+            ans.push(left);
+            left++;
+        }else if(s[i]==="D"){
+            //比后一个大则加入当前没有加入最大的的一个
+            ans.push(right);
+            right--;
         }
     }
-    return [...ans];
+    ans.push(left);  //或 ans.push(right);
+
+    return ans;
 };
 
-let nums = [4,3,2,7,8,2,3,1];
-let result=findDuplicates(nums);
+let s = "DDDII";
+let result=diStringMatch(s)
 console.log(result);
