@@ -1,41 +1,54 @@
-/**
- * @param {number[]} arr
- * @param {number} k
- * @return {number[]}
- */
-var smallestK = function(arr, k) {
-    if (k === 0) {
-        return [];
-    }
-    if (arr.length === k) {
-        return arr;
-    }
-    const left = [], right = [], same = [];
-    let randonIndex = Math.floor(arr.length/2);
-    let pivolt = arr[randonIndex];
-    for (let i = 0; i < arr.length; i++){
-        if (arr[i] < pivolt) {
-            left.push(arr[i]);
-        }else if (arr[i] > pivolt){
-            right.push(arr[i]);
-        }else{
-            same.push(arr[i]);
-        }
-    }
-    if (left.length === k) {
-        return left;
-    }else if (left.length > k){
-        return smallestK(left,k);
-    }else if (left.length < k) {
-        let res = left.length + same.length;
-        if (res >= k) {
-            return left.concat(same.slice(0, k - left.length))
-        }else{
-            return left.concat(same, smallestK(right, k - left.length - same.length));
-        }
-    }
-};
+var quickSort=(arr)=>{
+    quick(arr, 0, arr.length - 1);
+}
 
-let arr = [1,3,5,7,2,4,6,8], k = 4;
-let result = smallestK(arr, k);
-console.log(result);
+var quick=(arr,left,right)=>{
+    let index;
+    if (left < right) {
+        //划分数组
+        index=partition(arr, left, right);
+        if (left < index - 1) {
+            quick(arr, left, index - 1);
+        }
+        if (index < right) {
+            quick(arr, index, right);
+        }
+    }
+}
+
+// 一次快排
+var partition=(arr,left,right)=>{
+    //取中间项为基准
+    let datum=arr[Math.floor(Math.random() * (right - left + 1)) + left];
+    let i=left;
+    let j=right;
+    // 开始调整
+    while (i <= j){
+        //左指针右移
+        while(arr[i] < datum){
+            i++;
+        }
+        // 右指针左移
+        while(arr[j] > datum){
+            j--;
+        }
+        //交换
+        if (i <= j) {
+            swap(arr, i, j);
+            i += 1;
+            j -= 1;
+        }
+    }
+    return i;
+}
+
+//交换元素
+var swap=(arr,i,j)=>{
+    let temp=arr[i];
+    arr[i]=arr[j];
+    arr[j]=temp;
+}
+
+let test=[3,2,3,1,2,4,5,5,6];
+quickSort(test);
+console.log(test);  //
