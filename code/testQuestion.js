@@ -1,54 +1,57 @@
-var quickSort=(arr)=>{
-    quick(arr, 0, arr.length - 1);
-}
+/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number}
+ */
+var threeSumClosest = function(nums, target) {
 
-var quick=(arr,left,right)=>{
-    let index;
-    if (left < right) {
-        //划分数组
-        index=partition(arr, left, right);
-        if (left < index - 1) {
-            quick(arr, left, index - 1);
-        }
-        if (index < right) {
-            quick(arr, index, right);
+    nums.sort((a, b) => a - b);
+    let n = nums.length;
+    let sum = 0;
+    let closestValue = Number.MAX_SAFE_INTEGER;
+
+    var updateClosestValue = (value) =>{
+        // 根据差值的绝对值来更新答案
+        if (Math.abs(value - target) < Math.abs(closestValue - target)) {
+            closestValue = value;
         }
     }
-}
 
-// 一次快排
-var partition=(arr,left,right)=>{
-    //取中间项为基准
-    let datum=arr[Math.floor(Math.random() * (right - left + 1)) + left];
-    let i=left;
-    let j=right;
-    // 开始调整
-    while (i <= j){
-        //左指针右移
-        while(arr[i] < datum){
-            i++;
+    for (let i = 0; i < n; i++){
+        if (i > 0 && nums[i] === nums[i-1]){
+            continue;
         }
-        // 右指针左移
-        while(arr[j] > datum){
-            j--;
-        }
-        //交换
-        if (i <= j) {
-            swap(arr, i, j);
-            i += 1;
-            j -= 1;
+        let j = i + 1;
+        let k = n - 1;
+        let a = nums[i];
+        while (j < k){
+            let b = nums[j], c = nums[k];
+            sum = a + b + c;
+            if (sum === target) {
+                return target;
+            }
+            updateClosestValue(sum);
+            if (sum > target) {
+                //如果和大于 target，移动 c 对应的指针
+                k--;
+                //移动到下一个不相等的元素
+                while (j < k && nums[k] === c){
+                    k--;
+                }
+            }else{
+                // 如果和小于 target，移动 b 对应的指针
+                j++;
+                //移动到下一个不相等的元素
+                while (j < k && nums[j] === b){
+                    j++;
+                }
+            }
         }
     }
-    return i;
-}
 
-//交换元素
-var swap=(arr,i,j)=>{
-    let temp=arr[i];
-    arr[i]=arr[j];
-    arr[j]=temp;
-}
+    return closestValue;
+};
 
-let test=[3,2,3,1,2,4,5,5,6];
-quickSort(test);
-console.log(test);  //
+let nums = [-1,2,1,-4], target = 1;
+let result = threeSumClosest(nums, target);
+console.log(result);
