@@ -1,57 +1,25 @@
 /**
- * @param {number[]} nums
- * @param {number} target
+ * @param {number[][]} points
  * @return {number}
  */
-var threeSumClosest = function(nums, target) {
-
-    nums.sort((a, b) => a - b);
-    let n = nums.length;
-    let sum = 0;
-    let closestValue = Number.MAX_SAFE_INTEGER;
-
-    var updateClosestValue = (value) =>{
-        // 根据差值的绝对值来更新答案
-        if (Math.abs(value - target) < Math.abs(closestValue - target)) {
-            closestValue = value;
-        }
-    }
-
+var largestTriangleArea = function(points) {
+    const n = points.length;
+    let ans = 0.0;
     for (let i = 0; i < n; i++){
-        if (i > 0 && nums[i] === nums[i-1]){
-            continue;
-        }
-        let j = i + 1;
-        let k = n - 1;
-        let a = nums[i];
-        while (j < k){
-            let b = nums[j], c = nums[k];
-            sum = a + b + c;
-            if (sum === target) {
-                return target;
-            }
-            updateClosestValue(sum);
-            if (sum > target) {
-                //如果和大于 target，移动 c 对应的指针
-                k--;
-                //移动到下一个不相等的元素
-                while (j < k && nums[k] === c){
-                    k--;
-                }
-            }else{
-                // 如果和小于 target，移动 b 对应的指针
-                j++;
-                //移动到下一个不相等的元素
-                while (j < k && nums[j] === b){
-                    j++;
-                }
+        for (let j = i + 1; j < n; j++){
+            for (let k = j + 1; k < n; k++){
+                ans = Math.max(ans, triangleArea(points[i][0], points[i][1], points[j][0], points[j][1], points[k][0], points[k][1]));
             }
         }
     }
-
-    return closestValue;
+    return ans;
 };
 
-let nums = [-1,2,1,-4], target = 1;
-let result = threeSumClosest(nums, target);
+var triangleArea= (x1, y1, x2, y2, x3, y3) =>{
+    return 0.5 * Math.abs(x1 * y2 + x2 * y3 + x3* y1 -x1 * y3 - x2 * y1 - x3 * y2);
+};
+
+
+let points = [[0,0],[0,1],[1,0],[0,2],[2,0]];
+let result = largestTriangleArea(points);
 console.log(result);
