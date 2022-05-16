@@ -5,59 +5,34 @@
     <title>test</title>
     </head>
 <style type="text/css">
-  .wrap{
-    padding: 0 400px 0 200px;
-  }
-  .center,.left,.right{
-    position: relative;
+.wrap {
+    width: 520px;
+    border: 1px solid black;
+    margin: 0 auto;
     float: left;
-  }
-  .left{
-    width: 200px;
-    height: 200px;
-    background-color: #389777;
-
-    margin-left: -100%;
-    left: -200px;
-  }
-  .right{
-    width: 400px;
-    height: 200px;
-    background-color: #9899ff;
-
-    margin-left: -400px;
-    right: -400px;
-  }
-  .center{
-    height: 200px;
-    background-color: #c0c0c0;
-
-    width: 100%;
-  }
-  .main{
-    
-  }
+}
+.float{
+  width: 200px;
+  height: 200px;
+  background-color: green;
+  float: left;
+}
+.nofloat{
+  width: 300px;
+  height: 150px;
+  background-color: gray;
+}
 </style>
+
 <body>
-  <div class="wrap">
-    <div class="center">
-      <div class="main">中间宽度自适应</div>
-    </div>
-    <div class="left">左侧固定内容</div>
-    <div class="right">右侧宽度固定</div>
-  </div>
+<div class="wrap">
+   <div class="float">浮动</div>
+   <div class="clear"></div>
+   <div class="nofloat">不想被浮动影响</div>
+</div>
 </body>
 <script type="text/javascript">
-var ajax=new XMLHttpRequest();
-ajax.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-ajax.open("post","test.php");
-ajax.send("name=kop&age=66");
 
-ajax.onreadystatechange=function(){
-  if (ajax.readyState===4 && ajax.status===200) {
-    console.log(ajax.responseText);
-  }
-}
 
 </script>
 

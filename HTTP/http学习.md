@@ -518,4 +518,475 @@ MIME类型不是传达文档类型信息的唯一方式：
 
 有了这些技术，你可以配置服务器对www前缀和非www前缀的域名进行正确的响应，如果你无法预测用户会在浏览器地址栏使用哪个URL，你需要做的就是选择一个作为你的规范地址，然后重定向另一个。
 
+----
+
 # HTTP 基础
+
+## HTTP概述
+
+HTTP是一种能够获取如 HTML 这样的网络资源的 [protocol](https://developer.mozilla.org/zh-CN/docs/Glossary/Protocol)(通讯协议)。它是在 Web 上进行数据交换的基础，是一种 **client-server 协议**，也就是说，请求通常是由像浏览器这样的接受方发起的。一个完整的Web文档通常是由不同的子文档拼接而成的，像是文本、布局描述、图片、视频、脚本等等。
+
+![A Web document is the composition of different resources](https://mdn.mozillademos.org/files/13677/Fetching_a_page.png)
+
+客户端和服务端通过交换各自的消息（与数据流正好相反）进行交互。由像浏览器这样的客户端发出的消息叫做 *requests*，被服务端响应的消息叫做 *responses。*
+
+![HTTP as an application layer protocol, on top of TCP (transport layer) and IP (network layer) and below the presentation layer.](https://mdn.mozillademos.org/files/13673/HTTP%20&%20layers.png)HTTP被设计于20世纪90年代初期，是一种可扩展的协议。它是应用层的协议，通过[TCP](https://developer.mozilla.org/zh-CN/docs/Glossary/TCP)，或者是[TLS](https://developer.mozilla.org/zh-CN/docs/Glossary/TLS)－加密的TCP连接来发送，理论上任何可靠的传输协议都可以使用。因为其良好的扩展性，时至今日，它不仅被用来传输超文本文档，还用来传输图片、视频或者向服务器发送如HTML表单这样的信息。HTTP还可以根据网页需求，仅获取部分Web文档内容更新网页。
+
+---
+
+## [基于HTTP的组件系统](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#基于http的组件系统)
+
+HTTP是一个client-server协议：请求通过一个实体被发出，实体也就是用户代理。大多数情况下，这个用户代理都是指浏览器，当然它也可能是任何东西，比如一个爬取网页生成维护搜索引擎索引的机器爬虫。
+
+每一个发送到服务器的请求，都会被服务器处理并返回一个消息，也就是*response*。在这个请求与响应之间，还有许许多多的被称为 [proxies](https://developer.mozilla.org/zh-CN/docs/Glossary/Proxy_server) 的实体，他们的作用与表现各不相同，比如有些是网关，还有些是[caches](https://developer.mozilla.org/zh-CN/docs/Glossary/Cache)等。
+
+![img](https://mdn.mozillademos.org/files/13679/Client-server-chain.png)
+
+实际上，在一个浏览器和处理请求的服务器之间，还有路由器、调制解调器等许多计算机。由于Web的层次设计，那些在网络层和传输层的细节都被隐藏起来了。HTTP位于最上层的应用层。虽然底层对于分析网络问题非常重要，但是大多都跟对HTTP的描述不相干。
+
+### [客户端：user-agent](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#客户端：user-agent)
+
+user-agent 就是任何能够为用户发起行为的工具。这个角色通常都是由浏览器来扮演。一些例外情况，比如是工程师使用的程序，以及Web开发人员调试应用程序。
+
+浏览器**总是**作为发起一个请求的实体，他永远不是服务器（虽然近几年已经出现一些机制能够模拟由服务器发起的请求消息了）。
+
+要展现一个网页，浏览器首先发送一个请求来获取页面的HTML文档，再解析文档中的资源信息发送其他请求，获取可执行脚本或CSS样式来进行页面布局渲染，以及一些其它页面资源（如图片和视频等）。然后，浏览器将这些资源整合到一起，展现出一个完整的文档，也就是网页。浏览器执行的脚本可以在之后的阶段获取更多资源，并相应地更新网页。
+
+一个网页就是一个超文本文档。也就是说，有一部分显示的文本可能是链接，启动它（通常是鼠标的点击）就可以获取一个新的网页，使得用户可以控制客户端进行网上冲浪。浏览器来负责发送HTTP请求，并进一步解析HTTP返回的消息，以向用户提供明确的响应。
+
+### [Web服务端](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#web服务端)
+
+在上述通信过程的另一端，是由Web Server来*服务*并提供客户端所请求的文档。Server只是虚拟意义上代表一个机器：它可以是共享负载（负载均衡）的一组服务器组成的计算机集群，也可以是一种复杂的软件，通过向其他计算机（如缓存，数据库服务器，电子商务服务器 ...）发起请求来获取部分或全部资源。
+
+Server 不一定是一台机器，但一个机器上可以装载的众多Servers。在HTTP/1.1 和[`Host`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Host)头部中，它们甚至可以共享同一个IP地址。
+
+### [代理（Proxies）](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#代理（proxies）)
+
+在浏览器和服务器之间，有许多计算机和其他设备转发了HTTP消息。由于Web栈层次结构的原因，它们大多都出现在传输层、网络层和物理层上，对于HTTP应用层而言就是透明的，虽然它们可能会对应用层性能有重要影响。还有一部分是表现在应用层上的，被称为**代理（Proxies）**。代理（Proxies）既可以表现得透明，又可以不透明（“改变请求”会通过它们）。代理主要有如下几种作用：
+
+- 缓存（可以是公开的也可以是私有的，像浏览器的缓存）
+- 过滤（像反病毒扫描，家长控制...）
+- 负载均衡（让多个服务器服务不同的请求）
+- 认证（对不同资源进行权限管理）
+- 日志记录（允许存储历史信息）
+
+---
+
+## [HTTP 的基本性质](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#http_的基本性质)
+
+### [HTTP 是简单的](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#http_是简单的)
+
+虽然下一代HTTP/2协议将HTTP消息封装到了帧（frames）中，HTTP大体上还是被设计得简单易读。HTTP报文能够被人读懂，还允许简单测试，降低了门槛，对新人很友好。
+
+### [HTTP 是可扩展的](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#http_是可扩展的)
+
+在 HTTP/1.0 中出现的 [HTTP headers](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers) 让协议扩展变得非常容易。只要服务端和客户端就新 headers 达成语义一致，新功能就可以被轻松加入进来。
+
+### [HTTP 是无状态，有会话的](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#http_是无状态，有会话的)
+
+HTTP是无状态的：在同一个连接中，两个执行成功的请求之间是没有关系的。这就带来了一个问题，用户没有办法在同一个网站中进行连续的交互，比如在一个电商网站里，用户把某个商品加入到购物车，切换一个页面后再次添加了商品，这两次添加商品的请求之间没有关联，浏览器无法知道用户最终选择了哪些商品。而使用HTTP的头部扩展，HTTP Cookies就可以解决这个问题。把Cookies添加到头部中，创建一个会话让每次请求都能共享相同的上下文信息，达成相同的状态。
+
+注意，HTTP本质是无状态的，**使用Cookies可以创建有状态的会话**。
+
+---
+
+### [HTTP 和连接](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#http_和连接)
+
+一个连接是由传输层来控制的，这从根本上不属于HTTP的范围。HTTP并不需要其底层的传输层协议是面向连接的，只需要它是可靠的，或不丢失消息的（至少返回错误）。在互联网中，有两个最常用的传输层协议：TCP是可靠的，而UDP不是。因此，**HTTP依赖于面向连接的TCP进行消息传递，但连接并不是必须的。**
+
+在客户端（通常指浏览器）与服务器能够交互（客户端发起请求，服务器返回响应）之前，必须在这两者间建立一个 TCP 链接，打开一个 TCP 连接需要多次往返交换消息（因此耗时）。HTTP/1.0 默认为每一对 HTTP 请求/响应都打开一个单独的 TCP 连接。当需要连续发起多个请求时，这种模式比多个请求共享同一个 TCP 链接更低效。
+
+为了减轻这些缺陷，HTTP/1.1引入了流水线（被证明难以实现）和持久连接的概念：底层的TCP连接可以通过[`Connection`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Connection)头部来被部分控制。HTTP/2则发展得更远，通过在一个连接复用消息的方式来让这个连接始终保持为暖连接。 
+
+为了更好的适合HTTP，设计一种更好传输协议的进程一直在进行。Google就研发了一种以UDP为基础，能提供更可靠更高效的传输协议[QUIC](https://en.wikipedia.org/wiki/QUIC)。
+
+---
+
+## [HTTP 能控制什么](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#http_能控制什么)
+
+多年以来，HTTP良好的扩展性使得越来越多的Web功能归其控制。缓存和认证很早就可以由HTTP来控制了。另一方面，对同源同域的限制到2010年才有所改变。
+
+以下是可以被HTTP控制的常见特性。
+
+- [缓存 ](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Caching)
+  文档如何缓存能通过HTTP来控制。服务端能告诉代理和客户端哪些文档需要被缓存，缓存多久，而客户端也能够命令中间的缓存代理来忽略存储的文档。
+- *开放同源限制*
+  为了防止网络窥听和其它隐私泄漏，浏览器强制对Web网站做了分割限制。只有来自于**相同来源**的网页才能够获取网站的全部信息。这样的限制有时反而成了负担，HTTP可以通过修改头部来开放这样的限制，因此Web文档可以是由不同域下的信息拼接成的（某些情况下，这样做还有安全因素考虑）。
+- *认证*
+  一些页面能够被保护起来，仅让特定的用户进行访问。基本的认证功能可以直接通过HTTP提供，使用[`Authenticate`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Authenticate)相似的头部即可，或用HTTP Cookies来设置指定的会话。
+- *[代理和隧道](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Proxy_servers_and_tunneling)*
+  通常情况下，服务器和/或客户端是处于内网的，对外网隐藏真实 IP 地址。因此 HTTP 请求就要通过代理越过这个网络屏障。但并非所有的代理都是 HTTP 代理。例如，SOCKS协议的代理就运作在更底层，一些像 FTP 这样的协议也能够被它们处理。
+- *会话* 
+  使用HTTP Cookies允许你用一个服务端的状态发起请求，这就创建了会话。虽然基本的HTTP是无状态协议。这很有用，不仅是因为这能应用到像购物车这样的电商业务上，更是因为这使得任何网站都能轻松为用户定制展示内容了。
+
+----
+
+## [HTTP 流](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#http_流)
+
+当客户端想要和服务端进行信息交互时（服务端是指最终服务器，或者是一个中间代理），过程表现为下面几步：
+
+1. 打开一个TCP连接：TCP连接被用来发送一条或多条请求，以及接受响应消息。客户端可能打开一条新的连接，或重用一个已经存在的连接，或者也可能开几个新的TCP连接连向服务端。
+
+2. 发送一个HTTP报文：HTTP报文（在HTTP/2之前）是语义可读的。在HTTP/2中，这些简单的消息被封装在了帧中，这使得报文不能被直接读取，但是原理仍是相同的。
+
+   ```http
+   GET / HTTP/1.1
+   Host: developer.mozilla.org
+   Accept-Language: fr
+   ```
+
+3. 读取服务端返回的报文信息：
+
+   ```http
+   HTTP/1.1 200 OK
+   Date: Sat, 09 Oct 2010 14:28:02 GMT
+   Server: Apache
+   Last-Modified: Tue, 01 Dec 2009 20:18:22 GMT
+   ETag: "51142bc1-7449-479b075b2891b"
+   Accept-Ranges: bytes
+   Content-Length: 29769
+   Content-Type: text/html
+   
+   <!DOCTYPE html... (here comes the 29769 bytes of the requested web page)
+   ```
+
+4. 关闭连接或者为后续请求重用连接。
+
+当HTTP流水线启动时，后续请求都可以不用等待第一个请求的成功响应就被发送。然而HTTP流水线已被证明很难在现有的网络中实现，因为现有网络中有很多老旧的软件与现代版本的软件共存。因此，HTTP流水线已被在有多请求下表现得更稳健的HTTP/2的帧所取代。
+
+---
+
+## [HTTP 报文](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#http_报文)
+
+HTTP/1.1以及更早的HTTP协议报文都是语义可读的。在HTTP/2中，这些报文被嵌入到了一个新的二进制结构，帧。帧允许实现很多优化，比如报文头部的压缩和复用。即使只有原始HTTP报文的一部分以HTTP/2发送出来，每条报文的语义依旧不变，客户端会重组原始HTTP/1.1请求。因此用HTTP/1.1格式来理解HTTP/2报文仍旧有效。
+
+有两种HTTP报文的类型，请求与响应，每种都有其特定的格式。
+
+### [请求](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#请求)
+
+HTTP请求的一个例子：
+
+![A basic HTTP request](https://mdn.mozillademos.org/files/13687/HTTP_Request.png)
+
+请求由以下元素组成：
+
+- 一个HTTP的[method](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods)，经常是由一个动词像[`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET), [`POST`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST) 或者一个名词像[`OPTIONS`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/OPTIONS)，[`HEAD`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/HEAD)来定义客户端的动作行为。通常客户端的操作都是获取资源（GET方法）或者发送[HTML form](https://developer.mozilla.org/zh-CN/docs/Learn/Forms)表单（POST方法），虽然在一些情况下也会有其他操作。
+- 要获取的资源的路径，通常是上下文中就很明显的元素资源的URL，它没有[protocol](https://developer.mozilla.org/zh-CN/docs/Glossary/Protocol) （`http://`），[domain](https://developer.mozilla.org/zh-CN/docs/Glossary/Domain)（`developer.mozilla.org`），或是TCP的[port (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/Port)（HTTP一般在80端口）。
+- HTTP协议版本号。
+- 为服务端表达其他信息的可选头部[headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers)。
+- 对于一些像POST这样的方法，报文的body就包含了发送的资源，这与响应报文的body类似。
+
+### [响应](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#响应)
+
+HTTP响应的一个例子：
+
+![img](https://mdn.mozillademos.org/files/13691/HTTP_Response.png)
+
+响应报文包含了下面的元素：
+
+- HTTP协议版本号。
+- 一个状态码（[status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)），来告知对应请求执行成功或失败，以及失败的原因。
+- 一个状态信息，这个信息是非权威的状态码描述信息，可以由服务端自行设定。
+- HTTP [headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers)，与请求头部类似。
+- 可选项，比起请求报文，响应报文中更常见地包含获取的资源body。
+
+---
+
+## [基于HTTP的APIs](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview#基于http的apis)
+
+
+基于HTTP的最常用API是[`XMLHttpRequest`](https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest) API，可用于在[user agent](https://developer.mozilla.org/zh-CN/docs/Glossary/User_agent)和服务器之间交换数据。 现代[`Fetch API`](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API)提供相同的功能，具有更强大和灵活的功能集。
+
+另一种API，即服务器发送的事件，是一种单向服务，允许服务器使用HTTP作为传输机制向客户端发送事件。 使用[`EventSource`](https://developer.mozilla.org/zh-CN/docs/Web/API/EventSource)接口，客户端打开连接并建立事件句柄。 客户端浏览器自动将到达HTTP流的消息转换为适当的[`Event`](https://developer.mozilla.org/zh-CN/docs/Web/API/Event)对象，并将它们传递给专门处理这类[`type`](https://developer.mozilla.org/zh-CN/docs/Web/API/Event/type)事件的句柄，如果有这么个句柄的话。但如果相应的事件处理句柄根本没有建立，那就交给[`onmessage` (en-US)](https://developer.mozilla.org/en-US/docs/Web/API/EventSource/message_event)事件处理程序处理。
+
+---
+
+# HTTP消息
+
+HTTP消息是服务器和客户端之间交换数据的方式。有两种类型的消息︰ 请求（requests）--由客户端发送用来触发一个服务器上的动作；响应（responses）--来自服务器的应答。
+
+HTTP消息由采用ASCII编码的多行文本构成。在HTTP/1.1及早期版本中，这些消息通过连接公开地发送。在HTTP/2中，为了优化和性能方面的改进，曾经可人工阅读的消息被分到多个HTTP帧中。
+
+Web 开发人员或网站管理员，很少自己手工创建这些原始的HTTP消息︰ 由软件、浏览器、 代理或服务器完成。他们通过配置文件（用于代理服务器或服务器），API （用于浏览器）或其他接口提供HTTP消息。
+
+![From a user-, script-, or server- generated event, an HTTP/1.x msg is generated, and if HTTP/2 is in use, it is binary framed into an HTTP/2 stream, then sent.](https://mdn.mozillademos.org/files/13825/HTTPMsg2.png)
+
+HTTP/2二进制框架机制被设计为不需要改动任何API或配置文件即可应用︰ 它大体上对用户是透明的。
+
+HTTP 请求和响应具有相似的结构，由以下部分组成︰
+
+1. 一行起始行用于描述要执行的请求，或者是对应的状态，成功或失败。这个起始行总是单行的。
+2. 一个可选的HTTP头集合指明请求或描述消息正文。
+3. 一个空行指示所有关于请求的元数据已经发送完毕。
+4. 一个可选的包含请求相关数据的正文 (比如HTML表单内容), 或者响应相关的文档。 正文的大小有起始行的HTTP头来指定。
+
+起始行和 HTTP 消息中的HTTP 头统称为**请求头**，而其有效负载被称为**消息正文**。
+
+![Requests and responses share a common structure in HTTP](https://mdn.mozillademos.org/files/13827/HTTPMsgStructure2.png)
+
+---
+
+## [HTTP 请求](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Messages#http_请求)
+
+### [起始行](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Messages#起始行)
+
+HTTP请求是由客户端发出的消息，用来使服务器执行动作。*起始行 (start-line)* 包含三个元素：
+
+1. 一个 *[HTTP 方法](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods)*，一个动词 (像 [`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET), [`PUT`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PUT) 或者 [`POST`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST)) 或者一个名词 (像 [`HEAD`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/HEAD) 或者 [`OPTIONS`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/OPTIONS)), 描述要执行的动作. 例如, `GET` 表示要获取资源，`POST` 表示向服务器推送数据 (创建或修改资源, 或者产生要返回的临时文件)。
+
+2. 请求目标 (request target)，
+
+   通常是一个
+
+    
+
+   URL
+
+   ，或者是协议、端口和域名的绝对路径，通常以请求的环境为特征。请求的格式因不同的 HTTP 方法而异。它可以是：
+
+   - 一个绝对路径，末尾跟上一个 ' ? ' 和查询字符串。这是最常见的形式，称为 *原始形式 (origin form)*，被 GET，POST，HEAD 和 OPTIONS 方法所使用。
+     `POST / HTTP/1.1GET /background.png HTTP/1.0HEAD /test.html?query=alibaba HTTP/1.1OPTIONS /anypage.html HTTP/1.0`
+   - 一个完整的URL，被称为 *绝对形式 (absolute form)*，主要在使用 `GET` 方法连接到代理时使用。
+     `GET http://developer.mozilla.org/en-US/docs/Web/HTTP/Messages HTTP/1.1`
+   - 由域名和可选端口（以`':'`为前缀）组成的 URL 的 authority component，称为 *authority form*。 仅在使用 `CONNECT` 建立 HTTP 隧道时才使用。
+     `CONNECT developer.mozilla.org:80 HTTP/1.1`
+   - *星号形式 (asterisk form)*，一个简单的星号(`'*'`)，配合 `OPTIONS` 方法使用，代表整个服务器。
+     `OPTIONS * HTTP/1.1`
+
+3. *HTTP 版本 (HTTP version*)*，*定义了剩余报文的结构，作为对期望的响应版本的指示符。
+
+### [Headers](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Messages#headers)
+
+来自请求的 [HTTP headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers) 遵循和 HTTP header 相同的基本结构：不区分大小写的字符串，紧跟着的冒号 `(':')` 和一个结构取决于 header 的值。 整个 header（包括值）由一行组成，这一行可以相当长。
+
+有许多请求头可用，它们可以分为几组：
+
+- *General headers，*例如 [`Via`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Via)，适用于整个报文。
+- *Request headers，*例如 [`User-Agent`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/User-Agent)，[`Accept-Type`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Accept-Type)，通过进一步的定义(例如 [`Accept-Language`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Accept-Language))，或者给定上下文(例如 [`Referer`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Referer))，或者进行有条件的限制 (例如 [`If-None`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/If-None)) 来修改请求。
+- *Entity headers，*例如 [`Content-Length`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Length)，适用于请求的 body。显然，如果请求中没有任何 body，则不会发送这样的头文件。
+
+![Example of headers in an HTTP request](https://mdn.mozillademos.org/files/13821/HTTP_Request_Headers2.png)
+
+### [Body](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Messages#body)
+
+请求的最后一部分是它的 body。不是所有的请求都有一个 body：例如获取资源的请求，GET，HEAD，DELETE 和 OPTIONS，通常它们不需要 body。 有些请求将数据发送到服务器以便更新数据：常见的的情况是 POST 请求（包含 HTML 表单数据）。
+
+Body 大致可分为两类：
+
+- Single-resource bodies，由一个单文件组成。该类型 body 由两个 header 定义： [`Content-Type`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Type) 和 [`Content-Length`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Length).
+- [Multiple-resource bodies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#multipartform-data)，由多部分 body 组成，每一部分包含不同的信息位。通常是和  [HTML Forms](https://developer.mozilla.org/en-US/docs/Learn/Forms) 连系在一起。
+
+---
+
+## [HTTP 响应](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Messages#http_响应)
+
+### [状态行](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Messages#状态行)
+
+HTTP 响应的起始行被称作 *状态行* *(status line)*，包含以下信息：
+
+1. *协议版本*，通常为 `HTTP/1.1。`
+2. *状态码 (**status code)*，表明请求是成功或失败。常见的状态码是 [`200`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/200)，[`404`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/404)，或 [`302`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/302)。
+3. *状态文本 (status text)*。一个简短的，纯粹的信息，通过状态码的文本描述，帮助人们理解该 HTTP 消息。
+
+一个典型的状态行看起来像这样：`HTTP/1.1 404 Not Found`。
+
+### [Headers](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Messages#headers_2)
+
+响应的  [HTTP headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers) 遵循和任何其它 header 相同的结构：不区分大小写的字符串，紧跟着的冒号 (`':'`) 和一个结构取决于 header 类型的值。 整个 header（包括其值）表现为单行形式。
+
+有许多响应头可用，这些响应头可以分为几组：
+
+- *General headers，*例如 [`Via`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Via)，适用于整个报文。
+- *Response headers，*例如 [`Vary`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Vary) 和 [`Accept-Ranges`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Accept-Ranges)，提供其它不符合状态行的关于服务器的信息。
+- *Entity headers*，例如 [`Content-Length`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Length)，适用于请求的 body。显然，如果请求中没有任何 body，则不会发送这样的头文件。
+
+![Example of headers in an HTTP response](https://mdn.mozillademos.org/files/13823/HTTP_Response_Headers2.png)
+
+### [Body](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Messages#body_2)
+
+响应的最后一部分是 body。不是所有的响应都有 body：具有状态码 (如 [`201`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/201) 或 [`204`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/204)) 的响应，通常不会有 body。
+
+Body 大致可分为三类：
+
+- Single-resource bodies，由**已知**长度的单个文件组成。该类型 body 由两个 header 定义：[`Content-Type`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Type) 和 [`Content-Length`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Length)。
+- Single-resource bodies，由**未知**长度的单个文件组成，通过将 [`Transfer-Encoding`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Transfer-Encoding) 设置为 `chunked `来使用 chunks 编码。
+- [Multiple-resource bodies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#multipartform-data)，由多部分 body 组成，每部分包含不同的信息段。但这是比较少见的。
+
+---
+
+## [HTTP/2 帧](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Messages#http2_帧)
+
+HTTP/1.x 报文有一些性能上的缺点：
+
+- Header 不像 body，它不会被压缩。
+- 两个报文之间的 header 通常非常相似，但它们仍然在连接中重复传输。
+- 无法复用。当在同一个服务器打开几个连接时：TCP 热连接比冷连接更加有效。
+
+HTTP/2 引入了一个额外的步骤：它将 HTTP/1.x 消息分成帧并嵌入到流 (stream) 中。数据帧和报头帧分离，这将允许报头压缩。将多个流组合，这是一个被称为 *多路复用 (multiplexing)* 的过程，它允许更有效的底层 TCP 连接。
+
+![HTTP/2 modify the HTTP message to divide them in frames (part of a single stream), allowing for more optimization.](https://mdn.mozillademos.org/files/13819/Binary_framing2.png)
+
+HTTP 帧现在对 Web 开发人员是透明的。在 HTTP/2 中，这是一个在  HTTP/1.1 和底层传输协议之间附加的步骤。Web 开发人员不需要在其使用的 API 中做任何更改来利用 HTTP 帧；当浏览器和服务器都可用时，HTTP/2 将被打开并使用。
+
+---
+
+# 典型的 HTTP 会话
+
+在像 HTTP 这样的Client-Server（客户端-服务器）协议中，会话分为三个阶段：
+
+1. 客户端建立一条 TCP 连接（如果传输层不是 TCP，也可以是其他适合的连接）。
+2. 客户端发送请求并等待应答。
+3. 服务器处理请求并送回应答，回应包括一个状态码和对应的数据。
+
+从 HTTP/1.1 开始，连接在完成第三阶段后不再关闭，客户端可以再次发起新的请求。这意味着第二步和第三步可以连续进行数次。
+
+---
+
+## [建立连接](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Session#建立连接)
+
+在客户端-服务器协议中，连接是由客户端发起建立的。在HTTP中打开连接意味着在底层传输层启动连接，通常是 TCP。
+
+使用 TCP 时，HTTP 服务器的默认端口号是 80，另外还有 8000 和 8080 也很常用。页面的 URL 会包含域名和端口号，但当端口号为 80 时可以省略。前往 [标识互联网上的内容](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/Identifying_resources_on_the_Web) 获取更多内容。
+
+> **注意:** 客户端-服务器模型不允许服务器在没有显式请求时发送数据给客户端。为了解决这个问题，Web 开发者们使用了许多技术：例如，使用 [`XMLHTTPRequest`](https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest) 或 [`Fetch`](https://developer.mozilla.org/zh-CN/docs/Web/API/fetch) API 周期性地请求服务器，使用 HTML [WebSockets API](https://developer.mozilla.org/en-US/WebSockets)，或其他类似协议。
+
+---
+
+## [发送客户端请求](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Session#发送客户端请求)
+
+一旦连接建立，用户代理就可以发送请求 (用户代理通常是 Web 浏览器，但也可以是其他的（例如爬虫）。客户端请求由一系列文本指令组成，并使用 CRLF 分隔，它们被划分为三个块：
+
+1. 第一行包括请求方法及请求参数：
+   - 文档路径，不包括协议和域名的绝对路径 URL
+   - 使用的 HTTP 协议版本
+2. 接下来的行每一行都表示一个 HTTP 首部，为服务器提供关于所需数据的信息（例如语言，或 MIME 类型），或是一些改变请求行为的数据（例如当数据已经被缓存，就不再应答）。这些 HTTP 首部组成以一个空行结束的一个块。
+3. 最后一块是可选数据块，包含更多数据，主要被 POST 方法所使用。
+
+---
+
+### [请求示例](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Session#请求示例)
+
+访问 developer.mozilla.org 的根页面，即 [http://developer.mozilla.org/](https://developer.mozilla.org/)，并告诉服务器用户代理倾向于该页面使用法语展示：
+
+```http
+GET / HTTP/1.1
+Host: developer.mozilla.org
+Accept-Language: fr
+```
+
+注意最后的空行，它把首部与数据块分隔开。由于在 HTTP 首部中没有 `Content-Length`，数据块是空的，所以服务器可以在收到代表首部结束的空行后就开始处理请求。
+
+例如，发送表单的结果：
+
+```http
+POST /contact_form.php HTTP/1.1
+Host: developer.mozilla.org
+Content-Length: 64
+Content-Type: application/x-www-form-urlencoded
+
+name=Joe%20User&request=Send%20me%20one%20of%20your%20catalogue
+```
+
+### [请求方法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Session#请求方法)
+
+HTTP 定义了一组 [请求方法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods) 用来指定对目标资源的行为。它们一般是名词，但这些请求方法有时会被叫做 HTTP 动词。最常用的请求方法是 `GET` 和 `POST`：
+
+- [`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET) 方法请求指定的资源。`GET` 请求应该只被用于获取数据。
+- [`POST`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST) 方法向服务器发送数据，因此会改变服务器状态。这个方法常在 [HTML 表单](https://developer.mozilla.org/en-US/docs/Learn/Forms) 中使用。
+
+---
+
+## [服务器响应结构](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Session#服务器响应结构)
+
+当收到用户代理发送的请求后，Web 服务器就会处理它，并最终送回一个响应。与客户端请求很类似，服务器响应由一系列文本指令组成, 并使用 CRLF 分隔，它们被划分为三个不同的块：
+
+1. 第一行是 *`状态行`，*包括使用的 HTTP 协议版本，状态码和一个状态描述（可读描述文本）。
+2. 接下来每一行都表示一个 HTTP 首部，为客户端提供关于所发送数据的一些信息（如类型，数据大小，使用的压缩算法，缓存指示）。与客户端请求的头部块类似，这些 HTTP 首部组成一个块，并以一个空行结束。
+3. 最后一块是数据块，包含了响应的数据 （如果有的话）。
+
+### [响应示例](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Session#响应示例)
+
+成功的网页响应：
+
+```http
+HTTP/1.1 200 OK
+Date: Sat, 09 Oct 2010 14:28:02 GMT
+Server: Apache
+Last-Modified: Tue, 01 Dec 2009 20:18:22 GMT
+ETag: "51142bc1-7449-479b075b2891b"
+Accept-Ranges: bytes
+Content-Length: 29769
+Content-Type: text/html
+
+<!DOCTYPE html... (这里是 29769 字节的网页HTML源代码)
+```
+
+请求资源已被永久移动的网页响应：
+
+```http
+HTTP/1.1 301 Moved Permanently
+Server: Apache/2.2.3 (Red Hat)
+Content-Type: text/html; charset=iso-8859-1
+Date: Sat, 09 Oct 2010 14:30:24 GMT
+Location: https://developer.mozilla.org/ (目标资源的新地址, 服务器期望用户代理去访问它)
+Keep-Alive: timeout=15, max=98
+Accept-Ranges: bytes
+Via: Moz-Cache-zlb05
+Connection: Keep-Alive
+X-Cache-Info: caching
+X-Cache-Info: caching
+Content-Length: 325 (如果用户代理无法转到新地址，就显示一个默认页面)
+
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>301 Moved Permanently</title>
+</head><body>
+<h1>Moved Permanently</h1>
+<p>The document has moved <a href="https://developer.mozilla.org/">here</a>.</p>
+<hr>
+<address>Apache/2.2.3 (Red Hat) Server at developer.mozilla.org Port 80</address>
+</body></html>
+```
+
+请求资源不存在的网页响应：
+
+```http
+HTTP/1.1 404 Not Found
+Date: Sat, 09 Oct 2010 14:33:02 GMT
+Server: Apache
+Last-Modified: Tue, 01 May 2007 14:24:39 GMT
+ETag: "499fd34e-29ec-42f695ca96761;48fe7523cfcc1"
+Accept-Ranges: bytes
+Content-Length: 10732
+Content-Type: text/html
+
+<!DOCTYPE html... (包含一个站点自定义404页面, 帮助用户找到丢失的资源)
+```
+
+### [响应状态码](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Session#响应状态码)
+
+[HTTP 响应状态码](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 用来表示一个 HTTP 请求是否成功完成。响应被分为 5 种类型：信息型响应，成功响应，重定向，客户端错误和服务端错误。
+
+- [`200`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/200): OK. 请求成功。
+- [`301`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/301): Moved Permanently. 请求资源的 URI 已被改变。
+- [`404`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/404): Not Found. 服务器无法找到请求的资源。
+
+---
+
+# HTTP/1.x 的连接管理
+
+连接管理是一个 HTTP 的关键话题：打开和保持连接在很大程度上影响着网站和 Web 应用程序的性能。在 HTTP/1.x 里有多种模型：*短连接*, *长连接*, 和 *HTTP 流水线。*
+
+HTTP 的传输协议主要依赖于 TCP 来提供从客户端到服务器端之间的连接。在早期，HTTP 使用一个简单的模型来处理这样的连接。这些连接的生命周期是短暂的：每发起一个请求时都会创建一个新的连接，并在收到应答时立即关闭。
+
+这个简单的模型对性能有先天的限制：打开每一个 TCP 连接都是相当耗费资源的操作。客户端和服务器端之间需要交换好些个消息。当请求发起时，网络延迟和带宽都会对性能造成影响。现代浏览器往往要发起很多次请求(十几个或者更多)才能拿到所需的完整信息，证明了这个早期模型的效率低下。
+
+有两个新的模型在 HTTP/1.1 诞生了。首先是长连接模型，它会保持连接去完成多次连续的请求，减少了不断重新打开连接的时间。然后是 HTTP 流水线模型，它还要更先进一些，多个连续的请求甚至都不用等待立即返回就可以被发送，这样就减少了耗费在网络延迟上的时间。
+
+![Compares the performance of the three HTTP/1.x connection models: short-lived connections, persistent connections, and HTTP pipelining.](https://mdn.mozillademos.org/files/13727/HTTP1_x_Connections.png)
+
+HTTP/2 新增了其它连接管理模型。
+
+要注意的一个重点是 HTTP 的连接管理适用于两个连续节点之间的连接，如 [hop-by-hop](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers#hbh)，而不是 [end-to-end](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers#e2e)。当模型用于从客户端到第一个代理服务器的连接和从代理服务器到目标服务器之间的连接时(或者任意中间代理)效果可能是不一样的。HTTP 协议头受不同连接模型的影响，比如 [`Connection`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Connection) 和 [`Keep-Alive`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Keep-Alive)，就是 [hop-by-hop](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers#hbh) 协议头，它们的值是可以被中间节点修改的。
+
+一个相关的话题是HTTP连接升级，在这里，一个HTTP/1.1 连接升级为一个不同的协议，比如TLS/1.0，Websocket，甚至明文形式的HTTP/2。更多细节参阅[协议升级机制](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Protocol_upgrade_mechanism)。
