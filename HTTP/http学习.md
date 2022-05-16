@@ -990,3 +990,146 @@ HTTP/2 新增了其它连接管理模型。
 要注意的一个重点是 HTTP 的连接管理适用于两个连续节点之间的连接，如 [hop-by-hop](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers#hbh)，而不是 [end-to-end](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers#e2e)。当模型用于从客户端到第一个代理服务器的连接和从代理服务器到目标服务器之间的连接时(或者任意中间代理)效果可能是不一样的。HTTP 协议头受不同连接模型的影响，比如 [`Connection`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Connection) 和 [`Keep-Alive`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Keep-Alive)，就是 [hop-by-hop](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers#hbh) 协议头，它们的值是可以被中间节点修改的。
 
 一个相关的话题是HTTP连接升级，在这里，一个HTTP/1.1 连接升级为一个不同的协议，比如TLS/1.0，Websocket，甚至明文形式的HTTP/2。更多细节参阅[协议升级机制](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Protocol_upgrade_mechanism)。
+
+---
+
+## [短连接](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Connection_management_in_HTTP_1.x#短连接)
+
+HTTP 最早期的模型，也是  HTTP/1.0 的默认模型，是短连接。每一个 HTTP 请求都由它自己独立的连接完成；这意味着发起每一个 HTTP 请求之前都会有一次 TCP 握手，而且是连续不断的。
+
+TCP 协议握手本身就是耗费时间的，所以 TCP 可以保持更多的热连接来适应负载。短连接破坏了 TCP 具备的能力，新的冷连接降低了其性能。
+
+这是 HTTP/1.0 的默认模型(如果没有指定 [`Connection`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Connection) 协议头，或者是值被设置为 `close`)。而在 HTTP/1.1 中，只有当 [`Connection`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Connection) 被设置为 `close` 时才会用到这个模型。
+
+> 除非是要兼容一个非常古老的，不支持长连接的系统，没有一个令人信服的理由继续使用这个模型。
+
+## [长连接](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Connection_management_in_HTTP_1.x#长连接)
+
+短连接有两个比较大的问题：创建新连接耗费的时间尤为明显，另外 TCP 连接的性能只有在该连接被使用一段时间后(热连接)才能得到改善。为了缓解这些问题，*长连接* 的概念便被设计出来了，甚至在 HTTP/1.1 之前。或者这被称之为一个 *keep-alive* 连接。
+
+一个长连接会保持一段时间，重复用于发送一系列请求，节省了新建 TCP 连接握手的时间，还可以利用 TCP 的性能增强能力。当然这个连接也不会一直保留着：连接在空闲一段时间后会被关闭(服务器可以使用 [`Keep-Alive`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Keep-Alive) 协议头来指定一个最小的连接保持时间)。
+
+长连接也还是有缺点的；就算是在空闲状态，它还是会消耗服务器资源，而且在重负载时，还有可能遭受 [DoS attacks](https://developer.mozilla.org/zh-CN/docs/Glossary/DOS_attack) 攻击。这种场景下，可以使用非长连接，即尽快关闭那些空闲的连接，也能对性能有所提升。
+
+HTTP/1.0 里默认并不使用长连接。把 [`Connection`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Connection) 设置成 `close` 以外的其它参数都可以让其保持长连接，通常会设置为 `retry-after。`
+
+在 HTTP/1.1 里，默认就是长连接的，协议头都不用再去声明它(但我们还是会把它加上，万一某个时候因为某种原因要退回到 HTTP/1.0 呢)。
+
+## [HTTP 流水线](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Connection_management_in_HTTP_1.x#http_流水线)
+
+> HTTP 流水线在现代浏览器中并**不是默认被启用的**：
+
+- Web 开发者并不能轻易的遇见和判断那些搞怪的[代理服务器](https://en.wikipedia.org/wiki/Proxy_server)的各种莫名其妙的行为。
+- 正确的实现流水线是复杂的：传输中的资源大小，多少有效的 [RTT](https://en.wikipedia.org/wiki/Round-trip_delay_time) 会被用到，还有有效带宽，流水线带来的改善有多大的影响范围。不知道这些的话，重要的消息可能被延迟到不重要的消息后面。这个重要性的概念甚至会演变为影响到页面布局！因此 HTTP 流水线在大多数情况下带来的改善并不明显。
+- 流水线受制于 [HOL](https://en.wikipedia.org/wiki/Head-of-line_blocking) 问题。
+
+由于这些原因，流水线已经被更好的算法给代替，如 *multiplexing*，已经用在 HTTP/2。
+
+默认情况下，[HTTP](https://developer.mozilla.org/en-US/HTTP) 请求是按顺序发出的。下一个请求只有在当前请求收到应答过后才会被发出。由于会受到网络延迟和带宽的限制，在下一个请求被发送到服务器之前，可能需要等待很长时间。
+
+流水线是在同一条长连接上发出连续的请求，而不用等待应答返回。这样可以避免连接延迟。理论上讲，性能还会因为两个 HTTP 请求有可能被打包到一个 TCP 消息包中而得到提升。就算 HTTP 请求不断的继续，尺寸会增加，但设置 TCP 的 [MSS](https://en.wikipedia.org/wiki/Maximum_segment_size)(Maximum Segment Size) 选项，仍然足够包含一系列简单的请求。
+
+并不是所有类型的 HTTP 请求都能用到流水线：只有 [idempotent](https://developer.mozilla.org/zh-CN/docs/Glossary/Idempotent) 方式，比如 [`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET)、[`HEAD`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/HEAD)、[`PUT`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PUT) 和 [`DELETE`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/DELETE) 能够被安全的重试：如果有故障发生时，流水线的内容要能被轻易的重试。
+
+今天，所有遵循 HTTP/1.1 的代理和服务器都应该支持流水线，虽然实际情况中还是有很多限制：一个很重要的原因是，目前没有现代浏览器默认启用这个特性。
+
+---
+
+## [域名分片](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Connection_management_in_HTTP_1.x#域名分片)
+
+> 除非你有紧急而迫切的需求，不要使用这一过时的技术，升级到 HTTP/2 就好了。在 HTTP/2 里，做域名分片就没必要了：HTTP/2 的连接可以很好的处理并发的无优先级的请求。域名分片甚至会影响性能。大多数 HTTP/2 的实现还会使用一种称作[连接凝聚](https://daniel.haxx.se/blog/2016/08/18/http2-connection-coalescing/)的技术去尝试合并被分片的域名。
+
+作为 HTTP/1.x 的连接，请求是序列化的，哪怕本来是无序的，在没有足够庞大可用的带宽时，也无从优化。一个解决方案是，浏览器为每个域名建立多个连接，以实现并发请求。曾经默认的连接数量为 2 到 3 个，现在比较常用的并发连接数已经增加到 6 条。如果尝试大于这个数字，就有触发服务器 DoS 保护的风险。
+
+如果服务器端想要更快速的响应网站或应用程序的应答，它可以迫使客户端建立更多的连接。例如，不要在同一个域名下获取所有资源，假设有个域名是 `www.example.com`，我们可以把它拆分成好几个域名：`www1.example.com`、`www2.example.com`、`www3.example.com`。所有这些域名都指向同一台服务器，浏览器会同时为每个域名建立 6 条连接(在我们这个例子中，连接数会达到 18 条)。这一技术被称作域名分片。
+
+![img](https://mdn.mozillademos.org/files/13783/HTTPSharding.png)
+
+---
+
+# 协议升级机制
+
+[HTTP协议](https://developer.mozilla.org/en-US/HTTP) 提供了一种特殊的机制，这一机制允许将一个已建立的连接升级成新的、不相容的协议。这篇指南涵盖了其工作原理和使用场景。
+
+通常来说这一机制总是由客户端发起的 （不过也有例外，比如说可以由服务端发起[升级到传输层安全协议（TLS）](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Protocol_upgrade_mechanism#server-initiated_upgrade_to_tls)）， 服务端可以选择是否要升级到新协议。借助这一技术，连接可以以常用的协议启动（如HTTP/1.1），随后再升级到HTTP2甚至是WebSockets.
+
+> 注意：HTTP/2 明确禁止使用此机制，这个机制只属于HTTP/1.1
+
+## [升级HTTP/1.1的链接](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Protocol_upgrade_mechanism#升级http1.1的链接)
+
+协议升级请求总是由客户端发起的；暂时没有服务端请求协议更改的机制。当客户端试图升级到一个新的协议时，可以先发送一个普通的请求（[`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET)，[`POST`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST)等），不过这个请求需要进行特殊配置以包含升级请求。
+
+特别这个请求需要添加两项额外的header：
+
+- `Connection: Upgrade`
+
+  设置 `Connection` 头的值为 `"Upgrade"` 来指示这是一个升级请求.
+
+- `Upgrade: *protocols*`
+
+  `Upgrade` 头指定一项或多项协议名，按优先级排序，以逗号分隔。
+
+一个典型的包含升级请求的例子差不多是这样的：
+
+```http
+GET /index.html HTTP/1.1
+Host: www.example.com
+Connection: upgrade
+Upgrade: example/1, foo/2
+```
+
+根据之前的请求的协议，可能需要其他头部信息，例如：从HTTP/1.1升级到[WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) 允许配置有关 WebSocket 连接的头部详细信息，以及在连接时提供一定程度的安全性。查看 [升级到WebSocket协议的连接](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Protocol_upgrade_mechanism#升级到websocket协议的连接) 获取更多信息。
+
+如果服务器决定升级这次连接，就会返回一个 [`101 Switching Protocols`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/101) 响应状态码，和一个要切换到的协议的头部字段Upgrade。 如果服务器没有（或者不能）升级这次连接，它会忽略客户端发送的 `"Upgrade` 头部字段，返回一个常规的响应：例如一个[`200 OK`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/200)).
+
+服务在发送 [`101`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/101) 状态码之后，就可以使用新的协议，并可以根据需要执行任何其他协议指定的握手。实际上，一旦这次升级完成了，连接就变成了双向管道。并且可以通过新协议完成启动升级的请求。
+
+由HTTP/1.1请求建立的连接可以升级为HTTP/2协议的连接，但是反过来不可以。事实上HTTP/2已经不再支持101状态码了，也不再支持任何连接升级机制。
+
+## [升级机制的常用场合](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Protocol_upgrade_mechanism#升级机制的常用场合)
+
+此处将介绍最常用到 `Upgrade` header的场合。
+
+### [升级到WebSocket协议的连接](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Protocol_upgrade_mechanism#升级到websocket协议的连接)
+
+至今为止最经常会需要升级一个HTTP连接的场合就是使用WebSocket。当你用 [WebSocket API](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) 以及其他大部分实现WebSockets的库去建立WebSocket连接时，基本上都不用操心升级的过程，因为这些API已经实现了这一步。比如，用如下API打开一个WebSocket连接：
+
+```js
+webSocket = new WebSocket("ws://destination.server.ext", "optionalProtocol");
+```
+
+[`WebSocket()`](https://developer.mozilla.org/zh-CN/docs/Web/API/WebSocket/WebSocket) 构造函数已经自动完成了发送初始 HTTP/1.1 请求，处理握手及升级过程。
+
+你也可以用 `"wss://"` 地址格式来打开安全的WebSocket连接。
+
+如果想要自己重头实现WebSocket 连接，就必须要处理握手和升级过程。在创建初始HTTP/1.1会话之后你需要发送另一个HTTP标准请求，但在headers中要带上[Upgrade (en-US)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Upgrade) and [`Connection`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Connection)，也就是：
+
+```http
+Connection: Upgrade
+Upgrade: websocket
+```
+
+### [WebSocket 专有的 headers](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Protocol_upgrade_mechanism#websocket_专有的_headers)
+
+以下headers是在WebSocket升级过程中会出现的。除了 [Upgrade (en-US)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Upgrade) 和 [`Connection`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Connection) headers, 其他的一般浏览器和服务器都会在交互过程中处理好。
+
+#### [`Sec-WebSocket-Extensions`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Sec-WebSocket-Extensions)
+
+用于指定一个或多个请求服务器使用的协议级WebSocket扩展。允许在一个请求中使用多个Sec-WebSocket-Extension头，结果跟在一个头文件中包含了所有列出的扩展一样。
+
+```
+Sec-WebSocket-Extensions: extensions
+```
+
+- `extensions`
+
+  指需要(或支持)的扩展的逗号分隔列表。这些值来自[IANA WebSocket 扩展名注册表](https://www.iana.org/assignments/websocket/websocket.xml#extension-name)。带参数的扩展使用分号表示。
+
+例如：
+
+```
+Sec-WebSocket-Extensions: superspeed, colormode; depth=16
+```
+
+---
+
