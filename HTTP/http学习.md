@@ -2873,3 +2873,357 @@ Vary 首部是在 HTTP 协议的 1.1 版本中新添加的，而为了使缓存�
 从 HTTP 协议制定之初，该协议就准许另外一种协商机制：代理驱动型内容协商机制，或称为响应式协商机制。在这种协商机制中，当面临不明确的请求时，服务器会返回一个页面，其中包含了可供选择的资源的链接。资源呈现给用户，由用户做出选择。
 
 不幸的是，HTTP 标准没有明确指定提供可选资源链接的页面的格式，这一点阻碍了将这一过程无痛自动化。除了退回至服务端驱动型内容协商机制外，这种自动化方法几乎无一例外都是通过脚本技术来完成的，尤其是 JavaScript 重定向技术：在检测了协商的条件之后，脚本会触发重定向动作。另外一个问题是，为了获得实际的资源，需要额外发送一次请求，减慢了将资源呈现给用户的速度。
+
+---
+
+# HTTP请求范围
+
+HTTP 协议范围请求允许服务器只发送 HTTP 消息的一部分到客户端。范围请求在传送大的媒体文件，或者与文件下载的断点续传功能搭配使用时非常有用。
+
+## [检测服务器端是否支持范围请求](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Range_requests#检测服务器端是否支持范围请求)
+
+假如在响应中存在 [`Accept-Ranges`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Accept-Ranges) 首部（并且它的值不为 “none”），那么表示该服务器支持范围请求。例如，你可以使用 cURL 发送一个 [`HEAD`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/HEAD) 请求来进行检测。
+
+```bash
+curl -I http://i.imgur.com/z4d4kWk.jpg
+
+HTTP/1.1 200 OK
+...
+Accept-Ranges: bytes
+Content-Length: 146515
+```
+
+在上面的响应中， `Accept-Ranges: bytes` 表示界定范围的单位是 bytes 。这里 [`Content-Length`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Length) 也是有效信息，因为它提供了要检索的图片的完整大小。
+
+如果站点未发送 `Accept-Ranges` 首部，那么它们有可能不支持范围请求。一些站点会明确将其值设置为 "none"，以此来表明不支持。在这种情况下，某些应用的下载管理器会将暂停按钮禁用。
+
+```
+curl -I https://www.youtube.com/watch?v=EwTZ2xpQwpA
+
+HTTP/1.1 200 OK
+...
+Accept-Ranges: none
+```
+
+## [从服务器端请求特定的范围](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Range_requests#从服务器端请求特定的范围)
+
+假如服务器支持范围请求的话，你可以使用 [`Range`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Range) 首部来生成该类请求。该首部指示服务器应该返回文件的哪一或哪几部分。
+
+### [单一范围](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Range_requests#单一范围)
+
+我们可以请求资源的某一部分。这次我们依然用 cURL 来进行测试。"-H" 选项可以在请求中追加一个首部行，在这个例子中，是用 Range 首部来请求图片文件的前 1024 个字节。
+
+```bash
+curl http://i.imgur.com/z4d4kWk.jpg -i -H "Range: bytes=0-1023"
+```
+
+这样生成的请求如下：
+
+```http
+GET /z4d4kWk.jpg HTTP/1.1
+Host: i.imgur.com
+Range: bytes=0-1023
+```
+
+服务器端会返回状态码为 [`206`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/206) `Partial Content` 的响应：
+
+```http
+HTTP/1.1 206 Partial Content
+Content-Range: bytes 0-1023/146515
+Content-Length: 1024
+...
+(binary content)
+```
+
+在这里，[`Content-Length`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Length) 首部现在用来表示先前请求范围的大小（而不是整张图片的大小）。[`Content-Range`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Range) 响应首部则表示这一部分内容在整个资源中所处的位置。
+
+### [多重范围](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Range_requests#多重范围)
+
+Range头部也支持一次请求文档的多个部分。请求范围用一个逗号分隔开。
+
+```bash
+curl http://www.example.com -i -H "Range: bytes=0-50, 100-150"
+```
+
+服务器返回206 Partial Content状态码和Content-Type：multipart/byteranges; boundary=3d6b6a416f9b5头部，Content-Type：multipart/byteranges表示这个响应有多个byterange。每一部分byterange都有他自己的Content-type头部和Content-Range，并且使用boundary参数对body进行划分。
+
+```http
+HTTP/1.1 206 Partial Content
+Content-Type: multipart/byteranges; boundary=3d6b6a416f9b5
+Content-Length: 282
+
+--3d6b6a416f9b5
+Content-Type: text/html
+Content-Range: bytes 0-50/1270
+
+<!doctype html>
+<html>
+<head>
+    <title>Example Do
+--3d6b6a416f9b5
+Content-Type: text/html
+Content-Range: bytes 100-150/1270
+
+eta http-equiv="Content-type" content="text/html; c
+--3d6b6a416f9b5--
+```
+
+### [条件式范围请求](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Range_requests#条件式范围请求)
+
+当（中断之后）重新开始请求更多资源片段的时候，必须确保自从上一个片段被接收之后该资源没有进行过修改。
+
+The [`If-Range`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/If-Range) 请求首部可以用来生成条件式范围请求：假如条件满足的话，条件请求就会生效，服务器会返回状态码为 [`206`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/206) `Partial `的响应，以及相应的消息主体。假如条件未能得到满足，那么就会返回状态码为 [`200`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/200) `OK` 的响应，同时返回整个资源。该首部可以与  [`Last-Modified`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Last-Modified) 验证器或者 [`ETag`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/ETag) 一起使用，但是二者不能同时使用。
+
+```
+If-Range: Wed, 21 Oct 2015 07:28:00 GMT 
+```
+
+## [范围请求的响应](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Range_requests#范围请求的响应)
+
+与范围请求相关的有三种状态：
+
+- 在请求成功的情况下，服务器会返回 [`206`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/206) `Partial Content` 状态码。
+- 在请求的范围越界的情况下（范围值超过了资源的大小），服务器会返回 [`416`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/416) `Requested Range Not Satisfiable` （请求的范围无法满足） 状态码。
+- 在不支持范围请求的情况下，服务器会返回 [`200`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/200) `OK` 状态码。
+
+## [与分块传输编码的对比](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Range_requests#与分块传输编码的对比)
+
+[`Transfer-Encoding`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Transfer-Encoding) 首部允许分块编码，这在数据量很大，并且在请求未能完全处理完成之前无法知晓响应的体积大小的情况下非常有用。服务器会直接把数据发送给客户端而无需进行缓冲或确定响应的精确大小——后者会增加延迟。范围请求与分块传输是兼容的，可以单独或搭配使用。
+
+---
+
+# HTTP 的重定向
+
+URL 重定向，也称为 URL 转发，是一种当实际资源，如单个页面、表单或者整个 Web 应用被迁移到新的 URL 下的时候，保持（原有）链接可用的技术。HTTP 协议提供了一种特殊形式的响应—— HTTP 重定向（HTTP redirects）来执行此类操作。
+
+重定向可实现许多目标：
+
+- 站点维护或停机期间的临时重定向。
+- 永久重定向将在更改站点的URL，上传文件时的进度页等之后保留现有的链接/书签。
+- 上传文件时的表示进度的页面。
+
+## [原理](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#原理)
+
+在 HTTP 协议中，重定向操作由服务器通过发送特殊的响应（即 redirects）而触发。HTTP 协议的重定向响应的状态码为 3xx 。
+
+浏览器在接收到重定向响应的时候，会采用该响应提供的新的 URL ，并立即进行加载；大多数情况下，除了会有一小部分性能损失之外，重定向操作对于用户来说是不可见的。
+
+
+![img](https://mdn.mozillademos.org/files/13785/HTTPRedirect.png)
+
+不同类型的重定向映射可以划分为三个类别：
+
+1. [永久重定向](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections$edit#Permanent_redirections)
+2. [临时重定向](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections$edit#Temporary_redirections)
+3. [特殊重定向](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections$edit#Special_redirections)
+
+### [永久重定向](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#永久重定向)
+
+这种重定向操作是永久性的。它表示原 URL 不应再被使用，而应该优先选用新的 URL。搜索引擎机器人会在遇到该状态码时触发更新操作，在其索引库中修改与该资源相关的 URL 。
+
+| 编码  | 含义               | 处理方法                                                     | 典型应用场景                                             |
+| :---- | :----------------- | :----------------------------------------------------------- | :------------------------------------------------------- |
+| `301` | Moved Permanently  | [`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET) 方法不会发生变更，其他方法有可能会变更为 [`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET) 方法。[[1\]](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#attr1) | 网站重构。                                               |
+| `308` | Permanent Redirect | 方法和消息主体都不发生变化。                                 | 网站重构，用于非GET方法。(with non-GET links/operations) |
+
+[1] 该规范无意使方法发生改变，但在实际应用中用户代理会这么做。 308 状态码被创建用来消除在使用非 GET 方法时的歧义行为。
+
+### [临时重定向](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#临时重定向)
+
+有时候请求的资源无法从其标准地址访问，但是却可以从另外的地方访问。在这种情况下可以使用临时重定向。
+
+搜索引擎不会记录该新的、临时的链接。在创建、更新或者删除资源的时候，临时重定向也可以用于显示临时性的进度页面。
+
+| 编码  | 含义                 | 处理方法                                                     | 典型应用场景                                                 |
+| :---- | :------------------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
+| `302` | `Found`              | [`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET) 方法不会发生变更，其他方法有可能会变更为 [`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET) 方法。[[2\]](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#attr2) | 由于不可预见的原因该页面暂不可用。在这种情况下，搜索引擎不会更新它们的链接。 |
+| `303` | `See Other`          | [`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET) 方法不会发生变更，其他方法会**变更**为 GET 方法（消息主体会丢失）。 | 用于[`PUT`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PUT) 或 [`POST`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST) 请求完成之后进行页面跳转来防止由于页面刷新导致的操作的重复触发。 |
+| `307` | `Temporary Redirect` | 方法和消息主体都不发生变化。                                 | 由于不可预见的原因该页面暂不可用。在这种情况下，搜索引擎不会更新它们的链接。当站点支持非 GET 方法的链接或操作的时候，该状态码优于 302 状态码。 |
+
+[2] 该规范无意使方法发生改变，但在实际应用中用户代理会这么做。 307 状态码被创建用来消除在使用非 GET 方法时的歧义行为。
+
+### [特殊重定向](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#特殊重定向)
+
+除了上述两种常见的重定向之外，还有两种特殊的重定向。[`304`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/304) （Not Modified，资源未被修改）会使页面跳转到本地陈旧的缓存版本当中（该缓存已过期(?)），而 [`300`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/300) （Multiple Choice，多项选择） 则是一种手工重定向：以 Web 页面形式呈现在浏览器中的消息主体包含了一个可能的重定向链接的列表，用户可以从中进行选择。
+
+| 编码  | 含义              | 典型应用场景                                                 |
+| :---- | :---------------- | :----------------------------------------------------------- |
+| `300` | `Multiple Choice` | 不常用：所有的选项在消息主体的 HTML 页面中列出。鼓励在 [`Link`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Link) 头部加入机器可读的 `rel=alternate` |
+| `304` | `Not Modified`    | 发送用于重新验证的条件请求。表示缓存的响应仍然是新鲜的并且可以使用。 |
+
+## [设定重定向映射的其他方法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#设定重定向映射的其他方法)
+
+**HTTP 协议中重定向机制**并非唯一的重定向映射的方式。其他两种方法包括：
+
+1. 借助 HTML 的 meta 元素的 HTML 重定向机制
+2. 借助 [DOM](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model) 的 JavaScript 重定向机制。
+
+### [HTML 重定向机制](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#html_重定向机制)
+
+HTTP 协议中重定向机制是应该优先采用的创建重定向映射的方式，但是有时候 Web 开发者对于服务器没有控制权，或者无法对其进行配置。针对这些特定的应用情景，Web 开发者可以在精心制作的 HTML 页面的 [``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/head) 部分添加一个 [``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/meta) 元素，并将其 [`http-equiv`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/meta#attr-http-equiv) 属性的值设置为 `refresh` 。当显示页面的时候，浏览器会检测该元素，然后跳转到指定的页面。
+
+```html
+<head>
+  <meta http-equiv="Refresh" content="0; URL=http://example.com/" />
+</head>
+```
+
+[`content`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Global_attributes#attr-content) 属性的值开头是一个数字，指示浏览器在等待该数字表示的秒数之后再进行跳转。建议始终将其设置为 0 来获取更好的可访问性。
+
+显然，该方法仅适用于 HTML 页面（或类似的页面），然而并不能应用于图片或者其他类型的内容。
+
+注意这种机制会使浏览器的回退按钮失效：可以返回含有这个头部的页面，但是又会立即跳转。
+
+### [JavaScript 重定向机制](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#javascript_重定向机制)
+
+在 JavaScript 中，重定向机制的原理是设置 [`window.location`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/location) 的属性值，然后加载新的页面。
+
+```js
+window.location = "http://example.com/";
+```
+
+与 HTML 重定向机制类似，这种方式并不适用于所有类型的资源，并且显然只有在支持 JavaScript 的客户端上才能使用。另外一方面，它也提供了更多的可能性，比如在只有满足了特定的条件的情况下才可以触发重定向机制的场景。
+
+### [优先级](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#优先级)
+
+由于存在上述三种 URL 重定向机制，那么在多种方法同时设定的情况下，哪种方法会首先起作用呢？优先级顺序如下：
+
+1. HTTP 协议的重定向机制永远最先触发，即便是在没有传送任何页面——也就没有页面被（客户端）读取——的情况下。
+2. HTML 的重定向机制 (<meta>) 会在 HTTP 协议重定向机制未设置的情况下触发。
+3. JavaScript 的重定向机制总是作为最后诉诸的手段，并且只有在客户端开启了 JavaScript 的情况下才起作用。
+
+**任何情况下，只要有可能，就应该采用 HTTP 协议的重定向机制**，而不要使用(<meta>)标签。假如开发人员修改了 HTTP 重定向映射而忘记修改 HTML 页面的重定向映射，那么二者就会不一致，最终结果或者出现无限循环，或者导致其他噩梦的发生。
+
+---
+
+## [应用场景](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#应用场景)
+
+有以下几种应用场景可以使用重定向机制，但是需要注意应该尽可能地限制其使用数量，因为每一次重定向都会带来性能上的开销。
+
+### [域名别称](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#域名别称)
+
+理想情况下，一项资源只有一个访问位置，也就是只有一个 URL 。但是由于种种原因，需要为资源设定不同的名称（即不同的域名，例如带有和不带有 www 前缀的URL，以及简短易记的 URL 等）。在这种情况下，实用的方法是将其重定向到那个实际的（标准的）URL，而不是复制资源。
+
+在以下几种情况下可以使用域名别称：
+
+- 扩大站点的用户覆盖面。
+
+  一个常见的场景是，假如站点位于 `www.example.com` 域名下，那么通过 `example.com `也应该可以访问到。这种情况下，可以建立从 `example.com` 的页面到 `www.example.com` 的重定向映射。此外还可以提供常见的同义词，或者该域名容易导致的拼写错误的域名别称。
+
+- 迁移到另外一个域名。
+
+  例如，公司改名后，你希望用户在搜索旧名称的时候，依然可以访问到应用了新名称的站点。
+
+- 强制使用 HTTPS 协议。
+
+  对于 HTTP 版本站点的请求会被重定向至采用了 HTTPS 协议的版本。
+
+
+
+### 保持链接有效
+
+当你重构 Web 站点的时候，资源的 URL 会发生改变。即便是你可以更新站点内部的链接来适应新的命名体系，但无法控制被外部资源使用的 URL 。
+
+你并不想因此而使旧链接失效，因为它们会为你带来宝贵的用户（并且帮助优化你的SEO），所以需要建立从旧链接到新链接的重定向映射。
+
+> 即便是这项技术可以同样应用于内部链接，但是应该尽量避免内部重定向映射。重定向机制会带来相当大的性能开销（额外的 HTTP 请求），所以如果你可以通过修复链接来避免的话，那么就应该将其修复。
+
+
+### [对于不安全请求的临时响应](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#对于不安全请求的临时响应)
+
+不安全（[Unsafe](https://developer.mozilla.org/zh-CN/docs/Glossary/safe)）请求会修改服务器端的状态，应该避免用户无意的重复操作。
+
+通常，你并不想要你的用户重复发送  [`PUT`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PUT)、[`POST`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST) 或 [`DELETE`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/DELETE) 请求。假如你仅仅为该类请求返回响应的话，简单地点击刷新按钮就会（可能会有一个确认信息）导致请求的重复发送。
+
+在这种情况下，服务器可以返回一个 [`303`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/303) (See Other) 响应，其中含有合适的响应信息。如果刷新按钮被点击的话，只会导致该页面被刷新，而不会重复提交不安全的请求。
+
+### [对于耗时请求的临时响应](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#对于耗时请求的临时响应)
+
+一些请求的处理会需要比较长的时间，比如有时候 [`DELETE`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/DELETE) 请求会被安排为稍后处理。在这种情况下，会返回一个 [`303`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/303) (See Other)  重定向响应，该响应链接到一个页面，表示请求的操作已经被列入计划，并且最终会通知用户操作的进展情况，或者允许用户将其取消。
+
+## [在通用服务器中配置重定向](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#在通用服务器中配置重定向)
+
+### [Apache](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#apache)
+
+重定向映射可以在服务器的配置文件中设置，也可以在每一个文件目录的 .htaccess 文件中设置。
+
+[mod_alias](https://httpd.apache.org/docs/current/mod/mod_alias.html) 模块提供了 `Redirect` 和 `Redirect_Match` 两种指令来设置 [`302`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/302) 响应（默认值）：
+
+```
+<VirtualHost *:443>
+	ServerName example.com
+	Redirect / https://www.example.com
+</VirtualHost>
+```
+
+URL `https://example.com/` 会被重定向至 `https://www.example.com/` ，URL 下的任何文件或目录也将重定向到该 URL（`https://example.com/some-page` 将重定向至 `https://www.example.com/some-page`）。
+
+`Redirect_Match` 指令的功能与之类似，不同之处在于它可以通过[正则表达式](https://developer.mozilla.org/zh-CN/docs/Glossary/Regular_expression)来指定一批受影响的 URL ：
+
+```
+RedirectMatch ^/images/(.*)$ http://images.example.com/$1
+```
+
+位于 `images/` 文件夹下的所有文档都会被重定向至新的域名。
+
+如果你不想要设置临时跳转，那么可是使用额外的参数（使用 HTTP 状态码或者 permanent 关键字）来进行设置：
+
+```
+Redirect permanent / https://www.example.com
+# …acts the same as:
+Redirect 301 / https://www.example.com
+```
+
+[mod_rewrite](https://httpd.apache.org/docs/current/mod/mod_rewrite.html) 模块也可以用来设置重定向映射。它应用起来更灵活，但也更加复杂。
+
+### [Nginx](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#nginx)
+
+在 Nginx 中，你可以创建一个服务器模块来进行重定向设置：
+
+```
+server {
+	listen 80;
+	server_name example.com;
+	return 301 $scheme://www.example.com$request_uri;
+}
+```
+
+可以使用 rewrite 指令来针对一个文件目录或者一部分页面应用重定向设置：
+
+```
+rewrite ^/images/(.*)$ http://images.example.com/$1 redirect;
+rewrite ^/images/(.*)$ http://images.example.com/$1 permanent;
+```
+
+### [IIS](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#iis)
+
+在 IIS 中，你可以使用 `<httpRedirect>` 元素来配置重定向映射。
+
+---
+
+## [重定向死锁（循环）](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Redirections#重定向死锁（循环）)
+
+当后续的重定向路径重复之前的路径的时候，重定向循环就产生了。换句话说，就是陷入了无限循环当中，不会有一个最终的页面返回。
+
+大多数情况下，这属于服务器端错误。如果服务器检测不到，就会返回 [`500`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/500) `Internal Server Error` 。假如你在修改了服务器配置不久就出现了这个问题，八成是遇到了重定向循环。
+
+有时候，服务器端无法对其进行检测：重定向循环发生于多台服务器之间，对于每一台服务器来说，都无法获得一个全景图。在这种情况下，浏览器会负责进行检测，然后返回错误信息。Firefox 会呈现如下信息：
+
+```
+Firefox has detected that the server is redirecting the request for this address in a way that will never complete.
+Firefox 检测到服务器正在试图将请求进行重定向，而这种重定向永远不会完结。
+```
+
+而 Chrome 则会呈现如下信息：
+
+```
+This Webpage has a redirect loop
+本页面包含有重定向循环。
+```
+
+无论哪个场景，用户对此都无能为力(除非客户端发生突变，比如说缓存或者Cookie不匹配)
+
+避免重定向循环非常重要，因为它会完全毁掉用户的体验。
+
+---
+
