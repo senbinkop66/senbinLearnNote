@@ -1,27 +1,22 @@
 /**
- * @param {number} m
- * @param {number} n
- * @param {number} k
+ * @param {number[]} nums
  * @return {number}
  */
-var findKthNumber = function(m, n, k) {
-    let left = 1;
-    let right = m * n;
-    while (left < right){
-        let x = left + Math.floor((right - left) /2);
-        let count = Math.floor(x / n) * n;
-        for (let i = Math.floor(x / n) + 1; i <= m; i++){
-            count += Math.floor(x / i);
-        }
-        if (count >= k) {
-            right = x;
+var findMaxConsecutiveOnes = function(nums) {
+    let ans = 0;
+    let count = 0;
+    for (let i = 0; i < nums.length; i++){
+        if (nums[i] === 1) {
+            count++;
         }else{
-            left = x + 1;
+            ans = Math.max(ans, count);
+            count = 0;
         }
     }
-    return left;
+    ans = Math.max(ans, count);
+    return ans;
 };
 
-let  m = 3, n = 3, k = 5;
-let result = findKthNumber(m, n, k);
+let nums = [1,1,0,1,1,1];
+let result = findMaxConsecutiveOnes(nums);
 console.log(result);
