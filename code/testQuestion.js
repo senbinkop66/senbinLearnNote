@@ -1,31 +1,44 @@
 /**
- * @param {number[]} nums1
- * @param {number[]} nums2
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
  * @return {number[]}
  */
-var nextGreaterElement = function(nums1, nums2) {
-    let len1 = nums1.length, len2 = nums2.length;
-    let ans = new Array(len1);
-    const m = new Map();
-    const stack = [];
-    for (let i = len2 - 1; i>=0; i--){
-        while(stack.length && stack[stack.length - 1] <= nums2[i]){
-            stack.pop();
-        }
-        if (stack.length) {
-            m.set(nums2[i], stack[stack.length - 1]);
+var findMode = function(root) {
+    let ans = [];
+    let maxCount = 0, count = 0, base = 0;
+
+    const update = (x) => {
+        if (x === base) {
+            ++count;
         }else{
-            m.set(nums2[i], -1);
+            count = 1;
+            base = x;
         }
-        stack.push(nums2[i]);
+        if (count === maxCount) {
+            ans.push(base)
+        }
+        if (count > maxCount){
+            maxCount = count;
+            ans = [base];
+        }
     }
-    for (let i = 0; i < len1; i++){
-        ans[i] = m.get(nums1[i]);
+
+    const dfs = (p) => {
+        if (!p) {
+            return;
+        }
+        dfs(p.left);
+        update(p.val);
+        dfs(p.right);
     }
+    
+    dfs(root);
     return ans;
-
 };
-
-let nums1 = [4,1,2], nums2 = [1,3,4,2];
-let result = nextGreaterElement(nums1, nums2);
-console.log(result);
