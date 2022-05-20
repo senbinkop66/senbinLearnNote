@@ -1451,3 +1451,493 @@ console.log(add10(2));  // 12
 `add5` 和 `add10` 都是闭包。它们共享相同的函数定义，**但是保存了不同的词法环境**。在 `add5` 的环境中，`x` 为 5。而在 `add10` 中，`x` 则为 10。
 
 ## [实用的闭包](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Closures#practical_closures)
+
+闭包很有用，**因为它允许将函数与其所操作的某些数据（环境）关联起来**。这显然类似于面向对象编程。在面向对象编程中，对象允许我们将某些数据（对象的属性）与一个或者多个方法相关联。
+
+因此，通常你使用只有一个方法的对象的地方，都可以使用闭包。
+
+在 Web 中，你想要这样做的情况特别常见。大部分我们所写的 JavaScript 代码都是基于事件的 — 定义某种行为，然后将其添加到用户触发的事件之上（比如点击或者按键）。我们的代码通常作为回调：为响应事件而执行的函数。
+
+假如，我们想在页面上添加一些可以调整字号的按钮。一种方法是以像素为单位指定 `body` 元素的 `font-size`，然后通过相对的 `em` 单位设置页面中其它元素（例如`header`）的字号：
+
+```css
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+}
+h1 {
+  font-size: 1.5em;
+}
+h2 {
+  font-size: 1.2em;
+}
+
+```
+
+我们的文本尺寸调整按钮可以修改 `body` 元素的 `font-size` 属性，由于我们使用相对单位，页面中的其它元素也会相应地调整。
+
+以下是 JavaScript：
+
+```html
+  <style>
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 12px;
+    }
+    h1 {
+      font-size: 1.5em;
+    }
+    h2 {
+      font-size: 1.2em;
+    }
+
+  </style>
+</head>
+<body>
+  <div>
+    <button id="size-12">12</button>
+    <button id="size-14">14</button>
+    <button id="size-16">16</button>
+  </div>
+  <h1>一级标题</h1>
+  <h2>二级标题</h2>
+  <p>普通文本</p>
+<script type="text/javascript">
+  function makeSizer(size){
+    return function(){
+      document.body.style.fontSize = size + "px";
+    };
+  }
+
+  var size12 = makeSizer(12);
+  var size14 = makeSizer(14);
+  var size16 = makeSizer(16);
+
+  document.getElementById("size-12").onclick = size12;
+  document.getElementById("size-14").onclick = size14;
+  document.getElementById("size-16").onclick = size16;
+</script>
+```
+
+`size12`，`size14` 和 `size16` 三个函数将分别把 `body` 文本调整为 12，14，16 像素。我们可以将它们分别添加到按钮的点击事件上。
+
+## [用闭包模拟私有方法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Closures#emulating_private_methods_with_closures)
+
+编程语言中，比如 Java，是支持将方法声明为私有的，即它们只能被同一个类中的其它方法所调用。
+
+而 JavaScript 没有这种原生支持，但我们可以使用闭包来模拟私有方法。私有方法不仅仅有利于限制对代码的访问：还提供了管理全局命名空间的强大能力，避免非核心的方法弄乱了代码的公共接口部分。
+
+下面的示例展现了如何使用闭包来定义公共函数，并令其可以访问私有函数和变量。这个方式也称为[模块模式（module pattern）](https://www.google.com/search?q=javascript+module+pattern)：
+
+```js
+var Counter = (function(){
+	var privateCounter = 0;
+	function changeBy(val){
+		privateCounter += val;
+	}
+	return {
+		increment: function(){
+			changeBy(1);
+		},
+		decrement: function(){
+			changeBy(-1);
+		},
+		value: function(){
+			return privateCounter;
+		}
+	}
+})();
+
+console.log(Counter.value());  // 0
+Counter.increment();
+Counter.increment();
+console.log(Counter.value());  // 2
+Counter.decrement();
+console.log(Counter.value());  // 1
+
+```
+
+在之前的示例中，每个闭包都有它自己的词法环境；而这次我们只创建了一个词法环境，为三个函数所共享：`Counter.increment`，`Counter.decrement` 和 `Counter.value`。
+
+该共享环境创建于一个立即执行的匿名函数体内。这个环境中包含两个私有项：名为 `privateCounter` 的变量和名为 `changeBy` 的函数。这两项都无法在这个匿名函数外部直接访问。**必须通过匿名函数返回的三个公共函数访问**。
+
+**这三个公共函数是共享同一个环境的闭包**。多亏 JavaScript 的词法作用域，它们都可以访问 `privateCounter` 变量和 `changeBy` 函数。
+
+> **备注：**你应该注意到我们定义了一个匿名函数，用于创建一个计数器。我们立即执行了这个匿名函数，并将他的值赋给了变量`Counter`。我们可以把这个函数储存在另外一个变量`makeCounter`中，并用他来创建多个计数器。
+
+
+
+请注意两个计数器 `Counter1` 和 `Counter2` 是如何维护它们各自的独立性的。每个闭包都是引用自己词法作用域内的变量 `privateCounter` 。
+
+**每次调用其中一个计数器时，通过改变这个变量的值，会改变这个闭包的词法环境**。然而在一个闭包内对变量的修改，不会影响到另外一个闭包中的变量。
+
+> **备注：**以这种方式使用闭包，提供了许多与面向对象编程相关的好处 —— 特别是数据隐藏和封装。
+
+
+
+## [在循环中创建闭包：一个常见错误](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Closures#creating_closures_in_loops_a_common_mistake)
+
+在 ECMAScript 2015 引入 [`let` 关键字](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let) 之前，在循环中有一个常见的闭包创建问题。参考下面的示例：
+
+```html
+<body>
+  <p id="help">Helpful notes will appear here</p>
+  <p>E-mail: <input type="text" id="email" name="email"></p>
+  <p>Name: <input type="text" id="name" name="name"></p>
+  <p>Age: <input type="text" id="age" name="age"></p>
+
+<script type="text/javascript">
+  function showHelp(help){
+    document.getElementById("help").innerHTML = help;
+  }
+  function setupHelp(){
+    var helpText = [
+      {"id": "email", "help": "Your e-mail address"},
+      {'id': 'name', 'help': 'Your full name'},
+      {'id': 'age', 'help': 'Your age (you must be over 16)'},
+    ];
+
+    for (var i = 0; i < helpText.length; i++){
+      var item = helpText[i];
+      document.getElementById(item.id).onfocus = function(){
+        showHelp(item.help);
+      }
+    }
+  }
+
+  setupHelp();
+</script>
+```
+
+数组 `helpText` 中定义了三个有用的提示信息，每一个都关联于对应的文档中的`input` 的 ID。通过循环这三项定义，依次为相应`input`添加了一个 `onfocus` 事件处理函数，以便显示帮助信息。
+
+运行这段代码后，您会发现它没有达到想要的效果。无论焦点在哪个`input`上，显示的都是关于年龄的信息。
+
+原因是赋值给 `onfocus` 的是闭包。**这些闭包是由他们的函数定义和在 `setupHelp` 作用域中捕获的环境所组成的**。这三个闭包在循环中被创建，但他们共享了同一个词法作用域，在这个作用域中存在一个变量item。这是因为变量`item`使用var进行声明，由于变量提升，所以具有函数作用域。**当`onfocus`的回调执行时，`item.help`的值被决定**。由于循环在事件触发之前早已执行完毕，**变量对象`item`（被三个闭包所共享）已经指向了`helpText`的最后一项。**
+
+解决这个问题的一种方案是使用更多的闭包：特别是使用前面所述的函数工厂：
+
+```js
+  function showHelp(help){
+    document.getElementById("help").innerHTML = help;
+  }
+
+  function makeHelpCallback(help){
+    return function(){
+      showHelp(help);
+    }
+  }
+
+  function setupHelp(){
+    var helpText = [
+      {"id": "email", "help": "Your e-mail address"},
+      {'id': 'name', 'help': 'Your full name'},
+      {'id': 'age', 'help': 'Your age (you must be over 16)'},
+    ];
+
+    for (var i = 0; i < helpText.length; i++){
+      var item = helpText[i];
+      document.getElementById(item.id).onfocus = makeHelpCallback(item.help);
+    }
+  }
+
+  setupHelp();
+```
+
+这段代码可以如我们所期望的那样工作。**所有的回调不再共享同一个环境**， `makeHelpCallback` 函数**为每一个回调创建一个新的词法环境**。在这些环境中，`help` 指向 `helpText` 数组中对应的字符串。
+
+另一种方法使用了**匿名闭包**：
+
+```js
+  function showHelp(help){
+    document.getElementById("help").innerHTML = help;
+  }
+
+  function setupHelp(){
+    var helpText = [
+      {"id": "email", "help": "Your e-mail address"},
+      {'id': 'name', 'help': 'Your full name'},
+      {'id': 'age', 'help': 'Your age (you must be over 16)'},
+    ];
+
+    for (var i = 0; i < helpText.length; i++){
+      (function(){
+        var item = helpText[i];
+        document.getElementById(item.id).onfocus = function(){
+          showHelp(item.help);
+        }
+      })();  //马上把当前循环项的item与事件回调相关联起来
+    }
+  }
+
+  setupHelp();
+```
+
+如果不想使用过多的闭包，你可以用ES2015引入的let关键词：
+
+```js
+function showHelp(help) {
+  document.getElementById('help').innerHTML = help;
+}
+
+function setupHelp() {
+  var helpText = [
+      {'id': 'email', 'help': 'Your e-mail address'},
+      {'id': 'name', 'help': 'Your full name'},
+      {'id': 'age', 'help': 'Your age (you must be over 16)'}
+    ];
+
+  for (var i = 0; i < helpText.length; i++) {
+    let item = helpText[i];
+    document.getElementById(item.id).onfocus = function() {
+      showHelp(item.help);
+    }
+  }
+}
+
+setupHelp();
+```
+
+这个例子使用`let`而不是`var`，**因此每个闭包都绑定了块作用域的变量**，这意味着不再需要额外的闭包。
+
+另一个可选方案是使用 `forEach()`来遍历`helpText`数组并给每一个`<p>`添加一个监听器，如下所示：
+
+```js
+function showHelp(help) {
+  document.getElementById('help').innerHTML = help;
+}
+
+function setupHelp() {
+  var helpText = [
+      {'id': 'email', 'help': 'Your e-mail address'},
+      {'id': 'name', 'help': 'Your full name'},
+      {'id': 'age', 'help': 'Your age (you must be over 16)'}
+    ];
+
+  helpText.forEach(function(text) {
+    document.getElementById(text.id).onfocus = function() {
+      showHelp(text.help);
+    }
+  });
+}
+
+setupHelp();
+```
+
+## [性能考量](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Closures#performance_considerations)
+
+如果不是某些特定任务需要使用闭包，在其它函数中创建函数是不明智的，因为闭包在处理速度和内存消耗方面对脚本性能具有负面影响。
+
+例如，**在创建新的对象或者类时，方法通常应该关联于对象的原型，而不是定义到对象的构造器中**。原因是这将导致每次构造器被调用时，方法都会被重新赋值一次（也就是说，对于每个对象的创建，方法都会被重新赋值）。
+
+考虑以下示例：
+
+```js
+function MyObject(name, message){
+	this.name = name.toString();
+	this.message = message.toString();
+	this.getName = function(){
+		return this.name;
+	};
+	this.getMessage = function(){
+		return this.message;
+	};
+}
+```
+
+在上面的代码中，我们并没有利用到闭包的好处，因此可以避免使用闭包。修改成如下：
+
+```js
+function MyObject(name, message) {
+  this.name = name.toString();
+  this.message = message.toString();
+}
+MyObject.prototype = {
+  getName: function() {
+    return this.name;
+  },
+  getMessage: function() {
+    return this.message;
+  }
+};
+
+
+```
+
+但我们**不建议重新定义原型**。可改成如下例子：
+
+```js
+function MyObject(name, message) {
+  this.name = name.toString();
+  this.message = message.toString();
+}
+MyObject.prototype.getName = function() {
+  return this.name;
+};
+MyObject.prototype.getMessage = function() {
+  return this.message;
+};
+```
+
+在前面的两个示例中，继承的原型可以为所有对象共享，不必在每一次创建对象时定义方法。
+
+---
+
+# new 运算符
+
+**`new` 运算符**创建一个用户定义的对象类型的实例或具有构造函数的内置对象的实例。
+
+```js
+function Car(make, model, year) {
+  this.make = make;
+  this.model = model;
+  this.year = year;
+}
+
+const car1 = new Car('Eagle', 'Talon TSi', 1993);
+
+console.log(car1.make);
+// expected output: "Eagle"
+
+```
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new#语法)
+
+```js
+new constructor[([arguments])]
+```
+
+### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new#参数)
+
+- `constructor`
+
+  一个指定对象实例的类型的**类或函数**。
+
+- `arguments`
+
+  一个用于被 `constructor` 调用的参数列表。
+
+## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new#描述)
+
+**`new`** 关键字会进行如下的操作：
+
+1. 创建一个空的简单JavaScript对象（即`{}`）；
+2. 为步骤1新创建的对象添加属性`__proto__`，**将该属性链接至构造函数的原型对象** ；
+3. 将步骤1新创建的对象作为`this`的上下文 ；
+4. 如果该函数没有返回对象，则返回`this`。
+
+
+
+创建一个用户自定义的对象需要两步：
+
+1. 通过编写函数来定义对象类型。
+2. 通过 `new` 来创建对象实例。
+
+创建一个对象类型，需要创建一个指定其名称和属性的函数；对象的属性可以指向其他对象，看下面的例子：
+
+当代码 `new *Foo*(...)` 执行时，会发生以下事情：
+
+1. 一个继承自 `*Foo*.prototype` 的新对象被创建。
+2. 使用指定的参数调用构造函数 *`Foo`*，并将 `this` 绑定到新创建的对象。`new *Foo*` 等同于 *`new Foo`*`()`，**也就是没有指定参数列表**，*`Foo`* 不带任何参数调用的情况。
+3. 由构造函数返回的对象就是 `new` 表达式的结果。如果构造函数没有显式返回一个对象，则使用步骤1创建的对象。（一般情况下，构造函数不返回值，但是用户可以选择主动返回对象，来覆盖正常的对象创建步骤）
+
+你始终可以对已定义的对象添加新的属性。例如，`car1.color = "black"` 语句给 `car1` 添加了一个新的属性 `color`，并给这个属性赋值 "`black`"。但是，这不会影响任何其他对象。**要将新属性添加到相同类型的所有对象，你必须将该属性添加到 `Car` 对象类型的定义中。**
+
+你可以使用 `Function.prototype` 属性将共享属性添加到以前定义的对象类型。这定义了一个由该函数创建的所有对象共享的属性，而不仅仅是对象类型的其中一个实例。下面的代码将一个值为 `null` 的 `color` 属性添加到 `car` 类型的所有对象，然后仅在实例对象 `car1` 中用字符串 "`black`" 覆盖该值。
+
+```js
+function Car() {}
+
+car1 = new Car();
+car2 = new Car();
+
+console.log(car1.color);    // undefined
+
+Car.prototype.color = "original color";
+console.log(car1.color);    // original color
+
+car1.color = 'black';
+console.log(car1.color);   // black
+
+console.log(car1.__proto__.color) //original color
+console.log(car2.__proto__.color) //original color
+console.log(car1.color)  // black
+console.log(car2.color) // original color
+
+```
+
+> **备注：**如果你没有使用 `new` 运算符， **构造函数会像其他的常规函数一样被调用，** 并*不会创建一个对象**。***在这种情况下， `this` 的指向也是不一样的。
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new#示例)
+
+### [对象类型和对象实例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new#对象类型和对象实例)
+
+假设你要创建一个汽车的对象类型。你希望这个类型叫做car，这个类型具备make, model, year等属性，要做到这些，你需要写这样一个函数：
+
+```js
+function Car(make, model, year) {
+   this.make = make;
+   this.model = model;
+   this.year = year;
+}
+```
+
+现在，你可以如下所示创建一个 `mycar` 的对象：
+
+```js
+var mycar = new Car("Eagle", "Talon TSi", 1993);
+```
+
+这段代码创建了 `mycar` 并给他的属性指定值，于是 `mycar.make` 的值为"`Eagle`"， `mycar.year` 的值为1993，以此类推。
+
+你可以通过调用 `new` 来创建任意个汽车对象。例如：
+
+```js
+var kenscar = new Car("Nissan", "300ZX", 1992);
+```
+
+### [对象属性为其他对象](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new#对象属性为其他对象)
+
+假设你定义了一个对象叫做 `person`：
+
+```js
+function Person(name, age, sex) {
+   this.name = name;
+   this.age = age;
+   this.sex = sex;
+}
+```
+
+然后实例化两个新的 `person` 对象如下：
+
+```js
+var rand = new Person("Rand McNally", 33, "M");
+var ken = new Person("Ken Jones", 39, "M");
+```
+
+然后你可以重写 `car` 的定义，添加一个值为 `person` 对象的 `owner` 属性，如下：
+
+```js
+function Car(make, model, year, owner) {
+   this.make = make;
+   this.model = model;
+   this.year = year;
+   this.owner = owner;
+}
+```
+
+为了实例化新的对象，你可以用如下代码：
+
+```js
+var car1 = new Car("Eagle", "Talon TSi", 1993, rand);
+var car2 = new Car("Nissan", "300ZX", 1992, ken);
+```
+
+**创建对象时，并没有传字符串或数字给owner**，而是传了对象 `rand` 和 `ken` 。这个时候，你可以这样来获取 `car2` 的owner的name：
+
+```js
+car2.owner.name
+```
+
+---
+
