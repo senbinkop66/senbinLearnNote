@@ -28,3 +28,10 @@ LOAD DATA LOCAL INFILE 'filename.txt' INTO TABLE tableName LINES TERMINATED BY '
 
 //导出数据表
 mysqldump -u root -p --databases microbe_sl_gene_db --tables tableName > tableName.sql
+
+
+select 
+    player_id,
+    min(event_date) first_login
+from activity
+group by player_id
