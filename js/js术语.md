@@ -1941,3 +1941,114 @@ car2.owner.name
 
 ---
 
+# 暂时性死区
+
+`let` 变量在声明之前，不能够读写。如果声明中未指定初始值，则变量将使用 `undefined` 值初始化，在声明之前访问变量会导致 [`ReferenceError`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError)。
+
+> **备注：** 与 [`var`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/var#变量提升) 变量不同，如果在声明前使用 `var`，变量将会被初始化为`undefined`。
+
+从**块作用域的顶部**一直到变量声明完成之前，这个变量处在**暂时性死区**（TDZ，temporal dead zone）。
+
+```js
+{ // TDZ starts at beginning of scope
+  console.log(bar); // undefined
+  console.log(foo); // ReferenceError
+  var bar = 1;
+  let foo = 2; // End of TDZ (for foo)
+}
+```
+
+使用术语 “temporal” 是**因为区域取决于执行顺序（时间）**，而不是编写代码的顺序（位置）。例如，下面的代码会生效，是因为即使使用 `let` 变量的函数出现在变量声明之前，**但函数的执行是在 TDZ 的外面**。
+
+```js
+{
+  // TDZ starts at beginning of scope
+  const func = () => console.log(letVar); // OK
+
+  // Within the TDZ letVar access throws `ReferenceError`
+
+  let letVar = 3; // End of TDZ (for letVar)
+  func(); // Called outside TDZ!
+}
+```
+
+#### 暂时性死区与 `typeof`
+
+如果使用 `typeof` 检测在暂时性死区中的变量, 会抛出 `ReferenceError` 异常:
+
+```js
+// results in a 'ReferenceError'
+console.log(typeof i);
+let i = 10;
+```
+
+这与使用 `typeof` 检测值为 `undefined` 的未声明变量不同：
+
+```js
+// prints out 'undefined'
+console.log(typeof undeclaredVariable);
+```
+
+#### 暂时性死区和词法作用域
+
+以下代码会导致 `ReferenceError`：
+
+```js
+function test() {
+  var foo = 33;
+  if(foo) {
+    let foo = (foo + 55); // ReferenceError
+  }
+}
+test();
+```
+
+由于外部变量 `foo` 有值，因此会执行 `if` 语句块，**但是由于词法作用域，该值在块内不可用**：`if` 快内的标识符 `foo` 是 `let foo`。表达式 `(foo + 55)` 会抛出异常，**是因为 `let foo` 还没完成初始化，它仍然在暂时性死区里**。
+
+在以下情况下，这种现象可能会使您感到困惑。`let n of n.a` 已经在for循环块的私有范围内，因此，标识符 `n.a` 被解析为位于指令本身（`let n`）中的“ `n` ”对象的属性“ `a` ”。
+
+在没有执行到它的初始化语句之前，它仍旧存在于暂时性死区中。
+
+```js
+function go(n) {
+  // n here is defined!
+  console.log(n); // Object {a: [1,2,3]}
+
+  for (let n of n.a) { // ReferenceError
+    console.log(n);
+  }
+}
+
+go({a: [1, 2, 3]});
+```
+
+
+
+### [其他情况](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/let#其他情况)
+
+用在块级作用域中， **`let`** 将变量的作用域限制在块内， **而 `var` 声明的变量的作用域是在函数内**。
+
+```js
+var a = 1;
+var b = 2;
+
+if (a === 1) {
+  var a = 11; // the scope is global
+  let b = 22; // the scope is inside the if-block
+
+  console.log(a);  // 11
+  console.log(b);  // 22
+}
+
+console.log(a); // 11
+console.log(b); // 2
+```
+
+然而，`var` 与 `let` 合并的声明方式会抛出 [`SyntaxError`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError) 错误, 因为 `var` 会将变量提升至块的顶部, **这会导致隐式地重复声明变量。**
+
+```js
+let x = 1;
+{
+  var x = 2; // SyntaxError for re-declaration
+}
+```
