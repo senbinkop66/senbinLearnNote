@@ -1,30 +1,29 @@
 /**
- * @param {number} maxChoosableInteger
- * @param {number} desiredTotal
+ * @param {string} s
  * @return {boolean}
  */
-var canIWin = function(maxChoosableInteger, desiredTotal) {
-    let minChoosableInteger = 1;
-    var dfs = function(minChoosableInteger, maxChoosableInteger, desiredTotal){
-            if (maxChoosableInteger >= desiredTotal) {
-                return true;
-            }
-            if (minChoosableInteger + maxChoosableInteger < desiredTotal) {
-                minChoosableInteger++;
-                maxChoosableInteger--;
-                desiredTotal -= minChoosableInteger + maxChoosableInteger;
-                dfs(minChoosableInteger, maxChoosableInteger, desiredTotal);
-            }else{
+var checkRecord = function(s) {
+    let absent = 0;
+    let late = 0;
+    for (let i = 0; i < s.length; i++){
+        if (s[i] === "A") {
+            absent++;
+            if (absent > 1){
                 return false;
             }
+            late = 0;
+        }else if (s[i] === "L") {
+            late++;
+            if (late > 2) {
+                return false;
+            }
+        }else if (s[i] === "P") {
+            late = 0;
+        }
     }
-    if ((1 + maxChoosableInteger) * maxChoosableInteger / 2 < desiredTotal) {
-        return false;
-    }
-    return dfs(minChoosableInteger, maxChoosableInteger, desiredTotal)
+    return true;
 };
 
-
-let maxChoosableInteger = 10, desiredTotal = 0;
-let result = canIWin(maxChoosableInteger, desiredTotal);
+let s = "PPALLP";
+let result=checkRecord(s);
 console.log(result);
