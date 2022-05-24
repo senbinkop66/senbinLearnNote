@@ -1,29 +1,31 @@
 /**
  * @param {string} s
- * @return {boolean}
+ * @return {string}
  */
-var checkRecord = function(s) {
-    let absent = 0;
-    let late = 0;
-    for (let i = 0; i < s.length; i++){
-        if (s[i] === "A") {
-            absent++;
-            if (absent > 1){
-                return false;
-            }
-            late = 0;
-        }else if (s[i] === "L") {
-            late++;
-            if (late > 2) {
-                return false;
-            }
-        }else if (s[i] === "P") {
-            late = 0;
+var reverseWords = function(s) {
+    s = s.split("");
+    let n = s.length;
+    let start = 0;
+    for (let i = 0; i < n; i++){
+        if (s[i] === " ") {
+            swap(s, start,i - 1);
+            start = i + 1;
         }
     }
-    return true;
-};
+    swap(s, start, n - 1);
+    return s.join("");
 
-let s = "PPALLP";
-let result=checkRecord(s);
+};
+var swap = function(arr, left, right){
+    while(left < right){
+        let temp = arr[left];
+        arr[left] = arr[right];
+        arr[right] = temp;
+        left++;
+        right--;
+    }
+}
+
+let s = "Let's take LeetCode contest";
+let result = reverseWords(s);
 console.log(result);
