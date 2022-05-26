@@ -1,17 +1,17 @@
 /**
- * Definition for a binary tree node.
- * function TreeNode(val, left, right) {
- *     this.val = (val===undefined ? 0 : val)
- *     this.left = (left===undefined ? null : left)
- *     this.right = (right===undefined ? null : right)
- * }
+ * @param {number[]} candyType
+ * @return {number}
  */
-/**
- * @param {TreeNode} root
- * @param {TreeNode} subRoot
- * @return {boolean}
- */
-var isSubtree = function(root, subRoot) {
-    if (true) {}
-        Number.MAX_SAFE_INTEGER
+var distributeCandies = function(candyType) {
+    let s = new Set();
+    let n = candyType.length;
+    for (let i =0; i < n; i++){
+        s.add(candyType[i]);
+    }
+    let candyTypeNum = s.size;
+    if (n / 2 >= candyTypeNum) {
+        return candyTypeNum;
+    }else{
+        return n / 2;
+    }
 };
