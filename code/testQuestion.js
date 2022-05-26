@@ -13,4 +13,5 @@
  */
 var isSubtree = function(root, subRoot) {
     if (true) {}
+        Number.MAX_SAFE_INTEGER
 };
