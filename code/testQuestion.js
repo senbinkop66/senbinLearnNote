@@ -1,55 +1,36 @@
 /**
- * @param {string} queryIP
- * @return {string}
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
  */
-var validIPAddress = function(queryIP) {
-    const ans = ["IPv4", "IPv6", "Neither"];
-    if (/[^a-fA-F0-9.:]/g.test(queryIP)) {
-        //如果匹配到其他字符
-        return ans[2];
-    }
-    if (queryIP.indexOf(".") !== -1) {
-        //判断是否是Ipv4
-        queryIP = queryIP.split(".");
-        if (queryIP.length === 4) {
-            for (let i = 0; i < 4; i++){
-                let num = queryIP[i];
-                if (num.indexOf("e") !== -1) {
-                    return ans[2];
+/**
+ * @param {TreeNode} root
+ * @return {number}
+ */
+var sumRootToLeaf = function(root) {
+    let ans = 0;
+    let arr =[root];
+    while(arr.length > 0){
+        let len = arr.length;
+        while(len > 0){
+            let node = arr.shift();
+            if (node.left === null && node.right === null) {
+                ans += node.val;
+            }else{
+                if (node.left !== null) {
+                    node.left.val += 2 * node.val;
+                    arr.push(node.left);
                 }
-                if ( num === "0" || (num[0] !== "0" && !isNaN(Number(num)) && Number(num) > 0 && Number(num) <= 255)) {
-                    //
-                }else{
-                    return ans[2];
-                }
-            }
-            return ans[0];
-        }else{
-            return ans[2];
-        }
-
-    }else if (queryIP.indexOf(":") !== -1) {
-        //判断是否是IPv6
-        queryIP = queryIP.split(":");
-        if (queryIP.length === 8) {
-            for (let i = 0; i < 8; i++){
-                let num = queryIP[i];
-                if (num.length > 0 && num.length < 5) {
-                    //
-                }else{
-                    return ans[2];
+                if (node.right !== null) {
+                    node.right.val += 2 * node.val;
+                    arr.push(node.right);
                 }
             }
-            return ans[1];
-        }else{
-            return ans[2];
+            len--;
         }
-    }else{
-        return ans[2];
     }
+    return ans;
 };
-
-let queryIP = "1e1.4.5.6";
-let result = validIPAddress(queryIP);
-console.log(result);
-
