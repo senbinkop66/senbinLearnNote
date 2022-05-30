@@ -1,28 +1,12 @@
 /**
- * @param {string} s
+ * @param {string} queryIP
  * @return {string}
  */
-var removeOuterParentheses = function(s) {
-    let stack = [];
-    let ans = "";
-    for (let i = 0; i < s.length; i++){
-        let c = s[i];
-        if (c === ")") {
-            stack.pop();
-        }
-        //在遇到 ‘)’ 并将栈顶字符出栈后，如果栈为空，则不把字符放入结果
-        if (stack.length){
-            //其他情况下，需要把字符放入结果
-            ans += c;
-        }
-        //在遇到 ‘(’ 并将字符入栈后，如果栈的深度为 1，则不把字符放入结果
-        if (c === "(") {
-            stack.push(c);
-        }
-    }
-    return ans;
+var validIPAddress = function(queryIP) {
+
 };
 
-let s = "(()())(())";
-let result = removeOuterParentheses(s);
+let queryIP = "2001:0db8:85a3:0:0:8A2E:0370:7334";
+let result = validIPAddress(queryIP);
 console.log(result);
+
