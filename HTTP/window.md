@@ -251,3 +251,113 @@ document.addEventListener('DOMContentLoaded',function(){
   } 
 </script>
 ```
+
+---
+
+# Worker
+
+Worker 接口是 [Web Workers API ](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)的一部分，指的是一种可由脚本创建的后台任务，任务执行中可以向其创建者收发信息。要创建一个 Worker **，**只须调用 `Worker(URL) `构造函数，函数参数 `URL` 为指定的脚本。
+
+Worker 也可以创建新的 Worker，当然，**所有 Worker 必须与其创建者[同源](https://developer.mozilla.org/zh-CN/docs/Web/Security/Same-origin_policy)**（注意：[Blink](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/5R3B4RN4GHU)暂时不支持嵌套 Worker）。 
+
+需要注意的是，不是所有函数和构造函数(或者说…类)都可以在 Worker 中使用。具体参考页面 [Worker 所支持的函数和类](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Workers_API/Functions_and_classes_available_to_workers)。Worker 可以使用 [`XMLHttpRequest`](https://developer.mozilla.org/en-US/DOM/XMLHttpRequest) 发送请求，但是请求的 `responseXML` 与 `channel` 两个属性值始终返回 `null` （`fetch` 仍可正常使用，没有类似的限制）。 
+
+## [构造函数](https://developer.mozilla.org/zh-CN/docs/Web/API/Worker#构造函数)
+
+- [`Worker()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Worker/Worker)
+
+  创建一个专用Web worker，它只执行URL指定的脚本。使用 [Blob URL](https://developer.mozilla.org/zh-CN/docs/Web/API/Blob) 作为参数亦可。
+
+## [属性](https://developer.mozilla.org/zh-CN/docs/Web/API/Worker#属性)
+
+*继承*父对象*[`EventTarget`](https://developer.mozilla.org/zh-CN/docs/Web/API/EventTarget) 的属性，以及实现对象 [`AbstractWorker` (en-US)](https://developer.mozilla.org/en-US/docs/Web/API/Worker)的属性。*
+
+### [*事件句柄*](https://developer.mozilla.org/zh-CN/docs/Web/API/Worker#事件句柄)
+
+- [`AbstractWorker.onerror` (en-US)](https://developer.mozilla.org/en-US/docs/Web/API/Worker/error_event)
+
+  当[`ErrorEvent`](https://developer.mozilla.org/zh-CN/docs/Web/API/ErrorEvent) 类型的事件冒泡到 worker 时，事件监听函数 [`EventListener`](https://developer.mozilla.org/zh-CN/docs/conflicting/Web/API/EventTarget/addEventListener_380cb5f366307beb2c072f74e561ee98) 被调用. 它继承于 [`AbstractWorker` (en-US)](https://developer.mozilla.org/en-US/docs/Web/API/Worker).
+
+- [`Worker.onmessage`](https://developer.mozilla.org/zh-CN/docs/conflicting/Web/API/Worker/message_event)
+
+  当[`MessageEvent`](https://developer.mozilla.org/zh-CN/docs/Web/API/MessageEvent)类型的事件冒泡到 worker 时，事件监听函数 [`EventListener`](https://developer.mozilla.org/zh-CN/docs/conflicting/Web/API/EventTarget/addEventListener_380cb5f366307beb2c072f74e561ee98) 被调用. 例如，一个消息通过 [`DedicatedWorkerGlobalScope.postMessage` (en-US)](https://developer.mozilla.org/en-US/docs/Web/API/DedicatedWorkerGlobalScope/postMessage)，从执行者发送到父页面对象，消息保存在事件对象的 [`data` (en-US)](https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data) 属性中.
+
+- [`Worker.onmessageerror`](https://developer.mozilla.org/zh-CN/docs/conflicting/Web/API/Worker/messageerror_event)
+
+  当`messageerror` 类型的事件发生时，对应的`event handler` 代码被调用。
+
+## [方法](https://developer.mozilla.org/zh-CN/docs/Web/API/Worker#方法)
+
+*继承*父对象*[`EventTarget`](https://developer.mozilla.org/zh-CN/docs/Web/API/EventTarget) 的方法，以及实现对象 [`AbstractWorker` (en-US)](https://developer.mozilla.org/en-US/docs/Web/API/Worker)的方法。*
+
+- [`Worker.postMessage()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Worker/postMessage)
+
+  发送一条消息到最近的外层对象，消息可由任何 JavaScript 对象组成。
+
+- [`Worker.terminate()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Worker/terminate)
+
+  立即终止 worker。该方法不会给 worker 留下任何完成操作的机会；就是简单的立即停止。Service Woker 不支持这个方法。
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/API/Worker#示例)
+
+下面的代码通过构造函数 [`Worker()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Worker/Worker) 创建了一个 [`Worker`](https://developer.mozilla.org/zh-CN/docs/Web/API/Worker) 对象。
+
+```html
+      <form>
+        <div>
+          <label for="number1">Multiply number 1: </label>
+          <input type="text" id="number1" value="0">
+        </div>
+        <div>
+          <label for="number2">Multiply number 2: </label>
+          <input type="text" id="number2" value="0">
+        </div>
+        <div>
+          <label for="result">result: </label>
+          <input type="text" id="result" value="" disabled>
+        </div>
+      </form>
+<script type="text/javascript">
+
+  let first = document.querySelector("#number1");
+  let second = document.querySelector("#number2");
+  let result = document.querySelector('#result');
+  if (window.Worker) {
+    let myWorker = new Worker("worker.js");
+    first.onchange = function() {
+      myWorker.postMessage([first.value, second.value]);
+      console.log("Message posted to worker");
+    }
+    second.onchange = function() {
+      myWorker.postMessage([first.value, second.value]);
+      console.log('Message posted to worker');
+    }
+    myWorker.onmessage = function(e){
+      result.value = e.data;
+      console.log("Message received from worker");
+    }
+  }else{
+    console.log('Your browser doesn\'t support web workers.');
+  }
+  
+
+</script>
+```
+
+```js
+//worker.js
+onmessage = function(e) {
+	console.log("Worker: Message received from main script");
+	let result = e.data[0] * e.data[1];
+	if (isNaN(result)) {
+		postMessage("Please write two numbers");
+	}else{
+		let workerResult = result;
+		console.log("Worker: Posting message back to main script");
+		postMessage(workerResult);
+	}
+}
+```
+
+---
+
