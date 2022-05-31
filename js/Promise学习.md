@@ -47,7 +47,7 @@
 
 ### promise 的基本使用
 
-使用 1: 基本编码流程
+#### 使用 1: 基本编码流程
 
 ```js
   // 1.创建promise 对象，(pending状态), 指定执行器函数
@@ -55,22 +55,104 @@
     // 2.在执行器函数中启动行异步任务
     setTimeout(() => {
       const time = Date.now();
-      //根据结果做不同处理
+      //3.根据结果做不同处理
       if (time % 2 === 1) {
+        // 3.1 如果成功了，调用 resolve(),指定成功的value,变为resolved状态
         resolve(time);
       }else{
+        // 3.2 如果失败了，调用reject(),指定失败的reason,变为rejected状态
         reject("失败" + time);
       }
     }, 2000);
 
   });
-  // 4.获取promise结果
+  // 4.用promise指定成功或失败的回调函数来获取成功的value或失败的reason
   p.then((value) => {
+    // 成功的回调函数onResolved,得到成的value
     console.log("成功的value: " + value);
   }, (reason) => {
+    // 失败的回调函数onRejected,得到失败的reason
     console.log("失败的reason: " + reason);
   });
 ```
+
+#### 使用 2: 使用 promise 封装基于定时器的异步
+
+```js
+function doDelay(time) {
+  // 1.创建promise 对象，(pending状态), 指定执行器函数
+  return new Promise((resolve, reject) => {
+
+    // 2.在执行器函数中启动行异步任务
+    console.log("启动异步任务");
+
+    setTimeout(() => {
+      console.log("延迟任务开始执行...");
+      const time = Date.now();
+
+      //3.根据结果做不同处理, 假设: 时间为奇数代表成功, 为偶数代表失败
+      if (time % 2 === 1) {
+        // 3.1 如果成功了，调用 resolve(),指定成功的value,变为resolved状态
+        resolve("成功的数据 ", time);
+      }else{
+        // 3.2 如果失败了，调用reject(),指定失败的reason,变为rejected状态
+        reject("失败的数据 " + time);
+      }
+    }, time);
+  });
+}
+
+  const p1 = doDelay(2000);
+
+  // 4.用promise指定成功或失败的回调函数来获取成功的value或失败的reason
+  p1.then((value) => {
+    // 成功的回调函数onResolved,得到成的value
+    console.log("成功的value: " + value);
+  }, (reason) => {
+    // 失败的回调函数onRejected,得到失败的reason
+    console.log("失败的reason: " + reason);
+  });
+
+// 启动异步任务
+// 延迟任务开始执行...
+// 失败的reason: 失败的数据 1653979910670
+```
+
+#### 使用 3: 使用 promise 封装 ajax 异步请求
+
+```js
+  // 可复用的发 ajax 请求的函数: xhr + promise
+  function promiseAjax(url) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState !== 4) {
+          return;
+        }
+        const {status, response} = xhr;
+        // 请求成功, 调用 resolve(value)
+        if (status >= 200 && status < 300) {
+          //resolve(JSON.parse(response));
+          resolve(response);
+        } else {
+          // 请求失败, 调用 reject(reason)
+          reject(new Error("请求失败: status " + status));
+        }
+      };
+      xhr.open("GET", url);
+      xhr.send();
+    });
+  }
+  
+  let p = promiseAjax("http://127.0.0.1/test/genomefile.txt");
+  p.then(data => {
+    console.log('显示成功数据: ', data);
+  }, error => {
+    console.log("错误信息: ", error.message);
+  });
+```
+
+
 
 
 
@@ -98,6 +180,246 @@
 4. 终极解决方案?
 
    async/await
+
+```js
+// 成功的回调函数
+function successCallback(result) {
+  console.log("声音文件创建成功: " + result);
+}
+
+// 失败的回调函数
+function failureCallback(error) {
+  console.log("声音文件创建失败: " + error);
+}
+
+// 1).使用纯回调函数 
+createAudioFileAsync(audioSettings, successCallback, failureCallback);
+
+// 2) 使用 Promise
+const promise = createAudioFileAsync(audioSettings);
+setTimeout(() => {
+  promise.then(successCallback, failureCallback);
+}, 2000);
+
+
+// 回调地狱
+doSomething(function(result) {
+  doSomethingElse(result, function(newResult) {
+    doThirdThing(newResult, function(finalResult) {
+      console.log("Got the final result: " + finalResult);
+    }, failureCallback);
+  }, failureCallback);
+}, failureCallback);
+
+// 使用 promise 的链式调用解决回调地狱
+doSomething().then(function(result) {
+  return doSomethingElse(result);
+})
+  .then(function(newResult) {
+    return doThirdThing(newResult);
+  })
+  .then(function(finalResult) {
+    console.log("Got the final result: " + finalResult);
+  })
+  .catch(failureCallback);
+
+//async/await: 回调地狱的终极解决方案
+async function request(){
+  try {
+    const result = await doSomething();
+    const newResult = await doSomething(result);
+    const finalResult = await doThirdThing(newResult);
+    console.log("Got the final result: " + finalResult);
+  } catch (error) {
+    failureCallback(error);
+  }
+}
+```
+
+---
+
+## 如何使用 Promise?
+
+1. Promise 构造函数: Promise (excutor) {}
+
+​	(1) executor 函数: 执行器 (resolve, reject) => {}
+
+​	(2) resolve 函数: 内部定义成功时我们调用的函数 value => {}
+
+​	(3) reject 函数: 内部定义失败时我们调用的函数 reason => {}
+
+说明: **executor 会在 Promise 内部立即同步调用**,异步操作在执行器中执行
+
+
+
+2. Promise.prototype.then 方法: (onResolved, onRejected) => {}
+
+​	(1) onResolved 函数: 成功的回调函数 (value) => {}
+
+​	(2) onRejected 函数: 失败的回调函数 (reason) => {}
+
+说明: 指定用于得到成功 value 的成功回调和用于得到失败 reason 的失败回调，返回一个新的 promise 对象
+
+
+
+3. Promise.prototype.catch 方法: (onRejected) => {}
+
+​	(1) onRejected 函数: 失败的回调函数 (reason) => {}
+
+说明: then()的语法糖, 相当于: then(undefined, onRejected)
+
+
+
+4. Promise.resolve 方法: (value) => {}
+
+​	(1) value: 成功的数据或 promise 对象
+
+说明: 返回一个成功/失败的 promise 对象
+
+
+
+5. Promise.reject 方法: (reason) => {}
+
+​	(1) reason: 失败的原因
+
+说明: 返回一个失败的 promise 对象
+
+
+
+6. Promise.all 方法: (promises) => {}
+
+​	(1) promises: 包含 n 个 promise 的数组
+
+说明: 返回一个新的 promise, 只有所有的 promise 都成功才成功, 只要有一个失败了就直接失败
+
+
+
+7. Promise.race 方法: (promises) => {}
+   
+
+​	(1) promises: 包含 n 个 promise 的数组
+
+说明: 返回一个新的 promise, 第一个完成的 promise 的结果状态就是最终的结果状态
+
+```js
+new Promise((resolve, reject) => {
+  if (Date.now() % 2 === 0) {
+    resolve(1);
+  } else {
+    reject(2);
+  }
+}).then((value => {
+  console.log("onResolved1()", value);
+}).catch(reason => {
+  console.log("onRejected1()", reason);
+});
+```
+
+```js
+const p1 = Promise.resolve(1);
+const p2 = Promise.resolve(Promise.resolve(2));
+const p3 = Promise.resolve(Promise.reject(3));
+const p4 = Promise.reject(4);
+
+const p5 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    if (Date.now() % 2 === 0) {
+      resolve(66)
+    } else {
+      reject(99)
+    }
+  }, 100);
+});
+
+const pAll = Promise.all([p1, p2, p5]);
+pAll.then(
+  values => {
+    console.log("all成功了 ", values);
+  },
+  reason => {
+    console.log("all失败了 ", reason);
+  }
+);
+
+const pRace = Promise.race([p5, p1, p4]);
+pRace.then(
+  value => {console.log('race 成功了 ', value)},
+  reason => {console.log('race 失败了 ', reason)}
+);
+
+//race 成功了  1
+// all成功了  (3) [1, 2, 66]
+```
+
+---
+
+## promise 的几个关键问题
+
+### 如何改变 promise 的状态?
+
+(1) resolve(value): 如果当前是 pending 就会变为 resolved
+
+(2) reject(reason): 如果当前是 pending 就会变为 rejected
+
+(3) 抛出异常: 如果当前是 pending 就会变为 rejected
+
+### 一个 promise 指定多个成功/失败回调函数, 都会调用吗?
+
+当 promise 改变为对应状态时都会调用
+
+### 改变 promise 状态和指定回调函数谁先谁后?
+
+(1) 都有可能, 正常情况下是先指定回调再改变状态, 但也可以先改状态再指定回调
+
+(2) 如何先改状态再指定回调?
+
+① 在执行器中直接调用 resolve()/reject()
+② 延迟更长时间才调用 then()
+
+(3) 什么时候才能得到数据?
+
+① 如果先指定的回调, 那当状态发生改变时, 回调函数就会调用, 得到数据
+② 如果先改变的状态, 那当指定回调时, 回调函数就会调用, 得到数据
+
+### promise.then()返回的新 promise 的结果状态由什么决定?
+
+(1) 简单表达: 由 then()指定的回调函数执行的结果决定
+
+(2) 详细表达:
+
+① 如果抛出异常, 新 promise 变为 rejected, reason 为抛出的异常
+② 如果返回的是**非 promise** 的任意值, 新 promise 变为 resolved, value 为返回的值
+③ 如果返回的是另一个新 promise, 此 promise 的结果就会成为新 promise 的结果
+
+### promise 如何串连多个操作任务?
+
+(1) promise 的 then()返回一个新的 promise, 可以看成 then()的链式调用
+
+(2) 通过 then 的链式调用串连多个同步/异步任务
+
+### promise 异常传透?
+
+(1) 当使用 promise 的 then 链式调用时, 可以在最后指定失败的回调
+
+(2) 前面任何操作出了异常, 都会传到最后失败的回调中处理
+
+### 中断 promise 链?
+
+(1) 当使用 promise 的 then 链式调用时, 在中间中断, 不再调用后面的回调函数
+
+(2) 办法: 在回调函数中**返回一个 pendding 状态的 promise 对象**
+
+
+
+
+
+
+
+```
+
+```
+
+
 
 ---
 
@@ -1192,5 +1514,15 @@ Promise.race([p5, p6]).then((value) => {
 	console.log(reason);  //six
 	// p6 更快，所以它失败了
 });
+```
+
+
+
+# 自定义(手写)Promise
+
+
+
+```
+
 ```
 
