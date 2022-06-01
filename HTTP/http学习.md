@@ -701,6 +701,449 @@ HTTP响应的一个例子：
 
 ---
 
+# http方法
+
+1、GET方法
+
+`GET` 方法用于根据指定的 URI（Uniform Resource Identifier，统一资源标识符）从给定服务器中检索信息，即从指定资源中请求数据。使用GET方法的请求应该只是检索数据，并且不应对数据产生其他影响。注意 GET请求的不安全性，在地址栏和历史记录中明文显示。
+
+2、HEAD方法
+
+`HEAD`方法与`GET`方法基本相同，但没有响应体，仅传输状态行和标题部分。这对于查看响应头的数据非常有用，无需传输整个内容。`HEAD`方法常被用于客户端查看服务器的性能。
+
+3、POST方法
+
+`POST`方法用于将数据发送到服务器以创建或更新资源，它要求服务器确认并处理请求中包含的数据内容，这个请求可能会建立新的资源或/和修改现有资源。
+
+`POST`请求永远不会被缓存，且对数据长度没有限制；我们无法从浏览器历史记录中查找到POST请求。
+
+4、PUT方法
+
+`PUT`方法用于将数据发送到服务器以创建或更新资源，它可以用上传的内容替换目标资源中的所有当前内容。
+
+它会将包含的元素放在指定的 URI 下，如果 URI 指示的是当前资源，则会被更新取代；如果指定 URI 没有资源，会新增并将元素添加进去。
+
+5、DELETE方法
+
+`DELETE`方法用来删除指定 URI 的资源，它会删除 URI 给出的目标资源的所有当前内容。
+
+6、CONNECT方法
+
+`CONNECT`方法用来建立到给定 URI 标识的服务器的隧道；它是`HTTP/1.1`协议预留的，可以将链接改成管道方式的代理服务器。
+
+7、OPTIONS方法
+
+`OPTIONS`请求与`HEAD`相似，通常也是用于客户端查看服务器的性能。 这个方法会请求服务器返回该资源所支持的预定义URL的HTTP策略。该方法会用 ’*’ 来代替资源名称，向服务器发送`OPTIONS`请求，能够测试服务器功能是否正常。JavaScript的 XMLHttpRequest 对象进行`CORS`跨域资源共享时，就是使用`OPTIONS`方法发送嗅探请求，以判断是否有对指定资源的访问权限。
+
+8、TRACE方法
+
+`TRACE`请求服务器回显其收到的请求信息，该方法主要用于HTTP请求的测试或诊断。
+
+9、PATCH方法
+
+`PATCH`方法出现的较晚，它在2010年的[RFC 5789]标准中被定义。`PATCH`请求与`PUT`请求相似，一样用于资源的更新。两者有区别，`PATCH`通常用于资源的部分更新，而`PUT`通常用于资源的总体更新。
+PATCH 与 PUT 属性上的一个重要区别还在于：PUT 是幂等的，而 PATCH 不是幂等的。
+
+`PUT`把一个包含了修改某项数据后的完整资源对象传给后端，做完整更新。这种方法浪费带宽，效率低下。
+于是`PATCH`诞生，只传一个修改字段到指定资源去，表示该请求是一个局部更新，后端仅更新接收到的字段。
+
+---
+
+# GET
+
+**HTTP` GET` 方法**请求指定的资源。使用 `GET` 的请求应该只用于获取数据。
+
+| 请求是否有主体                                               | 否   |
+| :----------------------------------------------------------- | ---- |
+| 成功的响应是否有主体                                         | 是   |
+| 安全                                                         | 是   |
+| [幂等](https://developer.mozilla.org/zh-CN/docs/Glossary/Idempotent) | 是   |
+| 可缓存                                                       | 是   |
+| HTML 表单是否支持                                            | 是   |
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET#语法)
+
+```http
+GET /index.html
+```
+
+---
+
+# HEAD
+
+HTTP `HEAD` 方法 **请求资源的头部信息**，并且这些头部与 HTTP [`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET) 方法请求时返回的一致。该请求方法的一个**使用场景是在下载一个大文件前先获取其大小再决定是否要下载，以此可以节约带宽资源。**
+
+`HEAD` 方法的响应不应包含响应正文。即使包含了正文也必须忽略掉. 虽然描述正文信息的 [entity headers](https://developer.mozilla.org/zh-CN/docs/Glossary/Entity_header), 例如 [`Content-Length`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Length) 可能会包含在响应中，但它们并不是用来描述 `HEAD` 响应本身的，而是用来描述同样情况下的 [`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET) 请求应该返回的响应。
+
+如果 `HEAD` 请求的结果显示在上一次 [`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET) 请求后缓存的资源已经过期了，即使没有发出[`GET`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET)请求，缓存也会失效
+
+| 请求是否有正文                                               | 否   |
+| :----------------------------------------------------------- | ---- |
+| 成功的响应是否有正文                                         | 否   |
+| 安全                                                         | 是   |
+| [幂等](https://developer.mozilla.org/zh-CN/docs/Glossary/Idempotent) | 是   |
+| 可缓存                                                       | 是   |
+| [HTML 表单](https://developer.mozilla.org/en-US/docs/Learn/Forms) 是否支持 | 否   |
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/HEAD#语法)
+
+```http
+HEAD /index.html
+```
+
+---
+
+# POST
+
+**HTTP `POST` 方法** 发送数据给服务器。请求主体的类型由 [`Content-Type`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Type) 首部指定。
+
+PUT 和[`POST`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST)方法的区别是，**PUT 方法是幂等的**：连续调用一次或者多次的效果相同（无副作用）。连续调用同一个 POST 可能会带来额外的影响，比如多次提交订单。
+
+一个 `POST` 请求通常是通过 [HTML 表单](https://developer.mozilla.org/en-US/docs/Learn/Forms)发送，并返回服务器的修改结果。在这种情况下，content type 是通过在form元素中设置正确的 [`enctype`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/form#attr-enctype) 属性，或是在<input> 和<button>元素中设置 [`formenctype`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/Input#attr-formenctype) 属性来选择的:
+
+- `application/x-www-form-urlencoded`: 数据被编码成以 `'&'` 分隔的键 - 值对，同时以 `'='` 分隔键和值。非字母或数字的字符会被 [percent-encoding](https://developer.mozilla.org/zh-CN/docs/Glossary/percent-encoding): 这也就是为什么这种类型不支持二进制数据 (应使用 `multipart/form-data` 代替).
+- `multipart/form-data`
+- `text/plain`
+
+当 POST 请求是通过除 HTML 表单之外的方式发送时，例如使用 [`XMLHttpRequest`](https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest), 那么请求主体可以是任何类型。按 HTTP 1.1 规范中描述，POST 为了以统一的方法来涵盖以下功能：
+
+- 注释已有的资源
+- 在公告板，新闻组，邮件列表或类似的文章组中发布消息;
+- 通过注册新增用户;
+- 向数据处理程序提供一批数据，例如提交一个表单;
+- 通过追加操作，扩展数据库数据。
+
+| 请求是否有主体                                               | 是                                        |
+| :----------------------------------------------------------- | ----------------------------------------- |
+| 成功的响应是否有主体                                         | 是                                        |
+| 安全                                                         | 否                                        |
+| [幂等](https://developer.mozilla.org/zh-CN/docs/Glossary/Idempotent) | 否                                        |
+| 可缓存                                                       | Only if freshness information is included |
+| HTML 表单是否支持                                            | 是                                        |
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST#语法)
+
+```http
+POST /index.html
+```
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST#示例)
+
+使用默认的 `application/x-www-form-urlencoded` 做为 content type 的简单表单：
+
+```http
+POST / HTTP/1.1
+Host: foo.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 13
+
+say=Hi&to=Mom
+```
+
+使用 `multipart/form-data` 作为 content type 的表单：
+
+```http
+POST /test.html HTTP/1.1
+Host: example.org
+Content-Type: multipart/form-data;boundary="boundary"
+
+--boundary
+Content-Disposition: form-data; name="field1"
+
+value1
+--boundary
+Content-Disposition: form-data; name="field2"; filename="example.txt"
+
+value2
+```
+
+---
+
+# PUT
+
+**HTTP PUT 请求方法**使用请求中的**负载创建或者替换目标资源**。
+
+`PUT` 与 [`POST`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST) 方法的区别在于，PUT 方法是幂等的：调用一次与连续调用多次是等价的（即没有副作用），而连续调用多次 POST 方法可能会有副作用，比如将一个订单重复提交多次。
+
+| Request has body                                             | Yes  |
+| :----------------------------------------------------------- | ---- |
+| Successful response has body                                 | No   |
+| [Safe](https://developer.mozilla.org/zh-CN/docs/Glossary/safe) | No   |
+| [Idempotent](https://developer.mozilla.org/zh-CN/docs/Glossary/Idempotent) | Yes  |
+| [Cacheable (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/cacheable) | No   |
+| Allowed in [HTML forms](https://developer.mozilla.org/en-US/docs/Learn/Forms) | No   |
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PUT#语法)
+
+```http
+PUT /new.html HTTP/1.1
+```
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PUT#示例)
+
+### [请求](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PUT#请求)
+
+```http
+PUT /new.html HTTP/1.1
+Host: example.com
+Content-type: text/html
+Content-length: 16
+
+<p>New File</p>
+```
+
+### [应答](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PUT#应答)
+
+如果目标资源不存在，并且 PUT 方法成功创建了一份，那么源头服务器必须返回[`201`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/201) (`Created`) 来通知客户端资源已创建。
+
+```http
+HTTP/1.1 201 Created
+Content-Location: /new.html
+```
+
+如果目标资源已经存在，并且依照请求中封装的表现形式成功进行了更新，那么，源头服务器必须返回[`200`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/200) (`OK`) 或者[`204`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/204) (`No Content`) 来表示请求的成功完成。
+
+```http
+HTTP/1.1 204 No Content
+Content-Location: /existing.html
+```
+
+---
+
+# DELETE
+
+**HTTP DELETE** 请求方法用于**删除指定的资源**。
+
+| 请求是否有主体                                               | 可以有 |
+| :----------------------------------------------------------- | ------ |
+| 成功的返回是否有主体                                         | 可以有 |
+| 安全                                                         | 否     |
+| [幂等](https://developer.mozilla.org/zh-CN/docs/Glossary/Idempotent) | 是     |
+| 可缓存                                                       | 否     |
+| 可以在[HTML forms](https://developer.mozilla.org/en-US/docs/Learn/Forms)中使用 | 否     |
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/DELETE#语法)
+
+```http
+DELETE /file.html HTTP/1.1
+```
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/DELETE#示例)
+
+### [请求](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/DELETE#请求)
+
+```http
+DELETE /file.html HTTP/1.1
+```
+
+### [响应](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/DELETE#响应)
+
+如果 `DELETE `方法成功执行，那么可能会有以下几种状态码：
+
+- 状态码  [`202`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/202) (`Accepted`) 表示请求的操作可能会成功执行，但是尚未开始执行。
+- 状态码 [`204`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/204) (`No Content`) 表示操作已执行，但是无进一步的相关信息。
+- 状态码  [`200`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/200) (`OK`) 表示操作已执行，并且响应中提供了相关状态的描述信息。
+
+```http
+HTTP/1.1 200 OK
+Date: Wed, 21 Oct 2015 07:28:00 GMT
+
+<html>
+  <body>
+    <h1>File deleted.</h1>
+  </body>
+</html>
+```
+
+---
+
+# CONNECT
+
+在 HTTP 协议中，**`CONNECT`** 方法可以开启一个客户端与所请求资源之间的双向沟通的通道。它可以用来创建隧道（tunnel）。
+
+例如，**`CONNECT`** 可以用来访问采用了 [SSL](https://developer.mozilla.org/zh-CN/docs/Glossary/SSL) ([HTTPS](https://developer.mozilla.org/zh-CN/docs/Glossary/https)) 协议的站点。客户端要求代理服务器将 TCP 连接作为通往目的主机隧道。之后该服务器会代替客户端与目的主机建立连接。连接建立好之后，代理服务器会面向客户端发送或接收 TCP 消息流。
+
+`CONNECT` 是一个应用范围为点到点的方法。
+
+| Request has body                                             | No   |
+| :----------------------------------------------------------- | ---- |
+| Successful response has body                                 | Yes  |
+| [Safe](https://developer.mozilla.org/zh-CN/docs/Glossary/safe) | No   |
+| [Idempotent](https://developer.mozilla.org/zh-CN/docs/Glossary/Idempotent) | No   |
+| [Cacheable (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/cacheable) | No   |
+| Allowed in [HTML forms](https://developer.mozilla.org/en-US/docs/Learn/Forms) | No   |
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/CONNECT#语法)
+
+```http
+CONNECT www.example.com:443 HTTP/1.1
+```
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/CONNECT#示例)
+
+一些代理服务器在创建隧道时会要求进行身份验证。参见 [`Proxy-Authorization`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Proxy-Authorization) 首部。
+
+```http
+CONNECT server.example.com:80 HTTP/1.1
+Host: server.example.com:80
+Proxy-Authorization: basic aGVsbG86d29ybGQ=
+```
+
+---
+
+# OPTIONS
+
+**HTTP 的 `OPTIONS 方法`** 用于**获取目的资源所支持的通信选项**。客户端可以对特定的 URL 使用 OPTIONS 方法，也可以对整站（通过将 URL 设置为“*”）使用该方法。
+
+| Request has body                                             | No   |
+| :----------------------------------------------------------- | ---- |
+| Successful response has body                                 | Yes  |
+| [Safe](https://developer.mozilla.org/zh-CN/docs/Glossary/safe) | Yes  |
+| [Idempotent](https://developer.mozilla.org/zh-CN/docs/Glossary/Idempotent) | Yes  |
+| [Cacheable (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/cacheable) | No   |
+| Allowed in HTML forms                                        | No   |
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/OPTIONS#语法)
+
+```http
+OPTIONS /index.html HTTP/1.1
+OPTIONS * HTTP/1.1
+```
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/OPTIONS#示例)
+
+### [检测服务器所支持的请求方法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/OPTIONS#检测服务器所支持的请求方法)
+
+可以使用 OPTIONS 方法对服务器发起请求，以检测服务器支持哪些 HTTP 方法：
+
+```bash
+curl -X OPTIONS http://example.org -i
+```
+
+响应报文包含一个 [`Allow`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Allow) 首部字段，**该字段的值表明了服务器支持的所有 HTTP 方法**：
+
+```http
+HTTP/1.1 200 OK
+Allow: OPTIONS, GET, HEAD, POST
+Cache-Control: max-age=604800
+Date: Thu, 13 Oct 2016 11:45:00 GMT
+Expires: Thu, 20 Oct 2016 11:45:00 GMT
+Server: EOS (lax004/2813)
+x-ec-custom-error: 1
+Content-Length: 0
+```
+
+### [CORS 中的预检请求](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/OPTIONS#cors_中的预检请求)
+
+在 [CORS](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CORS) 中，可以使用 OPTIONS 方法发起一个预检请求，**以检测实际请求是否可以被服务器所接受**。预检请求报文中的 [`Access-Control-Request-Method`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Access-Control-Request-Method) 首部字段告知服务器实际请求所使用的 HTTP 方法；[`Access-Control-Request-Headers`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Access-Control-Request-Headers) 首部字段告知服务器实际请求所携带的自定义首部字段。**服务器基于从预检请求获得的信息来判断，是否接受接下来的实际请求。**
+
+```http
+OPTIONS /resources/post-here/ HTTP/1.1
+Host: bar.other
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-us,en;q=0.5
+Accept-Encoding: gzip,deflate
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+Connection: keep-alive
+Origin: http://foo.example
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: X-PINGOTHER, Content-Type
+```
+
+服务器所返回的 [`Access-Control-Allow-Methods`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Access-Control-Allow-Methods) 首部字段将所有允许的请求方法告知客户端。该首部字段与 [`Allow`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Allow) 类似，**但只能用于涉及到 CORS 的场景中。**
+
+```http
+HTTP/1.1 200 OK
+Date: Mon, 01 Dec 2008 01:15:39 GMT
+Server: Apache/2.0.61 (Unix)
+Access-Control-Allow-Origin: http://foo.example
+Access-Control-Allow-Methods: POST, GET, OPTIONS
+Access-Control-Allow-Headers: X-PINGOTHER, Content-Type
+Access-Control-Max-Age: 86400
+Vary: Accept-Encoding, Origin
+Content-Encoding: gzip
+Content-Length: 0
+Keep-Alive: timeout=2, max=100
+Connection: Keep-Alive
+Content-Type: text/plain
+```
+
+---
+
+# PATCH
+
+在 HTTP 协议中，请求方法 **PATCH** 用于**对资源进行部分修改**。
+
+在 HTTP 协议中， [`PUT`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PUT) 方法已经被用来表示对资源进行整体覆盖， 而 [`POST`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST) 方法则没有对标准的补丁格式的提供支持。不同于 `PUT `方法，而与 `POST `方法类似，`PATCH` 方法是**非幂等的**，这就意味着连续多个的相同请求会产生不同的效果。
+
+要判断一台服务器是否支持 `PATCH `方法，那么就看它是否将其添加到了响应首部 [`Allow`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Allow) 或者 [`Access-Control-Allow-Methods`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Access-Control-Allow-Methods)（在跨域访问的场合，CORS）的方法列表中 。
+
+另外一个支持 PATCH 方法的隐含迹象是 [`Accept-Patch`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Accept-Patch) 首部的出现，**这个首部明确了服务器端可以接受的补丁文件的格式**。
+
+| Request has body                                             | Yes  |
+| :----------------------------------------------------------- | ---- |
+| Successful response has body                                 | No   |
+| [Safe](https://developer.mozilla.org/zh-CN/docs/Glossary/safe) | No   |
+| [Idempotent](https://developer.mozilla.org/zh-CN/docs/Glossary/Idempotent) | No   |
+| [Cacheable (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/cacheable) | No   |
+| Allowed in [HTML forms](https://developer.mozilla.org/en-US/docs/Learn/Forms) | No   |
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PATCH#语法)
+
+```http
+PATCH /file.txt HTTP/1.1
+```
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PATCH#示例)
+
+### [请求](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PATCH#请求)
+
+```http
+PATCH /file.txt HTTP/1.1
+Host: www.example.com
+Content-Type: application/example
+If-Match: "e0023aa4e"
+Content-Length: 100
+
+[description of changes]
+```
+
+### [响应](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/PATCH#响应)
+
+ [`204`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/204) 状态码表示这是一个操作成功的响应，因为响应中不带有消息主体。
+
+```http
+HTTP/1.1 204 No Content
+Content-Location: /file.txt
+ETag: "e0023aa4f"
+```
+
+---
+
+# TRACE
+
+**HTTP `TRACE` 方法** 实现**沿通向目标资源的路径的消息环回（loop-back）测试** ，提供了一种实用的 debug 机制。
+
+请求的最终接收者应当原样反射（reflect）它接收到的消息，除了以下字段部分，作为一个[`Content-Type`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Type) 为 `message/http` 的 200（OK）响应的消息的主体（body）返回给客户端 。
+
+最终接收者是指初始（origin）服务器，或者第一个接收到 [`Max-Forwards`](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Max-Forwards) 值为 0 的请求的服务器。
+
+| 有主体（body）的请求（request）                              | 否   |
+| :----------------------------------------------------------- | ---- |
+| 包含主体（body）的成功的响应（response）                     | 否   |
+| [Safe](https://developer.mozilla.org/zh-CN/docs/Glossary/safe) | 否   |
+| [Idempotent](https://developer.mozilla.org/zh-CN/docs/Glossary/Idempotent) | 是   |
+| [Cacheable (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/cacheable) | 否   |
+| 允许用于 HTML 表单（form）                                   | 否   |
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/TRACE#语法)
+
+```http
+TRACE /index.html
+```
+
+---
+
 # HTTP消息
 
 HTTP消息是服务器和客户端之间交换数据的方式。有两种类型的消息︰ 请求（requests）--由客户端发送用来触发一个服务器上的动作；响应（responses）--来自服务器的应答。

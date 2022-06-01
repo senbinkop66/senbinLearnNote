@@ -5,26 +5,27 @@
     <title>test</title>
   </head>
   <style type="text/css">
-    .border {
-      position: relative;
-    width: 0;
-    height: 0;
-    border-style:solid;
-    border-width: 0 50px 50px;
-    border-color: transparent transparent #d9534f;
+  .box {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    background: red;
+    color: white;
   }
-  .border:after{
-    content: '';
-    border-style:solid;
-    border-width: 0 40px 40px;
-    border-color: transparent transparent #96ceb4;
-    position: absolute;
-    top: 6px;
-    left: -40px;
-}
+
+  #two {
+    position: relative;
+    top: 20px;
+    left: 20px;
+    background: blue;
+  }
+
   </style>
   <body>
-<div class="border"></div>
+  <div class="box" id="one">One</div>
+  <div class="box" id="two">Two</div>
+  <div class="box" id="three">Three</div>
+  <div class="box" id="four">Four</div>
 
 
 <script>
