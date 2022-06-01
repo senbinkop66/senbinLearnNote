@@ -5,24 +5,30 @@
     <title>test</title>
   </head>
   <style type="text/css">
-  
+    .border {
+      position: relative;
+    width: 0;
+    height: 0;
+    border-style:solid;
+    border-width: 0 50px 50px;
+    border-color: transparent transparent #d9534f;
+  }
+  .border:after{
+    content: '';
+    border-style:solid;
+    border-width: 0 40px 40px;
+    border-color: transparent transparent #96ceb4;
+    position: absolute;
+    top: 6px;
+    left: -40px;
+}
   </style>
   <body>
+<div class="border"></div>
+
+
 <script>
-  console.log('initial readyState:' + document.readyState);
 
-  document.addEventListener('readystatechange', () => console.log('readyState:' + document.readyState));
-  document.addEventListener('DOMContentLoaded', () => console.log('DOMContentLoaded'));
-
-  window.onload = () => console.log('window onload');
-</script>
-
-<iframe src="test2.html" onload="console.log('iframe onload')"></iframe>
-
-<img src="http://en.js.cx/clipart/train.gif" id="img">
-<script>
-  let img = document.querySelector("#img");
-  img.onload = () => console.log('img onload');
 </script>
 
   </body>
