@@ -1,44 +1,59 @@
 /**
- * @param {number[]} matchsticks
- * @return {boolean}
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
  */
-var makesquare = function(matchsticks) {
-    let len = matchsticks.length;
-    if (len < 4) {
-        return false;
-    }
-    let totalLen = 0;
-    matchsticks.forEach((item) => {
-        totalLen += item;
-    });
-    if (totalLen % 4 !== 0) {
-        return false;
-    }
-    matchsticks.sort((a, b) => b - a);
-    let edgeLength = totalLen / 4;
-    if (matchsticks[0] > edgeLength) {
-        return false;
-    }
-    const edges = new Array(4).fill(0);
-
-    const dfs = (index) => {
-        if (index === len) {
-            return true;
+/**
+ * @param {TreeNode} root
+ * @param {number} key
+ * @return {TreeNode}
+ */
+var deleteNode = function(root, key) {
+    let curr = root, currParent = null;
+    while (curr && curr.val !== key){
+        currParent = curr;
+        if (curr.val > key) {
+            curr = curr.left;
+        } else {
+            curr = curr.right;
         }
-        for (let i = 0; i < 4; i++){
-            edges[i] += matchsticks[index];
-            if (edges[i] <= edgeLength && dfs(index + 1)) {
-                return true;
-            }
-            edges[i] -= matchsticks[index];
-        }
-        return false;
     }
-    return dfs(0);
-
+    if (!curr) {
+        return root;
+    }
+    if (curr.left === null && curr.right === null) {
+        //是叶节点
+        curr = null;
+    } else if (curr.right === null) {
+        curr = curr.left;
+    } else if (curr.left === null) {
+        curr = curr.right;
+    }else{
+        let successor = curr.right, successorParent = curr;
+        while (successor.left) {
+            successorParent = successor;
+            successor = successor.left;
+        }
+        if (successorParent.val === curr.val) {
+            successorParent.right = successor.right;
+        } else {
+            successorParent.left = successor.right;
+        }
+        successor.right = curr.right;
+        successor.left = curr.left;
+        curr = successor;
+    }
+    if (!currParent) {
+        return curr;
+    }else{
+        if (currParent.left && currParent.left.val === key) {
+            currParent.left = curr;
+        } else {
+            currParent.right = curr;
+        }
+        return root;
+    }
 };
-
-
-let matchsticks = [1,1,2,2,2];
-let result = makesquare(matchsticks);
-console.log(result);

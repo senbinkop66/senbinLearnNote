@@ -2052,3 +2052,128 @@ let x = 1;
   var x = 2; // SyntaxError for re-declaration
 }
 ```
+
+---
+
+# Call stack（调用栈）
+
+调用栈是解释器（比如浏览器中的 JavaScript 解释器）追踪函数执行流的一种机制。当执行环境中调用了多个[函数](https://developer.mozilla.org/zh-CN/docs/Glossary/Function)时，通过这种机制，我们能够追踪到哪个函数正在执行，执行的函数体中又调用了哪个函数。
+
+- 每调用一个函数，解释器就会把该函数添加进调用栈并开始执行。
+- 正在调用栈中执行的函数还调用了其它函数，那么新函数也将会被添加进调用栈，一旦这个函数被调用，便会立即执行。
+- 当前函数执行完毕后，解释器将其清出调用栈，继续执行当前执行环境下的剩余的代码。
+- 当分配的调用栈空间被占满时，会引发“堆栈溢出”错误。
+
+```js
+function greeting() {
+   // [1] Some codes here
+   sayHi();
+   // [2] Some codes here
+}
+function sayHi() {
+   return "Hi!";
+}
+
+// 调用 `greeting` 函数
+greeting();
+
+// [3] Some codes here
+```
+
+上面的代码会按照如下流程这样执行：
+
+1. 忽略前面所有函数，直到 `greeting()` 函数被调用。
+
+2. 把 `greeting()` 添加进调用栈列表。
+
+3. 执行 greeting() 函数体中的所有代码。
+
+   ```
+   调用栈列表:
+   - greeting
+   ```
+
+4. 代码执行到 `sayHi()` 时，该函数被调用。
+
+5. 把 `sayHi()` 添加进调用栈列表。
+
+6. 执行 sayHi() 函数体中的代码，直到全部执行完毕。
+
+   ```
+   调用栈列表:
+   - sayHi
+   - greeting
+   ```
+
+7. 返回来继续执行 `greeting()` 函数体中 `sayHi()` 后面的代码。
+
+8. 删除调用栈列表中的 `sayHi()` 函数。
+
+9. 当 greeting() 函数体中的代码全部执行完毕，返回到调用 greeting() 的代码行，继续执行剩下的 JS 代码。
+
+   ```
+   调用栈列表:
+   - greeting
+   ```
+
+10. 删除调用栈列表中的 `greeting()` 函数。
+
+一开始，我们得到一个空空如也的调用栈。随后，每当有函数被调用都会自动地添加进调用栈，执行完函数体中的代码后，调用栈又会自动地移除这个函数。最后，我们又得到了一个空空如也的调用栈。
+
+---
+
+# AJAX
+
+**AJAX**（Asynchronous [JavaScript](https://developer.mozilla.org/zh-CN/docs/Glossary/JavaScript) And [XML](https://developer.mozilla.org/zh-CN/docs/Glossary/XML) ）是一种使用 [XMLHttpRequest](https://developer.mozilla.org/zh-CN/docs/Glossary/XHR_(XMLHttpRequest)) 技术构建更复杂，动态的网页的编程实践。
+
+AJAX允许只更新一个 [HTML](https://developer.mozilla.org/zh-CN/docs/Glossary/HTML) 页面的部分 [DOM](https://developer.mozilla.org/zh-CN/docs/Glossary/DOM)，而无须重新加载整个页面。AJAX还允许异步工作，这意味着当网页的一部分正试图重新加载时，您的代码可以继续运行（相比之下，同步会阻止代码继续运行，直到这部分的网页完成重新加载）。
+
+通过交互式网站和现代 Web 标准，AJAX正在逐渐被 JavaScript 框架中的函数和官方的 [`Fetch API`](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API) 标准取代。
+
+---
+
+# Base64的编码与解码
+
+**Base64** 是一组相似的[二进制到文本](https://en.wikipedia.org/wiki/Binary-to-text_encoding)（binary-to-text）的编码规则，使得二进制数据在解释成 radix-64 的表现形式后能够用 ASCII 字符串的格式表示出来。*Base64* 这个词出自一种 [MIME 数据传输编码](https://en.wikipedia.org/wiki/MIME#Content-Transfer-Encoding)。 
+
+Base64编码普遍应用于需要通过被设计为处理文本数据的媒介上储存和传输二进制数据而需要编码该二进制数据的场景。这样是为了保证数据的完整并且不用在传输过程中修改这些数据。Base64 也被一些应用（包括使用 [MIME](https://en.wikipedia.org/wiki/MIME) 的电子邮件）和在 [XML (en-US)](https://developer.mozilla.org/en-US/docs/Web/XML) 中储存复杂数据时使用。 
+
+在 JavaScript 中，有两个函数被分别用来处理解码和编码 *base64* 字符串：
+
+- [`atob()`](https://developer.mozilla.org/zh-CN/docs/Web/API/atob)
+- [`btoa()`](https://developer.mozilla.org/zh-CN/docs/Web/API/btoa)
+
+`atob()` 函数能够解码通过base-64编码的字符串数据。相反地，`btoa()` 函数能够从二进制数据“字符串”创建一个base-64编码的ASCII字符串。
+
+`atob()` 和 `btoa()` 均使用字符串。
+
+#### 编码尺寸增加
+
+每一个Base64字符实际上代表着6比特位。因此，3字节（一字节是8比特，3字节也就是24比特）的字符串/二进制文件可以转换成4个Base64字符(4x6 = 24比特)。
+
+这意味着Base64格式的字符串或文件的尺寸约是原始尺寸的133%（增加了大约33%）。如果编码的数据很少，增加的比例可能会更高。例如：字符串`"a"`的`length === 1`进行Base64编码后是`"YQ=="`的`length === 4`，尺寸增加了300%。
+
+---
+
+# 回调函数
+
+被作为实参传入另一函数，并在该外部函数内被调用，用以来完成某些任务的函数，称为回调函数。
+
+例如：
+
+```js
+function greeting(name) {
+  alert('Hello ' + name);
+}
+
+function processUserInput(callback) {
+  var name = prompt('Please enter your name.');
+  callback(name);
+}
+
+processUserInput(greeting);
+```
+
+以上示例为[同步](https://developer.mozilla.org/zh-CN/docs/Glossary/Synchronous)回调，它是立即执行的。
+
+然而需要注意的是，回调函数经常被用于在一个[异步](https://developer.mozilla.org/zh-CN/docs/Glossary/Asynchronous)操作完成后执行代码，它们被称为异步回调。一个常见的例子是在 promise 末尾添加的 [`.then`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then) 内执行回调函数（在 promise 被兑现或拒绝时执行）。这个结构常用于许多现代的 web API，例如 [`fetch()`](https://developer.mozilla.org/zh-CN/docs/Web/API/fetch)。
