@@ -866,7 +866,7 @@ ctx.fillStyle = "rgba(255,0,0,0.5)";
 
 ![img](https://developer.mozilla.org/@api/deki/files/88/=Canvas_linecap.png)
 
-属性 `lineCap` 的值决定了线段端点显示的样子。它可以为下面的三种的其中之一：`butt`，`round` 和 `square`。默认是 `butt。`
+属性 `lineCap` 的值**决定了线段端点显示的样子**。它可以为下面的三种的其中之一：`butt`，`round` 和 `square`。默认是 `butt。`
 
 在这个例子里面，我绘制了三条直线，分别赋予不同的 `lineCap` 值。还有两条辅助线，为了可以看得更清楚它们之间的区别，**三条线的起点终点都落在辅助线上**。
 
@@ -903,4 +903,537 @@ ctx.fillStyle = "rgba(255,0,0,0.5)";
     }
   }
 ```
+
+#### `lineJoin` 属性的例子
+
+![img](https://developer.mozilla.org/@api/deki/files/89/=Canvas_linejoin.png)
+
+`lineJoin` 的属性值决定了图形中两线段连接处所显示的样子。它可以是这三种之一：`round`, `bevel` 和 `miter。`默认是 `miter``。`
+
+这里我同样用三条折线来做例子，分别设置不同的 `lineJoin` 值。最上面一条是 `round` 的效果，边角处被磨圆了，**圆的半径等于线宽**。中间和最下面一条分别是 bevel 和 miter 的效果。当值是 `miter `的时候，线段会在连接处外侧延伸直至交于一点，延伸效果受到下面将要介绍的 `miterLimit` 属性的制约。
+
+```js
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    if (testCanvas.getContext) {
+      let ctx = testCanvas.getContext("2d");
+      
+      ctx.fillStyle = 'rgb(11, 10, 66)';
+      ctx.strokeStyle = 'rgb(67, 26, 66)';
+      const lineJoins = ["round", "bevel", "miter"];
+
+      // 画线条
+      ctx.lineWidth = 10;
+      for (let i = 0; i < 3; i++){
+        ctx.lineJoin = lineJoins[i];
+        ctx.beginPath();
+        ctx.moveTo(-5, 5 + i * 40);
+        ctx.lineTo(35, 45 + i * 40);
+        ctx.lineTo(75, 5 + i * 40);
+        ctx.lineTo(115, 45 + i * 40);
+        ctx.lineTo(155, 5 + i * 40);
+        ctx.stroke();
+      }
+    }
+  }
+```
+
+#### `miterLimit` 属性的演示例子
+
+就如上一个例子所见的应用 `miter` 的效果，线段的外侧边缘会被延伸交汇于一点上。线段之间夹角比较大时，交点不会太远，**但随着夹角变小，交点距离会呈指数级增大。**
+
+`miterLimit` 属性就是用来设定外延交点与连接点的最大距离，**如果交点距离大于此值，连接效果会变成了 bevel**。注意，最大斜接长度（即交点距离）是当前坐标系测量线宽与此`miterLimit`属性值（HTML canvas 默认为 10.0）的乘积，**所以`miterLimit`可以单独设置，不受显示比例改变或任何仿射变换的影响**：它只影响线条边缘的有效绘制形状。
+
+更准确的说，斜接限定值（`miterLimit`）是**延伸长度**（在 HTML Canvas 中，这个值是线段外连接点与路径中指定的点之间的距离）与**一半线宽**的**最大允许比值**。它也可以被等效定义为线条内外连接点距离（`miterLength`）与线宽（`lineWidth`）的最大允许比值（因为路径点是内外连接点的中点）。这等同于相交线段最小内夹角（*θ* ）的一半的余割值，小于此角度的斜接将不会被渲染，而仅渲染斜边连接：
+
+- `miterLimit` = **max** `miterLength` / `lineWidth` = 1 / **sin** ( **min** *θ* / 2 )
+- 斜接限定值默认为 10.0，这将会去除所有小于大约 11 度的斜接。
+- 斜接限定值为√2 ≈ 1.4142136（四舍五入）时，将去除所有锐角的斜接，仅保留钝角或直角。
+- 1.0 是合法的斜接限定值，但这会去除所有斜接。
+- **小于 1.0 的值不是合法的斜接限定值。**
+
+在下面的小示例中，您可以动态的设置`miterLimit`的值并查看它对画布中图形的影响。蓝色线条指出了锯齿图案中每个线条的起点与终点（同时也是不同线段之间的连接点）。
+
+在此示例中，当您设定`miterLimit`的值小于 4.2 时，图形可见部分的边角不会延伸相交，而是在蓝色线条边呈现斜边连接效果；当`miterLimit`的值大于 10.0 时，此例中大部分的边角都会在远离蓝线的位置相交，且从左至右，距离随着夹角的增大而减小；而介于上述值之间的值所呈现的效果，也介于两者之间。
+
+```html
+    <canvas id="test1" width="400" height="400"></canvas>
+    <input type="number" id="miterlimit1" min="1" value="10" />
+    <button onclick="draw();">重绘</button>
+<script type="text/javascript">
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    if (testCanvas.getContext) {
+      let ctx = testCanvas.getContext("2d");
+      ctx.clearRect(0, 0, 400, 400);  // 清空画布
+      // 绘制参考线
+      ctx.strokeStyle = 'rgb(67, 26, 66)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-5, 50, 160, 50);
+
+      // 设置线条样式
+      ctx.strokeStyle = "#432888";
+      ctx.lineWidth = 10;
+      
+       // 检查输入
+      let miterlimit1 = document.getElementById("miterlimit1").value;
+      if (miterlimit1.match(/\d+(\.\d+)?/)){
+        ctx.miterLimit = parseFloat(miterlimit1.value);
+      }else{
+        alert("Value must be a positive number");
+      }
+      console.log(miterlimit1);
+      // 绘制线条
+      ctx.beginPath();
+      ctx.moveTo(0, 100);
+      for (let i = 0; i < 24; i++){
+        let dy = i % 2 === 0 ? 25 : -25;
+        ctx.lineTo(Math.pow(i, 1.5) * 2, 75 + dy);
+      }
+      ctx.stroke();
+      return false;
+    }
+  }
+</script>
+```
+
+### [使用虚线](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Applying_styles_and_colors#using_line_dashes)
+
+用 `setLineDash` 方法和 `lineDashOffset` 属性来制定虚线样式。**`setLineDash` 方法接受一个数组，来指定线段与间隙的交替**；`lineDashOffset `属性设置起始偏移量。
+
+在这个例子中，我们要创建一个蚂蚁线的效果。它往往应用在计算机图形程序选区工具动效中。它可以帮助用户通过动画的边界来区分图像背景选区边框。
+
+```js
+  let testCanvas = document.getElementById("test1");
+  let ctx = testCanvas.getContext("2d");
+  let offset = 0
+  function draw() {
+    ctx.clearRect(0, 0, testCanvas.width, testCanvas.height);
+    ctx.setLineDash([4, 2]);
+    ctx.lineDashOffset = -offset;
+    ctx.strokeRect(10, 10, 100, 100);
+  }
+  function march() {
+    offset++;
+    if (offset > 16){
+      offset = 0;
+    }
+    draw();
+    setTimeout(march, 20);
+  }
+  march();
+```
+
+## [渐变 Gradients](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Applying_styles_and_colors#gradients)
+
+就好像一般的绘图软件一样，我们可以用线性或者径向的渐变来填充或描边。我们用下面的方法新建一个 `canvasGradient` 对象，并且赋给图形的 `fillStyle` 或 `strokeStyle` 属性。
+
+- [`createLinearGradient(x1, y1, x2, y2)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/createLinearGradient)
+
+  createLinearGradient 方法接受 4 个参数，表示渐变的起点 (x1,y1) 与终点 (x2,y2)。
+
+- [`createRadialGradient(x1, y1, r1, x2, y2, r2)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/createRadialGradient)
+
+  createRadialGradient 方法接受 6 个参数，前三个定义一个以 (x1,y1) 为原点，半径为 r1 的圆，后三个参数则定义另一个以 (x2,y2) 为原点，半径为 r2 的圆。
+
+```js
+var lineargradient = ctx.createLinearGradient(0,0,150,150);
+var radialgradient = ctx.createRadialGradient(75,75,0,75,75,100);
+```
+
+创建出 `canvasGradient` 对象后，我们就可以用 `addColorStop` 方法给它上色了。
+
+- [`gradient.addColorStop(position, color)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasGradient/addColorStop)
+
+  addColorStop 方法接受 2 个参数，`position` 参数**必须是一个 0.0 与 1.0 之间的数值**，**表示渐变中颜色所在的相对位置**。例如，0.5 表示颜色会出现在正中间。`color` 参数必须是一个有效的 CSS 颜色值（如 #FFF，rgba(0,0,0,1)，等等）。
+
+你可以根据需要添加任意多个色标（color stops）。下面是最简单的线性黑白渐变的例子。
+
+```js
+    let lineargradient = ctx.createLinearGradient(0, 0, 150, 150);
+    lineargradient.addColorStop(0, "white");
+    lineargradient.addColorStop(1, "black");
+```
+
+#### `createLinearGradient` 的例子
+
+![img](https://developer.mozilla.org/@api/deki/files/87/=Canvas_lineargradient.png)
+
+本例中，我弄了两种不同的渐变。第一种是**背景色渐变**，你会发现，我给同一位置设置了两种颜色，你也可以用这来实现突变的效果，就像这里从白色到绿色的突变。**一般情况下，色标的定义是无所谓顺序的，但是色标位置重复时，顺序就变得非常重要了**。所以，保**持色标定义顺序和它理想的顺序一致**，结果应该没什么大问题。
+
+第二种渐变，我并不是从 0.0 位置开始定义色标，因为那并不是那么严格的。**在 0.5 处设一黑色色标，渐变会默认认为从起点到色标之间都是黑色。**
+
+你会发现，`strokeStyle` 和 `fillStyle` 属性都可以接受 `canvasGradient` 对象。
+
+```js
+<script type="text/javascript">
+  let testCanvas = document.getElementById("test1");
+  let ctx = testCanvas.getContext("2d");
+  function draw() {
+    //创建渐变
+    let lineargradient1 = ctx.createLinearGradient(0, 0, 0, 150);
+    lineargradient1.addColorStop(0, "#00ABEB");
+    lineargradient1.addColorStop(0.5, "#FFFFFF");
+    lineargradient1.addColorStop(0.5, "#26C000");
+    lineargradient1.addColorStop(1, "#FFFFFF");
+
+    let lineargradient2 = ctx.createLinearGradient(0, 50, 0, 95);
+    lineargradient2.addColorStop(0.5, "#000000");
+    lineargradient2.addColorStop(0.5, "rgba(0, 0, 0, 0)");
+
+    //为填充和描边样式分配渐变
+    ctx.fillStyle = lineargradient1;
+    ctx.strokeStyle = lineargradient2;
+
+    //绘制形状
+    ctx.fillRect(10, 10, 130, 130);
+    ctx.strokeRect(50, 50, 50, 50);
+  }
+```
+
+### [`createRadialGradient` 的例子](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Applying_styles_and_colors#a_createradialgradient_example)
+
+这个例子，我定义了 4 个不同的径向渐变。由于可以控制渐变的起始与结束点，所以我们可以实现一些比（如在 Photoshop 中所见的）经典的径向渐变更为复杂的效果。（经典的径向渐变是只有一个中心点，简单地由中心点向外围的圆形扩张）
+
+```js
+  function draw() {
+    //创建渐变
+    let radgrad1 = ctx.createRadialGradient(45, 45, 10, 52, 50, 30);
+    radgrad1.addColorStop(0, '#A7D30C');
+    radgrad1.addColorStop(0.9, '#019F62');
+    radgrad1.addColorStop(1, 'rgba(1,159,98,0)');
+
+    let radgrad2 = ctx.createRadialGradient(105, 105, 20, 112, 120, 50);
+    radgrad2.addColorStop(0, '#FF5F98');
+    radgrad2.addColorStop(0.75, '#FF0188');
+    radgrad2.addColorStop(1, 'rgba(255,1,136,0)');
+
+    let radgrad3 = ctx.createRadialGradient(95,15,15,102,20,40);
+    radgrad3.addColorStop(0, '#00C9FF');
+    radgrad3.addColorStop(0.8, '#00B5E2');
+    radgrad3.addColorStop(1, 'rgba(0,201,255,0)');
+
+    let radgrad4 = ctx.createRadialGradient(0,150,50,0,140,90);
+    radgrad4.addColorStop(0, '#F4F201');
+    radgrad4.addColorStop(0.8, '#E4C700');
+    radgrad4.addColorStop(1, 'rgba(228,199,0,0)');
+
+    //绘制形状
+    ctx.fillStyle = radgrad1;
+    ctx.fillRect(0, 0, 150, 150);
+    ctx.fillStyle = radgrad3;
+    ctx.fillRect(0, 0, 150, 150);
+    ctx.fillStyle = radgrad2;
+    ctx.fillRect(0, 0, 150, 150);
+    ctx.fillStyle = radgrad4;
+    ctx.fillRect(0, 0, 150, 150);
+  }
+```
+
+这里，我让起点稍微偏离终点，这样可以达到一种球状 3D 效果。但最好不要让里圆与外圆部分交叠，那样会产生什么效果就真是不得而知了。
+
+4 个径向渐变效果的最后一个色标都是透明色。**如果想要两色标直接的过渡柔和一些，只要两个颜色值一致就可以了**。代码里面看不出来，是因为我用了两种不同的颜色表示方法，但其实是相同的，`#019F62 = rgba(1,159,98,1)。`
+
+## [图案样式 Patterns](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Applying_styles_and_colors#patterns)
+
+上一节的一个例子里面，我用了循环来实现图案的效果。其实，有一个更加简单的方法：`createPattern。`
+
+- [`createPattern(image, type)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/createPattern)
+
+  该方法接受两个参数。Image 可以是一个 `Image` 对象的引用，或者另一个 canvas 对象。`Type` 必须是下面的字符串值之一：`repeat`，`repeat-x`，`repeat-y` 和 `no-repeat`。
+
+> **注意：** 用 canvas 对象作为 `Image` 参数在 Firefox 1.5 (Gecko 1.8) 中是无效的。
+
+图案的应用跟渐变很类似的，创建出一个 pattern 之后，赋给 `fillStyle` 或 `strokeStyle` 属性即可。
+
+```js
+var img = new Image();
+img.src = 'someimage.png';
+var ptrn = ctx.createPattern(img,'repeat');
+```
+
+> **注意：**与 drawImage 有点不同，你需要确认 image 对象已经装载完毕，否则图案可能效果不对的。
+
+### [`createPattern` 的例子](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Applying_styles_and_colors#a_createpattern_example)
+
+在最后的例子中，我创建一个图案然后赋给了 `fillStyle` 属性。唯一要注意的是，**使用 Image 对象的 `onload` handler 来确保设置图案之前图像已经装载完毕。**
+
+```js
+  function draw() {
+    // 创建新 image 对象，用作图案
+    let img = new Image();
+    img.src = "./image1/img1.png";
+    img.onload = function(){
+      //创建图案
+      let pattern = ctx.createPattern(img, "repeat");
+      ctx.fillStyle = pattern;
+      ctx.fillRect(0, 0, 180, 235);
+    }
+  }
+```
+
+## [阴影 Shadows](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Applying_styles_and_colors#阴影_shadows)
+
+- [`shadowOffsetX = float`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/shadowOffsetX)
+
+  `shadowOffsetX` 和 `shadowOffsetY `用来设定阴影在 X 和 Y 轴的延伸距离，它们是不受变换矩阵所影响的。**负值表示阴影会往上或左延伸**，正值则表示会往下或右延伸，它们**默认都为 `0`**。
+
+- [`shadowOffsetY = float`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/shadowOffsetY)
+
+  shadowOffsetX 和 `shadowOffsetY `用来设定阴影在 X 和 Y 轴的延伸距离，它们是不受变换矩阵所影响的。负值表示阴影会往上或左延伸，**正值则表示会往下或右延伸**，它们默认都为 `0`。
+
+- [`shadowBlur = float`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/shadowBlur)
+
+  shadowBlur **用于设定阴影的模糊程度**，其数值并不跟像素数量挂钩，也不受变换矩阵的影响，默认为 `0`。
+
+- [`shadowColor = color`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/shadowColor)
+
+  shadowColor 是标准的 CSS 颜色值，**用于设定阴影颜色效果**，默认是全透明的黑色。
+
+### [文字阴影的例子](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Applying_styles_and_colors#a_shadowed_text_example)
+
+这个例子绘制了带阴影效果的文字。
+
+```js
+  function draw() {
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    ctx.shadowBlur = 2;
+    ctx.shadowColor = "rgba(66, 0, 58, 0.5)";
+
+    ctx.font = "20px Times New Roman";
+    ctx.fillStyle = "black";
+    ctx.fillText("Sample String shadow", 30, 50);
+  }
+```
+
+## [Canvas 填充规则](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Applying_styles_and_colors#canvas_fill_rules)
+
+当我们用到 `fill`（或者 [`clip`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/clip)和[`isPointinPath`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/isPointInPath) ）你可以选择一个填充规则，**该填充规则根据某处在路径的外面或者里面来决定该处是否被填充**，这对于自己与自己路径相交或者路径被嵌套的时候是有用的。
+
+两个可能的值：
+
+-  `nonzero`: [non-zero winding rule](http://en.wikipedia.org/wiki/Nonzero-rule), 默认值。
+- ` evenodd`: [even-odd winding rule](http://en.wikipedia.org/wiki/Even–odd_rule).
+
+这个例子，我们用填充规则 `evenodd`
+
+```js
+  function draw() {
+    ctx.beginPath();
+    ctx.arc(150, 150, 50, 0, Math.PI * 2, true);
+    ctx.arc(150, 150, 30, 0, Math.PI * 2, true);
+    ctx.fill("evenodd")
+  }
+```
+
+# 绘制文本
+
+canvas 提供了两种方法来渲染文本：
+
+- [`fillText(text, x, y [, maxWidth\])`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/fillText)
+
+  在指定的 (x,y) 位置填充指定的文本，绘制的最大宽度是可选的。
+
+- [`strokeText(text, x, y [, maxWidth\])`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/strokeText)
+
+  在指定的 (x,y) 位置绘制文本边框，绘制的最大宽度是可选的。
+
+### [一个填充文本的示例](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Drawing_text#a_filltext_example)
+
+文本用当前的填充方式被填充：
+
+```js
+  function draw() {
+    ctx.font = "48px serif";
+    ctx.fillText("Hello World",50, 50, 300);
+  }
+```
+
+### [一个文本边框的示例](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Drawing_text#a_stroketext_example)
+
+文本用当前的边框样式被绘制：
+
+```js
+  function draw() {
+    ctx.font = "48px serif";
+    ctx.strokeStyle = "#345fff";
+    ctx.strokeText("Hello World",50, 50, 300);
+  }
+```
+
+## [有样式的文本](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Drawing_text#有样式的文本)
+
+在上面的例子用我们已经使用了 `font` 来使文本比默认尺寸大一些。还有更多的属性可以让你改变 canvas 显示文本的方式：
+
+- [`font = value`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/font)
+
+  当前我们用来绘制文本的样式。这个字符串使用和 [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS) [`font`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/font) 属性相同的语法。**默认的字体是 `10px sans-serif`。**
+
+- [`textAlign = value`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/textAlign)
+
+  文本对齐选项。可选的值包括：`start`, `end`, `left`, `right` or `center`. 默认值是 `start`。
+
+- [`textBaseline = value`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/textBaseline)
+
+  基线对齐选项。可选的值包括：`top`, `hanging`, `middle`, `alphabetic`, `ideographic`, `bottom`。默认值是 `alphabetic。`
+
+- [`direction = value`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/direction)
+
+  文本方向。可能的值包括：`ltr`, `rtl`, `inherit`。默认值是 `inherit。`
+
+如果你之前使用过 CSS，那么这些选项你会很熟悉。
+
+### [textBaseline 例子](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Drawing_text#textbaseline例子)
+
+编辑下面的代码，看看它们在 canvas 中的变化：
+
+```js
+  function draw() {
+    ctx.font = "48px serif";
+    ctx.strokeStyle = "#345fff";
+    ctx.textBaseline = "hanging";  //top, hanging, middle, alphabetic, ideographic, bottom
+    ctx.strokeText("Hello World",50, 50, 300);
+  }
+
+function draw() {
+    ctx.font = '48px serif';
+    ctx.fillText('Hi!', 150, 50);
+    ctx.direction = 'rtl';
+    ctx.fillText('Hi!', 150, 130);
+  }
+```
+
+## [预测量文本宽度](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Drawing_text#预测量文本宽度)
+
+当你需要获得更多的文本细节时，下面的方法可以给你测量文本的方法。
+
+- [`measureText()`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/measureText)
+
+  将返回一个 [`TextMetrics`](https://developer.mozilla.org/zh-CN/docs/Web/API/TextMetrics)对象的宽度、所在像素，这些体现文本特性的属性。
+
+下面的代码段将展示如何测量文本来获得它的宽度：
+
+```js
+  function draw() {
+    ctx.font = '48px serif';
+    ctx.strokeStyle = "#345fff";
+    ctx.strokeText("Hello World",50, 50, 300);
+
+    let text = ctx.measureText("Hello World");
+    console.log(text.width); // 264
+  }
+```
+
+# 使用图像 Using images
+
+canvas 更有意思的一项特性就是图像操作能力。可以用于动态的图像合成或者作为图形的背景，以及游戏界面（Sprites）等等。浏览器支持的任意格式的外部图片都可以使用，比如 PNG、GIF 或者 JPEG。你甚至可以将同一个页面中其他 canvas 元素生成的图片作为图片源。
+
+引入图像到 canvas 里需要以下两步基本操作：
+
+1. 获得一个指向[`HTMLImageElement`](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLImageElement)的对象或者另一个 canvas 元素的引用作为源，也可以通过提供一个 URL 的方式来使用图片（参见[例子](https://www.html5canvastutorials.com/tutorials/html5-canvas-images/)）
+2. 使用`drawImage()`函数将图片绘制到画布上
+
+## [获得需要绘制的图片](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#获得需要绘制的图片)
+
+canvas 的 API 可以使用下面这些类型中的一种作为图片的源：
+
+- **[`HTMLImageElement`](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLImageElement)**
+
+  这些图片是由`Image()函数构造出来的，或者任何的<img>元素`
+
+- **[`HTMLVideoElement`](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLVideoElement)**
+
+  用一个 HTML 的 [``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/video)元素作为你的图片源，可以从视频中抓取当前帧作为一个图像
+
+- **[`HTMLCanvasElement`](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCanvasElement)**
+
+  可以使用另一个 [``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/canvas) 元素作为你的图片源。
+
+- **[`ImageBitmap`](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap)**
+
+  这是一个高性能的位图，可以低延迟地绘制，它可以从上述的所有源以及其它几种源中生成。
+
+这些源统一由 [`CanvasImageSource`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasImageSource)类型来引用。
+
+有几种方式可以获取到我们需要在 canvas 上使用的图片。
+
+### [使用相同页面内的图片](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#using_images_which_are_on_the_same_page)
+
+我们可以通过下列方法的一种来获得与 canvas 相同页面内的图片的引用：
+
+- [`document.images`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/images)集合
+-  [`document.getElementsByTagName()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/getElementsByTagName)方法
+- 如果你知道你想使用的指定图片的 ID，你可以用[`document.getElementById()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/getElementById)获得这个图片
+
+### [使用其它域名下的图片](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#using_other_canvas_elements)
+
+在 [`HTMLImageElement`](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLImageElement)上使用[crossOrigin](https://developer.mozilla.org/en-US/docs/HTML/CORS_settings_attributes)属性，你可以请求加载其它域名上的图片。如果图片的服务器允许跨域访问这个图片，那么你可以使用这个图片而不污染 canvas，否则，使用这个图片将会[污染 canvas](https://developer.mozilla.org/zh-CN/docs/CORS_Enabled_Image#.E4.BB.80.E4.B9.88.E6.98.AF.22.E8.A2.AB.E6.B1.A1.E6.9F.93.22.E7.9A.84canvas)。
+
+### [使用其它 canvas 元素](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#using_other_canvas_elements_2)
+
+和引用页面内的图片类似地，用 `document.getElementsByTagName `或 `document.getElementById `方法来获取其它 canvas 元素。但你引入的应该是已经准备好的 canvas。
+
+一个常用的应用就是将第二个 canvas 作为另一个大的 canvas 的缩略图。
+
+### [由零开始创建图像](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#creating_an_image_from_scratch)
+
+或者我们可以用脚本创建一个新的 [`HTMLImageElement`](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLImageElement) 对象。要实现这个方法，我们可以使用很方便的`Image()构造函数。`
+
+```js
+var img = new Image();   // 创建一个<img>元素
+img.src = 'myImage.png'; // 设置图片源地址
+```
+
+当脚本执行后，图片开始装载。
+
+若调用 `drawImage` 时，图片没装载完，那什么都不会发生（在一些旧的浏览器中可能会抛出异常）。因此你**应该用 load 事件来保证不会在加载完毕之前使用这个图片**：
+
+```js
+var img = new Image();   // 创建 img 元素
+img.onload = function(){
+  // 执行 drawImage 语句
+}
+img.src = 'myImage.png'; // 设置图片源地址
+```
+
+如果你只用到一张图片的话，这已经够了。但一旦需要不止一张图片，那就需要更加复杂的处理方法，但图片预加载策略超出本教程的范围。
+
+### [通过 data: url 方式嵌入图像](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#embedding_an_image_via_data_url)
+
+我们还可以通过 [data:url](http://en.wikipedia.org/wiki/Data:_URL) 方式来引用图像。Data urls 允许用一串 Base64 编码的字符串的方式来定义一个图片。
+
+```js
+img.src = 'data:image/gif;base64,R0lGODlhCwALAIAAAAAA3pn/ZiH5BAEAAAEALAAAAAALAAsAAAIUhA+hkcuO4lmNVindo7qyrIXiGBYAOw==';
+```
+
+其**优点就是图片内容即时可用**，无须再到服务器兜一圈。（还有一个优点是，可以将 CSS，JavaScript，HTML 和 图片全部封装在一起，迁移起来十分方便。）**缺点就是图像没法缓存**，图片大的话内嵌的 url 数据会相当的长：
+
+### [使用视频帧](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#drawimage)
+
+你还可以使用`<video>` 中的视频帧（即便视频是不可见的）。例如，如果你有一个 ID 为“myvideo”的`<video>` 元素，你可以这样做：
+
+```js
+  function getMyVideo() {
+    let testCanvas = document.getElementById("test1");
+    if (testCanvas.getContext) {
+      let ctx = testCanvas.getContext("2d");
+      let myVideo = document.getElementById("video1");
+      return myVideo;
+      
+    }
+  }
+```
+
+它将为这个视频返回[`HTMLVideoElement`](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLVideoElement)对象，正如我们前面提到的，它可以作为我们的 Canvas 图片源。
+
+## [绘制图片](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#drawimage_2)
+
+一旦获得了源图对象，我们就可以使用 `drawImage` 方法将它渲染到 canvas 里。`drawImage` 方法有三种形态，下面是最基础的一种。
+
+- **`drawImage(image, x, y)`**
+
+  其中 `image` 是 image 或者 canvas 对象，`x` 和 `y 是其在目标 canvas 里的起始坐标。`
+
+> SVG 图像必须在 <svg> 根指定元素的宽度和高度。
 
