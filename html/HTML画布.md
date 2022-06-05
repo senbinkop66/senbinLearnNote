@@ -1959,3 +1959,36 @@ Canvas 状态存储在栈中，**每当`save()`方法被调用后，当前的状
    这一步才是重绘动画帧。
 4. **恢复 canvas 状态**
    如果已经保存了 canvas 的状态，可以先恢复它，然后重绘下一帧。
+
+## [操控动画 Controlling an animation](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_animations#controlling_an_animation)
+
+在 canvas 上绘制内容是用 canvas 提供的或者自定义的方法，而通常，我们仅仅在脚本执行结束后才能看见结果，比如说，在 for 循环里面做完成动画是不太可能的。
+
+因此，**为了实现动画，我们需要一些可以定时执行重绘的方法**。有两种方法可以实现这样的动画操控。首先可以通过 `setInterval` 和 `setTimeout` 方法来控制在设定的时间点上执行重绘。
+
+### [**有安排的更新画布** Scheduled updates](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_animations#有安排的更新画布_scheduled_updates)
+
+首先，可以用[`window.setInterval()`](https://developer.mozilla.org/zh-CN/docs/Web/API/setInterval), [`window.setTimeout()`](https://developer.mozilla.org/zh-CN/docs/Web/API/setTimeout),和[`window.requestAnimationFrame()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestAnimationFrame)来设定定期执行一个指定函数。
+
+- [`setInterval(function, delay)` (en-US)](https://developer.mozilla.org/en-US/docs/Web/API/setInterval)
+
+  当设定好间隔时间后，function 会定期执行。
+
+- [`setTimeout(function, delay)` (en-US)](https://developer.mozilla.org/en-US/docs/Web/API/setTimeout)
+
+  ​	在设定好的时间之后执行函数
+
+  
+
+- [`requestAnimationFrame(callback)`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestAnimationFrame)
+
+  告诉浏览器你希望执行一个动画，并在重绘之前，请求浏览器执行一个特定的函数来更新动画。
+
+如果你并不需要与用户互动，你可以使用 setInterval() 方法，它就可以定期执行指定代码。如果我们需要做一个游戏，我们可以使用键盘或者鼠标事件配合上 setTimeout() 方法来实现。**通过设置事件监听，我们可以捕捉用户的交互，并执行相应的动作。**
+
+下面的例子，采用 [`window.requestAnimationFrame()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestAnimationFrame)实现动画效果。这个方法提供了更加平缓并更加有效率的方式来执行动画，**当系统准备好了重绘条件的时候，才调用绘制动画帧。**一般每秒钟回调函数执行 60 次，也有可能会被降低。
+
+## [太阳系的动画](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_animations#太阳系的动画)
+
+这个例子里面，我会做一个小型的太阳系模拟动画。
+
