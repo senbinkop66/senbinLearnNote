@@ -1992,3 +1992,591 @@ Canvas 状态存储在栈中，**每当`save()`方法被调用后，当前的状
 
 这个例子里面，我会做一个小型的太阳系模拟动画。
 
+```js
+  let sun = new Image();
+  let moon = new Image();
+  let earth = new Image();
+
+  function init() {
+    sun.src = "./image1/Canvas_sun.png";
+    moon.src = "./image1/Canvas_moon.png";
+    earth.src = "./image1/Canvas_earth.png";
+    window.requestAnimationFrame(draw);
+  }
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    let ctx = testCanvas.getContext("2d");
+
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.clearRect(0, 0, 300, 300);
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+    ctx.strokeStyle = "rgba(0, 153, 255, 0.4)";
+    ctx.save();
+    ctx.translate(150, 150);
+
+    // 地球
+    let time = new Date();
+    ctx.rotate(((2 * Math.PI) / 60) * time.getSeconds() + ((2 * Math.PI) / 60000) * time.getMilliseconds());
+    ctx.translate(105, 0);
+    ctx.fillRect(0, -12, 50, 24);  //阴影
+    ctx.drawImage(earth, -12, -12);
+
+    //月亮
+    ctx.save();
+    ctx.rotate( ((2 * Math.PI) / 6) * time.getSeconds() + ((2 * Math.PI) / 6000) * time.getMilliseconds());
+    ctx.translate(0,28.5);
+    ctx.drawImage(moon,-3.5,-3.5);
+    ctx.restore();
+
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.arc(150,150,105,0,Math.PI*2,false); // 地球轨道
+    ctx.stroke();
+
+    ctx.drawImage(sun, 0, 0, 300, 300);
+
+    window.requestAnimationFrame(draw);
+  }
+
+  init();
+```
+
+## [动画时钟](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_animations#动画时钟)
+
+这个例子实现一个动态时钟，可以显示当前时间。
+
+```js
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    let ctx = testCanvas.getContext("2d");
+
+    let now = new Date();
+
+    ctx.save();
+    ctx.clearRect(0, 0, 150, 150);
+    ctx.translate(75, 75);
+    ctx.scale(0.4, 0.4);
+    ctx.rotate(-Math.PI / 2);
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = "white";
+    ctx.lineWidth = 8;
+    ctx.lineCap = "round";
+
+    //12小时
+    ctx.save();
+    for (let i = 0; i < 12; i++){
+      ctx.beginPath();
+      ctx.rotate(Math.PI / 6);
+      ctx.moveTo(100, 0);
+      ctx.lineTo(120, 0);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    //60分钟
+    ctx.save();
+    ctx.lineWidth = 5;
+    for (let i = 0; i < 60; i++){
+      if (i % 5 !==0) {
+        ctx.beginPath();
+        ctx.moveTo(117, 0);
+        ctx.lineTo(120, 0);
+        ctx.stroke();
+      }
+      ctx.rotate(Math.PI / 30);
+    }
+    ctx.restore();
+
+    let second = now.getSeconds();
+    let minute = now.getMinutes();
+    let hour = now.getHours();
+    hour = hour > 12 ? hour - 12 : hour;
+
+    ctx.fillStyle = "black";
+
+    //时针
+    ctx.save();
+    ctx.rotate(hour * (Math.PI / 6) + (Math.PI / 360) * minute + (Math.Pi / 21600) * second);
+    ctx.lineWidth = 14;
+    ctx.beginPath();
+    ctx.moveTo(-20, 0);
+    ctx.lineTo(80, 0);
+    ctx.stroke();
+    ctx.restore();
+
+    //分针
+    ctx.save();
+    ctx.rotate((Math.PI / 30) * minute + (Math.Pi / 1800) * second);
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.moveTo(-28, 0);
+    ctx.lineTo(112, 0);
+    ctx.stroke();
+    ctx.restore();
+
+    //秒针
+    ctx.save();
+    ctx.rotate(second * Math.PI/30);
+    ctx.strokeStyle = "#D40000";
+    ctx.fillStyle = "#D40000";
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(-30,0);
+    ctx.lineTo(83,0);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0,0,10,0,Math.PI*2,true); //中心
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(95,0,10,0,Math.PI*2,true);  //指针指示点
+    ctx.stroke();
+    ctx.fillStyle = "rgba(0, 0, 0, 0)";
+    ctx.arc(0,0,3,0,Math.PI*2,true);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = "#325FA2";
+    ctx.arc(0, 0, 142, 0, Math.PI * 2, true);  //表盘
+    ctx.stroke();
+
+    ctx.restore();
+
+    window.requestAnimationFrame(draw);
+  }
+
+window.requestAnimationFrame(draw);
+```
+
+## [循环全景照片](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_animations#循环全景照片)
+
+在这个例子中，会有一个自左向右滑动的全景图。我们使用了在维基百科中找到的[尤塞米提国家公园的图片](https://mdn.mozillademos.org/files/4553/Capitan_Meadows,_Yosemite_National_Park.jpg)，当然你可以随意找一张任何尺寸大于 canvas 的图片。
+
+```js
+var img = new Image();
+
+// User Variables - customize these to change the image being scrolled, its
+// direction, and the speed.
+
+img.src = 'https://mdn.mozillademos.org/files/4553/Capitan_Meadows,_Yosemite_National_Park.jpg';
+var CanvasXSize = 800;
+var CanvasYSize = 200;
+var speed = 30; // lower is faster
+var scale = 1.05;
+var y = -4.5; // vertical offset
+
+// Main program
+
+var dx = 0.75;
+var imgW;
+var imgH;
+var x = 0;
+var clearX;
+var clearY;
+var ctx;
+
+img.onload = function() {
+    imgW = img.width * scale;
+    imgH = img.height * scale;
+
+    if (imgW > CanvasXSize) {
+        // image larger than canvas
+        x = CanvasXSize - imgW;
+    }
+    if (imgW > CanvasXSize) {
+        // image width larger than canvas
+        clearX = imgW;
+    } else {
+        clearX = CanvasXSize;
+    }
+    if (imgH > CanvasYSize) {
+        // image height larger than canvas
+        clearY = imgH;
+    } else {
+        clearY = CanvasYSize;
+    }
+
+    // get canvas context
+    ctx = document.getElementById('canvas').getContext('2d');
+
+    // set refresh rate
+    return setInterval(draw, speed);
+}
+
+function draw() {
+    ctx.clearRect(0, 0, clearX, clearY); // clear the canvas
+
+    // if image is <= Canvas Size
+    if (imgW <= CanvasXSize) {
+        // reset, start from beginning
+        if (x > CanvasXSize) {
+            x = -imgW + x;
+        }
+        // draw additional image1
+        if (x > 0) {
+            ctx.drawImage(img, -imgW + x, y, imgW, imgH);
+        }
+        // draw additional image2
+        if (x - imgW > 0) {
+            ctx.drawImage(img, -imgW * 2 + x, y, imgW, imgH);
+        }
+    }
+
+    // image is > Canvas Size
+    else {
+        // reset, start from beginning
+        if (x > (CanvasXSize)) {
+            x = CanvasXSize - imgW;
+        }
+        // draw aditional image
+        if (x > (CanvasXSize-imgW)) {
+            ctx.drawImage(img, x - imgW + 1, y, imgW, imgH);
+        }
+    }
+    // draw image
+    ctx.drawImage(img, x, y,imgW, imgH);
+    // amount to move
+    x += dx;
+}
+```
+
+下方就是是图片在其中滑动的 `<canvas>`。需要注意的是这里定义的 width 和 height 必须与 JavaScript 代码中的变量值CanvasXZSize和CanvasYSize保持一致。 
+
+```js
+<canvas id="canvas" width="800" height="200"></canvas>
+```
+
+## [鼠标追踪动画](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_animations#鼠标追踪动画)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Document</title>
+        <script>
+            var cn;
+            //= document.getElementById('cw');
+            var c;
+            var u = 10;
+            const m = {
+                x: innerWidth / 2,
+                y: innerHeight / 2
+            };
+            window.onmousemove = function(e) {
+                m.x = e.clientX;
+                m.y = e.clientY;
+
+            }
+            function gc() {
+                var s = "0123456789ABCDEF";
+                var c = "#";
+                for (var i = 0; i < 6; i++) {
+                    c += s[Math.ceil(Math.random() * 15)]
+                }
+                return c
+            }
+            var a = [];
+            window.onload = function myfunction() {
+                cn = document.getElementById('cw');
+                c = cn.getContext('2d');
+
+                for (var i = 0; i < 10; i++) {
+                    var r = 30;
+                    var x = Math.random() * (innerWidth - 2 * r) + r;
+                    var y = Math.random() * (innerHeight - 2 * r) + r;
+                    var t = new ob(innerWidth / 2,innerHeight / 2,5,"red",Math.random() * 200 + 20,2);
+                    a.push(t);
+                }
+                //cn.style.backgroundColor = "#700bc8";
+
+                c.lineWidth = "2";
+                c.globalAlpha = 0.5;
+                resize();
+                anim()
+            }
+            window.onresize = function() {
+
+                resize();
+
+            }
+            function resize() {
+                cn.height = innerHeight;
+                cn.width = innerWidth;
+                for (var i = 0; i < 101; i++) {
+                    var r = 30;
+                    var x = Math.random() * (innerWidth - 2 * r) + r;
+                    var y = Math.random() * (innerHeight - 2 * r) + r;
+                    a[i] = new ob(innerWidth / 2,innerHeight / 2,4,gc(),Math.random() * 200 + 20,0.02);
+
+                }
+                //  a[0] = new ob(innerWidth / 2, innerHeight / 2, 40, "red", 0.05, 0.05);
+                //a[0].dr();
+            }
+            function ob(x, y, r, cc, o, s) {
+                this.x = x;
+                this.y = y;
+                this.r = r;
+                this.cc = cc;
+                this.theta = Math.random() * Math.PI * 2;
+                this.s = s;
+                this.o = o;
+                this.t = Math.random() * 150;
+
+                this.o = o;
+                this.dr = function() {
+                    const ls = {
+                        x: this.x,
+                        y: this.y
+                    };
+                    this.theta += this.s;
+                    this.x = m.x + Math.cos(this.theta) * this.t;
+                    this.y = m.y + Math.sin(this.theta) * this.t;
+                    c.beginPath();
+                    c.lineWidth = this.r;
+                    c.strokeStyle = this.cc;
+                    c.moveTo(ls.x, ls.y);
+                    c.lineTo(this.x, this.y);
+                    c.stroke();
+                    c.closePath();
+
+                }
+            }
+            function anim() {
+                requestAnimationFrame(anim);
+                c.fillStyle = "rgba(0,0,0,0.05)";
+                c.fillRect(0, 0, cn.width, cn.height);
+                a.forEach(function(e, i) {
+                    e.dr();
+                });
+
+            }
+        </script>
+        <style>
+            #cw {
+                position: fixed;
+                z-index: -1;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: rgba(0,0,0,0.05);
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="cw"></canvas>
+        qwerewr
+
+    </body>
+</html>
+
+```
+
+# 高级动画
+
+## [绘制小球](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Advanced_animations#绘制小球)
+
+我们将会画一个小球用于动画学习，所以首先在画布上画一个球。下面的代码帮助我们建立画布。
+
+```html
+<canvas id="canvas" width="600" height="300"></canvas>
+```
+
+跟平常一样，我们需要先画一个 context（画布场景）。为了画出这个球，我们又会创建一个包含一些相关属性以及 `draw()` 函数的 `ball` 对象，来完成绘制。
+
+### 初始化
+
+小球实际上是一个简单的圆形，在arc() 函数的帮助下画出。
+
+```js
+  let testCanvas = document.getElementById("test1");
+  let ctx = testCanvas.getContext("2d");
+  let raf;
+
+  let ball = {
+    x: 100,
+    y: 100,
+    vx: 5,
+    vy: 2,
+    radius: 25,
+    color: "blue",
+    draw: function() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.fillStyle = this.color;
+      ctx.fill();
+    }
+  };
+ball.draw();
+```
+
+### 添加速率
+
+现在我们有了一个小球，正准备添加一些基本动画，正如我们上一章所学的。又是这样，window.requestAnimationFrame() 再一次帮助我们控制动画。小球依旧依靠添加速率矢量进行移动。在每一帧里面，我们依旧用clear 清理掉之前帧里旧的圆形。
+
+```js
+  function draw() {
+    ctx.clearRect(0, 0, testCanvas.width, testCanvas.height);
+    ball.draw();
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    raf = window.requestAnimationFrame(draw);
+  }
+
+  testCanvas.addEventListener("mouseover", function(e) {
+    raf = window.requestAnimationFrame(draw);
+  });
+  testCanvas.addEventListener("mouseout", function(e) {
+    window.cancelAnimationFrame(raf);
+  });
+
+  ball.draw();
+```
+
+### 边界
+
+若没有任何的碰撞检测，我们的小球很快就会超出画布。我们需要检查小球的 x 和 y 位置是否已经超出画布的尺寸以及是否需要将速度矢量反转。为了这么做，我们把下面的检查代码添加进 `draw` 函数：
+
+```js
+  function draw() {
+    ctx.clearRect(0, 0, testCanvas.width, testCanvas.height);
+    if (ball.x + ball.vx > testCanvas.width || ball.x + ball.vx < 0){
+      ball.vx = - ball.vx;
+    }
+    if (ball.y + ball.vy > testCanvas.height || ball.y + ball.vy < 0){
+      ball.vy = - ball.vy;
+    }
+    ball.draw();
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    raf = window.requestAnimationFrame(draw);
+  }
+```
+
+### 加速度
+
+为了让动作更真实，你可以像这样处理速度，例如：
+
+```js
+  function draw() {
+    ctx.clearRect(0, 0, testCanvas.width, testCanvas.height);
+    if (ball.x + ball.vx > testCanvas.width || ball.x + ball.vx < 0){
+      ball.vx = - ball.vx;
+    }
+    if (ball.y + ball.vy > testCanvas.height || ball.y + ball.vy < 0){
+      ball.vy = - ball.vy;
+    }
+    ball.draw();
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    ball.vy *= .99;
+    ball.vy += .25;
+    raf = window.requestAnimationFrame(draw);
+  }
+```
+
+这会逐帧减少垂直方向的速度，**所以小球最终将只会在地板上弹跳**。
+
+### 长尾效果
+
+现在，我们使用的是 clearRect 函数帮我们清除前一帧动画。若用一个半透明的 fillRect 函数取代之，就可轻松制作长尾效果。
+
+```js
+  function draw() {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.3)"
+    ctx.fillRect(0, 0, testCanvas.width, testCanvas.height);
+    // ctx.clearRect(0, 0, testCanvas.width, testCanvas.height);
+    if (ball.x + ball.vx > testCanvas.width || ball.x + ball.vx < 0){
+      ball.vx = - ball.vx;
+    }
+    if (ball.y + ball.vy > testCanvas.height || ball.y + ball.vy < 0){
+      ball.vy = - ball.vy;
+    }
+    ball.draw();
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    ball.vy *= .99;
+    ball.vy += .25;
+    raf = window.requestAnimationFrame(draw);
+  }
+```
+
+### 添加鼠标控制
+
+为了更好地控制小球，我们可以用 mousemove事件让它跟随鼠标活动。下面例子中，click 事件会释放小球然后让它重新跳起。
+
+```js
+  let testCanvas = document.getElementById("test1");
+  let ctx = testCanvas.getContext("2d");
+  let raf;
+  let running = false;
+
+  let ball = {
+    x: 100,
+    y: 100,
+    vx: 5,
+    vy: 1,
+    radius: 25,
+    color: "blue",
+    draw: function() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.fillStyle = this.color;
+      ctx.fill();
+    }
+  };
+
+  function clear() {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.3)"
+    ctx.fillRect(0, 0, testCanvas.width, testCanvas.height);
+  }
+
+  function draw() {
+    clear();
+    // ctx.clearRect(0, 0, testCanvas.width, testCanvas.height);
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    ball.draw();
+
+    if (ball.x + ball.vx > testCanvas.width || ball.x + ball.vx < 0){
+      ball.vx = - ball.vx;
+    }
+    if (ball.y + ball.vy > testCanvas.height || ball.y + ball.vy < 0){
+      ball.vy = - ball.vy;
+    }
+    raf = window.requestAnimationFrame(draw);
+  }
+
+  testCanvas.addEventListener("mousemove", function(e) {
+    if (!running) {
+      clear();
+      ball.x = e.offsetX;
+      ball.y = e.offsetY;
+      ball.draw();
+    }
+  });
+  testCanvas.addEventListener("click", function(e) {
+    if (!running) {
+      raf = window.requestAnimationFrame(draw);
+      running = true;
+    }
+  });
+  testCanvas.addEventListener("mouseout", function(e) {
+    window.cancelAnimationFrame(raf);
+    running = false;
+  });
+
+  ball.draw();
+
+```
+
+# 像素操作
