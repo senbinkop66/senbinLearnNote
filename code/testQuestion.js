@@ -1,18 +1,29 @@
 /**
- * @param {string[]} emails
- * @return {number}
+ * @param {number} radius
+ * @param {number} x_center
+ * @param {number} y_center
  */
-var numUniqueEmails = function(emails) {
-    let emialSet = new Set();
-    for (let i = 0; i < emails.length; i++){
-        let email = emails[i];
-        let index1 = email.indexOf("@");
-        let local = email.slice(0, index1).split("+")[0];
-        local = local.replaceAll(".","");
-        emialSet.add(local + email.slice(index1));
-    }
-    return emialSet.size;
+var Solution = function(radius, x_center, y_center) {
+    this.radius = radius;
+    this.x_center = x_center;
+    this.y_center = y_center;
 };
 
-let emails = ["test.email+alex@leetcode.com","test.e.mail+bob.cathy@leetcode.com","testemail+david@lee.tcode.com"];
-console.log(numUniqueEmails(emails));
+/**
+ * @return {number[]}
+ */
+Solution.prototype.randPoint = function() {
+    while (true){
+        let x = Math.random() * (this.radius * 2) - this.radius;
+        let y = Math.random() * (this.radius * 2) - this.radius;
+        if (x * x + y * y <= this.radius * this.radius) {
+            return [this.x_center + x, this.y_center + y];
+        }
+    }
+};
+
+/**
+ * Your Solution object will be instantiated and called as such:
+ * var obj = new Solution(radius, x_center, y_center)
+ * var param_1 = obj.randPoint()
+ */
