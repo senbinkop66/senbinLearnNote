@@ -1,24 +1,18 @@
 /**
- * @param {number} n
+ * @param {string[]} emails
  * @return {number}
  */
-var consecutiveNumbersSum = function(n) {
-    let ans = 0;
-    let bound = 2 * n;
-    for (let k = 1; k * (k + 1) <= bound; k++){
-        if (isKConsecutive(n, k)) {
-            ans++;
-        }
+var numUniqueEmails = function(emails) {
+    let emialSet = new Set();
+    for (let i = 0; i < emails.length; i++){
+        let email = emails[i];
+        let index1 = email.indexOf("@");
+        let local = email.slice(0, index1).split("+")[0];
+        local = local.replaceAll(".","");
+        emialSet.add(local + email.slice(index1));
     }
-    return ans;
+    return emialSet.size;
 };
 
-const isKConsecutive = (n, k) => {
-    if (k % 2 === 1) {
-        return n % k === 0;
-    } else {
-        return n % k !== 0 && 2 * n % k ===0;
-    }
-};
-
-console.log(consecutiveNumbersSum(15));
+let emails = ["test.email+alex@leetcode.com","test.e.mail+bob.cathy@leetcode.com","testemail+david@lee.tcode.com"];
+console.log(numUniqueEmails(emails));

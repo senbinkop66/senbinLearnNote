@@ -1433,7 +1433,529 @@ img.src = 'data:image/gif;base64,R0lGODlhCwALAIAAAAAA3pn/ZiH5BAEAAAEALAAAAAALAAs
 
 - **`drawImage(image, x, y)`**
 
-  其中 `image` 是 image 或者 canvas 对象，`x` 和 `y 是其在目标 canvas 里的起始坐标。`
+  其中 `image` 是 image 或者 canvas 对象，**`x` 和 `y 是其在目标 canvas 里的起始坐标。`**
 
 > SVG 图像必须在 <svg> 根指定元素的宽度和高度。
 
+### [例子：一个简单的线图](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#example_a_simple_line_graph)
+
+下面一个例子我用一个外部图像作为一线性图的背景。用背景图我们就不需要绘制复杂的背景，省下不少代码。这里只用到一个 image 对象，于是就在它的 `onload` 事件响应函数中触发绘制动作。`drawImage` 方法将背景图放置在 canvas 的左上角 (0,0) 处。
+
+```js
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    if (testCanvas.getContext) {
+      let ctx = testCanvas.getContext("2d");
+
+      let img = new Image();
+      img.onload = function(){
+        ctx.drawImage(img, 0, 0);
+        ctx.beginPath();
+        ctx.moveTo(30, 96);
+        ctx.lineTo(70, 66);
+        ctx.lineTo(103, 76);
+        ctx.lineTo(170, 15);
+        ctx.stroke();
+      }
+
+      img.src = "./image1/backdrop.png";
+    }
+  }
+```
+
+## [缩放 Scaling](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#scaling)
+
+`drawImage` 方法的又一变种是增加了两个用于控制图像在 canvas 中缩放的参数。
+
+- [`drawImage(image, x, y, width, height)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/drawImage)
+
+  这个方法多了 2 个参数：`width` 和 `height，`**这两个参数用来控制 当向 canvas 画入时应该缩放的大小**
+
+### [例子：平铺图像](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#example_tiling_an_image)
+
+在这个例子里，我会用一张图片像背景一样在 canvas 中以重复平铺开来。实现起来也很简单，只需要循环铺开经过缩放的图片即可。见下面的代码，第一层 `for` 循环是做行重复，第二层是做列重复的。图像大小被缩放至原来的三分之一，50x38 px。这种方法可以用来很好的达到背景图案的效果，在下面的教程中会看到。
+
+> 注意：图像可能会因为大幅度的缩放而变得起杂点或者模糊。如果您的图像里面有文字，那么最好还是不要进行缩放，因为那样处理之后很可能图像里的文字就会变得无法辨认了。
+
+```js
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    if (testCanvas.getContext) {
+      let ctx = testCanvas.getContext("2d");
+      let img = new Image();
+      img.onload = function(){
+        for (let i = 0; i < 4; i++){
+          for (let j = 0; j < 3; j++){
+            ctx.drawImage(img, j * 50, i * 38, 50, 38);
+          }
+        }
+      }
+      img.src = "./image1/rhino.jpg";
+    }
+  }
+```
+
+## [切片 Slicing](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#slicing)
+
+`drawImage` 方法的第三个也是最后一个变种有 8 个新参数，用于控制做切片显示的。
+
+- [`drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/drawImage)
+
+  第一个参数和其它的是相同的，都是一个图像或者另一个 canvas 的引用。其它 8 个参数最好是参照右边的图解，前 4 个是定义**图像源的切片位置和大小**，后 4 个则是定义切片的**目标显示位置和大小**。
+
+![img](https://developer.mozilla.org/@api/deki/files/79/=Canvas_drawimage.jpg)
+
+**切片是个做图像合成的强大工具**。假设有一张包含了所有元素的图像，那么你可以用这个方法来合成一个完整图像。例如，你想画一张图表，而手上有一个包含所有必需的文字的 PNG 文件，那么你可以很轻易的根据实际数据的需要来改变最终显示的图表。这方法的另一个好处就是你不需要单独装载每一个图像。
+
+### [例子：相框](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#example_framing_an_image)
+
+在这个例子里面我用到上面已经用过的犀牛图像，不过这次我要给犀牛头做个切片特写，然后合成到一个相框里面去。相框带有阴影效果，是一个以 24-bit PNG 格式保存的图像。因为 24-bit PNG 图像带有一个完整的 8-bit alpha 通道，与 GIF 和 8-bit PNG 不同，我可以将它放成背景而不必担心底色的问题。
+
+我用一个与上面用到的不同的方法来装载图像，直接将图像插入到 HTML 里面，然后通过 CSS 隐藏（`display:none`）它。两个图像我都赋了 `id` ，方便后面使用。看下面的脚本，相当简单，首先对犀牛头做好切片（第一次`drawImage`）放在 canvas 上，然后再上面套个相框（第二次`drawImage`）。
+
+```js
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    if (testCanvas.getContext) {
+      let ctx = testCanvas.getContext("2d");
+      let img1 = new Image();
+      let img2 = new Image();
+      img1.onload = function(){
+        ctx.drawImage(img1, 33, 71, 104, 124, 21, 20, 87, 104);
+      }
+      img2.onload = function() {
+        ctx.drawImage(img2, 0, 0);
+      }
+      img1.src = "./image1/rhino.jpg";
+      img2.src = "./image1/Canvas_picture_frame.png";
+    }
+  }
+```
+
+## [示例：画廊 Art gallery example](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Using_images#art_gallery_example)
+
+这一章最后的示例是弄一个小画廊。画廊由挂着几张画作的格子组成。当页面装载好之后，为每张画创建一个 canvas 元素并用加上画框然后插入到画廊中去。
+
+在这个例子里面，所有“画”都是固定宽高的，画框也是。你可以做些改进，通过脚本用画的宽高来准确控制围绕它的画框的大小。
+
+下面的代码应该是蛮简单易懂的了。就是遍历图像对象数组，依次创建新的 canvas 元素并添加进去。可能唯一需要注意的，对于那些并不熟悉 DOM 的朋友来说，是 `insertBefore` 方法的用法。`insertBefore` 是父节点（单元格）的方法，用于将新节点（canvas 元素）插入到我们想要插入的节点之前。
+
+```js
+function draw() {
+
+  // Loop through all images
+  for (let i=0;i<document.images.length;i++){
+
+    // Don't add a canvas for the frame image
+    if (document.images[i].getAttribute('id')!='frame'){
+
+      // Create canvas element
+      canvas = document.createElement('CANVAS');
+      canvas.setAttribute('width',132);
+      canvas.setAttribute('height',150);
+
+      // Insert before the image
+      document.images[i].parentNode.insertBefore(canvas,document.images[i]);
+
+      ctx = canvas.getContext('2d');
+
+      // Draw image to canvas
+      ctx.drawImage(document.images[i],15,20);
+
+      // Add frame
+      ctx.drawImage(document.getElementById('frame'),0,0);
+    }
+  }
+}
+```
+
+## 控制图像的缩放行为 
+
+如同前文所述，过度缩放图像可能会导致图像模糊或像素化。您可以通过使用绘图环境的[`imageSmoothingEnabled`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/imageSmoothingEnabled)属性来**控制是否在缩放图像时使用平滑算法**。默认值为`true`，即启用平滑缩放。您也可以像这样禁用此功能：
+
+```js
+ctx.mozImageSmoothingEnabled = false;
+ctx.webkitImageSmoothingEnabled = false;
+ctx.msImageSmoothingEnabled = false;
+ctx.imageSmoothingEnabled = false;
+```
+
+# 变形 
+
+变形是一种更强大的方法，可以将原点移动到另一点、对网格进行旋转和缩放。
+
+## 状态的保存和恢复 
+
+在了解变形之前，我先介绍两个在你开始绘制复杂图形时必不可少的方法。
+
+- [`save()`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/save)
+
+  保存画布 (canvas) 的所有状态
+
+- [`restore()`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/restore)
+
+  save 和 restore 方法是用来保存和恢复 canvas 状态的，都没有参数。Canvas 的**状态**就是**当前画面应用的所有样式和变形的一个快照。**
+
+Canvas 状态存储在栈中，**每当`save()`方法被调用后，当前的状态就被推送到栈中保存**。一个绘画状态包括：
+
+- 当前应用的变形（即移动，旋转和缩放，见下）
+- 以及下面这些属性：strokeStyle, fillStyle, globalAlpha, lineWidth, lineCap, lineJoin, miterLimit, lineDashOffset, shadowOffsetX, shadowOffsetY, shadowBlur, shadowColor, globalCompositeOperation, font, textAlign, textBaseline, direction, imageSmoothingEnabled
+- 当前的裁切路径（clipping path）
+
+你可以调用任意多次 `save`方法。**每一次调用 `restore` 方法，上一个保存的状态就从栈中弹出**，所有设定都恢复。
+
+### [`save` 和 `restore` 的应用例子](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Transformations#a_save_and_restore_canvas_state_example)
+
+我们尝试用这个连续矩形的例子来描述 canvas 的状态栈是如何工作的。
+
+第一步是用默认设置画一个大四方形，然后保存一下状态。改变填充颜色画第二个小一点的蓝色四方形，然后再保存一下状态。再次改变填充颜色绘制更小一点的半透明的白色四方形。
+
+到目前为止所做的动作和前面章节的都很类似。不过一旦我们调用 `restore`，状态栈中最后的状态会弹出，并恢复所有设置。如果不是之前用 `save `保存了状态，那么我们就需要手动改变设置来回到前一个状态，这个对于两三个属性的时候还是适用的，一旦多了，我们的代码将会猛涨。
+
+当第二次调用 `restore` 时，已经恢复到最初的状态，因此最后是再一次绘制出一个黑色的四方形。
+
+```js
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    if (testCanvas.getContext) {
+      let ctx = testCanvas.getContext("2d");
+      
+      ctx.fillRect(0, 0, 150, 150);  // 使用默认设置绘制一个矩形
+      ctx.save();  // 保存默认状态
+
+      ctx.fillStyle = "#09F";  // 在原有配置基础上对颜色做改变
+      ctx.fillRect(15, 15, 120, 120);  // 使用新的设置绘制一个矩形
+      ctx.save();  // 保存当前状态
+
+      ctx.fillStyle = "#FFF";  // 再次改变颜色配置
+      ctx.globalAlpha = 0.5;
+      ctx.fillRect(30, 30, 90, 90);  // 使用新的配置绘制一个矩形
+
+      ctx.restore();  // 重新加载之前的颜色状态
+      ctx.fillRect(45, 45, 60, 60);  // 使用上一次的配置绘制一个矩形
+
+      ctx.restore();  // 加载默认颜色配置
+      ctx.fillRect(60, 60, 30, 30);  // 使用加载的配置绘制一个矩形
+    }
+  }
+```
+
+## [移动 Translating](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Transformations#translating)
+
+
+![img](https://developer.mozilla.org/@api/deki/files/85/=Canvas_grid_translate.png)
+
+我们先介绍 `translate `方法，它用来移动 canvas 和它的原点到一个不同的位置。
+
+- `translate(x, y)`
+
+  `translate `方法接受两个参数。x 是左右偏移量，y 是上下偏移量，如右图所示。
+
+在做变形之前先保存状态是一个良好的习惯。**大多数情况下，调用 restore 方法比手动恢复原先的状态要简单得多**。又，如果你是在一个循环中做位移但没有保存和恢复 canvas 的状态，很可能到最后会发现怎么有些东西不见了，那是因为它很可能已经超出 canvas 范围以外了。
+
+### [`translate` 的例子](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Transformations#a_translate_example)
+
+这个例子显示了一些移动 canvas 原点的好处。如果不使用 `translate `方法，那么所有矩形都将被绘制在相同的位置（0,0）。`translate `方法**同时让我们可以任意放置这些图案，而不需要在 `fillRect()` 方法中手工调整坐标值，既好理解也方便使用**。
+
+在 `draw `方法中调用 `fillRect()` 方法 9 次，用了 2 层循环。每一次循环，先移动 canvas，画螺旋图案，然后恢复到原始状态。
+
+```js
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    let ctx = testCanvas.getContext("2d");
+
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        ctx.save();
+        ctx.fillStyle = `rgb(${51 * i}, ${255 - 51 * i}, 255)`;
+        ctx.translate(10 + j * 50, 10 + i * 50);
+        ctx.fillRect(0, 0, 25, 25);
+        ctx.restore();  //恢复到原始状态
+      }
+    }
+  }
+```
+
+## [旋转 Rotating](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Transformations#rotating)
+
+![img](https://developer.mozilla.org/@api/deki/files/84/=Canvas_grid_rotate.png)
+
+第二个介绍 `rotate `方法，它用于以原点为中心旋转 canvas。
+
+- `rotate(angle)`
+
+  这个方法只接受一个参数：旋转的角度 (angle)，它是顺时针方向的，以弧度为单位的值。
+
+**旋转的中心点始终是 canvas 的原点**，如果要改变它，我们需要用到 `translate `方法。
+
+### rotate 的例子
+
+在这个例子里，见右图，我用 `rotate `方法来画圆并构成圆形图案。当然你也可以分别计算出 x 和 y 坐标（`x = r*Math.cos(a); y = r*Math.sin(a)`）。这里无论用什么方法都无所谓的，因为我们画的是圆。计算坐标的结果只是旋转圆心位置，而不是圆本身。即使用 `rotate `旋转两者，那些圆看上去还是一样的，不管它们绕中心旋转有多远。
+
+这里我们又用到了两层循环。**第一层循环决定环的数量，第二层循环决定每环有多少个点**。每环开始之前，我都保存一下 canvas 的状态，这样恢复起来方便。每次画圆点，我都以一定夹角来旋转 canvas，**而这个夹角则是由环上的圆点数目的决定的**。最里层的环有 6 个圆点，这样，每次旋转的夹角就是 360/6 = 60 度。往外每一环的圆点数目是里面一环的 2 倍，那么每次旋转的夹角随之减半。
+
+```js
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    let ctx = testCanvas.getContext("2d");
+
+    ctx.translate(75, 75);
+    for (let i = 1; i < 6; i++) {
+      ctx.save();
+      ctx.fillStyle = `rgb(${51 * i}, ${255 - 51 * i}, 255)`;
+      for (let j = 0; j < 6 * i; j++) {
+        ctx.rotate(Math.PI * 2 / (i * 6));
+        ctx.beginPath();
+        ctx.arc(0, i * 12.5, 5, 0, Math.PI * 2, true);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+```
+
+## 缩放 Scaling
+
+接着是缩放。我们用它来增减图形在 canvas 中的像素数目，对形状，位图进行缩小或者放大。
+
+- `scale(x, y)`
+
+  `scale ` 方法可以缩放画布的水平和垂直的单位。两个参数都是实数，可以为负数，x 为水平缩放因子，y 为垂直缩放因子，**如果比 1 小，会缩小图形**，如果**比 1 大会放大图形**。默认值为 1，为实际大小。
+
+画布初始情况下，是以左上角坐标为原点的第一象限。**如果参数为负实数，相当于以 x 或 y 轴作为对称轴镜像反转**（例如，使用`translate(0,canvas.height); scale(1,-1);` 以 y 轴作为对称轴镜像反转，就可得到著名的笛卡尔坐标系，左下角为原点）。
+
+**默认情况下，canvas 的 1 个单位为 1 个像素**。举例说，如果我们设置缩放因子是 0.5，1 个单位就变成对应 0.5 个像素，这样绘制出来的形状就会是原先的一半。同理，**设置为 2.0 时，1 个单位就对应变成了 2 像素**，绘制的结果就是图形放大了 2 倍。
+
+### scale 的例子
+
+这最后的例子里，我们用不同的缩放方式来画两个图形。
+
+```js
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    let ctx = testCanvas.getContext("2d");
+
+    // 画一个简单的矩形，但缩放它
+    ctx.save();  //保存默认配置
+    ctx.scale(10, 3);
+    ctx.fillRect(1, 10, 10, 10);
+    ctx.restore();
+
+    //水平镜像
+    ctx.scale(-1, 1);
+    ctx.font = "48px serif";
+    ctx.fillText("KOP", -135, 120);
+  }
+```
+
+## [变形 Transforms](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Transformations#transforms)
+
+最后一个方法允许对变形矩阵直接修改。
+
+- [`transform(a, b, c, d, e, f)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/transform)
+
+  这个方法是**将当前的变形矩阵乘上一个基于自身参数的矩阵**，如下面的矩阵所示：
+
+  ```
+  [ 
+      a	c	e
+      b	d	f
+      0	0	1
+   ]
+  ```
+
+  **如果任意一个参数是`Infinity`，变形矩阵也必须被标记为无限大**，否则会抛出异常。
+
+这个函数的参数各自代表如下：
+
+- `a (m11)`
+
+  水平方向的缩放
+
+- `b(m12)`
+
+  竖直方向的倾斜偏移
+
+- `c(m21)`
+
+  水平方向的倾斜偏移
+
+- `d(m22)`
+
+  竖直方向的缩放
+
+- `e(dx)`
+
+  水平方向的移动
+
+- `f(dy)`
+
+  竖直方向的移动
+
+- [`setTransform(a, b, c, d, e, f)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/setTransform)
+
+  **这个方法会将当前的变形矩阵重置为单位矩阵**，然后用相同的参数调用 `transform `方法。如果任意一个参数是无限大，那么变形矩阵也必须被标记为无限大，否则会抛出异常。**从根本上来说，该方法是取消了当前变形，然后设置为指定的变形，一步完成。**
+
+- [`resetTransform()`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/resetTransform)
+
+  **重置当前变形为单位矩阵**，它和调用以下语句是一样的：`ctx.setTransform(1, 0, 0, 1, 0, 0);`
+
+### transform / setTransform 的例子
+
+```js
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    let ctx = testCanvas.getContext("2d");
+
+    let sin = Math.sin(Math.PI / 6);
+    let cos = Math.cos(Math.PI / 6);
+
+    ctx.translate(100, 100);
+
+    let c = 0;
+    for (let i = 0; i <= 12; i++) {
+      c = Math.floor(255 / 12 * i);
+      ctx.fillStyle = `rgb(${c}, ${c}, ${c})`;
+      ctx.fillRect(0, 0, 100, 10);
+      ctx.transform(cos, sin, -sin, cos, 0, 0);
+    }
+    ctx.setTransform(-1, 0, 0, 1, 100, 100);
+    ctx.fillStyle = "rgba(255, 128, 255, 0.5)";
+    ctx.fillRect(0, 50, 100, 100);
+  }
+```
+
+# 组合 Compositing
+
+在之前的例子里面，我们总是将一个图形画在另一个之上，对于其他更多的情况，仅仅这样是远远不够的。比如，对合成的图形来说，绘制顺序会有限制。不过，我们可以利用 globalCompositeOperation 属性来改变这种状况。此外，**clip属性允许我们隐藏不想看到的部分图形。**
+
+## [`globalCompositeOperation`](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Compositing#globalcompositeoperation)
+
+我们不仅可以在已有图形后面再画新图形，还可以用来遮盖指定区域，清除画布中的某些部分（清除区域不仅限于矩形，像[`clearRect()`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/clearRect)方法做的那样）以及更多其他操作。
+
+- [`globalCompositeOperation = type`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation)
+
+  这个属性**设定了在画新图形时采用的遮盖策略**，其值是一个标识 12 种遮盖方式的字符串。
+
+| 属性值           | 功能                                                         |
+| ---------------- | ------------------------------------------------------------ |
+| source-over      | 这是默认设置，并在现有画布上下文之上绘制新图形。             |
+| source-in        | 新图形只在新图形和目标画布重叠的地方绘制。其他的都是透明的。 |
+| source-out       | 在不与现有画布内容重叠的地方绘制新图形。                     |
+| source-atop      | 新图形只在与现有画布内容重叠的地方绘制。                     |
+| destination-over | 在现有的画布内容后面绘制新的图形。                           |
+| destination-in   | 现有的画布内容保持在新图形和现有画布内容重叠的位置。其他的都是透明的。 |
+| destination-out  | 现有内容保持在新图形不重叠的地方。                           |
+| destination-atop | 现有的画布只保留与新图形重叠的部分，新的图形是在画布内容后面绘制的。 |
+| lighter          | 两个重叠图形的颜色是通过颜色值相加来确定的。                 |
+| copy             | 只显示新图形。                                               |
+| xor              | 图像中，那些重叠和正常绘制之外的其他地方是透明的。           |
+| multiply         | 将顶层像素与底层相应像素相乘，结果是一幅更黑暗的图片。       |
+| screen           | 像素被倒转，相乘，再倒转，结果是一幅更明亮的图片。           |
+| overlay          | multiply 和 screen 的结合，原本暗的地方更暗，原本亮的地方更亮。 |
+| darken           | 保留两个图层中最暗的像素。                                   |
+| lighten          | 保留两个图层中最亮的像素。                                   |
+| color-dodge      | 将底层除以顶层的反置。                                       |
+| color-burn       | 将反置的底层除以顶层，然后将结果反过来。                     |
+| hard-light       | 屏幕相乘（A combination of multiply and screen）类似于叠加，但上下图层互换了。 |
+| soft-light       | 用顶层减去底层或者相反来得到一个正值。                       |
+| difference       | 一个柔和版本的强光（hard-light）。纯黑或纯白不会导致纯黑或纯白。 |
+| exclusion        | 和 difference 相似，但对比度较低。                           |
+| hue              | 保留了底层的亮度（luma）和色度（chroma），同时采用了顶层的色调（hue）。 |
+| saturation       | 保留底层的亮度（luma）和色调（hue），同时采用顶层的色度（chroma）。 |
+| color            | 保留了底层的亮度（luma），同时采用了顶层的色调 (hue) 和色度 (chroma)。 |
+| luminosity       | 保持底层的色调（hue）和色度（chroma），同时采用顶层的亮度（luma）。 |
+
+## [裁切路径](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Compositing#clipping_paths)
+
+![img](https://mdn.mozillademos.org/files/209/Canvas_clipping_path.png)
+
+裁切路径和普通的 canvas 图形差不多，不同的是它的作用是遮罩，用来隐藏不需要的部分。如右图所示。红边五角星就是裁切路径，所有在路径以外的部分都不会在 canvas 上绘制出来。
+
+如果和上面介绍的 `globalCompositeOperation` 属性作一比较，它可以实现与 `source-in` 和 `source-atop`差不多的效果。**最重要的区别是裁切路径不会在 canvas 上绘制东西，而且它永远不受新图形的影响**。这些特性使得它在特定区域里绘制图形时相当好用。
+
+在 [绘制图形](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Drawing_shapes) 一章中，我只介绍了 `stroke` 和 `fill` 方法，这里介绍第三个方法`clip`。
+
+- [`clip()`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/clip)
+
+  将当前正在构建的路径转换为当前的裁剪路径。
+
+我们使用 `clip()`方法来创建一个新的裁切路径。
+
+默认情况下，canvas 有一个与它自身一样大的裁切路径（**也就是没有裁切效果**）。
+
+### [`clip` 的例子](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Compositing#a_clip_example)
+
+这个例子，我会用一个圆形的裁切路径来限制随机星星的绘制区域。
+
+```js
+  function draw() {
+    let testCanvas = document.getElementById("test1");
+    let ctx = testCanvas.getContext("2d");
+
+    ctx.fillRect(0, 0, 400, 400);
+    ctx.translate(200, 200);
+
+    //创建一个圆形剪切路径
+    ctx.beginPath();
+    ctx.arc(0, 0, 150, 0, Math.PI * 2, true);
+    ctx.clip();
+
+    // 画背景
+    let lineargradient1 = ctx.createLinearGradient(0, -200, 0, 200);
+    lineargradient1.addColorStop(0, "#232256");
+    lineargradient1.addColorStop(1, "#143778");
+
+    ctx.fillStyle = lineargradient1;
+    ctx.fillRect(-200, -200, 400, 400);
+
+    //画星星
+    for (let i = 1; i <80; i++) {
+      ctx.save();
+      ctx.fillStyle = "#fff";
+      ctx.translate(200 - Math.floor(Math.random() * 400), 200 - Math.floor(Math.random() * 400));
+      drawStar(ctx, Math.floor(Math.random() * 4) + 2);
+      ctx.restore();
+    }
+  }
+
+  function drawStar(ctx, r) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(r, 0);
+    for (let i = 0; i < 9; i++){
+      ctx.rotate(Math.PI / 5);
+      if (i % 2 === 0) {
+        ctx.lineTo((r/0.525731)*0.200811, 0);
+      }else{
+        ctx.lineTo(r, 0);
+      }
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+```
+
+首先，我画了一个与 canvas 一样大小的黑色方形作为背景，然后移动原点至中心点。然后用 `clip` 方法创建一个弧形的裁切路径。裁切路径也属于 canvas 状态的一部分，可以被保存起来。如果我们在创建新裁切路径时想保留原来的裁切路径，我们需要做的就是保存一下 canvas 的状态。
+
+裁切路径创建之后所有出现在它里面的东西才会画出来。在画线性渐变时我们就会注意到这点。然后会绘制出 80 颗随机位置分布（经过缩放）的星星，当然也只有在裁切路径里面的星星才会绘制出来。
+
+# 基本的动画
+
+由于我们是用 JavaScript 去操控 `<canvas>` 对象，这样要实现一些交互动画也是相当容易的。在本章中，我们将看看如何做一些基本的动画。
+
+可能最大的限制就是图像一旦绘制出来，它就是一直保持那样了。**如果需要移动它，我们不得不对所有东西（包括之前的）进行重绘**。重绘是相当费时的，而且性能很依赖于电脑的速度。
+
+## [动画的基本步骤](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_animations#basic_animation_steps)
+
+你可以通过以下的步骤来画出一帧：
+
+1. **清空 canvas**
+   除非接下来要画的内容会完全充满 canvas（例如背景图），否则你需要清空所有。最简单的做法就是用 `clearRect` 方法。
+2. **保存 canvas 状态**
+   如果你要改变一些会改变 canvas 状态的设置（样式，变形之类的），又要在每画一帧之时都是原始状态的话，你需要先保存一下。
+3. **绘制动画图形（animated shapes）**
+   这一步才是重绘动画帧。
+4. **恢复 canvas 状态**
+   如果已经保存了 canvas 的状态，可以先恢复它，然后重绘下一帧。
