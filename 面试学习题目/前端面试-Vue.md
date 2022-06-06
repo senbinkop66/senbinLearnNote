@@ -16,11 +16,11 @@ v-model本质上不过是语法糖，可以用 v-model 指令在**表单**及**�
 
 1. 它会根据控件类型自动选取正确的方法来更新元素
 2. 它负责监听用户的输入事件以更新数据，并对一些极端场景进行一些特殊处理
-3. v-model会忽略所有表单元素的value、checked、selected特性的初始值,而**总是将 Vue 实例的数据作为数据来源**，因此我们应该通过 JavaScript 在组件的data选项中声明初始值
+3. v-model会忽略所有表单元素的value、checked、selected特性的初始值,而**总是将 Vue 实例的数据作为数据来源**，因此**我们应该通过 JavaScript 在组件的data选项中声明初始值。**
 
 **扩展：**
 
-v-model在内部为不同的输入元素使用不同的属性并抛出不同的事件：
+v-model在内部**为不同的输入元素使用不同的属性并抛出不同的事件**：
 
 1. text 和 textarea 元素使用value属性和input事件；
 2. checkbox 和 radio 使用checked属性和change事件；
@@ -41,6 +41,7 @@ v-model只不过是一个语法糖而已,真正的实现靠的还是
 <input v-model="sth" />
 <!-- 等同于-->
 <input :value="sth" @input="sth = $event.target.value" />
+
 <!--自html5开始,input每次输入都会触发oninput事件，所以输入时input的内容会绑定到sth中，于是sth的值就被改变-->
 <!--$event 指代当前触发的事件对象;-->
 <!--$event.target 指代当前触发的事件对象的dom;-->
@@ -57,14 +58,14 @@ v-model只不过是一个语法糖而已,真正的实现靠的还是
 
 Vue2.0的数据响应是**采用数据劫持结合发布者-订阅者模式的方式，通过Object.defineProperty () 来劫持各个属性的setter、getter**，但是它并不算是实现数据的响应式的完美方案，某些情况下需要对其进行修补或者hack这也是它的缺陷，主要表现在两个方面：
 
-1. vue 实例创建后，无法检测到对象属性的新增或删除，只能追踪到数据是否被修改
-2. 不能监听数组的变化
+1. vue 实例创建后，**无法检测到对象属性的新增或删除**，只能追踪到数据是否被修改
+2. **不能监听数组的变化**
 
 **解析：**
 
-1. vue 实例创建后，无法检测到对象属性的新增或删除，只能追踪到数据是否被修改(Object.defineProperty只能劫持对象的属性)。
+1. vue 实例创建后，无法检测到对象属性的新增或删除，只能追踪到数据是否被修改(**Object.defineProperty只能劫持对象的属性**)。
 
-   当创建一个Vue实例时，将遍历所有DOM对象，并为每个数据属性添加了get和set。get和set 允许Vue观察数据的更改并触发更新。但是，如果你在Vue实例化后添加（或删除）一个属性，这个属性不会被vue处理，改变get和set。
+   当创建一个Vue实例时，将遍历所有DOM对象，并为每个数据属性添加了get和set。get和set 允许Vue观察数据的更改并触发更新。但是，**如果你在Vue实例化后添加（或删除）一个属性，这个属性不会被vue处理，改变get和set。**
 
    解决方案：
 
@@ -82,7 +83,7 @@ Vue2.0的数据响应是**采用数据劫持结合发布者-订阅者模式的�
 
 2. 不能监听数组的变化
 
-   vue在实现数组的响应式时，它使用了一些hack，把无法监听数组的情况通过重写数组的部分方法来实现响应式，这也只限制在数组的push/pop/shift/unshift/splice/sort/reverse七个方法，其他数组方法及数组的使用则无法检测到，例如如下两种使用方式
+   vue在实现数组的响应式时，它使用了一些hack，**把无法监听数组的情况通过重写数组的部分方法来实现响应式**，这也只限制在数组的push/pop/shift/unshift/splice/sort/reverse七个方法，其他数组方法及数组的使用则无法检测到，例如如下两种使用方式
 
    ```js
    vm.items[index] = newValue;
@@ -91,12 +92,13 @@ Vue2.0的数据响应是**采用数据劫持结合发布者-订阅者模式的�
 
    vue实现数组响应式的方法
 
-   通过重写数组的Array.prototype对应的方法，具体来说就是重新指定要操作数组的prototype，并重新该prototype中对应上面的7个数组方法，通过下面代码简单了解下实现原理：
+   **通过重写数组的Array.prototype对应的方法**，具体来说就是重新指定要操作数组的prototype，并重新该prototype中对应上面的7个数组方法，通过下面代码简单了解下实现原理：
 
    ```js
    const methods = ['pop','shift','unshift','sort','reverse','splice', 'push'];
    // 复制Array.prototype，并将其prototype指向Array.prototype
    let proto = Object.create(Array.prototype);
+   
    methods.forEach(method => {
        proto[method] = function () { // 重写proto中的数组方法
            Array.prototype[method].call(this, ...arguments);
@@ -113,7 +115,7 @@ Vue2.0的数据响应是**采用数据劫持结合发布者-订阅者模式的�
        }
    })
    ```
-
+   
    
 
 ---
@@ -126,7 +128,7 @@ vue3.0 实现数据双向绑定是通过**Proxy**
 
 **Proxy**是 ES6 中新增的一个特性，翻译过来意思是"代理"，用在这里表示由它来“代理”某些操作。 Proxy 让我们能够以简洁易懂的方式控制外部对对象的访问。其功能非常类似于设计模式中的代理模式。
 
-Proxy 可以理解成，在目标对象之前架设一层“拦截”，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。
+Proxy 可以理解成，**在目标对象之前架设一层“拦截**”，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。
 
 使用 Proxy 的**核心优点**是可以交由它来处理一些非核心逻辑（如：读取或设置对象的某些属性前记录日志；设置对象的某些属性值前，需要验证；某些属性的访问控制等）。 从而可以让对象只需关注于核心逻辑，达到关注点分离，降低对象复杂度等目的。
 
@@ -1570,7 +1572,7 @@ vue和react的虚拟DOM的Diff算法大致相同，其核心是基于两个简�
 
 **参考答案：**
 
-目前几种主流的mvc(vm)框架都实现了单向数据绑定，而我所理解的双向数据绑定无非就是在单向绑定的基础上给可输入元素（input、textare等）添加了change(input)事件，来动态修改model和 view，并没有多高深。所以无需太过介怀是实现的单向或双向绑定。
+目前几种主流的mvc(vm)框架都实现了单向数据绑定，而我所理解的双向数据绑定**无非就是在单向绑定的基础上给可输入元素（input、textare等）添加了change(input)事件，来动态修改model和 view**，并没有多高深。所以无需太过介怀是实现的单向或双向绑定。
 
 实现数据绑定的做法有大致如下几种：
 
@@ -1578,7 +1580,7 @@ vue和react的虚拟DOM的Diff算法大致相同，其核心是基于两个简�
 
 这种方式现在毕竟太low了，我们更希望通过vm.property = value这种方式更新数据，同时自动更新视图，于是有了下面两种方式
 
-**脏值检查:** angular.js 是通过脏值检测的方式比对数据是否有变更，来决定是否更新视图，最简单的方式就是通过setInterval()定时轮询检测数据变动，当然Google不会这么low，angular只有在指定的事件触发时进入脏值检测，大致如下：
+**脏值检查:** angular.js 是通过脏值检测的方式比对数据是否有变更，来决定是否更新视图，最简单的方式就是通过setInterval()定时轮询检测数据变动，当然Google不会这么low，**angular只有在指定的事件触发时进入脏值检测**，大致如下：
 
 - DOM事件，譬如用户输入文本，点击按钮等。( ng-click )
 - XHR响应事件 ( $http )
@@ -1586,7 +1588,7 @@ vue和react的虚拟DOM的Diff算法大致相同，其核心是基于两个简�
 - Timer事件( timeout，interval )
 - 执行 digest()或apply()
 
-**数据劫持:** vue.js 则是采用数据劫持结合发布者-订阅者模式的方式，通过Object.defineProperty()来劫持各个属性的setter，getter，在数据变动时发布消息给订阅者，触发相应的监听回调。
+**数据劫持:** vue.js 则是采用**数据劫持**结合**发布者-订阅者模式**的方式，通过Object.defineProperty()来劫持各个属性的setter，getter，在数据变动时发布消息给订阅者，触发相应的监听回调。
 
 ----
 
@@ -1917,16 +1919,275 @@ MVVM 表示的是 Model-View-ViewModel
 
 ---
 
-## Vue跟传统开发的区别
+## 1.43 Vue跟传统开发的区别
 
 总结就是：
 
 - Vue所有的界面事件，都是只去操作数据的，Jquery操作DOM
 - Vue所有界面的变动，都是根据数据自动绑定出来的，Jquery操作DOM
 
+前端传统开发:假设你要写个网页
+
+        搭建结构：html语言搭建网页的结构,渲染数据到页面
+    
+        美化样式:css语言美化
+    
+        交互:js语言,操作DOM实现用户跟网页的交互行为,跟后端的数据交互
+
+缺点:
+
+    大量操作DOM
+    
+    渲染数据/更新页面数据很麻烦
+
+vue开发：
+
+    通过vue提供指令(模板语法)更快捷方便渲染页面结构,
+    
+    交互：通过vue内的事件机制,处理页面与用户交互行为,大大减轻的DOM操作
+
 ---
 
-## Vue和React对比
+## 1.44 Vue响应式原理
+
+### 如何追踪变化
+
+当你把一个普通的 JavaScript 对象传入 Vue 实例作为 `data` 选项，Vue 将遍历此对象所有的 property，并使用 [`Object.defineProperty`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty) 把这些 property 全部转为 [getter/setter](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Working_with_Objects#定义_getters_与_setters)。`Object.defineProperty` 是 ES5 中一个无法 shim 的特性，这也就是 Vue 不支持 IE8 以及更低版本浏览器的原因。
+
+这些 getter/setter 对用户来说是不可见的，但是在内部它们让 Vue 能够追踪依赖，在 property 被访问和修改时通知变更。这里需要注意的是不同浏览器在控制台打印数据对象时对 getter/setter 的格式化并不同，所以建议安装 [vue-devtools](https://github.com/vuejs/vue-devtools) 来获取对检查数据更加友好的用户界面。
+
+每个组件实例都对应一个 **watcher** 实例，它会在组件渲染的过程中把“接触”过的数据 property 记录为依赖。之后当依赖项的 setter 触发时，会通知 watcher，从而使它关联的组件重新渲染。
+
+![data](https://cn.vuejs.org/images/data.png)
+
+由于 JavaScript 的限制，Vue **不能检测**数组和对象的变化。尽管如此我们还是有一些办法来回避这些限制并保证它们的响应性。
+
+### [对于数组](https://cn.vuejs.org/v2/guide/reactivity.html#对于数组)
+
+Vue 无法检测 property 的添加或移除。**由于 Vue 会在初始化实例时对 property 执行 getter/setter 转化**，**所以 property 必须在 `data` 对象上存在才能让 Vue 将它转换为响应式的。**
+
+```js
+var vm = new Vue({
+  data:{
+    a:1
+  }
+})
+
+// `vm.a` 是响应式的
+
+vm.b = 2
+// `vm.b` 是非响应式的
+```
+
+对于已经创建的实例，Vue 不允许动态添加根级别的响应式 property。但是，**可以使用 `Vue.set(object, propertyName, value)` 方法向嵌套对象添加响应式 property。**例如，对于：
+
+```js
+Vue.set(vm.someObject, 'b', 2)
+```
+
+您还可以使用 `vm.$set` 实例方法，这也是全局 `Vue.set` 方法的别名：
+
+```js
+this.$set(this.someObject,'b',2)
+```
+
+有时你可能需要为已有对象赋值多个新 property，比如使用 `Object.assign()` 或 `_.extend()`。但是，这样添加到对象上的新 property 不会触发更新。在这种情况下，**你应该用原对象与要混合进去的对象的 property 一起创建一个新的对象。**
+
+```js
+// 代替 `Object.assign(this.someObject, { a: 1, b: 2 })`
+this.someObject = Object.assign({}, this.someObject, { a: 1, b: 2 })
+```
+
+### [对于数组](https://cn.vuejs.org/v2/guide/reactivity.html#对于数组)
+
+Vue 不能检测以下数组的变动：
+
+1. 当你利用索引直接设置一个数组项时，例如：`vm.items[indexOfItem] = newValue`
+2. 当你修改数组的长度时，例如：`vm.items.length = newLength`
+
+举个例子：
+
+```js
+var vm = new Vue({
+  data: {
+    items: ['a', 'b', 'c']
+  }
+})
+vm.items[1] = 'x' // 不是响应性的
+vm.items.length = 2 // 不是响应性的
+```
+
+为了解决第一类问题，以下两种方式都可以实现和 `vm.items[indexOfItem] = newValue` 相同的效果，同时也将在响应式系统内触发状态更新：
+
+```js
+// Vue.set
+Vue.set(vm.items, indexOfItem, newValue)
+
+// Array.prototype.splice
+vm.items.splice(indexOfItem, 1, newValue)
+```
+
+你也可以使用 [`vm.$set`](https://cn.vuejs.org/v2/api/#vm-set) 实例方法，该方法是全局方法 `Vue.set` 的一个别名：
+
+```js
+vm.$set(vm.items, indexOfItem, newValue)
+```
+
+为了解决第二类问题，你可以使用 `splice`：
+
+```js
+vm.items.splice(newLength)
+```
+
+### [声明响应式 property](https://cn.vuejs.org/v2/guide/reactivity.html#声明响应式-property)
+
+由于 Vue 不允许动态添加根级响应式 property，**所以你必须在初始化实例前声明所有根级响应式 property**，哪怕只是一个空值：
+
+```js
+var vm = new Vue({
+  data: {
+    // 声明 message 为一个空值字符串
+    message: ''
+  },
+  template: '<div>{{ message }}</div>'
+})
+// 之后设置 `message`
+vm.message = 'Hello!'
+```
+
+**如果你未在 `data` 选项中声明 `message`，Vue 将警告你渲染函数正在试图访问不存在的 property。**
+
+这样的限制在背后是有其技术原因的，**它消除了在依赖项跟踪系统中的一类边界情况**，也使 Vue 实例能更好地配合类型检查系统工作。但与此同时在代码可维护性方面也有一点重要的考虑：`data` 对象就像组件状态的结构 (schema)。提前声明所有的响应式 property，可以让组件代码在未来修改或给其他开发人员阅读时更易于理解。
+
+### [异步更新队列](https://cn.vuejs.org/v2/guide/reactivity.html#异步更新队列)
+
+可能你还没有注意到，Vue 在更新 DOM 时是**异步**执行的。只要侦听到数据变化，Vue 将开启一个队列，并缓冲在同一事件循环中发生的所有数据变更。**如果同一个 watcher 被多次触发，只会被推入到队列中一次**。这种在缓冲时去除重复数据对于避免不必要的计算和 DOM 操作是非常重要的。然后，在下一个的事件循环“tick”中，Vue 刷新队列并执行实际 (已去重的) 工作。Vue 在内部对异步队列尝试使用原生的 `Promise.then`、`MutationObserver` 和 `setImmediate`，如果执行环境不支持，则会采用 `setTimeout(fn, 0)` 代替。
+
+例如，当你设置 `vm.someData = 'new value'`，该组件不会立即重新渲染。**当刷新队列时，组件会在下一个事件循环“tick”中更新。**多数情况我们不需要关心这个过程，但是如果你想基于更新后的 DOM 状态来做点什么，这就可能会有些棘手。虽然 Vue.js 通常鼓励开发人员使用“数据驱动”的方式思考，避免直接接触 DOM，但是有时我们必须要这么做。**为了在数据变化之后等待 Vue 完成更新 DOM，可以在数据变化之后立即使用 `Vue.nextTick(callback)`**。**这样回调函数将在 DOM 更新完成后被调用**。例如：
+
+```html
+<div id="example">{{message}}</div>
+<script>
+var vm = new Vue({
+  el: '#example',
+  data: {
+    message: '123'
+  }
+})
+vm.message = 'new message' // 更改数据
+vm.$el.textContent === 'new message' // false
+Vue.nextTick(function () {
+  vm.$el.textContent === 'new message' // true
+})
+</script>
+```
+
+在组件内使用 `vm.$nextTick()` 实例方法特别方便，因为它不需要全局 `Vue`，**并且回调函数中的 `this` 将自动绑定到当前的 Vue 实例**上：
+
+```js
+Vue.component('example', {
+  template: '<span>{{ message }}</span>',
+  data: function () {
+    return {
+      message: '未更新'
+    }
+  },
+  methods: {
+    updateMessage: function () {
+      this.message = '已更新'
+      console.log(this.$el.textContent) // => '未更新'
+      this.$nextTick(function () {
+        console.log(this.$el.textContent) // => '已更新'
+      })
+    }
+  }
+})
+```
+
+因为 `$nextTick()` 返回一个 `Promise` 对象，所以你可以使用新的 [ES2017 async/await](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function) 语法完成相同的事情：
+
+```js
+methods: {
+  updateMessage: async function () {
+    this.message = '已更新'
+    console.log(this.$el.textContent) // => '未更新'
+    await this.$nextTick()
+    console.log(this.$el.textContent) // => '已更新'
+  }
+}
+```
+
+---
+
+## 1.44 vue3响应式原理
+
+### 1.响应式核心
+
+假如下面的例子中，想让sum变为响应式变量：
+
+```javascript
+let num1 = 1;
+let num2 = 2;
+let sum = num1 + num2;
+
+num1 = 10
+console.log(sum) //sum依旧是3，非响应式
+```
+
+则要实现的部分有：
+
+- 数据劫持：要知道num1、num2何时发生变化
+- 依赖收集：知道sum依赖哪些数据，例子中sum依赖了num1、num2，则要建立它们的依赖关系
+- 派发更新：当依赖的数据num1、num2发生改变时，要通知响应对象sum重新运算
+
+vue3通过Proxy拦截数据的读取和设置（数据劫持），当数据读取时，通过track函数触发依赖的收集；当数据被设置时，通过trigger函数去派发更新。
+
+那么vue3如何使用响应式呢？
+
+- vue3既可以通过data函数返回一个响应式对象，也可以通过ref、reactive来创建响应式变量。使用reactive等时，即在内部对数据用Proxy进行了包装。
+- 使用computed、watch、视图渲染函数等时，可以看作声明了一个依赖响应式数据的回调，这个回调会被传入effect（副作用函数），当依赖的数据改变时，回调被重新调用，从而computed等得到更新。
+
+要实现简单版的响应式，其大致结构为：
+
+```javascript
+//创建响应式变量，拦截数据的get和set
+function reactive(obj){}
+
+//effect函数包裹那些 依赖响应式数据的函数cb
+//cb依赖的数据更新时，重新执行effect
+function effect(cb){}
+
+//依赖收集，建立响应式数据和effect的映射关系
+function track(target, property){}
+
+//触发更新，根据依赖关系，执行effect函数
+function trigger(target, property){}
+```
+
+使用：
+
+```javascript
+let obj = reactive({
+  num1: 10,
+  num2: 20
+})
+let sum = 0
+
+effect(()=>{
+  sum = obj.num1 + obj.num2
+})
+
+console.log(sum) //30
+
+obj.num1 = 100
+console.log(sum)  //应该为120
+```
+
+
+
+---
+
+## 1.45 Vue和React对比
 
 ### 相同点
 
@@ -1946,7 +2207,7 @@ MVVM 表示的是 Model-View-ViewModel
 
 ---
 
-## vue2的diff算法与vue3的diff算法
+## 1.46 vue2的diff算法与vue3的diff算法
 
 vue2 核心 diff 算法 采用的是`双端比较算法`
 
@@ -1960,22 +2221,22 @@ vue3 核心 diff 算法采用的是`去头尾的最长递增子序列算法`
 
 Diff算法即差异查找算法。
 
-## Vue的diff策略
+### Vue的diff策略
 
 - 传统的计算两颗树的差异时间复杂度为O(n^3),显然成本比较高（老树的每一个节点都去遍历新树的节点，直到找到新树对应的节点。那么这个流程就是 O(n^2)，再紧接着找到不同之后，再计算最短修改距离然后修改节点，这里是 O(n^3)。）
 - Vue采用对树的节点进行同层比较，**所以时间复杂度是O(n)，比较高效**
 
-## Vue Diff算法的基于什么策略
+### Vue Diff算法的基于什么策略
 
 - Web UI 中 DOM 节点跨层级的移动操作特别少，可以忽略不计 （tree-diff）
 - 拥有相同类的两个组件将会生成相似的树形结构，拥有不同类的两个组件将会生成不同的树形结（component diff）
 - 对于同一层级的一组子节点，它们可以通过唯一 id 进行区分（element-diff）
 
-## Vue Diff算法的原因以及目的
+### Vue Diff算法的原因以及目的
 
 Vue diff算法是vue2中引入虚拟DOM的产物，它的出现是为了通过对比新旧节点计算出需要改动的最小变化。 **核心思想：尽可能的复用老节点**
 
-## Vue2 diff流程
+### Vue2 diff流程
 
 ### 新老节点不同
 
@@ -1999,7 +2260,7 @@ Vue diff算法是vue2中引入虚拟DOM的产物，它的出现是为了通过�
 - 新的节点有剩余 进行添加操作
 - 老的节点有剩余 进行移除
 
-## Vue3的diff流程
+### Vue3的diff流程
 
 ### 新旧节点不同
 
@@ -2062,7 +2323,7 @@ Vue diff算法是vue2中引入虚拟DOM的产物，它的出现是为了通过�
 
 ---
 
-## SPA首屏加载速度慢的怎么解决？
+## 1.47 SPA首屏加载速度慢的怎么解决？
 
 ```js
 const times = performance.timing;
@@ -2094,4 +2355,112 @@ test127.html:258 loadEventEnd: 0
 test127.html:258 toJSON: function toJSON() { [native code] }
 */
 ```
+
+### 什么是首屏加载
+
+首屏时间（First Contentful Paint），指的是浏览器从响应用户输入网址地址，到首屏内容渲染完成的时间，此时整个网页不一定要全部渲染完成，但需要展示当前视窗需要的内容
+
+首屏加载可以说是用户体验中**最重要**的环节
+
+### 加载慢的原因
+
+在页面渲染的过程，导致加载速度慢的因素可能如下：
+
+- 网络延时问题
+- 资源文件体积是否过大
+- 资源是否重复发送请求去加载了
+- 加载脚本的时候，渲染内容堵塞了
+
+## 解决方案
+
+常见的几种SPA首屏优化方式
+
+- 减小入口文件积
+- 静态资源本地缓存
+- UI框架按需加载
+- 图片资源的压缩
+- 组件重复打包
+- 开启GZip压缩
+- 使用SSR
+
+### 减小入口文件体积
+
+常用的手段是路由懒加载，把不同路由对应的组件分割成不同的代码块，待路由被请求的时候会单独打包路由，使得入口文件变小，加载速度大大增加
+
+在`vue-router`配置路由的时候，采用动态加载路由的形式
+
+```js
+routes:[ 
+    path: 'Blogs',
+    name: 'ShowBlogs',
+    component: () => import('./components/ShowBlogs.vue')
+]
+```
+
+以函数的形式加载路由，这样就可以把各自的路由文件分别打包，只有在解析给定的路由时，才会加载路由组件
+
+### 静态资源本地缓存
+
+后端返回资源问题：
+
+- 采用`HTTP`缓存，设置`Cache-Control`，`Last-Modified`，`Etag`等响应头
+- 采用`Service Worker`离线缓存
+
+前端合理利用`localStorage`
+
+### UI框架按需加载
+
+在日常使用`UI`框架，例如`element-UI`、或者`antd`，我们经常性直接引用整个`UI`库
+
+```js
+import ElementUI from 'element-ui'
+Vue.use(ElementUI)
+```
+
+但实际上我用到的组件只有按钮，分页，表格，输入与警告 所以我们要按需引用
+
+```js
+import { Button, Input, Pagination, Table, TableColumn, MessageBox } from 'element-ui';
+Vue.use(Button)
+Vue.use(Input)
+Vue.use(Pagination)
+```
+
+### 组件重复打包
+
+假设`A.js`文件是一个常用的库，现在有多个路由使用了`A.js`文件，这就造成了重复下载
+
+解决方案：在`webpack`的`config`文件中，修改`CommonsChunkPlugin`的配置
+
+```js
+minChunks: 3
+```
+
+`minChunks`为3表示会把使用3次及以上的包抽离出来，放进公共依赖文件，避免了重复加载组件
+
+### 图片资源的压缩
+
+图片资源虽然不在编码过程中，但它却是对页面性能影响最大的因素
+
+对于所有的图片资源，我们可以进行适当的压缩
+
+对页面上使用到的`icon`，可以使用在线字体图标，或者雪碧图，将众多小图标合并到同一张图上，用以减轻`http`请求压力。
+
+### 开启GZip压缩
+
+拆完包之后，我们再用`gzip`做一下压缩 安装`compression-webpack-plugin`
+
+```js
+cnmp i compression-webpack-plugin -D
+```
+
+在服务器我们也要做相应的配置 如果发送请求的浏览器支持`gzip`，就发送给它`gzip`格式的文件 我的服务器是用`express`框架搭建的 只要安装一下`compression`就能使用
+
+### 使用SSR
+
+SSR（Server side ），也就是服务端渲染，组件或页面通过服务器生成html字符串，再发送到浏览器
+
+从头搭建一个服务端渲染是很复杂的，`vue`应用建议使用`Nuxt.js`实现服务端渲染
+
+---
 
