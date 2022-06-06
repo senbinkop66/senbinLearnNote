@@ -2464,3 +2464,136 @@ SSR（Server side ），也就是服务端渲染，组件或页面通过服务�
 
 ---
 
+## 1.48 虚拟DOM
+
+### 什么是虚拟DOM
+
+Virtual dom, 即虚拟DOM节点。**它通过`JS`的Object对象模拟DOM中的节点，然后再通过特定的render方法将其渲染成真实的DOM节点**。
+
+*所谓虚拟DOM，是一个用于表示真实 DOM 结构和属性的 `JavaScript` 对象，这个对象用于对比前后虚拟 DOM 的差异化，然后进行局部渲染从而实现性能上的优化。在`Vue.js` 中虚拟 DOM 的 `JavaScript` 对象就是 VNode。*
+
+```
+1.     虚拟dom就是通过一个对象描述一个html结构
+2.     在js对象和真实dom树之间存在的一个虚拟对象
+3.     所有的dom树节点都是根据这个虚拟dom实现生成的
+4.     在虚拟dom向真实的dom树转换之前会根据diff算法动态的计算需要更改的标签 进行替换操作
+```
+
+虚拟 DOM （`Virtual DOM` ）这个概念相信大家都不陌生，从 `React` 到 `Vue` ，虚拟 `DOM` 为这两个框架都带来了跨平台的能力（`React-Native` 和 `Weex`）
+
+实际上它只是一层对真实`DOM`的抽象，以`JavaScript` 对象 (`VNode` 节点) 作为基础的树，**用对象的属性来描述节点**，最终可以通过一系列操作使这棵树映射到真实环境上
+
+在`Javascript`对象中，虚拟`DOM` 表现为一个 `Object`对象。并且最少包含标**签名** (`tag`)、**属性** (`attrs`) 和**子元素对象** (`children`) 三个属性，不同框架对这三个属性的名命可能会有差别
+
+创建虚拟`DOM`就是为了更好将虚拟的节点渲染到页面视图中，所以**虚拟`DOM`对象的节点与真实`DOM`的属性一一照应**
+
+在`vue`中同样使用到了虚拟`DOM`技术
+
+定义真实`DOM`
+
+```html
+<div id="app">
+    <p class="p">节点内容</p>
+    <h3>{{ foo }}</h3>
+</div>
+```
+
+实例化`vue`
+
+```js
+const app = new Vue({
+    el:"#app",
+    data:{
+        foo:"foo"
+    }
+})
+```
+
+观察`render`的`render`，我们能得到虚拟`DOM`
+
+```js
+(function anonymous(
+) {
+	with(this){return _c('div',{attrs:{"id":"app"}},[_c('p',{staticClass:"p"},
+					  [_v("节点内容")]),_v(" "),_c('h3',[_v(_s(foo))])])}})
+```
+
+通过`VNode`，`vue`可以对这颗抽象树进行创建节点,删除节点以及修改节点的操作， **经过`diff`算法得出一些需要修改的最小单位**,再更新视图，减少了`dom`操作，提高了性能
+
+### **虚拟DOM的优势**
+
+```
+1.  可以针对不同的终端平台 输出不同的页面展示节点
+    比如：网页、微信小程序、原生应用
+    
+2.  在生成的时候只需要修改render方法渲染出不同的节点标签即可
+```
+
+
+
+### 为什么需要虚拟DOM
+
+`DOM`是很慢的，其元素非常庞大，页面的性能问题，大部分都是由`DOM`操作引起的
+
+由此可见，操作`DOM`的代价仍旧是昂贵的，频繁操作还是会出现页面卡顿，影响用户的体验
+
+浏览器在生成dom树的时候，非常消耗资源，因此引入虚拟dom概念通过一定的算法优化之后能够非常快捷的根据数据生成真实的html节点现在`vue`和`react`都是使用的虚拟dom
+
+**举个例子：**
+
+你用传统的原生`api`或`jQuery`去操作`DOM`时，浏览器会从构建`DOM`树开始从头到尾执行一遍流程
+
+当你在一次操作时，需要更新10个`DOM`节点，浏览器没这么智能，收到第一个更新`DOM`请求后，并不知道后续还有9次更新操作，因此会马上执行流程，最终执行10次流程
+
+而通过`VNode`，同样更新10个`DOM`节点，虚拟`DOM`不会立即操作`DOM`，**而是将这10次更新的`diff`内容保存到本地的一个`js`对象中，最终将这个`js`对象一次性`attach`到`DOM`树上，避免大量的无谓计算**
+
+> 很多人认为虚拟 DOM 最大的优势是 diff 算法，减少 JavaScript 操作真实 DOM 的带来的性能消耗。虽然这一个虚拟 DOM 带来的一个优势，但并不是全部。**虚拟 DOM 最大的优势在于抽象了原本的渲染过程，实现了跨平台的能力**，而不仅仅局限于浏览器的 DOM，可以是安卓和 IOS 的原生组件，可以是近期很火热的小程序，也可以是各种GUI
+
+集中操作dom的话，会减少重排和重绘的次数，重排开销是比较大的，为什么重排开销大？因为重排会导致浏览器重新生成渲染树
+
+
+
+### Virtual DOM 真的比操作原生 DOM 快吗？
+
+**对 React 的 Virtual DOM 的误解**
+
+React 从来没有说过 “React 比原生操作 DOM 快”。**React 的基本思维模式是每次有变动就整个重新渲染整个应用**。如果没有 Virtual DOM，简单来想就是直接重置 innerHTML。很多人都没有意识到，在一个大型列表所有数据都变了的情况下，重置 innerHTML 其实是一个还算合理的操作... 真正的问题是在 “全部重新渲染” 的思维模式下，即使只有一行数据变了，它也需要重置整个 innerHTML，这时候显然就有大量的浪费。
+
+我们可以比较一下 innerHTML vs. Virtual DOM 的重绘性能消耗：
+
+（1）innerHTML: render html string O(template size) + 重新创建所有 DOM 元素 O(DOM size)
+
+（2）Virtual DOM: render Virtual DOM + diff O(template size) + 必要的 DOM 更新 O(DOM change)
+
+Virtual DOM render + diff 显然比渲染 html 字符串要慢，但是！它依然是纯 js 层面的计算，比起后面的 DOM 操作来说，依然便宜了太多。可以看到，innerHTML 的总计算量不管是 js 计算还是 DOM 操作都是和整个界面的大小相关，**但 Virtual DOM 的计算量里面，只有 js 计算和界面大小相关**，DOM 操作是和数据的变动量相关的。前面说了，**和 DOM 操作比起来，js 计算是极其便宜的**。这才是为什么要有 Virtual DOM：它保证了 1）不管你的数据变化多少，每次重绘的性能都可以接受；2) 你依然可以用类似 innerHTML 的思路去写你的应用。
+
+**MVVM vs. Virtual DOM**
+
+相比起 React，其他 MVVM 系框架比如 Angular, Knockout 以及 Vue、Avalon 采用的都是数据绑定：通过 Directive/Binding 对象，观察数据变化并保留对实际 DOM 元素的引用，当有数据变化时进行对应的操作。MVVM 的变化检查是**数据层面**的，而 React 的检查是 DOM 结构层面的。MVVM 的性能也根据变动检测的实现原理有所不同：Angular 的脏检查使得任何变动都有固定的
+O(watcher count) 的代价；Knockout/Vue/Avalon 都采用了依赖收集，在 js 和 DOM 层面都是 O(change)：
+
+（1）脏检查：scope digest O(watcher count) + 必要 DOM 更新 O(DOM change)
+
+（2）依赖收集：重新收集依赖 O(data change) + 必要 DOM 更新 O(DOM change)可以看到，Angular 最不效率的地方在于任何小变动都有的和 watcher 数量相关的性能代价。但是！当所有数据都变了的时候，Angular 其实并不吃亏。依赖收集在初始化和数据变化的时候都需要重新收集依赖，这个代价在小量更新的时候几乎可以忽略，但在数据量庞大的时候也会产生一定的消耗。
+
+MVVM 渲染列表的时候，由于每一行都有自己的数据作用域，所以通常都是每一行有一个对应的 ViewModel 实例，或者是一个稍微轻量一些的利用原型继承的 "scope" 对象，但也有一定的代价。所以，MVVM 列表渲染的初始化几乎一定比 React 慢，因为创建 ViewModel / scope 实例比起 Virtual DOM 来说要昂贵很多。这里所有 MVVM 实现的一个共同问题就是在列表渲染的数据源变动时，尤其是当数据是全新的对象时，如何有效地复用已经创建的 ViewModel 实例和 DOM 元素。假如没有任何复用方面的优化，由于数据是 “全新” 的，MVVM 实际上需要销毁之前的所有实例，重新创建所有实例，最后再进行一次渲染！这就是为什么题目里链接的 angular/knockout 实现都相对比较慢。相比之下，React 的变动检查由于是 DOM 结构层面的，即使是全新的数据，只要最后渲染结果没变，那么就不需要做无用功。
+
+Angular 和 Vue 都提供了列表重绘的优化机制，也就是 “提示” 框架如何有效地复用实例和 DOM 元素。比如数据库里的同一个对象，在两次前端 API 调用里面会成为不同的对象，但是它们依然有一样的 uid。这时候你就可以提示 track by uid 来让 Angular 知道，这两个对象其实是同一份数据。那么原来这份数据对应的实例和 DOM 元素都可以复用，只需要更新变动了的部分。或者，你也可以直接 track by $index 来进行 “原地复用”：直接根据在数组里的位置进行复用。在题目给出的例子里，如果 angular 实现加上 track by $index 的话，后续重绘是不会比 React 慢多少的。甚至在 dbmonster 测试中，Angular 和 Vue 用了 track by $index 以后都比 React 快: dbmon (注意 Angular 默认版本无优化，优化过的在下面）
+
+顺道说一句，React 渲染列表的时候也需要提供 key 这个特殊 prop，本质上和 track-by 是一回事。
+
+**性能比较也要看场合**
+
+在比较性能的时候，要分清楚**初始渲染、小量数据更新、大量数据更新**这些不同的场合。Virtual DOM、脏检查 MVVM、数据收集 MVVM 在不同场合各有不同的表现和不同的优化需求。Virtual DOM 为了提升小量数据更新时的性能，也需要针对性的优化，比如 shouldComponentUpdate 或是 immutable data。
+
+（1）初始渲染：Virtual DOM > 脏检查 >= 依赖收集
+
+（2）小量数据更新：依赖收集 >> Virtual DOM + 优化 > 脏检查（无法优化） > Virtual DOM 无优化
+
+（3）大量数据更新：脏检查 + 优化 >= 依赖收集 + 优化 > Virtual DOM（无法/无需优化）>> MVVM 无优化
+
+不要天真地以为 Virtual DOM 就是快，diff 不是免费的，batching 么 MVVM 也能做，而且最终 patch 的时候还不是要用原生 API。在我看来 Virtual DOM 真正的价值从来都不是性能，而是它
+
+(1) 为函数式的 UI 编程方式打开了大门；(2) 可以渲染到 DOM 以外的 backend，比如 ReactNative。
+
+注：react本身遵循的就是 UI = fn(state) 这样的一个公式，这里的fn 就是函数，通过state去触发fn（在这个过程是有很多复杂的计算操作，比如Virtual DOM对比），最后导致UI的更新，不知道我理解的对不对。
