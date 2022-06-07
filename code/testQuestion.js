@@ -1,24 +1,37 @@
-var MyCalendarThree = function() {
-    this.tree = new Map();
-    this.lazy = new Map();
-};
-
-MyCalendarThree.prototype.book = function(start, end) {
-    this.update(start, end - 1, 0, 1000000000, 1);
-    return this.tree.get(1) || 0;
-};
-
-MyCalendarThree.prototype.update = function(start, end, l, r, idx) {
-    if (r < start || end < l) {
-        return;
-    } 
-    if (start <= l && r <= end) {
-        this.tree.set(idx, (this.tree.get(idx) || 0) + 1);
-        this.lazy.set(idx, (this.lazy.get(idx) || 0) + 1);
-    } else {
-        const mid = (l + r) >> 1;
-        this.update(start, end, l, mid, 2 * idx);
-        this.update(start, end, mid + 1, r, 2 * idx + 1);
-        this.tree.set(idx, (this.lazy.get(idx) || 0) + Math.max((this.tree.get(2 * idx) || 0), (this.tree.get(2 * idx + 1) || 0)));
+/**
+ * @param {number[]} piles
+ * @param {number} h
+ * @return {number}
+ */
+var minEatingSpeed = function(piles, h) {
+    let low = 1;
+    let high = 0;
+    for (let pile of piles) {
+        high = Math.max(high, pile);
     }
+    let k = high;
+    while(low < high) {
+        let speed = Math.floor((high - low) / 2) + low;
+        let time = getTime(piles, speed);
+        if (time <= h) {
+            //可以在 h 小时内吃掉所有香蕉，则最小速度一定小于或等于 speed
+            k = speed;
+            high = speed;
+        } else {
+            // 否则，最小速度一定大于 speed
+            low = speed + 1;
+        }
+    }
+    return k;
+};
+
+const getTime = (piles, speed) => {
+    let time = 0;
+    for (let pile of piles) {
+        time += Math.ceil(pile / speed);
+    }
+    return time;
 }
+
+let piles = [3,6,7,11], h = 8;
+console.log(minEatingSpeed(piles, h));
