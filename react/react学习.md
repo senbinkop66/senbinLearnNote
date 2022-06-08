@@ -10,7 +10,7 @@ React 是一个声明式，高效且灵活的用于**构建用户界面**的 Jav
 ## 为什么学习React
 
 1. 原生JavaScript操作DOM繁琐、效率低（DOM-API操作UI)
-2. 使用Javas直接操作DOM，浏览器会进行大量的重绘重排
+2. 使用Javascript直接操作DOM，浏览器会进行大量的重绘重排
 3. 原生JavaScript没有组件化编码方案，代码复用率低
 
 ## React 特点
@@ -85,7 +85,7 @@ ReactDOM.render(<Hello />, document.getElementById("root"));
 
 React 可以直接下载使用，下载包中也提供了很多学习的实例。
 
-本教程使用了 React 的版本为 16.4.0，你可以在官网 https://reactjs.org/ 下载最新版。
+教程使用了 React 的版本为 16.4.0，可以在官网 https://reactjs.org/ 下载最新版。
 
 你也可以直接使用 Staticfile CDN 的 React CDN 库，地址如下：
 
@@ -159,7 +159,7 @@ export default App;
 
 src/index.js 是一个入口文件，我们可以尝试直接修改 src/index.js 文件代码：
 
-```js
+```jsx
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
@@ -307,11 +307,11 @@ const VDOM = React.createElement('xx',{id:'xx'},'xx')
 
 元素是构成 React 应用的最小单位，它用于描述屏幕上输出的内容。
 
-```js
+```jsx
 const element = <h1>Hello, world!</h1>;
 ```
 
-与浏览器的 DOM 元素不同，React 当中的元素事实上是普通的对象，React DOM 可以确保 浏览器 DOM 的数据内容与 React 元素保持一致。
+与浏览器的 DOM 元素不同，**React 当中的元素事实上是普通的对象**，React DOM 可以确保 浏览器 DOM 的数据内容与 React 元素保持一致。
 
 ### 将元素渲染到 DOM 中
 
@@ -321,13 +321,13 @@ const element = <h1>Hello, world!</h1>;
 <div id="example"></div>
 ```
 
-在此 div 中的所有内容都将由 React DOM 来管理，所以我们将其称为 "根" DOM 节点。
+在此 div 中的所有内容都将由 React DOM 来管理，所以我们**将其称为 "根" DOM 节点**。
 
-我们用 React 开发应用时一般只会定义一个根节点。但如果你是在一个已有的项目当中引入 React 的话，你可能会需要在不同的部分单独定义 React 根节点。
+我们**用 React 开发应用时一般只会定义一个根节点**。但如果你是在一个已有的项目当中引入 React 的话，你可能会需要在不同的部分单独定义 React 根节点。
 
 要将React元素渲染到根DOM节点中，我们通过把它们都传递给 **ReactDOM.render()** 的方法来将其渲染到页面上：
 
-```react
+```jsx
 const element = <h1>Hello, world!</h1>;
 ReactDOM.render(
     element,
@@ -337,9 +337,9 @@ ReactDOM.render(
 
 ### 更新元素渲染
 
-React 元素都是不可变的。当元素被创建之后，你是无法改变其内容或属性的。
+**React 元素都是不可变的**。当元素被创建之后，你是无法改变其内容或属性的。
 
-目前更新界面的唯一办法是创建一个新的元素，然后将它传入 ReactDOM.render() 方法：
+目前更新界面的**唯一办法是创建一个新的元素**，然后将它传入 ReactDOM.render() 方法：
 
 ```react
 function tick() {
@@ -409,7 +409,7 @@ setInterval(tick, 1000);
 
 **React 只会更新必要的部分**
 
-值得注意的是 React DOM 首先会比较元素内容先后的不同，而在渲染过程中只会更新改变了的部分。
+值得注意的是 **React DOM 首先会比较元素内容先后的不同**，而在渲染过程中只会更新改变了的部分。
 
 
 
@@ -425,7 +425,7 @@ React 使用 JSX 来替代常规的 JavaScript。  全称: JavaScript XML
 
  JS + XML本质是**React.createElement(component, props, ...children)**方法的语法糖
 
-我们不需要一定使用 JSX，但它有以下优点：
+我们不需要一定使用 JSX，但它有以下**优点**：
 
 - JSX 执行更快，因为它在编译为 JavaScript 代码后进行了优化。
 - 它是类型安全的，在编译过程中就能发现错误。
@@ -441,11 +441,11 @@ const element = <h1>Hello, world!</h1>;
 
 它被称为 JSX， 一种 JavaScript 的语法扩展。 我们推荐在 React 中使用 JSX 来描述用户界面。
 
-JSX 是在 JavaScript 内部实现的。
+**JSX 是在 JavaScript 内部实现的。**
 
-我们知道元素是构成 React 应用的最小单位，JSX 就是用来声明 React 当中的元素。
+我们知道**元素**是构成 React 应用的最小单位，JSX 就是用来声明 React 当中的元素。
 
-与浏览器的 DOM 元素不同，React 当中的元素事实上是普通的对象，React DOM 可以确保 浏览器 DOM 的数据内容与 React 元素保持一致。
+与浏览器的 DOM 元素不同，**React 当中的元素事实上是普通的对象**，React DOM 可以确保 浏览器 DOM 的数据内容与 React 元素保持一致。
 
 要将 React 元素渲染到根 DOM 节点中，我们通过把它们都传递给 ReactDOM.render() 的方法来将其渲染到页面上：
 
@@ -454,7 +454,7 @@ var myDivElement = <div className="foo" />;
 ReactDOM.render(myDivElement, document.getElementById('example'));
 ```
 
-> 注意: 由于 JSX 就是 JavaScript，一些标识符像 `class` 和 `for` 不建议作为 XML 属性名。作为替代，React DOM 使用 `className` 和 `htmlFor` 来做对应的属性。
+> 注意: 由于 JSX 就是 JavaScript，一些标识符像 `class` 和 `for` 不建议作为 XML 属性名。作为替代，React DOM 使用 **`className` 和 `htmlFor` 来做对应的属性**。
 
 ## 作用
 
@@ -551,9 +551,9 @@ ReactDOM.render(
 ```jsx
 ReactDOM.render(
     <div>
-    <h1>菜鸟教程</h1>
-    <h2>欢迎学习 React</h2>
-    <p data-myattribute = "somevalue">这是一个很不错的 JavaScript 库!</p>
+        <h1>菜鸟教程</h1>
+        <h2>欢迎学习 React</h2>
+        <p data-myattribute = "somevalue">这是一个很不错的 JavaScript 库!</p>
     </div>
     ,
     document.getElementById('example')
@@ -599,7 +599,7 @@ ReactDOM.render(
 ```jsx
 ReactDOM.render(
     <div>
-      <h1>{i == 1 ? 'True!' : 'False'}</h1>
+      <h1>{i === 1 ? 'True!' : 'False'}</h1>
     </div>
     ,
     document.getElementById('example')
@@ -608,7 +608,7 @@ ReactDOM.render(
 
 ## 样式
 
-React 推荐使用内联样式。我们可以使用 **camelCase** 语法来设置内联样式. React 会在指定元素数字后自动添加 **px** 。以下实例演示了为 **h1** 元素添加 **myStyle** 内联样式：
+**React 推荐使用内联样式**。我们可以使用 **camelCase** 语法来设置内联样式. React 会在指定元素数字后自动添加 **px** 。以下实例演示了为 **h1** 元素添加 **myStyle** 内联样式：
 
 ```jsx
 var myStyle = {
@@ -623,7 +623,7 @@ ReactDOM.render(
 
 ## 注释
 
-注释需要写在花括号中，实例如下：
+**注释需要写在花括号中**，实例如下：
 
 ```jsx
 ReactDOM.render(
@@ -637,7 +637,7 @@ ReactDOM.render(
 
 ## 数组
 
-JSX 允许在模板中插入数组，数组会自动展开所有成员：
+JSX 允许在模板中插入数组，**数组会自动展开所有成员**：
 
 ```jsx
 var arr = [
@@ -658,25 +658,25 @@ ReactDOM.render(
 
 ###  模块
 
-1. 理解：向外提供特定功能的js程序, 一般就是一个js文件
-2. 为什么要拆成模块：随着业务逻辑增加，代码越来越多且复杂。
+1. 理解：向外提供特定功能的js程序, **一般就是一个js文件**
+2. 为什么要拆成模块：**随着业务逻辑增加，代码越来越多且复杂。**
 3.  作用：复用js, 简化js的编写, 提高js运行效率
 
 ### 组件
 
-1.  理解：用来实现局部功能效果的代码和资源的集合(html/css/js/image等等)
+1.  理解：用来**实现局部功能效果**的代码和资源的集合(html/css/js/image等等)
 2.  为什么要用组件： 一个界面的功能更复杂
 3. 作用：复用编码, 简化项目编码, 提高运行效率
 
 ###  模块化
 
-当应用的js都以模块来编写的, 这个应用就是一个模块化的应用
+当应用的js都以模块来编写的, 这个应用就是一个**模块化的应用**
 
 ### 组件化
 
-当应用是以多组件的方式实现, 这个应用就是一个组件化的应用
+当应用是以多组件的方式实现, 这个应用就是一个**组件化的应用**
 
-### 注意
+### **注意**
 
 1. 组件名必须首字母大写
 2. 虚拟DOM元素只能有一个根元素
@@ -744,7 +744,7 @@ class Welcome extends React.Component {
 }
 ```
 
-2、**const element = <HelloMessage />** 为用户自定义的组件。
+2、const element = `<HelloMessage />` 为用户自定义的组件。
 
 > 注意，原生 HTML 元素名以小写字母开头，**而自定义的 React 类名以大写字母开头**，比如 HelloMessage 不能写成 helloMessage。除此之外还需要注意组件类只能包含一个顶层标签，否则也会报错。
 
@@ -765,7 +765,7 @@ ReactDOM.render(
 
 以上实例中 **name** 属性通过 **props.name** 来获取。
 
-> 注意，在添加属性时， class 属性需要写成 className ，for 属性需要写成 htmlFor ，这是因为 class 和 for 是 JavaScript 的保留字。
+> 注意，在添加属性时， class 属性需要写成 className ，for 属性需要写成 htmlFor ，**这是因为 class 和 for 是 JavaScript 的保留字。**
 
 ### 类式组件
 
@@ -836,13 +836,109 @@ ReactDOM.render(
 
 实例中 App 组件使用了 Name、Url 和 Nickname 组件来输出对应的信息。
 
+---
+
 
 
 # React State(状态)
 
+## 组件三大核心属性1: state
+
 React 把组件看成是一个**状态机**（State Machines）。通过与用户的交互，实现不同状态，然后渲染 UI，让用户界面和数据保持一致。
 
-React 里，只需更新组件的 state，然后根据新的 state 重新渲染用户界面（不要操作 DOM）。
+React 里，**只需更新组件的 state，然后根据新的 state 重新渲染用户界面**（不要操作 DOM）。
+
+###  理解
+
+1.  state是组件对象最重要的属性, 值是对象(可以包含多个key-value的组合)
+2. 组件被称为"状态机", 通过更新组件的state来更新对应的页面显示(重新渲染组件)
+
+###  强烈注意
+
+1. 组件中render方法中的this为组件实例对象
+2. 组件自定义的方法中this为undefined，如何解决？
+
+​		a)   强制绑定this: 通过函数对象的bind()
+
+​		b)   箭头函数
+
+3.  状态数据，不能直接修改或更新
+
+```jsx
+/*
+需求: 定义一个展示天气信息的组件
+	1. 默认展示天气炎热 或 凉爽
+	2. 点击文字切换天气
+*/
+//App.js
+
+
+import './App.css';
+import React, {Component} from 'react';
+
+class Weather extends Component {
+  //构造器调用几次？ ———— 1次
+  constructor(props){
+    console.log("constructor");
+    super(props);
+    // 初始化状态
+    this.state = {isHot: true, wind: "大风"};
+
+    //解决changeWeather中this指向问题
+    this.changeWeather = this.changeWeather.bind(this);
+  }
+
+  //render调用几次？ ———— 1+n次 1是初始化的那次 n是状态更新的次数
+  render() {
+    // 读取状态
+    const {isHot, wind} = this.state;
+    return <h1 onClick={this.changeWeather}>今天天气很{isHot ? "炎热" : "凉爽"},{wind}</h1>
+  }
+
+  // changeWeather调用几次？ ———— 点几次调几次
+  changeWeather(){
+    // changeWeather放在哪里？ ———— Weather的原型对象上，供实例使用
+    // 由于changeWeather是作为onClick的回调，所以不是通过实例调用的，是直接调用
+    // 类中的方法默认开启了局部的严格模式，所以changeWeather中的this为undefined
+    console.log("changeWeather");
+    // 获取原来的 isHot 值
+    const isHot = this.state.isHot;
+    
+    //严重注意：状态必须通过setState进行更新,且更新是一种合并，不是替换。
+    this.setState({isHot: !isHot});
+    console.log(this);
+
+    //严重注意：状态(state)不可直接更改，下面这行就是直接更改！！！
+    //this.state.isHot = !isHot //这是错误的写法
+  }
+}
+
+export default Weather;
+
+```
+
+```jsx
+//index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import Weather from './App';
+import reportWebVitals from './reportWebVitals';
+
+ReactDOM.render(
+   <React.StrictMode>
+     <Weather/>
+   </React.StrictMode>,
+   document.getElementById('root')
+);
+
+reportWebVitals();
+
+```
+
+
+
+
 
 以下实例创建一个名称扩展为 React.Component 的 ES6 类，在 render() 方法中使用 this.state 来修改当前的时间。
 
