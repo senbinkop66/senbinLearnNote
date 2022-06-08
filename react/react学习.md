@@ -1,20 +1,32 @@
 # React介绍
 
-React 是一个声明式，高效且灵活的用于构建用户界面的 JavaScript 库。使用 React 可以将一些简短、独立的代码片段组合成复杂的 UI 界面，这些代码片段被称作“组件”。
+React 是一个声明式，高效且灵活的用于**构建用户界面**的 JavaScript 库。使用 React 可以将一些简短、独立的代码片段组合成复杂的 UI 界面，这些代码片段被称作“组件”。
 
-- React 是一个用于构建用户界面的 JAVASCRIPT 库。
+- React 是一个用于**动态构建用户界面**的 JAVASCRIPT 库(只关注于视图)。
 - React 主要用于构建 UI，很多人认为 React 是 MVC 中的 V（视图）。
 - React 起源于 Facebook 的内部项目，用来架设 Instagram 的网站，并于 2013 年 5 月开源。
 - React 拥有较高的性能，代码逻辑非常简单，越来越多的人已开始关注和使用它。
 
+## 为什么学习React
+
+1. 原生JavaScript操作DOM繁琐、效率低（DOM-API操作UI)
+2. 使用Javas直接操作DOM，浏览器会进行大量的重绘重排
+3. 原生JavaScript没有组件化编码方案，代码复用率低
+
 ## React 特点
 
-- **1.声明式设计** −React采用声明范式，可以轻松描述应用。
-- **2.高效** −React通过对DOM的模拟，最大限度地减少与DOM的交互。
+- **1.声明式设计** −React采用声明范式，可以轻松描述应用。（声明式编码）
+- **2.高效** −React通过对DOM的模拟，使用虚拟DOM+优秀的Diff算法，最大限度地减少与真实DOM的交互。
 - **3.灵活** −React可以与已知的库或框架很好地配合。
 - **4.JSX** − JSX 是 JavaScript 语法的扩展。React 开发不一定使用 JSX ，但我们建议使用它。
 - **5.组件** − 通过 React 构建组件，使得代码更加容易得到复用，能够很好的应用在大项目的开发中。
 - **6.单向响应的数据流** − React 实现了单向响应的数据流，从而减少了重复代码，这也是它为什么比传统数据绑定更简单。
+- 在React Native中可以使用React语法进行移动端开发
+
+##  React高效的原因
+
+1. 使用虚拟(virtual)DOM, 不总是直接操作页面真实DOM。
+2. DOM Diffing算法, 最小化页面重绘。
 
 ## React 第一个实例
 
@@ -67,6 +79,8 @@ function Hello(props) {
 ReactDOM.render(<Hello />, document.getElementById("root"));
 ```
 
+----
+
 # React 安装
 
 React 可以直接下载使用，下载包中也提供了很多学习的实例。
@@ -90,6 +104,12 @@ React 可以直接下载使用，下载包中也提供了很多学习的实例�
 ```
 
 **注意:** 在浏览器中使用 Babel 来编译 JSX 效率是非常低的。
+
+## 相关js库
+
+1. react.js：React核心库。
+2. react-dom.js：提供操作DOM的react扩展库。
+3.  babel.min.js：解析JSX语法代码转为JS代码的库。
 
 ## 通过 npm 使用 React
 
@@ -163,9 +183,127 @@ reportWebVitals();
 setInterval(tick,1000);
 ```
 
+---
 
+# React的基本使用
+
+## 基本
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>React</title>
+	<!-- 引入react核心库 -->
+	<script src="./js/react.development.js"></script>
+	<!-- 引入react-dom，用于支持react操作DOM -->
+	<script src="./js/react-dom.development.js"></script>
+	<!-- 引入babel，用于将jsx转为js -->
+	<script src="./js/babel.min.js"></script>
+</head>
+<body>
+	<!-- 准备好一个容器 -->
+	<div id="test">
+	</div>
+
+	<!-- 此处一定要写babel -->
+	<script type="text/babel">
+		// 创建虚拟DOM
+		const VDOM = <h1>Hello,React</h1>;  /* 此处一定不要写引号，因为不是字符串 */
+
+		// 渲染虚拟DOM到页面
+		ReactDOM.render(VDOM, document.getElementById("test"));
+	</script>
+
+</body>
+</html>
+```
+
+## 创建虚拟DOM的两种方式
+
+1.  纯JS方式(一般不用)
+2.  JSX方式
+
+###  纯JS方式(一般不用)
+
+React]()提供了一些API来创建一种 “特别” 的一般js对象
+
+```js
+const VDOM = React.createElement('xx',{id:'xx'},'xx')
+```
+
+1. 上面创建的就是一个简单的虚拟DOM对象
+2. 虚拟DOM对象最终都会被React转换为真实的DOM
+3. 我们编码时基本只需要操作react的虚拟DOM相关数据, react会转换为真实DOM变化而更新界。
+
+```js
+		// 创建虚拟DOM
+		const VDOM = React.createElement("h1", {id: "title"}, React.createElement("span", {}, "Hello React"));
+		// 渲染虚拟DOM到页面
+		ReactDOM.render(VDOM, document.getElementById("test"));
+```
+
+### JSX方式
+
+
+
+```jsx
+		// 创建虚拟DOM
+		const VDOM = (
+			<h1 id="title">
+				<span>Hello,React</span>
+			</h1>
+		);  //此处一定不要写引号，因为不是字符串
+		// 渲染虚拟DOM到页面
+		ReactDOM.render(VDOM, document.getElementById("test"));
+```
+
+
+
+## 虚拟DOM与真实DOM
+
+```jsx
+		// 创建虚拟DOM
+		const VDOM = (
+			<h1 id="title">
+				<span>Hello,React</span>
+			</h1>
+		);
+		// 渲染虚拟DOM到页面
+		ReactDOM.render(VDOM, document.getElementById("test"));
+		
+		//虚拟DOM
+		console.log(VDOM); 
+		// {$$typeof: Symbol(react.element), type: 'h1', key: null, ref: null, props: {…}, …}
+		
+		//真实DOM
+		let tDOM = document.getElementById("demo");
+		console.log(tDOM);
+		// <div id="demo"></div>
+
+		console.log(typeof VDOM);  //object
+		console.log(VDOM instanceof Object);  //true
+```
+
+关于虚拟DOM：
+	1.本质是Object类型的对象（一般对象）
+
+​	2.虚拟DOM比较“轻”，真实DOM比较“重”，因为虚拟DOM是React内部在用，无需真实DOM上那么多的属性。
+
+​	3.虚拟DOM最终会被React转化为真实DOM，呈现在页面上。
+
+
+
+
+
+----
 
 # React 元素渲染
+
+
+
+
 
 元素是构成 React 应用的最小单位，它用于描述屏幕上输出的内容。
 
@@ -273,11 +411,19 @@ setInterval(tick, 1000);
 
 值得注意的是 React DOM 首先会比较元素内容先后的不同，而在渲染过程中只会更新改变了的部分。
 
+
+
+
+
+----
+
 # React JSX
 
-React 使用 JSX 来替代常规的 JavaScript。
+React 使用 JSX 来替代常规的 JavaScript。  全称: JavaScript XML
 
 **JSX 是一个看起来很像 XML 的 JavaScript 语法扩展**。
+
+ JS + XML本质是**React.createElement(component, props, ...children)**方法的语法糖
 
 我们不需要一定使用 JSX，但它有以下优点：
 
@@ -309,6 +455,85 @@ ReactDOM.render(myDivElement, document.getElementById('example'));
 ```
 
 > 注意: 由于 JSX 就是 JavaScript，一些标识符像 `class` 和 `for` 不建议作为 XML 属性名。作为替代，React DOM 使用 `className` 和 `htmlFor` 来做对应的属性。
+
+## 作用
+
+用来简化创建虚拟DOM
+
+## 语法
+
+```jsx
+const myId = "kop66";
+const myData = "YNWA";
+
+// 创建虚拟DOM
+const VDOM = (
+	<div>
+	<h2 className="title" id={myId.toLocaleLowerCase()}>
+		<span style={{color:"#430000", fontSize:"28px"}}>{myData}</span>
+	</h2>
+	UserName:<input type="text" name="userName" /><br/>
+	Age:<input type="text" name="userAge" />
+		</div>
+	);
+// 渲染虚拟DOM到页面
+ReactDOM.render(VDOM, document.getElementById("test"));
+/*
+jsx语法规则：
+	1.定义虚拟DOM时，不要写引号。
+	2.标签中混入JS表达式时要用{}。
+	3.样式的类名指定不要用class，要用className。
+	4.内联样式，要用style={{key:value}}的形式去写。
+	5.只有一个根标签
+	6.标签必须闭合
+	7.标签首字母
+		(1).若小写字母开头，则将该标签转为html中同名元素，若html中无该标签对应的同名元素，则报错。
+		(2).若大写字母开头，react就去渲染对应的组件，若组件没有定义，则报错。
+*/
+```
+
+## 例子
+
+```jsx
+// 模拟一些数据
+const data = ["React","Vue","Angular","jQuery"];
+
+// 创建虚拟DOM
+const VDOM = (
+	<div>
+		<h1>前端JS框架</h1>
+		<ul>
+			{
+				data.map((item, index) => {
+					return <li key={index}>{item}</li>
+				})
+			}
+		</ul>
+	</div>
+	);
+
+// 渲染虚拟DOM到页面
+ReactDOM.render(VDOM, document.getElementById("test"));
+
+/* 
+			一定注意区分：【js语句(代码)】与【js表达式】
+					1.表达式：一个表达式会产生一个值，可以放在任何一个需要值的地方
+								下面这些都是表达式：
+										(1). a
+										(2). a+b
+										(3). demo(1)
+										(4). arr.map() 
+										(5). function test () {}
+					2.语句(代码)：
+								下面这些都是语句(代码)：
+										(1).if(){}
+										(2).for(){}
+										(3).switch(){case:xxxx}
+		
+	 */
+```
+
+
 
 ## 使用 JSX
 
@@ -429,6 +654,61 @@ ReactDOM.render(
 
 # React 组件
 
+## 模块与组件、模块化与组件化的理解
+
+###  模块
+
+1. 理解：向外提供特定功能的js程序, 一般就是一个js文件
+2. 为什么要拆成模块：随着业务逻辑增加，代码越来越多且复杂。
+3.  作用：复用js, 简化js的编写, 提高js运行效率
+
+### 组件
+
+1.  理解：用来实现局部功能效果的代码和资源的集合(html/css/js/image等等)
+2.  为什么要用组件： 一个界面的功能更复杂
+3. 作用：复用编码, 简化项目编码, 提高运行效率
+
+###  模块化
+
+当应用的js都以模块来编写的, 这个应用就是一个模块化的应用
+
+### 组件化
+
+当应用是以多组件的方式实现, 这个应用就是一个组件化的应用
+
+### 注意
+
+1. 组件名必须首字母大写
+2. 虚拟DOM元素只能有一个根元素
+3. 虚拟DOM元素必须有结束标签
+
+
+
+## React面向组件编程
+
+### 函数式组件
+
+适用于**简单组件**的定义
+
+```jsx
+// 创建函数式组件
+function MyComponent() {
+	console.log(this); //此处的this是undefined，因为babel编译后开启了严格模式
+	return <h2>函数式组件</h2>
+}
+
+// 渲染组件到页面
+ReactDOM.render(<MyComponent/>, document.getElementById("test"));
+/* 
+	执行了ReactDOM.render(<MyComponent/>.......之后，发生了什么？
+		1.React解析组件标签，找到了MyComponent组件。
+		2.发现组件是使用函数定义的，随后调用该函数，将返回的虚拟DOM转为真实DOM，随后呈现在页面中。
+		*/
+
+```
+
+
+
 我们封装一个输出 "Hello World！" 的组件，组件名为 HelloMessage：
 
 ```jsx
@@ -444,7 +724,7 @@ ReactDOM.render(
 );
 ```
 
-### 实例解析：
+#### 实例解析：
 
 1、我们可以使用函数定义了一个组件：
 
@@ -466,7 +746,7 @@ class Welcome extends React.Component {
 
 2、**const element = <HelloMessage />** 为用户自定义的组件。
 
-> 注意，原生 HTML 元素名以小写字母开头，而自定义的 React 类名以大写字母开头，比如 HelloMessage 不能写成 helloMessage。除此之外还需要注意组件类只能包含一个顶层标签，否则也会报错。
+> 注意，原生 HTML 元素名以小写字母开头，**而自定义的 React 类名以大写字母开头**，比如 HelloMessage 不能写成 helloMessage。除此之外还需要注意组件类只能包含一个顶层标签，否则也会报错。
 
 如果我们需要向组件传递参数，可以使用 **this.props** 对象,实例如下：
 
@@ -486,6 +766,41 @@ ReactDOM.render(
 以上实例中 **name** 属性通过 **props.name** 来获取。
 
 > 注意，在添加属性时， class 属性需要写成 className ，for 属性需要写成 htmlFor ，这是因为 class 和 for 是 JavaScript 的保留字。
+
+### 类式组件
+
+适用于 **复杂组件** 的定义
+
+```jsx
+// 创建类式组件
+class MyComponent extends React.Component {
+	render() {
+		//render是放在哪里的？—— MyComponent的原型对象上，供实例使用。
+		//render中的this是谁？—— MyComponent的实例对象 <=> MyComponent组件实例对象。
+		console.log('render中的this:', this);  // MyComponent {props: {…}, context: {…}, refs: {…}, updater: {…}, _reactInternalFiber: FiberNode, …}
+		return <h2>类式组件</h2>
+	}
+}
+
+// 渲染组件到页面
+ReactDOM.render(<MyComponent/>, document.getElementById("test"));
+		/* 
+			执行了ReactDOM.render(<MyComponent/>.......之后，发生了什么？
+					1.React解析组件标签，找到了MyComponent组件。
+					2.发现组件是使用类定义的，随后new出来该类的实例，并通过该实例调用到原型上的render方法。
+					3.将render返回的虚拟DOM转为真实DOM，随后呈现在页面中。
+		*/
+```
+
+#### 渲染类组件标签的基本流程
+
+1. React内部会创建组件实例对象
+2. 调用render()得到虚拟DOM, 并解析为真实DOM
+3. 插入到指定的页面元素内部
+
+
+
+
 
 ## 复合组件
 
