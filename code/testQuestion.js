@@ -1,17 +1,14 @@
-// 用纯函数重写 class User
+let animal = {
+  eat: function() { // 这里是故意这样写的，而不是 eat() {...
+    // ...
+  }
+};
 
-// 1. 创建构造器函数
-function User(name) {
-    this.name = name;
-}
-// 函数的原型（prototype）默认具有 "constructor" 属性，
-// 所以，我们不需要创建它
+let rabbit = {
+  __proto__: animal,
+  eat: function() {
+    super.eat();
+  }
+};
 
-// 2. 将方法添加到原型
-User.prototype.sayHi = function() {
-    console.log("Hi!", this.name);
-}
-
-// 用法：
-let user = new User("kop");
-user.sayHi();
+rabbit.eat();  // 错误调用 super（因为这里没有 [[HomeObject]]）

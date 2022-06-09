@@ -6,82 +6,51 @@
 	<title></title>
 </head>
 	<style type="text/css">
-		body {
-			margin: 0;
-		}
-		body, html, .container {
-			height: 100vh;
-			box-sizing: border-box;
-			text-align: center;
-			overflow: hidden;
-		}
-		.container {
-			/* 开启 grid 布局 */
-			display: grid;
-			grid-template-rows: auto 1fr auto;
-		}
-		.header{
-			background-color: #987dff;
-		}
-		.content {
-			/* 中间部分的布局可以参考 两列、三列布局  */
-			display: grid;
-			grid-template-columns: auto 1fr;
-			background-color: #feeeee;
-		}
-		.left {
-			width: 240px;
-			background-color: #123456;
-			font-size: 80px;
-			line-height: calc(100vh - 200px);
-		}
-		.right {
-			background-color: #123123;
-			font-size: 60px;
-
-			/* 如果超出出现滚动条 */
-			overflow: auto;
-			height: 100%;
-		}
-		.right-in {
-			/* 假设容器内有500px的元素 */
-			height: 500px;
-		}
-		.footer {
-			background-color: #321456;
-		}
-		.header, .footer {
-			height: 100px;
-			line-height: 100px;
-			text-align: center;
-			font-size: 40px;
-		}
+	
 	</style>
 
 <body>
-	<div class="container">
-		<div class="header">header</div>
-		<div class="content">
-			<div class="left">导航</div>
-			<div class="right">
-				<div class="right-in">
-					自适应，超出高度出现滚动条<br>
-					自适应，超出高度出现滚动条<br>
-					自适应，超出高度出现滚动条<br>
-					自适应，超出高度出现滚动条<br>
-					自适应，超出高度出现滚动条<br>
-					自适应，超出高度出现滚动条<br>
-					自适应，超出高度出现滚动条<br>
-					自适应，超出高度出现滚动条<br>
-					自适应，超出高度出现滚动条<br>
-					自适应，超出高度出现滚动条<br>
-					自适应，超出高度出现滚动条<br>
-					自适应，超出高度出现滚动条<br>
-					自适应，超出高度出现滚动条<br>
-				</div>
-			</div>
-		</div>
-		<div class="footer">footer</div>
-	</div>
+	<div id="demo"></div>
+	<button onclick="clock.start();">开始</button>
+	<button onclick="clock.stop();">停止</button>
 </body>
+<script type="text/javascript">
+class Clock {
+  constructor(args) {
+    this.template = args.template;
+    this.el = args.el;
+  }
+  timer = null;
+  render() {
+    let date = new Date();
+    let hours = this.format(date.getHours());
+    let minutes = this.format(date.getMinutes());
+    let seconds = this.format(date.getSeconds());
+    let output = this.template.replace("h", hours)
+      .replace("m", minutes)
+      .replace("s", seconds);
+    this.el.innerHTML = output;
+  }
+  format(value) {
+    if (value < 10) {
+      return "0" + value;
+    }
+    return value;
+  }
+  stop() {
+    clearInterval(this.timer);
+  }
+  start() {
+  	clearInterval(this.timer);
+    this.render();
+    this.timer = setInterval(() => this.render(), 1000);
+  }
+}
+
+let el = document.getElementById("demo");
+let clock = new Clock({template: 'h:m:s', el:el});
+clock.start();
+
+</script>
+
 </html>

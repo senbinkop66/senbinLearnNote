@@ -688,7 +688,7 @@ ReactDOM.render(
 
 ### 函数式组件
 
-适用于**简单组件**的定义
+定义组件最简单的方式就是编写 JavaScript 函数：
 
 ```jsx
 // 创建函数式组件
@@ -707,7 +707,13 @@ ReactDOM.render(<MyComponent/>, document.getElementById("test"));
 
 ```
 
+```jsx
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}
+```
 
+该函数是一个有效的 React 组件，因为它接收唯一带有数据的 “props”（代表属性）对象与并返回一个 React 元素。这类组件被称为“函数组件”，**因为它本质上就是 JavaScript 函数。**
 
 我们封装一个输出 "Hello World！" 的组件，组件名为 HelloMessage：
 
@@ -802,9 +808,31 @@ ReactDOM.render(<MyComponent/>, document.getElementById("test"));
 
 
 
-## 复合组件
+## 组合组件
 
-我们可以通过创建多个组件来合成一个组件，即把组件的不同功能点进行分离。
+组件可以在其输出中引用其他组件。这就可以让我们用同一组件来抽象出任意层次的细节。按钮，表单，对话框，甚至整个屏幕的内容：在 React 应用程序中，这些通常都会以组件的形式表示。
+
+例如，我们可以创建一个可以多次渲染 `Welcome` 组件的 `App` 组件：
+
+```jsx
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}
+
+function App() {
+  return (
+    <div>
+      <Welcome name="Sara" />
+      <Welcome name="Cahal" />
+      <Welcome name="Edite" />
+    </div>
+  );
+}
+```
+
+**通常来说，每个新的 React 应用程序的顶层组件都是 `App` 组件**。但是，如果你将 React 集成到现有的应用程序中，你可能需要使用像 `Button` 这样的小组件，并自下而上地将这类组件逐步应用到视图层的每一处。
+
+
 
 以下实例我们实现了输出网站名字和网址的组件：
 
@@ -836,6 +864,166 @@ ReactDOM.render(
 
 实例中 App 组件使用了 Name、Url 和 Nickname 组件来输出对应的信息。
 
+----
+
+## 提取组件
+
+将组件拆分为更小的组件。
+
+例如，参考如下 `Comment` 组件：
+
+```jsx
+function Comment(props) {
+  return (
+    <div className="Comment">
+      <div className="UserInfo">
+        <img className="Avatar"
+          src={props.author.avatarUrl}
+          alt={props.author.name}
+        />
+        <div className="UserInfo-name">
+          {props.author.name}
+        </div>
+      </div>
+      <div className="Comment-text">
+        {props.text}
+      </div>
+      <div className="Comment-date">
+        {formatDate(props.date)}
+      </div>
+    </div>
+  );
+}
+```
+
+该组件用于描述一个社交媒体网站上的评论功能，它接收 `author`（对象），`text` （字符串）以及 `date`（日期）作为 props。
+
+该组件由于嵌套的关系，变得难以维护，且很难复用它的各个部分。因此，让我们从中提取一些组件出来。
+
+首先，我们将提取 `Avatar` 组件：
+
+```jsx
+function Avatar(props) {
+  return (
+    <img className="Avatar"
+      src={props.user.avatarUrl}
+      alt={props.user.name}
+    />
+  );
+}
+```
+
+`Avatar` 不需知道它在 `Comment` 组件内部是如何渲染的。因此，我们给它的 props 起了一个更通用的名字：`user`，而不是 `author`。
+
+我们建议从组件自身的角度命名 props，而不是依赖于调用组件的上下文命名。
+
+我们现在针对 `Comment` 做些微小调整：
+
+```jsx
+function Comment(props) {
+  return (
+    <div className="Comment">
+      <div className="UserInfo">
+        <Avatar user={props.author} />
+        <div className="UserInfo-name">
+          {props.author.name}
+        </div>
+      </div>
+      <div className="Comment-text">
+        {props.text}
+      </div>
+      <div className="Comment-date">
+        {formatDate(props.date)}
+      </div>
+    </div>
+  );
+}
+```
+
+接下来，我们将提取 `UserInfo` 组件，该组件在用户名旁渲染 `Avatar` 组件：
+
+```jsx
+function UserInfo(props) {
+  return (
+    <div className="UserInfo">
+      <Avatar user={props.user} />
+      <div className="UserInfo-name">
+        {props.user.name}
+      </div>
+    </div>
+  );
+}
+```
+
+进一步简化 `Comment` 组件：
+
+```jsx
+function Comment(props) {
+  return (
+    <div className="Comment">
+      <UserInfo user={props.author} />
+      <div className="Comment-text">
+        {props.text}
+      </div>
+      <div className="Comment-date">
+        {formatDate(props.date)}
+      </div>
+    </div>
+  );
+}
+```
+
+最初看上去，提取组件可能是一件繁重的工作，但是，在大型应用中，构建可复用组件库是完全值得的。
+
+根据经验来看，**如果 UI 中有一部分被多次使用**（`Button`，`Panel`，`Avatar`），**或者组件本身就足够复杂**（`App`，`FeedStory`，`Comment`），那么它就是一个可提取出独立组件的候选项。
+
+----
+
+## 渲染组件
+
+之前，我们遇到的 React 元素都只是 DOM 标签：
+
+```jsx
+const element = <div />;
+```
+
+不过，React 元素也可以是用户自定义的组件：
+
+```jsx
+const element = <Welcome name="Sara" />;
+```
+
+当 React 元素为用户自定义组件时，它会将 JSX 所接收的属性（attributes）以及子组件（children）转换为单个对象传递给组件，这个对象被称之为 “props”。
+
+例如，这段代码会在页面上渲染 “Hello, Sara”：
+
+```jsx
+function Welcome(props) {  
+    return <h1>Hello, {props.name}</h1>;
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+const element = <Welcome name="Sara" />;
+root.render(element);
+```
+
+让我们来回顾一下这个例子中发生了什么：
+
+1. 我们调用 `root.render()` 函数，并传入 `<Welcome name="Sara" />` 作为参数。
+2. React 调用 `Welcome` 组件，并将 `{name: 'Sara'}` 作为 props 传入。
+3. `Welcome` 组件将 `<h1>Hello, Sara</h1>` 元素作为返回值。
+4. React DOM 将 DOM 高效地更新为 `<h1>Hello, Sara</h1>`。
+
+>**注意：** 组件名称必须以大写字母开头。
+>
+>React 会将以小写字母开头的组件视为原生 DOM 标签。例如，`<div />` 代表 HTML 的 div 标签，而 `<Welcome />` 则代表一个组件，并且需在作用域内使用 `Welcome`。
+>
+>你可以在[深入 JSX](https://zh-hans.reactjs.org/docs/jsx-in-depth.html#user-defined-components-must-be-capitalized) 中了解更多关于此规范的原因。
+
+
+
+
+
 ---
 
 
@@ -850,13 +1038,14 @@ React 里，**只需更新组件的 state，然后根据新的 state 重新渲�
 
 ###  理解
 
-1.  state是组件对象最重要的属性, 值是对象(可以包含多个key-value的组合)
-2. 组件被称为"状态机", 通过更新组件的state来更新对应的页面显示(重新渲染组件)
+1.  state是组件对象最重要的属性, **值是对象**(可以包含多个key-value的组合)
+2.  组件被称为"状态机", **通过更新组件的state来更新对应的页面显示**(重新渲染组件)
+3.  State 与 props 类似，但是 state 是私有的，并且完全受控于当前组件。
 
 ###  强烈注意
 
-1. 组件中render方法中的this为组件实例对象
-2. 组件自定义的方法中this为undefined，如何解决？
+1. 组件中**render方法中的this为组件实例对象**
+2. 组件**自定义的方法中this为undefined**，如何解决？
 
 ​		a)   强制绑定this: 通过函数对象的bind()
 
@@ -936,48 +1125,135 @@ reportWebVitals();
 
 ```
 
+### state简写方式
 
+```jsx
+class Weather extends Component {
+  // 初始化状态
+  state = {isHot: true, wind: "大风"};
 
+  //render调用几次？ ———— 1+n次 1是初始化的那次 n是状态更新的次数
+  render() {
+    // 读取状态
+    const {isHot, wind} = this.state;
+    return <h1 onClick={this.changeWeather}>今天天气很<span style={{color: isHot ? "#ff99ff" : "#843bfb"}}>{isHot ? "炎热" : "凉爽"}</span>,{wind}</h1>
+  }
 
+  // 自定义方法————要用赋值语句的形式+箭头函数
+  changeWeather = () => {
+    // 获取原来的 isHot 值
+    const isHot = this.state.isHot;
+    //严重注意：状态必须通过setState进行更新,且更新是一种合并，不是替换。
+    this.setState({isHot: !isHot});
+  }
+}
 
-以下实例创建一个名称扩展为 React.Component 的 ES6 类，在 render() 方法中使用 this.state 来修改当前的时间。
+//2.渲染组件到页面
+ReactDOM.render(<Weather/>, document.getElementById('test'))
+```
 
-添加一个类构造函数来初始化状态 this.state，类组件应始终使用 props 调用基础构造函数。
+----
+
+### 将函数组件转换成 class 组件
+
+```jsx
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+function Clock(props) {
+  return (
+    <div>
+      <h1>Hello, world!</h1>
+      <h2>It is {props.date.toLocaleTimeString()}.</h2>
+    </div>
+  );
+}
+
+function tick() {
+  root.render(<Clock date={new Date()} />);
+}
+
+setInterval(tick, 1000);
+```
+
+通过以下五步将 `Clock` 的函数组件转成 class 组件：
+
+1. 创建一个同名的 [ES6 class](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Classes)，并且继承于 `React.Component`。
+2. 添加一个空的 `render()` 方法。
+3. 将函数体移动到 `render()` 方法之中。
+4. 在 `render()` 方法中使用 `this.props` 替换 `props`。
+5. 删除剩余的空函数声明。
 
 ```jsx
 class Clock extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {date: new Date()};
-  }
- 
   render() {
     return (
       <div>
         <h1>Hello, world!</h1>
-        <h2>现在是 {this.state.date.toLocaleTimeString()}.</h2>
+        <h2>It is {this.props.date.toLocaleTimeString()}.</h2>
       </div>
     );
   }
 }
- 
-ReactDOM.render(
-  <Clock />,
-  document.getElementById('example')
-);    
 ```
 
-接下来，我们将使Clock设置自己的计时器并每秒更新一次。
+现在 `Clock` 组件被定义为 class，而不是函数。
 
-### 将生命周期方法添加到类中
+每次组件更新时 `render` 方法都会被调用，但只要在相同的 DOM 节点中渲染 `<Clock />` ，就仅有一个 `Clock` 组件的 class 实例被创建使用。这就使得我们可以使用如 state 或生命周期方法等很多其他特性。
 
-在具有许多组件的应用程序中，在销毁时释放组件所占用的资源非常重要。
+我们通过以下三步将 `date` 从 props 移动到 state 中：
 
-每当 Clock 组件第一次加载到 DOM 中的时候，我们都想生成定时器，这在 React 中被称为**挂载**。
+1. 把 `render()` 方法中的 `this.props.date` 替换成 `this.state.date` ：
 
-同样，每当 Clock 生成的这个 DOM 被移除的时候，我们也会想要清除定时器，这在 React 中被称为**卸载**。
+```jsx
+class Clock extends React.Component {
+  render() {
+    return (
+      <div>
+        <h1>Hello, world!</h1>
+        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+```
 
-我们可以在组件类上声明特殊的方法，当组件挂载或卸载时，来运行一些代码：
+2. 添加一个 [class 构造函数](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Classes#Constructor)，然后在该函数中为 `this.state` 赋初值：
+
+```jsx
+class Clock extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {date: new Date()};  }
+
+  render() {
+    return (
+      <div>
+        <h1>Hello, world!</h1>
+        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+```
+
+通过以下方式将 `props` 传递到父类的构造函数中：
+
+```js
+  constructor(props) {
+    super(props);
+    this.state = {date: new Date()};
+  }
+```
+
+Class 组件应该始终使用 `props` 参数来调用父类的构造函数。
+
+3. 移除 `<Clock />` 元素中的 `date` 属性：
+
+```jsx
+root.render(<Clock />);
+```
+
+代码如下：
 
 ```jsx
 class Clock extends React.Component {
@@ -985,113 +1261,225 @@ class Clock extends React.Component {
     super(props);
     this.state = {date: new Date()};
   }
- 
+
+  render() {
+    return (
+      <div>
+        <h1>Hello, world!</h1>
+        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Clock />);
+```
+
+接下来，我们会设置 `Clock` 的计时器并每秒更新它。
+
+
+
+### 将生命周期方法添加到类中
+
+在具有许多组件的应用程序中，当组件被销毁时释放所占用的资源是非常重要的。
+
+当 Clock 组件第一次被渲染到 DOM 中的时候，就为其设置一个计时器。这在 React 中被称为“**挂载**（mount）”。
+
+同时，当 DOM 中 Clock 组件被删除的时候，应该清除计时器。这在 React 中被称为“**卸载**（unmount）”。
+
+我们可以为 class 组件声明一些特殊的方法，当组件挂载或卸载时就会去执行这些方法：
+
+```jsx
+class Clock extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {date: new Date()};
+  }
+
   componentDidMount() {
     this.timerID = setInterval(
       () => this.tick(),
       1000
     );
   }
- 
+
   componentWillUnmount() {
     clearInterval(this.timerID);
   }
- 
+
   tick() {
     this.setState({
       date: new Date()
     });
   }
- 
+
   render() {
     return (
       <div>
         <h1>Hello, world!</h1>
-        <h2>现在是 {this.state.date.toLocaleTimeString()}.</h2>
+        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
       </div>
     );
   }
 }
- 
-ReactDOM.render(
-  <Clock />,
-  document.getElementById('example')
-);
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Clock />);
 ```
 
 **实例解析：**
 
 **componentDidMount()** 与 **componentWillUnmount()** 方法被称作生命周期钩子。
 
-在组件输出到 DOM 后会执行 **componentDidMount()** 钩子，我们就可以在这个钩子上设置一个定时器。
+`componentDidMount()` 方法会在组件已经被渲染到 DOM 中后运行，所以，最好在这里设置计时器
 
-this.timerID 为定时器的 ID，我们可以在 **componentWillUnmount()** 钩子中卸载定时器。
+接下来把计时器的 ID 保存在 `this` 之中（`this.timerID`）。
 
-**代码执行顺序：**
+尽管 `this.props` 和 `this.state` 是 React 本身设置的，且都拥有特殊的含义，但是其实你可以向 class 中随意添加不参与数据流（比如计时器 ID）的额外字段。
 
-1. 当 `<Clock />` 被传递给 `ReactDOM.render()` 时，React 调用 `Clock` 组件的构造函数。 由于 `Clock` 需要显示当前时间，所以使用包含当前时间的对象来初始化 `this.state` 。 我们稍后会更新此状态。
-2. React 然后调用 `Clock` 组件的 `render()` 方法。这是 React 了解屏幕上应该显示什么内容，然后 React 更新 DOM 以匹配 `Clock` 的渲染输出。
-3. 当 `Clock` 的输出插入到 DOM 中时，React 调用 `componentDidMount()` 生命周期钩子。 在其中，`Clock` 组件要求浏览器设置一个定时器，每秒钟调用一次 `tick()`。
-4. 浏览器每秒钟调用 `tick()` 方法。 在其中，`Clock` 组件通过使用包含当前时间的对象调用 `setState()` 来调度UI更新。 通过调用 `setState()` ，React 知道状态已经改变，并再次调用 `render()` 方法来确定屏幕上应当显示什么。 这一次，`render()` 方法中的 `this.state.date` 将不同，所以渲染输出将包含更新的时间，并相应地更新 DOM。
-5. 一旦 `Clock` 组件被从 DOM 中移除，React 会调用 `componentWillUnmount()` 这个钩子函数，定时器也就会被清除。
+我们会在 `componentWillUnmount()` 生命周期方法中清除计时器
+
+最后，我们会实现一个叫 `tick()` 的方法，`Clock` 组件每秒都会调用它。
+
+使用 `this.setState()` 来时刻更新组件 state：
+
+现在时钟每秒都会刷新。
+
+让我们来快速概括一下发生了什么和这些方法的调用顺序：
+
+1. 当 `<Clock />` 被传给 `root.render()`的时候，React 会调用 `Clock` 组件的构造函数。因为 `Clock` 需要显示当前的时间，所以它会用一个包含当前时间的对象来初始化 `this.state`。我们会在之后更新 state。
+2. 之后 React 会调用组件的 `render()` 方法。这就是 React 确定该在页面上展示什么的方式。然后 React 更新 DOM 来匹配 `Clock` 渲染的输出。
+3. 当 `Clock` 的输出被插入到 DOM 中后，React 就会调用 `ComponentDidMount()` 生命周期方法。在这个方法中，`Clock` 组件向浏览器请求设置一个计时器来每秒调用一次组件的 `tick()` 方法。
+4. 浏览器每秒都会调用一次 `tick()` 方法。 在这方法之中，`Clock` 组件会通过调用 `setState()` 来计划进行一次 UI 更新。得益于 `setState()` 的调用，React 能够知道 state 已经改变了，然后会重新调用 `render()` 方法来确定页面上该显示什么。这一次，`render()` 方法中的 `this.state.date` 就不一样了，**如此一来就会渲染输出更新过的时间。React 也会相应的更新 DOM。**
+5. 一旦 `Clock` 组件从 DOM 中被移除，React 就会调用 `componentWillUnmount()` 生命周期方法，这样计时器就停止了。
+
+----
+
+### 正确地使用 State
+
+关于 `setState()` 你应该了解三件事：
+
+#### 不要直接修改 State
+
+例如，此代码不会重新渲染组件：
+
+```js
+// Wrong
+this.state.comment = 'Hello';
+```
+
+而是应该使用 `setState()`:
+
+```js
+// Correct
+this.setState({comment: 'Hello'});
+```
+
+**构造函数是唯一可以给 `this.state` 赋值的地方。**
+
+#### State 的更新可能是异步的
+
+出于性能考虑，React 可能会把多个 `setState()` 调用合并成一个调用。
+
+因为 `this.props` 和 `this.state` 可能会异步更新，**所以你不要依赖他们的值来更新下一个状态。**
+
+例如，**此代码可能会无法更新计数器**：
+
+```js
+// Wrong
+this.setState({
+  counter: this.state.counter + this.props.increment,
+});
+```
+
+要解决这个问题，可以让 `setState()` 接收一个函数而不是一个对象。这个函数用上一个 state 作为第一个参数，将此次更新被应用时的 props 做为第二个参数：
+
+```js
+// Correct
+this.setState((state, props) => ({
+  counter: state.counter + props.increment
+}));
+```
+
+上面使用了[箭头函数](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions)，不过使用普通的函数也同样可以：
+
+```js
+// Correct
+this.setState(function(state, props) {
+  return {
+    counter: state.counter + props.increment
+  };
+});
+```
+
+### State 的更新会被合并
+
+当你调用 `setState()` 的时候，**React 会把你提供的对象合并到当前的 state**。
+
+例如，你的 state 包含几个独立的变量：
+
+```js
+  constructor(props) {
+    super(props);
+    this.state = {
+      posts: [],
+      comments: []
+    };
+  }
+```
+
+然后你可以分别调用 `setState()` 来单独地更新它们：
+
+```js
+  componentDidMount() {
+    fetchPosts().then(response => {
+      this.setState({
+        posts: response.posts
+      });
+    });
+
+    fetchComments().then(response => {
+      this.setState({
+        comments: response.comments
+      });
+    });
+  }
+```
+
+**这里的合并是浅合并**，所以 `this.setState({comments})` 完整保留了 `this.state.posts`， 但是完全替换了 `this.state.comments`。
+
+
+
+----
 
 ### 数据自顶向下流动
 
-父组件或子组件都不能知道某个组件是有状态还是无状态，并且它们不应该关心某组件是被定义为一个函数还是一个类。
+不管是父组件或是子组件**都无法知道某个组件是有状态的还是无状态的**，并且它们也并不关心它是函数组件还是 class 组件。
 
-这就是为什么状态通常被称为**局部或封装**。 除了拥有并设置它的组件外，其它组件不可访问。
+**这就是为什么称 state 为局部的或是封装的的原因**。除了拥有并设置了它的组件，其他组件都无法访问。
 
-以下实例中 FormattedDate 组件将在其属性中接收到 date 值，并且不知道它是来自 Clock 状态、还是来自 Clock 的属性、亦或手工输入：
+组件**可以选择把它的 state 作为 props 向下传递到它的子组件中**：
 
 ```jsx
-function FormattedDate(props) {
-  return <h2>现在是 {props.date.toLocaleTimeString()}.</h2>;
-}
- 
-class Clock extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {date: new Date()};
-  }
- 
-  componentDidMount() {
-    this.timerID = setInterval(
-      () => this.tick(),
-      1000
-    );
-  }
- 
-  componentWillUnmount() {
-    clearInterval(this.timerID);
-  }
- 
-  tick() {
-    this.setState({
-      date: new Date()
-    });
-  }
- 
-  render() {
-    return (
-      <div>
-        <h1>Hello, world!</h1>
-        <FormattedDate date={this.state.date} />
-      </div>
-    );
-  }
-}
- 
-ReactDOM.render(
-  <Clock />,
-  document.getElementById('example')
-);
+<FormattedDate date={this.state.date} />
 ```
 
-这通常被称为自顶向下或单向数据流。 任何状态始终由某些特定组件所有，并且从该状态导出的任何数据或 UI 只能影响树中下方的组件。
+`FormattedDate` 组件会在其 props 中接收参数 `date`，但是组件本身无法知道它是来自于 `Clock` 的 state，或是 `Clock` 的 props，还是手动输入的：
 
-如果你想象一个组件树作为属性的瀑布，每个组件的状态就像一个额外的水源，它连接在一个任意点，但也流下来。
+```js
+function FormattedDate(props) {
+  return <h2>It is {props.date.toLocaleTimeString()}.</h2>;
+}
+```
 
-为了表明所有组件都是真正隔离的，我们可以创建一个 App 组件，它渲染三个Clock：
+**这通常会被叫做“自上而下”或是“单向”的数据流**。
+
+任何的 state 总是所属于特定的组件，**而且从该 state 派生的任何数据或 UI 只能影响树中“低于”它们的组件**。
+
+如果你把一个以组件构成的树想象成一个 props 的数据瀑布的话，**那么每一个组件的 state 就像是在任意一点上给瀑布增加额外的水源，但是它只能向下流动。**
+
+为了证明每个组件都是真正独立的，我们可以创建一个渲染三个 `Clock` 的 `App` 组件：
 
 ```jsx
 function FormattedDate(props) {
@@ -1144,17 +1532,161 @@ function App() {
 ReactDOM.render(<App />, document.getElementById('example'));
 ```
 
-以上实例中每个 Clock 组件都建立了自己的定时器并且独立更新。
+每个 `Clock` 组件都会单独设置它自己的计时器并且更新它。
 
-在 React 应用程序中，组件是有状态还是无状态被认为是可能随时间而变化的组件的实现细节。
+在 React 应用中**，组件是有状态组件还是无状态组件属于组件实现的细节**，它可能会随着时间的推移而改变。你可以在有状态的组件中使用无状态的组件，反之亦然。
 
-我们可以在有状态组件中使用无状态组件，也可以在无状态组件中使用有状态组件。
+
+
+----
 
 # React Props
 
+## 组件三大核心属性2: props
+
 state 和 props 主要的区别在于 **props** 是不可变的，**而 state 可以根据与用户交互来改变**。这就是为什么有些容器组件需要定义 state 来更新和修改数据。 而子组件只能通过 props 来传递数据。
 
+### 理解
+
+1. 每个组件对象都会有props(properties的简写)属性
+
+2. 组件标签的所有属性都保存在props中
+
+### 作用
+
+1. 通过标签属性从组件外向组件内传递变化的数据
+
+2. 注意: 组件内部不要修改props数据
+
+### 编码操作
+
+1. 内部读取某个属性值
+
+```js
+this.props.name
+```
+
+2. 对props中的属性值进行类型限制和必要性限制
+
+(1) 第一种方式（React v15.5 开始已弃用）：
+
+```js
+Person.propTypes = {
+ name: React.PropTypes.string.isRequired,
+ age: React.PropTypes.number
+}
+```
+
+(2) 第二种方式（新）：使用prop-types库进限制（需要引入prop-types库）
+
+```js
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+Person.propTypes = {
+  name: PropTypes.string.isRequired,
+  age: PropTypes.number. 
+}
+
+```
+
+扩展属性: 将对象的所有属性通过props传递
+
+```jsx
+<Person {...person} />
+```
+
+4. 默认属性值：
+
+```js
+Person.defaultProps = {
+  age: 18,
+  sex:'男'
+}
+```
+
+5. 组件类的构造函数
+
+```js
+constructor(props){
+  super(props)
+  console.log(props)  //打印所有属性
+}
+```
+
+
+
 ## 使用 Props
+
+### 单独传递
+
+```jsx
+/*
+需求: 自定义用来显示一个人员信息的组件
+1.	姓名必须指定，且为字符串类型；
+2.	性别为字符串类型，如果性别没有指定，默认为男
+3.	年龄为字符串类型，且为数字类型，默认值为18
+*/
+
+// Person.js
+class Person extends Component {
+  render() {
+    const {name, sex, age} = this.props;
+    return (
+        <ul>
+          <li>姓名: {name}</li>
+          <li>性别: {sex}</li>
+          <li>年龄: {age}</li>
+        </ul>
+      )
+  }
+}
+
+//index.js
+ReactDOM.render(
+   <React.StrictMode>
+     <Person name="Arnold" sex="male" age={23} />
+     <Person name="Salah" sex="male" age={29} />
+     <Person name="Kaita" sex="male" age={26} />
+   </React.StrictMode>,
+   document.getElementById('root')
+);
+
+```
+
+### 多组属性批量传递
+
+```jsx
+// Person.js
+class Person extends Component {
+  render() {
+    const {name, sex, age} = this.props;
+    return (
+        <ul>
+          <li>姓名: {name}</li>
+          <li>性别: {sex}</li>
+          <li>年龄: {age + 1}</li>
+        </ul>
+      )
+  }
+}
+
+// index.js
+const persons = [
+	{name: "Arnold", sex: "male", age: 23},
+	{name:"Salah", sex: "male", age: 29},
+	{name:"Kaita", sex: "male", age: 26},
+];
+ReactDOM.render(
+   <React.StrictMode>
+     <Person {...persons[0]} />
+     <Person {...persons[1]} />
+     <Person {...persons[2]} />
+   </React.StrictMode>,
+   document.getElementById('root')
+);
+```
+
+
 
 以下实例演示了如何在组件中使用 props：
 
@@ -1172,27 +1704,76 @@ ReactDOM.render(
 
 实例中 name 属性通过 props.name 来获取。
 
-## 默认 Props
+## Props 的只读性
 
-你可以通过组件类的 defaultProps 属性为 props 设置默认值，实例如下：
+组件无论是使用函数声明还是通过 class 声明，都决不能修改自身的 props。来看下这个 sum 函数：
+
+```js
+function sum(a, b) {
+  return a + b;
+}
+```
+
+这样的函数被称为[“纯函数”](https://en.wikipedia.org/wiki/Pure_function)，因为该函数不会尝试更改入参，且多次调用下相同的入参始终返回相同的结果。
+
+相反，下面这个函数则不是纯函数，因为它更改了自己的入参：
 
 ```jsx
-class HelloMessage extends React.Component {
+function withdraw(account, amount) {
+  account.total -= amount;
+}
+```
+
+React 非常灵活，但它也有一个严格的规则：
+
+**所有 React 组件都必须像纯函数一样保护它们的 props 不被更改。**
+
+当然，应用程序的 UI 是动态的，并会伴随着时间的推移而变化。在[下一章节](https://zh-hans.reactjs.org/docs/state-and-lifecycle.html)中，我们将介绍一种新的概念，称之为 “state”。在不违反上述规则的情况下，state 允许 React 组件随用户操作、网络响应或者其他变化而动态更改输出内容。
+
+----
+
+## 默认 Props值
+
+您可以通过配置特定的 `defaultProps` 属性来定义 `props` 的默认值：实例如下：
+
+```jsx
+class Greeting extends React.Component {
   render() {
     return (
       <h1>Hello, {this.props.name}</h1>
     );
   }
 }
-HelloMessage.defaultProps = {
-  name: 'kop'
+
+// 指定 props 的默认值：
+Greeting.defaultProps = {
+  name: 'Stranger'
 };
-const element = <HelloMessage/>;
-ReactDOM.render(
-  element,
-  document.getElementById('example')
-);
+
+// 渲染出 "Hello, Stranger"：
+const root = ReactDOM.createRoot(document.getElementById('example')); 
+root.render(<Greeting />);
 ```
+
+如果你正在使用像 plugin-proposal-class-properties（之前名为 plugin-transform-class-properties）的 Babel 转换工具，你也可以在 React 组件类中声明 defaultProps 作为静态属性。此语法提案还没有最终确定，需要进行编译后才能在浏览器中运行。要了解更多信息，请查阅 class fields proposal。
+
+```jsx
+class Greeting extends React.Component {
+  static defaultProps = {
+    name: 'stranger'
+  }
+
+  render() {
+    return (
+      <div>Hello, {this.props.name}</div>
+    )
+  }
+}
+```
+
+`defaultProps` 用于确保 `this.props.name` 在父组件没有指定其值时，有一个默认值。`propTypes` 类型检查发生在 `defaultProps` 赋值后，**所以类型检查也适用于 `defaultProps`**。
+
+----
 
 ## State 和 Props
 
@@ -1203,7 +1784,7 @@ class WebSite extends React.Component {
   constructor() {
       super();
       this.state = {
-        name: "阿西河前端教程",
+        name: "kop",
         site: "https://www.kop.com"
       }
     }
@@ -1238,7 +1819,46 @@ ReactDOM.render(
 );
 ```
 
-## Props 验证
+
+
+## 使用 PropTypes 进行类型检查
+
+>注意：自 React v15.5 起，`React.PropTypes` 已移入另一个包中。请使用 [`prop-types` 库](https://www.npmjs.com/package/prop-types) 代替。
+>
+>我们提供了一个 [codemod 脚本](https://zh-hans.reactjs.org/blog/2017/04/07/react-v15.5.0.html#migrating-from-reactproptypes)来做自动转换。
+
+随着你的应用程序不断增长，你可以通过类型检查捕获大量错误。对于某些应用程序来说，你可以使用 [Flow](https://flow.org/) 或 [TypeScript](https://www.typescriptlang.org/) 等 JavaScript 扩展来对整个应用程序做类型检查。但即使你不使用这些扩展，React 也内置了一些类型检查的功能。要在组件的 props 上进行类型检查，你只需配置特定的 `propTypes` 属性：
+
+```js
+import PropTypes from 'prop-types';
+
+class Greeting extends React.Component {
+  render() {
+    return (
+      <h1>Hello, {this.props.name}</h1>
+    );
+  }
+}
+
+Greeting.propTypes = {
+  name: PropTypes.string
+};
+```
+
+在此示例中，我们使用的是 class 组件，但是同样的功能也可用于函数组件，或者是由 [`React.memo`](https://zh-hans.reactjs.org/docs/react-api.html#reactmemo)/[`React.forwardRef`](https://zh-hans.reactjs.org/docs/react-api.html#reactforwardref) 创建的组件。
+
+`PropTypes` 提供一系列验证器，可用于确保组件接收到的数据类型是有效的。在本例中, 我们使用了 `PropTypes.string`。当传入的 `prop` 值类型不正确时，JavaScript 控制台将会显示警告。出于性能方面的考虑，`propTypes` 仅在开发模式下进行检查。
+
+### 对Props进行限制
+
+第一种方式（React v15.5 开始已弃用）
+
+```jsx
+Person.propTypes = {
+ name: React.PropTypes.string.isRequired,
+ age: React.PropTypes.number
+}
+```
 
 React.PropTypes 在 React v15.5 版本后已经移到了 **prop-types** 库。
 
@@ -1246,93 +1866,859 @@ React.PropTypes 在 React v15.5 版本后已经移到了 **prop-types** 库。
 <script src="https://cdn.bootcss.com/prop-types/15.6.1/prop-types.js"></script>
 ```
 
-Props 验证使用 **propTypes**，它可以保证我们的应用组件被正确使用，React.PropTypes 提供很多验证器 (validator) 来验证传入数据是否有效。当向 props 传入无效数据时，JavaScript 控制台会抛出警告。
+Props 验证使用 **propTypes**，它可以保证我们的应用组件被正确使用，React.PropTypes 提供很多验证器 (validator) 来验证传入数据是否有效。**当向 props 传入无效数据时，JavaScript 控制台会抛出警告。**
 
-以下实例创建一个 Mytitle 组件，属性 title 是必须的且是字符串，非字符串类型会自动转换为字符串 ：
+第二种方式（新）：使用prop-types库进限制（需要引入prop-types库）
+
+```js
+Person.propTypes = {
+  name: PropTypes.string.isRequired,
+  age: PropTypes.number. 
+}
+```
+
+
 
 ```jsx
-var title = "阿西河前端教程";
-// var title = 123;
-class MyTitle extends React.Component {
+//person.js
+import './App.css';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+class Person extends Component {
   render() {
+    const {name, sex, age} = this.props;
+    //props是只读的
+    //this.props.name = 'kop' //此行代码会报错，因为props是只读的
     return (
-      <h1>Hello, {this.props.title}</h1>
+        <ul>
+          <li>姓名: {name}</li>
+          <li>性别: {sex}</li>
+          <li>年龄: {age + 1}</li>
+        </ul>
+      )
+  }
+  
+}
+//对标签属性进行类型、必要性的限制
+Person.propTypes = {
+  name: PropTypes.string.isRequired,  //限制name必传，且为字符串
+  sex: PropTypes.string,  // 限制sex为字符串
+  age: PropTypes.number,  // 限制age为数值
+  speak: PropTypes.func,  // 限制speak为函数
+}
+
+  //指定默认标签属性值
+Person.defaultProps = {
+  sex: "男",  // sex默认值为男
+  age: 18  // age默认值为18
+}
+export default Person;
+
+```
+
+```jsx
+// index.js
+const persons = [
+	{name: "Arnold", sex: "male"},
+	{name:"Salah", sex: "male", age: 29},
+	{name:"Kaita", age: 26},
+];
+
+function speak() {
+  console.log("说话");
+}
+
+ReactDOM.render(
+   <React.StrictMode>
+     <Person {...persons[0]} speak={speak} />
+     <Person {...persons[1]} />
+     <Person {...persons[2]} />
+   </React.StrictMode>,
+   document.getElementById('root')
+);
+```
+
+### 限制props的简写方式
+
+```jsx
+import './App.css';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+class Person extends Component {
+  //static 关键字声明的是类自身的属性，实例上访问不到
+  //对标签属性进行类型、必要性的限制
+  static propTypes = {
+    name: PropTypes.string.isRequired,  //限制name必传，且为字符串
+    sex: PropTypes.string,  // 限制sex为字符串
+    age: PropTypes.number,  // 限制age为数值
+    speak: PropTypes.func,  // 限制speak为函数
+  }
+  
+  //指定默认标签属性值
+  static defaultProps = {
+    sex: "男",  // sex默认值为男
+    age: 18  // age默认值为18
+  }
+
+  render() {
+    const {name, sex, age} = this.props;
+    //props是只读的
+    //this.props.name = 'kop' //此行代码会报错，因为props是只读的
+    return (
+        <ul>
+          <li>姓名: {name}</li>
+          <li>性别: {sex}</li>
+          <li>年龄: {age + 1}</li>
+        </ul>
+      )
+  }
+}
+
+export default Person;
+```
+
+### 限制单个元素
+
+你可以通过 `PropTypes.element` 来确保传递给组件的 children 中只包含一个元素。
+
+```jsx
+import PropTypes from 'prop-types';
+
+class MyComponent extends React.Component {
+  render() {
+    // 这必须只有一个元素，否则控制台会打印警告。
+    const children = this.props.children;
+    return (
+      <div>
+        {children}
+      </div>
     );
   }
 }
-MyTitle.propTypes = {
-  title: PropTypes.string
-};
-ReactDOM.render(
-    <MyTitle title={title} />,
-    document.getElementById('example')
-);
-```
 
-```jsx
-var title = "阿西河前端教程";
-// var title = 123;
-var MyTitle = React.createClass({
-  propTypes: {
-    title: React.PropTypes.string.isRequired,
-  },
-  render: function() {
-     return <h1> {this.props.title} </h1>;
-   }
-});
-ReactDOM.render(
-    <MyTitle title={title} />,
-    document.getElementById('example')
-);
-```
-
-更多验证器说明如下：
-
-```jsx
 MyComponent.propTypes = {
-    // 可以声明 prop 为指定的 JS 基本数据类型，默认情况，这些数据是可选的
-   optionalArray: React.PropTypes.array,
-    optionalBool: React.PropTypes.bool,
-    optionalFunc: React.PropTypes.func,
-    optionalNumber: React.PropTypes.number,
-    optionalObject: React.PropTypes.object,
-    optionalString: React.PropTypes.string,
-    // 可以被渲染的对象 numbers, strings, elements 或 array
-    optionalNode: React.PropTypes.node,
-    //  React 元素
-    optionalElement: React.PropTypes.element,
-    // 用 JS 的 instanceof 操作符声明 prop 为类的实例。
-    optionalMessage: React.PropTypes.instanceOf(Message),
-    // 用 enum 来限制 prop 只接受指定的值。
-    optionalEnum: React.PropTypes.oneOf(['News', 'Photos']),
-    // 可以是多个对象类型中的一个
-    optionalUnion: React.PropTypes.oneOfType([
-      React.PropTypes.string,
-      React.PropTypes.number,
-      React.PropTypes.instanceOf(Message)
-    ]),
-    // 指定类型组成的数组
-    optionalArrayOf: React.PropTypes.arrayOf(React.PropTypes.number),
-    // 指定类型的属性构成的对象
-    optionalObjectOf: React.PropTypes.objectOf(React.PropTypes.number),
-    // 特定 shape 参数的对象
-    optionalObjectWithShape: React.PropTypes.shape({
-      color: React.PropTypes.string,
-      fontSize: React.PropTypes.number
-    }),
-    // 任意类型加上 `isRequired` 来使 prop 不可空。
-    requiredFunc: React.PropTypes.func.isRequired,
-    // 不可空的任意类型
-    requiredAny: React.PropTypes.any.isRequired,
-    // 自定义验证器。如果验证失败需要返回一个 Error 对象。不要直接使用 `console.warn` 或抛异常，因为这样 `oneOfType` 会失效。
-    customProp: function(props, propName, componentName) {
-      if (!/matchme/.test(props[propName])) {
-        return new Error('Validation failed!');
-      }
+  children: PropTypes.element.isRequired
+};
+```
+
+
+
+### 更多验证器
+
+以下提供了使用不同验证器的例子：
+
+```jsx
+import PropTypes from 'prop-types';
+
+MyComponent.propTypes = {
+  // 你可以将属性声明为 JS 原生类型，默认情况下
+  // 这些属性都是可选的。
+  optionalArray: PropTypes.array,
+  optionalBool: PropTypes.bool,
+  optionalFunc: PropTypes.func,
+  optionalNumber: PropTypes.number,
+  optionalObject: PropTypes.object,
+  optionalString: PropTypes.string,
+  optionalSymbol: PropTypes.symbol,
+
+  // 任何可被渲染的元素（包括数字、字符串、元素或数组）
+  // (或 Fragment) 也包含这些类型。
+  optionalNode: PropTypes.node,
+
+  // 一个 React 元素。
+  optionalElement: PropTypes.element,
+
+  // 一个 React 元素类型（即，MyComponent）。
+  optionalElementType: PropTypes.elementType,
+
+  // 你也可以声明 prop 为类的实例，这里使用
+  // JS 的 instanceof 操作符。
+  optionalMessage: PropTypes.instanceOf(Message),
+
+  // 你可以让你的 prop 只能是特定的值，指定它为
+  // 枚举类型。
+  optionalEnum: PropTypes.oneOf(['News', 'Photos']),
+
+  // 一个对象可以是几种类型中的任意一个类型
+  optionalUnion: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+    PropTypes.instanceOf(Message)
+  ]),
+
+  // 可以指定一个数组由某一类型的元素组成
+  optionalArrayOf: PropTypes.arrayOf(PropTypes.number),
+
+  // 可以指定一个对象由某一类型的值组成
+  optionalObjectOf: PropTypes.objectOf(PropTypes.number),
+
+  // 可以指定一个对象由特定的类型值组成
+  optionalObjectWithShape: PropTypes.shape({
+    color: PropTypes.string,
+    fontSize: PropTypes.number
+  }),
+
+  // An object with warnings on extra properties
+  optionalObjectWithStrictShape: PropTypes.exact({
+    name: PropTypes.string,
+    quantity: PropTypes.number
+  }),
+
+  // 你可以在任何 PropTypes 属性后面加上 `isRequired` ，确保
+  // 这个 prop 没有被提供时，会打印警告信息。
+  requiredFunc: PropTypes.func.isRequired,
+
+  // 任意类型的必需数据
+  requiredAny: PropTypes.any.isRequired,
+
+  // 你可以指定一个自定义验证器。它在验证失败时应返回一个 Error 对象。
+  // 请不要使用 `console.warn` 或抛出异常，因为这在 `oneOfType` 中不会起作用。
+  customProp: function(props, propName, componentName) {
+    if (!/matchme/.test(props[propName])) {
+      return new Error(
+        'Invalid prop `' + propName + '` supplied to' +
+        ' `' + componentName + '`. Validation failed.'
+      );
     }
+  },
+
+  // 你也可以提供一个自定义的 `arrayOf` 或 `objectOf` 验证器。
+  // 它应该在验证失败时返回一个 Error 对象。
+  // 验证器将验证数组或对象中的每个值。验证器的前两个参数
+  // 第一个是数组或对象本身
+  // 第二个是他们当前的键。
+  customArrayProp: PropTypes.arrayOf(function(propValue, key, componentName, location, propFullName) {
+    if (!/matchme/.test(propValue[key])) {
+      return new Error(
+        'Invalid prop `' + propFullName + '` supplied to' +
+        ' `' + componentName + '`. Validation failed.'
+      );
+    }
+  })
+};
+```
+
+
+
+## 函数式组件使用props
+
+```jsx
+		//创建组件
+		function Person (props){
+			const {name,age,sex} = props
+			return (
+					<ul>
+						<li>姓名：{name}</li>
+						<li>性别：{sex}</li>
+						<li>年龄：{age}</li>
+					</ul>
+				)
+		}
+		Person.propTypes = {
+			name:PropTypes.string.isRequired, //限制name必传，且为字符串
+			sex:PropTypes.string,//限制sex为字符串
+			age:PropTypes.number,//限制age为数值
+		}
+
+		//指定默认标签属性值
+		Person.defaultProps = {
+			sex:'男',//sex默认值为男
+			age:18 //age默认值为18
+		}
+		//渲染组件到页面
+		ReactDOM.render(<Person name="kop"/>,document.getElementById('test1'))
+```
+
+如果你在常规开发中使用函数组件，那你可能需要做一些适当的改动，以保证 PropsTypes 应用正常。
+
+假设你有如下组件：
+
+```jsx
+export default function HelloWorldComponent({ name }) {
+  return (
+    <div>Hello, {name}</div>
+  )
+}
+```
+
+如果要添加 PropTypes，你可能需要在导出之前以单独声明的一个函数的形式，声明该组件，具体代码如下：
+
+```jsx
+function HelloWorldComponent({ name }) {
+  return (
+    <div>Hello, {name}</div>
+  )
+}
+
+export default HelloWorldComponent
+```
+
+接着，可以直接在 `HelloWorldComponent` 上添加 PropTypes：
+
+```jsx
+import PropTypes from 'prop-types'
+
+function HelloWorldComponent({ name }) {
+  return (
+    <div>Hello, {name}</div>
+  )
+}
+
+HelloWorldComponent.propTypes = {
+  name: PropTypes.string
+}
+
+export default HelloWorldComponent
+```
+
+
+
+---
+
+# 构造器constructor()
+
+```
+constructor(props)
+```
+
+**如果不初始化 state 或不进行方法绑定，则不需要为 React 组件实现构造函数。**
+
+在 React 组件挂载之前，会调用它的构造函数。在为 React.Component 子类实现构造函数时，应在其他语句之前调用 `super(props)`。否则，`this.props` 在构造函数中**可能会出现未定义的 bug**。
+
+通常，在 React 中，构造函数**仅用于以下两种情况**：
+
+- 通过给 `this.state` 赋值对象来初始化[内部 state](https://zh-hans.reactjs.org/docs/state-and-lifecycle.html)。
+- 为[事件处理函数](https://zh-hans.reactjs.org/docs/handling-events.html)绑定实例
+
+在 `constructor()` 函数中**不要调用 `setState()` 方法**。如果你的组件需要使用内部 state，请直接在构造函数中为 **`this.state` 赋值初始 state**：
+
+```js
+constructor(props) {
+  super(props);
+  // 不要在这里调用 this.setState()
+  this.state = { counter: 0 };
+  this.handleClick = this.handleClick.bind(this);
+}
+```
+
+**只能在构造函数中直接为 `this.state` 赋值。**如需在其他方法中赋值，你应使用 `this.setState()` 替代。
+
+**要避免在构造函数中引入任何副作用或订阅**。如遇到此场景，请将对应的操作放置在 `componentDidMount` 中。
+
+> 注意
+>
+> **避免将 props 的值复制给 state！这是一个常见的错误：**
+>
+> ```js
+> constructor(props) {
+>  super(props);
+>  // 不要这样做
+>  this.state = { color: props.color };
+> }
+> ```
+>
+> 如此做毫无必要（你可以直接使用 `this.props.color`），同时还产生了 bug（更新 prop 中的 `color` 时，并不会影响 state）。
+>
+> **只有在你刻意忽略 prop 更新的情况下使用。**此时，应将 prop 重命名为 `initialColor` 或 `defaultColor`。必要时，你可以[修改它的 `key`](https://zh-hans.reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#recommendation-fully-uncontrolled-component-with-a-key)，以强制“重置”其内部 state。
+>
+> 请参阅关于[避免派生状态的博文](https://zh-hans.reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html)，以了解出现 state 依赖 props 的情况该如何处理。
+
+```js
+  constructor(props) {
+    // 构造器是否接收props,是否传递给super,取决于：是否希望在构造器中通过this访问props
+    super(props);
+    console.log("constructor", this.props);
+  }
+```
+
+----
+
+# React Refs
+
+## 组件三大核心属性3: refs与事件处理
+
+React 支持一种非常特殊的属性 **Ref** ，你可以用来绑定到 render() 输出的任何组件上。
+
+这个特殊的属性允许你引用 render() 返回的相应的支撑实例（ backing instance ）。这样就可以确保在任何时间总是拿到正确的实例。
+
+**组件内的标签可以定义ref属性来标识自己**
+
+**Refs 提供了一种方式，允许我们访问 DOM 节点或在 render 方法中创建的 React 元素。**
+
+在典型的 React 数据流中，[props](https://zh-hans.reactjs.org/docs/components-and-props.html) 是父组件与子组件交互的唯一方式。要修改一个子组件，你需要使用新的 props 来重新渲染它。但是，在某些情况下，你需要在典型数据流之外强制修改子组件。被修改的子组件可能是一个 React 组件的实例，也可能是一个 DOM 元素。对于这两种情况，React 都提供了解决办法。
+
+## 何时使用 Refs
+
+下面是几个适合使用 refs 的情况：
+
+- 管理焦点，文本选择或媒体播放。
+- 触发强制动画。
+- 集成第三方 DOM 库。
+
+**避免使用 refs 来做任何可以通过声明式实现来完成的事情**。
+
+举个例子，避免在 `Dialog` 组件里暴露 `open()` 和 `close()` 方法，最好传递 `isOpen` 属性。
+
+## 勿过度使用 Refs
+
+你可能首先会想到使用 refs 在你的 app 中“让事情发生”。如果是这种情况，请花一点时间，认真再考虑一下 state 属性应该被安排在哪个组件层中。通常你会想明白，让更高的组件层级拥有这个 state，是更恰当的。查看 [状态提升](https://zh-hans.reactjs.org/docs/lifting-state-up.html) 以获取更多有关示例。
+
+>注意
+>
+>下面的例子已经更新为使用在 React 16.3 版本引入的 `React.createRef()` API。如果你正在使用一个较早版本的 React，我们推荐你使用[回调形式的 refs](https://zh-hans.reactjs.org/docs/refs-and-the-dom.html#callback-refs)。
+
+----
+
+
+
+## 过时 API：String 类型的 Refs
+
+如果你之前使用过 React，你可能了解过之前的 API 中的 string 类型的 ref 属性，例如 `"textInput"`。你可以通过 `this.refs.textInput` 来访问 DOM 节点。我们不建议使用它，因为 string 类型的 refs 存在 [一些问题](https://github.com/facebook/react/pull/8333#issuecomment-271648615)。它已过时并可能会在未来的版本被移除。
+
+> 如果你目前还在使用 `this.refs.textInput` 这种方式访问 refs ，我们建议用[回调函数](https://zh-hans.reactjs.org/docs/refs-and-the-dom.html#callback-refs)或 [`createRef` API](https://zh-hans.reactjs.org/docs/refs-and-the-dom.html#creating-refs) 的方式代替。
+
+绑定一个 ref 属性到 render 的返回值上：
+
+```html
+<input ref="myInput" />
+```
+
+在其它代码中，通过 this.refs 获取支撑实例：
+
+```js
+var input = this.refs.myInput;
+var inputValue = input.value;
+var inputRect = input.getBoundingClientRect();
+```
+
+### 完整实例
+
+你可以通过使用 this 来获取当前 React 组件，或使用 ref 来获取组件的引用，实例如下：
+
+```jsx
+import './App.css';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+class MyComponent extends Component {
+  // 展示左侧输入框的数据
+  showData = () => {
+    const {input1} = this.refs;
+    console.log("input1:", input1.value);
+  }
+
+  // 展示右侧输入框的数据
+  showData2 = () => {
+    const {input2} = this.refs;
+    console.log("input2:", input2.value);
+  }
+
+  render() {
+    return (
+      <div>
+        <input ref="input1" type="text" placeholder="点击按钮提示数据" />&nbsp;
+        <button onClick={this.showData}>点击提示左侧的数据</button>&nbsp;
+        <input ref="input2" onBlur={this.showData2} type="text" placeholder="失去焦点提示数据" />
+      </div>
+    )
+  }
+}
+
+export default MyComponent;
+```
+
+实例中，我们获取了输入框的支撑实例的引用，子点击按钮后输入框获取焦点。
+
+我们也可以使用 getDOMNode() 方法获取 DOM 元素
+
+## 回调函数形式的refs
+
+React 也支持另一种设置 refs 的方式，称为“回调 refs”。它能助你更精细地控制何时 refs 被设置和解除。
+
+不同于传递 `createRef()` 创建的 `ref` 属性，你会传递一个函数。这个函数中接受 React 组件实例或 HTML DOM 元素作为参数，以使它们能在其他地方被存储和访问。
+
+下面的例子描述了一个通用的范例：使用 `ref` 回调函数，在实例的属性中存储对 DOM 节点的引用。
+
+```jsx
+class CustomTextInput extends React.Component {
+  constructor(props) {
+    super(props);
+    this.textInput = null;
+    this.setTextInputRef = element => {
+      this.textInput = element;
+    };
+
+    this.focusTextInput = () => {
+      // 使用原生 DOM API 使 text 输入框获得焦点
+      if (this.textInput) this.textInput.focus();
+    };
+  }
+
+  componentDidMount() {
+    // 组件挂载后，让文本框自动获得焦点
+    this.focusTextInput();
+  }
+
+  render() {
+    // 使用 `ref` 的回调函数将 text 输入框 DOM 节点的引用存储到 React
+    // 实例上（比如 this.textInput）
+    return (
+      <div>
+        <input
+          type="text"
+          ref={this.setTextInputRef}
+        />
+        <input
+          type="button"
+          value="Focus the text input"
+          onClick={this.focusTextInput}
+        />
+      </div>
+    );
   }
 }
 ```
+
+React 将在组件挂载时，会调用 `ref` 回调函数并传入 DOM 元素，当卸载时调用它并传入 `null`。**在 `componentDidMount` 或 `componentDidUpdate` 触发前，React 会保证 refs 一定是最新的。**
+
+你可以在组件间传递回调形式的 refs，就像你可以传递通过 `React.createRef()` 创建的对象 refs 一样。
+
+```jsx
+function CustomTextInput(props) {
+  return (
+    <div>
+      <input ref={props.inputRef} />
+    </div>
+  );
+}
+
+class Parent extends React.Component {
+  render() {
+    return (
+      <CustomTextInput
+        inputRef={el => this.inputElement = el}
+      />
+    );
+  }
+}
+```
+
+在上面的例子中，`Parent` 把它的 refs 回调函数当作 `inputRef` props 传递给了 `CustomTextInput`，而且 `CustomTextInput` 把相同的函数作为特殊的 `ref` 属性传递给了 `<input>`。结果是，在 `Parent` 中的 `this.inputElement` 会被设置为与 `CustomTextInput` 中的 `input` 元素相对应的 DOM 节点。
+
+
+
+```jsx
+import './App.css';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+class MyComponent extends Component {
+  // 展示左侧输入框的数据
+  showData = () => {
+    console.log(this);
+    const {input1} = this;
+    console.log("input1:", input1.value);
+  }
+
+  // 展示右侧输入框的数据
+  showData2 = () => {
+    const {input2} = this;
+    console.log("input2:", input2.value);
+  }
+
+  render() {
+    return (
+      <div>
+        <h2>回调形式的ref</h2>
+        <input ref={c => this.input1 = c } type="text" placeholder="点击按钮提示数据" />&nbsp;
+        <button onClick={this.showData}>点击提示左侧的数据</button>&nbsp;
+        <input ref={c => this.input2 = c} onBlur={this.showData2} type="text" placeholder="失去焦点提示数据" />
+      </div>
+    )
+  }
+}
+
+export default MyComponent;
+```
+
+### 关于回调 refs 的说明
+
+如果 `ref` 回调函数是以内联函数的方式定义的，**在更新过程中它会被执行两次，第一次传入参数 `null`，然后第二次会传入参数 DOM 元素。**这是因为在每次渲染时会创建一个新的函数实例，所以 React 清空旧的 ref 并且设置新的。
+
+**通过将 ref 的回调函数定义成 class 的绑定函数的方式可以避免上述问题**，但是大多数情况下它是无关紧要的。
+
+#### 回调ref中回调执行次数的问题
+
+```jsx
+import './App.css';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+class MyComponent extends Component {
+  state = {
+    isHot: false
+  }
+
+  // 展示左侧输入框的数据
+  showInfo = () => {
+    const {input1} = this;
+    console.log("input1:", input1.value);
+  }
+
+  changeWeather = () => {
+    const {isHot} = this.state;
+    this.setState({isHot: !isHot});
+  }
+	
+    // 通过将 ref 的回调函数定义成 class 的绑定函数的方式可以避免上述问题
+  saveInput = (currentNode) => {
+    this.input1 = currentNode;
+    console.log("@", currentNode);
+  }
+
+  render() {
+    const {isHot} = this.state;
+    return (
+      <div>
+        <h2>回调形式的ref</h2>
+        <h4>今天天气很{isHot ? '炎热':'凉爽'}</h4>
+        {/*<input ref={(currentNode) => {
+            this.input1 = currentNode;
+            console.log("@", currentNode);
+          }
+        } type="text" />&nbsp;*/}
+        <input ref={this.saveInput} type="text" />&nbsp;
+        <button onClick={this.showInfo}>点击提示输入的数据</button>&nbsp;
+        <button onClick={this.changeWeather}>点我切换天气</button>
+      </div>
+    )
+  }
+}
+
+export default MyComponent;
+```
+
+----
+
+## createRef创建refs容器
+
+### 创建 Refs
+
+Refs 是使用 `React.createRef()` 创建的，并通过 `ref` 属性附加到 React 元素。**在构造组件时，通常将 Refs 分配给实例属性，以便可以在整个组件中引用它们。**
+
+```jsx
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.myRef = React.createRef();
+  }
+  render() {
+    return <div ref={this.myRef} />;
+  }
+}
+
+```
+
+### 访问 Refs
+
+当 ref 被传递给 `render` 中的元素时，对该节点的引用可以在 ref 的 `current` 属性中被访问。
+
+```js
+const node = this.myRef.current;
+```
+
+ref 的值根据节点的类型而有所不同：
+
+- 当 `ref` 属性用于 HTML 元素时，构造函数中使用 `React.createRef()` 创建的 `ref` **接收底层 DOM 元素**作为其 `current` 属性。
+- 当 `ref` 属性用于自定义 class 组件时，`ref` 对象**接收组件的挂载实例**作为其 `current` 属性。
+- **你不能在函数组件上使用 `ref` 属性**，因为他们没有实例。
+
+以下例子说明了这些差异。
+
+#### 为 DOM 元素添加 ref
+
+以下代码使用 `ref` 去存储 DOM 节点的引用：
+
+```jsx
+class CustomTextInput extends React.Component {
+  constructor(props) {
+    super(props);
+    // 创建一个 ref 来存储 textInput 的 DOM 元素
+    this.textInput = React.createRef();
+    this.focusTextInput = this.focusTextInput.bind(this);
+  }
+
+  focusTextInput() {
+    // 直接使用原生 API 使 text 输入框获得焦点
+    // 注意：我们通过 "current" 来访问 DOM 节点
+    this.textInput.current.focus();
+  }
+
+  render() {
+    // 告诉 React 我们想把 <input> ref 关联到
+    // 构造器里创建的 `textInput` 上
+    return (
+      <div>
+        <input
+          type="text"
+          ref={this.textInput} />
+        <input
+          type="button"
+          value="Focus the text input"
+          onClick={this.focusTextInput}
+        />
+      </div>
+    );
+  }
+}
+```
+
+React 会在组件挂载时给 `current` 属性传入 DOM 元素，并在组件卸载时传入 `null` 值。`ref` 会在 `componentDidMount` 或 `componentDidUpdate` 生命周期钩子触发前更新。
+
+#### 为 class 组件添加 Ref
+
+如果我们想包装上面的 `CustomTextInput`，来模拟它挂载之后立即被点击的操作，我们可以使用 ref 来获取这个自定义的 input 组件并手动调用它的 `focusTextInput` 方法：
+
+```jsx
+class AutoFocusTextInput extends React.Component {
+  constructor(props) {
+    super(props);
+    this.textInput = React.createRef();
+  }
+
+  componentDidMount() {
+    this.textInput.current.focusTextInput();
+  }
+
+  render() {
+    return (
+      <CustomTextInput ref={this.textInput} />
+    );
+  }
+}
+```
+
+请注意，这仅在 `CustomTextInput` 声明为 class 时才有效：
+
+```js
+class CustomTextInput extends React.Component {
+  // ...
+}
+```
+
+#### Refs 与函数组件
+
+默认情况下，**你不能在函数组件上使用 `ref` 属性**，因为它们没有实例：
+
+```jsx
+function MyFunctionComponent() {
+  return <input />;
+}
+
+class Parent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.textInput = React.createRef();
+  }
+  render() {
+    // This will *not* work!
+    return (
+      <MyFunctionComponent ref={this.textInput} />
+    );
+  }
+}
+```
+
+如果要在函数组件中使用 `ref`，你可以使用 [`forwardRef`](https://zh-hans.reactjs.org/docs/forwarding-refs.html)（可与 [`useImperativeHandle`](https://zh-hans.reactjs.org/docs/hooks-reference.html#useimperativehandle) 结合使用），或者可以将该组件转化为 class 组件。
+
+不管怎样，你可以**在函数组件内部使用 `ref` 属性**，只要它指向一个 DOM 元素或 class 组件：
+
+```jsx
+function CustomTextInput(props) {
+  // 这里必须声明 textInput，这样 ref 才可以引用它
+  const textInput = useRef(null);
+
+  function handleClick() {
+    textInput.current.focus();
+  }
+
+  return (
+    <div>
+      <input
+        type="text"
+        ref={textInput} />
+      <input
+        type="button"
+        value="Focus the text input"
+        onClick={handleClick}
+      />
+    </div>
+  );
+}
+```
+
+
+
+```jsx
+import './App.css';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+class MyComponent extends Component {
+
+  // React.createRef调用后可以返回一个容器，该容器可以存储被ref所标识的节点,该容器是“专人专用”的
+  myRef = React.createRef();
+  myRef2 = React.createRef();
+
+  // 展示左侧输入框的数据
+  showData = () => {
+    // console.log(this.myRef);
+    console.log("input1:", this.myRef.current.value);
+  }
+
+  // 展示右侧输入框的数据
+  showData2 = () => {
+    console.log("input2:", this.myRef2.current.value);
+  }
+
+  render() {
+    return (
+      <div>
+        <h2>回调形式的ref</h2>
+        <input ref={this.myRef} type="text" placeholder="点击按钮提示数据" />&nbsp;
+        <button onClick={this.showData}>点击提示左侧的数据</button>&nbsp;
+        <input ref={this.myRef2} onBlur={this.showData2} type="text" placeholder="失去焦点提示数据" />
+      </div>
+    )
+  }
+}
+
+export default MyComponent;
+```
+
+---
+
+### 将 DOM Refs 暴露给父组件
+
+在极少数情况下，你可能希望在父组件中引用子节点的 DOM 节点。通常不建议这样做，因为它会打破组件的封装，**但它偶尔可用于触发焦点或测量子 DOM 节点的大小或位置。**
+
+虽然你可以[向子组件添加 ref](https://zh-hans.reactjs.org/docs/refs-and-the-dom.html#adding-a-ref-to-a-class-component)，但这不是一个理想的解决方案，**因为你只能获取组件实例而不是 DOM 节点**。并且，**它还在函数组件上无效。**
+
+如果你使用 16.3 或更高版本的 React, 这种情况下我们推荐使用 [ref 转发](https://zh-hans.reactjs.org/docs/forwarding-refs.html)。**Ref 转发使组件可以像暴露自己的 ref 一样暴露子组件的 ref**。关于怎样对父组件暴露子组件的 DOM 节点，在 [ref 转发文档](https://zh-hans.reactjs.org/docs/forwarding-refs.html#forwarding-refs-to-dom-components)中有一个详细的例子。
+
+如果你使用 16.2 或更低版本的 React，或者你需要比 ref 转发更高的灵活性，你可以使用[这个替代方案](https://gist.github.com/gaearon/1a018a023347fe1c2476073330cc5509)将 ref 作为特殊名字的 prop 直接传递。
+
+可能的话，**我们不建议暴露 DOM 节点**，但有时候它会成为救命稻草。注意这个方案需要你在子组件中增加一些代码。如果你对子组件的实现没有控制权的话，你剩下的选择是使用 [`findDOMNode()`](https://zh-hans.reactjs.org/docs/react-dom.html#finddomnode)，但在[`严格模式`](https://zh-hans.reactjs.org/docs/strict-mode.html#warning-about-deprecated-finddomnode-usage) 下已被废弃且不推荐使用。
+
+
+
+
+
+
+
+----
 
 # React 事件处理
 
@@ -2444,58 +3830,3 @@ ReactDOM.render(
 );
 ```
 
-# React Refs
-
-React 支持一种非常特殊的属性 **Ref** ，你可以用来绑定到 render() 输出的任何组件上。
-
-这个特殊的属性允许你引用 render() 返回的相应的支撑实例（ backing instance ）。这样就可以确保在任何时间总是拿到正确的实例。
-
-### 使用方法
-
-绑定一个 ref 属性到 render 的返回值上：
-
-```html
-<input ref="myInput" />
-```
-
-在其它代码中，通过 this.refs 获取支撑实例：
-
-```js
-var input = this.refs.myInput;
-var inputValue = input.value;
-var inputRect = input.getBoundingClientRect();
-```
-
-### 完整实例
-
-你可以通过使用 this 来获取当前 React 组件，或使用 ref 来获取组件的引用，实例如下：
-
-```jsx
-class MyComponent extends React.Component {
-  handleClick() {
-    // 使用原生的 DOM API 获取焦点
-    this.refs.myInput.focus();
-  }
-  render() {
-    //  当组件插入到 DOM 后，ref 属性添加一个组件的引用于到 this.refs
-    return (
-      <div>
-        <input type="text" ref="myInput" />
-        <input
-          type="button"
-          value="点我输入框获取焦点"
-          onClick={this.handleClick.bind(this)}
-        />
-      </div>
-    );
-  }
-}
-ReactDOM.render(
-  <MyComponent />,
-  document.getElementById('example')
-);
-```
-
-实例中，我们获取了输入框的支撑实例的引用，子点击按钮后输入框获取焦点。
-
-我们也可以使用 getDOMNode() 方法获取 DOM 元素
