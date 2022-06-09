@@ -867,7 +867,7 @@ console.log(p); // Foo {}
 
 ### 实例成员
 
-每次通过new 调用类标识符时，都会执行类构造函数。在这个函数内部，可以为新创建的实例（this）添加“自有”属性。至于添加什么样的属性，则没有限制。另外，在构造函数执行完毕后，仍然可以给实例继续添加新成员。
+每次通过new 调用类标识符时，都会执行类构造函数。在这个函数内部，可以为新创建的实例（this）添加“自有”属性。至于添加什么样的属性，则没有限制。**另外，在构造函数执行完毕后，仍然可以给实例继续添加新成员。**
 
 **每个实例都对应一个唯一的成员对象，这意味着所有成员都不会在原型上共享**：
 
@@ -883,16 +883,139 @@ class Person {
 }
 let p1 = new Person(),
 p2 = new Person();
+
 p1.sayName(); // Jack
 p2.sayName(); // Jack
+
 console.log(p1.name === p2.name); // false
 console.log(p1.sayName === p2.sayName); // false
 console.log(p1.nicknames === p2.nicknames); // false
+
 p1.name = p1.nicknames[0];
 p2.name = p2.nicknames[1];
 p1.sayName(); // Jake
 p2.sayName(); // J-Dog
 ```
+
+---
+
+### 静态属性
+
+>*最近新增的特性* ,  这是一个最近添加到 JavaScript 的特性。 
+
+静态属性被用于当我们想要存储类级别的数据时，而不是绑定到实例。
+
+静态的属性也是可能的，它们看起来就像常规的类属性，但前面加有 `static`：
+
+```js
+class Article {
+  static publisher = "fans";
+}
+
+let article = new Article();
+console.log(article.publisher);  // undefined
+console.log(Article.publisher);  // fans
+```
+
+这等同于直接给 `Article` 赋值：
+
+```js
+Article.publisher = "fans";
+```
+
+### 继承静态属性和方法
+
+**静态属性和方法是可被继承的。**
+
+例如，下面这段代码中的 `Animal.compare` 和 `Animal.planet` 是可被继承的，可以通过 `Rabbit.compare` 和 `Rabbit.planet` 来访问：
+
+```js
+class Animal {
+  static planet = "Earth";
+
+  constructor(name, speed) {
+    this.name = name;
+    this.speed =speed;
+  }
+
+  run(speed = 0) {
+    this.speed += speed;
+    console.log(`${this.name} runs with speed ${this.speed}.`);
+  }
+
+  static compare(animalA, animalB) {
+    return animalA.speed - animalB.speed;
+  }
+}
+
+class Rabbit extends Animal {
+  hide() {
+    console.log(`${this.name} hides!`);
+  }
+}
+
+let rabbits = [
+  new Rabbit("野兔", 100),
+  new Rabbit("玉兔", 153),
+  new Rabbit("灰兔", 88)
+];
+
+rabbits.sort(Rabbit.compare);
+
+rabbits[0].run();  //  灰兔 runs with speed 88.
+console.log(Rabbit.planet);  //  Earth
+```
+
+现在我们调用 `Rabbit.compare` 时，继承的 `Animal.compare` 将会被调用。
+
+它是如何工作的？再次，使用原型。你可能已经猜到了，`extends` 让 `Rabbit` 的 `[[Prototype]]` 指向了 `Animal`。
+
+![class问题2](E:\pogject\学习笔记\image\js\class问题2.png)
+
+所以，`Rabbit extends Animal` 创建了两个 `[[Prototype]]` 引用：
+
+1. `Rabbit` 函数原型继承自 `Animal` 函数。
+2. `Rabbit.prototype` 原型继承自 `Animal.prototype`。
+
+结果就是，继承对常规方法和静态方法都有效。
+
+这里，让我们通过代码来检验一下：
+
+```js
+// 对于静态的
+console.log(Rabbit.__proto__ === Animal);  // true
+
+// 对于常规方法
+console.log(Rabbit.prototype.__proto__ === Animal.prototype);  // true
+
+
+```
+
+
+
+```js
+class Animal {}
+
+console.log(Animal.prototype.__proto__ === Object.prototype);  // true
+console.log(Animal.__proto__ === Object);  // false
+console.log(Animal.__proto__ === Function.prototype);  // true  所有函数都是默认如此
+
+console.log(Animal.getOwnPropertyNames({a: 1, b: 2}));  //  TypeError: Animal.getOwnPropertyNames is not a function
+```
+
+```js
+class Animal extends Object {}
+
+console.log(Animal.prototype.__proto__ === Object.prototype);  // true
+console.log(Animal.__proto__ === Object);  // true
+console.log(Animal.__proto__ === Function.prototype);  // false
+
+console.log(Animal.getOwnPropertyNames({a: 1, b: 2}));  //  [ 'a', 'b' ]
+```
+
+
+
+----
 
 ### 原型方法与访问器
 
@@ -960,9 +1083,15 @@ p.name = 'Jake';
 console.log(p.name); // Jake
 ```
 
+----
+
 ### 静态类方法
 
-可以在类上定义静态方法。这些方法通常用于执行不特定于实例的操作，**也不要求存在类的实例**。与原型成员类似，静态成员每个类上只能有一个。
+可以在类上定义静态方法。这些方法通常用于执行不特定于实例的操作，**也不要求存在类的实例**。
+
+与原型成员类似，**静态成员每个类上只能有一个**。
+
+静态方法被用于实现属于整个类的功能。它与具体的类实例无关。
 
 **静态类成员在类定义中使用 static 关键字作为前缀**。在静态成员中，this 引用类自身。其他所有约定跟原型成员一样：
 
@@ -984,6 +1113,7 @@ class Person {
 let p = new Person();
 p.locate(); // instance, Person {}
 Person.prototype.locate(); // prototype, {constructor: ... }
+
 Person.locate(); // class, class Person {}
 ```
 
@@ -1010,6 +1140,115 @@ console.log(Person.create()); // Person { _age: 34 }
 console.log(Person.create()); // Person { _age: 62 }
 ```
 
+我们可以把一个方法作为一个整体赋值给类。这样的方法被称为 **静态的（static）**。
+
+在一个类的声明中，它们以 `static` 关键字开头，如下所示：
+
+```js
+class User {
+  static staticMethod() {
+    console.log(this === User);
+  }
+}
+
+User.staticMethod();  // true
+```
+
+这实际上跟直接将其作为属性赋值的作用相同：
+
+```js
+class User {}
+
+User.staticMethod = function() {
+  console.log(this === User);
+};
+
+User.staticMethod(); // true
+```
+
+在 `User.staticMethod()` 调用中的 `this` 的值是类构造器 `User` 自身
+
+**通常，静态方法用于实现属于整个类**，但不属于该类任何特定对象的函数。
+
+
+
+例如，我们有对象 `Article`，并且需要一个方法来比较它们。
+
+通常的解决方案就是添加 `Article.compare` 静态方法：
+
+```js
+class Article {
+  constructor(title, date) {
+    this.title = title;
+    this.date = date;
+  }
+
+  static compare(articleA, articleB) {
+    return articleA.date - articleB.date;
+  }
+}
+
+let articles = [
+  new Article("HTML", new Date(2022, 1, 1)),
+  new Article("CSS", new Date(2022, 0, 3)),
+  new Article("JavaScript", new Date(2022, 11, 1))
+];
+
+articles.sort(Article.compare);
+
+console.log(articles[0]);  //Article { title: 'CSS', date: 2022-01-02T16:00:00.000Z }
+```
+
+这里 `Article.compare` 方法代表“上面的”文章，意思是比较它们。它不是文章的方法，而是整个 class 的方法。
+
+
+
+另一个例子是所谓的 **工厂方法**。
+
+比如说，我们需要通过多种方式来创建一篇文章：
+
+1. 通过用给定的参数来创建（`title`，`date` 等）。
+2. 使用今天的日期来创建一个空的文章。
+3. ……其它方法。
+
+第一种方法我们可以通过 constructor 来实现。对于第二种方式，我们可以创建类的一个静态方法来实现。
+
+例如这里的 `Article.createTodays()`：
+
+```js
+class Article {
+  constructor(title, date) {
+    this.title = title;
+    this.date = date;
+  }
+
+  static createTodays() {
+    // 记住 this = Article
+    return new this("kop's day", new Date());
+  }
+}
+
+let article = Article.createTodays();
+
+console.log(article);  // Article { title: "kop's day", date: 2022-06-09T08:45:56.680Z }
+```
+
+
+
+现在，每当我们需要创建一个今天的文章时，我们就可以调用 `Article.createTodays()`。再说明一次，它不是一个文章的方法，而是整个 class 的方法。
+
+静态方法也被用于与数据库相关的公共类，可以用于搜索/保存/删除数据库中的条目， 就像这样：
+
+```js
+// 假定 Article 是一个用来管理文章的特殊类
+// 通过 id 来移除文章的静态方法：
+Article.remove({id: 12345});
+```
+
+
+
+----
+
 ### 非函数原型和类成员
 
 虽然类定义并不显式支持在原型或类上添加成员数据，但在类定义外部，可以手动添加：
@@ -1022,13 +1261,332 @@ class Person {
 }
 // 在类上定义数据成员
 Person.greeting = 'My name is';
+
 // 在原型上定义数据成员
 Person.prototype.name = 'Jake';
+
 let p = new Person();
 p.sayName(); // My name is Jake
 ```
 
-**注意** 类定义中之所以没有显式支持添加数据成员，是因为在共享目标（原型和类）上添加可变（可修改）数据成员是一种反模式。一般来说，对象实例应该独自拥有通过 this引用的数据。
+**注意** 类定义中之所以没有显式支持添加数据成员，**是因为在共享目标（原型和类）上添加可变（可修改）数据成员是一种反模式**。
+
+一般来说，对象实例应该独自拥有通过 this引用的数据。
+
+---
+
+### 私有的和受保护的属性和方法
+
+面向对象编程最重要的原则之一 —— 将内部接口与外部接口分隔开来。
+
+#### 内部接口和外部接口
+
+在面向对象的编程中，属性和方法分为两组：
+
+- **内部接口** —— 可以通过该类的其他方法访问，但不能从外部访问的方法和属性。
+- **外部接口** —— 也可以从类的外部访问的方法和属性。
+
+内部接口用于对象工作，它的细节相互使用。我们需要使用一个对象时只需知道它的外部接口。我们可能完全不知道它的内部是如何工作的。
+
+在 JavaScript 中，有两种类型的对象字段（属性和方法）：
+
+- 公共的：可从任何地方访问。它们构成了外部接口。到目前为止，我们只使用了公共的属性和方法。
+- **私有的：只能从类的内部访问。这些用于内部接口。**
+
+在许多其他编程语言中，还存在“受保护”的字段：只能从类的内部和基于其扩展的类的内部访问（例如私有的，但可以从继承的类进行访问）。它们对于内部接口也很有用。从某种意义上讲，它们比私有的属性和方法更为广泛，因为我们通常希望继承类来访问它们。
+
+受保护的字段不是在语言级别的 Javascript 中实现的，但实际上它们非常方便，**因为它们是在 Javascript 中模拟的类定义语法**。
+
+##### 受保护的 “waterAmount”
+
+首先，让我们做一个简单的咖啡机类：
+
+```js
+class CoffeeMachine {
+  waterAmount = 0;  // 内部的水量
+
+  constructor(power) {
+    this.power = power;
+    console.log(`Create a coffee machine, power: ${power}`);
+  }
+}
+
+//创建咖啡机
+let coffeeMachine = new CoffeeMachine(666);
+
+// 加水
+coffeeMachine.waterAmount = 200;
+
+console.log(coffeeMachine.waterAmount);  // 200
+```
+
+现在，属性 `waterAmount` 和 `power` 是公共的。我们可以轻松地从外部将它们 get/set 成任何值。
+
+让我们将 `waterAmount` 属性更改为受保护的属性，以对其进行更多控制。例如，我们不希望任何人将它的值设置为小于零的数。
+
+**受保护的属性通常以下划线 `_` 作为前缀。**
+
+这不是在语言级别强制实施的，但是程序员之间有一个众所周知的约定，**即不应该从外部访问此类型的属性和方法**。
+
+所以我们的属性将被命名为 `_waterAmount`：
+
+```js
+class CoffeeMachine {
+  constructor(power) {
+    this.power = power;
+    console.log(`Create a coffee machine, power: ${power}`);
+  }
+  _waterAmount = 0;  // 内部的水量
+
+  set waterAmount(value) {
+    if (value < 0) {
+      value = 0;
+    }
+    this._waterAmount = value;
+  }
+
+  get waterAmount() {
+    return this._waterAmount;
+  }
+}
+
+//创建咖啡机
+let coffeeMachine = new CoffeeMachine(666);
+
+// 加水
+coffeeMachine.waterAmount = -100;
+
+console.log(coffeeMachine.waterAmount);  // 0
+```
+
+现在访问已受到控制，因此将水量的值设置为小于零的数变得不可能。
+
+##### 只读的 “power”
+
+对于 `power` 属性，让我们将它设为只读。有时候一个属性必须只能被在创建时进行设置，之后不再被修改。
+
+咖啡机就是这种情况：功率永远不会改变。
+
+要做到这一点，我们只需要设置 getter，而不设置 setter：
+
+```js
+class CoffeeMachine {
+  constructor(power) {
+    this._power = power;
+  }
+  _waterAmount = 0;  // 内部的水量
+
+  set waterAmount(value) {
+    if (value < 0) {
+      value = 0;
+    }
+    this._waterAmount = value;
+  }
+
+  get waterAmount() {
+    return this._waterAmount;
+  }
+
+  get power() {
+    return this._power;
+  }
+}
+
+//创建咖啡机
+let coffeeMachine = new CoffeeMachine(666);
+
+console.log(coffeeMachine.power);  // 666
+
+coffeeMachine.power = 250;  //无效
+
+console.log(coffeeMachine.power);  // 666
+```
+
+
+
+**Getter/setter 函数**
+
+这里我们使用了 getter/setter 语法。
+
+但大多数时候首选 `get.../set...` 函数，像这样：
+
+```js
+class CoffeeMachine {
+  _waterAmount = 0;
+
+  setWaterAmount(value) {
+    if (value < 0) value = 0;
+    this._waterAmount = value;
+  }
+
+  getWaterAmount() {
+    return this._waterAmount;
+  }
+}
+
+new CoffeeMachine().setWaterAmount(100);
+```
+
+这看起来有点长，但函数更灵活。它们可以接受多个参数（即使我们现在还不需要）。
+
+另一方面，get/set 语法更短，所以最终没有严格的规定，而是由你自己来决定。
+
+>**受保护的字段是可以被继承的**
+>
+>如果我们继承 `class MegaMachine extends CoffeeMachine`，那么什么都无法阻止我们从新的类中的方法访问 `this._waterAmount` 或 `this._power`。
+>
+>所以受保护的字段是自然可被继承的。与我们接下来将看到的私有字段不同。
+
+##### 私有的 “#waterLimit”
+
+> 这是一个最近添加到 JavaScript 的特性。 JavaScript 引擎不支持（或部分支持），需要 polyfills。
+
+这儿有一个马上就会被加到规范中的已完成的 Javascript 提案，它为私有属性和方法提供语言级支持。
+
+私有属性和方法应该以 `#` 开头。它们只在类的内部可被访问。
+
+例如，这儿有一个私有属性 `#waterLimit` 和检查水量的私有方法 `#fixWaterAmount`：
+
+```js
+class CoffeeMachine {
+  constructor(power) {
+    this._power = power;  //受保护的属性
+  }
+  _waterAmount = 0;  // 内部的水量
+
+  #waterLimit = 200;  //私有属性
+
+  //私有方法
+  #fixWaterAmount(value) {
+    if (value < 0) {
+      return 0;
+    }
+    if (value > this.#waterLimit) {
+      return this.#waterLimit;
+    }
+    return value;
+  }
+
+  set waterAmount(value) {
+    this._waterAmount = this.#fixWaterAmount(value);
+  }
+
+  get waterAmount() {
+    return this._waterAmount;
+  }
+
+  get power() {
+    return this._power;
+  }
+}
+
+//创建咖啡机
+let coffeeMachine = new CoffeeMachine(666);
+
+console.log(coffeeMachine.waterAmount);  // 0
+coffeeMachine.waterAmount = 100;
+console.log(coffeeMachine.waterAmount);  // 100
+coffeeMachine.waterAmount =300;
+console.log(coffeeMachine.waterAmount);  //  300
+
+// 不能从类的外部访问类的私有属性和方法
+
+//coffeeMachine.#fixWaterAmount(123); // SyntaxError: Private field '#fixWaterAmount' must be declared in an enclosing class
+
+coffeeMachine.#waterLimit = 1000; // SyntaxError: Private field '#waterLimit' must be declared in an enclosing class
+```
+
+在语言级别，`#` 是该字段为私有的特殊标志。我们无法从外部或从继承的类中访问它。
+
+私有字段与公共字段不会发生冲突。我们可以同时拥有私有的 `#waterAmount` 和公共的 `waterAmount` 字段。
+
+例如，让我们使 `waterAmount` 成为 `#waterAmount` 的一个访问器：
+
+```js
+class CoffeeMachine {
+
+  #waterAmount = 0;
+
+  get waterAmount() {
+    return this.#waterAmount;
+  }
+
+  set waterAmount(value) {
+    if (value < 0) value = 0;
+    this.#waterAmount = value;
+  }
+}
+
+let machine = new CoffeeMachine();
+
+machine.waterAmount = 100;
+
+console.log(machine.#waterAmount); // SyntaxError: Private field '#waterAmount' must be declared in an enclosing class
+```
+
+
+
+与受保护的字段不同，私有字段由语言本身强制执行。这是好事儿。
+
+但是如果我们继承自 `CoffeeMachine`，那么我们将无法直接访问 `#waterAmount`。我们需要依靠 `waterAmount` getter/setter：
+
+```js
+
+class MegaCoffeeMachine extends CoffeeMachine {
+  method() {
+    console.log( this.#waterAmount ); // Error: can only access from CoffeeMachine
+  }
+}
+```
+
+在许多情况下，这种限制太严重了。如果我们扩展 `CoffeeMachine`，则可能有正当理由访问其内部。这就是为什么大多数时候都会使用受保护字段，即使它们不受语言语法的支持。
+
+> **私有字段不能通过 this[name] 访问**
+>
+> 私有字段很特别。
+>
+> 正如我们所知道的，通常我们可以使用 `this[name]` 访问字段：
+>
+> ```js
+> class User {
+>   ...
+>   sayHi() {
+>     let fieldName = "name";
+>     console.log(`Hello, ${this[fieldName]}`);
+>   }
+> }
+> ```
+>
+> 对于私有字段来说，这是不可能的：`this['#name']` 不起作用。这是确保私有性的语法限制。
+
+就面向对象编程（OOP）而言，内部接口与外部接口的划分被称为 [封装](https://en.wikipedia.org/wiki/Encapsulation_(computer_programming))。
+
+它具有以下优点：
+
+- 保护用户，使他们不会误伤自己
+
+- 可支持性
+
+- **如果我们严格界定内部接口，那么这个 class 的开发人员可以自由地更改其内部属性和方法，甚至无需通知用户。**
+
+​			如果你是这样的 class 的开发者，那么你会很高兴知道可以安全地重命名私有变量，可以更改甚至删除其参数，因为没有外部代码依赖于它们。
+
+​			对于用户来说，当新版本问世时，应用的内部可能被进行了全面检修，但如果外部接口相同，则仍然很容易升级。
+
+- 隐藏复杂性
+
+人们喜欢使用简单的东西。至少从外部来看是这样。内部的东西则是另外一回事了。
+
+**当实施细节被隐藏，并提供了简单且有据可查的外部接口时，总是很方便的。**
+
+为了隐藏内部接口，我们使用受保护的或私有的属性：
+
+- 受保护的字段以 `_` 开头。这是一个众所周知的约定，不是在语言级别强制执行的。程序员应该只通过它的类和从它继承的类中访问以 `_` 开头的字段。
+- 私有字段以 `#` 开头。JavaScript 确保我们只能从类的内部访问它们。
+
+目前，各个浏览器对私有字段的支持不是很好，但可以用 polyfill 解决。
+
+---
 
 ### 迭代器与生成器方法
 
@@ -1117,6 +1675,11 @@ for (let [idx,nickname] of p){
 ----
 
 #### “extends” 关键字
+
+“extends” 语法会设置两个原型：
+
+1. 在构造函数的 `"prototype"` 之间设置原型（为了获取实例方法）。
+2. 在构造函数之间会设置原型（为了获取静态方法）。
 
 ES6 类支持**单继承**。使用 extends 关键字，就可以继承任何拥有[[Construct]]和原型的对象。很大程度上，**这意味着不仅可以继承一个类，也可以继承普通的构造函数**（保持向后兼容）：
 
@@ -1865,7 +2428,7 @@ new Vehicle();  //Error: Vehicle cannot be directly instantiated
 
 ```
 
-另外，通过在抽象基类构造函数中进行检查，可以要求派生类必须定义某个方法。因为原型方法在调用类构造函数之前就已经存在了，所以可以通过 this 关键字来检查相应的方法：
+另外，通过在抽象基类构造函数中进行检查，**可以要求派生类必须定义某个方法**。因为原型方法在调用类构造函数之前就已经存在了，所以可以通过 this 关键字来检查相应的方法：
 
 ```js
 class Vehicle {
@@ -1888,13 +2451,14 @@ class Bus extends Vehicle {
 class Van extends Vehicle {}
 
 new Bus(); // [class Bus extends Vehicle]
+
 new Van(); // Error: Inheriting class must define foo()
 
 ```
 
 ### 继承内置类型
 
-ES6 类为继承内置引用类型提供了顺畅的机制，开发者可以方便地扩展内置类型：
+ES6 类为继承内置引用类型提供了顺畅的机制，**开发者可以方便地扩展内置类型**：
 
 ```js
 class SuperArray extends Array{
@@ -1908,21 +2472,26 @@ class SuperArray extends Array{
 }
 
 let a=new SuperArray(1,2,3,4,5);
+
 console.log(a instanceof Array);
 console.log(a instanceof SuperArray);
+
 console.log(a); // [1, 2, 3, 4, 5]
 a.shuffle();
 console.log(a); // [3, 2, 5, 4, 1]
 ```
 
-有些内置类型的方法会返回新实例。默认情况下，返回实例的类型与原始实例的类型是一致的：
+有些内置类型的方法会返回新实例**。默认情况下，返回实例的类型与原始实例的类型是一致的**：
 
 ```js
 class SuperArray extends Array {}
+
 let a1 = new SuperArray(1, 2, 3, 4, 5);
 let a2 = a1.filter(x => !!(x%2))
+
 console.log(a1); // [1, 2, 3, 4, 5]
 console.log(a2); // [1, 3, 5]
+
 console.log(a1 instanceof SuperArray); // true
 console.log(a2 instanceof SuperArray); // true
 ```
@@ -1937,11 +2506,121 @@ class SuperArray extends Array {
 }
 let a1 = new SuperArray(1, 2, 3, 4, 5);
 let a2 = a1.filter(x => !!(x%2))
+
 console.log(a1); // [1, 2, 3, 4, 5]
 console.log(a2); // [1, 3, 5]
 console.log(a1 instanceof SuperArray); // true
 console.log(a2 instanceof SuperArray); // false
 ```
+
+---
+
+#### 扩展内建类
+
+内建的类，例如 `Array`，`Map` 等也都是可以扩展的（extendable）。
+
+例如，这里有一个继承自原生 `Array` 的类 `PowerArray`：
+
+```js
+// 给 PowerArray 新增了一个方法（可以增加更多）
+class PowerArray extends Array {
+  isEmpty() {
+    return this.length === 0;
+  }
+}
+
+let arr = new PowerArray(2, 3, 5, 7, 10);
+
+console.log(arr.isEmpty());  // false
+
+let arr2 = arr.filter(item => item >=10);
+console.log(arr2);  // PowerArray(1) [ 10 ]
+console.log(arr2.isEmpty());  // false
+```
+
+请注意一个非常有趣的事儿。内建的方法例如 `filter`，`map` 等 — 返回的正是子类 `PowerArray` 的新对象。它们内部使用了对象的 `constructor` 属性来实现这一功能。
+
+在上面的例子中，
+
+```js
+console.log(arr.constructor === PowerArray);  // true
+```
+
+当 `arr.filter()` 被调用时，**它的内部使用的是 `arr.constructor` 来创建新的结果数组**，而不是使用原生的 `Array`。这真的很酷，**因为我们可以在结果数组上继续使用 `PowerArray` 的方法。**
+
+甚至，我们可以定制这种行为。
+
+我们可以给这个类添加一个特殊的静态 getter `Symbol.species`。如果存在，则应返回 JavaScript 在内部用来在 `map` 和 `filter` 等方法中创建新实体的 `constructor`。
+
+如果我们希望像 `map` 或 `filter` 这样的内建方法返回常规数组，我们可以在 `Symbol.species` 中返回 `Array`，就像这样：
+
+```js
+// 给 PowerArray 新增了一个方法（可以增加更多）
+class PowerArray extends Array {
+  isEmpty() {
+    return this.length === 0;
+  }
+
+  // 内建方法将使用这个作为 constructor
+  static get [Symbol.species]() {
+    return Array;
+  }
+}
+
+let arr = new PowerArray(2, 3, 5, 7, 10, 66);
+
+console.log(arr.isEmpty());  // false
+
+// filter 使用 arr.constructor[Symbol.species] 作为 constructor 创建新数组
+let arr2 = arr.filter(item => item >=10);
+console.log(arr2);  // [ 10, 66 ]
+
+console.log(arr2.isEmpty());  // TypeError: arr2.isEmpty is not a function
+
+console.log(arr.constructor === PowerArray);  // true
+console.log(arr.constructor === Array);  // false
+
+
+console.log(arr2.constructor === PowerArray);  // false
+console.log(arr2.constructor === Array);  // true
+
+```
+
+正如你所看到的，现在 `.filter` 返回 `Array`。所以扩展的功能不再传递。
+
+**其他集合的工作方式类似**
+
+其他集合，例如 `Map` 和 `Set` 的工作方式类似。它们也使用 `Symbol.species`。
+
+
+
+#### 内建类没有静态方法继承
+
+内建对象有它们自己的静态方法，例如 `Object.keys`，`Array.isArray` 等。
+
+如我们所知道的，**原生的类互相扩展**。例如，`Array` 扩展自 `Object`。
+
+通常，当一个类扩展另一个类时，静态方法和非静态方法都会被继承。这已经在 [静态属性和静态方法](https://zh.javascript.info/static-properties-methods#statics-and-inheritance) 中详细地解释过了。
+
+**但内建类却是一个例外。它们相互间不继承静态方法。**
+
+例如，`Array` 和 `Date` 都继承自 `Object`，所以它们的实例都有来自 `Object.prototype` 的方法。但 `Array.[[Prototype]]` 并不指向 `Object`，所以它们没有例如 `Array.keys()`（或 `Date.keys()`）这些静态方法。
+
+这里有一张 `Date` 和 `Object` 的结构关系图：
+
+![class问题3](E:\pogject\学习笔记\image\js\class问题3.png)
+
+
+
+正如你所看到的，`Date` 和 `Object` 之间没有连结。它们是独立的，**只有 `Date.prototype` 继承自 `Object.prototype`，仅此而已。**
+
+与我们所了解的通过 `extends` 获得的继承相比，**这是内建对象之间继承的一个重要区别**。
+
+
+
+
+
+----
 
 ### 类混入
 
@@ -1949,26 +2628,28 @@ console.log(a2 instanceof SuperArray); // false
 
 **注意** Object.assign()方法是为了混入对象行为而设计的。只有在需要混入类的行为 时才有必要自己实现混入表达式。**如果只是需要混入多个对象的属性，那么使用 Object.assign()就可以了**。 
 
-在下面的代码片段中，extends 关键字后面是一个 JavaScript 表达式。任何可以解析为一个类或一 个构造函数的表达式都是有效的。这个表达式会在求值类定义时被求值：
+在下面的代码片段中，extends 关键字后面是一个 JavaScript 表达式。**任何可以解析为一个类或一 个构造函数的表达式都是有效的**。这个表达式会在求值类定义时被求值：
 
 ```js
 class Vehicle {}
+
 function getParentClass() {
-console.log('evaluated expression');
-return Vehicle;
+	console.log('evaluated expression');
+	return Vehicle;
 }
+
 class Bus extends getParentClass() {}
 // 可求值的表达式
 ```
 
 混入模式可以通过在一个表达式中连缀多个混入元素来实现，这个表达式最终会解析为一个可以被继承的类。如果 Person 类需要组合 A、B、C，则需要某种机制实现 B 继承 A，C 继承 B，而 Person再继承 C，从而把 A、B、C 组合到这个超类中。实现这种模式有不同的策略。
 
-一个策略是定义一组“可嵌套”的函数，每个函数分别接收一个超类作为参数，而将混入类定义为这个参数的子类，并返回这个类。这些组合函数可以连缀调用，最终组合成超类表达式：
+一个策略是**定义一组“可嵌套”的函数**，每个函数分别接收一个超类作为参数，而将混入类定义为这个参数的子类，并返回这个类。这些组合函数可以连缀调用，最终组合成超类表达式：
 
 ```js
-class Vehicle{}
+class Vehicle {}
 
-let FooMixin=(Superclass)=>class extends Superclass{
+let FooMixin = (Superclass) => class extends Superclass{
     foo(){
         console.log("foo");
     }
@@ -2013,8 +2694,8 @@ let BazMixin = (Superclass) => class extends Superclass {
     }
 };
 
-function mix(BaseClass,...Mixins){
-    return Mixins.reduce((accumulator,current)=>current(accumulator),BaseClass);
+function mix(BaseClass, ...Mixins){
+    return Mixins.reduce((accumulator, current)=>current(accumulator), BaseClass);
 }
 
 class Bus extends mix(Vehicle,FooMixin,BarMixin,BazMixin){}
@@ -2025,4 +2706,299 @@ b.bar(); // bar
 b.baz(); // baz
 ```
 
-**注意** 很多 JavaScript 框架（特别是 React）已经抛弃混入模式，转向了组合模式（把方法 提取到独立的类和辅助对象中，然后把它们组合起来，但不使用继承）。这反映了那个众 所周知的软件设计原则：“**组合胜过继承**（composition over inheritance）。”这个设计原则被 很多人遵循，在代码设计中能提供极大的灵活性。
+**注意** 很多 JavaScript 框架（特别是 React）已经抛弃混入模式，**转向了组合模式**（把方法 提取到独立的类和辅助对象中，然后把它们组合起来，但不使用继承）。这反映了那个众 所周知的软件设计原则：“**组合胜过继承**（composition over inheritance）。”这个设计原则被 很多人遵循，在代码设计中能提供极大的灵活性。
+
+
+
+
+
+
+
+
+
+---
+
+# 类检查："instanceof"
+
+`instanceof` 操作符用于检查一个对象是否属于某个特定的 class。同时，它还考虑了继承。
+
+在许多情况下，可能都需要进行此类检查。例如，它可以被用来构建一个 **多态性（polymorphic）** 的函数，该函数根据参数的类型对参数进行不同的处理。
+
+## instanceof 操作符
+
+```js
+obj instanceof Class
+```
+
+**如果 `obj` 隶属于 `Class` 类（或 `Class` 类的衍生类）**，则返回 `true`。
+
+```js
+class Rabbit {}
+let rabbit = new Rabbit();
+
+// rabbit 是 Rabbit class 的对象吗？
+console.log( rabbit instanceof Rabbit ); // true
+```
+
+它还可以与构造函数一起使用：
+
+```js
+// 这里是构造函数，而不是 class
+function Rabbit() {}
+
+let rabbit = new Rabbit();
+// rabbit 是 Rabbit class 的对象吗？
+console.log(rabbit instanceof Rabbit ); // true
+```
+
+……与诸如 `Array` 之类的内建 class 一起使用：
+
+```js
+let arr = [1, 2, 3];
+console.log( arr instanceof Array ); // true
+console.log( arr instanceof Object ); // true
+```
+
+有一点需要留意，`arr` 同时还隶属于 `Object` 类。因为从原型上来讲，`Array` 是继承自 `Object` 的。
+
+通常，`instanceof` 在检查中会将原型链考虑在内。此外，**我们还可以在静态方法 `Symbol.hasInstance` 中设置自定义逻辑**。
+
+`obj instanceof Class` 算法的执行过程大致如下：
+
+1. 如果这儿有静态方法 `Symbol.hasInstance`，那就直接调用这个方法：
+
+   例如：
+
+   **`Symbol.hasInstance`**用于判断某对象是否为某构造器的实例。因此你可以用它自定义 [`instanceof`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/instanceof) 操作符在某个类上的行为。
+
+```js
+// 设置 instanceOf 检查
+// 并假设具有 canEat 属性的都是 animal
+
+class Animal {
+  static [Symbol.hasInstance](obj) {
+    if (obj.canEat) {
+      return true;
+    }
+  }
+}
+
+let obj = { canEat: true};
+console.log(obj instanceof Animal);  //  true
+
+let animal = new Animal();
+console.log(animal instanceof Animal);  //  false
+```
+
+2.大多数 class 没有 `Symbol.hasInstance`。**在这种情况下，标准的逻辑是**：使用 `obj instanceOf Class` 检查 `Class.prototype` 是否等于 `obj` 的原型链中的原型之一。
+
+换句话说就是，一个接一个地比较：
+
+```js
+obj.__proto__ === Class.prototype ?
+obj.__proto__.__proto__ === Class.prototype ?
+obj.__proto__.__proto__.__proto__ === Class.prototype ?
+...
+// 如果任意一个的答案为 true，则返回 true
+// 否则，如果我们已经检查到了原型链的尾端，则返回 false
+```
+
+在上面那个例子中，`rabbit.__proto__ === Rabbit.prototype`，所以立即就给出了结果。
+
+而在继承的例子中，匹配将在第二步进行：
+
+```js
+class Animal {}
+class Rabbit extends Animal {}
+
+let rabbit = new Rabbit();
+console.log(rabbit instanceof Animal); // true
+
+console.log(rabbit.__proto__ === Animal.prototype);  // false（无匹配）
+console.log(rabbit.__proto__.__proto__ === Animal.prototype);  // true（匹配！）
+
+```
+
+下图展示了 `rabbit instanceof Animal` 的执行过程中，`Animal.prototype` 是如何参与比较的：
+
+![class问题4](E:\pogject\学习笔记\image\js\class问题4.png)
+
+这里还要提到一个方法 [objA.isPrototypeOf(objB)](https://developer.mozilla.org/zh/docs/Web/JavaScript/Reference/Global_Objects/object/isPrototypeOf)，如果 `objA` 处在 `objB` 的原型链中，则返回 `true`。
+
+所以，**可以将 `obj instanceof Class` 检查改为 `Class.prototype.isPrototypeOf(obj)`。**
+
+这很有趣，但是 `Class` 的 constructor 自身是不参与检查的！检查过程只和原型链以及 `Class.prototype` 有关。
+
+创建对象后，如果更改 `prototype` 属性，可能会导致有趣的结果。
+
+就像这样：
+
+```js
+function Rabbit() {}
+let rabbit = new Rabbit();
+
+// 修改了 prototype
+Rabbit.prototype = {};
+
+// ...再也不是 rabbit 了！
+console.log( rabbit instanceof Rabbit ); // false
+console.log( rabbit instanceof Object ); // true
+
+
+console.log(rabbit.__proto__ === Rabbit.prototype);  //false
+console.log(rabbit.__proto__.__proto__ === Object.prototype)  //true
+```
+
+
+
+## 使用 Object.prototype.toString 方法来揭示类型
+
+大家都知道，一个普通对象被转化为字符串时为 `[object Object]`：
+
+```js
+let obj = {a: 1};
+console.log(obj); // { a: 1 }
+console.log(obj.toString()); // [object Object]
+
+let arr = [1, 2, 3];
+console.log(arr);  //  [ 1, 2, 3 ]
+console.log(arr.toString());  // 1,2,3
+```
+
+这是通过 `toString` 方法实现的。但是这儿有一个隐藏的功能，该功能可以使 `toString` 实际上比这更强大。**我们可以将其作为 `typeof` 的增强版或者 `instanceof` 的替代方法来使用。**
+
+听起来挺不可思议？那是自然，精彩马上揭晓。
+
+按照 [规范](https://tc39.github.io/ecma262/#sec-object.prototype.tostring) 所讲，内建的 `toString` 方法可以被从对象中提取出来，并在任何其他值的上下文中执行。其结果取决于该值。
+
+- 对于 number 类型，结果是 `[object Number]`
+- 对于 boolean 类型，结果是 `[object Boolean]`
+- 对于 `null`：`[object Null]`
+- 对于 `undefined`：`[object Undefined]`
+- 对于数组：`[object Array]`
+- ……等（可自定义）
+
+让我们演示一下：
+
+```js
+// 方便起见，将 toString 方法复制到一个变量中
+let objectToString = Object.prototype.toString;
+
+let a = 66;
+console.log(objectToString.call(a));  //  [object Number]
+
+let str = "abc";
+console.log(objectToString.call(str));  //  [object String]
+
+let b = false;
+console.log(objectToString.call(b));  //  [object Boolean]
+
+let n = null;
+console.log(objectToString.call(n));  //  [object Null]
+
+let u = undefined;
+console.log(objectToString.call(u));  //  [object Undefined]
+
+let arr = [1, 2, 3];
+console.log(objectToString.call(arr)); // [object Array]
+
+let obj = {a: 1};
+console.log(objectToString.call(obj)); // [object Object]
+
+let s = Symbol("b");
+console.log(objectToString.call(s)); // [object Symbol]
+
+let m = BigInt(100);
+console.log(objectToString.call(m));  //  [object BigInt]
+
+let reg = /abc/;
+console.log(objectToString.call(reg));  //  [object RegExp]
+
+let now = new Date();
+console.log(objectToString.call(now));  //  [object Date]
+
+let fn = function() {
+  return 200;
+}
+console.log(objectToString.call(fn));  //  [object Function]
+
+class Person {}
+console.log(objectToString.call(Person));  //  [object Function]
+```
+
+这里我们用到了在 [装饰器模式和转发，call/apply](https://zh.javascript.info/call-apply-decorators) 一章中讲过的 [call](https://developer.mozilla.org/zh/docs/Web/JavaScript/Reference/Global_Objects/function/call) 方法来在上下文 `this=arr` 中执行函数 `objectToString`。
+
+在内部，**`toString` 的算法会检查 `this`，并返回相应的结果**。
+
+
+
+## Symbol.toStringTag
+
+可以使用特殊的对象属性 Symbol.toStringTag 自定义对象的 toString 方法的行为。
+
+例如：
+
+```js
+let user = {
+  [Symbol.toStringTag]: "User"
+};
+
+console.log( {}.toString.call(user) ); // [object User]
+```
+
+对于大多数特定于环境的对象，都有一个这样的属性。下面是一些特定于浏览器的示例：
+
+```js
+// 特定于环境的对象和类的 toStringTag：
+console.log( window[Symbol.toStringTag]); // Window
+
+console.log( XMLHttpRequest.prototype[Symbol.toStringTag] ); // XMLHttpRequest
+
+console.log( {}.toString.call(window) ); // [object Window]
+
+console.log( {}.toString.call(new XMLHttpRequest()) ); // [object XMLHttpRequest]
+```
+
+正如我们所看到的，输出结果恰好是 `Symbol.toStringTag`（如果存在），只不过被包裹进了 `[object ...]` 里。
+
+这样一来，我们手头上就有了个“磕了药似的 typeof”，不仅能检查原始数据类型，而且适用于内建对象，更可贵的是还支持自定义。
+
+所以，如果我们想要获取内建对象的类型，并希望把该信息以字符串的形式返回，**而不只是检查类型的话，我们可以用 `{}.toString.call` 替代 `instanceof`。**
+
+
+
+让我们总结一下我们知道的类型检查方法：
+
+|               | 用于                                                         | 返回值     |
+| :------------ | :----------------------------------------------------------- | :--------- |
+| `typeof`      | 原始数据类型                                                 | string     |
+| `{}.toString` | 原始数据类型，内建对象，包含 `Symbol.toStringTag` 属性的对象 | string     |
+| `instanceof`  | 对象                                                         | true/false |
+
+正如我们所看到的，从技术上讲，`{}.toString` 是一种“更高级的” `typeof`。
+
+当我们使用类的层次结构（hierarchy），并想要对该类进行检查，同时还要考虑继承时，这种场景下 `instanceof` 操作符确实很出色。
+
+
+
+在下面的代码中，为什么 `instanceof` 会返回 `true`？我们可以明显看到，`a` 并不是通过 `B()` 创建的。
+
+```js
+function A() {}
+function B() {}
+
+A.prototype = B.prototype = {};
+
+let a = new A();
+
+console.log( a instanceof B ); // true
+```
+
+是的，看起来确实很奇怪。
+
+`instanceof` 并不关心函数，而是关心函数的与原型链匹配的 `prototype`。
+
+并且，这里 `a.__proto__ == B.prototype`，所以 `instanceof` 返回 `true`。
+
+总之，**根据 `instanceof` 的逻辑，真正决定类型的是 `prototype`**，而不是构造函数。
+

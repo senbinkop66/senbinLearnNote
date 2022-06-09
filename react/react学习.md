@@ -2722,6 +2722,49 @@ export default MyComponent;
 
 # React 事件处理
 
+1. 通过onXxx属性指定事件处理函数(注意大小写)
+
+- React使用的是**自定义(合成)事件**, 而不是使用的原生DOM事件 --为了更好的兼容性
+
+- React中的事件是通过**事件委托方式**处理的(委托给组件最外层的元素) -- 为了的高效
+
+2. 通过event.target得到发生事件的DOM元素对象 -- 不要过度使用ref
+
+```jsx
+import './App.css';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+class MyComponent extends Component {
+
+  // React.createRef调用后可以返回一个容器，该容器可以存储被ref所标识的节点,该容器是“专人专用”的
+  myRef = React.createRef();
+  // 展示左侧输入框的数据
+  showData = (event) => {
+    // console.log(event.target.value);
+    console.log("input1:", this.myRef.current.value);
+  }
+
+  // 展示右侧输入框的数据
+  showData2 = (event) => {
+    console.log("input2:", event.target.value);
+  }
+
+  render() {
+    return (
+      <div>
+        <h2>事件处理</h2>
+        <input ref={this.myRef} type="text" placeholder="点击按钮提示数据" />&nbsp;
+        <button onClick={this.showData}>点击提示左侧的数据</button>&nbsp;
+        <input onBlur={this.showData2} type="text" placeholder="失去焦点提示数据" />
+      </div>
+    )
+  }
+}
+
+export default MyComponent;
+```
+
 React 元素的事件处理和 DOM 元素类似。但是有一点语法上的不同：
 
 - **React 事件绑定属性的命名采用驼峰式写法，而不是小写。**
@@ -2763,7 +2806,7 @@ function ActionLink() {
 }
 ```
 
-实例中 e 是一个合成事件。
+**实例中 e 是一个合成事件。**
 
 使用 React 的时候通常你不需要使用 addEventListener 为一个已创建的 DOM 元素添加监听器。你仅仅需要在这个元素初始渲染的时候提供一个监听器。
 
@@ -2796,9 +2839,9 @@ ReactDOM.render(
 );
 ```
 
-你必须谨慎对待 JSX 回调函数中的 this，类的方法默认是不会绑定 this 的。如果你忘记绑定 this.handleClick 并把它传入 onClick, 当你调用这个函数的时候 this 的值会是 undefined。
+你必须谨慎对待 JSX 回调函数中的 this，**类的方法默认是不会绑定 this 的**。如果你忘记绑定 this.handleClick 并把它传入 onClick, 当你调用这个函数的时候 this 的值会是 undefined。
 
-这并不是 React 的特殊行为；它是函数如何在 JavaScript 中运行的一部分。通常情况下，如果你没有在方法后面添加 () ，例如 onClick={this.handleClick}，你应该为这个方法绑定 this。
+这并不是 React 的特殊行为；它是函数如何在 JavaScript 中运行的一部分。**通常情况下，如果你没有在方法后面添加 () ，例如 onClick={this.handleClick}，你应该为这个方法绑定 this。**
 
 如果使用 bind 让你很烦，这里有两种方式可以解决。如果你正在使用实验性的属性初始化器语法，你可以使用属性初始化器来正确的绑定回调函数：
 
@@ -2819,7 +2862,7 @@ class LoggingButton extends React.Component {
 }
 ```
 
-如果你没有使用属性初始化器语法，你可以在回调函数中使用 箭头函数：
+如果你没有使用属性初始化器语法，**你可以在回调函数中使用 箭头函数**：
 
 ```jsx
 class LoggingButton extends React.Component {
@@ -2837,7 +2880,7 @@ class LoggingButton extends React.Component {
 }
 ```
 
-使用这个语法有个问题就是每次 LoggingButton 渲染的时候都会创建一个不同的回调函数。在大多数情况下，这没有问题。然而如果这个回调函数作为一个属性值传入低阶组件，这些组件可能会进行额外的重新渲染。我们通常建议在构造函数中绑定或使用属性初始化器语法来避免这类性能问题。
+使用这个语法有个问题就是每次 LoggingButton 渲染的时候都会创建一个不同的回调函数。在大多数情况下，这没有问题。然而如果这个回调函数作为一个属性值传入低阶组件，这些组件可能会进行额外的重新渲染**。我们通常建议在构造函数中绑定或使用属性初始化器语法来避免这类性能问题。**
 
 ## 向事件处理程序传递参数
 
@@ -2850,9 +2893,9 @@ class LoggingButton extends React.Component {
 
 上述两种方式是等价的。
 
-上面两个例子中，参数 e 作为 React 事件对象将会被作为第二个参数进行传递。通过箭头函数的方式，事件对象必须显式的进行传递，但是通过 bind 的方式，事件对象以及更多的参数将会被隐式的进行传递。
+上面两个例子中，参数 e 作为 React 事件对象将会被作为第二个参数进行传递。**通过箭头函数的方式，事件对象必须显式的进行传递**，但是**通过 bind 的方式，事件对象以及更多的参数将会被隐式的进行传递**。
 
-值得注意的是，通过 bind 方式向监听函数传参，在类组件中定义的监听函数，事件对象 e 要排在所传递参数的后面，例如：
+值得注意的是，**通过 bind 方式向监听函数传参**，在类组件中定义的监听函数，事件对象 e 要排在所传递参数的后面，例如：
 
 ```jsx
 class Popper extends React.Component{
@@ -2876,7 +2919,445 @@ class Popper extends React.Component{
 }
 ```
 
+----
 
+# React 表单与事件
+
+HTML 表单元素与 React 中的其他 DOM 元素有所不同，因为表单元素生来就保留一些内部状态。
+
+在 HTML 当中，像 `<input>`, `<textarea>`, 和 `<select>` 这类表单元素会维持自身状态，并根据用户输入进行更新。但在 React 中，可变的状态通常保存在组件的状态属性中，并且只能用 setState() 方法进行更新。
+
+## 非受控组件
+
+现用现取
+
+```jsx
+import './App.css';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+class MyComponent extends Component {
+  handleSubmit = (event) => {
+    event.preventDefault();  //阻止表单提交
+    // console.log(this);
+    const {username, password} = this;
+    console.log(`输入的用户名：${username.value}, 密码：${password.value}`);
+  }
+
+  render() {
+    return (
+      <div>
+        <h2>收集表单数据</h2>
+        <form onSubmit={this.handleSubmit}>
+          User Name:<input ref={c => this.username = c} type="text" name="username" placeholder="用户名" />&nbsp;
+          Password:<input ref={c => this.password = c} type="password" name="password" placeholder="密码" />&nbsp;
+          <button>login</button>
+        </form>
+      </div>
+    )
+  }
+}
+
+export default MyComponent;
+```
+
+## 受控组件
+
+随输入的变化数据自动变化
+
+```jsx
+import './App.css';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+class MyComponent extends Component {
+  // 初始化状态
+  state = {
+    username: "",  // 用户名
+    password: "",  // 密码
+  }
+
+  // 保存用户名到状态中
+  saveUsername = (event) => {
+    this.setState({username: event.target.value});
+  }
+  // 保存密码到状态中
+  savePassword = (event) => {
+    this.setState({password: event.target.value});
+  }
+
+  // 表单提交的回调
+  handleSubmit = (event) => {
+    event.preventDefault();  //阻止表单提交
+    // console.log(this);
+    const {username, password} = this.state;
+    console.log(`输入的用户名：${username}, 密码：${password}`);
+  }
+
+  render() {
+    return (
+      <div>
+        <h2>收集表单数据</h2>
+        <form onSubmit={this.handleSubmit}>
+          User Name:<input onChange={this.saveUsername} type="text" name="username" />&nbsp;
+          Password:<input onChange={this.savePassword} type="password" name="password" />&nbsp;
+          <button>login</button>
+        </form>
+      </div>
+    )
+  }
+}
+
+export default MyComponent;
+```
+
+---
+
+## 使用高阶函数和函数柯里化
+
+```js
+				/* 
+					高阶函数：如果一个函数符合下面2个规范中的任何一个，那该函数就是高阶函数。
+									1.若A函数，接收的参数是一个函数，那么A就可以称之为高阶函数。
+									2.若A函数，调用的返回值依然是一个函数，那么A就可以称之为高阶函数。
+									常见的高阶函数有：Promise、setTimeout、arr.map()等等
+
+					函数的柯里化：通过函数调用继续返回函数的方式，实现多次接收参数最后统一处理的函数编码形式。 
+						function sum(a){
+							return(b)=>{
+								return (c)=>{
+									return a+b+c
+								}
+							}
+						}
+					*/
+```
+
+```jsx
+import './App.css';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+class MyComponent extends Component {
+  // 初始化状态
+  state = {
+    username: "",  // 用户名
+    password: "",  // 密码
+  }
+
+  saveFormData = (dataType) => {
+    return (event) => {
+      this.setState({[dataType]: event.target.value});
+    }
+  }
+
+  // 表单提交的回调
+  handleSubmit = (event) => {
+    event.preventDefault();  //阻止表单提交
+    // console.log(this);
+    const {username, password} = this.state;
+    console.log(`输入的用户名：${username}, 密码：${password}`);
+  }
+
+  render() {
+    return (
+      <div>
+        <h2>收集表单数据</h2>
+        <form onSubmit={this.handleSubmit}>
+          User Name:<input onChange={this.saveFormData("username")} type="text" name="username" />&nbsp;
+          Password:<input onChange={this.saveFormData("password")} type="password" name="password" />&nbsp;
+          <button>login</button>
+        </form>
+      </div>
+    )
+  }
+}
+
+export default MyComponent;
+```
+
+## 不用函数柯里化实现
+
+```jsx
+import './App.css';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+class MyComponent extends Component {
+  // 初始化状态
+  state = {
+    username: "",  // 用户名
+    password: "",  // 密码
+  }
+
+  saveFormData = (dataType, event) => {
+    this.setState({[dataType]: event.target.value});
+  }
+
+  // 表单提交的回调
+  handleSubmit = (event) => {
+    event.preventDefault();  //阻止表单提交
+    // console.log(this);
+    const {username, password} = this.state;
+    console.log(`输入的用户名：${username}, 密码：${password}`);
+  }
+
+  render() {
+    return (
+      <div>
+        <h2>收集表单数据</h2>
+        <form onSubmit={this.handleSubmit}>
+          User Name:<input onChange={event => this.saveFormData("username", event)} type="text" name="username" />&nbsp;
+          Password:<input onChange={event => this.saveFormData("password", event)} type="password" name="password" />&nbsp;
+          <button>login</button>
+        </form>
+      </div>
+    )
+  }
+}
+
+export default MyComponent;
+```
+
+
+
+
+
+----
+
+## 一个简单的实例
+
+在实例中我们设置了输入框 input 值 value = {this.state.data}。在输入框值发生变化时我们可以更新 state。我们可以使用 onChange 事件来监听 input 的变化，并修改 state。
+
+```jsx
+class HelloMessage extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {value: 'Hello kop!'};
+      this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+  render() {
+    var value = this.state.value;
+    return <div>
+            <input type="text" value={value} onChange={this.handleChange} />
+            <h4>{value}</h4>
+           </div>;
+  }
+}
+ReactDOM.render(
+  <HelloMessage />,
+  document.getElementById('example')
+);
+```
+
+上面的代码将渲染出一个值为 Hello kop! 的 input 元素，并通过 onChange 事件响应更新用户输入的值。
+
+
+
+在以下实例中我们将为大家演示如何在子组件上使用表单。 onChange 方法将触发 state 的更新并将更新的值传递到子组件的输入框的 value 上来重新渲染界面。
+
+你**需要在父组件通过创建事件句柄** (handleChange) ，**并作为 prop (updateStateProp) 传递到你的子组件上**。
+
+```jsx
+class Content extends React.Component {
+  render() {
+    return  <div>
+            <input type="text" value={this.props.myDataProp} onChange={this.props.updateStateProp} />
+            <h4>{this.props.myDataProp}</h4>
+            </div>;
+  }
+}
+class HelloMessage extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {value: 'Hello axihe!'};
+      this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+  render() {
+    var value = this.state.value;
+    return <div>
+            <Content myDataProp = {value}
+              updateStateProp = {this.handleChange}></Content>
+           </div>;
+  }
+}
+ReactDOM.render(
+  <HelloMessage />,
+  document.getElementById('example')
+);
+
+```
+
+## Select 下拉菜单
+
+在 React 中，不使用 selected 属性，而在根 select 标签上用 value 属性来表示选中项。
+
+```jsx
+class FlavorForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {value: 'coconut'};
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+  handleSubmit(event) {
+    alert('Your favorite flavor is: ' + this.state.value);
+    event.preventDefault();
+  }
+  render() {
+    return (
+      <form onSubmit={this.handleSubmit}>
+        <label>
+          选择您最喜欢的网站
+          <select value={this.state.value} onChange={this.handleChange}>
+            <option value="gg">Google</option>
+            <option value="rn">axihe</option>
+            <option value="tb">Taobao</option>
+            <option value="fb">Facebook</option>
+          </select>
+        </label>
+        <input type="submit" value="提交" />
+      </form>
+    );
+  }
+}
+ReactDOM.render(
+  <FlavorForm />,
+  document.getElementById('example')
+);
+```
+
+## 多个表单
+
+当你有处理多个 input 元素时，你可以通过给每个元素添加一个 name 属性，来让处理函数根据 event.target.name 的值来选择做什么。
+
+```jsx
+class Reservation extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isGoing: true,
+      numberOfGuests: 2
+    };
+    this.handleInputChange = this.handleInputChange.bind(this);
+  }
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+    this.setState({
+      [name]: value
+    });
+  }
+  render() {
+    return (
+      <form>
+        <label>
+          是否离开：
+          <input
+            name="isGoing"
+            type="checkbox"
+            checked={this.state.isGoing}
+            onChange={this.handleInputChange} />
+        </label>
+        <br />
+        <label>
+          访客数：
+          <input
+            name="numberOfGuests"
+            type="number"
+            value={this.state.numberOfGuests}
+            onChange={this.handleInputChange} />
+        </label>
+      </form>
+    );
+  }
+}
+ReactDOM.render(
+  <Reservation />,
+  document.getElementById('example')
+);
+
+```
+
+## React 事件
+
+以下实例演示通过 onClick 事件来修改数据：
+
+```jsx
+class HelloMessage extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {value: 'Hello axihe!'};
+      this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(event) {
+    this.setState({value: '阿西河前端教程'})
+  }
+  render() {
+    var value = this.state.value;
+    return <div>
+            <button onClick={this.handleChange}>点我</button>
+            <h4>{value}</h4>
+           </div>;
+  }
+}
+ReactDOM.render(
+  <HelloMessage />,
+  document.getElementById('example')
+);
+```
+
+当你需要从子组件中更新父组件的 state 时，你需要在父组件通过创建事件句柄 (handleChange) ，并作为 prop (updateStateProp) 传递到你的子组件上。实例如下：
+
+```jsx
+class Content extends React.Component {
+  render() {
+    return  <div>
+              <button onClick = {this.props.updateStateProp}>点我</button>
+              <h4>{this.props.myDataProp}</h4>
+           </div>
+  }
+}
+class HelloMessage extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {value: 'Hello axihe!'};
+      this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(event) {
+    this.setState({value: '阿西河前端教程'})
+  }
+  render() {
+    var value = this.state.value;
+    return <div>
+            <Content myDataProp = {value}
+              updateStateProp = {this.handleChange}></Content>
+           </div>;
+  }
+}
+ReactDOM.render(
+  <HelloMessage />,
+  document.getElementById('example')
+);
+```
+
+
+
+
+
+
+
+-----
 
 # React 条件渲染
 
@@ -3429,6 +3910,8 @@ bool isMounted()
 
 **isMounted()**方法用于判断组件是否已挂载到 DOM 中。可以使用该方法保证了**setState()**和**forceUpdate()**在异步场景下的调用不会出错。
 
+---
+
 # React 组件生命周期
 
 组件的生命周期可分成三个状态：
@@ -3448,6 +3931,259 @@ bool isMounted()
 - **componentWillUnmount**在组件从 DOM 中移除之前立刻被调用。
 
 这些方法的详细说明，可以参考[官方文档](http://facebook.github.io/react/docs/component-specs.html#lifecycle-methods)。
+
+----
+
+## 引出生命周期
+
+### 理解
+
+1. 组件从创建到死亡它会经历一些特定的阶段。
+
+2. React组件中包含一系列勾子函数(生命周期回调函数), 会在特定的时刻调用。
+
+3. 我们在定义组件时，会在特定的生命周期回调函数中，做特定的工作。
+
+
+
+```jsx
+import './App.css';
+import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+//创建组件
+// 生命周期回调函数 <==> 生命周期钩子函数 <==> 生命周期函数 <==> 生命周期钩子
+class MyComponent extends Component {
+  state = {
+    opacity: 1
+  }
+  death = () => {
+    // 卸载组件
+    ReactDOM.unmountComponentAtNode(document.getElementById("root"));
+  }
+
+  // 组件挂载完毕
+  componentDidMount() {
+    console.log("componentDidMount");
+    this.timer = setInterval(() => {
+      // 获取原状态
+      let {opacity} = this.state;
+      opacity -= 0.1;
+      if (opacity <= 0) {
+        opacity = 1;
+      }
+      this.setState({opacity});
+    }, 200);
+  }
+
+  // 组件将要卸载
+  componentWillUnmount() {
+    // 清除定时器
+    console.log("componentWillUnmount");
+    clearInterval(this.timer);
+  }
+  render() {
+    console.log("render");
+    return (
+      <div>
+        <h2 style={{opacity: this.state.opacity, color: "#345678"}}>React怎么学习？</h2>
+        <button onClick={this.death}>try</button>
+      </div>
+    )
+  }
+}
+
+export default MyComponent;
+```
+
+----
+
+## react生命周期(旧)
+
+![image-20220609195616524](E:\pogject\学习笔记\image\js\react生命周期旧)
+
+生命周期的三个阶段（旧）
+
+   **1.** **初始化阶段:** 由ReactDOM.render()触发---初次渲染
+
+1. constructor()
+
+2. componentWillMount()
+
+3. render()
+
+4. componentDidMount()   =====> **常用**,  一般在这个钩子中做一些初始化的事，例如：**开启定时器、发送网络请求、订阅消息**
+
+   **2.** **更新阶段:** 由组件内部this.setSate()或父组件重新render触发
+
+1. shouldComponentUpdate()
+
+2. componentWillUpdate()
+
+3. render()   =====> 必须使用的一个
+
+4. componentDidUpdate()
+
+​    **3.** **卸载组件:** 由ReactDOM.unmountComponentAtNode()触发
+
+1. componentWillUnmount()  =====> **常用**   ，一般在这个钩子中做一些收尾的事，例如：**关闭定时器、取消订阅消息**
+
+
+
+```jsx
+import './App.css';
+import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
+// import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+//创建组件
+class MyComponent extends Component {
+  // 构造器
+  constructor(props) {
+    console.log("Count --- constructor");
+    super(props);
+    this.state = {count: 0};
+  }
+
+  // 加1按钮的回调
+  add = () => {
+    // 获取原状态
+    const {count} = this.state;
+    // 更新状态
+    this.setState({count: count + 1})
+  }
+
+  // 卸载组件按钮的回调
+  death = () => {
+    // 卸载组件
+    ReactDOM.unmountComponentAtNode(document.getElementById("root"));
+  }
+
+  // 强制更新按钮的回调
+  force = () => {
+    this.forceUpdate();
+  }
+
+  // 组件将要挂载
+  componentWillMount() {
+    console.log("Count --- componentWillMount");
+  }
+
+  // 组件挂载完毕
+  componentDidMount() {
+    console.log("Count --- componentDidMount");
+  }
+
+  // 控制组件更新的“阀门”
+  shouldComponentUpdate() {
+    console.log("Count --- shouldComponentUpdate");
+    // 写了必需返回 true 才能更新
+    return true;
+  }
+
+  // 组件将要更新的钩子
+  componentWillUpdate() {
+    console.log("Count --- componentWillUpdate");
+  }
+
+  // 组件更新完毕的钩子
+  componentDidUpdate() {
+    console.log("Count --- componentDisUpdate");
+  }
+
+  // 组件将要卸载
+  componentWillUnmount() {
+    console.log("Count --- componentWillUnmount");
+  }
+
+
+  render() {
+    console.log("Count --- render");
+    const {count} = this.state;
+    return (
+      <div>
+        <h2 style={{opacity: this.state.opacity, color: "#345678"}}>当前求和为：{count}</h2>
+        <button onClick={this.add}>add</button>
+        <button onClick={this.death}>卸载组件</button>
+        <button onClick={this.force}>强制更新</button>
+      </div>
+    )
+  }
+}
+
+export default MyComponent;
+```
+
+
+
+父子组件
+
+```jsx
+// 父组件A
+class A extends React.Component {
+	// 初始化状态
+	state = {carName: "OOOO"};
+	
+	changeCar = () => {
+		this.setState({carName: "BMW"});
+	}
+
+	render() {
+		return (
+			<div>
+				<div>我是A组件</div>
+				<button onClick={this.changeCar}>换车</button>
+				<B carName={this.state.carName} />
+			</div>
+		)
+	}
+}
+
+// 子组件B
+class B extends React.Component {
+
+	// 组件将要接收新的props的钩子
+	componentWillReceiveProps(props) {
+		console.log("B --- componentWillReceiveProps", props);
+	}
+
+	  // 控制组件更新的“阀门”
+  shouldComponentUpdate() {
+    console.log("B --- shouldComponentUpdate");
+    // 写了必需返回 true 才能更新
+    return true;
+  }
+
+  // 组件将要更新的钩子
+  componentWillUpdate() {
+    console.log("B --- componentWillUpdate");
+  }
+
+  // 组件更新完毕的钩子
+  componentDidUpdate() {
+    console.log("B --- componentDisUpdate");
+  }
+
+  // 组件将要卸载
+  componentWillUnmount() {
+    console.log("B --- componentWillUnmount");
+  }
+
+  render() {
+  	console.log("B --- render");
+  	return (
+  		<div>我是B组件，接收到的车是:{this.props.carName}</div>
+  	);
+  }
+}
+
+// 渲染组件到页面
+ReactDOM.render(<A />, document.getElementById("test"));
+
+```
+
+
 
 
 
@@ -3546,6 +4282,10 @@ ReactDOM.render(
 );
 ```
 
+
+
+-----
+
 # React AJAX
 
 React 组件的数据可以通过 componentDidMount 方法中的 Ajax 来获取，当从服务端获取数据时可以将数据存储在 state 中，再用 this.setState 方法重新渲染 UI。
@@ -3596,237 +4336,5 @@ ReactDOM.render(
   document.getElementById('example')
 );
 </script>
-```
-
-# React 表单与事件
-
-HTML 表单元素与 React 中的其他 DOM 元素有所不同，因为表单元素生来就保留一些内部状态。
-
-在 HTML 当中，像 `<input>`, `<textarea>`, 和 `<select>` 这类表单元素会维持自身状态，并根据用户输入进行更新。但在 React 中，可变的状态通常保存在组件的状态属性中，并且只能用 setState() 方法进行更新。
-
-## 一个简单的实例
-
-在实例中我们设置了输入框 input 值 value = {this.state.data}。在输入框值发生变化时我们可以更新 state。我们可以使用 onChange 事件来监听 input 的变化，并修改 state。
-
-```jsx
-class HelloMessage extends React.Component {
-  constructor(props) {
-      super(props);
-      this.state = {value: 'Hello kop!'};
-      this.handleChange = this.handleChange.bind(this);
-  }
-  handleChange(event) {
-    this.setState({value: event.target.value});
-  }
-  render() {
-    var value = this.state.value;
-    return <div>
-            <input type="text" value={value} onChange={this.handleChange} />
-            <h4>{value}</h4>
-           </div>;
-  }
-}
-ReactDOM.render(
-  <HelloMessage />,
-  document.getElementById('example')
-);
-```
-
-上面的代码将渲染出一个值为 Hello kop! 的 input 元素，并通过 onChange 事件响应更新用户输入的值。
-
-
-
-在以下实例中我们将为大家演示如何在子组件上使用表单。 onChange 方法将触发 state 的更新并将更新的值传递到子组件的输入框的 value 上来重新渲染界面。
-
-你**需要在父组件通过创建事件句柄** (handleChange) ，**并作为 prop (updateStateProp) 传递到你的子组件上**。
-
-```jsx
-class Content extends React.Component {
-  render() {
-    return  <div>
-            <input type="text" value={this.props.myDataProp} onChange={this.props.updateStateProp} />
-            <h4>{this.props.myDataProp}</h4>
-            </div>;
-  }
-}
-class HelloMessage extends React.Component {
-  constructor(props) {
-      super(props);
-      this.state = {value: 'Hello axihe!'};
-      this.handleChange = this.handleChange.bind(this);
-  }
-  handleChange(event) {
-    this.setState({value: event.target.value});
-  }
-  render() {
-    var value = this.state.value;
-    return <div>
-            <Content myDataProp = {value}
-              updateStateProp = {this.handleChange}></Content>
-           </div>;
-  }
-}
-ReactDOM.render(
-  <HelloMessage />,
-  document.getElementById('example')
-);
-
-```
-
-## Select 下拉菜单
-
-在 React 中，不使用 selected 属性，而在根 select 标签上用 value 属性来表示选中项。
-
-```jsx
-class FlavorForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {value: 'coconut'};
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-  handleChange(event) {
-    this.setState({value: event.target.value});
-  }
-  handleSubmit(event) {
-    alert('Your favorite flavor is: ' + this.state.value);
-    event.preventDefault();
-  }
-  render() {
-    return (
-      <form onSubmit={this.handleSubmit}>
-        <label>
-          选择您最喜欢的网站
-          <select value={this.state.value} onChange={this.handleChange}>
-            <option value="gg">Google</option>
-            <option value="rn">axihe</option>
-            <option value="tb">Taobao</option>
-            <option value="fb">Facebook</option>
-          </select>
-        </label>
-        <input type="submit" value="提交" />
-      </form>
-    );
-  }
-}
-ReactDOM.render(
-  <FlavorForm />,
-  document.getElementById('example')
-);
-```
-
-## 多个表单
-
-当你有处理多个 input 元素时，你可以通过给每个元素添加一个 name 属性，来让处理函数根据 event.target.name 的值来选择做什么。
-
-```jsx
-class Reservation extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isGoing: true,
-      numberOfGuests: 2
-    };
-    this.handleInputChange = this.handleInputChange.bind(this);
-  }
-  handleInputChange(event) {
-    const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
-    const name = target.name;
-    this.setState({
-      [name]: value
-    });
-  }
-  render() {
-    return (
-      <form>
-        <label>
-          是否离开：
-          <input
-            name="isGoing"
-            type="checkbox"
-            checked={this.state.isGoing}
-            onChange={this.handleInputChange} />
-        </label>
-        <br />
-        <label>
-          访客数：
-          <input
-            name="numberOfGuests"
-            type="number"
-            value={this.state.numberOfGuests}
-            onChange={this.handleInputChange} />
-        </label>
-      </form>
-    );
-  }
-}
-ReactDOM.render(
-  <Reservation />,
-  document.getElementById('example')
-);
-
-```
-
-## React 事件
-
-以下实例演示通过 onClick 事件来修改数据：
-
-```jsx
-class HelloMessage extends React.Component {
-  constructor(props) {
-      super(props);
-      this.state = {value: 'Hello axihe!'};
-      this.handleChange = this.handleChange.bind(this);
-  }
-  handleChange(event) {
-    this.setState({value: '阿西河前端教程'})
-  }
-  render() {
-    var value = this.state.value;
-    return <div>
-            <button onClick={this.handleChange}>点我</button>
-            <h4>{value}</h4>
-           </div>;
-  }
-}
-ReactDOM.render(
-  <HelloMessage />,
-  document.getElementById('example')
-);
-```
-
-当你需要从子组件中更新父组件的 state 时，你需要在父组件通过创建事件句柄 (handleChange) ，并作为 prop (updateStateProp) 传递到你的子组件上。实例如下：
-
-```jsx
-class Content extends React.Component {
-  render() {
-    return  <div>
-              <button onClick = {this.props.updateStateProp}>点我</button>
-              <h4>{this.props.myDataProp}</h4>
-           </div>
-  }
-}
-class HelloMessage extends React.Component {
-  constructor(props) {
-      super(props);
-      this.state = {value: 'Hello axihe!'};
-      this.handleChange = this.handleChange.bind(this);
-  }
-  handleChange(event) {
-    this.setState({value: '阿西河前端教程'})
-  }
-  render() {
-    var value = this.state.value;
-    return <div>
-            <Content myDataProp = {value}
-              updateStateProp = {this.handleChange}></Content>
-           </div>;
-  }
-}
-ReactDOM.render(
-  <HelloMessage />,
-  document.getElementById('example')
-);
 ```
 
