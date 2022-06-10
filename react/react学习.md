@@ -1758,6 +1758,38 @@ React 非常灵活，但它也有一个严格的规则：
 
 ## 默认 Props值
 
+### `defaultProps`
+
+`defaultProps` 可以为 Class 组件添加默认 props。**这一般用于 props 未赋值，但又不能为 `null` 的情况**。例如：
+
+```js
+class CustomButton extends React.Component {
+  // ...
+}
+
+CustomButton.defaultProps = {
+  color: 'blue'
+};
+```
+
+如果未提供 `props.color`，则默认设置为 `'blue'`
+
+```jsx
+  render() {
+    return <CustomButton /> ; // props.color 将设置为 'blue'
+  }
+```
+
+如果 `props.color` 被设置为 `null`，则它将保持为 `null`
+
+```jsx
+  render() {
+    return <CustomButton color={null} /> ; // props.color 将保持是 null
+  }
+```
+
+
+
 您可以通过配置特定的 `defaultProps` 属性来定义 `props` 的默认值：实例如下：
 
 ```jsx
@@ -4836,18 +4868,285 @@ class ErrorBoundary extends React.Component {
 componentDidCatch(error, info)
 ```
 
-此生命周期在后代组件抛出错误后被调用。 它接收两个参数：
+**此生命周期在后代组件抛出错误后被调用**。 它接收两个参数：
 
 1. `error` —— 抛出的错误。
 2. `info` —— 带有 `componentStack` key 的对象，其中包含[有关组件引发错误的栈信息](https://zh-hans.reactjs.org/docs/error-boundaries.html#component-stack-traces)。
 
-`componentDidCatch()` 会在“提交”阶段被调用，因此允许执行副作用。 它应该用于记录错误之类的情况：
+`componentDidCatch()` 会在“提交”阶段被调用，**因此允许执行副作用。 它应该用于记录错误之类的情况**：
+
+```jsx
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    // 更新 state 使下一次渲染可以显示降级 UI
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, info) {
+    // "组件堆栈" 例子:
+    //   in ComponentThatThrows (created by App)
+    //   in ErrorBoundary (created by App)
+    //   in div (created by App)
+    //   in App
+    logComponentStackToMyService(info.componentStack);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // 你可以渲染任何自定义的降级 UI
+      return <h1>Something went wrong.</h1>;
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+React 的开发和生产构建版本在 `componentDidCatch()` 的方式上有轻微差别。
+
+在开发模式下，错误会冒泡至 `window`，这意味着任何 `window.onerror` 或 `window.addEventListener('error', callback)` 会中断这些已经被 `componentDidCatch()` 捕获的错误。
+
+**相反，在生产模式下，错误不会冒泡**，这意味着任何根错误处理器只会接受那些没有显式地被 `componentDidCatch()` 捕获的错误。
+
+>注意
+>
+>如果发生错误，你可以通过调用 `setState` 使用 `componentDidCatch()` 渲染降级 UI，但在未来的版本中将不推荐这样做。 **可以使用静态 `getDerivedStateFromError()` 来处理降级渲染。**
 
 
 
+---
+
+## 过时的生命周期方法
+
+以下生命周期方法标记为“过时”。**这些方法仍然有效，但不建议在新代码中使用它们**。参阅此[博客文章](https://zh-hans.reactjs.org/blog/2018/03/27/update-on-async-rendering.html)以了解更多有关迁移旧版生命周期方法的信息。
+
+### `UNSAFE_componentWillMount()`
+
+```
+UNSAFE_componentWillMount()
+```
+
+> 注意
+>
+> 此生命周期之前名为 `componentWillMount`。该名称将继续使用至 React 17。可以使用 [`rename-unsafe-lifecycles` codemod](https://github.com/reactjs/react-codemod#rename-unsafe-lifecycles) 自动更新你的组件。
+
+`UNSAFE_componentWillMount()` 在挂载之前被调用。它在 `render()` 之前调用，因此在此方法中同步调用 `setState()` 不会触发额外渲染。**通常，我们建议使用 `constructor()` 来初始化 state。**
+
+**避免在此方法中引入任何副作用或订阅**。如遇此种情况，请改用 `componentDidMount()`。
+
+此方法是**服务端渲染唯一会调用的生命周期函数。**
+
+----
+
+### `UNSAFE_componentWillReceiveProps()`
+
+```
+UNSAFE_componentWillReceiveProps(nextProps)
+```
+
+> 注意
+>
+> 此生命周期之前名为 `componentWillReceiveProps`。该名称将继续使用至 React 17。可以使用 [`rename-unsafe-lifecycles` codemod](https://github.com/reactjs/react-codemod#rename-unsafe-lifecycles) 自动更新你的组件。
+
+> 注意:
+>
+> 使用此生命周期方法通常会出现 bug 和不一致性：
+>
+> - 如果你需要**执行副作用**（例如，数据提取或动画）以响应 props 中的更改，请改用 [`componentDidUpdate`](https://zh-hans.reactjs.org/docs/react-component.html#componentdidupdate) 生命周期。
+> - 如果你使用 `componentWillReceiveProps` **仅在 prop 更改时重新计算某些数据**，请[使用 memoization helper 代替](https://zh-hans.reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#what-about-memoization)。
+> - 如果你使用 `componentWillReceiveProps` 是为了**在 prop 更改时“重置”某些 state**，请考虑使组件[完全受控](https://zh-hans.reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#recommendation-fully-controlled-component)或[使用 `key` 使组件完全不受控](https://zh-hans.reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#recommendation-fully-uncontrolled-component-with-a-key) 代替。
+>
+> 对于其他使用场景，[请遵循此博客文章中有关派生状态的建议](https://zh-hans.reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html)。
+
+`UNSAFE_componentWillReceiveProps()` **会在已挂载的组件接收新的 props 之前被调用**。如果你需要更新状态以响应 prop 更改（例如，重置它），你可以比较 `this.props` 和 `nextProps` 并在此方法中使用 `this.setState()` 执行 state 转换。
+
+请注意，**如果父组件导致组件重新渲染，即使 props 没有更改，也会调用此方法**。如果只想处理更改，**请确保进行当前值与变更值的比较。**
+
+在[挂载](https://zh-hans.reactjs.org/docs/react-component.html#mounting)过程中，React 不会针对初始 props 调用 `UNSAFE_componentWillReceiveProps()`。**组件只会在组件的 props 更新时调用此方法**。调用 `this.setState()` **通常不会**触发 `UNSAFE_componentWillReceiveProps()`。
+
+------
+
+### `UNSAFE_componentWillUpdate()`
+
+```
+UNSAFE_componentWillUpdate(nextProps, nextState)
+```
+
+> 注意
+>
+> 此生命周期之前名为 `componentWillUpdate`。该名称将继续使用至 React 17。可以使用 [`rename-unsafe-lifecycles` codemod](https://github.com/reactjs/react-codemod#rename-unsafe-lifecycles) 自动更新你的组件。
+
+**当组件收到新的 props 或 state 时，会在渲染之前调用** `UNSAFE_componentWillUpdate()`。使用此作为在更新发生之前执行准备更新的机会。初始渲染不会调用此方法。
+
+注意，你**不能此方法中调用 `this.setState()`**；在 `UNSAFE_componentWillUpdate()` 返回之前，你也不应该执行任何其他操作（例如，dispatch Redux 的 action）触发对 React 组件的更新
+
+通常，此方法可以替换为 `componentDidUpdate()`。如果你在此方法中读取 DOM 信息（例如，为了保存滚动位置），则可以将此逻辑移至 `getSnapshotBeforeUpdate()` 中。
+
+> 注意
+>
+> 如果 `shouldComponentUpdate()` 返回 false，则不会调用 `UNSAFE_componentWillUpdate()`。
 
 
 
+---
+
+## 其他 API
+
+不同于上述生命周期方法（React 主动调用），以下方法是你可以在组件中调用的方法。
+
+只有两个方法：`setState()` 和 `forceUpdate()`。
+
+### `setState()`
+
+```js
+setState(updater, [callback])
+```
+
+`setState()` **将对组件 state 的更改排入队列**，并**通知 React 需要使用更新后的 state 重新渲染此组件及其子组件**。
+
+这是用于更新用户界面以响应事件处理器和处理服务器数据的**主要方式**
+
+将 `setState()` 视为`请求`**而不是立即更新组件的命令**。为了更好的感知性能，**React 会延迟调用它，然后通过一次传递更新多个组件**。在罕见的情况下，你需要强制 DOM 更新同步应用，你可以使用 [`flushSync`](https://zh-hans.reactjs.org/docs/react-dom.html#flushsync) 来包装它，但这可能会损害性能。
+
+`setState()` 并不总是立即更新组件。**它会批量推迟更新**。这使得在调用 `setState()` 后立即读取 `this.state` 成为了隐患。**为了消除隐患，请使用 `componentDidUpdate` 或者 `setState` 的回调函数（`setState(updater, callback)`）**，这两种方式都可以保证在应用更新后触发。如需基于之前的 state 来设置当前的 state，请阅读下述关于参数 `updater` 的内容。
+
+除非 `shouldComponentUpdate()` 返回 `false`，否则 `setState()` 将始终执行重新渲染操作。如果可变对象被使用，且无法在 `shouldComponentUpdate()` 中实现条件渲染，那么仅在新旧状态不一时调用 `setState()`可以避免不必要的重新渲染
+
+参数一为带有形式参数的 `updater` 函数：
+
+```js
+(state, props) => stateChange
+```
+
+`state` 是对应用变化时组件状态的引用。当然，**它不应直接被修改。你应该使用基于 `state` 和 `props` 构建的新对象来表示变化**。例如，假设我们想根据 `props.step` 来增加 state：
+
+```js
+this.setState((state, props) => {
+  return {counter: state.counter + props.step};
+});
+```
+
+updater 函数中接收的 `state` 和 `props` 都保证为最新。**updater 的返回值会与 `state` 进行浅合并。**
+
+`setState()` 的第二个参数为**可选的回调函数**，它将在 `setState` 完成合并并重新渲染组件后执行。**通常，我们建议使用 `componentDidUpdate()` 来代替此方式。**
+
+`setState()` 的第一个参数除了接受函数外，还可以接受对象类型：
+
+```js
+setState(stateChange[, callback])
+```
+
+`stateChange` 会将传入的对象浅层合并到新的 state 中，例如，调整购物车商品数：
+
+```js
+this.setState({quantity: 2})
+```
+
+这种形式的 `setState()` 也是异步的，并且在同一周期内会对多个 `setState` 进行批处理。例如，如果在同一周期内多次设置商品数量增加，则相当于：
+
+```js
+Object.assign(
+  previousState,
+  {quantity: state.quantity + 1},
+  {quantity: state.quantity + 1},
+  ...
+)
+```
+
+后调用的 `setState()` 将覆盖同一周期内先调用 `setState` 的值，因此商品数仅增加一次。**如果后续状态取决于当前状态，我们建议使用 updater 函数的形式代替：**
+
+```
+this.setState((state) => {
+  return {quantity: state.quantity + 1};
+});
+```
+
+有关更多详细信息，请参阅：
+
+- [State 和生命周期指南](https://zh-hans.reactjs.org/docs/state-and-lifecycle.html)
+- [深入学习：何时以及为什么 `setState()` 会批量执行？](https://stackoverflow.com/a/48610973/458193)
+- [深入：为什么不直接更新 `this.state`？](https://github.com/facebook/react/issues/11527#issuecomment-360199710)
+
+------
+
+### `forceUpdate()`
+
+```
+component.forceUpdate(callback)
+```
+
+默认情况下，当组件的 state 或 props 发生变化时，组件将重新渲染。如果 `render()` 方法依赖于其他数据，**则可以调用 `forceUpdate()` 强制让组件重新渲染。**
+
+调用 `forceUpdate()` 将致使组件调用 `render()` 方法，此操作会跳过该组件的 `shouldComponentUpdate()`。**但其子组件会触发正常的生命周期方法，包括 `shouldComponentUpdate()` 方法**。如果标记发生变化，React 仍将只更新 DOM。
+
+通常你应该避免使用 `forceUpdate()`，尽量在 `render()` 中使用 `this.props` 和 `this.state`。
+
+---
+
+## Class 属性
+
+### `defaultProps`
+
+`defaultProps` 可以为 Class 组件添加默认 props。这一般用于 props 未赋值，但又不能为 `null` 的情况。例如：
+
+```js
+class CustomButton extends React.Component {
+  // ...
+}
+
+CustomButton.defaultProps = {
+  color: 'blue'
+};
+```
+
+如果未提供 `props.color`，则默认设置为 `'blue'`
+
+```jsx
+  render() {
+    return <CustomButton /> ; // props.color 将设置为 'blue'
+  }
+```
+
+如果 `props.color` 被设置为 `null`，则它将保持为 `null`
+
+```jsx
+  render() {
+    return <CustomButton color={null} /> ; // props.color 将保持是 null
+  }
+```
+
+------
+
+
+
+### `displayName`
+
+`displayName` 字符串多用于调试消息。通常，你不需要设置它，因为它可以根据函数组件或 class 组件的名称推断出来。如果调试时需要显示不同的名称或创建高阶组件，请参阅[使用 displayname 轻松进行调试](https://zh-hans.reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging)了解更多。
+
+----
+
+## 实例属性
+
+### `props`
+
+`this.props` 包括被该组件调用者定义的 props。欲了解 props 的详细介绍，请参阅[组件 & Props](https://zh-hans.reactjs.org/docs/components-and-props.html)。
+
+需特别注意，`this.props.children` 是一个特殊的 prop，通常由 JSX 表达式中的子组件组成，而非组件本身定义。
+
+### `state`
+
+组件中的 state 包含了随时可能发生变化的数据。state 由用户自定义，它是一个普通 JavaScript 对象。
+
+如果某些值未用于渲染或数据流（例如，计时器 ID），则不必将其设置为 state。此类值可以在组件实例上定义。
+
+欲了解关于 state 的更多信息，请参阅 [State & 生命周期](https://zh-hans.reactjs.org/docs/state-and-lifecycle.html)。
+
+永远不要直接改变 `this.state`，因为后续调用的 `setState()` 可能会替换掉你的改变。请把 `this.state` 看作是不可变的。
 
 -----
 
@@ -4901,5 +5200,449 @@ ReactDOM.render(
   document.getElementById('example')
 );
 </script>
+```
+
+
+
+----
+
+# Diffing 算法
+
+当对比两棵树时，React 首先比较两棵树的根节点。不同类型的根节点元素会有不同的形态。
+
+![image-20220610201432602](E:\pogject\学习笔记\image\js\reactDiff算法)
+
+### 设计动机
+
+在某一时间节点调用 React 的 `render()` 方法，会创建一棵由 React 元素组成的树。在下一次 state 或 props 更新时，相同的 `render()` 方法会返回一棵不同的树。React 需要基于这两棵树之间的差别来判断如何高效的更新 UI，以保证当前 UI 与最新的树保持同步。
+
+此算法有一些通用的解决方案，即生成将一棵树转换成另一棵树的最小操作次数。然而，即使使用[最优的算法](http://grfia.dlsi.ua.es/ml/algorithms/references/editsurvey_bille.pdf)，该算法的复杂程度仍为 O(n 3 )，其中 n 是树中元素的数量。
+
+如果在 React 中使用该算法，那么展示 1000 个元素则需要 10 亿次的比较。这个开销实在是太过高昂。于是 React 在**以下两个假设的基础之上**提出了一套 O(n) 的启发式算法：
+
+1. **两个不同类型的元素会产生出不同的树**；
+2. 开发者可以**使用 `key` 属性**标识哪些子元素在不同的渲染中可能是不变的。
+
+在实践中，我们发现以上假设在几乎所有实用的场景下都成立。
+
+### 对比不同类型的元素
+
+**当根节点为不同类型的元素时，React 会拆卸原有的树并且建立起新的树。**举个例子，当一个元素从 `<a>` 变成 `<img>`，从 `<Article>` 变成 `<Comment>`，或从 `<Button>` 变成 `<div>` 都会触发一个完整的重建流程。
+
+**当卸载一棵树时，对应的 DOM 节点也会被销毁。**组件实例将执行 `componentWillUnmount()` 方法。当建立一棵新的树时，对应的 DOM 节点会被创建以及插入到 DOM 中。组件实例将执行 `UNSAFE_componentWillMount()` 方法，紧接着 `componentDidMount()` 方法。所有与之前的树相关联的 state 也会被销毁。
+
+**在根节点以下的组件也会被卸载，它们的状态会被销毁**。比如，当比对以下更变时：
+
+```jsx
+<div>
+  <Counter />
+</div>
+
+<span>
+  <Counter />
+</span>
+```
+
+React 会销毁 `Counter` 组件并且重新装载一个新的组件。
+
+### 对比同一类型的元素
+
+当对比两个相同类型的 React 元素时，React 会保留 DOM 节点，**仅比对及更新有改变的属性**。比如：
+
+```jsx
+<div className="before" title="stuff" />
+
+<div className="after" title="stuff" />
+```
+
+通过对比这两个元素，React 知道只需要修改 DOM 元素上的 `className` 属性。
+
+**当更新 `style` 属性时，React 仅更新有所更变的属性**。比如：
+
+```jsx
+<div style={{color: 'red', fontWeight: 'bold'}} />
+
+<div style={{color: 'green', fontWeight: 'bold'}} />
+```
+
+通过对比这两个元素，React 知道只需要修改 DOM 元素上的 `color` 样式，无需修改 `fontWeight`。
+
+**在处理完当前节点之后，React 继续对子节点进行递归。**
+
+### 对比同类型的组件元素
+
+当一个组件更新时，组件实例会保持不变，因此可以在不同的渲染时保持 state 一致。**React 将更新该组件实例的 props 以保证与最新的元素保持一致**，并且调用该实例的 `UNSAFE_componentWillReceiveProps()`、`UNSAFE_componentWillUpdate()` 以及 `componentDidUpdate()` 方法。
+
+下一步，调用 `render()` 方法，diff 算法将在之前的结果以及新的结果中进行递归。
+
+### 对子节点进行递归
+
+默认情况下，当递归 DOM 节点的子元素时，React 会同时遍历两个子元素的列表；**当产生差异时，生成一个 mutation。**
+
+**在子元素列表末尾新增元素时，更新开销比较小**。比如：
+
+```jsx
+<ul>
+  <li>first</li>
+  <li>second</li>
+</ul>
+
+<ul>
+  <li>first</li>
+  <li>second</li>
+  <li>third</li>
+</ul>
+```
+
+React 会先匹配两个 `<li>first</li>` 对应的树，然后匹配第二个元素 `<li>second</li>` 对应的树，最后插入第三个元素的 `<li>third</li>` 树。
+
+**如果只是简单的将新增元素插入到表头，那么更新开销会比较大**。比如：
+
+```jsx
+<ul>
+  <li>Duke</li>
+  <li>Villanova</li>
+</ul>
+
+<ul>
+  <li>Connecticut</li>
+  <li>Duke</li>
+  <li>Villanova</li>
+</ul>
+```
+
+React 并不会意识到应该保留 `<li>Duke</li>` 和 `<li>Villanova</li>`，**而是会重建每一个子元素。这种情况会带来性能问题。**
+
+### Keys
+
+为了解决上述问题，React 引入了 `key` 属性。当子元素拥有 key 时，React 使用 key 来匹配原有树上的子元素以及最新树上的子元素。以下示例在新增 `key` 之后，使得树的转换效率得以提高：
+
+```jsx
+<ul>
+  <li key="2015">Duke</li>
+  <li key="2016">Villanova</li>
+</ul>
+
+<ul>
+  <li key="2014">Connecticut</li>
+  <li key="2015">Duke</li>
+  <li key="2016">Villanova</li>
+</ul>
+```
+
+现在 React 知道只有带着 `'2014'` key 的元素是新元素，带着 `'2015'` 以及 `'2016'` key 的元素仅仅移动了。
+
+实际开发中，编写一个 key 并不困难。你要展现的元素可能已经有了一个唯一 ID，于是 key 可以直接从你的数据中提取：
+
+```jsx
+<li key={item.id}>{item.name}</li>
+```
+
+**当以上情况不成立时，你可以新增一个 ID 字段到你的模型中**，或者**利用一部分内容作为哈希值来生成一个 key**。这个 key 不需要全局唯一，**但在列表中需要保持唯一。**
+
+最后，你也可以使用元素在数组中的下标作为 key。**这个策略在元素不进行重新排序时比较合适，如果有顺序修改，diff 就会变慢。**
+
+当基于下标的组件进行重新排序时，**组件 state 可能会遇到一些问题**。由于组件实例是基于它们的 key 来决定是否更新以及复用，如果 key 是一个下标，那么修改顺序时会修改当前的 key，**导致非受控组件的 state（比如输入框）可能相互篡改，会出现无法预期的变动。**
+
+在 Codepen 有两个例子，分别为 [展示使用下标作为 key 时导致的问题](https://zh-hans.reactjs.org/redirect-to-codepen/reconciliation/index-used-as-key)，以及[不使用下标作为 key 的例子的版本，修复了重新排列，排序，以及在列表头插入的问题](https://zh-hans.reactjs.org/redirect-to-codepen/reconciliation/no-index-used-as-key)。
+
+## 
+
+```jsx
+import '../App.css';
+import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
+// import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+  /*
+   经典面试题:
+      1). react/vue中的key有什么作用？（key的内部原理是什么？）
+      2). 为什么遍历列表时，key最好不要用index?
+      
+      1. 虚拟DOM中key的作用：
+          1). 简单的说: key是虚拟DOM对象的标识, 在更新显示时key起着极其重要的作用。
+
+          2). 详细的说: 当状态中的数据发生变化时，react会根据【新数据】生成【新的虚拟DOM】, 
+                        随后React进行【新虚拟DOM】与【旧虚拟DOM】的diff比较，比较规则如下：
+
+                  a. 旧虚拟DOM中找到了与新虚拟DOM相同的key：
+                        (1).若虚拟DOM中内容没变, 直接使用之前的真实DOM
+                        (2).若虚拟DOM中内容变了, 则生成新的真实DOM，随后替换掉页面中之前的真实DOM
+
+                  b. 旧虚拟DOM中未找到与新虚拟DOM相同的key
+                        根据数据创建新的真实DOM，随后渲染到到页面
+                  
+      2. 用index作为key可能会引发的问题：
+                1. 若对数据进行：逆序添加、逆序删除等破坏顺序操作:
+                        会产生没有必要的真实DOM更新 ==> 界面效果没问题, 但效率低。
+
+                2. 如果结构中还包含输入类的DOM：
+                        会产生错误DOM更新 ==> 界面有问题。
+                        
+                3. 注意！如果不存在对数据的逆序添加、逆序删除等破坏顺序操作，
+                  仅用于渲染列表用于展示，使用index作为key是没有问题的。
+          
+      3. 开发中如何选择key?:
+                1.最好使用每条数据的唯一标识作为key, 比如id、手机号、身份证号、学号等唯一值。
+                2.如果确定只是简单的展示数据，用index也是可以的。
+   */
+  
+  /* 
+    慢动作回放----使用index索引值作为key
+
+      初始数据：
+          {id:1,name:'小张',age:18},
+          {id:2,name:'小李',age:19},
+      初始的虚拟DOM：
+          <li key=0>小张---18<input type="text"/></li>
+          <li key=1>小李---19<input type="text"/></li>
+
+      更新后的数据：
+          {id:3,name:'小王',age:20},
+          {id:1,name:'小张',age:18},
+          {id:2,name:'小李',age:19},
+      更新数据后的虚拟DOM：
+          <li key=0>小王---20<input type="text"/></li>
+          <li key=1>小张---18<input type="text"/></li>
+          <li key=2>小李---19<input type="text"/></li>
+
+  -----------------------------------------------------------------
+
+  慢动作回放----使用id唯一标识作为key
+
+      初始数据：
+          {id:1,name:'小张',age:18},
+          {id:2,name:'小李',age:19},
+      初始的虚拟DOM：
+          <li key=1>小张---18<input type="text"/></li>
+          <li key=2>小李---19<input type="text"/></li>
+
+      更新后的数据：
+          {id:3,name:'小王',age:20},
+          {id:1,name:'小张',age:18},
+          {id:2,name:'小李',age:19},
+      更新数据后的虚拟DOM：
+          <li key=3>小王---20<input type="text"/></li>
+          <li key=1>小张---18<input type="text"/></li>
+          <li key=2>小李---19<input type="text"/></li>
+
+   */
+
+//创建组件
+class Person extends Component {
+  state = {
+      persons:[
+        {id: 1, name: '太子', age: 23},
+        {id: 2, name: '萝卜', age: 26},
+      ]
+  };
+
+  add = () =>{
+    const {persons} = this.state;
+    const p = {id: persons.length + 1, name: "法老", age: 29};
+    this.setState({persons: [p, ...persons]});
+  }
+
+  render() {
+    return (
+      <div>
+        <h2>展示人员信息</h2>
+        <button onClick={this.add}>添加一个人</button>
+        <h3>使用index（索引值）作为key</h3>
+        <ul>
+          {
+            this.state.persons.map((personObj, index) => {
+              return <li key={index}>{personObj.name}---{personObj.age}&nbsp;<input type="text" /></li>
+            })
+          }
+        </ul>
+        <hr/>
+        <h3>使用id（数据的唯一标识）作为key</h3>
+        <ul>
+          {
+            this.state.persons.map((personObj, index) => {
+              return <li key={personObj.id}>{personObj.name}---{personObj.age}&nbsp;<input type="text" /></li>
+            })
+          }
+        </ul>
+      </div>
+    )
+  }
+}
+
+export default Person;
+```
+
+## 权衡
+
+请谨记协调算法是一个实现细节。React 可以在每个 action 之后对整个应用进行重新渲染，得到的最终结果也会是一样的。在此情境下，重新渲染表示在所有组件内调用 `render` 方法，这不代表 React 会卸载或装载它们。**React 只会基于以上提到的规则来决定如何进行差异的合并。**
+
+我们定期优化启发式算法，让常见用例更高效地执行。**在当前的实现中，可以理解为一棵子树能在其兄弟之间移动，但不能移动到其他位置。**在这种情况下，算法会重新渲染整棵子树。
+
+由于 React 依赖启发式算法，因此当以下假设没有得到满足，性能会有所损耗。
+
+1. **该算法不会尝试匹配不同组件类型的子树**。如果你发现你在两种不同类型的组件中切换，但输出非常相似的内容，**建议把它们改成同一类型。**在实践中，我们没有遇到这类问题。
+2. **Key 应该具有稳定，可预测，以及列表内唯一的特质**。不稳定的 key（比如通过 `Math.random()` 生成的）会导致许多组件实例和 DOM 节点被不必要地重新创建，这可能导致性能下降和子组件中的状态丢失。
+
+
+
+----
+
+# React应用(基于React脚手架)
+
+---
+
+## 使用create-react-app创建react应用
+
+### react脚手架
+
+1. xxx脚手架: 用来帮助程序员快速创建一个基于xxx库的模板项目
+
+- 包含了所有需要的配置（语法检查、jsx编译、devServer…）
+
+- 下载好了所有相关的依赖
+
+- 可以直接运行一个简单效果
+
+2. react提供了一个用于创建react项目的脚手架库: create-react-app
+
+3. 项目的整体技术架构为:  react + webpack + es6 + eslint
+
+4. 使用脚手架开发的项目的特点: **模块化, 组件化, 工程化**
+
+---
+
+### 创建项目并启动
+
+**第一步**，全局安装：
+
+```bash
+npm i -g create-react-app
+```
+
+**第二步**，切换到想创项目的目录，使用命令：
+
+```bash
+create-react-app my-app1
+```
+
+**第三步**，进入项目文件夹：
+
+```bash
+cd my-app1
+```
+
+**第四步**，启动项目：
+
+```bash
+npm start
+```
+
+### react脚手架项目结构
+
+```bash
+public ---- 静态资源文件夹
+		favicon.icon ------ 网站页签图标
+		index.html -------- 主页面
+		logo192.png ------- logo图
+		logo512.png ------- logo图
+		manifest.json ----- 应用加壳的配置文件
+		robots.txt -------- 爬虫协议文件
+src ---- 源码文件夹
+		App.css -------- App组件的样式
+		App.js --------- App组件
+		App.test.js ---- 用于给App做测试
+		index.css ------ 样式
+		index.js ------- 入口文件
+		logo.svg ------- logo图
+		reportWebVitals.js
+			--- 页面性能分析文件(需要web-vitals库的支持)
+		setupTests.js
+			---- 组件单元测试的文件(需要jest-dom库的支持)
+
+```
+
+####  public/index.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- %PUBLIC_URL% 代表public文件夹路径 -->
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <!-- 开启理想视口，用于做移动端网页的适配 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 用于配置浏览器页签+地址栏的颜色(仅支持安卓手机浏览器) -->
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <!-- 用于指定网页添加到手机主屏幕后的图标 -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <!-- 应用加壳时的配置文件 -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <title>React App</title>
+  </head>
+  <body>
+    <!-- 若浏览器不支持js则展示标签中的内容 -->
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
+</html>
+
+```
+
+
+
+
+
+### 功能界面的组件化编码流程（通用）
+
+1. 拆分组件: 拆分界面,抽取组件
+
+2. 实现静态组件: 使用组件实现静态页面效果
+
+3. 实现动态组件
+
+​		3.1 动态显示初始化数据
+
+​			3.1.1 数据类型
+
+​			3.1.2 数据名称
+
+​			3.1.3 保存在哪个组件?
+
+​		3.2 交互(从绑定事件监听开始)
+
+### 
+
+```html
+
 ```
 

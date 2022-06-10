@@ -11,4 +11,5 @@ let rabbit = {
   }
 };
 
+
 rabbit.eat();  // 错误调用 super（因为这里没有 [[HomeObject]]）
