@@ -10,46 +10,17 @@
 	</style>
 
 <body>
-	<div id="demo"></div>
-	<button onclick="clock.start();">开始</button>
-	<button onclick="clock.stop();">停止</button>
+
+<li>
+  <label>
+    <input type="checkbox" />
+    <span>xxxx</span>
+  </label>
+</li>
+
+
 </body>
 <script type="text/javascript">
-class Clock {
-  constructor(args) {
-    this.template = args.template;
-    this.el = args.el;
-  }
-  timer = null;
-  render() {
-    let date = new Date();
-    let hours = this.format(date.getHours());
-    let minutes = this.format(date.getMinutes());
-    let seconds = this.format(date.getSeconds());
-    let output = this.template.replace("h", hours)
-      .replace("m", minutes)
-      .replace("s", seconds);
-    this.el.innerHTML = output;
-  }
-  format(value) {
-    if (value < 10) {
-      return "0" + value;
-    }
-    return value;
-  }
-  stop() {
-    clearInterval(this.timer);
-  }
-  start() {
-  	clearInterval(this.timer);
-    this.render();
-    this.timer = setInterval(() => this.render(), 1000);
-  }
-}
-
-let el = document.getElementById("demo");
-let clock = new Clock({template: 'h:m:s', el:el});
-clock.start();
 
 </script>
 
