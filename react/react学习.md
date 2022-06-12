@@ -2778,6 +2778,134 @@ export default MyComponent;
 
 # React 事件处理
 
+React 元素的事件处理和 DOM 元素的很相似，但是有一点语法上的不同：
+
+- React 事件的命名采用小驼峰式（camelCase），而不是纯小写。
+- 使用 JSX 语法时你需要传入一个函数作为事件处理函数，而不是一个字符串。
+
+例如，传统的 HTML：
+
+```html
+<button onclick="activateLasers()">
+  Activate Lasers
+</button>
+```
+
+在 React 中略微不同：
+
+```jsx
+<button onClick={activateLasers}>
+  Activate Lasers
+</button>
+```
+
+在 React 中另一个不同点是**你不能通过返回 `false` 的方式阻止默认行为**。你必须显式的使用 `preventDefault`。例如，传统的 HTML 中阻止表单的默认提交行为，你可以这样写：
+
+```html
+<form onsubmit="console.log('You clicked submit.'); return false">
+  <button type="submit">Submit</button>
+</form>
+```
+
+在 React 中，可能是这样的：
+
+```jsx
+function Form() {
+  function handleSubmit(e) {
+    e.preventDefault();
+    console.log('You clicked submit.');
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+```
+
+在这里，`e` 是一个合成事件。React 根据 [W3C 规范](https://www.w3.org/TR/DOM-Level-3-Events/)来定义这些合成事件，所以你不需要担心跨浏览器的兼容性问题。**React 事件与原生事件不完全相同。**如果想了解更多，请查看 [`SyntheticEvent`](https://zh-hans.reactjs.org/docs/events.html) 参考指南。
+
+使用 React 时，你一般不需要使用 `addEventListener` 为已创建的 DOM 元素添加监听器。**事实上，你只需要在该元素初始渲染的时候添加监听器即可。**
+
+当你使用 [ES6 class](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Classes) 语法定义一个组件的时候，通常的做法是将事件处理函数声明为 class 中的方法。例如，下面的 `Toggle` 组件会渲染一个让用户切换开关状态的按钮：
+
+```jsx
+class Toggle extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {isToggleOn: true};
+
+    // 为了在回调中使用 `this`，这个绑定是必不可少的
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick() {
+    this.setState(prevState => ({
+      isToggleOn: !prevState.isToggleOn
+    }));
+  }
+
+  render() {
+    return (
+      <button onClick={this.handleClick}>
+        {this.state.isToggleOn ? 'ON' : 'OFF'}
+      </button>
+    );
+  }
+}
+```
+
+你必须谨慎对待 JSX 回调函数中的 `this`，在 JavaScript 中，class 的方法默认不会[绑定](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_objects/Function/bind) `this`。**如果你忘记绑定 `this.handleClick` 并把它传入了 `onClick`，当你调用这个函数的时候 `this` 的值为 `undefined`。**
+
+这并不是 React 特有的行为；这其实与 [JavaScript 函数工作原理](https://www.smashingmagazine.com/2014/01/understanding-javascript-function-prototype-bind/)有关。**通常情况下，如果你没有在方法后面添加 `()`**，例如 `onClick={this.handleClick}`，**你应该为这个方法绑定 `this`**。
+
+```jsx
+class LoggingButton extends React.Component {
+  // 此语法确保 `handleClick` 内的 `this` 已被绑定。
+  // 注意: 这是 *实验性* 语法。
+  handleClick = () => {
+    console.log('this is:', this);
+  }
+
+  render() {
+    return (
+      <button onClick={this.handleClick}>
+        Click me
+      </button>
+    );
+  }
+}
+```
+
+[Create React App](https://github.com/facebookincubator/create-react-app) 默认启用此语法。
+
+如果你没有使用 class fields 语法，你可以在回调中使用[箭头函数](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Functions/Arrow_functions)：
+
+```jsx
+class LoggingButton extends React.Component {
+  handleClick() {
+    console.log('this is:', this);
+  }
+
+  render() {
+    // 此语法确保 `handleClick` 内的 `this` 已被绑定。
+    return (
+      <button onClick={() => this.handleClick()}>
+        Click me
+      </button>
+    );
+  }
+}
+```
+
+此语法问题在于每次渲染 `LoggingButton` 时**都会创建不同的回调函数**。在大多数情况下，这没什么问题，**但如果该回调函数作为 prop 传入子组件时，这些组件可能会进行额外的重新渲染**。我们通常建议**在构造器中绑定或使用 class fields 语法来避免这类性能问**题。
+
+
+
+
+
+
 1. 通过onXxx属性指定事件处理函数(注意大小写)
 
 - React使用的是**自定义(合成)事件**, 而不是使用的原生DOM事件 --为了更好的兼容性
@@ -2821,135 +2949,20 @@ class MyComponent extends Component {
 export default MyComponent;
 ```
 
-React 元素的事件处理和 DOM 元素类似。但是有一点语法上的不同：
 
-- **React 事件绑定属性的命名采用驼峰式写法，而不是小写。**
-- 如果采用 JSX 的语法你需要传入一个函数作为事件处理函数，而不是一个字符串 (DOM 元素的写法）
-
-HTML 通常写法是：
-
-```jsx
-<button onclick="activateLasers()">  激活按钮</button>
-```
-
-React 中写法为：
-
-```jsx
-<button onClick={activateLasers}>  激活按钮</button>
-```
-
-在 React 中**另一个不同是你不能使用返回 false 的方式阻止默认行为**， 你**必须明确的使用 preventDefault**。
-
-例如，通常我们在 HTML 中阻止链接默认打开一个新页面，可以这样写：
-
-```jsx
-<a href="#" onclick="console.log('点击链接'); return false">  点我</a>
-```
-
-在 React 的写法为：
-
-```jsx
-function ActionLink() {
-  function handleClick(e) {
-    e.preventDefault();
-    console.log('链接被点击');
-  }
-  return (
-    <a href="#" onClick={handleClick}>
-      点我
-    </a>
-  );
-}
-```
-
-**实例中 e 是一个合成事件。**
-
-使用 React 的时候通常你不需要使用 addEventListener 为一个已创建的 DOM 元素添加监听器。你仅仅需要在这个元素初始渲染的时候提供一个监听器。
-
-当你使用 ES6 class 语法来定义一个组件的时候，事件处理器会成为类的一个方法。例如，下面的 Toggle 组件渲染一个让用户切换开关状态的按钮：
-
-```jsx
-class Toggle extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {isToggleOn: true};
-    // 这边绑定是必要的，这样 `this` 才能在回调函数中使用
-    this.handleClick = this.handleClick.bind(this);
-  }
-  handleClick() {
-    this.setState(prevState => ({
-      isToggleOn: !prevState.isToggleOn
-    }));
-  }
-  render() {
-    return (
-      <button onClick={this.handleClick}>
-        {this.state.isToggleOn ? 'ON' : 'OFF'}
-      </button>
-    );
-  }
-}
-ReactDOM.render(
-  <Toggle />,
-  document.getElementById('example')
-);
-```
-
-你必须谨慎对待 JSX 回调函数中的 this，**类的方法默认是不会绑定 this 的**。如果你忘记绑定 this.handleClick 并把它传入 onClick, 当你调用这个函数的时候 this 的值会是 undefined。
-
-这并不是 React 的特殊行为；它是函数如何在 JavaScript 中运行的一部分。**通常情况下，如果你没有在方法后面添加 () ，例如 onClick={this.handleClick}，你应该为这个方法绑定 this。**
-
-如果使用 bind 让你很烦，这里有两种方式可以解决。如果你正在使用实验性的属性初始化器语法，你可以使用属性初始化器来正确的绑定回调函数：
-
-```jsx
-class LoggingButton extends React.Component {
-  // 这个语法确保了 `this` 绑定在  handleClick 中
-  // 这里只是一个测试
-  handleClick = () => {
-    console.log('this is:', this);
-  }
-  render() {
-    return (
-      <button onClick={this.handleClick}>
-        Click me
-      </button>
-    );
-  }
-}
-```
-
-如果你没有使用属性初始化器语法，**你可以在回调函数中使用 箭头函数**：
-
-```jsx
-class LoggingButton extends React.Component {
-  handleClick() {
-    console.log('this is:', this);
-  }
-  render() {
-    //  这个语法确保了 `this` 绑定在  handleClick 中
-    return (
-      <button onClick={(e) => this.handleClick(e)}>
-        Click me
-      </button>
-    );
-  }
-}
-```
-
-使用这个语法有个问题就是每次 LoggingButton 渲染的时候都会创建一个不同的回调函数。在大多数情况下，这没有问题。然而如果这个回调函数作为一个属性值传入低阶组件，这些组件可能会进行额外的重新渲染**。我们通常建议在构造函数中绑定或使用属性初始化器语法来避免这类性能问题。**
 
 ## 向事件处理程序传递参数
 
-通常我们会为事件处理程序传递额外的参数。例如，若是 id 是你要删除那一行的 id，以下两种方式都可以向事件处理程序传递参数：
+在循环中，通常我们会为事件处理函数传递额外的参数。例如，若 `id` 是你要删除那一行的 ID，以下两种方式都可以向事件处理函数传递参数：
 
 ```jsx
 <button onClick={(e) => this.deleteRow(id, e)}>Delete Row</button>
 <button onClick={this.deleteRow.bind(this, id)}>Delete Row</button>
 ```
 
-上述两种方式是等价的。
+上述两种方式是等价的，分别通过[箭头函数](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions)和 [`Function.prototype.bind`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_objects/Function/bind) 来实现。
 
-上面两个例子中，参数 e 作为 React 事件对象将会被作为第二个参数进行传递。**通过箭头函数的方式，事件对象必须显式的进行传递**，但是**通过 bind 的方式，事件对象以及更多的参数将会被隐式的进行传递**。
+在这两种情况下，React 的事件对象 `e` 会被作为第二个参数传递。**如果通过箭头函数的方式，事件对象必须显式的进行传递**，而通过 `bind` 的方式，事件对象以及更多的参数将会被隐式的进行传递。
 
 值得注意的是，**通过 bind 方式向监听函数传参**，在类组件中定义的监听函数，事件对象 e 要排在所传递参数的后面，例如：
 
@@ -2979,11 +2992,25 @@ class Popper extends React.Component{
 
 # React 表单与事件
 
-HTML 表单元素与 React 中的其他 DOM 元素有所不同，因为表单元素生来就保留一些内部状态。
+在 React 里，HTML 表单元素的工作方式和其他的 DOM 元素有些不同，**这是因为表单元素通常会保持一些内部的 state**。例如这个纯 HTML 表单只接受一个名称：
 
-在 HTML 当中，像 `<input>`, `<textarea>`, 和 `<select>` 这类表单元素会维持自身状态，并根据用户输入进行更新。但在 React 中，可变的状态通常保存在组件的状态属性中，并且只能用 setState() 方法进行更新。
+```html
+<form>
+  <label>
+    名字:
+    <input type="text" name="name" />
+  </label>
+  <input type="submit" value="提交" />
+</form>
+```
+
+此表单具有默认的 HTML 表单行为，即在用户提交表单后浏览到新页面。如果你在 React 中执行相同的代码，它依然有效。但大多数情况下，使用 JavaScript 函数可以很方便的处理表单的提交， 同时还可以访问用户填写的表单数据。实现这种效果的标准方式是使用“受控组件”。
+
+在 HTML 当中，像 `<input>`, `<textarea>`, 和 `<select>` 这类表单元素会维持自身状态，并根据用户输入进行更新。**但在 React 中，可变的状态通常保存在组件的状态属性中**，并且只能用 setState() 方法进行更新。
 
 ## 非受控组件
+
+
 
 现用现取
 
@@ -3019,7 +3046,13 @@ export default MyComponent;
 
 ## 受控组件
 
-随输入的变化数据自动变化
+在 HTML 中，表单元素（如`<input>`、 `<textarea>` 和 `<select>`）通常自己维护 state，并根据用户输入进行更新。而在 React 中，可变状态（mutable state）通常保存在组件的 state 属性中，并且只能通过使用 [`setState()`](https://zh-hans.reactjs.org/docs/react-component.html#setstate)来更新。
+
+**我们可以把两者结合起来，使 React 的 state 成为“唯一数据源”**。渲染表单的 React 组件还控制着用户输入过程中表单发生的操作。
+
+被 React **以这种方式控制取值的表单输入元素**就叫做“**受控组件**”。
+
+例如，如果我们想让前一个示例在提交时打印出名称，我们可以将表单写为受控组件：
 
 ```jsx
 import './App.css';
@@ -3066,6 +3099,36 @@ class MyComponent extends Component {
 
 export default MyComponent;
 ```
+
+由于在表单元素上设置了 `value` 属性，因此显示的值将始终为 `this.state.value`，**这使得 React 的 state 成为唯一数据源。由于 `handlechange` 在每次按键时都会执行并更新 React 的 state，因此显示的值将随着用户输入而更新。**
+
+**对于受控组件来说，输入的值始终由 React 的 state 驱动**。你也可以将 value 传递给其他 UI 元素，或者通过其他事件处理函数重置，但这意味着你需要编写更多的代码。
+
+---
+
+## 受控输入空值
+
+在[受控组件](https://zh-hans.reactjs.org/docs/forms.html#controlled-components)上指定 `value` 的 prop 会阻止用户更改输入。如果你指定了 `value`，但输入仍可编辑，则可能是你意外地将 `value` 设置为 `undefined` 或 `null`。
+
+下面的代码演示了这一点。（输入最初被锁定，但在短时间延迟后变为可编辑。）
+
+```jsx
+ReactDOM.createRoot(mountNode).render(<input value="hi" />);
+
+setTimeout(function() {
+  ReactDOM.createRoot(mountNode).render(<input value={null} />);
+}, 1000);
+```
+
+## 受控组件的替代品
+
+有时使用受控组件会很麻烦，因为你需要为数据变化的每种方式都编写事件处理函数，并通过一个 React 组件传递所有的输入 state。当你将之前的代码库转换为 React 或将 React 应用程序与非 React 库集成时，这可能会令人厌烦。在这些情况下，你可能希望使用[非受控组件](https://zh-hans.reactjs.org/docs/uncontrolled-components.html), 这是实现输入表单的另一种方式。
+
+## 成熟的解决方案
+
+如果你想寻找包含验证、追踪访问字段以及处理表单提交的完整解决方案，使用 [Formik](https://jaredpalmer.com/formik) 是不错的选择。然而，它也是建立在受控组件和管理 state 的基础之上 —— 所以不要忽视学习它们。
+
+
 
 ---
 
@@ -3177,108 +3240,105 @@ export default MyComponent;
 
 
 
+----
 
+## textarea 标签
+
+在 HTML 中, `<textarea>` 元素通过其子元素定义其文本:
+
+```html
+<textarea>
+  你好， 这是在 text area 里的文本
+</textarea>
+```
+
+而在 React 中，`<textarea>` 使用 `value` 属性代替。这样，可以使得使用 `<textarea>` 的表单和使用单行 input 的表单非常类似：
+
+```jsx
+class EssayForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: '请撰写一篇关于你喜欢的 DOM 元素的文章.'
+    };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+
+  handleSubmit(event) {
+    alert('提交的文章: ' + this.state.value);
+    event.preventDefault();
+  }
+
+  render() {
+    return (
+      <form onSubmit={this.handleSubmit}>
+        <label>
+          文章:
+          <textarea value={this.state.value} onChange={this.handleChange} />
+        </label>
+        <input type="submit" value="提交" />
+      </form>
+    );
+  }
+}
+```
+
+请注意，`this.state.value` 初始化于构造函数中，因此文本区域默认有初值。
 
 ----
 
-## 一个简单的实例
 
-在实例中我们设置了输入框 input 值 value = {this.state.data}。在输入框值发生变化时我们可以更新 state。我们可以使用 onChange 事件来监听 input 的变化，并修改 state。
-
-```jsx
-class HelloMessage extends React.Component {
-  constructor(props) {
-      super(props);
-      this.state = {value: 'Hello kop!'};
-      this.handleChange = this.handleChange.bind(this);
-  }
-  handleChange(event) {
-    this.setState({value: event.target.value});
-  }
-  render() {
-    var value = this.state.value;
-    return <div>
-            <input type="text" value={value} onChange={this.handleChange} />
-            <h4>{value}</h4>
-           </div>;
-  }
-}
-ReactDOM.render(
-  <HelloMessage />,
-  document.getElementById('example')
-);
-```
-
-上面的代码将渲染出一个值为 Hello kop! 的 input 元素，并通过 onChange 事件响应更新用户输入的值。
-
-
-
-在以下实例中我们将为大家演示如何在子组件上使用表单。 onChange 方法将触发 state 的更新并将更新的值传递到子组件的输入框的 value 上来重新渲染界面。
-
-你**需要在父组件通过创建事件句柄** (handleChange) ，**并作为 prop (updateStateProp) 传递到你的子组件上**。
-
-```jsx
-class Content extends React.Component {
-  render() {
-    return  <div>
-            <input type="text" value={this.props.myDataProp} onChange={this.props.updateStateProp} />
-            <h4>{this.props.myDataProp}</h4>
-            </div>;
-  }
-}
-class HelloMessage extends React.Component {
-  constructor(props) {
-      super(props);
-      this.state = {value: 'Hello axihe!'};
-      this.handleChange = this.handleChange.bind(this);
-  }
-  handleChange(event) {
-    this.setState({value: event.target.value});
-  }
-  render() {
-    var value = this.state.value;
-    return <div>
-            <Content myDataProp = {value}
-              updateStateProp = {this.handleChange}></Content>
-           </div>;
-  }
-}
-ReactDOM.render(
-  <HelloMessage />,
-  document.getElementById('example')
-);
-
-```
 
 ## Select 下拉菜单
 
-在 React 中，不使用 selected 属性，而在根 select 标签上用 value 属性来表示选中项。
+在 HTML 中，`<select>` 创建下拉列表标签。例如，如下 HTML 创建了水果相关的下拉列表：
+
+```html
+<select>
+  <option value="grapefruit">葡萄柚</option>
+  <option value="lime">酸橙</option>
+  <option selected value="coconut">椰子</option>
+  <option value="mango">芒果</option>
+</select>
+```
+
+请注意，由于 `selected` 属性的缘故，椰子选项默认被选中。**React 并不会使用 `selected` 属性，而是在根 `select` 标签上使用 `value` 属性。**这在受控组件中更便捷，因为您只需要在根标签中更新它。例如：
 
 ```jsx
 class FlavorForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {value: 'coconut'};
+
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+
   handleChange(event) {
     this.setState({value: event.target.value});
   }
+
   handleSubmit(event) {
-    alert('Your favorite flavor is: ' + this.state.value);
+    alert('你喜欢的风味是: ' + this.state.value);
     event.preventDefault();
   }
+
   render() {
     return (
       <form onSubmit={this.handleSubmit}>
         <label>
-          选择您最喜欢的网站
+          选择你喜欢的风味:
           <select value={this.state.value} onChange={this.handleChange}>
-            <option value="gg">Google</option>
-            <option value="rn">axihe</option>
-            <option value="tb">Taobao</option>
-            <option value="fb">Facebook</option>
+            <option value="grapefruit">葡萄柚</option>
+            <option value="lime">酸橙</option>
+            <option value="coconut">椰子</option>
+            <option value="mango">芒果</option>
           </select>
         </label>
         <input type="submit" value="提交" />
@@ -3286,15 +3346,39 @@ class FlavorForm extends React.Component {
     );
   }
 }
-ReactDOM.render(
-  <FlavorForm />,
-  document.getElementById('example')
-);
 ```
+
+总的来说，这使得 `<input type="text">`, `<textarea>` 和 `<select>` 之类的标签都非常相似—它们都接受一个 `value` 属性，你可以使用它来实现受控组件。
+
+注意
+
+你可以将数组传递到 `value` 属性中，以支持在 `select` 标签中选择多个选项：
+
+```jsx
+<select multiple={true} value={['B', 'C']}>
+```
+
+----
+
+## 文件 input 标签
+
+在 HTML 中，`<input type="file">` 允许用户从存储设备中选择一个或多个文件，将其上传到服务器，或通过使用 JavaScript 的 [File API](https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications) 进行控制。
+
+```html
+<input type="file" />
+```
+
+因为它的 value 只读，所以它是 React 中的一个**非受控**组件。将与其他非受控组件[在后续文档中](https://zh-hans.reactjs.org/docs/uncontrolled-components.html#the-file-input-tag)一起讨论。
+
+----
+
+
 
 ## 多个表单
 
-当你有处理多个 input 元素时，你可以通过给每个元素添加一个 name 属性，来让处理函数根据 event.target.name 的值来选择做什么。
+当需要处理多个 `input` 元素时，我们可以给每个元素添加 `name` 属性，**并让处理函数根据 `event.target.name` 的值选择要执行的操作**。
+
+例如：
 
 ```jsx
 class Reservation extends React.Component {
@@ -3304,21 +3388,25 @@ class Reservation extends React.Component {
       isGoing: true,
       numberOfGuests: 2
     };
+
     this.handleInputChange = this.handleInputChange.bind(this);
   }
+
   handleInputChange(event) {
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
+
     this.setState({
       [name]: value
     });
   }
+
   render() {
     return (
       <form>
         <label>
-          是否离开：
+          参与:
           <input
             name="isGoing"
             type="checkbox"
@@ -3327,7 +3415,7 @@ class Reservation extends React.Component {
         </label>
         <br />
         <label>
-          访客数：
+          来宾人数:
           <input
             name="numberOfGuests"
             type="number"
@@ -3338,12 +3426,30 @@ class Reservation extends React.Component {
     );
   }
 }
-ReactDOM.render(
-  <Reservation />,
-  document.getElementById('example')
-);
-
 ```
+
+这里使用了 ES6 [计算属性名称](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Operators/Object_initializer#Computed_property_names)的语法更新给定输入名称对应的 state 值：
+
+例如：
+
+```js
+this.setState({
+  [name]: value});
+```
+
+等同 ES5:
+
+```js
+var partialState = {};
+partialState[name] = value;
+this.setState(partialState);
+```
+
+另外，由于 `setState()` 自动[将部分 state 合并到当前 state](https://zh-hans.reactjs.org/docs/state-and-lifecycle.html#state-updates-are-merged), 只需调用它更改部分 state 即可。
+
+
+
+----
 
 ## React 事件
 
@@ -5704,7 +5810,25 @@ export default class Welcome extends Component {
 
 实现组件间数据传递
 
+### todoList案例相关知识点
 
+​    1.拆分组件、实现静态组件，注意：className、style的写法
+
+​    2.动态初始化列表，如何确定将数据放在哪个组件的state中？
+
+​          ——某个组件使用：放在其自身的state中
+
+​          ——某些组件使用：放在他们共同的父组件state中（官方称此操作为：状态提升）
+
+​    3.关于父子之间通信：
+
+​        1.【父组件】给【子组件】传递数据：通过props传递
+
+​        2.【子组件】给【父组件】传递数据：通过props传递，要求父提前给子传递一个函数
+
+​    4.注意defaultChecked 和 checked的区别，类似的还有：defaultValue 和 value
+
+​    5.状态在哪里，操作状态的方法就在哪里
 
 -----
 
@@ -5938,6 +6062,8 @@ export default class RequestData extends Component {
 
 ## github搜索用户案例
 
+### axios实现
+
 #### App.js
 
 ```jsx
@@ -6045,4 +6171,285 @@ export default class List extends Component {
 	}
 }
 ```
+
+#### server.js
+
+```js
+const express = require("express")
+const axios = require("axios")
+const app = express()
+/*
+  请求地址： http://localhost:3000/search/users?q=aa
+
+  后台路由
+    key： /search/users
+    value： function () {}
+*/
+app.get("/search/users", function (req, res) {
+  const {q} = req.query
+  axios({
+    url: 'https://api.github.com/search/users',
+    params: {q}
+  }).then(response => {
+    res.json(response.data)
+  })
+})
+
+app.listen(5000, "localhost", (err) => {
+  if (!err){
+  	console.log("服务器启动成功")
+  	console.log("请求github真实数据请访问：http://localhost:5000/search/users")
+  	console.log("请求本地模拟数据请访问：http://localhost:5000/search/users2")
+  } 
+  else console.log(err);
+})
+
+```
+
+#### setupProxy.js
+
+```js
+const proxy = require('http-proxy-middleware')
+
+module.exports = function(app){
+	app.use(
+		proxy('/api1',{ //遇见/api1前缀的请求，就会触发该代理配置
+			target:'http://localhost:5000', //请求转发给谁
+			changeOrigin:true,//控制服务器收到的请求头中Host的值
+			pathRewrite:{'^/api1':''} //重写请求路径(必须)
+		})
+	)
+}
+```
+
+
+
+----
+
+### pubsub实现
+
+#### App.js
+
+```jsx
+//创建“外壳”组件App
+import './App.css';
+import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
+// import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+import GithubSearch from "./components/GithubSearch";
+import List from './components/List'
+
+// 创建并暴露App组件
+ export default class App extends Component {
+  render() {
+    return (
+      <div className="container">
+        <GithubSearch />
+        <List />
+      </div>
+    )
+  }
+}
+
+```
+
+#### GithubSearch
+
+```jsx
+import React, {Component} from "react";
+import axios from "axios";
+import PubSub from "pubsub-js";
+
+export default class GithubSearch extends Component {
+	// 搜索函数
+	search = () => {
+		// 获取用户的输入(连续解构赋值+重命名)
+		// const {keyWordElement: {value: keyWord}} = this;
+		const keyWord = this.keyWordElement.value
+		//发送请求前通知List更新状态
+		PubSub.publish("searchResult", {isFirst:false,isLoading:true});
+
+		axios.get(`api1/search/users?q=${keyWord}`).then(
+			response => {
+				//请求成功后通知List更新状态
+				PubSub.publish("searchResult", {isLoading:false, users: response.data.items});
+			}, error => {
+				// 请求失败后通知List更新状态
+				PubSub.publish("searchResult", {isLoading:false, err: error.message});;
+		});
+	}
+
+	render() {
+		return (
+			<section className="jumbotron">
+				<h3 className="jumbotron-heading">搜索github用户</h3>
+				<input ref={c => this.keyWordElement = c} type="text" placeholder="输入关键词点击搜索" />&nbsp;
+				<button onClick={this.search}>搜索</button>
+			</section>
+		)
+	}
+}
+```
+
+#### List
+
+```jsx
+import React, {Component} from "react";
+import "./index.css";
+import PubSub from "pubsub-js";
+
+
+export default class List extends Component {
+	 	// 初始化状态
+ 	state = {
+ 		users: [],  // users初始值为数组
+ 		isFirst: true,  // 是否为第一次打开页面
+ 		isLoading: false,  //标识是否处于加载中
+ 		err: "",  // 存储请求相关的错误信息
+ 	};
+
+ 	componentDidMount() {
+ 		this.token = PubSub.subscribe("searchResult", (_msg, stateObj) => {
+ 			this.setState(stateObj);
+ 		});
+ 	}
+ 	componentWillUnmount() {
+ 		PubSub.unsubscribe(this.token);
+ 	}
+
+	render() {
+		const {users, isFirst, isLoading, err} = this.state;
+		return (
+			<div className="row">
+				{
+						isFirst ? <h2>欢迎使用，输入关键字，随后点击搜索</h2> : 
+							isLoading ? <h2>Loading...</h2> : 
+								err ? <h2 style={{color: "red"}}>{err}</h2> : 
+									users.map((userObj) => {
+										return (
+											<div key={userObj.id} className="card">
+												<a rel="noreferrer" href={userObj.html_url} target="_blank">
+													<img alt="head_portrait" src={userObj.avatar_url} style={{width:"100px"}} />
+												</a>
+												<p className="card-text">{userObj.login}</p>
+											</div>
+										)
+									})
+				}
+			</div>
+		)
+	}
+}
+```
+
+
+
+----
+
+### fetch实现
+
+#### GithubSearch
+
+```jsx
+import React, {Component} from "react";
+// import axios from "axios";
+import PubSub from "pubsub-js";
+
+export default class GithubSearch extends Component {
+	// 搜索函数
+	search = async () => {
+		// 获取用户的输入(连续解构赋值+重命名)
+		// const {keyWordElement: {value: keyWord}} = this;
+		const keyWord = this.keyWordElement.value
+		//发送请求前通知List更新状态
+		PubSub.publish("searchResult", {isFirst:false,isLoading:true});
+
+		/*
+		// 发送网络请求---使用fetch发送（未优化）
+		fetch(`api1/search/users?q=${keyWord}`).then(
+			response => {
+				console.log("联系服务器成功了");
+				return response.json();
+				
+			}, error => {
+				console.log('联系服务器失败了',error);
+				return new Promise(() => {});  //不再往下走
+				// PubSub.publish("searchResult", {isLoading:false, err: error.message});
+		}).then(
+			response => {
+				//请求成功后通知List更新状态
+				console.log("获取数据成功了", response);
+				// PubSub.publish("searchResult", {isLoading:false, users: response.items});
+			},
+			error => {
+				// 请求失败后通知List更新状态
+				console.log('获取数据失败了',error);
+			}
+		);
+		*/
+		// 发送网络请求---使用fetch发送（优化）
+		try {
+			const response = await fetch(`api1/search/users?q=${keyWord}`);
+			const data = await response.json();
+			console.log(data);
+			PubSub.publish("searchResult", {isLoading:false, users: data.items});
+		} catch (error) {
+			// 统一处理错误
+			console.log('请求出错',error);
+			PubSub.publish("searchResult", {isLoading:false, err: error.message});;
+		}
+	}
+
+	render() {
+		return (
+			<section className="jumbotron">
+				<h3 className="jumbotron-heading">搜索github用户</h3>
+				<input ref={c => this.keyWordElement = c} type="text" placeholder="输入关键词点击搜索" />&nbsp;
+				<button onClick={this.search}>搜索</button>
+			</section>
+		)
+	}
+}
+```
+
+---
+
+### github搜索案例总结
+
+​    1.设计状态时要考虑全面，例如带有网络请求的组件，要考虑请求失败怎么办。
+
+​    2.ES6小知识点：解构赋值+重命名         
+
+```js
+let obj = {a:{b:1}}
+
+const {a} = obj; //传统解构赋值
+
+const {a:{b}} = obj; //连续解构赋值
+
+const {a:{b:value}} = obj; //连续解构赋值+重命名
+```
+
+​    3.消息订阅与发布机制
+
+​          1.先订阅，再发布（理解：有一种隔空对话的感觉）
+
+​          2.适用于任意组件间通信
+
+​          3.要在组件的componentWillUnmount中取消订阅
+
+​    4.fetch发送请求（关注分离的设计思想）       
+
+```js
+try {
+ 	const response= await fetch(`/api1/search/users2?q=${keyWord}`)
+	const data = await response.json()
+	console.log(data);
+} catch (error) {
+	console.log('请求出错',error);
+}
+```
+
+---
 
