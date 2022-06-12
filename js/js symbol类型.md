@@ -945,3 +945,244 @@ with(obj) {
 }
 ```
 
+---
+
+# Symbol.prototype[@@toPrimitive]
+
+`**[@@toPrimitive]()**` 方法可将 Symbol 对象转换为原始值。
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/@@toPrimitive#语法)
+
+```
+Symbol()[Symbol.toPrimitive](hint);
+```
+
+### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/@@toPrimitive#返回值)
+
+该原始值为指定的 [`Symbol`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol) 对象
+
+## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/@@toPrimitive#描述)
+
+ [`Symbol`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol) 的 `[@@toPrimitive]()` 方法返回该 Symbol 对象原始值作为 Symbol 数据形式。 `hint` 参数未被使用。
+
+JavaScript 调用 `[@@toPrimitive]() `方法将一个对象转换为原始值表示。你不需要自己调用 `[@@toPrimitive]()` 方法；**当对象需要被转换为原始值时，JavaScript 会自动地调用该方法。**
+
+----
+
+# Symbol.for()
+
+ 
+
+`Symbol.for(key)` 方法会根据给定的键 `key`，来从运行时的 symbol 注册表中找到对应的 symbol，如果找到了，则返回它，否则，新建一个与该键关联的 symbol，并放入全局 symbol 注册表中。
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/for#syntax)
+
+```
+Symbol.for(key);
+```
+
+### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/for#参数)
+
+- key
+
+  一个字符串，作为 symbol 注册表中与某 symbol 关联的键（同时也会作为该 symbol 的描述）。
+
+### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/for#返回值)
+
+返回由给定的 key 找到的 symbol，**否则就是返回新创建的 symbol。**
+
+## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/for#description)
+
+和 `Symbol()` 不同的是，用 `Symbol.for()` 方法创建的的 symbol 会被放入一个全局 symbol 注册表中。`Symbol.for() 并不是每次都会创建一个新的 symbol`，它会首先检查给定的 key 是否已经在注册表中了。假如是，则会直接返回上次存储的那个。否则，它会再新建一个。
+
+### [全局 symbol 注册表](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/for#全局_symbol_注册表)
+
+symbol 注册表中的记录结构：
+
+| 字段名     | 字段值                          |
+| :--------- | :------------------------------ |
+| [[key]]    | 一个字符串，用来标识每个 symbol |
+| [[symbol]] | 存储的 symbol 值                |
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/for#示例)
+
+```js
+Symbol.for("foo"); // 创建一个 symbol 并放入 symbol 注册表中，键为 "foo"
+Symbol.for("foo"); // 从 symbol 注册表中读取键为"foo"的 symbol
+
+
+Symbol.for("bar") === Symbol.for("bar"); // true，证明了上面说的
+Symbol("bar") === Symbol("bar"); // false，Symbol() 函数每次都会返回新的一个 symbol
+
+
+var sym = Symbol.for("mario");
+sym.toString();
+// "Symbol(mario)"，mario 既是该 symbol 在 symbol 注册表中的键名，又是该 symbol 自身的描述字符串
+```
+
+为了防止冲突，最好给你要放入 symbol 注册表中的 symbol 带上键前缀。
+
+```js
+Symbol.for("mdn.foo");
+Symbol.for("mdn.bar");
+```
+
+----
+
+# Symbol.keyFor()
+
+## [概述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/keyFor#summary)
+
+`Symbol.keyFor(sym)` 方法用来获取全局 symbol 注册表中与某个 symbol 关联的键。
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/keyFor#syntax)
+
+```
+Symbol.keyFor(sym);
+```
+
+### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/keyFor#参数)
+
+- sym
+
+  必选参数，需要查找键值的某个 Symbol 。
+
+### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/keyFor#返回值)
+
+如果全局注册表中查找到该 symbol，则返回该 symbol 的 key 值，返回值为字符串类型。**否则返回 undefined**
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/keyFor#示例)
+
+```js
+// 创建一个全局 Symbol
+let globalSym = Symbol.for("foo");
+console.log(Symbol.keyFor(globalSym));  // foo
+
+let localSym = Symbol("foo");
+console.log(Symbol.keyFor(localSym));  // undefined
+
+// 以下 Symbol 不是保存在全局 Symbol 注册表中
+console.log(Symbol.keyFor(Symbol.iterator));  // undefined
+```
+
+----
+
+# Symbol.prototype.toSource()
+
+> **非标准:** 该特性是非标准的，请尽量不要在生产环境中使用它！
+
+`**toSource()**` 方法返回代表该对象源码的字符串。
+
+该方法通常由 JavaScript 内部调用。
+
+## [Syntax](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toSource#syntax)
+
+```
+Symbol.toSource()
+
+var sym = Symbol()
+sym.toSource()
+```
+
+## [Description](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toSource#description)
+
+`toSource` 方法返回以下值：
+
+对于内建`Symbol` 对象, `toSource` 返回以下字符串，表明源代码不可见：
+
+```
+"function Symbol() {
+   [native code]
+}"
+```
+
+
+
+对于`Symbol` 实例, `toSource` 返回代表源码的字符串。
+
+```
+"Symbol()"
+```
+
+---
+
+# Symbol.prototype.toString()
+
+## [概述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toString#summary)
+
+`toString()` 方法返回当前 symbol 对象的字符串表示。
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toString#syntax)
+
+```
+symbol.toString();
+```
+
+## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toString#description)
+
+[`Symbol`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol) 对象拥有自己的 `toString` 方法，因而遮蔽了原型链上的 [`Object.prototype.toString()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/toString)。
+
+### [symbol 原始值不能转换为字符串](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toString#symbol_原始值不能转换为字符串)
+
+symbol 原始值不能转换为字符串，所以只能先转换成它的包装对象，再调用 `toString()` 方法：
+
+```js
+Symbol("foo") + "bar";
+// TypeError: Can't convert symbol to string
+
+Symbol("foo").toString() + "bar"
+// "Symbol(foo)bar"，就相当于下面的：
+
+Object(Symbol("foo")).toString() + "bar"
+// "Symbol(foo)bar"
+```
+
+## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toString#示例)
+
+```js
+console.log(Symbol("foo").toString());  //  Symbol(foo)
+
+// well-known symbols
+console.log(Symbol.iterator.toString());  //  Symbol(Symbol.iterator)
+
+// global symbols
+console.log(Symbol.for("foo").toString());   // Symbol(foo)
+```
+
+----
+
+# Symbol.prototype.valueOf()
+
+## [概述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/valueOf#summary)
+
+`valueOf()` 方法返回当前 symbol 对象所包含的 symbol 原始值。
+
+## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/valueOf#syntax)
+
+```
+symbol.valueOf();
+```
+
+## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/valueOf#description)
+
+在 JavaScript 中，虽然大多数类型的对象在某些操作下都会自动的隐式调用自身的 `valueOf()` 方法或者 `toString()` 方法来将自己转换成一个原始值，但 symbol 对象不会这么干，**symbol 对象无法隐式转换成对应的原始值**：
+
+```js
+Object(Symbol("foo")) + "bar";
+// TypeError: can't convert symbol object to primitive
+// 无法隐式的调用 valueOf() 方法
+
+Object(Symbol("foo")).valueOf() + "bar";
+// TypeError:  can't convert symbol to string
+// 手动调用 valueOf() 方法，虽然转换成了原始值，但 symbol 原始值不能转换为字符串
+
+Object(Symbol("foo")).toString() + "bar";
+// "Symbol(foo)bar"，需要手动调用 toString() 方法才行
+
+
+let s = Symbol("foo");
+
+console.log(s.valueOf());  //  Symbol(foo)
+console.log(s.valueOf() + "bar");  //  TypeError: Cannot convert a Symbol value to a string
+```
+

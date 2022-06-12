@@ -5150,58 +5150,6 @@ CustomButton.defaultProps = {
 
 -----
 
-# React AJAX
-
-React 组件的数据可以通过 componentDidMount 方法中的 Ajax 来获取，当从服务端获取数据时可以将数据存储在 state 中，再用 this.setState 方法重新渲染 UI。
-
-当使用异步加载数据时，在组件卸载前使用 componentWillUnmount 来取消未完成的请求。
-
-以下实例演示了获取 Github 用户最新 gist 共享描述：
-
-```jsx
-        <script src="./jquery-3.6.0.js"></script>
-
-        <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
-        <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
-        <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
-<
-
-div id="example"></div>
-<script type="text/babel">
-class UserGist extends React.Component {
-  constructor(props) {
-      super(props);
-      this.state = {username: '', lastGistUrl: ''};
-  }
-  componentDidMount() {
-    this.serverRequest = $.get(this.props.source, function (result) {
-      var lastGist = result[0];
-      console.log(lastGist);
-      this.setState({
-        username: lastGist.owner.login,
-        lastGistUrl: lastGist.html_url
-      });
-    }.bind(this));
-  }
-  componentWillUnmount() {
-    this.serverRequest.abort();
-  }
-  render() {
-    return (
-      <div>
-        {this.state.username} 用户最新的 Gist 共享地址：
-        <a href={this.state.lastGistUrl}>{this.state.lastGistUrl}</a>
-      </div>
-    );
-  }
-}
-ReactDOM.render(
-  <UserGist source="https://api.github.com/users/octocat/gists" />,
-  document.getElementById('example')
-);
-</script>
-```
-
 
 
 ----
@@ -5748,9 +5696,353 @@ export default class Welcome extends Component {
 }
 ```
 
-
+----
 
 ## toDoList案例
 
+功能: 组件化实现此功能
 
+实现组件间数据传递
+
+
+
+-----
+
+# React AJAX
+
+### 前置说明
+
+1. React本身只关注于界面, 并不包含发送ajax请求的代码
+
+2. 前端应用需要通过ajax请求与后台进行交互(json数据)
+
+3. react应用中需要集成第三方ajax库(或自己封装)
+
+### 常用的ajax请求库
+
+1. jQuery: 比较重, 如果需要另外引入不建议使用
+
+2. axios: 轻量级, 建议使用
+
+- 封装XmlHttpRequest对象的ajax
+- promise风格
+- 可以用在浏览器端和node服务器端
+
+
+
+
+
+React 组件的数据可以通过 componentDidMount 方法中的 Ajax 来获取，当从服务端获取数据时可以将数据存储在 state 中，再用 this.setState 方法重新渲染 UI。
+
+当使用异步加载数据时，在组件卸载前使用 componentWillUnmount 来取消未完成的请求。
+
+以下实例演示了获取 Github 用户最新 gist 共享描述：
+
+```jsx
+        <script src="./jquery-3.6.0.js"></script>
+
+        <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+        <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+        <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+<
+
+div id="example"></div>
+<script type="text/babel">
+class UserGist extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {username: '', lastGistUrl: ''};
+  }
+  componentDidMount() {
+    this.serverRequest = $.get(this.props.source, function (result) {
+      var lastGist = result[0];
+      console.log(lastGist);
+      this.setState({
+        username: lastGist.owner.login,
+        lastGistUrl: lastGist.html_url
+      });
+    }.bind(this));
+  }
+  componentWillUnmount() {
+    this.serverRequest.abort();
+  }
+  render() {
+    return (
+      <div>
+        {this.state.username} 用户最新的 Gist 共享地址：
+        <a href={this.state.lastGistUrl}>{this.state.lastGistUrl}</a>
+      </div>
+    );
+  }
+}
+ReactDOM.render(
+  <UserGist source="https://api.github.com/users/octocat/gists" />,
+  document.getElementById('example')
+);
+</script>
+```
+
+## axios请求数据
+
+### server1.js
+
+```js
+const express = require('express')
+const app = express()
+
+app.use((request,response,next)=>{
+	console.log('有人请求服务器1了');
+	console.log('请求来自于',request.get('Host'));
+	console.log('请求的地址',request.url);
+	next()
+})
+
+app.get('/students',(request,response)=>{
+	const students = [
+		{id:'001',name:'tom',age:18},
+		{id:'002',name:'jerry',age:19},
+		{id:'003',name:'tony',age:120},
+	]
+	response.send(students)
+})
+
+app.listen(5000,(err)=>{
+	if(!err) console.log('服务器1启动成功了,请求学生信息地址为：http://localhost:5000/students');
+})
+
+```
+
+server2.js
+
+```js
+const express = require('express')
+const app = express()
+
+app.use((request,response,next)=>{
+	console.log('有人请求服务器2了');
+	next()
+})
+
+app.get('/cars',(request,response)=>{
+	const cars = [
+		{id:'001',name:'奔驰',price:199},
+		{id:'002',name:'马自达',price:109},
+		{id:'003',name:'捷达',price:120},
+	]
+	response.send(cars)
+})
+
+app.listen(5001,(err)=>{
+	if(!err) console.log('服务器2启动成功了,请求汽车信息地址为：http://localhost:5001/cars');
+})
+
+```
+
+### react脚手架配置代理
+
+#### 方法一
+
+在package.json中追加如下配置
+
+```json
+  "proxy": "http://localhost:5000"
+```
+
+说明：
+
+1. 优点：配置简单，前端请求资源时可以不加任何前缀。
+
+2. 缺点：不能配置多个代理。
+
+3. 工作方式：上述方式配置代理，当请求了3000不存在的资源时，那么该请求会转发给5000 （优先匹配前端资源）
+
+#### 方法二
+
+1. 第一步：创建代理配置文件
+
+   在src下创建配置文件：src/setupProxy.js
+
+2. 编写setupProxy.js配置具体代理规则：
+
+```js
+const proxy = require("http-proxy-middleware");
+
+module.exports = function(app) {
+	app.use(
+		proxy("/api1", { //遇见/api1前缀的请求，就会触发该代理配置
+			target: `http://localhost:5000`,  //  请求转发给谁
+			changeOrigin: true,  // 控制服务器收到的请求头中Host的值
+			pathRewrite: {"^/api1": ""}   //重写请求路径(必须)
+		}),
+		 /*
+         	changeOrigin设置为true时，服务器收到的请求头中的host为：localhost:5000
+         	changeOrigin设置为false时，服务器收到的请求头中的host为：localhost:3000
+         	changeOrigin默认值为false，但我们一般将changeOrigin值设为true
+         */
+		proxy("/api2", { //遇见/api2前缀的请求，就会触发该代理配置
+			target: `http://localhost:5001`,  //  请求转发给谁
+			changeOrigin: true,  // 控制服务器收到的请求头中Host的值
+			pathRewrite: {"^/api2": ""}   //重写请求路径(必须)
+		})
+	);
+}
+```
+
+说明：
+
+1. 优点：可以配置多个代理，可以灵活的控制请求是否走代理。
+
+2. 缺点：配置繁琐，前端请求资源时必须加前缀。
+
+### index.js
+
+```jsx
+import React, {Component} from "react";
+import hello from "./index.module.css";
+import axios from 'axios'
+
+export default class RequestData extends Component {
+	getStudentData = () => {
+		axios.get("http://localhost:3000/api1/students").then(
+			response => {
+				console.log("成功:", response.data);
+			}, error => {
+				console.log("失败:", error);
+			}
+		);
+	}
+
+	getCarData = () => {
+		axios.get("http://localhost:3000/api2/cars").then(
+			response => {
+				console.log("成功:", response.data);
+			}, error => {
+				console.log("失败:", error);
+			}
+		);
+	}
+	render() {
+		return (
+			<div>
+				<button onClick={this.getStudentData}>点我获取学生数据</button>
+				<button onClick={this.getCarData}>点我获取汽车数据</button>
+			</div>
+		)
+	}
+}
+```
+
+
+
+----
+
+## github搜索用户案例
+
+#### App.js
+
+```jsx
+//创建“外壳”组件App
+
+import './App.css';
+import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
+// import PropTypes from 'prop-types';  //引入prop-types，用于对组件标签属性进行限制
+
+import GithubSearch from "./components/GithubSearch";
+import List from './components/List'
+
+// 创建并暴露App组件
+ export default class App extends Component {
+ 	// 初始化状态
+ 	state = {
+ 		users: [],  // users初始值为数组
+ 		isFirst: true,  // 是否为第一次打开页面
+ 		isLoading: false,  //标识是否处于加载中
+ 		err: "",  // 存储请求相关的错误信息
+ 	}
+
+ 	// 更新App的state
+ 	updateAppState = (stateObj) => {
+ 		this.setState(stateObj);
+ 	}
+  render() {
+    
+    return (
+      <div className="container">
+        <GithubSearch updateAppState={this.updateAppState} />
+        <List {...this.state} />
+      </div>
+    )
+  }
+}
+```
+
+#### GithubSearch
+
+```jsx
+import React, {Component} from "react";
+import axios from "axios";
+
+export default class GithubSearch extends Component {
+	// 搜索函数
+	search = () => {
+		// 获取用户的输入(连续解构赋值+重命名)
+		// const {keyWordElement: {value: keyWord}} = this;
+		const keyWord = this.keyWordElement.value;
+		console.log(keyWord);
+		//发送请求前通知App更新状态
+		this.props.updateAppState({isFirst:false,isLoading:true});
+
+		axios.get(`api1/search/users?q=${keyWord}`).then(response => {
+			//请求成功后通知App更新状态
+			this.props.updateAppState({isLoading:false, users: response.data.items});
+		}, error => {
+			// 请求失败后通知App更新状态
+			this.props.updateAppState({isLoading:false, err: error.message});;
+		});
+	}
+
+	render() {
+		return (
+			<section className="jumbotron">
+				<h3 className="jumbotron-heading">搜索github用户</h3>
+				<input ref={c => this.keyWordElement = c} type="text" placeholder="输入关键词点击搜索" />&nbsp;
+				<button onClick={this.search}>搜索</button>
+			</section>
+		)
+	}
+}
+```
+
+#### List
+
+```jsx
+import React, {Component} from "react";
+import "./index.css";
+
+export default class List extends Component {
+	render() {
+		const {users, isFirst, isLoading, err} = this.props;
+		return (
+			<div className="row">
+				{
+						isFirst ? <h2>欢迎使用，输入关键字，随后点击搜索</h2> : 
+							isLoading ? <h2>Loading...</h2> : 
+								err ? <h2 style={{color: "red"}}>{err}</h2> : 
+									users.map((userObj) => {
+										return (
+											<div key={userObj.id} className="card">
+												<a rel="noreferrer" href={userObj.html_url} target="_blank">
+													<img alt="head_portrait" src={userObj.avatar_url} style={{width:"100px"}} />
+												</a>
+												<p className="card-text">{userObj.login}</p>
+											</div>
+										)
+									})
+				}
+			</div>
+		)
+	}
+}
+```
 
