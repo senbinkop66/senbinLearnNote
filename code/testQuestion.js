@@ -1,12 +1,17 @@
 /**
- * @param {string[]} words
- * @param {string} pattern
- * @return {string[]}
+ * @param {number[]} heights
+ * @return {number}
  */
-var findAndReplacePattern = function(words, pattern) {
-    
+var heightChecker = function(heights) {
+    let ans = 0;
+    let arr = [...heights];
+    arr.sort((a, b) => a -b);
+    arr.forEach((value, index) => {
+        ans += value === heights[index] ? 0 : 1;
+    });
+    return ans;
 };
 
-let words = ["abc","deq","mee","aqq","dkd","ccc"], pattern = "abb";
-let result = findAndReplacePattern(words, pattern);
+let heights = [5,1,2,3,4];
+let result = heightChecker(heights);
 console.log(result);

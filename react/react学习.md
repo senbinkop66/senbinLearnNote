@@ -6810,3 +6810,282 @@ NavLink与封装NavLink
 								</Routes>
 ```
 
+
+
+## 解决样式丢失问题
+
+### public/index.html
+
+```html
+    <!-- <link rel="stylesheet" type="text/css" href="%PUBLIC_URL%/css/bootstrap.css"> -->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+```
+
+### App.js
+
+```jsx
+//创建“外壳”组件App
+import './App.css';
+import React, {Component} from 'react';
+import {Routes, Route} from 'react-router-dom';
+
+import Home from "./pages/Home";
+import About from './pages/About';
+import Test from "./pages/Test";
+import Header from "./components/Header";
+import MyNavLink from "./components/MyNavLink";
+
+// 创建并暴露App组件
+export default class App extends Component {
+	render() {
+		return (
+			<div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-8">
+						<Header />
+					</div>
+				</div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-2">
+						<div className="list-group">
+{/*
+		解决多级路径刷新页面样式丢失的问题
+				1.public/index.html 中 引入样式时不写 ./ 写 / （常用）
+				2.public/index.html 中 引入样式时不写 ./ 写 %PUBLIC_URL% （常用）
+				3.使用HashRouter
+*/}
+
+							{/* 在React中靠路由链接实现切换组件--编写路由链接 */}
+								<MyNavLink to="kop/about" children="About"></MyNavLink>
+								<MyNavLink to="kop/home">Home</MyNavLink>
+						</div>
+					</div>
+
+					<div className="col-xs-6">
+						<div className="panel">
+							<div className="panel-body">
+								{/* 注册路由 */}
+								<Routes>
+									<Route path="kop/about" element={<About />} />
+									<Route path="kop/home" element={<Home />} />
+								</Routes>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		)
+	}
+}
+
+```
+
+## 精准匹配与模糊匹配
+
+```jsx
+// 创建并暴露App组件
+export default class App extends Component {
+	render() {
+		return (
+			<div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-8">
+						<Header />
+					</div>
+				</div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-2">
+						<div className="list-group">
+{/*
+		路由的严格匹配与模糊匹配
+				1.默认使用的是模糊匹配（简单记：【输入的路径】必须包含要【匹配的路径】，且顺序要一致）
+				2.开启严格匹配：<Route exact={true} path="/about" element={<About />}/>
+				3.严格匹配不要随便开启，需要再开，有些时候开启会导致无法继续匹配二级路由
+*/}
+
+							{/* 在React中靠路由链接实现切换组件--编写路由链接 */}
+								<MyNavLink to="/about" children="About"></MyNavLink>
+								<MyNavLink to="/home/a/b">Home</MyNavLink>
+						</div>
+					</div>
+
+					<div className="col-xs-6">
+						<div className="panel">
+							<div className="panel-body">
+								{/* 注册路由 */}
+
+								<Routes>
+									<Route exact path="/about" element={<About />} />
+									<Route exact path="/home" element={<Home />} />
+								</Routes>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		)
+	}
+}
+
+```
+
+## Redirect的使用
+
+```jsx
+//创建“外壳”组件App
+import './App.css';
+import React, {Component} from 'react';
+import {Routes, Route, Navigate} from 'react-router-dom';
+
+import Home from "./pages/Home";
+import About from './pages/About';
+import Header from "./components/Header";
+import MyNavLink from "./components/MyNavLink";
+
+// 创建并暴露App组件
+export default class App extends Component {
+	render() {
+		return (
+			<div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-8">
+						<Header />
+					</div>
+				</div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-2">
+						<div className="list-group">
+
+							{/* 在React中靠路由链接实现切换组件--编写路由链接 */}
+								<MyNavLink to="/about">About</MyNavLink>
+								<MyNavLink to="/home">Home</MyNavLink>
+						</div>
+					</div>
+
+					<div className="col-xs-6">
+						<div className="panel">
+							<div className="panel-body">
+								{/* 注册路由 */}
+{/*
+	Redirect的使用	
+				1.一般写在所有路由注册的最下方，当所有路由都无法匹配时，跳转到Redirect指定的路由
+				2.具体编码：
+						<Routes>
+									<Route path="/about" element={<About />} />
+									<Route path="/home" element={<Home />} />
+									<Redirect to="/about" />
+						</Routes>
+*/}
+								<Routes>
+									<Route path="/about" element={<About />} />
+									<Route path="/home" element={<Home />} />
+									{/*<Redirect to="/about" />  v6 版本已经改变 */}
+									<Route path="*" element={<Navigate to="/about" />} />
+								</Routes>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		)
+	}
+}
+
+```
+
+## 嵌套路由的使用
+
+### Home
+
+```jsx
+import React, {Component} from "react";
+import {Route, Routes, Navigate} from "react-router-dom";
+import MyNavLink from "../../components/MyNavLink";
+import News from "./News";
+import Message from "./Message";
+
+export default class Home extends Component {
+	//
+	render() {
+		return (
+			<div>
+				<h3>我是Home的内容</h3>
+				<div>
+					<ul className="nav nav-tabs">
+						<li>
+							<MyNavLink to="home/news">News</MyNavLink>
+						</li>
+						<li>
+							<MyNavLink to="home/message">Message</MyNavLink>
+						</li>
+					</ul>
+					{/* 注册路由 */}
+					{/*
+						嵌套路由
+							1.注册子路由时要写上父路由的path值
+							2.路由的匹配是按照注册路由的顺序进行的
+							3.二级路由不加/
+					*/}
+					<Routes>
+						<Route path="home/news" element={<News />} />
+						<Route path="home/message" element={<Message />} />
+						<Route path="*" element={<Navigate to="home/news" />} />
+					</Routes>
+				</div>
+			</div>
+		)
+	}
+}
+
+```
+
+## 向路由组件传递参数
+
+### params参数
+
+### search参数
+
+### state参数
+
+```js
+/*
+向路由组件传递参数
+  1.params参数
+        路由链接(携带参数)：<Link to='/demo/test/tom/18'}>详情</Link>
+        注册路由(声明接收)：<Route path="/demo/test/:name/:age" component={Test}/>
+        接收参数：this.props.match.params
+  2.search参数
+        路由链接(携带参数)：<Link to='/demo/test?name=tom&age=18'}>详情</Link>
+        注册路由(无需声明，正常注册即可)：<Route path="/demo/test" component={Test}/>
+        接收参数：this.props.location.search
+        备注：获取到的search是urlencoded编码字符串，需要借助querystring解析
+  3.state参数
+        路由链接(携带参数)：<Link to={{pathname:'/demo/test',state:{name:'tom',age:18}}}>详情</Link>
+        注册路由(无需声明，正常注册即可)：<Route path="/demo/test" component={Test}/>
+        接收参数：this.props.location.state
+        备注：刷新也可以保留住参数
+*/
+```
+
+
+
+## push模式和replace模式
+
+```js
+/*
+编程式路由导航
+借助this.props.history对象上的API对操作路由跳转、前进、后退
+    -this.props.history.push()
+    -this.props.history.replace()
+    -this.props.history.goBack()
+    -this.props.history.goForward()
+    -this.props.history.go()
+*/
+```
+
+
+
+
+
+----
+
