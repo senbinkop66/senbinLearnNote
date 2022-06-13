@@ -6453,3 +6453,360 @@ try {
 
 ---
 
+
+
+# react路由
+
+## 路由的理解
+
+### SPA的理解
+
+1. 单页Web应用（single page web application，SPA）。
+
+2. 整个应用只有**一个完整的页面**。
+
+3. 点击页面中的链接**不会刷新**页面，只会做页面的**局部更新。**
+4. 数据都需要通过ajax请求获取, 并在前端异步展现。
+
+### 什么是路由?
+
+1. 一个路由就是一个映射关系(key:value)
+
+2. key为路径, value可能是function或component
+
+### 路由分类
+
+1. **后端路由**：
+
+(1)   理解： value是function, 用来处理客户端提交的请求。
+
+(2)   注册路由： `router.get(path, function(req, res))`
+
+(3)   工作过程：当node接收到一个请求时, 根据请求路径找到匹配的路由, 调用路由中的函数来处理请求, 返回响应数据
+
+2. **前端路由**：
+
+(1)   浏览器端路由，value是component，用于展示页面内容。
+
+(2)   注册路由: `<Route path="/test" component={Test}>`
+
+(3)   工作过程：当浏览器的path变为/test时, 当前路由组件就会变为Test组件
+
+### react-router-dom的理解
+
+1. react的一个插件库。
+
+2. 专门用来实现一个SPA应用。
+
+3. 基于react的项目基本都会用到此库。
+
+-----
+
+## 路由的基本使用
+
+### App.js
+
+```jsx
+//创建“外壳”组件App
+import './App.css';
+import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
+import {Link, Routes, Route} from 'react-router-dom';
+
+import Home from "./components/Home";
+import About from './components/About';
+
+/*
+路由的基本使用
+			1.明确好界面中的导航区、展示区
+			2.导航区的a标签改为Link标签
+						<Link to="/xxxxx">Demo</Link>
+			3.展示区写Route标签进行路径的匹配
+						<Route path='/xxxx' component={Demo}/>
+						v6版本:
+							<Routes>
+								<Route path='/xxxx' element={<Demo /> }/>
+							</Routes>
+			4.<App>的最外侧包裹了一个<BrowserRouter>或<HashRouter>
+*/
+
+// 创建并暴露App组件
+export default class App extends Component {
+	render() {
+		return (
+			<div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-8">
+						<div className="page-header">
+							<h2>React Router Demo</h2>
+						</div>
+					</div>
+				</div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-2">
+						<div className="list-group">
+							{/* 原生html中，靠<a>跳转不同的页面 */}
+							{/* <a className="list-group-item" href="./about.html">About</a>
+							<a className="list-group-item active" href="./home.html">Home</a> */}
+
+							{/* 在React中靠路由链接实现切换组件--编写路由链接 */}
+								<Link className="list-group-item" to="/about">About</Link>
+								<Link className="list-group-item" to="/home">Home</Link>
+						</div>
+					</div>
+
+					<div className="col-xs-6">
+						<div className="panel">
+							<div className="panel-body">
+								{/* 注册路由 */}
+								<Routes>
+									<Route path="/about" element={<About />} />
+									<Route path="/home" element={<Home />} />
+								</Routes>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		)
+	}
+}
+
+```
+
+## 路由组件与一般组件
+
+### App.js
+
+```jsx
+//创建“外壳”组件App
+import './App.css';
+import React, {Component} from 'react';
+import {Link, Routes, Route} from 'react-router-dom';
+
+import Home from "./pages/Home";   //Home是路由组件
+import About from './pages/About';   //About是路由组件
+import Header from "./components/Header";  //Header是一般组件
+
+/*
+路由组件与一般组件
+			1.写法不同：
+						一般组件：<Demo/>
+						路由组件：<Route path="/demo" element={<Demo />}/>
+			2.存放位置不同：
+						一般组件：components
+						路由组件：pages
+			3.接收到的props不同：
+						一般组件：写组件标签时传递了什么，就能收到什么
+						路由组件：接收到三个固定的属性
+											history:
+														go: ƒ go(n)
+														goBack: ƒ goBack()
+														goForward: ƒ goForward()
+														push: ƒ push(path, state)
+														replace: ƒ replace(path, state)
+											location:
+														pathname: "/about"
+														search: ""
+														state: undefined
+											match:
+														params: {}
+														path: "/about"
+														url: "/about"
+*/
+
+// 创建并暴露App组件
+export default class App extends Component {
+	render() {
+		return (
+			<div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-8">
+						<Header />
+					</div>
+				</div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-2">
+						<div className="list-group">
+							{/* 原生html中，靠<a>跳转不同的页面 */}
+							{/* <a className="list-group-item" href="./about.html">About</a>
+							<a className="list-group-item active" href="./home.html">Home</a> */}
+
+							{/* 在React中靠路由链接实现切换组件--编写路由链接 */}
+								<Link className="list-group-item" to="/about">About</Link>
+								<Link className="list-group-item" to="/home">Home</Link>
+						</div>
+					</div>
+
+					<div className="col-xs-6">
+						<div className="panel">
+							<div className="panel-body">
+								{/* 注册路由 */}
+								<Routes>
+									<Route path="/about" element={<About />} />
+									<Route path="/home" element={<Home />} />
+								</Routes>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		)
+	}
+}
+```
+
+## NavLink的使用
+
+```jsx
+//创建“外壳”组件App
+import './App.css';
+import React, {Component} from 'react';
+import {NavLink, Routes, Route} from 'react-router-dom';
+
+import Home from "./pages/Home";   //Home是路由组件
+import About from './pages/About';   //About是路由组件
+import Header from "./components/Header";  //Header是一般组件
+
+// 创建并暴露App组件
+export default class App extends Component {
+	render() {
+		return (
+			<div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-8">
+						<Header />
+					</div>
+				</div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-2">
+						<div className="list-group">
+							{/* 原生html中，靠<a>跳转不同的页面 */}
+							{/* <a className="list-group-item" href="./about.html">About</a>
+							<a className="list-group-item active" href="./home.html">Home</a> */}
+
+							{/* 在React中靠路由链接实现切换组件--编写路由链接 */}
+							{/*通过activeClassName指定样式名不生效，用下面方式*/}
+								<NavLink className={({isActive}) => "list-group-item " + (isActive ? "demo" : "")} to="/about">About</NavLink>
+								<NavLink className={({isActive}) => "list-group-item " + (isActive ? "demo" : "")} to="/home">Home</NavLink>
+						</div>
+					</div>
+
+					<div className="col-xs-6">
+						<div className="panel">
+							<div className="panel-body">
+								{/* 注册路由 */}
+								<Routes>
+									<Route path="/about" element={<About />} />
+									<Route path="/home" element={<Home />} />
+								</Routes>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		)
+	}
+}
+```
+
+```html
+    <style type="text/css">
+        /* indx.html 新增样式 */
+      .demo {
+        background-color: #43fffb !important;
+        color: #fff !important;
+      }
+    </style>
+```
+
+## NavLink的包装
+
+### MyNavLink
+
+```jsx
+import React, {Component} from "react";
+import "./index.css";
+import {NavLink} from "react-router-dom";
+
+export default class MyNavLink extends Component {
+	//
+	render() {
+		return (
+			<NavLink className={({isActive}) => "list-group-item " + (isActive ? "demo" : "")} {...this.props} />
+		)
+	}
+}
+```
+
+### App.js
+
+```jsx
+//创建“外壳”组件App
+import './App.css';
+import React, {Component} from 'react';
+import {Routes, Route} from 'react-router-dom';
+
+import Home from "./pages/Home";   //Home是路由组件
+import About from './pages/About';   //About是路由组件
+import Header from "./components/Header";  //Header是一般组件
+import MyNavLink from "./components/MyNavLink";  //Header是一般组件
+
+// 创建并暴露App组件
+export default class App extends Component {
+	render() {
+		return (
+			<div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-8">
+						<Header />
+					</div>
+				</div>
+				<div className="row">
+					<div className="col-xs-offset-2 col-xs-2">
+						<div className="list-group">
+{/*
+NavLink与封装NavLink
+				1.NavLink可以实现路由链接的高亮，通过activeClassName指定样式名
+				2.标签体内容是一个特殊的标签属性
+				3.通过this.props.children可以获取标签属性
+*/}
+							{/* 在React中靠路由链接实现切换组件--编写路由链接 */}
+								<MyNavLink to="/about" children="About"></MyNavLink>
+								<MyNavLink to="/home">Home</MyNavLink>
+						</div>
+					</div>
+
+					<div className="col-xs-6">
+						<div className="panel">
+							<div className="panel-body">
+								{/* 注册路由 */}
+								<Routes>
+									<Route path="/about" element={<About />} />
+									<Route path="/home" element={<Home />} />
+								</Routes>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		)
+	}
+}
+
+```
+
+## Switch的使用(已经被Routes替代)
+
+```jsx
+{/*
+	1.通常情况下，path和component是一一对应的关系。
+	2.Switch可以提高路由匹配效率(单一匹配)。
+*/}
+								<Routes>
+									<Route path="/about" element={<About />} />
+									<Route path="/home" element={<Home />} />
+									<Route path="/home" element={<Test />} />
+								</Routes>
+```
+
