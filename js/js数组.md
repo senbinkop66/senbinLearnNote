@@ -582,16 +582,76 @@ if (!Array.from) {
 
 ### Array.isArray()
 
-用来判断某个变量是否是一个数组对象
+用来判断某个变量是否是一个数组对象,  Array.isArray() 用于确定传递的值是否是一个 Array。
 
+#### 语法
 
+```
+Array.isArray(obj)
+```
 
+#### 参数
 
+**obj**
 
+​    需要检测的值。
 
+#### 返回值
+
+如果值是 Array，则为 true；否则为 false。
+
+#### 示例
+
+```js
+// 下面的函数调用都返回 true
+Array.isArray([]);
+Array.isArray([1]);
+Array.isArray(new Array());
+Array.isArray(new Array('a', 'b', 'c', 'd'))
+
+// 鲜为人知的事实：其实 Array.prototype 也是一个数组。
+Array.isArray(Array.prototype);
+
+// 下面的函数调用都返回 false
+Array.isArray();
+Array.isArray({});
+Array.isArray(null);
+Array.isArray(undefined);
+Array.isArray(17);
+Array.isArray('Array');
+Array.isArray(true);
+Array.isArray(false);
+Array.isArray(new Uint8Array(32))
+Array.isArray({ __proto__: Array.prototype });
 
 ```
 
+#### instanceof VS isArray
+
+当检测 Array 实例时，Array.isArray 优于 instanceof，**因为 Array.isArray 能检测 iframes。**
+
+```js
+const iframe = document.createElement('iframe');
+document.body.appendChild(iframe);
+xArray = window.frames[window.frames.length-1].Array;
+const arr = new xArray(1,2,3); // [1,2,3]
+
+// Correctly checking for Array
+Array.isArray(arr);  // true
+
+// Considered harmful, because doesn't work through iframes
+arr instanceof Array; // false
+
+```
+
+#### Polyfill
+
+```js
+if (!Array.isArray) {
+  Array.isArray = function(arg) {
+    return Object.prototype.toString.call(arg) === '[object Array]';
+  };
+}
 ```
 
 
@@ -601,6 +661,218 @@ if (!Array.from) {
 ### Array.of()
 
 根据一组参数来创建新的数组实例，支持任意的参数数量和类型
+
+`Array.of()` 方法创建一个**具有可变数量参数**的新数组实例，而不考虑参数的数量或类型。
+
+ `Array.of()` 和 `Array 构造函数`之间的**区别在于处理整数参数**：
+
+- `Array.of(7)` 创建一个具有单个元素 7 的数组，而 `Array(7)` 创建一个长度为 7 的空数组（注意：**这是指一个有 7 个空位 (empty) 的数组**，而不是由 7 个undefined组成的数组）。
+
+```js
+Array.of(7);       // [7]
+Array.of(1, 2, 3); // [1, 2, 3]
+
+Array(7);          // [ , , , , , , ]
+Array(1, 2, 3);    // [1, 2, 3]
+```
+
+#### 语法
+
+```js
+Array.of(element0[, element1[, ...[, elementN]]])
+```
+
+#### 参数
+
+- element*N*
+
+  任意个参数，将按顺序成为返回数组中的元素。
+
+#### 返回值
+
+新的 Array 实例。
+
+#### 描述
+
+此函数是 ECMAScript 2015 标准的一部分。详见 Array.of 和 Array.from proposal 和 Array.of polyfill。
+
+#### 示例
+
+```js
+Array.of(1);         // [1]
+Array.of(1, 2, 3);   // [1, 2, 3]
+Array.of(undefined); // [undefined]
+```
+
+#### 兼容旧环境
+
+如果原生不支持的话，在其他代码之前执行以下代码会创建 Array.of() 。
+
+```js
+if (!Array.of) {
+  Array.of = function() {
+    return Array.prototype.slice.call(arguments);
+  };
+}
+```
+
+#### Polyfill
+
+```js
+(function( global ) {
+  "use strict";
+
+  function isConstructor( C ) {
+    try {
+      new C();
+      return true;
+    } catch ( e ) {
+      return false;
+    }
+  }
+
+
+  Array.from = function( arrayLike ) {
+    var items, len, C, A, k, Pk, kPresent, kValue;
+
+    // 1.  Let items be ToObject(arrayLike).
+    items = Object(arrayLike);
+
+    // 3. Let lenValue be the result of calling the [[Get]]
+    // internal method of items with the argument "length".
+    // 4. Let len be ToInteger(lenValue).
+    len = +items.length;
+
+    // 6.  Let C be the |this| value.
+    C = this;
+
+    // 7.  If isConstructor(C) is true, then
+    if ( isConstructor(C) ) {
+      // a.  Let newObj be the result of calling the
+      //     [[Construct]] internal method of C with an argument
+      //     list containing the single item len.
+      // b.  Let A be ToObject(newObj).
+      A = Object(new C(len));
+    } else {
+      A = new Array(len);
+    }
+
+    // 10. Let k be 0.
+    k = 0;
+
+    // 11. Repeat, while k < len
+    while ( k < len ) {
+      // a. Let Pk be ToString(k).
+      Pk = String(k);
+      // b. Let kPresent be the result of calling the [[HasProperty]]
+      //      internal method of items with argument Pk.
+      kPresent = items.hasOwnProperty(Pk);
+      // c. If kPresent is true, then...
+      if ( kPresent ) {
+        // i.  Let kValue be the result of calling the [[Get]]
+        //      internal method of items with argument Pk.
+        kValue = items[ Pk ];
+        // ii.  ReturnIfAbrupt(kValue).
+        // iii.  Let defineStatus be the result of calling the
+        //      [[DefineOwnProperty]] internal method of A with
+        //      arguments Pk, Property Descriptor
+        //      {[[Value]]: kValue.[[value]],
+        //      [[Writable]]: true,
+        //      [[Enumerable]]: true,
+        //      [[Configurable]]: true}, and true.
+        A[ k ] = kValue;
+      }
+
+      // d. Increase k by 1.
+      k++;
+    }
+
+    // 14. Return A.
+    return A;
+  };
+
+
+  Array.of = function() {
+    var items, len, C, A, k, Pk, kPresent, kValue;
+
+    // X.  Let items be ToObject(arrayLike).
+    items = Object(arguments);
+
+    // 1. Let lenValue be the result of calling the [[Get]]
+    // internal method of items with the argument "length".
+    // 2. Let len be ToInteger(lenValue).
+    len = +items.length;
+
+    // 3.  Let C be the |this| value.
+    C = this;
+
+    // 4. If isConstructor(C) is true, then
+    if ( isConstructor(C) ) {
+      // a, b.
+      A = Object(new C(len));
+    } else {
+    // 5. Else, a.
+      A = new Array(len);
+    }
+
+    // 6. omitted
+    // 7. Let k be 0.
+    k = 0;
+
+    // 8. Repeat, while k < len
+    while ( k < len ) {
+      // a. Let Pk be ToString(k).
+      Pk = String(k);
+      // b. Let kValue be the result of calling the [[Get]]
+      //    internal method of items with argument Pk.
+      kValue = items[ Pk ];
+      // c. Let defineStatus be the result of calling the
+      //    [[DefineOwnProperty]] internal method of A with
+      //    arguments Pk, Property Descriptor
+      //    {[[Value]]: kValue.[[value]],
+      //    [[Writable]]: true,
+      //    [[Enumerable]]: true,
+      //    [[Configurable]]: true}, and true.
+      A[ k ] = kValue;
+
+      // d. omitted
+      // e. Increase k by 1.
+      k++;
+    }
+
+    // 9, 10. omitted
+    // 11. Return A.
+    return A;
+  };
+
+  global.Array.from = Array.from;
+  global.Array.of = Array.of;
+
+})( global );
+
+
+{
+  // tests
+  var arrayLike = { 0: "a", 1: "b", 2: "c", length: 3 };
+
+  console.log( Array.from(arrayLike) );
+
+  console.log( Array.of(0) );
+  console.log( Array.of(1, null, undefined, false, 2) );
+  console.log( Array.of() );
+
+
+  var other = {
+    from: Array.from,
+    of: Array.of
+  };
+
+  console.log( other.from(arrayLike) );
+  console.log( other.of(1, null, undefined, false, 2) );
+}
+```
+
+
 
 ----
 
