@@ -6576,13 +6576,7 @@ export default class App extends Component {
 
 ```
 
-#### 函数式
-
-```
-
-```
-
-
+#### 
 
 ## 路由组件与一般组件
 

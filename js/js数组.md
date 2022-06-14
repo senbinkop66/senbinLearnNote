@@ -882,9 +882,149 @@ if (!Array.of) {
 
 数组中的元素个数
 
+`length` 是`Array`的实例属性。返回或设置一个数组中的元素个数。**该值是一个无符号 32-bit 整数**，并且总是大于数组最高项的下标。
+
+#### 描述
+
+length 属性的值是一个 0 到 2^32 - 1 的整数。
+
+```js
+var namelistA = new Array(4294967296); // 2 的 32 次方 = 4294967296
+var namelistC = new Array(-100) // 负号
+
+console.log(namelistA.length); // RangeError: 无效数组长度
+console.log(namelistC.length); // RangeError: 无效数组长度
+
+
+var namelistB = [];
+namelistB.length = Math.pow(2,32)-1; //set array length less than 2 to the 32nd power
+console.log(namelistB.length);   // 4294967295
+```
+
+你可以设置 `length` 属性的值来截断任何数组。当通过改变`length`属性值来扩展数组时，实际元素的数目将会增加。例如：将一个拥有 2 个元素的数组的 `length` 属性值设为 3 时，那么这个数组将会包含 3 个元素，并且，第三个元素的值将会是 `undefined` 。
+
+```js
+function printEntries(arr) {
+  var goNext = true;
+  var entries = arr.entries();
+  while (goNext) {
+    var result = entries.next();
+    if (result.done !== true) {
+      console.log(result.value[1]);
+      goNext = true;
+    } else
+      goNext = false;
+  }
+  console.log('=== printed ===');
+}
+
+var arr = [1, 2, 3];
+printEntries(arr);
+
+arr.length = 5; // set array length to 5 while currently 3.
+printEntries(arr);
+
+// 1
+// 2
+// 3
+// === printed ===
+
+// 1
+// 2
+// 3
+// undefined
+// undefined
+// === printed ===
+```
+
+
+
+但是， `length` 属性不一定表示数组中定义值的个数。了解更多：[长度与数值下标属性之间的关系](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#relationship_between_length_and_numerical_properties)。
+
+| `Array.length` 属性的属性特性： |       |
+| :------------------------------ | ----- |
+| writable                        | true  |
+| enumerable                      | false |
+| configurable                    | false |
+
+- Writable ：如果设置为false，该属性值将不能被修改。
+- Configurable ：如果设置为false，删除或更改任何属性都将会失败。
+- Enumerable ：如果设置为 true ，属性可以通过迭代器for或for...in进行迭代。
+
+#### 示例
+
+##### 遍历数组
+
+下面的例子中，通过数组下标遍历数组元素，并把每个元素的值修改为原值的 2 倍。
+
+```js
+var numbers = [1, 2, 3, 4, 5];
+var length = numbers.length;
+for (var i = 0; i < length; i++) {
+  numbers[i] *= 2;
+}
+// 遍历后的结果 [2, 4, 6, 8, 10]
+```
+
+##### 截断数组
+
+下面的例子中，如果数组长度大于 3，则把该数组的长度截断为 3 。
+
+```js
+var numbers = [1, 2, 3, 4, 5];
+
+if (numbers.length > 3) {
+  numbers.length = 3;
+}
+
+console.log(numbers); // [1, 2, 3]
+console.log(numbers.length); // 3
+```
+
+----
+
 ### Array.prototype[@@unscopables]
 
-包含了所有 ES2015 (ES6) 中新定义的、且并未被更早的 ECMAScript 标准收纳的属性名。这些属性被排除在由 with 语句绑定的环境中
+Symbol 属性 @@unscopable 包含了所有 ES2015 (ES6) 中新定义的、且并未被更早的 ECMAScript 标准收纳的属性名。这些属性被排除在由 with 语句绑定的环境中。
+
+#### 语法
+
+```
+arr[Symbol.unscopables]
+```
+
+#### 描述
+
+with 绑定中未包含的数组默认属性有：
+
+```
+copyWithin()
+entries()
+fill()
+find()
+findIndex()
+includes()
+keys()
+values()
+```
+
+#### 示例
+
+以下的代码在 ES5 或更早的版本中能正常工作。然而 ECMAScript 2015 (ES6) 或之后的版本中新添加了 Array.prototype.keys() 这个方法。这意味着在 with 语句的作用域中，"keys"只能作为方法，而不能作为某个变量。这正是内置的 @@unscopables 即 Array.prototype[@@unscopables] symbol 属性所要解决的问题：**防止某些数组方法被添加到 with 语句的作用域内。**
+
+```js
+var keys = [];
+
+with(Array.prototype) {
+  keys.push("something");
+}
+
+Object.keys(Array.prototype[Symbol.unscopables]);
+// ["copyWithin", "entries", "fill", "find", "findIndex",
+//  "includes", "keys", "values"]
+```
+
+
 
 ----
 
@@ -894,13 +1034,254 @@ if (!Array.of) {
 
 用于合并两个或多个数组。此方法不会更改现有数组，而是返回一个新数组
 
+#### 语法
+
+```
+var new_array = old_array.concat(value1[, value2[, ...[, valueN]]])
+```
+
+#### 参数
+
+valueN 可选
+
+数组或值，将被合并到一个新的数组中。如果省略了所有 `valueN` 参数，则 `concat` 会返回调用此方法的现存数组的一个浅拷贝。详情请参阅下文描述。
+
+#### 返回值
+
+新的 Array 实例。
+
+#### 描述
+
+`concat`方法创建一个新的数组，它由被调用的对象中的元素组成，每个参数的顺序依次是该参数的元素（如果参数是数组）或参数本身（如果参数不是数组）。它不会递归到嵌套数组参数中。
+
+`concat`方法不会改变`this`或任何作为参数提供的数组，**而是返回一个浅拷贝**，它包含与原始数组相结合的相同元素的副本。 原始数组的元素将复制到新数组中，如下所示：
+
+- 对象引用（而不是实际对象）：`concat`**将对象引用复制到新数组中**。 原始数组和新数组都引用相同的对象。 也就是说，如果引用的对象被修改，则更改对于新数组和原始数组都是可见的。 **这包括也是数组的数组参数的元素。**
+
+- 数据类型如字符串，数字和布尔（不是String，Number 和 Boolean 对象）：concat将字符串和数字的**值**复制到新数组中。
+
+> **备注：**数组/值在连接时保持不变。此外，对于新数组的任何操作（仅当元素不是对象引用时）都不会对原始数组产生影响，反之亦然。
+
+#### 示例
+
+##### 连接两个数组
+
+以下代码将两个数组合并为一个新数组：
+
+```js
+let alpha = ['a', 'b', 'c'];
+let numeric = [1, 2, 3];
+
+let newArr = alpha.concat(numeric);
+console.log(newArr);  // [ 'a', 'b', 'c', 1, 2, 3 ]
+
+numeric[0] = 100;
+console.log(newArr);  // [ 'a', 'b', 'c', 1, 2, 3 ]
+```
+
+##### 连接三个数组
+
+以下代码将三个数组合并为一个新数组：
+
+```js
+var num1 = [1, 2, 3],
+    num2 = [4, 5, 6],
+    num3 = [7, 8, 9];
+
+var nums = num1.concat(num2, num3);
+
+console.log(nums);
+// results in [1, 2, 3, 4, 5, 6, 7, 8, 9]
+```
+
+##### 将值连接到数组
+
+以下代码将三个值连接到数组：
+
+```js
+var alpha = ['a', 'b', 'c'];
+
+var alphaNumeric = alpha.concat(1, [2, 3]);
+
+console.log(alphaNumeric);
+// results in ['a', 'b', 'c', 1, 2, 3]
+```
+
+##### 合并嵌套数组
+
+以下代码合并数组并保留引用：
+
+```js
+let alpha = [['a'], 'b', 'c'];
+let numeric = [1, [2], 3];
+
+//对于数组内的值是引用对象执行浅拷贝
+let newArr = alpha.concat(numeric);
+console.log(newArr);  // [ [ 'a' ], 'b', 'c', 1, [ 2 ], 3 ]
+
+numeric[1].push(100);
+alpha[0].push('z');
+console.log(newArr);  // [ [ 'a', 'z' ], 'b', 'c', 1, [ 2, 100 ], 3 ]
+```
+
+
+
+----
+
 ### Array.prototype.copyWithin()
 
-浅复制数组的一部分到同一数组中的另一个位置，并返回它，不会改变原数组的长度
+**浅复制**数组的一部分到同一数组中的另一个位置，并返回它，不会改变原数组的长度
+
+#### 语法
+
+```
+arr.copyWithin(target[, start[, end]])
+```
+
+#### 参数
+
+**target**
+
+0 为基底的索引，**复制序列到该位置**。如果是负数，`target` 将从末尾开始计算。如果 `target` 大于等于 `arr.length`，将不会发生拷贝。如果 `target` 在 `start` 之后，复制的序列将被修改以符合 `arr.length`。
+
+**start**
+
+0 为基底的索引，开始复制元素的起始位置。如果是负数，`start` 将从末尾开始计算。**如果 `start` 被忽略，`copyWithin` 将会从 0 开始复制。**
+
+**end**
+
+0 为基底的索引，开始复制元素的结束位置。`copyWithin` 将会拷贝到该位置，**但不包括 `end` 这个位置的元素**。如果是负数， `end` 将从末尾开始计算。**如果 `end` 被忽略，`copyWithin` 方法将会一直复制至数组结尾**（默认为 `arr.length`）。
+
+#### 返回值
+
+改变后的数组。
+
+#### 描述
+
+参数 target、start 和 end 必须为整数。
+
+如果 start 为负，则其指定的索引位置等同于 length+start，length 为数组的长度。end 也是如此。
+
+copyWithin 方法**不要求其 this 值必须是一个数组对象**；除此之外，copyWithin 是一个可变方法，**它可以改变 this 对象本身**，并且返回它，而不仅仅是它的拷贝。
+
+copyWithin 就像 C 和 C++ 的 memcpy 函数一样，**且它是用来移动 Array 或者 TypedArray 数据的一个高性能的方法**。复制以及粘贴序列这两者是为一体的操作; **即使复制和粘贴区域重叠，粘贴的序列也会有拷贝来的值。**
+
+copyWithin 函数被设计为通用式的，其不要求其 this 值必须是一个数组对象。
+
+`copyWithin` 是一个可变方法，**它不会改变 this 的长度 length**，但是**会改变 this 本身的内容**，且需要时会创建新的属性。
+
+#### 示例
+
+```js
+let a = [1, 2, 3, 4, 5];
+
+let b = a.copyWithin(-2);
+
+console.log(a);  // [ 1, 2, 3, 1, 2 ]
+console.log(b);  // [ 1, 2, 3, 1, 2 ]
+
+a = [1, 2, 3, 4, 5];
+a.copyWithin(0, 3);
+console.log(a);  // [ 4, 5, 3, 4, 5 ]
+
+a = [1, 2, 3, 4, 5];
+a.copyWithin(0, 3, 4);
+console.log(a);  // [ 4, 2, 3, 4, 5 ]
+
+a = [1, 2, 3, 4, 5];
+a.copyWithin(-2, -3, -1);
+console.log(a);  // [ 1, 2, 3, 3, 4 ]
+
+console.log([].copyWithin.call({length: 5, 3: 1}, 0, 3));  // { '0': 1, '3': 1, length: 5 }
+
+// ES2015 Typed Arrays are subclasses of Array
+let i32a = new Int32Array([1, 2, 3, 4, 5]);
+i32a.copyWithin(0, 2);
+console.log(i32a);  // Int32Array(5) [ 3, 4, 5, 4, 5 ]
+
+console.log([].copyWithin.call(new Int32Array([1, 2, 3, 4, 5]), 0, 3, 4));  // Int32Array(5) [ 4, 2, 3, 4, 5 ]
+```
+
+#### polyfill
+
+```js
+if (!Array.prototype.copyWithin) {
+  Array.prototype.copyWithin = function(target, start/*, end*/) {
+    // Steps 1-2.
+    if (this == null) {
+      throw new TypeError('this is null or not defined');
+    }
+
+    var O = Object(this);
+
+    // Steps 3-5.
+    var len = O.length >>> 0;
+
+    // Steps 6-8.
+    var relativeTarget = target >> 0;
+
+    var to = relativeTarget < 0 ?
+      Math.max(len + relativeTarget, 0) :
+      Math.min(relativeTarget, len);
+
+    // Steps 9-11.
+    var relativeStart = start >> 0;
+
+    var from = relativeStart < 0 ?
+      Math.max(len + relativeStart, 0) :
+      Math.min(relativeStart, len);
+
+    // Steps 12-14.
+    var end = arguments[2];
+    var relativeEnd = end === undefined ? len : end >> 0;
+
+    var final = relativeEnd < 0 ?
+      Math.max(len + relativeEnd, 0) :
+      Math.min(relativeEnd, len);
+
+    // Step 15.
+    var count = Math.min(final - from, len - to);
+
+    // Steps 16-17.
+    var direction = 1;
+
+    if (from < to && to < (from + count)) {
+      direction = -1;
+      from += count - 1;
+      to += count - 1;
+    }
+
+    // Step 18.
+    while (count > 0) {
+      if (from in O) {
+        O[to] = O[from];
+      } else {
+        delete O[to];
+      }
+
+      from += direction;
+      to += direction;
+      count--;
+    }
+
+    // Step 19.
+    return O;
+  };
+}
+
+```
+
+
+
+----
 
 ### Array.prototype.entries()
 
 返回一个新的 Array Iterator 对象，该对象包含数组中每个索引的键/值对
+
+
+
+----
 
 ### Array.prototype.every()
 
