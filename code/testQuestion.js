@@ -1,37 +1,41 @@
 /**
- * @param {number[][]} mat
- * @return {number[]}
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number}
  */
-var findDiagonalOrder = function(mat) {
-    const m = mat.length;
-    const n = mat[0].length;
-    const res = new Array(m * n).fill(0);
-    let pos = 0;
-    for (let i = 0; i < m + n - 1; i++) {
-        if (i % 2 === 1) {
-            let x = i < n ? 0 : i - n + 1;
-            let y = i < n ? i : n - 1;
-            while (x < m && y >= 0) {
-                res[pos] = mat[x][y];
-                pos++;
-                x++;
-                y--;
-            }
+var smallestDistancePair = function(nums, k) {
+    nums.sort((a, b) => a - b);
+    let n = nums.length;
+    let left = 0, right = nums[n - 1] - nums[0];
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        let cnt = 0;
+        for (let j = 0; j < n; j++) {
+            const i = binarySearch(nums, j, nums[j] - mid);
+            cnt += j - i;
+        }
+        if (cnt >= k) {
+            right = mid - 1;
         } else {
-            let x = i < m ? i : m - 1;
-            let y = i < m ? 0 : i - m + 1;
-            while (x >= 0 && y < n) {
-                res[pos] = mat[x][y];
-                pos++;
-                x--;
-                y++;
-            }
+            left = mid + 1;
         }
     }
-    return res;
+    return left;
 };
 
+const binarySearch = (nums, end, target) => {
+    let left = 0, right = end;
+    while(left < right) {
+        const mid = Math.floor((left + right) / 2);
+        if (nums[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
+    }
+    return left;
+}
 
-let mat = [[1,2,3],[4,5,6],[7,8,9]];
-let result = findDiagonalOrder(mat);
+let nums = [1,3,1], k = 1;
+let result = smallestDistancePair(nums, k);
 console.log(result);
