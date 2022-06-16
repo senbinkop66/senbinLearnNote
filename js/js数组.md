@@ -1279,6 +1279,133 @@ if (!Array.prototype.copyWithin) {
 
 返回一个新的 Array Iterator 对象，该对象包含数组中每个索引的键/值对
 
+#### 语法
+
+```
+arr.entries()
+```
+
+#### 返回值
+
+一个新的 [`Array`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array) 迭代器对象。[Array Iterator](https://www.ecma-international.org/ecma-262/6.0/#sec-createarrayiterator)是对象，它的原型（`__proto__`:Array Iterator）上有一个[next](https://www.ecma-international.org/ecma-262/6.0/#sec-%arrayiteratorprototype%.next)方法，可用用于遍历迭代器取得原数组的 [key,value]。
+
+#### 示例
+
+##### Array Iterator
+
+```js
+let arr = ["a", "b", "c"];
+let iterator = arr.entries();
+
+console.log(iterator);  // Object [Array Iterator] {}
+/*Array Iterator {}
+         __proto__:Array Iterator
+         next:ƒ next()
+         Symbol(Symbol.toStringTag):"Array Iterator"
+         __proto__:Object
+*/
+```
+
+##### iterator.next()
+
+```js
+let arr = ["a", "b", "c"];
+let iterator = arr.entries();
+
+console.log(iterator.next());
+
+/*
+	{value: Array(2), done: false}
+          done:false
+          value:(2) [0, "a"]
+           __proto__: Object
+*/
+// iterator.next() 返回一个对象，对于有元素的数组，
+// 是 next{ value: Array(2), done: false }；
+// next.done 用于指示迭代器是否完成：在每次迭代时进行更新而且都是 false，
+// 直到迭代器结束 done 才是 true。
+// next.value 是一个 ["key","value"] 的数组，是返回的迭代器中的元素值。
+```
+
+##### iterator.next 方法运行
+
+```jsx
+let arr = ["a", "b", "c"];
+let iterator = arr.entries();
+
+let a = [];
+
+// for(let i=0; i< arr.length; i++){        // 实际使用的是这个
+for (let i = 0; i < arr.length + 1; i++) {  // 注意，是 length+1，比数组的长度大
+  let temp = iterator.next();               // 每次迭代时更新 next
+  console.log(temp.done);                   // 这里可以看到更新后的 done 都是 false
+  if (temp.done !== true) {                 // 遍历迭代器结束 done 才是 true
+    console.log(temp.value);
+    a[i] = temp.value;
+  }
+}
+
+console.log(a);  // 遍历完毕，输出 next.value 的数组
+
+/*
+false
+[ 0, 'a' ]
+false
+[ 1, 'b' ]
+false
+[ 2, 'c' ]
+true
+[ [ 0, 'a' ], [ 1, 'b' ], [ 2, 'c' ] ]
+*/
+```
+
+##### 二维数组按行排序
+
+```js
+function sortArr(arr) {
+  let goNext = true;
+  let entries = arr.entries();
+  while(goNext) {
+    let result = entries.next();
+    if (result.done !== true) {
+      result.value[1].sort((a, b) => a - b);
+      goNext = true;
+    } else {
+      goNext = false;
+    }
+  }
+  return arr;
+}
+
+let arr = [[1,34],[456,2,3,44,234],[4567,1,4,5,6],[34,78,23,1]];
+let newArr = sortArr(arr);
+console.log(newArr);
+/*
+[
+  [ 1, 34 ],
+  [ 2, 3, 44, 234, 456 ],
+  [ 1, 4, 5, 6, 4567 ],
+  [ 1, 23, 34, 78 ]
+]
+*/
+```
+
+##### 使用for…of 循环
+
+```js
+let arr = ["a", "b", "c"];
+let iterator = arr.entries();
+
+for (let a of iterator) {
+  console.log(a);
+}
+/*
+[ 0, 'a' ]
+[ 1, 'b' ]
+[ 2, 'c' ]
+*/
+```
+
 
 
 ----
@@ -1287,13 +1414,304 @@ if (!Array.prototype.copyWithin) {
 
 测试一个数组内的所有元素是否都能通过某个指定函数的测试。它返回一个布尔值
 
+> **备注：**若收到一个空数组，此方法在任何情况下都会返回 `true`。
+
+#### 语法
+
+```
+arr.every(callback(element[, index[, array]])[, thisArg])
+```
+
+#### 参数
+
+callback
+
+​	用来测试每个元素的函数，它可以接收三个参数：
+
+- `element`
+
+  用于测试的当前值。
+
+- `index`可选
+
+  用于测试的当前值的索引。
+
+- `array`可选
+
+  调用 `every` 的当前数组。
+
+thisArg
+
+执行 `callback` 时使用的 `this` 值。
+
+#### 返回值
+
+如果回调函数的每一次返回都为 **truthy** 值，返回 true，否则返回 false。
+
+#### 描述
+
+`every` 方法为数组中的每个元素执行一次 `callback` 函数，直到它找到一个会使 `callback` 返回 [falsy](https://developer.mozilla.org/zh-CN/docs/Glossary/Falsy) 的元素。如果发现了一个这样的元素，`every` 方法将会立即返回 `false`。否则，`callback` 为每一个元素返回 `true`，`every` 就会返回 `true`。**`callback` 只会为那些已经被赋值的索引调用。不会为那些被删除或从未被赋值的索引调用。**
+
+`callback` 在被调用时可传入三个参数：元素值，元素的索引，原数组。
+
+如果为 `every` 提供一个 `thisArg` 参数，则该参数为调用 `callback` 时的 `this` 值**。如果省略该参数，则 `callback` 被调用时的 `this` 值，在非严格模式下为全局对象，在严格模式下传入 `undefined`。**详见 `this` 条目。
+
+`every` 不会改变原数组。
+
+`every` 遍历的元素范围在第一次调用 `callback` 之前就已确定了。**在调用 `every` 之后添加到数组中的元素不会被 `callback` 访问到**。如果数组中存在的元素被更改，**则他们传入 `callback` 的值是 `every` 访问到他们那一刻的值**。那些被删除的元素或从来未被赋值的元素将不会被访问到。
+
+`every` 和数学中的"所有"类似，当所有的元素都符合条件才会返回 `true`。正因如此，**若传入一个空数组，无论如何都会返回 `true`。**（这种情况属于[无条件正确](http://en.wikipedia.org/wiki/Vacuous_truth)：正因为一个[空集合](https://en.wikipedia.org/wiki/Empty_set#Properties)没有元素，**所以它其中的所有元素都符合给定的条件。**)
+
+#### 示例
+
+##### 检测所有数组元素的大小
+
+下例检测数组中的所有元素是否都大于 10。
+
+```js
+function isBigEnough(element, index, array) {
+  return element >= 10;
+}
+console.log([12, 5, 8, 130, 44].every(isBigEnough));   // false
+console.log([12, 54, 18, 130, 44].every(isBigEnough)); // true
+```
+
+##### 使用箭头函数
+
+箭头函数为上面的检测过程提供了更简短的语法。
+
+```js
+console.log([12, 5, 8, 130, 44].every((element, index, array) => element > 10));   // false
+console.log([12, 54, 18, 130, 44].every((element, index, array) => element > 10)); // true
+```
+
+```js
+const isBiggerThantarget = (element) => element > 10;
+
+console.log([12, 5, 8, 130, 44].every(isBiggerThantarget));   // false
+console.log([12, 54, 18, 130, 44].every(isBiggerThantarget)); // true
+```
+
+```js
+const factoryFn = (target) => {
+  return (element) => {
+    return element > target;
+  }
+}
+
+console.log([12, 5, 8, 130, 44].every(factoryFn(10)));   // false
+console.log([12, 54, 18, 130, 44].every(factoryFn(10))); // true
+```
+
+#### 兼容旧环境（Polyfill）
+
+在 ECMA-262 第 5 版时，`every` 被添加进 ECMA-262 标准；因此，在某些实现环境中，它尚未被支持。你可以把下面的代码放到脚本的开头来解决此问题，该代码允许在那些没有原生支持 `every` 的实现环境中使用它。该算法是 ECMA-262 第 5 版中指定的算法，它假定 `Object` 和 `TypeError` 拥有它们的初始值，且 `fun.call` 等价于 [`Function.prototype.call`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/call)。
+
+```js
+if (!Array.prototype.every) {
+  Array.prototype.every = function(callbackfn, thisArg) {
+    'use strict';
+    var T, k;
+
+    if (this == null) {
+      throw new TypeError('this is null or not defined');
+    }
+
+    // 1. Let O be the result of calling ToObject passing the this
+    //    value as the argument.
+    var O = Object(this);
+
+    // 2. Let lenValue be the result of calling the Get internal method
+    //    of O with the argument "length".
+    // 3. Let len be ToUint32(lenValue).
+    var len = O.length >>> 0;
+
+    // 4. If IsCallable(callbackfn) is false, throw a TypeError exception.
+    if (typeof callbackfn !== 'function') {
+      throw new TypeError();
+    }
+
+    // 5. If thisArg was supplied, let T be thisArg; else let T be undefined.
+    if (arguments.length > 1) {
+      T = thisArg;
+    }
+
+    // 6. Let k be 0.
+    k = 0;
+
+    // 7. Repeat, while k < len
+    while (k < len) {
+
+      var kValue;
+
+      // a. Let Pk be ToString(k).
+      //   This is implicit for LHS operands of the in operator
+      // b. Let kPresent be the result of calling the HasProperty internal
+      //    method of O with argument Pk.
+      //   This step can be combined with c
+      // c. If kPresent is true, then
+      if (k in O) {
+
+        // i. Let kValue be the result of calling the Get internal method
+        //    of O with argument Pk.
+        kValue = O[k];
+
+        // ii. Let testResult be the result of calling the Call internal method
+        //     of callbackfn with T as the this value and argument list
+        //     containing kValue, k, and O.
+        var testResult = callbackfn.call(T, kValue, k, O);
+
+        // iii. If ToBoolean(testResult) is false, return false.
+        if (!testResult) {
+          return false;
+        }
+      }
+      k++;
+    }
+    return true;
+  };
+}
+
+```
+
+
+
+
+
+----
+
 ### Array.prototype.fill()
 
-用一个固定值填充一个数组中从起始索引到终止索引内的全部元素
+用一个固定值填充一个数组中从起始索引到终止索引内的全部元素。不包括终止索引。
+
+#### 语法
+
+```
+arr.fill(value[, start[, end]])
+```
+
+#### 参数
+
+value
+
+用来填充数组元素的值。
+
+`start` 可选
+
+起始索引，默认值为 0。
+
+`end` 可选
+
+终止索引，默认值为 `this.length`。
+
+#### 返回值
+
+修改后的数组。
+
+#### 描述
+
+**`fill`** 方法接受三个参数 `value`, `start` 以及 `end`. `start` 和 `end` 参数是可选的，其默认值分别为 `0` 和 `this` 对象的 `length `属性值。
+
+如果 `start` 是个负数，则开始索引会被自动计算成为 `length+start`, 其中 `length` 是 `this` 对象的 `length `属性值。如果 `end` 是个负数，则结束索引会被自动计算成为 `length+end`。
+
+`fill` 方法故意被设计成通用方法，**该方法不要求 `this` 是数组对象**。
+
+`fill` 方法是个可变方法，**它会改变调用它的 `this` 对象本身，然后返回它**，而并不是返回一个副本。
+
+**当一个对象被传递给 `fill`方法的时候，填充数组的是这个对象的引用。**
+
+#### 示例
+
+```js
+[1, 2, 3].fill(4);               // [4, 4, 4]
+[1, 2, 3].fill(4, 1);            // [1, 4, 4]
+[1, 2, 3].fill(4, 1, 2);         // [1, 4, 3]
+[1, 2, 3].fill(4, 1, 1);         // [1, 2, 3]
+[1, 2, 3].fill(4, 3, 3);         // [1, 2, 3]
+[1, 2, 3].fill(4, -3, -2);       // [4, 2, 3]
+[1, 2, 3].fill(4, NaN, NaN);     // [1, 2, 3]
+[1, 2, 3].fill(4, 3, 5);         // [1, 2, 3]
+Array(3).fill(4);                // [4, 4, 4]
+[].fill.call({ length: 3 }, 4);  // {0: 4, 1: 4, 2: 4, length: 3}
+
+// Objects by reference.
+var arr = Array(3).fill({}) // [{}, {}, {}];
+// 需要注意如果 fill 的参数为引用类型，会导致都执行同一个引用类型
+// 如 arr[0] === arr[1] 为 true
+arr[0].hi = "hi"; // [{ hi: "hi" }, { hi: "hi" }, { hi: "hi" }]
+
+
+let arr = new Array(5).fill({a: 1, b: 2});
+console.log(arr[0]);  // { a: 1, b: 2 }
+
+arr[1]['c'] = "c";
+
+console.log(arr[0]);  // { a: 1, b: 2, c: 'c' }
+```
+
+#### polyfill
+
+```jsx
+if (!Array.prototype.fill) {
+  Object.defineProperty(Array.prototype, 'fill', {
+    value: function(value) {
+
+      // Steps 1-2.
+      if (this == null) {
+        throw new TypeError('this is null or not defined');
+      }
+
+      var O = Object(this);
+
+      // Steps 3-5.
+      var len = O.length >>> 0;
+
+      // Steps 6-7.
+      var start = arguments[1];
+      var relativeStart = start >> 0;
+
+      // Step 8.
+      var k = relativeStart < 0 ?
+        Math.max(len + relativeStart, 0) :
+        Math.min(relativeStart, len);
+
+      // Steps 9-10.
+      var end = arguments[2];
+      var relativeEnd = end === undefined ?
+        len : end >> 0;
+
+      // Step 11.
+      var final = relativeEnd < 0 ?
+        Math.max(len + relativeEnd, 0) :
+        Math.min(relativeEnd, len);
+
+      // Step 12.
+      while (k < final) {
+        O[k] = value;
+        k++;
+      }
+
+      // Step 13.
+      return O;
+    }
+  });
+}
+
+```
+
+
+
+----
 
 ### Array.prototype.filter()
 
 创建一个新数组，其包含通过所提供函数实现的测试的所有元素
+
+
+
+
+
+----
 
 ### Array.prototype.find()
 
