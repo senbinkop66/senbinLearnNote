@@ -1482,7 +1482,2876 @@ null被当成复合对象，**由于null没有valueOf与toString方法**，因�
 
 - 存在 NaN 则返回 false
 
+---
 
+# js部分
+
+---
+
+## 1.1 请问在JS中有哪些数据类型？
+
+JavaScript 语言中类型集合由原始值和对象组成。
+
+**原始值**（直接表示在语言底层的不可变数据）
+
+除对象类型（object）以外的其它任何类型定义的不可变的值（值本身无法被改变）。例如（与 C 语言不同），JavaScript 中字符串是不可变的（译注：如，JavaScript 中**对字符串的操作一定返回了一个新字符串**，原始字符串并没有被改变）。我们称这些类型的值为“*原始值*”。
+
+- 布尔类型
+- Null 类型
+- Undefined 类型
+- 数字类型
+- BigInt 类型
+- 字符串类型
+- 符号类型(symbol)
+
+符号（Symbols）类型是**唯一**且**不可修改**的原始值，并且可以用来作为对象的键(key)，在某些语言当中也有与之相似的类型（原子类型，atoms）。
+
+**对象**（一组属性的集合）
+
+在计算机科学中, 对象（object）是指内存中的可以被[标识符](https://developer.mozilla.org/zh-CN/docs/Glossary/Identifier)引用的一块区域。
+
+
+
+JS数据类型一共有7种，分为基本数据类型和引用数据类型
+
+- **基本数据类型**：字符串（String）、数字(Number)、布尔(Boolean)、空（Null）、未定义（Undefined）、Symbol、BigInt
+
+Symbol：ES6引入了一种新的原始数据类型，表示独一无二的值，**主要用于解决属性名冲突的问题**，做为标记
+
+BigInt：新增数据类型，是ES2020新增加的，精度大于 2^53 - 1， 是比Number类型支持的范围更大的整数值，在对大整数执行运算时，使用BigInt，会减少整数溢出问题
+
+创建方式：BigInt(value)、在一个整数字面量后面加 n 
+
+```js
+let a = 10n; 
+let b = BigInt(10);  
+console.log(a === b);     // true
+```
+
+注意：由于在Number 与 BigInt 之间进行转换会损失精度，**建议仅在值可能大于2^53 时使用 BigInt类型**，并且不在两种类型之间进行相互转换。
+
+与Number不同点：
+
+（1）不能用于 Math 对象中的方法；
+
+（2）不能和任何 Number 实例混合运算，两者必须转换成同一种类型（ BigInt 变量在转换成 Number 变量时可能会丢失精度）
+
+
+
+- **引用数据类型**：对象(Object)，其中包含了日期（Date）、函数（Function)、数组（Array）、正则（RegExp）等
+
+两者总结区别：
+
+（1）声明变量时不同的内存分配：
+
+基本：存储在栈中的简单数据段，它们的值直接存储在变量访问的位置
+
+原因：**基本类型数据占据的空间是固定的**，所以将他们存储在较小的内存区域——栈，便于迅速查寻变量的值
+
+引用：存储在堆中的对象，存储在变量处的值是一个指针，指向存储对象的内存地址
+
+ 原因：**引用类型数据的大小会改变**，不能把它放在栈中，否则会降低变量查寻速度，**相反，地址的大小是固定的，可以存在栈中**
+
+（2）不同的内存分配机制也带来了不同的访问机制
+
+引用：js中不允许直接访问保存在堆内存中的对象，在访问一个对象时，**首先得到对象在堆内存中的地址**，按照这个地址去获得对象中的值（引用访问）
+
+基本：可直接访问
+
+（3）复制变量时的不同
+
+基本：变量复制时，会将原始值的副本赋值给新变量，此后两变量是完全独立的，他们只是拥有相同的值而已（深拷贝）
+
+引用：变量复制时，会把内存地址赋值给新变量，新旧变量都指向了堆内存中的同一个对象，任何一个作出的改变都会影响另一个（浅拷贝）（深拷贝浅拷贝对比详见下3.3）
+
+（4）参数传递的不同（把实参复制给形参的过程）
+
+由于内存分配的差别，两者在传参时也有区别
+
+基本：只是把变量里的值传递给参数，**之后参数和这个变量互不影响**
+
+引用：**传递的值也就是这个内存地址**，这也就是为什么函数内部对这个参数的修改会体现在外部，因为它们都指向同一个对象
+
+----
+
+## 1.2 请问Undefined与Null有何异同点？
+
+共同点：都是基本类型，保存在栈中
+
+不同点：
+
+Undefined表示"缺少值"，**就是此处应该有一个值，但是还没有定义**，转为数值时为NaN。典型用法：
+
+- 变量被声明了，但没有赋值时，就等于undefined
+- 调用函数时，应该提供的参数没有提供，该参数等于undefined
+- 对象没有赋值的属性，该属性的值为undefined
+- 函数没有返回值时，默认返回undefined
+
+Null：
+
+表示"没有对象"，**即该处不应该有值**，转为数值时为0。典型用法是：
+
+- 作为函数的参数，表示该函数的参数不是对象
+- 作为对象原型链的终点
+
+注意：
+
+```js
+undefined == null; //true
+undefined === null; //false
+```
+
+ECMAScript 规范： null 和  undefined 的行为很相似，并且**都表示 一个无效的值**，那么它们所表示的内容也具有相似性，故他们相等。
+
+全等操作 === 在比较相等性的时候，两者不是同一类型值，会发生类型转换，故两者不全等。
+
+```js
+Number(undefined); // NaN
+Number(null); // 0
+
+```
+
+---
+
+## 1.3 请问如何判断js变量的数据类型？
+
+常见判断方法有以下四种：
+
+- **typeof xx**
+
+返回一个字符串（小写），用来判断：Undefined、String、Number、Boolean、Symbol、Object、Function，无法检测引用类型里的Array
+
+```bash
+> typeof(undefined)
+'undefined'
+> typeof("abc")
+'string'
+> typeof(100)
+'number'
+> typeof(false)
+'boolean'
+> typeof(Symbol(2))
+'symbol'
+
+> typeof(BigInt(200))
+'bigint'
+```
+
+优点：可区分Object与Function
+
+缺点：
+
+（1）对于 Null ，返回 object 类型
+
+```js
+> typeof(null)
+'object'
+```
+
+原因：Null类型只有一个null值，该值表示一个**空对象指针**（出自JavaScript高级程序设计）
+
+**typeof的检测原理**：不同的对象在底层都表示为二进制，在js中二进制前**（低）三位存储其类型信息**为：000: Object、100：String、110： Boolean、1： Number。**null的二进制表示全为0，自然前三位也是0，所以执行typeof时会返回"object"。**
+
+  （2） 对于Array、Date、RegExp都会返回object，不能更详细的区分
+
+```js
+var fn=function(){};
+let obj={a:1};
+let arr=[1,2,3];
+let now=new Date();
+let reg=/abc/;
+
+console.log(typeof(fn));  //function
+console.log(typeof(obj));  //object
+console.log(typeof(arr));  //object
+console.log(typeof(now));  //object
+console.log(typeof(reg));  //object
+```
+
+- **xx instanceof xx**
+
+返回true/false，**只能判断引用类型** ，无法检测基本类型
+
+判断原理：**判断一个构造函数的prototype属性所指向的对象是否存在另外一个要检测对象的原型链上**。简单来说：能验证new构造函数创建出来的实例，左边的对象是否是右边的类的实例，**属于验证式判断类型**
+
+缺点：**只能用来判断两个对象是否属于实例关系**， 而不能判断一个对象实例具体属于哪种类型（**原型链上的都会返回true**）
+
+```js
+console.log('abc' instanceof String);// false 
+console.log( String('abc') instanceof String);// true 
+
+console.log(12 instanceof Number);// false 
+console.log(new Number(12) instanceof Number);// true 
+
+console.log(true instanceof Boolean);// false 
+console.log(new Boolean(true) instanceof Boolean);// true 
+
+console.log({name:'yy'} instanceof Object);// true 
+console.log(new Object({name:'yy'}) instanceof Object);// true 
+
+console.log(['12','123'] instanceof Object);// true 
+console.log(['12','123'] instanceof Array);// true 
+console.log(new Array('12',32) instanceof Object);// true 
+console.log(new Array('12',32) instanceof Array);// true 
+
+console.log(function(){} instanceof Object);// true 
+console.log(function(){} instanceof Function);// true 
+console.log(new Function() instanceof Function);// true 
+
+console.log(new Date() instanceof Object);// true 
+console.log(new RegExp instanceof Object);// true 
+
+console.log(new String('abc') instanceof Object);// true 
+console.log(new Number(12) instanceof Object);// true
+
+console.log(null instanceof Object);  //false
+console.log(undefined instanceof Object);  //false
+console.log(Symbol(2) instanceof Object);  //false
+console.log(BigInt(2) instanceof Object);  //false
+```
+
+
+
+- **xx.constructor === xx**
+
+返回true/false，判断原理：
+
+当一个函数F被定义时，JS引擎会为F添加prototype原型，然后再在prototype上添加一个constructor属性，并让其指向F的引用
+
+具体来说：当 var f = new F() 时，F被当成了构造函数，f是F的实例对象，**此时F原型上的constructor传递到了f上，因此f.constructor === F**
+
+缺点：不可判断Null、Undefined是无效的对象，**没有constructor存在**
+
+constructor 是不稳定的，如创建的对象更改了原型，无法检测到最初的类型
+
+```js
+console.log("abc".constructor===String);  //true
+console.log(new Number(2).constructor===Number);  //true
+console.log([1,2,3].constructor===Array);  //true
+console.log(false.constructor===Boolean);  //true
+console.log(new Function().constructor===Function);  //true
+console.log(new Date().constructor===Date);  //true
+console.log(/abc/.constructor===RegExp);  //true
+
+console.log(document.constructor===HTMLDocument);  //true
+```
+
+- **Object.prototype.toString.call(xx)**
+
+返回“[object type]”（字符串），**能判断所有类型**，万金油方法
+
+判断原理：**JS中的所有对象都是继承自Object对象的**，通过call方法（显式绑定）改变this指向，利用Object.prototype上的原生toString()方法判断数据类型
+
+```js
+console.log(Object.prototype.toString.call(123));  // [object Number]
+console.log(Object.prototype.toString.call("abc"));  //[object String]
+console.log(Object.prototype.toString.call(undefined));  //[object Undefined]
+console.log(Object.prototype.toString.call(null));  //[object Null]
+console.log(Object.prototype.toString.call(false));  //[object Boolean]
+
+console.log(Object.prototype.toString.call(Symbol(2)));  //[object Symbol]
+console.log(Object.prototype.toString.call(100n));  //[object BigInt]
+
+console.log(Object.prototype.toString.call({}));  //[object Object]
+console.log(Object.prototype.toString.call([]));  //[object Array]
+
+console.log(Object.prototype.toString.call(new Date()));  //[object Date]
+console.log(Object.prototype.toString.call(new RegExp("abc","g")));  //[object RegExp]
+
+console.log(Object.prototype.toString.call(function(){}));  //[object Function]
+```
+
+-----
+
+## 1.4 请问===与==有何区别？相等与全等的区别
+
+==：相等(值)
+
+**先转换再比较**（强制转换）
+
+- 有布尔值，把false->0， true->1， 调用Number()方法
+- 字符串 和 数值，字符串转数值 ；调用Number()方法
+- 对象 和 非对象，调用对象的valueOf()和toString()方法把对象转换成基础类型的值再比较，**除Date对象外，会优先尝试使用valueOf()方法**
+- 有一个是NaN， 则返回false。 即使两个都是NaN，也返回false，**因为按照规则，NaN不等于NaN**
+- 两个操作数都是对象，则比较他们是不是同一个对象，如果指向的是同一个对象，则返回ture 因为对象存的是地址值
+- 比较相等性之前， **不能将 null和 undefined转换成其他任何值**
+
+```bash
+> 1==true
+true
+> 2==false
+false
+> 2===true
+false
+> 1=="1"
+true
+> []==""
+true
+
+> []==false
+true
+> []=={}
+false
+> []==[]
+false
+> {}=={}
+false
+> null==undefined
+true
+> 1==NaN
+false
+
+> 0==undefined
+false
+> 0==null
+false
+
+> false==0
+true
+> false==null
+false
+> false==undefined
+false
+
+
+```
+
+**=== ： 全等(类型和值）**
+
+**先判断类型再比较**， 类型不同直接不等，不转换类型
+
+```bash
+> 0===0
+true
+> []===[]
+false
+> 2===2
+true
+```
+
+---
+
+## 1.5 请问你了解js作用域吗？
+
+**1，js作用域**
+
+作用域：在运行时代码中的某些特定部分中变量、函数和对象的**可访问性**。换句话说，作用域决定了代码区块中变量和其他资源的可见性，作用域就是一个独立的地盘，让变量不会外泄、暴露出去。
+
+**作用域最大作用**：隔离变量，不同作用域下同名变量不会有冲突
+
+作用域是分层的，**内层作用域可以访问外层作用域的变量**，反之不行
+
+**2， JavaScript 没有块级作用域（ES6之前）**，只有全局作用域和函数作用域，ES6引入块级作用域（相关知识会在第5章中分析）
+
+全局作用域（浏览器）：window
+
+- 最外层函数 和在最外层函数外面定义的变量拥有全局作用域
+
+- **所有末定义直接赋值的变量自动声明为拥有全局作用域**
+- 所有window对象的属性拥有全局作用域，如window.name、window.location、window.top等
+
+- nodejs 的全局对象：global，**声明全局变量的方式为: global.变量名**
+
+- 在各个模块下都可以直接访问 global 对象
+
+- 一个文件就是一个模块，通过 require 引入模块
+
+
+函数作用域：
+
+- 声明在函数内部的变量
+
+
+**3，作用域链**
+
+当我们需要某个变量的值时，先去它最近的作用域去找，如果找不到，就找它的上级作用域，依次类推，直到找到全局，如全都未定义，那就抛出一个错误，如下代码所示
+
+```js
+var a = 1
+function A(){
+    function B(){
+        console.log(a);
+    }
+    return B();
+}
+A();//1
+
+```
+
+常见面试题：
+
+```js
+var a=10;
+function A(){
+    alert(a);
+};
+function B(){
+    var a=20;
+    A();
+}
+B();//10
+
+```
+
+为什么输出10，而不是20？**js中变量的作用域链与定义时的环境有关，与执行时无关**。调用函数B，B中调用了函数A，函数A里面没定义变量a，函数A只是被B调用且不传参，因此函数A无权使用函数B的局部变量a，而在上方还有一个全局变量a，因此这里输出10
+
+---
+
+## 1.6 请问什么是变量提升？什么是函数提升？
+
+js区别于C、C++、Java语言，在ES6之前，JavaScript没有块级作用域，只有**全局作用域**和**函数作用域**。
+
+这题在面试时尽量用具体代码举例说明
+
+先看下面代码：
+
+```js
+console.log(a);
+
+var a=2;  //undefined
+```
+
+变量 a 在使用前没有先进行声明，会抛出 ReferenceError异常?还是输出 2 ？事实上都不对，正确答案是输出 undefined（已声明未定义值）
+
+这就是一个典型的 **变量提升** 现象
+
+js 实际上会将 var a = 2 看成两个声明： var a和 a = 2。第一个定义声明在**编译阶段**进行，**第二个赋值声明被留在原地等待执行阶段**
+
+因此上面代码会以如下形式进行处理：
+
+```js
+var a; 
+console.log(a); 
+a = 2;
+```
+
+**所有的声明（变量和函数）都会被“移动”到各自作用域的最前端**，这个过程被称为 **变量（函数）提升**
+
+再看一个高频考题：
+
+```js
+var a=true;
+
+foo();  //undefined
+
+function foo(){   //函数声明
+	if (a) {
+		var a=10;
+	}
+	console.log(a);
+}
+```
+
+最终的答案是 undefined，代码实际js执行情况如下：
+
+```js
+function foo() { 	
+    var a; 	
+    if(a) { 		
+    	a = 10; 	
+    } 	
+    console.log(a); 
+} 
+var a;  
+a = true;  
+foo();
+
+```
+
+首先， foo(...) {} 的位置被移到了 foo();的前面，**这是函数发生了提升**，在 foo(...) {} 中，为什么会输出 undefined，而不是10？
+
+原因：**JavaScript 中没有块级作用域，**所以 var a = 10会被 JavaScript 分为两步：var a; **会被提升到函数作用域中的最顶端**，声明了一个局部变量 a，在 foo(...) {} 的函数作用域中，**这个重名局部变量 a 会屏蔽全局变量 a**，换句话说，在对 a 的赋值声明之前，在 foo(...) {}中，a 的值都是 undefined，无法进入 if(a) {...} 中，所以最后打印出来 undefined
+
+注意：在 JavaScript 中，函数有两种方式进行声明，函数声明会被提升，**但函数表达式却不会被提升**
+
+```js
+var a = true; 
+foo();  //TypeError: foo is not a function
+
+var foo = function() { 	//函数表达式
+    if(a) { 		
+    	var a = 10; 	
+	} 	
+	console.log(a); 
+}
+
+```
+
+```js
+var a; 
+var foo；  
+a = true; 
+foo();  
+foo = function() { 
+    if(a) {      
+    	var a = 10;    
+    } 
+    console.log(a); 
+}
+```
+
+当执行到foo()时，foo 还没有赋值（如果它是一个函数声明而不是函数表达式，那么就会赋值）。foo()对 undefined 值进行函数调用而导致非法操作，因此会抛出 TypeError 异常
+
+函数优先：函数声明和变量声明都会被提升。**但函数会首先被提升，然后才是变量提升**
+
+```js
+foo();  // 1
+
+function foo(){  //函数声明
+	console.log("1");
+}
+
+foo();  // 1
+
+var foo = function() { 	//函数表达式
+	console.log("2"); 
+}
+
+
+foo();  //2
+```
+
+输出 1 而不是 2！这段代码片段会被引擎理解为：
+
+```js
+function foo() { 	
+    console.log('1'); 
+}  
+var foo;
+foo();  
+foo = function() {
+ 	console.log('2'); 
+ }
+```
+
+---
+
+## 1.7 请问js有哪些常见报错类型？它们有什么区别？
+
+在js中常有6种错误类型：TypeError、ReferenceError、SyntaxError、RangeError、EvalError、URIError。其中 TypeError 和 ReferenceError 日常开发会经常碰到。
+
+**TypeError：**类型错误(调用不存在的方法)，变量或参数不是预期类型时发生的错误
+
+```js
+var a;
+
+console.log(a.b); //TypeError: Cannot read properties of undefined (reading 'b')
+```
+
+变量 a 存在，但a的b属性不存在
+
+**ReferenceError：**引用错误(要用的变量没找到)
+
+```js
+console.log(b)  //ReferenceError: b is not defined
+```
+
+对 b 进行 **RHS**查询，在所有嵌套作用域中遍寻不到变量
+
+**SyntaxError：**语法错误（给关键字赋值、变量名不符合规范）
+
+```js
+//var 1;  //SyntaxError: Unexpected number
+
+function=1;  //SyntaxError: Unexpected token '='
+```
+
+**RangeError：**范围错误(参数超范围)，主要有：数组长度为负数、Number对象的方法参数超出范围、函数堆栈超过最大值
+
+```js
+// 1、数组长度为负数
+[].length = -5      // Uncaught RangeError: Invalid array length
+
+// 2、Number对象的方法参数超出范围
+var num = new Number(12.34)
+console.log(num.toFixed(-1))   //RangeError: toFixed() digits argument must be between 0 and 100    at Number.toFixed (<anonymous>)
+
+```
+
+**EvalError：**非法调用 eval()，eval()函数没有被正确执行
+
+```js
+var myEval = eval;
+myEval("alert('call eval')");
+// 需要注意的是：ES5以上的JavaScript中已经不再抛出该错误，但依然可以通过new关键字来自定义该类型的错误提示。
+
+new Error([message[fileName[lineNumber]]])
+// 第一个参数是错误提示信息，第二个是文件名，第三个是行号。
+
+```
+
+**URIError：**URI不合法，相关函数的参数不正确。
+
+```js
+decodeURI("%")     // URIError: URI malformed
+```
+
+---
+
+### **1、什么是LHS和RHS查询？**
+
+如上所说，对于var a = 2， js引擎会将它分为两步完成：var a 和 a = 2
+
+变量的赋值操作会执行两个动作：首先编译器会在当前作用域中声明一个变量（如果之前没有声明过），然后在运行时引擎会在引用域中查找该变量，如果能够找到就会对它赋值
+
+LHS和RHS就是js对变量的两种查找操作， 查找的过程是由作用域（词法作用域）进行协助，在编译的第二步中执行
+
+LHS（Left-hand Side）和RHS（Right-hand Side）通常是指**等号（赋值运算）**的**左右边的查询**，但并不一定意味就是"="的左侧和右侧，赋值操作还有其他几种形式，因此在概念上最好将其理解为：**“赋值操作的目标是谁**（LHS）”以及“**谁是赋值操作的源头**（RHS）”
+
+可以参考下面代码加以理解：
+
+```js
+function foo(a) { 	
+    var b = a; 	
+    return a + b; 
+}  
+var c = foo(2);
+```
+
+代码中一共有3个LHS查询和4个RHS查询
+
+LHS：
+
+```
+第2、5行中的b = ...、c = ...，变量在赋值操作的左边，对 b、c 需要 LHS 查询
+
+第5行调用 foo(2) 时，需要将实参2赋值给形参a，所以对 a 需要 LHS 查询
+```
+
+RHS：
+
+```
+第2行 b = a， a 在赋值操作的右边，需要知道 a的值，对 a 需要 RHS 查询
+
+第3行 reutrn a + b， 需要知道 a 和 b 的值， 分别对 a 和 b 都进行 RHS 查询
+
+第6行 c = foo(2)，foo(2) 在赋值操作的右边，需要知道 foo(2)的值，对 foo(2) 需要 RHS 查询
+```
+
+当**RHS****查询不成功**时：会抛出 ReferenceError异常
+
+当**LHS查询不成功**时：会自动隐式地创建一个全局变量（非严格模式下），该变量使用LHS查询的目标作为标识符，或者抛出 ReferenceError 异常（严格模式下）
+
+---
+
+## 2.1 请问你了解js中的闭包吗？
+
+概念一：闭包是指有权访问另一个函数作用域中的变量的函数（概念出自《JavaScript高级程序设计》）
+
+概念二：一个函数和对其周围状态（词法环境）的引用捆绑在一起（或者说函数被引用包围），这样的组合就是闭包，也就是说，闭包让你可以在一个内层函数中访问到其外层函数的作用域。（概念出自MDN）
+
+可以简单理解为：闭包就是一个函数，一个外部函数通过调用函数并return返回出内部函数，此内部函数就是一个闭包
+
+js作用域只能函数内部向外层访问，闭包就是将函数内部和函数外部连接起来的一座桥梁，能够在函数外部访问到函数内部作用域的局部变量的函数
+
+```js
+function f1(){
+	var n=10;
+	function f2(){  //f2函数就是闭包
+		console.log(n);  
+	}
+	return f2;  //重点在这里，将闭包函数作为返回值，做到f1能访问到f2的内部局部变量
+}
+
+var result=f1();
+result();  //10
+```
+
+此时f2函数形成了一个闭包，因f2函数里需要访问f1作用域下的n变量，但他们不处于同一个作用域，故两者相互牵引，需要输出n，f1中的变量n就必须存在，作用域链在f1中找到n，输出n时，垃圾回收机制会认为f2还没有执行完成，但此时作用域链查找已经到了f1作用域下，所以n的内存空间不会被垃圾回收机制清除
+
+闭包**优点**：
+
+- 可以读取函数内部的变量
+- 延长局部变量寿命，不被垃圾回收机制销毁
+- 封装变量（模仿块级作用域）
+
+高频考题：
+
+```js
+for(var i=0;i<5;i++){
+      setTimeout(function(){
+            console.log(i); //输出5个5
+      });
+} 
+```
+
+预期应该是输出0、1、2、3、4，但实际是输出5个5，因为setTimeout事件是被异步触发的，当事件被触发的时候，for循环早已经结束
+
+可利用闭包解决该问题：将每次循环的i值封闭起来， 当沿着作用域链从内到外查找变量i时，会先找到被封闭在闭包环境中的i
+
+```js
+//1、在setTimeout外部创建一个自执行函数，并将i当作参数传递进闭包
+for(var i=0;i<5;i++){
+    (function(num){
+        setTimeout(function(){
+            console.log(num);   // 输出0，1，2，3，4         
+        }, num*1000);
+      }
+    )(i)
+}
+
+//2、在setTimeout内部函数创建一个闭包，并将i当作参数传递进去
+for(var i=0;i<5;i++){
+        setTimeout(function(num){
+            return function(){ //用匿名函数打造一个num变量副本
+            	console.log(num);   // 输出0，1，2，3，4 
+            }
+        }(i), i*1000);
+} 
+```
+
+**闭包缺点：**
+
+- 闭包会导致变量不会被垃圾回收机制所清除，会大量消耗内存
+- 使用不恰当可能会造成**内存泄漏**的问题
+
+**避免闭包引起的内存泄漏**：
+
+1、在退出函数之前，将不使用的局部变量全部删除或者赋值为null
+
+将变量设置为null：切断变量与它此前引用的值之间的连接，当垃圾回收器下次运行时，会删除这些值并回收它们占用的内存
+
+2、避免变量的循环赋值和引用
+
+----
+
+## 2.2 请问js垃圾回收机制是什么工作原理？
+
+js语言有 自动垃圾回收机制，执行环境会管理 代码执行过程中使用的内存，垃圾收集器会定期（周期性）找出不再继续使用的变量，然后释放其内存
+
+不再使用的变量：**生命周期结束的变量**（局部变量），**全局变量的生命周期直至浏览器卸载页面才会结束**
+
+**栈内存 垃圾回收：**
+
+栈内存中的垃圾回收其实就是**销毁执行栈中的执行上下文**，**栈顶**就是正在执行函数的执行上下文， 当函数执行完毕后，执行栈中对应的执行上下文会被销毁
+
+**ESP** 是执行栈中用来记录当前执行状态的指针， 当执行完一行后**，ESP 指针下移**，即**该行对应的上下文被回收**。 可理解为js引擎就是通过ESP指针的下移操作完成栈内存中的垃圾回收
+
+**堆内存 垃圾回收：**
+
+js中堆内存的垃圾回收主要建立在 代际假说 和 分代收集 两个概念上
+
+**代际假说：**
+
+- 大部分对象的存活时间都很短，分配完内存以后很快就变得不可访问
+- “不死”的对象，存活时间都很长
+
+**分代收集：**
+
+- 堆内存分为 新生代 和 老生代 两个区域
+- **新生代**区域：存放的都是存活时间比较短，占内存比较小的对象
+- **老生代**区域：存放的都是存活时间比较长，占内存比较大的对象
+
+**主垃圾回收器和副垃圾回收器：**
+
+新生代区域：副垃圾回收器
+
+老生代区域：主垃圾回收器
+
+这两个垃圾回收器的大致工作流程是相同的，可以简化为三步：
+
+（1）、标记待回收的内存
+
+（2）、垃圾内存回收
+
+（3）、内存碎片整理（频繁的垃圾回收后，会产生很多不连续的内存空间，不利于后续数据的存储）
+
+副垃圾回收器 工作流程
+
+主要是对**新生代区域**进行垃圾回收，新生代区域的内存空间比较小，大约是 1~8M
+
+采用的是 Scavenge 算法 进行垃圾回收，主要是将新生代区域 分成两部分：**空闲区域** 和**对象区域**， Scavenge 算法具体工作流程：
+
+（1）、所有进入新生代区域新产生的对象都会存放到对象区域中
+
+（2）、当对象区域被写满的时候会进行垃圾回收
+
+（3）、垃圾回收器会标记垃圾数据（使用“标记清除算法”）
+
+（4）、标记完成后对象区域会**将有效数据按照一定顺序存放到空闲区域的一端**
+
+（5）、存放好后，对象区域和空闲区域会角色互换
+
+（6）、清空当前的空闲区域的内存空间
+
+其中，因为是对象区域的有效数据按照一定顺序放到了空闲区域中，所以也顺便完成内存碎片的整理
+
+注意：新生代区域的空间很小，经常很快被填满，js有一个对象晋升策略解决这种情况：
+
+对象晋升策略规定**：两次垃圾回收还存活的对象就会被移动到老生代区域**
+
+**主垃圾回收器 工作流程**
+
+对老生代区域进行垃圾回收，老生代区域的内存空间要大很多，用 Scavenge算法 效率明要低很多，还是按照以下三步进行垃圾回收：
+
+（1）、通过标记清除算法，标记垃圾数据
+
+（2）、标记垃圾数据后，主垃圾回收器开始进行垃圾回收，**把可回收对象加入到空闲列表中**
+
+（3）、 剩下就是内存碎片整理，主垃圾回收器会将存活的对象移动到一端，然后清理掉边界以外的内存
+
+---
+
+### **1、什么是标记清除算法与引用计数算法？**
+
+两算法都是针对垃圾数据标记的
+
+**标记清除：**js中**最常用**的垃圾回收方式，当变量进入环境时，（一般是在函数中声明一个变量），将这个变量标记为“进入环境”。而当变量离开环境时，则将其标记为“离开环境”。**逻辑上讲，永远不能回收 进入环境的变量 所占用的内存，因为当执行流进入相应的环境，就可能会用到它们**
+
+```js
+function test(){
+    var a =10;//被标记 ，进入环境
+    var b =20;//被标记 ，进入环境
+}
+test();//执行完毕 之后 a、b又被标离开环境，被回收
+```
+
+**引用计数：**跟踪记录每个值被引用的次数。当声明了一个变量并将一个引用类型值赋给该变量时，这个值的引用次数是1；若同一个值又被赋给另一个变量，则该值的引用次数再加1。相反，如果包含对这个值引用的变量又取得了另外一个值，则这个值的引用次数减1
+
+当这个值的**引用次数变成0时**，则表示没有办法再访问这个值了，其占用的内存空间可回收
+
+```js
+function test(){
+    var a ={};//a的引用次数为0
+    var b = a ;//a的引用次数加1，为1 
+    var c = a;//a的引用次数再加1，为2
+    var b ={};//a的引用次数减1，为1
+}
+```
+
+注意：引用计数算法是js早期的垃圾标记算法，现在几乎不怎么用，该算法存在一个问题：**无法应对互相引用的情况**，当两个对象互相引用时，就会永远无法被回收，从而造成内存泄漏。 基于这个问题，后来提出了标记-清除算法
+
+---
+
+## 2.3 请问js有哪几种常见的内存泄露情况？
+
+**1、闭包**
+
+闭包可以延长局部变量寿命，若使用不当则会导致内存泄露
+
+**2、意外的全局变量**
+
+js中如果不用var声明变量，该变量将被视为window对象(全局对象)的属性，也就是全局变量，**目前开发场景中：主要还是使用let和const较多**
+
+```js
+function foo(arg) {
+    bar = "this is a hidden global variable";
+}
+function foo(arg) {
+    window.bar = "this is an explicit global variable";
+}
+```
+
+上面代码中两个函数是等价的，**调用完函数后，变量仍然存在，会导致泄漏**
+
+如果不注意this的话，也可能发生内存泄露：
+
+```js
+function foo() {
+    this.variable = "potential accidental global";
+}
+foo();// 没有对象调用foo, 也没有给它绑定this, 所以this是window
+```
+
+解决办法：加上“use strict”，**启用严格模式来避免**，**严格模式会组织创建意外的全局变量**
+
+**3、被遗忘的定时器或者回调**
+
+```js
+var someResource = getData();
+setInterval(function() {
+    var node = document.getElementById('Node');
+    if(node) {
+        node.innerHTML = JSON.stringify(someResource));
+    }
+}, 1000);
+```
+
+如上代码，**若id为Node的元素从DOM中被移除，但定时器仍会存在**，因为回调函数中包含对someResource的引用，定时器外面的someResource也不会被释放
+
+**4、没有清理的DOM元素引用**
+
+```js
+var elements = {
+    button: document.getElementById('button'),
+    image: document.getElementById('image'),
+    text: document.getElementById('text')
+};
+function doStuff() {
+    image.src = 'http://some.url/image';
+    button.click();
+    console.log(text.innerHTML);
+}
+function removeButton(){
+	document.body.removeChild(document.getElementById('button'));
+}
+```
+
+虽用removeChild移除了button，但是还在elements对象里保存着button的引用，DOM元素还在内存里面
+
+---
+
+## 2.4 请问你了解js的原型链吗？
+
+与其他面向对象语言不同，ES6之前js没有引入类（class）的概念，js并非通过类而是直接通过构造函数来创建实例
+
+**构造函数与实例原型**
+
+在js中，每当定义一个函数(普通函数、类)时候，都会天生自带一个prototype属性，这个属性**指向函数的原型对象**，并且这个属性是一个对象数据类型的值
+
+![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632988937142/6792CAEEBFCDBCFC9E66B7976460013F)
+
+
+
+原型对象可看作一个公共的区域，**所有同一个类的实例都可以访问到原型对象**，可将对象都有的内容，统一设置到原型对象中
+
+`__proto__`
+
+**每个对象**(除null外)都会有`__proto__`属性，这个属性会指向该对象的原型
+
+注意：`__proto__ `是 ES 标准中 [[proto]] 指针，**不建议在代码中直接编写` proto `属性**，应该通过 **Object.getPrototypeOf(）**来获取原型
+
+**`person.__proto__ === Person.prototype `![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632988972481/CE5C7C6471A9A7C318E42BC23AE5A324)**
+
+
+
+**constructor**
+
+**每个原型都有一个constructor属性**，**指向该关联的构造函数**
+
+![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632988988342/C2935E207F25D2B293E277867849672F)
+
+**原型链**
+
+在JavaScript中万物都是对象，对象和对象之间也有关系，并不是孤立存在的。对象之间的继承关系，在JavaScript中是通过prototype对象指向父类对象，直到指向Object对象为止，这样就形成了一个原型指向的链条，专业术语称之为**原型链**
+
+注意：Object是js中所有**对象数据类型**的基类（最顶层的类），Object.prototype 没有原型，（`Object.prototype.__proto__ `的值为 null）
+
+```js
+console.log(Object.prototype);  // [Object: null proto
+console.log(Object.prototype.__proto__);  // null
+
+let a = 1;
+console.log(a.__proto__);  // {}
+```
+
+像下图中：person → Person → Object ，普通人继承人类，人类继承对象类
+
+当访问**对象的一个属性或方法时**，会先在对象自身中寻找，如果有则直接使用，**如果没有则会去原型对象中寻找**，如果找到则直接使用。如果没有则去原型的原型中寻找，直到找到Object对象的原型，Object对象的原型没有原型，如果在Object原型中依然没有找到，则返回undefined
+
+![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632989014554/847EB5079F1C884C1E9B01D4CDD52E60)
+
+
+
+看一道经典面试题：
+
+```js
+var F=function(){}
+
+Object.prototype.a=function(){
+	console.log("a()");
+}
+
+Function.prototype.b=function(){
+	console.log("b()")
+}
+
+var f=new F();
+
+F.a();  //a()
+F.b();  //b()
+f.a();  //a()
+f.b();  //TypeError: f.b is not a function
+```
+
+这道题有几个考点：1、原型与原型链 2、实例对象、构造函数、Object、Function的关系
+
+代码分析：F是个构造函数，而f是构造函数F的一个实例
+
+有：
+
+```js
+console.log(F instanceof Object);  //true
+console.log(F instanceof Function);  //true
+```
+
+F是Object 和 Function两个的实例，即F既能访问到a，也能访问到b
+
+故：F.a() 输出 a()   F.b()  输出  b()
+
+
+
+对于f，并不是Function的实例，**因为它本来就不是构造函数**，只能访问Object原型链
+
+有：
+
+```js
+console.log(f instanceof Object);  //true
+console.log(f instanceof Function);  //false
+```
+
+故：f.a() 输出  a() f.b()报错
+
+具体分析下，它们是如何在原型链上查找的：
+
+**F.a() 查找路径：**
+
+F自身：没有 → `F.__proto__`(Function.prototype)：没有 → `F.__proto__.__proto__`(Object.prototype)：输出 a()
+
+```js
+console.log(F.__proto__);  //{ b: [Function (anonymous)] }
+console.log(F.__proto__.__proto__);  //[Object: null prototype] { a: [Function (anonymous)] }
+```
+
+**F.b() 查找路径：**
+
+F自身：没有 → `F.__proto__`(Function.prototype)：b()
+
+**f.a的查找路径：**
+
+f自身：没有 → `f.__proto__`(Object.prototype)：输出a()
+
+```js
+console.log(Object.getPrototypeOf(f));  //{}
+console.log(f.__proto__.__proto__);  //[Object: null prototype] { a: [Function (anonymous)] }
+```
+
+**f.b的查找路径：**
+
+f自身：没有 → `f.__proto`__(Object.prototype)：没有 → f.`__proto__.__proto__ `(Object.prototype.`__proto__`)：找不到，所以报错
+
+---
+
+## 2.5 请问js有哪些继承方式？
+
+js常用继承方式主要有6种：原型链继承、构造函数继承、组合继承、原型式继承、寄生式继承、寄生组合式继承
+
+创造一个超类型的构造函数Super()，为它设置静态属性name、原型链方法getSuper()
+
+```js
+function Super(){
+    this.name =["super"];
+}
+Super.prototype.getSuper = function(){
+    return this.name;
+}
+```
+
+再创造一个子类构造函数Sub()，使用以上6种继承方法让Sub()继承Super()
+
+```js
+function Sub(){
+    
+}
+```
+
+---
+
+### 1. 原型链继承
+
+（将 子类的原型对象 指向 超类型的实例）**函数式继承**
+
+```js
+function Super(){
+	this.name=["super"];
+}
+Super.prototype.getSuper=function(){
+	return this.name;
+}
+
+function Sub(){
+
+}
+
+Sub.prototype=new Super();  //将Sub的原型对象Sub.prototype指向Super的实例
+
+var sub1=new Sub();  //创建Sub的实例sub1
+sub1.name.push("sub1");
+
+console.log(sub1.getSuper());  // [ 'super', 'sub1' ]
+
+var sub2=new Sub();  //创建Sub的实例sub2
+sub2.name.push("sub2");
+
+console.log(sub2.getSuper());  //[ 'super', 'sub1', 'sub2' ]
+```
+
+这样可以在Sub中继承 Super的属性name 以及 原型链方法getSuper，然而在sub1中修改name时，sub2的name也会受到影响
+
+这种继承方式的**缺点**是：
+
+（1）所有实例共享 超类中的属性
+
+（2）子类的实例 不能向超类型构造函数传参
+
+---
+
+### 2.构造函数继承
+
+（子类中使用call调用超类）**函数式继承**
+
+```js
+function Super(name){
+	this.name=name;
+}
+Super.prototype.getSuper=function(){
+	return this.name;
+}
+
+function Sub(name){
+	Super.call(this,name);  //在Sub中使用call去调用Super
+}
+
+
+var sub1=new Sub("sub1");  //创建Sub的实例sub1,
+
+//console.log(sub1.getSuper());  //(不能继承原型链方法）TypeError: sub1.getSuper is not a function
+console.log(sub1.name);  //  sub1
+
+var sub2=new Sub();  //创建Sub的实例sub2
+
+//console.log(sub2.getSuper());  //(不能继承原型链方法）TypeError: sub2.getSuper is not a function
+console.log(sub2.name);  //undefined
+
+var sup1=new Super();
+console.log(sup1.getSuper());  //undefined
+```
+
+在Sub中用call调用Super，继承了Super的所有静态属性。在实例sub1、sub2中，各自对name的修改也互不影响，**实现了属性不共享，子类的实例也能向超类型构造函数传参**  
+
+这种继承方式的**缺点**是：
+
+（1）、不能继承原型链方法
+
+---
+
+### 3.组合继承
+
+（原型链继承+构造函数继承）函数式继承
+
+```js
+function Super(name){
+	this.name=name;
+}
+Super.prototype.getSuper=function(){
+	return this.name;
+}
+
+function Sub(name){
+	Super.call(this,name);  //第二次调用，构造函数继承
+}
+
+Sub.prototype=new Super();  //第一次调用，原型链继承
+Sub.prototype.constructor=Sub;
+
+var sub1=new Sub("sub1");  //创建Sub的实例sub1,
+
+console.log(sub1.getSuper());  //sub1
+console.log(sub1.name);  //  sub1
+console.log(sub1 instanceof Sub);  // true
+console.log(sub1 instanceof Super);  // true
+
+var sub2=new Sub("sub2");  //创建Sub的实例sub2
+
+console.log(sub2.getSuper());  // sub2
+console.log(sub2.name);  //sub2
+
+```
+
+在子类Sub中，使用 call继承超类型的属性 + 原型链继承原型链的方法和属性，弥补了上面两种继承方式的三个缺点
+
+这种继承方式的**缺点**是：
+
+（1）、调用了两次超类型的构造函数
+
+第一次：Sub.prototype = new Super()，调用一次超类型构造函数
+
+第二次：Sub内使用call方法，又调用了一次超类型构造函数，且之后每次实例化子类sub1、sub2...的过程中（ new Sub() ），都会调用超类型构造函数
+
+---
+
+### 4.原型式继承
+
+创造了一个 临时的构造函数F，将 F的原型 指向传进来的对象参数，再返回F的实例）
+
+```js
+function object(o){
+	function F(){}
+	F.prototype=o;
+	return new F();
+}
+
+var person={
+	name:"js",
+	friends:["css","ts"]
+}
+
+var people1=object(person);
+// var people1 = Object.create(person);在传入一个参数的情况下，Object.create()和object()相同
+people1.name="python";
+people1.friends.push("pip");
+
+console.log(people1.name);  //python
+console.log(people1.friends);  //[ 'css', 'ts', 'pip' ]
+
+var people2=object(person);
+people2.name="java";
+people2.friends.push("jar");
+
+console.log(people2.friends);  //[ 'css', 'ts', 'pip', 'jar' ]
+
+console.log(person.name);  //js
+console.log(person.friends);  //[ 'css', 'ts', 'pip', 'jar' ]
+```
+
+原型式继承和原型链继承类似，区别：前者是完成了一次对 对象的浅拷贝，**后者是对构造函数进行继承**
+
+**缺点**也是一致的：属性会被共享
+
+---
+
+### 5.寄生式继承
+
+（基于原型式继承的封装）
+
+```js
+function object(o){
+	function F(){}
+	F.prototype=o;
+	return new F();
+}
+
+function createAnother(o){
+	var clone=object(o);
+	clone.sayHi=function(){
+		console.log("hi");
+	}
+	return clone;
+}
+
+var person={
+	name:"js",
+	friends:["css","ts"]
+}
+
+var people1=createAnother(person);
+// var people1 = Object.create(person);在传入一个参数的情况下，Object.create()和object()相同
+people1.name="python";
+people1.friends.push("pip");
+
+console.log(people1.name);  //python
+console.log(people1.friends);  //[ 'css', 'ts', 'pip' ]
+
+var people2=createAnother(person);
+people2.name="java";
+people2.friends.push("jar");
+
+console.log(people2.friends);  //[ 'css', 'ts', 'pip', 'jar' ]
+
+people1.sayHi();  // hi
+people2.sayHi();  // hi
+```
+
+此方法使用较少，本质上可以通过寄生式继承 **实现子类方法sayHi的复用**，后面通过createAnother()创造出来的对象，都拥有sayHi方法
+
+---
+
+### 6.寄生组合式继承
+
+在组合继承中，**若需要优化一次调用，那一定是第一次调用**：原型链继承，利用原型式继承便可实现
+
+Sub.prototype = new Super()，实质上就是一次对超类型原型对象的拷贝
+
+```js
+function object(o){
+	function F(){}
+	F.prototype=o;
+	return new F();
+}
+
+function inheritPrototype(subType,superType){
+	//复制超类型的原型对象
+	var clone=object(superType.prototype);
+	//将构造函数指向子类型
+	clone.constructor=subType;
+	subType.prototype=clone;
+}
+
+function Super(name){
+	this.name=name;
+}
+Super.prototype.getSuper=function(){
+	return this.name;
+}
+
+function Sub(name){
+	Super.call(this,name);  //第二次调用，构造函数继承
+}
+
+
+// 优化前：
+// Sub.prototype = new Super();        //第一次调用
+// Sub.prototype.constructor = Sub;
+// 优化后：
+inheritPrototype(Sub,Super);
+
+var sub1=new Sub("sub1");  //创建Sub的实例sub1,
+
+console.log(sub1.getSuper());  //sub1
+console.log(sub1.name);  //  sub1
+console.log(sub1 instanceof Sub);  // true
+console.log(sub1 instanceof Super);  // true
+
+var sub2=new Sub("sub2");  //创建Sub的实例sub2
+
+console.log(sub2.getSuper());  // sub2
+console.log(sub2.name);  //sub2
+```
+
+子类对超类型的原型对象的继承，分为以下几个步骤：
+
+（1）、封装一个 inheritPrototype 函数
+
+（2）、利用object（或Object.create()）复制出超类型的原型对象
+
+（3）、将原型对象的构造函数指向自身（把名字改成自己的：clone.constructor = subType，**constructor相当于一张身份证，身份证上的名字一定得是自己）**
+
+（4）、将拷贝出来的对象传递给子类的原型对象
+
+结合性记忆：原型链继承+构造函数继承 = 组合继承；为了优化: 组合继承→原型式继承→寄生式继承→寄生组合式继承
+
+---
+
+## 2.6 请问js在new过程中到底做了什么？
+
+在js日常开发中，常new一个构造函数或类得到对应实例，下面代码分别是利用ES5 构造函数与ES6 class类实现一个简单的创建实例
+
+```js
+// ES5 构造函数 
+var Parent = function (name, age) {     
+    this.name = name;     
+    this.age = age; 
+}; 
+Parent.prototype.sayName = function () {           
+    console.log(this.name); 
+}; 
+var child = new Parent('echo', 26); 
+child.sayName() //echo
+
+//ES6 class类
+class Parent {     
+    constructor(name, age) {         
+        this.name = name;         
+        this.age = age;     
+    }     
+    sayName() {         
+        console.log(this.name);     
+    } 
+}; 
+const child = new Parent('echo', 26); 
+child.sayName() //echo
+```
+
+对于var child = new Parent('echo', 26)，要创建 Parent 的新实例，必须使用 new 操作符，以这种方式调用构造函数有以下几个步骤：
+
+（1）、创建一个新对象，如var child =｛｝
+
+（2）、新对象的`_proto_`属性指向构造函数的原型对象，
+
+（3）、将构造函数的作用域赋给新对象（因此 this 就指向了这个新对象）
+
+（4）、执行构造函数中的代码，将属性添加给child中的this对象
+
+（5）、若构造器没有手动返回对象，则返回第一步创建的对象（新对象child）
+
+通俗理解：在new一个对象时，新对象（新实例）没有prototype属性，所以把prototype属性赋值给新对象的`_proto_`属性
+
+**`new`** 关键字会进行如下的操作：
+
+1. 创建一个空的简单JavaScript对象（即`{}`）；
+2. 为步骤1新创建的对象添加属性`__proto__`，将该属性链接至构造函数的原型对象 ；
+3. 将步骤1新创建的对象作为`this`的上下文 ；
+4. 如果该函数没有返回对象，则返回`this`。
+
+---
+
+## 2.7 请问如何js原生方法实现new方法？
+
+可根据上题中的new()操作步骤加以理解性记忆，下面是参考代码：
+
+```js
+//定义 new 方法
+let newMethod = function(Parent, ...rest){
+
+	// 1.以构造器的prototype属性为原型，创建新对象；
+	let newObj = Object.create(Parent.prototype);
+
+	// 2.将this和调用参数传给构造器执行
+	let result = Parent.apply(newObj, rest);
+
+	// 3.如果构造器没有手动返回对象，则返回第一步的对象（4）
+	return typeof result==="object" ? result : newObj;
+};
+
+function Person(name,age){
+	this.name=name;
+	this.age=age;
+}
+
+let person=newMethod(Person,"kop",66);
+console.log(person.name);  // kop
+console.log(person.age);  //66
+```
+
+---
+
+## 3.1 请问你了解js中的this绑定机制吗？
+
+this特点：
+
+1. this是js的关键字之一，**它是对象自动生成的一个内部对象**，只能在对象内部使用
+2. 随着使用场合的不同，this的值会发生变化，并不是一成不变的
+3. this指向完全取决于：**什么地方以什么方式调用**，而不是 创建时
+
+this 4种绑定机制：默认绑定、隐式绑定、显示绑定、new绑定，箭头函数的this不适用于这4种绑定机制，需要单独分析，将会在后续ES6新特性章节中做重点分析
+
+### 1.默认绑定
+
+（函数调用时无任何调用前缀的情景）  没有其他绑定规则存在时的默认规则，**也是函数调用中最常见情况**
+
+```js
+function fn1(){
+  let fn2=function(){
+    console.log(this);  //Window
+    fn3();
+  };
+  console.log(this);  //Window
+  fn2();
+};
+
+function fn3(){
+  console.log(this);  //Window
+};
+
+fn1();
+
+/*
+<ref *1> Object [global] {
+  global: [Circular *1],
+  clearInterval: [Function: clearInterval],
+  clearTimeout: [Function: clearTimeout],
+  setInterval: [Function: setInterval],
+  setTimeout: [Function: setTimeout] {
+    [Symbol(nodejs.util.promisify.custom)]: [Getter]
+  },
+  queueMicrotask: [Function: queueMicrotask],
+  performance: Performance {
+    nodeTiming: PerformanceNodeTiming {
+      name: 'node',
+      entryType: 'node',
+      startTime: 0,
+      duration: 107.68200016021729,
+      nodeStart: 0.7476000785827637,
+      v8Start: 7.08810019493103,
+      bootstrapComplete: 55.69720005989075,
+      environment: 25.186300039291382,
+      loopStart: -1,
+      loopExit: -1,
+      idleTime: 0
+    },
+    timeOrigin: 1652074920565.308
+  },
+  clearImmediate: [Function: clearImmediate],
+  setImmediate: [Function: setImmediate] {
+    [Symbol(nodejs.util.promisify.custom)]: [Getter]
+  }
+}
+*/
+```
+
+代码中无论函数声明在哪，在哪调用，**由于函数调用时前面并未指定任何对象，这种情况下this指向全局对象window**
+
+注意：在严格模式下（use strict），全局对象将无法使用默认绑定，会报undefined错误
+
+```js
+function fn1(){
+  console.log(this);  //Window
+  console.log(this.a);  // 1
+}
+
+function fn2(){
+  "use strict";
+  console.log(this);  //undefined
+  console.log(this.a);  // Uncaught TypeError: Cannot read properties of undefined (reading 'a')
+}
+
+var a=1;
+
+fn1();
+fn2();
+
+```
+
+### 2.隐式绑定
+
+在函数调用时，前面存在调用它的对象，即函数的调用是在该对象上触发的，**调用位置上存在上下文对象，那this就会隐式绑定到该对象上**
+
+```js
+function foo(){
+	console.log(this.a);
+}
+
+var a=2;
+var obj={
+	a:3,
+	foo:foo
+};
+
+obj.foo();  // 3
+```
+
+代码中foo函数被当做引用属性，被添加到obj对象上。调用过程：获取obj.foo属性→ 根据引用关系找到foo函数，执行调用
+
+这里对foo的调用存在上下文对象obj，**this进行了隐式绑定，即this绑定到了obj上，this.a被解析成了obj.a**
+
+多层调用链（面试高频考题）（函数调用前存在多个对象，**this指向距离调用自己最近的对象**）
+
+```js
+function foo(){
+	console.log(this.a);
+}
+
+var a=2;
+
+var obj1={
+	a:4,
+	foo:foo
+};
+
+var obj3 = {
+	b:10,
+	foo: foo
+}
+
+var obj2={
+	a:3,
+	obj1:obj1,
+	obj3: obj3,
+	foo:foo
+};
+
+
+foo();  // 2
+obj1.foo();  // 4
+obj2.foo();  // 3
+obj2.obj1.foo();  //4
+
+obj2.obj3.foo();  // undefined
+```
+
+代码中调用链不只一层，存在obj1、obj2两个对象，先获取obj2.obj1→通过引用获取到obj1对象，再访问 obj1.foo →最后执行foo函数调用，获取最后一层调用的上下文对象，即obj1，所以结果是4（obj1.a）
+
+#### 隐式丢失
+
+在一些特殊情况下，**会存在隐式绑定丢失问题**，最常见：参数传递、变量赋值
+
+**参数传递**
+
+```js
+function foo(){
+	console.log(this.a);
+}
+
+function fn1(param){
+	param();
+}
+
+var a=2;
+
+var obj1={
+	a:4,
+	foo:foo
+};
+
+fn1(obj1.foo);  // 2
+```
+
+代码中将 obj.foo 作为参数传递进 fn1 中执行，**只是单纯地传递了一个函数而已**，this并没有跟函数绑在一起，**发生了隐式丢失**，this依旧指向window
+
+**变量赋值（本质上与传参相同）**
+
+```js
+function foo(){
+  console.log(this.a);
+}
+
+var a=2;
+
+var obj1={
+  a:4,
+  foo:foo
+};
+
+let fn1=obj1.foo;
+fn1();  // 2
+
+```
+
+### 3.显式绑定（call、apply、bind）
+
+```js
+function foo(){
+	console.log(this.a);
+}
+
+var a=4;
+
+let obj1={
+	a:1,
+};
+let obj2={
+	a:2,
+};
+let obj3={
+	a:3,
+};
+
+foo();  // 4
+foo.call(obj1);  // 1
+foo.apply(obj2);  // 2
+
+foo.bind(obj3)();  // 3
+
+foo.apply(null);  // 4
+foo.apply(undefined);  // 4
+foo.bind(null)();  // 4
+foo.bind(undefined)();  // 4
+```
+
+代码中，我们分别通过call、apply、bind改变了函数fn的this指向
+
+通常，js中调用一个函数时（函数调用），函数处于一个被动的状态，**而call与apply让函数从被动变主动**，函数能主动选择自己的上下文，这种写法又称之为**函数应用**
+
+注意：若使用函数应用的方法改变this指向时，**指向参数是null或者undefined，那么 this 将指向全局对象**
+
+### 4.new 绑定
+
+```js
+function Fn(){
+	this.a=1;
+}
+
+let obj=new Fn();
+
+console.log(obj.a);  // 1
+```
+
+代码中，构造函数调用创建了一个新对象obj，而在函数体内，this将指向新对象obj上（可以抽象理解为新对象就是this）
+
+---
+
+**this绑定优先级**
+
+如果一个函数调用存在多种绑定方法，this最终指向是什么呢？this绑定优先级为：
+
+显式绑定 > 隐式绑定 > 默认绑定
+
+new绑定 > 隐式绑定 > 默认绑定
+
+注意：**不存在显式绑定和new绑定同时生效的场景**，若同时写会直接报错
+
+---
+
+### **1、作用域链与原型链有什么区别？**
+
+作用域链：当**访问一个变量**时，首先在当前作用域查找标识符，如果没有找到就去**父作用域**找，作用域链**顶端**是全局对象window，如果window都没有这个变量则**报错**
+
+原型链：当**在对象上访问某属性**时，首先会查找当前对象，如果没有就顺着**原型链**往上找，原型链**顶端**是null，如果全程都没找到则**返回undefined**，而不是报错
+
+---
+
+## 3.2 请问call、apply与bind有什么区别？
+
+call、apply与bind：都能用于改变this绑定
+
+**apply与call：**
+
+都是函数应用，**指定this的同时也会执行函数**，参数传递方式不同
+
+call与apply的绑定**只适用当前调用，调用完毕即失效**，下次要用还得重新绑
+
+**call：**接受一个参数列表，第一个参数指向this，**其余的参数在函数执行时都会作为函数形参传入函数**
+
+**apply：**除了第一个参数作为this指向外，其它参数都被包裹在一个**数组**中，在函数执行时同样会作为形参传入
+
+```js
+let o = {
+    a: 1
+};
+function fn(b, c) {
+    console.log(this.a + b + c);
+};
+// fn.call(this, arg1, arg2, ...);
+fn.call(o, 2, 3); // 6
+// fn.apply(this, [arg1, arg2, ...]);
+fn.apply(o, [2, 3]); // 6
+```
+
+**bind：**
+
+绑定this后**并不会立马执行**，而是**返回一个全新的boundFcuntion绑定函数**
+
+bind属于**硬绑定**，返回的boundFunction的this指向**无法再次**通过bind、apply或 call **修改**
+
+```js
+let obj1={
+	a:1
+}
+let obj2={
+	a:2
+}
+
+function fn(b,c){
+	console.log(this.a + b + c);
+}
+
+let fn1=fn.bind(obj1,2,3);
+
+fn1();  //6
+
+//尝试再次传入形参
+fn1(4,4);  // 6
+
+//尝试改变this
+fn1.call(obj2);  //6
+```
+
+代码中， 当执行fn1时，**本质上等于window.fn1()**，如果this还能被改变，那this岂不是得指向window，那bind方法就毫无意义了
+
+----
+
+## 3.3 请问什么是浅拷贝？什么是深拷贝？两者有何区别？
+
+深拷贝与浅拷贝简单区分方法：假设B复制了A，当修改A时，B是否改变，若B也跟着变化，说明是**浅拷贝**；若B没变化，则是**深拷贝**
+
+注意：一般情况下，**深拷贝只针对较为复杂的object类型数据**
+
+在js中， 分基本数据类型与引用数据类型，这两类数据存储分别是：
+
+**基本数据类型**：名与值都存储在**栈内存**中，例如let a=1：
+
+| 名   | 值   |
+| ---- | ---- |
+| a    | 1    |
+
+当b=a时，b复制了a的值，栈内存会新开辟一个内存给b，例如：
+
+| 名   | 值   |
+| ---- | ---- |
+| a    | 1    |
+| b    | 1    |
+
+当修改a=2时，对b并不会造成影响，因为此时的b具有独立的存储空间，不受a的影响了
+
+----
+
+**引用数据类型**：名存在**栈内存**中，值存在于**堆内存**中，栈内存会提供一个引用的地址指向堆内存中的值
+
+![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632990546361/CED43FA80498C5A06F84AEBC056ECA6F)
+
+当b=a时，其实b复制了a的引用地址，而并非堆内存中的值
+
+![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632990559186/967F55AE7D26B8CCB6590C26CFCDAD2B)
+
+而当a[0]=1时进行数组修改时，由于a与b指向的是同一个地址，自然b也受影响，这就是所谓的浅拷贝
+
+![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632990569165/E829A2CEBAE11215E510B538F34432B5)
+
+----
+
+## 3.4 请问js如何实现深拷贝？
+
+1. 递归复制所有层级属性
+
+   （面试高频撕代码题）
+
+可理解为一层层地复制对象中的属性， 直到值为基础类型，缺点：代码较为复杂
+
+```js
+//使用递归的方式实现数组、对象的深拷贝
+
+function deepClone(obj){
+	//判断要进行深拷贝的是数组还是对象，是数组的话进行数组拷贝，对象的话进行对象拷贝
+	var objClone=Array.isArray(obj) ? [] : {};
+	//进行深拷贝的不能为空，并且是对象
+	if (obj && typeof obj === "object") {
+		for (key in obj){
+			if (obj.hasOwnProperty(key)) {
+				if (obj[key] && typeof obj[key] === "object") {
+					objClone[key]=deepClone(obj[key]);
+				}else{
+					objClone[key]=obj[key];
+				}
+			}
+		}
+	}
+	return objClone;
+}
+
+let obj1={
+	a:1,
+	b:{
+		c:2
+	},
+	d:[3,4,5],
+	e:true
+}
+
+let obj2=deepClone(obj1);
+
+obj2.b.c=66;
+
+console.log(obj1.b.c);  //2
+console.log(obj2.b.c);  //66
+```
+
+2. 借助JSON对象的parse和stringify
+
+利用js的内置对象JSON来进行**数组对象**的深拷贝，缺点：无法实现对象中**方法**的深拷贝
+
+```js
+function deepClone(obj){
+	var _obj=JSON.stringify(obj);
+	var objClone=JSON.parse(_obj);
+	return objClone;
+}
+
+let nums = [1, 2, 3];
+let nums2 = deepClone(nums);
+nums[1] = 4;
+console.log(nums);  //  [ 1, 4, 3 ]
+console.log(nums2);  //  [ 1, 2, 3 ]
+
+let obj = {
+	a: 1,
+	foo : function(){
+		console.log("foo");
+	}
+}
+
+let obj2 = deepClone(obj);
+
+console.log(obj);  //  { a: 1, foo: [Function: foo] }
+console.log(obj2);  //  { a: 1 }
+```
+
+stringify() → JavaScript对象序列化为JSON字符串
+
+parse() → 把JSON字符串解析为原生JavaScript值
+
+3. 通过jQuery的extend方法
+
+```js
+var array = [1,2,3,4];
+var newArray = $.extend(true,[],array);    
+```
+
+4. Object.assign()拷贝
+
+当对象中只有一级属性，没有二级属性的时候，此方法为深拷贝，但是对象中有对象的时候，**此方法，在二级属性以后就是浅拷贝**
+
+```js
+
+let obj1={
+	a:1,
+	b:{
+		c:2
+	},
+	d:[3,4,5],
+	e:true
+}
+
+let obj2=Object.assign({}, obj1);
+
+obj2.b.c=66;
+obj2.a=10;
+
+console.log(obj1.a);  //1
+console.log(obj2.a);  //10
+
+console.log(obj1.b.c);  //66
+console.log(obj2.b.c);  //66
+```
+
+5. lodash函数库
+
+lodash是一个很热门的函数库，可利用lodash.cloneDeep()[实现深拷贝](https://www.lodashjs.com/docs/lodash.cloneDeep#_clonedeepvalue)
+
+```bash
+$ cnpm i lodash --save
+```
+
+
+
+```js
+var _ = require("lodash");
+
+let obj1={
+	a:1,
+	b:{
+		c:2
+	},
+	d:[3,4,5],
+	e:true
+}
+
+let obj2=_.cloneDeep(obj1);
+
+obj2.b.c=66;
+obj2.a=10;
+
+console.log(obj1.a);  //1
+console.log(obj2.a);  //10
+console.log(obj1.b.c);  //2
+console.log(obj2.b.c);  //66
+```
+
+
+
+---
+
+## 3.5 请问js如何判断一个变量是空对象？
+
+**1.for in** 
+
+利用for in 循环遍历对象和对象原型上的**可枚举属性**
+
+缺点：**只能遍历可枚举属性**，若一个对象上只有不可枚举属性的话，会判断错误
+
+```js
+function isEmptyObj(obj){
+	for (let i in obj){
+		return false;  //能遍历，不为空
+	}
+	return true;
+}
+
+let a={};
+let b=[];
+let c="";
+
+console.log(isEmptyObj(a));  // true
+console.log(isEmptyObj(b));  // true
+console.log(isEmptyObj(c));  // true
+```
+
+
+
+  **2.** **Object.keys()** 
+
+```js
+console.log(Object.keys(obj).length===0)
+```
+
+Object.keys能返回对象自身上**所有可枚举属性的名称**所构成的数组，若数组长度为0，那就是一个空对象
+
+缺点：如for in断一样，Object.keys方法也只返回可枚举属性
+
+```js
+let a={};
+let b=[];
+let c="";
+
+console.log(Object.keys(a).length===0);  // true
+console.log(Object.keys(b).length===0);  // true
+console.log(Object.keys(c).length===0);  // true
+```
+
+  **3. 将对象转化为json字符串**
+
+```js
+console.log(JSON.stringify(obj)==='{}')
+```
+
+```js
+let a={};
+let b=[];
+let c="";
+
+console.log(JSON.stringify(a));  // {}
+console.log(JSON.stringify(b));  // []
+console.log(JSON.stringify(c));  // ""
+```
+
+  **4.** **Object.getOwnPropertyNames()**
+
+```js
+console.log(Object.getOwnPropertyNames(obj).length == 0)
+```
+
+Object.getOwnPropertyNames方法获取到对象中的属性名，存到一个数组中，返回数组对象，若数组长度为0，则是空对象
+
+缺点：此方法是Object.keys的改进，**可获取到不可枚举属性**，**但该方法无法获取Symbol属性**
+
+```js
+let a={
+	[Symbol("a")]:1
+};
+let b=[];
+let c="";
+
+console.log(Object.getOwnPropertyNames(a).length===0);  // true
+console.log(Object.getOwnPropertyNames(b).length===0);  // false
+console.log(Object.getOwnPropertyNames(c).length===0);  // false
+```
+
+  **5. Reflect.ownKeys()**
+
+```js
+console.log(Reflect.ownKeys(obj).length===0)
+```
+
+Reflect.ownKeys也可以返回对象自身属性名所构成的数组，**该方法可以返回不可枚举属性以及Symbol属性**
+
+```js
+let a={
+	[Symbol("a")]:1
+};
+let b=[];
+let c="";
+
+console.log(Reflect.ownKeys(a).length===0);  // false
+console.log(Reflect.ownKeys(b).length===0);  // true
+console.log(Reflect.ownKeys(c).length===0);  // TypeError: Reflect.ownKeys called on non-object
+```
+
+---
+
+### **1、什么可枚举属性？什么是不可枚举属性？**
+
+可枚举属性是指内部**可枚举标志**（enumerable）设置为true的属性，不可枚举属性即是enumerable为false（摘自MDN）
+
+---
+
+### **2、js遍历对象各个方法区别总结**
+
+| 方法                           | 基本属性 | 原型链属性 | 不可枚举属性 | symbol属性 |
+| ------------------------------ | -------- | ---------- | ------------ | ---------- |
+| for in                         | ✔        | ✔          | ✖            | ✖          |
+| Object.keys()                  | ✔        | ✖          | ✖            | ✖          |
+| Object.getOwnPropertyNames()   | ✔        | ✖          | ✔            | ✖          |
+| Object.getOwnPropertySymbols() | ✖        | ✖          | ✔            | ✔          |
+| Reflect.ownKeys()              | ✔        | ✖          | ✔            | ✔          |
+
+**for in （遍历key）**：可遍历到原型对象上的属性 ，用hasOwnProperty()方法过滤, 可遍历得到字符串类型的键值，通常不适用于数组遍历
+
+**Object.values() 、Object.keys() ：**可自动过滤原型链上的属性
+
+**Object.getOwnPropertyNames()：**可遍历不可枚举的属性
+
+**Reflect.ownkeys()：** 可遍历不可枚举的属性 和 Symbol属性
+
+---
+
+## 3.6 请问js有哪些遍历数组的方法？
+
+ **1.** **for循环**
+
+用临时变量将长度缓存起来，避免重复获取数组长度，当数组较大时优化效果比较明显，写法比较繁琐
+
+```js
+for(let j = 0,len=arr.length; j < len; j++) {
+    
+}
+```
+
+  **2.** **forEach（）**
+
+遍历数组中的每一项，没有返回值，即使有return，也不会返回任何值，对原数组没有影响，不支持IE浏览器，执行速度比map()快
+
+```js
+//参数：item数组中的当前索引的值, index当前项的索引, array原始数组
+arr.forEach((item,index,array)=>{
+    
+})    
+```
+
+  **3.** **map（）**
+
+**创建一个新的数组，新数组的每一个元素由调用数组中的每一个元素执行提供的函数得来**，有return返回值
+
+return的意义：不影响原来的数组，**只是把原数组克隆一份**，改变克隆的数组中的对应项
+
+```js
+let a=[1,2,3,4,5];
+
+let b=a.map((item,index,arr)=>{
+	return item**2;
+});
+
+console.log(a);  //[ 1, 2, 3, 4, 5 ]
+console.log(b);  // [ 1, 4, 9, 16, 25 ]
+```
+
+
+
+  **5.** **for of**
+
+遍历value，适用遍历数组对象、字符串、map、set等**拥有迭代器对象**的集合，**不能遍历对象**，**因为没有迭代器**
+
+与forEach()区别：可以正确响应break、continue和return语句
+
+与for in 区别：无法循环遍历对象，**不会遍历自定义属性**
+
+```js
+for (var value of arr) { 
+    console.log(value); 
+}
+
+let a=[1,2,3,4,5];
+
+for (let i of a){
+	console.log(i);  // 1 2 3 4 5
+}
+
+let obj={
+	a:1,
+	b:2
+}
+
+for (let o of obj){  //TypeError: obj is not iterable
+	console.log(o);
+}
+```
+
+  **6.** **reduce()**
+
+接收一个函数作为累加器，数组中的每个值（从左到右）开始缩减，得出最终计算值
+
+相当于：**为数组中的每一个元素依次执行回调函数**，不包括数组中被删除或从未被赋值的元素
+
+```js
+arr.reduce(function(total, currentValue, currentIndex, arr), initialValue)
+```
+
+
+
+各参数意义：
+
+| function()   | 必需 | 用于执行每个数组元素的函数     |
+| ------------ | ---- | ------------------------------ |
+| total        | 必需 | 初始值, 或者计算结束后的返回值 |
+| currentValue | 必需 | 当前元素                       |
+| currentIndex | 可选 | 当前元素的索引                 |
+| arr          | 可选 | 当前元素所属的数组对象         |
+| initialValue | 可选 | 传递给函数的初始值             |
+
+一起看几个reduce()的实际应用（面试时可能要求撕代码）
+
+- **简单用法：数组求和，求乘积**
+
+```js
+let a=[1,2,3,4,5];
+
+console.log(a.reduce((prev,curr,index,arr) => prev+curr));  //15
+console.log(a.reduce((prev,curr,index,arr) => prev*curr));  //120
+
+```
+
+- **复杂用法：**
+
+计算数组中每个元素出现的次数
+
+```js
+let nums=[1,2,3,4,5,2,3,5];
+
+let ans=nums.reduce((prev,curr)=>{
+	if (curr in prev) {
+		prev[curr]++;
+	}else{
+		prev[curr]=1;
+	}
+	return prev;
+},{})
+console.log(ans);  //{ '1': 1, '2': 2, '3': 2, '4': 1, '5': 2 }
+
+```
+
+数组去重（ 面试高频撕代码题）
+
+```js
+let nums=[1,2,3,4,5,2,3,5];
+
+let ans=nums.reduce((prev,curr)=>{
+	if (!prev.includes(curr)) {
+		return prev.concat(curr);
+	}else{
+		return prev;
+	}
+},[])
+console.log(ans);  //[ 1, 2, 3, 4, 5 ]
+
+```
+
+将多维数组转化为一维（又名数组扁平化， 面试高频撕代码题）
+
+```js
+let nums=[1,2,3,[4,5,[2,3]],5];
+
+var FlatArr=function(arr){
+	return arr.reduce((prev,curr)=>prev.concat(Array.isArray(curr) ? FlatArr(curr) : curr),[]);
+}
+
+let ans=FlatArr(nums);
+console.log(ans);  //[1, 2, 3, 4, 5, 2, 3, 5 ]
+
+```
+
+---
+
+# js高级
+
+----
+
+## 4.1 请问什么是函数防抖？什么是函数节流？
+
+**函数防抖**(debounce)：触发高频事件后n秒内，函数只会执行一次，如果n秒内高频事件再次被触发，则重新计算时间
+
+**函数节流**(throttle)：高频事件触发，但在n秒内只会执行一次，所以节流会稀释函数的执行频率
+
+两者**都是为了限制函数的执行频次**，以优化函数触发频率过高导致的响应速度跟不上触发频率，出现延迟，假死或卡顿的现象
+
+可结合下图对两者进行区分：
+
+![img](https://uploadfiles.nowcoder.com/images/20211008/897353_1633667352451/6AF15ACD40C68A84BAD11D4A2F5981F6)
+
+**防抖：**
+
+实现思路：在事件被触发n秒后再执行回调函数，如果在这n秒内又被触发，则重新计时
+
+特点：如果事件在规定的时间间隔内被不断的触发，则调用方法被不断的延迟，**当遇到不断触发但是仍然需要触发的情况，应该选用节流**
+
+只有当高频事件停止，**最后一次事件触发的超时调用才能在wait时间后执行**
+
+```js
+function debounce(fn,wait){
+	var timeout;  //用来存放定时器的返回值，一触发就重新计时
+	return function(){
+		var context=this;
+		//把前一个 setTimeout clear 掉
+		clearTimeout(timeout);
+		//又创建一个新的 setTimeout,保障间隔时间内持续触发，不会执行fn函数
+		timeout=setTimeout(function(){
+			fn.apply(context);
+		},wait);
+	}
+}
+```
+
+防抖 (debounce)
+
+防抖，顾名思义，防止抖动，以免把一次事件误认为多次，敲键盘就是一个每天都会接触到的防抖操作。
+
+特点：等待某种操作停止后，加以间隔进行操作
+
+- 持续触发不执行
+- 不触发的一段时间之后再执行
+
+想要了解一个概念，必先了解概念所应用的场景。在 JS 这个世界中，有哪些防抖的场景呢
+
+1. 登录、发短信等按钮避免用户点击太快，以致于发送了多次请求，需要防抖
+2. 调整浏览器窗口大小时，resize 次数过于频繁，造成计算过多，此时需要一次到位，就用到了防抖
+3. 文本编辑器实时保存，当无任何更改操作一秒后进行保存
+4. `mousemove` 鼠标滑动事件
+5. Select 去服务端动态搜索功能
+
+代码如下，可以看出来**防抖重在清零 `clearTimeout(timer)`**
+
+```javascript
+function debounce (f, wait) {
+  let timer
+  return (...args) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      f(...args)
+    }, wait)
+  }
+}
+```
+
+---
+
+**节流：**（每隔一段时间发一次 Ajax 请求，用节流）
+
+规定一个单位时间，**在这个单位时间内，只能有一次触发事件的回调函数执行**，如果在同一个单位时间内某事件被触发多次，只有一次能生效
+
+实现思路：通过判断是否到达一定时间来触发函数，**若没到规定时间则使用计时器延后**，而下一次事件则会重新设定计时器
+
+```js
+function throttle(fn,delay){
+	let canRun=true;  //通过闭包保存一个标记
+	return function(){
+		//在函数开头判断标记是否为true,不为true 则return
+		if (!canRun) {
+			return;
+		}
+		//立即设置为false
+		canRun=false;
+		//将外部传入的函数的执行放在setTimeout中
+		setTimeout(()=>{
+			//最后在setTimeout执行完毕后再把标记设置为true(关键)表示可以执行下一次循环了
+			//当定时器没有执行的时候标记永远是false,在开头被return掉
+			fn.apply(this,arguments);
+			canRun=true;
+		},delay);
+	};
+}
+```
+
+节流 (throttle)
+
+节流，顾名思义，控制水的流量。控制事件发生的频率，如控制为1s发生一次，甚至1分钟发生一次。与服务端(server)及网关(gateway)控制的限流 (Rate Limit) 类似。
+
+特点：每等待某种间隔后，进行操作
+
+- 持续触发并不会执行多次
+- 到一定时间 / 其它间隔 ( 如滑动的高度 )再去执行
+
+1. `scroll` 事件，每隔一秒计算一次位置信息等
+2. 浏览器播放事件，每个一秒计算一次进度信息等
+3. input 框实时搜索并发送请求展示下拉列表，没隔一秒发送一次请求 (也可做防抖)
+4. 埋点场景。商品搜索列表、商品橱窗等，用户滑动时 定时 / 定滑动的高度 发送埋点请求
+5. 运维系统查看应用运行日志时，每 n 秒刷新一次
+
+代码如下，可以看出来**节流重在开关锁 `timer=null`**
+
+```javascript
+function throttle (f, wait) {
+  let timer
+  return (...args) => {
+    if (timer) { return }
+    timer = setTimeout(() => {
+      f(...args)
+      timer = null
+    }, wait)
+  }
+}
+```
+
+
+
+----
+
+## 4.2 请问js有哪些数组去重方法？
+
+### **1.for循环（两次嵌套）+ 新数组**
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	let flag=true;  //元素是否存在重复
+	const result=new Array();
+	for(let i=0;i<arr.length;i++){
+		flag=true;
+		for(let j=i+1;j<arr.length;j++){
+			if (arr[i]===arr[j]) {
+				//遇到重复的退出该次循环,即保留的是重复元素中最后面的一个
+				flag=false;
+				break;
+			}
+		}
+		if (flag) {  //如果从该元素往后没有重复
+			result.push(arr[i]);
+		}
+	}
+	return result;
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 4, 5, 3, 2 ]
+```
+
+涉及到多次遍历，执行时间较长
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	if (arr.length===0){
+		return arr;
+	}
+	let flag=true;  //元素是否存在重复
+	const result=new Array();
+	result.push(arr[0]);
+
+	for(let i=1;i<arr.length;i++){
+		flag=true;
+		for(let j=0;j<result.length;j++){
+			if (arr[i]===result[j]) {  //比较新数组中是否存在
+				//存在则退出该次循环
+				flag=false;
+				break;
+			}
+		}
+		if (flag) {  //不存在则加入
+			result.push(arr[i]);
+		}
+	}
+	return result;
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **2.for循环（两次嵌套）+ splice （ES5中最常用）**
+
+双层循环，外层循环元素，内层循环时比较值，值相同时，删除这个值
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	if (arr.length===0){
+		return arr;
+	}
+	for(let i=0;i<arr.length;i++){
+		for(let j=i+1;j<arr.length;j++){
+			if (arr[i]===arr[j]) {
+				//遇到重复的删除后一个
+				arr.splice(j,1);
+				j--;  //这个减一很关键
+			}
+		}
+	}
+	return arr;
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **3.for 循环（一次） + indexOf() + 新数组**
+
+对方法1进行改进，对新数组判定是否有该字符，可以调用 Array.prototype.indexOf 函数，执行时间缩减了很多
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	if (arr.length===0){
+		return arr;
+	}
+	const result=new Array();
+	for(let i=0;i<arr.length;i++){
+		if (result.indexOf(arr[i])===-1) {
+			result.push(arr[i]);
+		}
+	}
+	return result;
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **4.sort 排序后去重**
+
+利用sort()排序方法，然后根据排序后的结果进行遍历及相邻元素对比
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	if (arr.length===0){
+		return arr;
+	}
+	arr=arr.sort();
+	const result=new Array();
+	result.push(arr[0])
+	
+	for(let i=1;i<arr.length;i++){
+		if (arr[i]!==arr[i-1]) {
+			result.push(arr[i]);
+		}
+	}
+	return result;
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **5.Map哈希映射**
+
+利用 ES6 中的 Map 集合替代前面方法中的新数组，调用Map.has替代indexOf()，Map.set 替代push()，执行速度比前面的方法都要快
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	if (arr.length===0){
+		return arr;
+	}
+	let m=new Map();
+	const result=new Array();
+
+	for(let i=0;i<arr.length;i++){
+		if (m.has(arr[i])) {
+			//map.set(arr[i], true);
+			m.set(arr[i],m.get(arr[i])+1);  //可以查看重复元素及其次数
+		}else{
+			//map.set(arr[i], false);   // 如果没有该key值
+			m.set(arr[i],1);
+			result.push(arr[i]);
+		}
+	}
+	console.log(m);  //Map(5) { 1 => 1, 2 => 3, 3 => 2, 4 => 1, 5 => 1 }
+	return result;
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **6.new Set() + Array.from()**
+
+利用 ES6 中的 Set 集合，Set 集合是一种无重复元素的列表，new Set(arr)会自动剔除重复元素，Array.from(...)将 Set 集合转换为数组
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	return Array.from(new Set(arr));
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **7.new Set() + …(展开运算符)**
+
+思路与方法6一致，只是将 Set 集合转换为数组的实现方法从 Array.from(...) 改成了 ...(展开运算符)
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	return [...new Set(arr)];
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **8.for循环(一次) + 新对象**
+
+将创建一个新数组，**改成创建一个新对象**，判定对象的 key 值，存在跳过，不存在则将字符以对象的 key 值存储
+
+执行时间：所有的方法中最短的，**因为js对象的属性是基于Hash表实现**，对属性进行访问的时间复杂度可以达到O(1)，故此方法的时间复杂度为O(n) ；上述一般双重循环时间复杂度为O(n^2)
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	let obj={};
+	for (let i=0; i < arr.length; i++){
+		if (!obj[arr[i]]) {
+			obj[arr[i]]=1;
+		}
+	}
+	return Object.keys(obj);
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ '1', '2', '3', '4', '5' ]
+```
+
+---
+
+## 4.3 请问你了解js事件循环机制（Event Loop）吗？
+
+js是一门主要运行在浏览器的脚本语言，主要用途之一是操作DOM元素
+
+若js同时有两个线程，对同一个DOM元素进行操作，这时浏览器应该听哪个线程的？如何判断优先级？为了避免这种问题，js必须是一门单线程语言。
+
+**主线程**：即主线程会不停的从执行栈中读取事件，直至执行完所有栈中的同步代码
+
+**任务队列**：当遇到一个异步事件后，js并不会一直等待异步事件返回结果，而是会将这个事件挂在与执行栈不同的队列中，即任务队列
+
+**异步任务**：分为 宏任务（macrotask） 与 微任务 (microtask)，不同的API注册的任务会依次进入自身对应的队列中，然后等待 Event Loop 将它们依次压入执行栈中执行
+
+**常见宏任务**(macrotask)：
+
+script(整体代码)、setTimeout、setInterval、UI 渲染、 I/O、postMessage、 MessageChannel、setImmediate(Node.js 环境)
+
+**常见微任务**(microtask)：
+
+Promise、 MutaionObserver、process.nextTick(Node.js环境）
+
+Event Loop(事件循环)：宏任务 > 所有微任务 > 宏任务（主要针对V8）
+
+1. 执行栈选择最先进入队列的宏任务(通常是script整体代码)，如果有则执行
+2. 检查是否存在 Microtask，如果存在则不停地执行，直至清空 microtask 队列
+3. 更新render(每一次事件循环，浏览器都可能会去更新渲染)
+4. 重复以上步骤
+
+![img](https://uploadfiles.nowcoder.com/images/20211008/897353_1633673400290/7F695AB6524E72C0BC007BEFD17FC007)
+
+一起看两道经典面试题：（主要考察执行顺序问题，考察频率极高）
+
+```js
+//题目一
+
+setTimeout(function(){
+	console.log(1);
+});
+
+new Promise(function(resolve,reject){
+	console.log(2);
+	resolve();
+}).then(function(){
+	console.log(3);
+});
+
+console.log(4);
+
+// 2 4 3 1
+```
+
+**先执行script同步代码**：先执行Promise中的console.log(2)，再执行console.log(4)
+
+**再执行微任务**：Promise的then函数
+
+最后执行定时器中的console.log(1)，最终输出顺序为：2，4，3，1
+
+注意：**对于Promise，本身是同步的**， **Promise.then是异步的**
+
+```js
+//题目二（稍微复杂一点，建议结合分析多看几遍）
+
+console.log("script start");
+
+async function async1(){
+    //await  操作符用于等待一个Promise 对象。它只能在异步函数 async function 中使用。
+	await async2();
+	console.log("async1 end");
+}
+
+async function async2(){
+	console.log("async2 end");
+}
+
+async1();
+
+setTimeout(function(){
+	console.log("setTimeout");
+},0);
+
+new Promise(function(resolve,reject){
+	console.log("Promise");
+	resolve();
+}).then(function(){
+	console.log("promise1");
+}).then(function(){
+	console.log("promise2");
+});
+
+console.log("script end");
+
+/*
+script start
+async2 end
+Promise
+script end
+async1 end
+promise1
+promise2
+setTimeout
+*/
+```
+
+首先执行同步代码：
+
+（1）、执行 console.log('script start')
+
+（2）、执行 async1() ，马上执行 async2函数：console.log('async2 end')
+
+（3）、执行 new Promise()中的同步函数：console.log('Promise')
+
+（4）、最后执行 console.log('script end')，同步代码执行完毕
+
+看剩下的异步代码：
+
+（5）、setTimeout是宏任务，留到最后
+
+----
+
+剩下微任务：
+
+```js
+async function async1() {
+  await async2()
+  console.log('async1 end') 
+}
+new Promise(resolve => {
+  resolve()
+})
+.then(function() {
+  console.log('promise1') 
+})
+.then(function() {
+  console.log('promise2') 
+})
+```
+
+（6）、根据队列的先入先出方式，先执行 await async2() 后面的函数 console.log('async1 end') 
+
+（7）、执行promise的resolve函数
+
+```js
+new Promise(resolve => { resolve() })
+```
+
+也就是两个then： console.log('promise1') 、console.log('promise2')
+
+（8）、 最后执行宏任务 setTimeout函数 console.log('setTimeout')
+
+综上所述，以上代码执行的顺序是：
+
+“script start”、“async2 end”、“Promise”、“script end”、“async1 end”、“promise1”、 “promise2 ”、“setTimeout”
+
+----
+
+## 4.4 请问setTimeout与setInterval有何区别？
+
+setTimeout() 是在载入后，延迟指定时间后，去执行一次表达式，次数只有一次
+
+setInterval() 是指定某个任务每隔一段时间就执行一次，可以无限次的定时执行
+
+通俗理解：setTimeout()是**延时器**，setInterval()是**定时器**
+
+注意：setTimeout和setInterval都是不能保证时间精度的，他们的第二个参数（延时）**只能保证何时把代码添加到浏览器的任务队列中**，**不能保证添加到队列就会立即执行**
+
+若队列前面还有其他任务，主线程被占用，那么就要等这些任务执行完再执行
+
+---
+
+## 4.5 请问js有哪几种方式创建对象？
+
+1. 使用 Object 直接创建对象
+
+```js
+// 创建对象
+var newObj = new Object()；
+// 添加属性
+newObj.property1 = value1;
+newObj.property2 = value2;
+// 添加方法
+newObj.method1 = function () { };
+newObj.method2 = function (a, b, c) { };
+```
+
+2. 使用new关键字调用 构造器 创建对象
+
+```js
+// 创建对象
+function 对象名（参数1，参数2…）{
+    this.property1 = 参数1;
+    this.method1 = function ( ) { }
+}
+// 使用对象
+var obj = new 对象名（参数1，参数2）;  
+```
+
+3. 使用JSON创建对象 （JOSN格式中**属性名要加双引号**）
+
+```js
+var object = {属性名1：属性值1，属性名2：属性值2，.....}
+```
+
+4. 组合使用**构造函数**和**原型模式**
+
+```js
+function Student(name, sex, grade){     
+    this.name=name;     
+    this.sex=sex;     
+    this.grade=grade; 
+}   
+Student.prototype.sayName=function(){        
+    console.log(this.name); 
+}   
+Student.prototype.school="nongda";
+```
+
+构造函数用于**定义实例的属性**，原型模式用于**定义方法和共享的属性**，可极大节约内存
+
+-----
+
+## 4.6 请问你了解js严格模式吗？
+
+设立"严格模式"的意义：
+
+- 消除js语法中的一些不合理、不严谨之处，减少一些怪异行为
+- 消除代码运行的一些不安全之处，保证代码运行的安全
+- 提高编译器效率，增加运行速度
+
+使用"use strict"便可进入严格模式，通常有两种调用方法：
+
+**针对整个文件**：将"use strict"放在文件的第一行，则整个文件都将以"严格模式"运行。
+
+**针对单个函数**：将"use strict"放在函数体的第一行，则整个函数以"严格模式"运行。
+
+严格模式与非严格模式的一些常见区别：
+
+- 在正常模式中，如果一个变量没有声明就赋值，默认是全局变量。**严格模式禁止这种用法，全局变量必须显式声明**，然后再使用
+
+```js
+'use strict'
+a = 1 // 严格模式下将报错，非严格模式a变量会提升至全局作用域
+```
+
+- 严格模式创建了第三种作用域：eval作用域
+
+正常模式下，eval语句的作用域，取决于它处于全局作用域，还是处于函数作用域。**严格模式下，eval语句本身就是一个作用域**，不再能够生成全局变量了，**它所生成的变量只能用于eval内部**
+
+```js
+'use strict'
+eval('var a = 1')
+console.log(typeof a) // 严格模式下为undefined;非严格模式下为number
+```
+
+- **禁止this关键字指向全局对象**，使用构造函数时，**如果忘了加new，this不再指向全局对象**
+- **禁止删除变量**（ delete x）； 删除对象上不存在的属性也会报错
+
+```js
+function usualMode() {
+    function fn() {} 
+    var a = 1
+    delete a // 不会报错，但实际上也没能删除变量a
+    delete fn // 同delete a
+}
+usalMode() // 正常执行
+ 
+function strictMode() {
+    'use strict'
+    function fn() {} 
+    var a = 1
+    delete a
+}
+strictMode() // 将报错
+```
+
+- 严格模式禁用with语法，使用将报错
+
+```js
+function usualMode() {
+    with({a: 1}) {
+    	console.log(a)
+    }
+}
+usalMode() // 正常输出 1
+ 
+function strictMode() {
+    'use strict'
+    with({a: 1}) {
+    	console.log(a)
+    }
+}
+strictMode() // 将报错
+```
 
 ---
 

@@ -1707,7 +1707,197 @@ if (!Array.prototype.fill) {
 
 创建一个新数组，其包含通过所提供函数实现的测试的所有元素
 
+```js
+const words = ['spray', 'limit', 'elite', 'exuberant', 'destruction', 'present'];
 
+const result = words.filter(word => word.length > 6);
+
+console.log(result);
+// expected output: Array ["exuberant", "destruction", "present"]
+```
+
+#### 语法
+
+```js
+var newArray = arr.filter(callback(element[, index[, array]])[, thisArg])
+```
+
+#### 参数
+
+callback
+
+用来测试数组的每个元素的函数。返回 `true` 表示该元素通过测试，保留该元素，`false` 则不保留。它接受以下三个参数：
+
+- `element`
+
+  数组中当前正在处理的元素。
+
+- `index`可选
+
+  正在处理的元素在数组中的索引。
+
+- `array`可选
+
+  调用了 `filter` 的数组本身。
+
+`thisArg`可选
+
+执行 `callback` 时，用于 `this` 的值。
+
+#### 返回值
+
+一个新的、由通过测试的元素组成的数组，如果没有任何数组元素通过测试，则返回空数组。
+
+#### 描述
+
+`filter` 为数组中的每个元素调用一次 `callback` 函数，并利用所有使得 `callback` 返回 true 或[等价于 true 的值](https://developer.mozilla.org/zh-CN/docs/Glossary/Truthy)的元素创建一个新数组。**`callback` 只会在已经赋值的索引上被调用**，对于那些已经被删除或者从未被赋值的索引不会被调用。那些没有通过 `callback` 测试的元素会被跳过，不会被包含在新数组中。
+
+`callback` 被调用时传入三个参数：
+
+1. 元素的值
+2. 元素的索引
+3. 被遍历的数组本身
+
+如果为 `filter` 提供一个 `thisArg` 参数，则它会被作为 `callback` 被调用时的 `this` 值。否则，`callback` 的 `this` 值在非严格模式下将是全局对象，严格模式下为 `undefined`。`callback` 函数最终观察到的 `this` 值是根据[通常函数所看到的 "this"的规则](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/this)确定的。
+
+`filter` 不会改变原数组，它返回过滤后的新数组。
+
+`filter` 遍历的元素范围在第一次调用 `callback` 之前就已经确定了。**在调用 `filter` 之后被添加到数组中的元素不会被 `filter` 遍历到。**如果已经存在的元素被改变了，则他们传入 `callback` 的值是 `filter` 遍历到它们那一刻的值。被删除或从来未被赋值的元素不会被遍历到。
+
+#### 示例
+
+##### 筛选排除所有较小的值
+
+下例使用 filter 创建了一个新数组，该数组的元素由原数组中值大于 10 的元素组成。
+
+```js
+function isBigEnough(element) {
+  return element >= 10;
+}
+var filtered = [12, 5, 8, 130, 44].filter(isBigEnough);
+// filtered is [12, 130, 44]
+
+```
+
+##### 过滤 JSON 中的无效条目
+
+以下示例使用 filter() 创建具有非零 id 的元素的 json。
+
+```js
+let arr = [
+  { id: 15 },
+  { id: -1 },
+  { id: 0 },
+  { id: 3 },
+  { id: 12.2 },
+  { },
+  { id: null },
+  { id: NaN },
+  { id: 'undefined' }
+];
+
+let invalidEntries = 0;
+
+function isNumber(obj) {
+  return obj !== undefined && typeof(obj) === 'number' && !isNaN(obj);
+}
+
+function filterByID(item) {
+  if (isNumber(item.id) && item.id !== 0) {
+    return true;
+  }
+  invalidEntries++;
+  return false;
+}
+
+let arrByID = arr.filter(filterByID);
+
+console.log('Filtered Array\n', arrByID);
+// Filtered Array
+// [{ id: 15 }, { id: -1 }, { id: 3 }, { id: 12.2 }]
+
+console.log('Number of Invalid Entries = ', invalidEntries);
+// Number of Invalid Entries = 5
+```
+
+##### 在数组中搜索
+
+下例使用 filter() 根据搜索条件来过滤数组内容。
+
+```js
+var fruits = ['apple', 'banana', 'grapes', 'mango', 'orange'];
+
+/**
+ * Array filters items based on search criteria (query)
+ */
+function filterItems(query) {
+  return fruits.filter(function(el) {
+      return el.toLowerCase().indexOf(query.toLowerCase()) > -1;
+  })
+}
+
+console.log(filterItems('ap')); // ['apple', 'grapes']
+console.log(filterItems('an')); // ['banana', 'mango', 'orange']
+```
+
+##### ES2015 实现
+
+```js
+const fruits = ['apple', 'banana', 'grapes', 'mango', 'orange'];
+
+/**
+ * Array filters items based on search criteria (query)
+ */
+const filterItems = (query) => {
+  return fruits.filter((el) =>
+    el.toLowerCase().indexOf(query.toLowerCase()) > -1
+  );
+}
+
+console.log(filterItems('ap')); // ['apple', 'grapes']
+console.log(filterItems('an')); // ['banana', 'mango', 'orange']
+```
+
+
+
+#### polyfill
+
+```js
+if (!Array.prototype.filter){
+  Array.prototype.filter = function(func, thisArg) {
+    'use strict';
+    if ( ! ((typeof func === 'Function' || typeof func === 'function') && this) )
+        throw new TypeError();
+
+    var len = this.length >>> 0,
+        res = new Array(len), // preallocate array
+        t = this, c = 0, i = -1;
+    if (thisArg === undefined){
+      while (++i !== len){
+        // checks to see if the key was set
+        if (i in this){
+          if (func(t[i], i, t)){
+            res[c++] = t[i];
+          }
+        }
+      }
+    }
+    else{
+      while (++i !== len){
+        // checks to see if the key was set
+        if (i in this){
+          if (func.call(thisArg, t[i], i, t)){
+            res[c++] = t[i];
+          }
+        }
+      }
+    }
+
+    res.length = c; // shrink down array to proper size
+    return res;
+  };
+}
+```
 
 
 
@@ -1715,17 +1905,260 @@ if (!Array.prototype.fill) {
 
 ### Array.prototype.find()
 
-返回数组中满足提供的测试函数的第一个元素的值。否则返回 undefined
+返回数组中满足提供的测试函数的第一个元素的值。**否则返回 undefined**
+
+```js
+const array1 = [5, 12, 8, 130, 44];
+
+const found = array1.find(element => element > 10);
+
+console.log(found);
+// expected output: 12
+
+```
+
+
+
+#### 语法
+
+```js
+arr.find(callback[, thisArg])
+```
+
+#### 参数
+
+callback
+
+在数组每一项上执行的函数，接收 3 个参数：
+
+- `element`
+
+  当前遍历到的元素。
+
+- `index`可选
+
+  当前遍历到的索引。
+
+- `array`可选
+
+  数组本身。
+
+`thisArg`可选
+
+执行回调时用作 `this` 的对象。
+
+#### 返回值
+
+数组中第一个满足所提供测试函数的元素的值，否则返回 undefined。
+
+#### 描述
+
+`find` 方法对数组中的每一项元素执行一次 `callback` 函数，直至有一个 callback 返回 `true`。当找到了这样一个元素后，该方法会立即返回这个元素的值，否则返回 [`undefined`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/undefined)。**注意 `callback` 函数会为数组中的每个索引调用即从 `0` 到 `length - 1`，而不仅仅是那些被赋值的索引**，这**意味着对于稀疏数组来说，该方法的效率**要**低于**那些**只遍历有值的索引的方法**。
+
+`callback` 函数带有 3 个参数：当前元素的值、当前元素的索引，以及数组本身。
+
+如果提供了 `thisArg` 参数，那么它将作为每次 `callback` 函数执行时的 `this`，如果未提供，则使用 [`undefined`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/undefined)。
+
+`find` 方法不会改变数组。
+
+**在第一次调用 `callback` 函数时会确定元素的索引范围**，因此在 `find` 方法开始执行之后添加到数组的新元素将不会被 `callback` 函数访问到。如果数组中一个尚未被 `callback` 函数访问到的元素的值被 `callback` 函数所改变，那么当 `callback` 函数访问到它时，**它的值是将是根据它在数组中的索引所访问到的当前值**。被删除的元素**仍旧会被访问到，但是其值已经是 undefined 了**。
+
+#### 示例
+
+##### 用对象的属性查找数组里的对象
+
+```js
+const inventory = [
+  {name: 'apples', quantity: 2},
+  {name: 'bananas', quantity: 0},
+  {name: 'cherries', quantity: 5}
+];
+
+function isCherries(fruit) {
+  return fruit.name === 'cherries';
+}
+
+console.log(inventory.find(isCherries));
+// { name: 'cherries', quantity: 5 }
+```
+
+##### 寻找数组中的质数
+
+下面的例子展示了如何从一个数组中寻找质数（如果找不到质数则返回 undefined）
+
+```js
+function isPrime(element, index, array) {
+  let start = 2;
+  while (start <= Math.sqrt(element)) {
+    if (element % start++ < 1) {
+      return false;
+    }
+  }
+  return element > 1;
+}
+
+console.log([4, 6, 8, 12].find(isPrime)); // undefined, not found
+console.log([4, 5, 8, 12].find(isPrime)); // 5
+```
+
+当在回调中删除数组中的一个值时，当访问到这个位置时，其传入的值是 undefined：
+
+```js
+// Declare array with no elements at indexes 2, 3, and 4
+const array = [0,1,,,,5,6];
+
+// Shows all indexes, not just those with assigned values
+array.find(function(value, index) {
+  console.log('Visited index ', index, ' with value ', value);
+});
+/*
+Visited index  0  with value  0
+Visited index  1  with value  1
+Visited index  2  with value  undefined
+Visited index  3  with value  undefined
+Visited index  4  with value  undefined
+Visited index  5  with value  5
+Visited index  6  with value  6
+*/
+
+
+// Shows all indexes, including deleted
+array.find(function(value, index) {
+  // Delete element 5 on first iteration
+  if (index === 0) {
+    console.log('Deleting array[5] with value ', array[5]);
+    delete array[5];
+  }
+  // Element 5 is still visited even though deleted
+  console.log('Visited index ', index, ' with value ', value);
+});
+/*
+Deleting array[5] with value  5
+Visited index  0  with value  0
+Visited index  1  with value  1
+Visited index  2  with value  undefined
+Visited index  3  with value  undefined
+Visited index  4  with value  undefined
+Visited index  5  with value  undefined
+Visited index  6  with value  6
+*/
+```
+
+#### polyfill
+
+```js
+if (!Array.prototype.find) {
+  Object.defineProperty(Array.prototype, 'find', {
+    value: function(predicate) {
+     // 1. Let O be ? ToObject(this value).
+      if (this == null) {
+        throw new TypeError('"this" is null or not defined');
+      }
+
+      var o = Object(this);
+
+      // 2. Let len be ? ToLength(? Get(O, "length")).
+      var len = o.length >>> 0;
+
+      // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+      if (typeof predicate !== 'function') {
+        throw new TypeError('predicate must be a function');
+      }
+
+      // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+      var thisArg = arguments[1];
+
+      // 5. Let k be 0.
+      var k = 0;
+
+      // 6. Repeat, while k < len
+      while (k < len) {
+        // a. Let Pk be ! ToString(k).
+        // b. Let kValue be ? Get(O, Pk).
+        // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+        // d. If testResult is true, return kValue.
+        var kValue = o[k];
+        if (predicate.call(thisArg, kValue, k, o)) {
+          return kValue;
+        }
+        // e. Increase k by 1.
+        k++;
+      }
+
+      // 7. Return undefined.
+      return undefined;
+    }
+  });
+}
+```
+
+
+
+----
 
 ### Array.prototype.findIndex()
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
 
 返回数组中满足提供的测试函数的第一个元素的索引。若没有找到对应元素则返回 -1
 
 ### Array.prototype.flat()
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
 按照一个可指定的深度递归遍历数组，并将所有元素与遍历到的子数组中的元素合并为一个新数组返回
 
 ### Array.prototype.flatMap()
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
 
 使用映射函数映射每个元素，然后将结果压缩成一个新数组
 

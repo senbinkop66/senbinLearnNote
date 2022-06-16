@@ -3,39 +3,21 @@
  * @param {number} k
  * @return {number}
  */
-var smallestDistancePair = function(nums, k) {
-    nums.sort((a, b) => a - b);
-    let n = nums.length;
-    let left = 0, right = nums[n - 1] - nums[0];
-    while (left <= right) {
-        const mid = Math.floor((left + right) / 2);
-        let cnt = 0;
-        for (let j = 0; j < n; j++) {
-            const i = binarySearch(nums, j, nums[j] - mid);
-            cnt += j - i;
+var findPairs = function(nums, k) {
+   const visited = new Set();
+   const res = new Set();
+    for (let num of nums) {
+        if (visited.has(num - k)) {
+            res.add(num - k);
         }
-        if (cnt >= k) {
-            right = mid - 1;
-        } else {
-            left = mid + 1;
+        if (visited.has(num + k)) {
+            res.add(num);
         }
+        visited.add(num);
     }
-    return left;
+    return res.size;
 };
 
-const binarySearch = (nums, end, target) => {
-    let left = 0, right = end;
-    while(left < right) {
-        const mid = Math.floor((left + right) / 2);
-        if (nums[mid] < target) {
-            left = mid + 1;
-        } else {
-            right = mid;
-        }
-    }
-    return left;
-}
-
-let nums = [1,3,1], k = 1;
-let result = smallestDistancePair(nums, k);
+let nums = [3, 1, 4, 1, 5], k = 2;
+let result = findPairs(nums, k);
 console.log(result);

@@ -2635,3 +2635,2007 @@ img{vertical-align:top;}
 
 ---
 
+---
+
+## 1.2 请问CSS3有哪些新特性？
+
+CSS 为层叠样式表，用来定义页面中的HTML各标签如何显示，控制页面的整体布局与样式。
+
+CSS3为W3C组织发布的最新版CSS，主要有以下新特性：
+
+**1. 选择器**
+
+CSS3增加了很多选择器，以供样式绑定使用，常用的主要有：
+
+:nth-child(n)：匹配其父标签的第n个子元素，不论元素类型，n可以是数字、关键字、公式
+
+:nth-of-type(n)：选择与之其匹配的父元素的第N个子元素
+
+:frist-child：相对于父级做参考，“所有”子元素的第一个子元素，并且“位置”要对应
+
+:empty：选择没有子元素的每个元素
+
+[abc*="def"]：选择adc属性值中包含子串"def"的所有元素
+
+  **2. 动画**
+
+CSS3新增创建动画方法，通过@keyframes 规则创建动画，在规则中指定 CSS 样式，就能创建由当前样式逐渐改为新样式的动画效果，用百分比来规定变化发生的时间，或用"from" 和 "to"（等同于 0% 和 100%）
+
+利用animation属性将动画绑定到指定选择器上，至少绑定动画名称与时长
+
+  **3. 形状变换**
+
+CSS3新增了transform属性实现元素的旋转、缩放、倾斜平移等形状变换。主要有以下新方法：
+
+translate()：元素从当前位置在x 坐标、y 坐标上移动
+
+rotate()：元素顺时针旋转给定的角度（负值则逆时针旋转）
+
+scale()：通过向量形式定义的缩放值来放大或缩小元素尺寸
+
+skew()：元素按照一定的角度进行倾斜转换
+
+  **4. 文本**
+
+CSS3新增text-shadow属性可实现文本阴影，text-overflow属性可规定当文本溢出盒子时呈现效果
+
+  **5. 边框**
+
+CSS3新增边框属性，可呈现更多的边框效果，有以下3个边框属性：
+
+border-radius：创建圆角矩形
+
+box-shadow：给盒子添加阴影效果
+
+border-image：可利用图片创建边框
+
+  **6. 过渡**
+
+CSS3提供transition 属性呈现元素由A样式过渡至B样式，常用两个值定义过渡效果：transition-property：过渡的属性列表，transition-duration：过渡持续的时间
+
+  **7.** **盒模型定义**
+
+在 CSS 中，所有的元素都被一个个的“盒子（box）”包围着，理解这些“盒子”的基本原理，是我们使用CSS实现准确布局、处理元素排列的关键。
+
+完整的 CSS 盒模型应用于块级盒子，内联盒子只使用盒模型中定义的部分内容。模型定义了盒的每个部分 —— margin, border, padding, and content —— 合在一起就可以创建我们在页面上看到的内容。为了增加一些额外的复杂性，有一个标准的和替代（IE）的盒模型。
+
+[盒模型的各个部分](https://developer.mozilla.org/zh-CN/docs/Learn/CSS/Building_blocks/The_box_model#盒模型的各个部分)
+
+ CSS中组成一个块级盒子需要:
+
+- **Content box**: 这个区域是用来显示内容，大小可以通过设置 [`width`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/width) 和 [`height`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/height).
+- **Padding box**: 包围在内容区域外部的空白区域； 大小通过 [`padding`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/padding) 相关属性设置。
+- **Border box**: 边框盒包裹内容和内边距。大小通过 [`border`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/border) 相关属性设置。
+- **Margin box**: 这是最外面的区域，是盒子和其他元素之间的空白区域。大小通过 [`margin`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/margin) 相关属性设置。
+
+CSS3增加了新的用户界面属性来调整标签尺寸、盒尺寸以及外部轮廓等，常用属性有：
+
+resize：指定一个标签可由用户调整大小
+
+outline-offset：对轮廓进行偏移，并在超出边框边缘的位置绘制轮廓
+
+box-sizing：允许以确切的方式定义适应某个区域的具体内容，可定义盒模型，有三个值：content-box：边框和padding不包含在元素的宽高之内、border-box：边框和padding包含在元素的宽高之内、inherit：从父标签继承 box-sizing 属性值
+
+ **8.Flex布局**
+
+弹性布局，使页面布局更加方便与灵活，舍弃传统上下排列页面元素，采用双轴排列方式，水平主轴与垂直交叉轴，并按照比例对元素进行放大与缩小，可利用简洁语法实现自适应布局
+
+通过6个属性设置**容器属性**：flex-direction、flex-wrap、flex-flow、justify-content、align-items、align-content，设置容器的轴线方向、元素对齐方向、换行
+
+通过6个属性设置**元素属性**：order、flex-grow、flex-shrink、flex-basis、flex、align-self，设置元素的排列顺序、放大/缩小比例、多余空间分配方案、对齐方案
+
+---
+
+### 1.盒模型与宽高计算方式？
+
+前端页面都由一个个盒子组成，每个盒子由content、padding、border、margin4部分组成。目前主要有两种盒模型：标准盒模型与IE盒模型（怪异盒模型），不同盒模型盒子的宽高值不同
+
+标准盒模型：width 和 height 指content区域的宽度和高度，增加内边距、边框和外边距不会影响内容区域的尺寸，但是会增加元素框的总尺寸
+
+IE盒模型（怪异盒模型）：width 和 height 指content+border+padding的宽度和高度
+
+如何设置盒模型？
+
+1、若定义了完整的<!DOCTYPE>声明，会直接触发标准盒模型，若<!DOCTYPE>声明缺失，则会由浏览器自己判定，IE浏览器中IE9以下（IE6.IE7.IE8）的版本触发IE盒模型，其他浏览器会默认为标准盒模型
+
+2、可通过box-sizing属性来设置盒模型解析模式：
+
+- content-box： 默认值，border和padding不算到width范围内，可以理解为标准盒模型，
+- border-box：border和padding划到width范围内，可以理解为怪异盒模型
+
+**[标准盒模型]**
+
+在标准模型中，如果你给盒设置 `width` 和 `height`，实际设置的是 *content box*。 padding 和 border 再加上设置的宽高一起决定整个盒子的大小。
+
+假设定义了 `width`, `height`, `margin`, `border`, and `padding`:
+
+```css
+.box {
+  width: 350px;
+  height: 150px;
+  margin: 25px;
+  padding: 25px;
+  border: 5px solid black;
+}
+```
+
+如果使用标准模型宽度 = 410px (350 + 25 + 25 + 5 + 5)，高度 = 210px (150 + 25 + 25 + 5 + 5)，padding 加 border 再加 content box。
+
+> **注**: margin 不计入实际大小 —— 当然，它会影响盒子在页面所占空间，但是影响的是盒子外部空间。盒子的范围到边框为止 —— 不会延伸到margin。
+
+[替代（IE）盒模型](https://developer.mozilla.org/zh-CN/docs/Learn/CSS/Building_blocks/The_box_model#替代（ie）盒模型)
+
+你可能会认为盒子的大小还要加上边框和内边距，这样很麻烦，而且你的想法是对的! 因为这个原因，css还有一个替代盒模型。使用这个模型，所有宽度都是可见宽度，所以内容宽度是该宽度减去边框和填充部分。使用上面相同的样式得到 (width = 350px, height = 150px).
+
+默认浏览器会使用标准模型。如果需要使用替代模型，您可以通过为其设置 `box-sizing: border-box` 来实现。 这样就可以告诉浏览器使用 `border-box` 来定义区域，从而设定您想要的大小。
+
+```css
+.box {
+  box-sizing: border-box;
+} 
+```
+
+如果你希望所有元素都使用替代模式，而且确实很常用，设置 `box-sizing` 在 `<html>` 元素上，然后设置所有元素继承该属性，正如下面的例子。如果想要深入理解，请看 [the CSS Tricks article on box-sizing](https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/)。
+
+```css
+html {
+  box-sizing: border-box;
+}
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+```
+
+---
+
+### 2.[块级盒子（Block box） 和 内联盒子（Inline box）](https://developer.mozilla.org/zh-CN/docs/Learn/CSS/Building_blocks/The_box_model#块级盒子（block_box）_和_内联盒子（inline_box）)
+
+在 CSS 中我们广泛地使用两种“盒子” —— **块级****盒子** (**block box**) 和 **内联盒子** (**inline box**)**。**这两种盒子会在**页面流**（page flow）和**元素之间的关系**方面表现出不同的行为:
+
+一个被定义成块级的（block）盒子会表现出以下行为:
+
+- 盒子会在内联的方向上扩展并占据父容器在该方向上的所有可用空间，在绝大数情况下意味着盒子会和父容器一样宽
+- 每个盒子都会换行
+- [`width`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/width) 和 [`height`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/height) 属性可以发挥作用
+- 内边距（padding）, 外边距（margin） 和 边框（border） 会将其他元素从当前盒子周围“推开”
+
+除非特殊指定，诸如标题(`<h1>`等)和段落(`<p>`)默认情况下都是块级的盒子。
+
+如果一个盒子对外显示为 `inline`，那么他的行为如下:
+
+- 盒子不会产生换行。
+-  [`width`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/width) 和 [`height`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/height) 属性将不起作用。
+- 垂直方向的内边距、外边距以及边框会被应用但是不会把其他处于 `inline` 状态的盒子推开。
+- 水平方向的内边距、外边距以及边框会被应用且会把其他处于 `inline` 状态的盒子推开。
+
+用做链接的 `<a>` 元素、 `<span>`、 `<em>` 以及 `<strong>` 都是默认处于 `inline` 状态的。
+
+我们通过对盒子[`display`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/display) 属性的设置，比如 `inline` 或者 `block` ，来控制盒子的外部显示类型。
+
+[补充: 内部和外部显示类型](https://developer.mozilla.org/zh-CN/docs/Learn/CSS/Building_blocks/The_box_model#补充_内部和外部显示类型)
+
+在这里最好也解释下**内部** 和 **外部** 显示类型。如上所述， css的box模型有一个外部显示类型，来决定盒子是块级还是内联。
+
+同样盒模型还有内部显示类型，它决定了盒子内部元素是如何布局的。默认情况下是按照 **[正常文档流](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Normal_Flow)** 布局，也意味着它们和其他块元素以及内联元素一样(如上所述).
+
+但是，我们可以通过使用类似 `flex` 的 `display` 属性值来更改内部显示类型。 如果设置 `display: flex`，在一个元素上，外部显示类型是 `block`，但是内部显示类型修改为 `flex`。 该盒子的所有直接子元素都会成为flex元素，会根据 [弹性盒子（Flexbox](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Flexbox) [）](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Flexbox)规则进行布局，稍后您将了解这些规则。
+
+---
+
+
+
+## 1.3 请问你了解行内元素、块级元素、空元素吗，它们如何互相转换？
+
+- 行内元素、块级元素、空元素定义
+
+行内元素（内联元素）：与其他元素水平方向依次排列，处于同一行，通常不会以新行开始，宽度就是内容的宽度，不可改变
+
+块级元素：总在新一行开始，一个元素独占一行，宽度默认100%（继承父元素宽度）
+
+两者区别总结如下表：
+
+|                   | 行内元素                                                     | 块级元素                                                     |
+| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 容纳内容          | 只能容纳文本或其他内联元素                                   | 容纳内联元素或其他块元素                                     |
+| 设置宽度width     | 无效                                                         | 有效                                                         |
+| 设置高度height    | 无效                                                         | 有效                                                         |
+| 设置内边距padding | 左右有效，上下无效                                           | 有效                                                         |
+| 设置外边距margin  | 左右有效，上下无效                                           | 有效                                                         |
+| 常见元素          | <a>、<span>、<strong>、<i>、 <button>、<em>、<label>、<textarea>、<kbd>...... | <div>、<hn>、<p> 、<ul>、<ol>、<li>、<header>、<footer>、<form>、<nav>...... |
+
+**空元素**：官方术语为**自闭合标签**，没有内容的 HTML 元素，没有闭合标签，在开始标签就关闭了，常见标签：
+
+```
+<br>、<hr>、<img>、<input>、<link>、<meta>
+```
+
+
+
+----
+
+### 1.行内元素和块级元素转换方式
+
+**1、display属性**
+
+display：inline-block 行内元素——>行内块元素
+
+display：block 行内元素——>块级元素
+
+display：inline 块级元素——>行内元素
+
+**2、float**
+
+设置行内元素float：left/right，则该行内元素**隐式转换**为块级元素 ，且有浮动特性
+
+**3、position**
+
+设置行内元素position：absolute/fixed 会把行内元素**隐式转换**为块级元素，且有定位特性
+
+---
+
+### 2.置换元素定义与特点？
+
+置换元素：内容不受CSS视觉格式化模型控制，渲染模型不考虑对此内容渲染，拥有固定尺寸的元素（有且仅有置换元素有固定尺寸），浏览器依据元素的标签和属性来决定具体显示内容，又名**替换元素**
+
+块级元素包含置换元素、非置换元素；行内元素同样包含置换元素、非置换元素；行内置换元素有可修改的宽高属性，其默认值即元素的固有宽高
+
+常见置换元素有：视图元素<img>、<object>、<video>等
+
+表单元素<textarea>、<input>、<select>等
+
+某些元素只在一些特殊情况下表现为可替换元素，如 <audio>、<canvas>等
+
+---
+
+### 3. 空元素
+
+一个**空元素（empty element）**可能是 HTML，SVG，或者 MathML 里的一个不能存在子节点（例如内嵌的元素或者元素内的文本）的[element](https://developer.mozilla.org/zh-CN/docs/Glossary/Element)。
+
+[HTML](https://www.w3.org/html/wg/drafts/html/CR/)，[SVG](https://www.w3.org/TR/SVG2/) 和 [MathML](https://www.w3.org/Math/draft-spec/) 的规范都详细定义了每个元素能包含的具体内容（define very precisely what each element can contain）。许多组合是没有任何语义含义的，比如一个 [``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/audio) 元素嵌套在一个 [``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/hr) 元素里。
+
+在 HTML 中，通常在一个空元素上使用一个闭标签是无效的。例如， `<input type="text"></input>` 的闭标签是无效的 HTML。
+
+在 HTML 中有以下这些空元素：
+
+```html
+<area>
+<base>
+<br>
+<col>
+<colgroup> when the span is present
+<command>
+<embed>
+<hr>
+<img>
+<input>
+<keygen>
+<link>
+<meta>
+<param>
+<source>
+<track>
+<wbr>
+```
+
+**Note**: 在极少数情况下，空元素被错误地称为“无效元素”(void elements)。
+
+----
+
+## 1.4 请问CSS选择器有哪些，应该如何计算优先级？
+
+CSS选择器可将CSS样式表与HTML元素进行一一绑定，实现一对一，一对多、多对一的样式控制。CSS样式具有三大特性：继承、 优先级和层叠
+
+**继承**：即子类元素继承父类的样式
+
+**优先级**：指不同类别样式的权重比较
+
+**层叠**：当数量相同时，后者覆盖前者
+
+CSS选择器分类众多，主要可分为以下几类：
+
+| 标签选择器                 | 如：body,div,p,ul,li                                   |
+| -------------------------- | ------------------------------------------------------ |
+| 类选择器                   | 如：class="head",class="head_logo"                     |
+| ID选择器                   | 如：id="name",id="name_txt"                            |
+| 全局选择器（通配符选择器） | 如：*号                                                |
+| 组合选择器                 | 如：.head .head_logo（各选择器用空格键分开）           |
+| 后代选择器                 | 如：#head .nav ul li 从父集到子孙集的选择器            |
+| 群组选择器                 | div,span,img {color:Red} 即具有相同样式的标签分组显示  |
+| 继承选择器                 | 如：div p（各选择器用空格键分开）                      |
+| 伪类选择器                 | 如：a元素的伪类，4种状态：link、visited、active、hover |
+| 字符串匹配属性选择器       | 如：^  $  *三种，分别对应开始、结尾、包含              |
+| 子选择器                   | 如：div>p （大于号>分隔）                              |
+| 相邻选择器                 | 如：h1+p（加号+分隔）                                  |
+
+CSS优先级算法：
+
+对于同一优先级选择器，后写的会覆盖先写的样式
+
+当两个不同选择器都作用到同一个HTML元素时，如果定义的属性值有冲突，那么应该受哪个选择器控制？CSS有一套固定的优先级排序：
+
+属性后面使用!important > 作为style属性行内样式>ID选择器 > 类选择器 = 属性选择器 = 伪类选择器 > 标签选择器= 伪元素选择器 > 通配符选择器 > 继承选择器 > 浏览器默认属性
+
+当有多个级别组合的选择器时，往往利用上述优先级排序无法得出优先级，故有以下优先级计算方式：
+
+每个选择器对应一个初始"四位数"：0、0、0、0
+
+若是 行内选择器，则加1、0、0、0
+
+若是 ID选择器，则加0、1、0、0
+
+若是 类选择器/属性选择器/伪类选择符，则分别加0、0、1、0
+
+若是 标签选择器/伪元素选择器，则分别加0、0、0、1
+
+最终优先级由级别权重与出现次数决定，统计元素对应的所有选择器的权重与次数，最终得到的”四位数“，从左到右进行比较，大的优先级越高。
+
+需注意：
+
+- !important的优先级是最高的，但出现冲突时则需比较“四位数”
+- 通配符选择器、子选择器、相邻选择器、同胞选择器权重值为0
+- 优先级相同时，则采用就近原则，选择最后出现的样式
+
+---
+
+### 1.优先级
+
+浏览器通过**优先级**来判断哪些属性值与一个元素最为相关，从而在该元素上应用这些属性值。优先级是基于不同种类[选择器](https://developer.mozilla.org/en-US/CSS/CSS_Reference#selectors)组成的匹配规则。
+
+优先级就是分配给指定的 CSS 声明的一个权重，它由 匹配的选择器中的 每一种选择器类型的 数值 决定。
+
+而当优先级与多个 CSS 声明中任意一个声明的优先级相等的时候，CSS 中最后的那个声明将会被应用到元素上。
+
+当同一个元素有多个声明的时候，优先级才会有意义。因为每一个直接作用于元素的 CSS 规则总是会接管/覆盖（take over）该元素从祖先元素继承而来的规则。
+
+[选择器类型](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Specificity#选择器类型)
+
+下面列表中，选择器类型的优先级是递增的：
+
+1. [类型选择器](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors)（例如，`h1`）和伪元素（例如，`::before`）
+2. [类选择器](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) (例如，`.example`)，属性选择器（例如，`[type="radio"]`）和伪类（例如，`:hover`）
+3. [ID 选择器](https://developer.mozilla.org/en-US/docs/Web/CSS/ID_selectors)（例如，`#example`）。
+
+**通配选择符**（universal selector）（[`*`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Universal_selectors)）**关系选择符**（combinators）（[`+`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Adjacent_sibling_combinator), [`>`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Child_combinator), [`~`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/General_sibling_combinator), ['` `'](https://developer.mozilla.org/en-US/docs/Web/CSS/Descendant_combinator), [`||`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Column_combinator)）和 **否定伪类**（negation pseudo-class）（[`:not()`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/:not)）对优先级没有影响。（但是，在 `:not()` 内部声明的选择器会影响优先级）。
+
+给元素添加的**内联样式** (例如，`style="font-weight:bold"`) 总会覆盖外部样式表的任何样式 ，因此可看作是具有最高的优先级。
+
+---
+
+### 2. [`!important` 例外规则](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Specificity#!important_例外规则)
+
+当在一个样式声明中使用一个 `!important` 规则时，此声明将覆盖任何其他声明。虽然，从技术上讲，`!important` 与优先级无关，但它与最终的结果直接相关。使用 `!important` 是一个**坏习惯**，应该尽量避免，因为这破坏了样式表中的固有的级联规则 使得调试找bug变得更加困难了。当两条相互冲突的带有 `!important` 规则的声明被应用到相同的元素上时，拥有更大优先级的声明将会被采用。
+
+**一些经验法则：**
+
+- **一定**要优先考虑使用样式规则的优先级来解决问题而不是 `!important`
+- **只有**在需要覆盖全站或外部 CSS 的特定页面中使用 `!important`
+- **永远不要**在你的插件中使用 `!important`
+- **永远不要**在全站范围的 CSS 代码中使用 `!important`
+
+- **与其使用** **`!important`****，你可以：**
+
+1. 更好地利用 CSS 级联属性
+
+2. 使用更具体的规则。在您选择的元素之前，增加一个或多个其他元素，使选择器变得更加具体，并获得更高的优先级。
+
+   ```html
+   <div id="test">
+     <span>Text</span>
+   </div>
+   ```
+
+   
+
+   ```css
+   div#test span { color: green; }
+   div span { color: blue; }
+   span { color: red; }
+   ```
+
+   
+
+   无论 css 语句的顺序是什么样的，文本都会是绿色的（green），因为这一条规则是最有针对性、优先级最高的。（同理，无论语句顺序怎样，蓝色 blue 的规则都会覆盖红色 red 的规则）
+
+3. 对于（2）的一种特殊情况，当您无其他要指定的内容时，请复制简单的选择器以增加特异性。
+
+   ```css
+   #myId#myId span { color: yellow; }
+   .myClass.myClass span { color: orange; }
+   ```
+
+   
+
+什么的情况下可以使用 `!important`：
+
+A) 覆盖内联样式
+
+你的网站上有一个设定了全站样式的 CSS 文件，同时你（或是你同事）写了一些很差的内联样式。
+
+全局的CSS文件会在全局范围内设置网站的外观，而直接在各个元素上定义的内联样式可能会覆盖您的全局CSS文件。 内联样式和!important都被认为是非常不好的做法，但是有时你可以在CSS文件里用!important去覆盖内联样式。
+
+在这种情况下，你就可以在你全局的 CSS 文件中写一些 `!important` 的样式来**覆盖掉那些直接写在元素上的行内样式**。
+
+```css
+<div class="foo" style="color: red;">What color am I?</div>
+```
+
+
+
+```css
+.foo[style*="color: red"] {
+  color: firebrick !important;
+}
+```
+
+
+
+许多JavaScript框架和库都添加了内联样式。 有时候可以用`!important`与优先级高的选择器一起使用，**以重写覆盖这些内联样式**。
+
+B) 覆盖优先级高的选择器
+
+```css
+#someElement p {
+  color: blue;
+}
+
+p.awesome {
+  color: red;
+}
+```
+
+在外层有 `#someElement` 的情况下，你怎样能使 `awesome `的段落变成红色呢？这种情况下，如果不使用 `!important` ，第一条规则永远比第二条的优先级更高
+
+**怎样覆盖** `!important`
+
+A)很简单，只需再添加一条 带 `!important` 的CSS规则，再给这个给选择器更高的优先级（添加一个标签，ID或类）；或是添加一样选择器，把它的位置放在原有声明的后面。
+
+一些拥有更高优先级的例子：
+
+```css
+   table td { height: 50px !important; }
+.myTable td { height: 50px !important; }
+#myTable td { height: 50px !important; }
+```
+
+
+
+B)或者使用相同的选择器，但是置于已有的样式之后：
+
+```css
+td { height: 50px !important; }
+```
+
+C)或干脆改写原来的规则，以避免使用 `!important`。
+
+```css
+[id="someElement"] p {
+  color: blue;
+}
+
+p.awesome {
+  color: red;
+}
+```
+
+将id作为属性选择器的一部分而不是id选择器，将使其具有与类相同的特异性。 上面的两个选择器现在具有相同的权重。 在优先级相同情况下，后面定义的CSS样式会被应用。
+
+---
+
+## 1.5 请问伪元素与伪类有什么区别？
+
+伪类：本质上是为了弥补常规CSS选择器的不足，存在DOM文档中(无标签，找不到，只有符合触发条件时才能看到 )，逻辑上存在但在文档树中却无须标识的“幽灵”分类。
+
+伪元素：本质上是创建了一个有内容的虚拟容器，不实际存在于DOM文档树中，仅在逻辑上存在，是虚拟的元素，代表某个元素的子元素
+
+比如，有以下HTML代码：
+
+```html
+<div>
+    <p>a</p>
+    <p>b</p>
+</div>
+
+```
+
+想要第一个p标签字体颜色变蓝色，使用伪类就很简单：
+
+```css
+p:first-child{
+    color:blue;
+}
+```
+
+不用伪类呢？ 就需要为第一个p标签添加一个类class，再通过类选择器添加颜色属性：
+
+```html
+<div>
+    <p class="first-child">a</p>
+    <p>b</p>
+</div>
+<style type="text/css">
+.first-child{
+    color:blue;
+}
+</style>
+```
+
+使用伪元素来实现该效果：
+
+```css
+p::first-child{
+    color:blue;
+}
+```
+
+不用伪元素呢？则需要在第一个p标签中创建一个span标签，再通过span标签选择器添加颜色属性
+
+```html
+<div>
+    <p><span>a</span></p>
+    <p>b</p>
+</div>
+<style type="text/css">
+p span{
+    color:blue;
+}
+</style>
+
+```
+
+- 伪类是通过添加“class类”来实现，伪元素是通过添加“元素”来实现，**二者本质区别：是否创造了新元素**
+- **可同时使用多个伪类**，而只能同时使用一个伪元素，伪类可理解为添加类，所以可以多个，**而伪元素在一个选择器中只能出现一次，并且只能出现在末尾**
+- 伪类和伪元素的语法不同：伪类单冒号，如：:link 、:hover ；伪元素双冒号，如：::after、::before
+
+常见的伪类及功能分类如下图可见：
+
+![img](E:\pogject\学习笔记\image\js\常见的伪类及功能分类)
+
+常见的伪元素如下表可见：
+
+| 伪元素                                   | 作用                                   |
+| ---------------------------------------- | -------------------------------------- |
+| ::before（CSS2中为 :before）             | 在选中元素之前添加内容                 |
+| ::after（CSS2中为 :after）               | 在选中元素之后添加内容                 |
+| ::first-letter（CSS1中为 :first-letter） | 向选取文字块的第一个字符添加特殊样式   |
+| ::first-line（CSS1中为 :first-line）     | 向选取文字块的首行字符添加特殊样式     |
+| ::placeholder                            | 选取字段的占位符文本(提示信息)         |
+| ::selection                              | 选取文档中高亮(反白)的部分             |
+| ::inactive-selection                     | 选取非活动状态时文档中高亮(反白)的部分 |
+| ::marker                                 | 选取列表自动生成的项目标记符号         |
+
+---
+
+## 1.7 请问你了解哪些CSS常用单位？
+
+可将单位分为绝对单位与相对单位，**绝对单位**即固定长度的单位，不会变化，主要有：pt：Points 磅、in：Inches 英寸、mm：Millimeter 毫米、cm：Centimeter 厘米、q：Quarter millimeters 1/4毫米。
+
+**相对单位**会随着参考值得变化而变化，在开发中使用频率更高，主要有：
+
+- **px：**Pixel CSS像素，是web页面图像显示的基本单元，区别于物理像素，不是一个确定的物理量，也不是一个点或者小方块，而是CSS中的一个抽象概念，是一个相对单位，受上下文影响，默认情况（zoom100%）下1个CSS像素等于1个物理像素，若手动将页面放大或缩小，1个CSS像素就不等于1个物理像素。
+
+在一些高PPI（每英寸像素数）的设备上，1个CSS像素默认相当于多个物理像素。比如iPhone的屏幕对比一般的手机屏幕会看起来更精细清晰一些，iPhone6、7、8都是两倍屏手机，1个CSS像素等于2个物理像素，对比一般的手机屏幕会看起来更清晰一些。
+
+- **rem：**Root element meter 通过根文档（ body/html ）内文本的字体尺寸计算尺寸，如下代码示例，若未指定字体大小则为浏览器默认字体大小（浏览器默认字体大小为16px)。
+
+```html
+<body>     
+<div class="element"></div> 
+</body>  
+<style type="text/css">  
+body {     
+    font-size: 14px; 
+} 
+.element {     
+    font-size: 16px;     
+    width: 2rem;     /* 2rem === 28px */ 
+} 
+</style>
+
+```
+
+- **em：**Element meter 通过当前对象内文本的字体尺寸计算尺寸，若未指定字体大小则继承自上级元素，直至 body，若body未指定则为浏览器的默认字体尺寸。
+
+```html
+<body>     
+<div class="element"></div> 
+</body>  
+<style type="text/css"> 
+body {     
+    font-size: 14px; 
+} 
+.element {     
+    font-size: 16px;     
+    width: 2em;     /* 2em === 32px */ } 
+</style>
+
+```
+
+- **%：**百分比，笼统的说是相对于父元素的百分比，不同CSS属性，百分比的表现有所不同。常见使用场景：
+
+- - width、height：width**相对于父元素**的宽；height相对于父元素的高进行百分比计算
+  - 定位relative：top、bottom相对父元素的高;  left 、right相对于父元素的宽进行计算
+  - border-radius：**相对自身标签的宽高**设置每个边角的**垂直和水平**半径
+  - margin: left、right、top、bottom**相当于父元素的宽度**进行计算
+  - 定位absolute：top、bottom**相对定位元素**的高；left 、right相对于定位元素的宽进行计算，同时位于absolute中的其他属性如width heiht margin等**都对当于定位元素**进行计算
+  - line-hight设置内联元素垂直居中时，%**相对于文本的行高**进行计算，非父元素
+
+- **vh vw：**view height/view width，相对于视口的高度和宽度，视口指屏幕可见范围，1vh 等于1/100的视口高度，1vw 等于1/100的视口宽度。假设浏览器高度950px，宽度为1920px, 1 vh = 950px/100 = 9.5 px，1vw = 1920px/100 =19.2 px
+
+---
+
+1. **物理像素与CSS像素有什么换算关系呢？**
+
+CSS像素*DPR = 物理像素
+
+像素比（DPR）：一个CSS像素占用几个物理像素
+
+---
+
+## 2.1 请问有哪些CSS浏览器兼容问题以及解决方案？
+
+目前，浏览器厂商众多，Chrome，Frirefox，Safari，Edge，IE6……对于同一段CSS代码，不同厂商、甚至同一厂商不同版本的解析效果极大可能不一致，其根本原因是浏览器内核不同，这就导致了页面显示效果不统一，产生了CSS兼容性问题
+
+目前对兼容问题的解决方案：
+
+- **浏览器CSS样式初始化**
+
+在所有CSS开始前，对某些属性初始化，以防不同浏览器的显示效果不一样，通常不推荐一味地使用通配符统一初始化样式
+
+```css
+*{
+ margin: 0;
+ padding: 0;
+}
+```
+
+- **浏览器私有属性**
+
+可直接在某个属性中额外添加浏览器私有写法，确保浏览器能识别该属性值，有两种开发思路，分别是渐近增强和优雅降级
+
+**渐进增强：**先写某些特殊浏览器能识别的私有属性，再写通用写法确保大部分浏览器能正常显示
+
+```html
+<style type="text/css">
+.test {
+  -webkit-transform:rotate(-3deg); /*Chrome/Safari*/
+  -moz-transform:rotate(-3deg); /*Firefox*/
+  -ms-transform:rotate(-3deg); /*IE*/
+  -o-transform:rotate(-3deg); /*Opera*/
+   transform:rotate(-3deg);
+  background-color: #fe3388;
+  width: 300px;
+  height: 300px;
+}
+</style>
+<body>
+<div class="test"></div>
+</body>
+```
+
+**优雅降级：**先确保大部分浏览器能正常显示，再写某些特殊浏览器能识别的私有属性
+
+```html
+<style type="text/css">
+.test {
+  width: 300px;
+  height: 300px;
+  background-color: #fe3388;
+  transform:rotate(-3deg);
+  -webkit-transform:rotate(-3deg); /*Chrome/Safari*/
+  -moz-transform:rotate(-3deg); /*Firefox*/
+  -ms-transform:rotate(-3deg); /*IE*/
+  -o-transform:rotate(-3deg); /*Opera*/
+}
+</style>
+<body>
+<div class="test"></div>
+```
+
+- **CSS hack语法（**一般情况下，尽量避免使用CSS hack，过多滥用会造成html文档混乱，不易管理与维护）
+
+1. **条件hack**，IE浏览器专有的hack方式，微软官方推荐
+
+```css
+<!--[if IE]> 	
+这段文字只在IE浏览器显示 	
+<![endif]-->
+<!--[if gte IE 6]> 	
+这段文字只在IE6以上(包括)版本IE浏览器显示 	
+<![endif]-->
+```
+
+  **2.** **属性级hack** CSS样式属性名前加上一些只有特定浏览器才能识别的hack前缀，以达到预期的页面展现效果
+
+```css
+.test {
+  color: red; /* All browsers */
+  *color: blue;  /* IE7，IE6 */
+  _color: skyblue;  /* IE6 */
+}
+```
+
+  **3.** **选择符级hack，**在CSS选择器前加上一些只有某些特定浏览器才能识别的前缀
+
+```css
+*html /* *前缀只对IE6生效*/
+*+html /* *+前缀只对IE7生效*/
+@media screen\9{...} /*只对IE6/7生效*/
+@media \0screen {body { background: red; }} /*只对IE8有效*/
+@media \0screen\,screen\9{body { background: blue; }} /*只对IE6/7/8有效*/
+@media screen\0 {body { background: green; }} /*只对IE8/9/10有效*/
+@media screen and (min-width:0\0) {body { background: gray; }} /*只对IE9/10有效*/ 
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {body { background: orange; }} /*只对IE10有效*/
+```
+
+- **自动化插件**
+
+在解析CSS文件时，插件会自动添加浏览器前缀至CSS代码中，如Autoprefixer
+
+---
+
+## 2.2 请问Flex的常见写法：flex:1表达什么含义？
+
+虽说Flex具有众多属性，但在实际开发常简写为：flex：1，再结合display：flex，就能轻松打造出自适应布局，这也是Flex布局最大的优势。实际上flex为：flex-grow flex-shrink flex-basic三者的缩写。
+
+flex-grow：定义在分配多余空间时，盒子的放大比例，默认为0，**即存在剩余空间，也不放大**
+
+flex-shrink：定义在分配多余空间时，盒子的缩小比例（多余空间可能是负值），默认为1，**即空间不足将缩小**
+
+flex-basis：定义在分配多余空间之前，**盒子占据的主轴空间**（可理解为基准值），通常根据该属性计算多余空间，默认为auto，即盒子自身大小
+
+flex取值不同，空间分配计算值不同，有以下几种常见情况：
+
+|                | flex-grow | flex-shrink | flex-basis | 解释                                                         |
+| -------------- | --------- | ----------- | ---------- | ------------------------------------------------------------ |
+| flex: 2 3 23px | 2         | 3           | 23px       | 当flex有三个值时，则依次分配给flex-grow、flex-shrink、flex-basic |
+| flex: none     | 0         | 0           | auto       | 当 flex 为none时，则计算值为0 0 auto                         |
+| flex: auto     | 1         | 1           | auto       | 当 flex 为auto时，则计算值为1 1 auto                         |
+| flex: 1        | 1         | 1           | 0%         | 当 flex 为一个非负数字，该数字为 flex-grow 值，flex-shrink 取 1，flex-basis 取 0% |
+| flex: 0%       | 1         | 1           | 0%         | 当 flex 为一个长度或百分比，该数字为 flex-basis 值，flex-grow 取 1，flex-shrink 取 1 |
+| flex: 23px     | 1         | 1           | 23px       |                                                              |
+| flex: 2 3      | 2         | 3           | 0%         | 当 flex 为两个非负数字，则分别为 flex-grow 和 flex-shrink 的值，flex-basis 取 0% |
+| flex: 2 23px   | 2         | 1           | 23px       | 当 flex 为一个非负数字和一个长度或百分比，则分别视为 flex-grow 和 flex-basis 的值，flex-shrink 取 1 |
+
+关于 flex-basis 的取值情况：
+
+- auto：盒子本身大小
+- 百分比：根据其包含块（即伸缩父容器）的主尺寸计算
+- 0：盒子本身大小，当盒子大小未定义时，按其内容来来计算
+- 可以代替width属性定义盒子大小，**同时声明width属性和flex-basic属性时，会以flex-basic的值来计算**
+
+针对以下Flex布局，算出三个盒子自适应后的最终宽度。
+
+```html
+<style type="text/css">
+.parent {
+    display: flex;
+    width: 600px;
+}
+.item-1 {
+    width: 140px;
+    flex: 2 1 0%;
+    background-color: red;
+    height: 50px;
+}
+.item-2 {
+    width: 100px;
+    flex: 2 1 auto;
+    background-color: green;
+    height: 50px;
+}
+.item-3 {
+    flex: 1 1 200px;
+    background-color: blue;
+    height: 50px;
+}
+</style>
+
+<body>
+<div class="parent">
+    <div class="item-1"></div>
+    <div class="item-2"></div>
+    <div class="item-3"></div> 
+</div>
+</body>
+```
+
+```
+主轴上父容器总尺寸： 600px
+
+子元素总基准值（flex-basis）：0% + auto + 200px = 300px，其中
+
+0% 即 600*0% = 0 宽度
+
+auto 对应取盒子自身尺寸：100px
+
+故剩余空间： 600px - 300px = 300px
+
+剩余空间为正，需要扩大子元素，伸缩放大(flex-grow)系数之和为： 2 + 2 + 1 = 5
+
+剩余空间分配如下：
+
+item-1 和 item-2 各分配 2/5，各得 300*2/5 = 120px
+
+item-3 分配 1/5，得 300*1/5 = 60px
+
+各项目最终宽度为：
+
+item-1 = 0% + 120px = 0 + 120px = 120px
+
+item-2 = auto + 120px = 100px + 120px = 220px
+
+item-3 = 200px + 60px = 260px
+```
+
+---
+
+## 2.3 请问清除浮动有哪些常用方法？
+
+目前常用清除浮动的方法主要有：
+
+  **1.** **给父元素添加 overflow：hidden（BFC布局）**
+
+overflow：hidden为隐藏溢出，当内容超过其父元素时，可以用该方式将溢出的部分裁剪掉，使页面更加美观
+
+当子元素浮动，给父元素添加overflow：hidden，按照该属性特性，将子元素超出的部分截掉，但是子元素有浮动，无法裁剪，只能父元素增加高度去包裹住子元素，从而使得父元素拥有高度，且高度随子元素自适应变化，从而清除浮动效果
+
+代码比较简洁，可以通过触发BFC方式，但是因为本身overflow的本质是溢出隐藏的效果，所以有的时候也会有一些问题存在，比如内容增多的时候不会自动换行导致内容被隐藏掉，无法显示出要溢出的元素。
+
+```html
+<style type="text/css">
+.wrap {
+    width: 520px;
+    border: 1px solid black;
+    margin: 0 auto;
+    overflow: hidden;
+    /* 加上这句话，就可以清除浮动   overflow = hidden|auto|scroll 都可以实现*/
+}
+.float{
+  width: 200px;
+  height: 200px;
+  background-color: green;
+  float: left;
+}
+.nofloat{
+  width: 300px;
+  height: 150px;
+  background-color: gray;
+  overflow: hidden;
+}
+</style>
+
+<body>
+<div class="wrap">
+   <div class="float">浮动</div>
+   <div class="nofloat">不想被浮动影响</div>
+</div>
+</body>
+```
+
+这里父容器是没有设置固定高度的，本来第一个子元素浮动之后，父元素的高度会塌陷到跟第二个子元素一样高，但由于这里分别给第二个子元素和父元素都设置了overflow:hidden ，所以它们都生成了一个新的BFC区域，根据上文提供的BFC布局规则可以得知：**BFC区域不会与float box 重叠**；**计算BFC高度时浮动元素的高度也参与计算**。所以就得到清除浮动的效果。说得比较绕，但其实清除浮动得根据自己开发中的实际情况合理使用。  
+
+**2. 给需要清除浮动元素添加clear:both**
+
+clear: both：元素的左侧和右侧均不允许出现浮动元素（摘自W3C），添加了 clear属性的元素只能通过调整自身来使自己不要和浮动元素排列在一起，不能移动别的元素。若一个元素同时设置了 float：left 和 clear：left，左边不能有浮动元素，那么这个元素就要调整自己，排到下一行，因设置了 float: left，这个元素会往左边靠拢，所以这个元素会跑到下一行，同时往左浮动
+
+```css
+.wrap {
+    width: 520px;
+    border: 1px solid black;
+    margin: 0 auto;
+}
+.float{
+  width: 200px;
+  height: 200px;
+  background-color: green;
+  float: left;
+}
+.nofloat{
+  width: 300px;
+  height: 150px;
+  background-color: gray;
+  clear: both;
+}
+```
+
+  **3. 给浮动元素下方添加空盒子**
+
+给该空盒子清除浮动（一般用clear:both），把父元素撑开，需要注意：必须是块级元素，此方法早期比较常用，会给页面增加无意义标签，**通常不建议页面中设置多个无意义标签。**
+
+```html
+<style type="text/css">
+.wrap {
+    width: 520px;
+    border: 1px solid black;
+    margin: 0 auto;
+}
+.float{
+  width: 200px;
+  height: 200px;
+  background-color: green;
+  float: left;
+}
+.nofloat{
+  width: 300px;
+  height: 150px;
+  background-color: gray;
+}
+.clear{
+  clear: both;
+}
+</style>
+
+<body>
+<div class="wrap">
+   <div class="float">浮动</div>
+   <div class="clear"></div>
+     <br class="clear" />    <!--也可以使用br等别的块级元素来清除浮动-->
+   <div class="nofloat">不想被浮动影响</div>
+</div>
+</body>
+```
+
+  **4. 利用after伪元素清除浮动::after**
+
+该种方式的原理和方法3一样，添加一个内容为空的伪类，同时清除浮动（一般用clear:both），**这里用伪类代替了空盒子，避免增加无意义标签**
+
+```html
+<style type="text/css">
+.wrap {
+    width: 520px;
+    border: 1px solid black;
+    margin: 0 auto;
+}
+.float{
+  width: 200px;
+  height: 200px;
+  background-color: green;
+  float: left;
+}
+.nofloat{
+  width: 300px;
+  height: 150px;
+  background-color: gray;
+}
+.clearfix:after{
+  content:".";  /*尽量不要为空，一般写一个点*/
+  display: block;
+  height: 0;
+  clear: both;
+  overflow: hidden;
+  visibility: hidden;
+}
+   .clearfix {
+    *zoom: 1;   /*  *只有IE6,7识别 */
+}
+</style>
+
+<body>
+<div class="wrap clearfix">
+   <div class="float">浮动</div>
+   <div class="nofloat">不想被浮动影响</div>
+</div>
+```
+
+**5. 利用after伪元素空余字符法**
+
+```css
+.clearfix::after{
+    content:"\200B";   /* content:'\0200'; 也可以 */
+    display:block;
+    height:0;
+    clear:both;
+}
+
+.clearfix {
+    *zoom: 1; 
+}
+```
+
+  **6.** **让父元素也浮动**
+
+以浮制浮，父元素与子元素一起脱离文档流浮动，这样父元素就能自适应子元素高度，此方法有较大弊端，一定会影响父元素之后的元素排列，影响页面整体布局
+
+```css
+.wrap {
+    width: 520px;
+    border: 1px solid black;
+    margin: 0 auto;
+    float: left;
+}
+.float{
+  width: 200px;
+  height: 200px;
+  background-color: green;
+  float: left;
+}
+.nofloat{
+  width: 300px;
+  height: 150px;
+  background-color: gray;
+}
+```
+
+  **7. 给父元素添加固定高度**
+
+此方法仅适用于子元素高度已知并且固定情况
+
+----
+
+## 2.4 请问有哪些常见margin问题，有什么解决办法？
+
+### **1. 父元素margin塌陷,父子边距重合**
+
+边界重叠是指两个或多个盒子(可能相邻也可能嵌套)的相邻边界(其间没有任何非空内容、补白、边框)重合在一起而形成一个单一边界。
+
+只发生在垂直方向，父元素和第一个/最后一个子元素设置了同方向的margin值，两个属性之间没有其他内容进行隔离，导致父元素margin-top/margin-bottom塌陷
+
+父子元素的边界重叠
+
+```html
+<style>
+  .parent {
+    background: #e7a1c5;
+  }
+  .parent .child {
+    background: #c8cdf5;
+    height: 100px;
+    margin-top: 10px;
+  }
+</style>
+<section class="parent">
+  <article class="child"></article>
+</section>
+```
+
+以为期待的效果：
+
+![img](https://static.nowcoder.com/images/activity/2021jxy/front/images/1696b9ade2b71502.png)
+
+而实际上效果如下:
+
+![img](https://static.nowcoder.com/images/activity/2021jxy/front/images/1696b9aded524e48.png)
+
+在这里父元素的高度不是 110px，而是 100px，在这里发生了高度坍塌。
+
+**产生原因：**
+
+ 是如果块元素的 `margin-top` 与它的第一个子元素的 `margin-top` 之间没有 `border`、`padding`、`inline` `content`、 `clearance` 来分隔，或者块元素的 margin-bottom 与它的最后一个子元素的 margin-bottom 之间没有 `border`、`padding`、`inline` `content`、`height`、`min-height`、 `max-height` 分隔，那么外边距会塌陷。**子元素多余的外边距会被父元素的外边距截断。**
+
+**解决办法**：
+
+父子元素的边界重叠得解决方案： 在父元素上加上 overflow:hidden;使其成为 BFC。
+
+```html
+<style>
+  .parent {
+    background: #e7a1c5;
+    overflow:hidden;
+  }
+  .parent .child {
+    background: #c8cdf5;
+    height: 100px;
+    margin-top: 10px;
+  }
+</style>
+<section class="parent">
+  <article class="child"></article>
+</section>
+```
+
+
+
+常见解决办法：
+
+- 给父级元素设置边框或内边距
+- **触发BFC布局**，改变父级元素渲染规则，将父级元素独立，可给父级盒子添加：position：absolute/fixed、display：inline-block、float：left/right、overflow：hidden等一些触发BFC的属性，但是使用的时候都会带来不同的问题，具体使用中还需根据具体情况选择
+- 给子元素前面添加一个空的兄弟元素，其overflow设为hidden，起隔离作用
+
+```html
+    <style type="text/css">
+      .parent{
+        width: 500px;
+        height: 500px;
+        background-color: blue;
+        margin: 20px;
+      }
+      .child{
+        width: 200px;
+        height: 200px;
+        background-color: orange;
+        margin: 50px;
+      }
+      .sub{
+        overflow: hidden;
+      }
+    </style>
+      </head>
+
+<body>
+<div class="parent">
+  <div class="sub"></div>
+  <div class="child"></div>
+</div>
+```
+
+重叠意义：外边距的重叠只产生在普通流文档的上下外边距之间，这个看起来有点奇怪的规则，其实有其现实意义。设想，当我们上下排列一系列规则的块级元素（如段落P）时，那么块元素之间因为外边距重叠的存在，段落之间就不会产生双倍的距离。
+
+解决方法： 
+
+外层元素padding代替
+内层元素透明边框 border:1px solid transparent;
+内层元素绝对定位 postion:absolute:
+外层元素 overflow:hidden;
+内层元素 加float:left;或display:inline-block;
+内层元素padding:1px;
+
+----
+
+###  **2. 同级元素margin重叠**
+
+只发生在垂直方向，在同一个BFC区域内，相邻的兄弟元素会出现margin重叠情况，通常是上一个盒子的margin-bottom和下一个盒子的margin-top，叠加后的间距通常是：**两者为正取大值**（如下图所示效果），**一正一负/两者为负取两者之和**
+
+![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632985623694/974EDA43625E4786A64431DC1560371A)
+
+```html
+    <style type="text/css">
+      .parent{
+        width: 500px;
+        height: 800px;
+        background-color: gray;
+        margin: 20px;
+        overflow: hidden;
+      }
+      .child1{
+        width: 200px;
+        height: 200px;
+        background-color: blue;
+        margin: 100px;
+      }
+      .child2{
+        width: 200px;
+        height: 200px;
+        background-color: green;
+        margin: 50px;
+      }
+    </style>
+      </head>
+
+<body>
+<div class="parent">
+  <div class="child1"></div>
+  <div class="child2"></div>
+</div>
+```
+
+**分析原因：**在于child1的margin-bottom的参照元素是child2，而child2的margin-top的参照元素恰好是child1，这就导致了它俩之间的间距就会以**两值中最大的那个**为实际效果。这个现象其实和我们生活中很多场景很像，仔细想想应该不难理解。
+
+常见解决办法：
+
+触发BFC布局，改变元素渲染规则，将其中一个元素独立出来
+
+**解决方法**：只设置一个元素的margin-top或者margin-bottom，避免margin重叠。 
+
+```
+
+```
+
+---
+
+###  **3. 空元素自身margin重叠**
+
+若一个无内容的空元素，同时设置了margin-top与margin-bottom，则会发生重叠，如下图所示效果
+
+![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632985644955/FF6C2EB8F4D5CC20E8B3FCF9601FC281)
+
+---
+
+## 2.5 请问display:none、visibility:hidden、opacity:0有什么异同点？
+
+相同点：都可以让网页中某个元素隐藏
+
+不同点：
+
+- **空间占据**
+
+display:none：元素没有被渲染，不存在于Render Tree中，不保留元素位置，在页面上彻底消失，可理解为：看不见摸不到
+
+visibility:hidden：存在于Render Tree中，元素在网页上不可见，但元素位置没有改变，可理解为：看不见但摸得到
+
+opacity:0 ：会占据空间
+
+- **子元素**
+
+display:none：所有子元素都会被隐藏，占据的空间会消失，不可点击，也不可被访问
+
+visibility:hidden：具有继承性，给父元素设置，子元素也会继承，但若重新给子元素设置visibility: visible，子元素又会显示
+
+opacity:0 ：具有继承性，**不能**通过设置子元素的 opacity:1 使其显示
+
+- **DOM结构**
+
+display:none：影响DOM结构，会触发回流，计数器不会计数，浏览器渲染开销大
+
+visibility:hidden：不影响DOM结构，计数器仍运行，只会触发重绘
+
+opacity:0 ：只会触发重绘
+
+- **事件绑定**
+
+display:none和visibility:hidden：元素上绑定的事件无法触发
+
+opacity:0 ：元素上绑定的事件可以触发
+
+---
+
+## 2.6 请问src和href有什么异同点？
+
+相同点：都具有引用功能
+
+不同点：
+
+**href：**表示超文本引用，通常用于link、a等元素，**href是引用和页面关联**，在当前元素和引用资源之间建立联系
+
+**src：**source的缩写，表示资源引用，通常用于img，script，iframe等元素，**指向外部资源的位置**，指向的内部会迁入到文档中当前标签所在的位置；在请求src资源时会将其指向的资源下载并应用到当前文档中，如js脚本，img图片等元素
+
+href和src的区别
+1.href：Hypertext Reference的缩写，超文本引用，它指向一些网络资源，建立和当前元素或者说是本文档的链接关系。在加载它的时候，不会停止对当前文档的处理，浏览器会继续往下走。常用在a、link等标签。
+
+```html
+<a href="http://www.baidu.com"></a>
+<link type="text/css" rel="stylesheet" href="common.css">
+```
+
+如上面所显示的那样，当浏览器加载到link标签时，会识别这是CSS文档，并行下载该CSS文档，但并不会停止对当前页面后续内容的加载。这也是不建议使用@import加载CSS的原因。
+
+2.src：source的所写，表示的是对资源的引用，它指向的内容会嵌入到当前标签所在的位置。由于src的内容是页面必不可少的一部分，因此浏览器在解析src时会停下来对后续文档的处理，直到src的内容加载完毕。常用在script、img、iframe标签中，我们建议js文件放在HTML文档的最后面。如果js文件放在了head标签中，可以使用window.onload实现js的最后加载。
+
+```html
+<img src="img/girl.jpg">
+  
+<frame src="top.html">
+  
+<iframe src="top.html">
+  
+<script src="show.js">
+```
+
+总结：href用于建立当前页面与引用资源之间的关系（链接），而src则会替换当前标签。遇到href，页面会并行加载后续内容；而src则不同，浏览器需要加载完毕src的内容才会继续往下走。
+
+---
+
+# 页面布局
+
+---
+
+## 3.1 请问定位布局position属性有哪些取值？
+
+定位布局：页面元素CSS样式采用position属性，可在top/bottom/right/left四个方向进行位置移动，从而达到定位效果，position属性可取以下7个值：
+
+  **1. 相对定位 relative**
+
+- 不会使元素脱离文档流（原本位置会被保留，即改变位置也不会占用新位置）
+- 相对于自身原本位置移动（没有定位偏移量则对元素无影响）
+- 不影响元素本身特性（无论块级元素或行内元素，保留其原本特性）
+- 常用于提升层级，从而改变元素覆盖关系，若两个都为定位元素，后面的会覆盖前面
+
+  **2. 绝对定位 absolute**
+
+- 使元素完全脱离文档流（在文档流中不再占原来位置）
+- 行内元素设置定位效果后，支持设置宽高
+- 区块元素设置定位效果后，未设置宽度时由内容撑开宽度
+- **相对于最近一个有定位的父元素进行偏移**，如果不存在就逐级向上排查，直到相对于body元素，即相对于浏览器窗口（必须有参照物）
+- 子绝父相，一般配合相对定位使用，（将父元素设置相对定位，子元素相对于父元素偏移）
+- 可提升层级
+
+  **3. 固定定位 fixed**
+
+- 直接相对于浏览器窗口进行“绝对定位”
+- 浮动在页面中，元素位置不会随浏览器窗口滚动条滚动而变化
+- 不会受文档流动影响
+
+  **4. 粘性定位 sticky**
+
+- 基于用户的滚动来定位，在相对定位与绝对定位两者间切换。滚动前相当于position:relative，当页面滚动超出目标区域时，相当于position:fixed，会将元素固定在目标位置
+- 相对于离它最近的具有滚动框的父级元素，如果父级元素都不可以滚动，那相对于浏览器窗口计算偏移量
+- 如top: 50px，在sticky元素到达距离相对定位的元素顶部50px的位置时固定，无论怎么滚动，都不再向上移动
+- 兼容性不好，如Internet Explorer, Edge 15 及更早 IE 版本不支持 sticky 定位，通常需要结合CSS3兼容方案
+
+  **5. 静态定位 static**
+
+- 默认定位，遵循正常的文档流
+- 元素不会受到影响
+
+  **6. 继承值 inherit**
+
+- 从父元素继承 position 属性值
+
+  **7. 初始值 initial**
+
+- initial 关键字可用于任何 HTML 元素上任何 CSS 属性
+- 可将所有CSS属性恢复到初始状态
+
+---
+
+###  **1. fixed定位会出现失效情况吗？有什么解决办法吗？**
+
+存在常见3种fixed定位失效情况：
+
+    (1) 父元素的transform属性值不为none时，子元素的fixed失效（比较常见，仅在部分浏览器中失效）
+    
+    失效原因：当元素祖先的 transform 属性非 none 时，**定位容器由视口改为该祖先**（摘自MDN）
+    
+    解决办法：
+    
+    经过实验发现，absolute定位在该情况下不会失效，**可利用absolute定位模拟fixed效果**，
+
+主要**实现思路**：将html的滚动条禁用，开启body滚动条，对该元素absolute定位，并不设置父级元素定位，会相对document定位，但其滚动条未开启，不会受body滚动影响
+
+```
+
+```
+
+   (2)  perspective属性值不为none时（不常见）
+
+    浏览器都不支持 perspective 属性，Chrome 和 Safari 支持替代的 -webkit-perspective 属性，目前可行办法就是删掉perspective属性
+    
+    (3)  元素的will-change中指定了任意 CSS 属性
+    
+    目前可行办法就是尽量避免给fixed定位元素设置will-change
+
+---
+
+## 3.2 请问你了解浮动布局float属性吗？
+
+浮动布局：为方便页面设计，给元素设置float属性，将元素脱离文档流，浮动框进行左右移动，直至外边缘遇到包含框或者另一个浮动框边缘，**再通过margin属性调整位置**，float属性可取3个值：left：左浮动、right：右浮动、none：不浮动（默认）
+
+浮动的影响：
+
+- 改变块级元素的排列方式，内容从上下排列显示变成水平排列显示
+- 浮动元素会脱离文档流，**不占位**，盒子重叠，内容不重叠
+- 浮动的块级元素的宽度由内容撑开，行内元素可设宽高、margin和padding均有效，**可理解为隐式转换为inline-block元素**
+
+---
+
+### 1. 浮动布局最常产生什么问题？
+
+通常父级盒子不设置高度时，高度将由内容或子元素撑开，当子元素浮动脱离文档流后， 父盒子就会出现高度塌陷，边框变成一条线，通常需要清除浮动来解决该问题
+
+---
+
+### 2.怎么理解css文档流/元素脱离文档流后有什么特点
+
+文档流处在文档的最底层，它规定了一个页面的位置和元素布局等规则。
+我们所创建的元素都处在文档流中，文档流所指定的规则比如块级元素独占一行，内联元素不会独占一行，内联元素不能设置高宽，父元素的高度由子元素撑开等。文档流之所以称为流，是它的布局像流一样从上到下在从左到右。
+而元素脱离文档流之后，该元素便不再遵循文档流的规则，比如块级元素不再独占一行，内联元素脱离文档流之后可以设置高宽，脱离的元素不能撑开父元素，不再在文档流中占有位置等。
+而脱离文档流的设置有两种：float，position：absolute
+
+1、float
+（我的理解是通过设置float来脱离文档流，脱离后的元素会遵循文档流之外的另一套规则，暂且称为浮动规则）。
+规则如下：
+①、产生字围效果，元素不会盖住文字，文字会绕着元素布局。
+②、元素层级提高，会盖住非浮动的元素。
+③、父元素的垂直外边距不会和子元素重叠。
+④、浮动元素不会超过超过上面的非浮动元素，会排列在非浮动块元素的下一行。
+⑤、元素浮动后会尽量向页面的左上或右上浮动，直到遇到父元素边框或其它浮动元素（浮动的元素不会脱离父元素，浮动还是相对于父元素浮动）。
+⑥、浮动的元素不会超过它上边的兄弟元素，最多一边齐。
+⑦、文档流中子元素的宽度默认为父元素的100%，脱离文档流之后，块元素的高宽度都只能由内容撑开，而且浮动的子元素无法撑开父元素（除非父元素也是浮动元素）。
+⑧、内联元素浮动后会变成块级元素。
+
+2、position:absolute
+（我的理解是通过设置绝对定位来脱离文档流，脱离后的元素会遵循文档流之外的另一套规则，暂且称为绝对定位规则）。
+规则如下：
+①、 绝对定位是相对于离他最近的开启了定位的祖先元素进行定位的，没有这种祖先元素，则相对于浏览器窗口（以左上角为坐标（0，0））
+②、定位元素会提高一个层级。
+③、内联元素变块级元素，高宽都只能由内容撑开。
+④、当一个文档流中的元素前的一个元素开启了绝对定位，则这个文档流中的元素会向上移动，被前元素覆盖。（其实跟浮动规则差不多），如果没有这样的情况，则开启了绝对定位的元素如果不设置偏移量，位置不会发生变化。
+
+浮动规则≠绝对定位规则，两者不相通
+这句话的意思是一个浮动元素和一个定位元素会重叠，且绝对定位元素的层级高于浮动元素的层级（按照浮动规则，浮动的兄弟元素是不会相互覆盖的）。
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<style type="text/css">
+		#box1{
+			width: 400px;
+			height: 400px;
+			/* position: absolute; */
+			float: left;
+			background-color: red;
+		}
+		#box2{
+			width: 100px;
+		    height: 100px;
+			background: green;
+			float:left;
+			/* position: absolute; */
+	</style>
+	<body>
+		<div id="box1">	
+		</div>
+		<div id="box2">
+		</div>
+	</body>
+</html>
+
+```
+
+（当两个元素都开启绝对定位且不设置偏移量时，两个元素也会像上面这个图一样相互覆盖）
+
+---
+
+## 3.3 请问BFC布局有哪些特点、触发条件以及实际应用？
+
+BFC（Block Formatting Context）：格式化上下文，也称BFC布局，是Web页面中盒模型布局的CSS渲染模式，**指一个独立的渲染区域，与其他元素隔离，不受外部布局影响**
+
+BFC布局特点：
+
+- 在BFC区域内，内部盒子会在垂直方向上一个接一个地放置
+- 在BFC区域内，内部盒子垂直方向上的距离由margin决定。（可理解为：属于同一个BFC的两个相邻盒子的上下margin会发生重叠）
+- 同一个BFC区域内，**设置了float属性的盒子不会重叠**
+- BFC就是页面上的一个隔离的独立容器，容器内外元素互不影响
+- 计算BFC的高度时，区域内的浮动元素也参与计算
+
+BFC布局触发条件（满足任意一个即可形成BFC）：
+
+- 根元素<html>
+- 浮动元素：float不为none
+- 绝对定位元素：position（absolute、fixed）
+- display为inline-block、table-cells、table-caption、flex、inline-flex
+- overflow不为visible（hidden、auto、scroll）
+
+BFC布局实际应用：
+
+- 清除浮动，通过设置overflow:hidden解决父元素坍塌问题
+- 垂直margin合并，BFC区域内两个相邻元素的垂直外边距会发生叠加，**叠加后的外边距为两者外边距的最大值。这样可保持各区域间上下间距一致**，比如多个段落之间与顶部底部的边距保持一致
+- 防止垂直 margin 合并，**反之可以在元素外层包裹一层容器，并触发该容器生成一个新的BFC布局**，与相邻元素隔离开来
+- 实现自适应双栏、三栏布局，利用浮动、定位、Flex布局原理可实现多种自适应布局
+
+---
+
+## 3.4 请问如何将一个<div>盒子在页面垂直水平居中？
+
+### 元素宽高固定时（设元素宽高为100px）：
+
+- **absolute + 负margin**
+
+```html
+<style type="text/css">
+  .box{
+    width: 100px;
+    height: 100px;
+    background-color: gray;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -50px;
+    margin-top: -50px;
+  }
+</style>
+<body>
+  <div class="box"></div>
+</body>
+```
+
+- **absolute + margin auto**
+
+```css
+  .box{
+    width: 100px;
+    height: 100px;
+    background-color: gray;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+  }
+```
+
+- **absolute + calc()**
+
+```css
+  .box{
+    width: 100px;
+    height: 100px;
+    background-color: gray;
+    position: absolute;
+    top: calc(50% - 50px);
+    left: calc(50% - 50px);
+  }
+```
+
+### 元素宽高未知时：
+
+- absolute + transform
+
+```html
+<style type="text/css">
+  .box{
+    background-color: gray;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+  }
+</style>
+<body>
+  <div class="box">元素宽高未知</div>
+</body>
+```
+
+- table，需要先打造一个表格结构，再将盒子放入单元格中，表格单元格中的**内容本身就是垂直居中的**，此法弊端：增加了很多冗余代码
+
+```html
+<style type="text/css">
+  .wrap{
+    width: 200px;
+    height: 200px;
+    border: 1px solid black;
+    text-align: center;
+  }
+  .box{
+    background-color: gray;
+    display: inline-block;
+  }
+</style>
+<body>
+  <body>
+  <table>
+    <tbody>
+      <tr>
+        <td class="wrap">
+          <div class="box">元素宽高未知</div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+```
+
+- css-table，CSS新增的table属性，直接把普通元素，变为table元素的现实效果，原理与用table一样，但没有那么多的冗余代码
+
+```html
+<style type="text/css">
+  .wrap{
+    width: 200px;
+    height: 200px;
+    border: 1px solid black;
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+  }
+  .box{
+    background-color: gray;
+    display: inline-block;
+  }
+</style>
+<body>
+  <div class="wrap">
+      <div class="box">元素宽高未知</div>
+  </div>
+</body>
+```
+
+- flex布局
+
+```html
+<style type="text/css">
+  .wrap{
+    width: 200px;
+    height: 200px;
+    border: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .box{
+    background-color: gray;
+  }
+</style>
+<body>
+  <div class="wrap">
+      <div class="box">元素宽高未知</div>
+  </div>
+</body>
+```
+
+- grid布局，CSS新出的网格布局，代码量少，但兼容性不太好
+
+```html
+<style type="text/css">
+  .wrap{
+    width: 200px;
+    height: 200px;
+    border: 1px solid black;
+    display: grid;
+  }
+  .box{
+    background-color: gray;
+    align-self: center;
+    justify-self: center;
+  }
+</style>
+<body>
+  <div class="wrap">
+      <div class="box">元素宽高未知</div>
+  </div>
+</body>
+```
+
+总结：宽高固定时，推荐absolute + 负margin；宽高不固定，推荐flex
+
+---
+
+## 3.5 请问实现自适应两栏布局（左定宽，右宽度自适应）有哪些方法？
+
+```html
+<style type="text/css">
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
+  }
+  .right{
+    height: 200px;
+    background-color: #c0c0c0;
+  }
+</style>
+<body>
+  <div class="wrap">
+    <div class="left">左侧固定内容</div>
+    <div class="right">右侧内容自适应</div>
+  </div>
+</body>
+```
+
+- **float**
+
+```css
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
+      
+    float: left;
+  }
+  .right{
+    height: 200px;
+    background-color: #c0c0c0;
+      
+    margin-left: 200px;
+  }
+```
+
+- **absolute**
+
+```css
+  .wrap{
+    position: relative;
+  }
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .right{
+    height: 200px;
+    background-color: #c0c0c0;
+
+    margin-left: 200px;
+  }
+```
+
+- **table**
+
+```css
+  .wrap{
+    display: table;
+    width: 100%;
+  }
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
+
+    display: table-cell;
+  }
+  .right{
+    height: 200px;
+    background-color: #c0c0c0;
+
+    display: table-cell;
+  }
+```
+
+- **calc()**
+
+```css
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
+
+    float: left;
+  }
+  .right{
+    height: 200px;
+    background-color: #c0c0c0;
+
+    float: left;
+    width: calc(100% - 200px);
+  }
+```
+
+- **inline-block+calc()**
+
+```css
+  .wrap{
+    width: 100%;
+  }
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
+
+    display: inline-block;
+  }
+  .right{
+    height: 200px;
+    background-color: #c0c0c0;
+
+    display: inline-block;
+    width: calc(100% - 200px);  /* 谷歌和火狐都不能达到目的*/
+  }
+```
+
+- **flex布局**
+
+```css
+  .wrap{
+    display: flex;
+  }
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
+
+    flex: 0 0 auto;
+  }
+  .right{
+    height: 200px;
+    background-color: #c0c0c0;
+
+    flex: 1;
+  }
+```
+
+---
+
+## 3.6 请问实现自适应三栏布局（左右定宽，中间宽度自适应）有哪些方法？
+
+- 左边左浮动，右边右浮动，中间自适应，需注意：**中间盒子必须放在DOM结构的最后**，若放在第一个，会占据第一行文档流位置，左右两边的盒子只能在第二行浮动
+
+```html
+<style type="text/css">
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
+
+    float: left;
+  }
+  .right{
+    width: 400px;
+    height: 200px;
+    background-color: #9899ff;
+
+    float: right;
+  }
+  .center{
+    height: 200px;
+    background-color: #c0c0c0;
+
+    margin: 0 400px 0 200px; /*为左右两盒子留出位置*/
+  }
+</style>
+<body>
+  <div class="wrap">
+    <div class="left">左侧固定内容</div>
+    
+    <div class="right">右侧宽度固定</div>
+    
+    <div class="center">中间宽度自适应</div>
+  </div>
+```
+
+- 左右两盒子绝对定位，中间自适应，三个盒子的先后顺序无要求
+
+```html
+<style type="text/css">
+  .wrap{
+    position: relative;
+  }
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .right{
+    width: 400px;
+    height: 200px;
+    background-color: #9899ff;
+
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  .center{
+    height: 200px;
+    background-color: #c0c0c0;
+
+    margin: 0 400px 0 200px; /*为左右两盒子留出位置*/
+  }
+</style>
+<body>
+  <div class="wrap">
+    <div class="left">左侧固定内容</div>
+    <div class="center">中间宽度自适应</div>
+    <div class="right">右侧宽度固定</div>
+  </div>
+</body>
+```
+
+- flex布局，左右两盒子定宽，中间盒子flex：1，flex-grow：1、flex-shrink：1、flex-basic：0%，中间盒子的宽度：自动分配父元素除去左右盒子后的宽度，其次，弹性布局中盒子默认水平方向排列，需注意：必须最外层加一个大盒子，且中间盒子必须放在中间，按左中右顺序排列
+
+```css
+  .wrap{
+    display: flex;
+  }
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
+  }
+  .right{
+    width: 400px;
+    height: 200px;
+    background-color: #9899ff;
+  }
+  .center{
+    height: 200px;
+    background-color: #c0c0c0;
+
+    flex: 1;  /*等同于flex-grow：1、flex-shrink：1、flex-basic：0%*/
+  }
+```
+
+- 圣杯布局法，浮动+负margin，此方法逻辑上稍复杂，建议大家一步步理解后再实践一下，**center盒子必须放在DOM结构第一个**
+
+```html
+<div class="container">
+    <div class="center"></div>
+    <div class="left"></div>
+    <div class="right"></div>
+</div>
+```
+
+**步骤1：center盒子**宽度100%，左右两边盒子定宽
+
+**步骤2：三个盒子**先设置相对定位，再左浮动，脱离文档流
+
+为什么用relative 而不用 absolute呢？因为**设置absolute会让float失效**，而relative就不存在这个问题
+
+**步骤3：left盒子** margin-left：-100%（直接将left盒子拉到center盒子左边），这里效果不等同取left盒子宽度（left盒子会跑到center盒子右边），margin设置-100%就等价于把left盒子向左移动视窗宽度的距离，等价于left盒子直接放置到最左边
+
+**步骤4：left盒子**会覆盖center盒子左边部分内容，要把center盒子内容拉出来，在外围container加上左右padding，值分别为左右两盒子宽度，此时left盒子也会跟过来，left盒子设置left：-自身盒子宽度
+
+**步骤5：right盒子** margin-left：-自身盒子宽度，移动到center盒子右边，不需要盒子处于最左端，所以不需要-100%，仅让它回到第一行即可
+
+**步骤6：right盒子** right -自身盒子宽度，就可以让它不覆盖center盒子右边部分内容
+
+完整的CSS代码如下：
+
+```html
+<style type="text/css">
+  .wrap{
+    padding: 0 400px 0 200px;
+  }
+  .center,.left,.right{
+    position: relative;
+    float: left;
+  }
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
+
+    margin-left: -100%;
+    left: -200px;
+  }
+  .right{
+    width: 400px;
+    height: 200px;
+    background-color: #9899ff;
+
+    margin-left: -400px;
+    right: -400px;
+  }
+  .center{
+    height: 200px;
+    background-color: #c0c0c0;
+
+    width: 100%;
+  }
+</style>
+<body>
+  <div class="wrap">
+    <div class="center">中间宽度自适应</div>
+    <div class="left">左侧固定内容</div>
+    <div class="right">右侧宽度固定</div>
+  </div>
+</body>
+```
+
+- 双飞翼布局法，前半部分与圣杯布局基本一致，三栏全部float浮动，但左右两盒子加上负margin让其跟中间盒子并排，以形成三栏布局。
+
+**不同处：**对于中间盒子被覆盖问题的解决思路：直接在center盒子内部创建子盒子用于放置内容，对该子盒子设置margin-left和margin-right为左右两盒子留出位置
+
+简单地说，对比圣杯布局，双飞翼布局比圣杯布局多创建了一个div，但不用相对布局
+
+```html
+<style type="text/css">
+  .center,.left,.right{
+    position: relative;
+    float: left;
+  }
+  .left{
+    width: 200px;
+    height: 200px;
+    background-color: #389777;
+
+    margin-left: -100%;
+  }
+  .right{
+    width: 400px;
+    height: 200px;
+    background-color: #9899ff;
+
+    margin-left: -400px;
+  }
+  .center{
+    height: 200px;
+    background-color: #c0c0c0;
+
+    width: 100%;
+  }
+  .main{
+    margin: 0 400px 0 200px;
+  }
+</style>
+<body>
+  <div class="wrap">
+    <div class="center">
+      <div class="main">中间宽度自适应</div>
+    </div>
+    <div class="left">左侧固定内容</div>
+    <div class="right">右侧宽度固定</div>
+  </div>
+</body>
+```
+
+---
