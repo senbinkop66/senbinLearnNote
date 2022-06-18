@@ -1,110 +1,420 @@
 -------
 
-## 10.1 继承相关
+## 1. css有哪些可继承的属性
 
-css的继承：就是给父级设置一些属性，子级继承了父级的该属性，这就是我们的css中的继承。 官方解释，继承是一种规则，它允许样式不仅应用于特定的html标签元素，而且应用于其后代元素。
+css的继承：就是给父级设置一些属性，子级继承了父级的该属性，这就是我们的css中的继承。 官方解释，继承是一种规则，它允许样式不仅应用于特定的html标签元素，而且应用于其后代元素。继承是指的是给父元素设置一些属性，后代元素会自动拥有这些属性。
 
-**无继承性的属性**
+### 有继承性的属性
 
-1、display：规定元素应该生成的框的类型
+继承中比较特殊的几点：
 
-2、文本属性：
+- a 标签的字体颜色不能被继承
+- h1-h6标签字体的大下也是不能被继承的
 
-vertical-align：垂直文本对齐
+#### (1) 字体系列属性
 
-text-decoration：规定添加到文本的装饰
-
-text-shadow：文本阴影效果
-
-white-space：空白符的处理
-
-unicode-bidi：设置文本的方向
-
-3、盒子模型的属性：width、height、margin 、margin-top、margin-right、margin-bottom、margin-left、border、 border-style、border-top-style、border-right-style、border-bottom-style、border-left-style、border-width、border-top-width、border-right-right、border-bottom-width、border-left-width、border-color、border-top-color、border-right-color、border-bottom-color、border-left-color、border-top、border-right、border-bottom、border-left、padding、padding-top、padding-right、padding-bottom、padding-left
-
-4、背景属性：background、background-color、background-image、background-repeat、background-position、background-attachment
-
-5、定位属性：float、clear、position、top、right、bottom、left、min-width、min-height、max-width、max-height、overflow、clip、z-index
-
-6、生成内容属性：content、counter-reset、counter-increment
-
-7、轮廓样式属性：outline-style、outline-width、outline-color、outline
-
-8、页面样式属性：size、page-break-before、page-break-after
-
-9、声音样式属性：pause-before、pause-after、pause、cue-before、cue-after、cue、play-during
-
-**有继承性的属性**
-
-1、字体系列属性
-
+```css
 font：组合字体
-
 font-family：规定元素的字体系列
-
 font-weight：设置字体的粗细
-
 font-size：设置字体的尺寸
-
 font-style：定义字体的风格
-
 font-variant：设置小型大写字母的字体显示文本，这意味着所有的小写字母均会被转换为大写，但是所有使用小型大写 字体的字母与其余文本相比，其字体尺寸更小。
 
 font-stretch：对当前的 font-family 进行伸缩变形。所有主流浏览器都不支持。
-
 font-size-adjust：为某个元素规定一个 aspect 值，这样就可以保持首选字体的 x-height。
+```
 
-2、文本系列属性
+#### (2) 文本系列属性
 
+```css
 text-indent：文本缩进
-
 text-align：文本水平对齐
-
 line-height：行高
-
 word-spacing：增加或减少单词间的空白（即字间隔）
-
 letter-spacing：增加或减少字符间的空白（字符间距）
-
 text-transform：控制文本大小写
-
 direction：规定文本的书写方向
+color：文本颜色 ,  a元素除外
+```
 
-color：文本颜色 a元素除外
+#### (3) 元素可见性
 
-3、元素可见性：visibility
+```css
+visibility: visible; /* hidden, collapse */
+```
 
-4、表格布局属性：caption-side、border-collapse、border-spacing、empty-cells、table-layout
+#### (4) 表格布局属性：
 
-5、列表布局属性：list-style-type、list-style-image、list-style-position、list-style
+```css
+caption-side:  /* 将表格的标题<caption> 放到规定的位置 */
+border-collapse: 用来决定表格的边框是分开的还是合并的
+border-spacing: 指定相邻单元格边框之间的距离
+empty-cells:  属性定义了用户端 user agent 应该怎么来渲染表格 <table> 中没有可见内容的单元格的边框和背景。
+table-layout:  定义了用于布局表格单元格，行和列的算法
+```
 
-6、生成内容属性：quotes
+#### (5) 列表布局属性
 
-7、光标属性：cursor
+```css
+list-style-type
+list-style-image
+list-style-position
+list-style
+```
 
-8、页面样式属性：page、page-break-inside、windows、orphans
+#### (6) 引号类型
 
-9、声音样式属性：speak、speak-punctuation、speak-numeral、speak-header、speech-rate、volume、voice-family、 pitch、pitch-range、stress、richness、、azimuth、elevation
+```css
+quotes: 用于设置引号的样式。
 
-**所有元素可以继承的属性**
+/* Keyword value */
+quotes: none;
+
+/* <string> values */
+quotes: "«" "»";           /* Set open-quote and close-quote to the French quotation marks */
+quotes: "«" "»" "‹" "›";   /* Set two levels of quotation marks */
+
+/* Global values */
+quotes: inherit;
+quotes: initial;
+quotes: unset;
+```
+
+#### (7) 光标属性
+
+```css
+cursor: 设置光标的类型
+
+cursor: /* help, wait, crosshair, not-allowed, zoom-in, grab; */
+```
+
+#### (8)页面样式属性
+
+```css
+@page: 用于在打印文档时修改某些 CSS 属性
+page-break-inside: 调整当前元素内的分页符
+windows:
+orphans: 设置块容器中必须显示在页面、区域或列底部的最小行数。
+```
+
+#### (9) 声音样式属性
+
+```
+speak、speak-punctuation、speak-numeral、speak-header、speech-rate、volume、voice-family、 pitch、pitch-range、stress、richness、、azimuth、elevation
+```
+
+### 所有元素可以继承的属性
 
 1. 元素可见性：visibility
 2. 光标属性：cursor
 
-**内联元素可以继承的属性**
+### 内联元素可以继承的属性
 
 1. 字体系列属性
 2. 除text-indent、text-align之外的文本系列属性
 
-**块级元素可以继承的属性**
+----
 
-1. text-indent、text-align
+## 2.块元素哪些属性可以继承？
+
+text-indent、text-align、visibility、cursor
+
+----
+
+## 3. 没有继承性的属性
+
+- display
+- 文本属性：vertical-align、text-decoration
+- 盒子模型的属性：宽度、高度、内外边距、边框等
+- 背景属性：背景图片、颜色、位置等
+- 定位属性：浮动、清除浮动、定位position等
+- 生成内容属性：content、counter-reset、counter-increment
+- 轮廓样式属性：outline-style、outline-width、outline-color、outline
+- 页面样式属性：size、page-break-before、page-break-after
+
+----
+
+## 4. 请问CSS选择器有哪些
+
+CSS选择器可将CSS样式表与HTML元素进行一一绑定，实现一对一，一对多、多对一的样式控制。CSS样式具有三大特性：**继承、 优先级和层叠**
+
+**继承**：即子类元素继承父类的样式
+
+**优先级**：指不同类别样式的权重比较
+
+**层叠**：当数量相同时，后者覆盖前者
+
+它是元素和其他部分组合起来告诉浏览器哪个HTML元素应当是被选为应用规则中的CSS属性值的方式。选择器所选择的元素，叫做“选择器的对象”
+
+CSS选择器分类众多，主要可分为以下几类：
+
+
+
+| 类型           | 示例                                                         |
+| -------------- | ------------------------------------------------------------ |
+| 通用选择器     | ` * ns|* *|*`    可以将其限制为特定的名称空间或所有名称空间。 |
+| 标签选择器     | 如：body,div,p,ul,li  按照给定的节点名称，选择所有匹配的元素。 |
+| 类选择器       | 如：.classname  按照给定的 `class` 属性的值，选择所有匹配的元素。 |
+| ID选择器       | 如：#idname    按照 `id` 属性选择一个与之匹配的元素。需要注意的是，一个文档中，每个 ID 属性都应当是唯一的。 |
+| 属性选择器     | `[attr] [attr=value] [attr~=value] [attr|=value] [attr^=value] [attr$=value] [attr*=value]` 按照给定的属性，选择所有匹配的元素。 |
+| 分组选择器     |                                                              |
+| 选择器列表     | `div, span `   `,` 是将不同的选择器组合在一起的方法，它选择所有能被列表中的任意一个选择器选中的节点。 |
+| 组合器         |                                                              |
+| 后代选择器     | 如：#head .nav ul li 从父集到子孙集的选择器, （各选择器用空格键分开）组合器选择前一个元素的后代节点。 |
+| 直接子代组合器 | `A > B `    组合器选择前一个元素的直接子代的节点。           |
+| 一般兄弟组合器 | `A ~ B`  组合器选择兄弟元素，也就是说，后一个节点在前一个节点后面的任意位置，并且共享同一个父节点。 |
+| 紧邻兄弟组合器 | `A + B`      组合器选择相邻元素，即后一个元素紧跟在前一个之后，并且共享同一个父节点。 |
+| 列组合器       | `A || B`  组合器选择属于某个表格行的节点。                   |
+| 伪选择器       |                                                              |
+| 伪类           | `:` 伪选择器支持按照未被包含在文档树中的状态信息来选择元素。 |
+| 伪元素         | `::` 伪选择器用于表示无法用 HTML 语义表达的实体。            |
+|                |                                                              |
+
+
+
+----
+
+## 5.伪类选择器
+
+```css
+:link ：选择未被访问的链接
+:visited：选取已被访问的链接
+:active：选择活动链接
+:hover ：鼠标指针浮动在上面的元素
+:focus ：选择具有焦点的
+:first-child：父元素的首个子元素
+```
+
+
+
+----
+
+## 6.伪元素选择器
+
+```css
+:first-letter ：用于选取指定选择器的首字母
+:first-line ：选取指定选择器的首行
+:before : 选择器在被选元素的内容前面插入内容
+:after : 选择器在被选元素的内容后面插入内容
+```
+
+
+
+----
+
+## 7.属性选择器
+
+```css
+[attribute] 选择带有attribute属性的元素
+[attribute=value] 选择所有使用attribute=value的元素
+[attribute~=value] 选择attribute属性包含value的元素
+[attribute|=value]：选择attribute属性以value开头的元素
+```
+
+----
+
+## 8.CSS优先级如何计算
+
+### css优先级
+
+浏览器通过**优先级**来判断哪些属性值与一个元素最为相关，从而在该元素上应用这些属性值。优先级是**基于不同种类选择器组成的匹配规则。**
+
+### 优先级是如何计算的？
+
+- 优先级就是分配给指定的 CSS 声明的一个`权重`，它由 匹配的选择器中的 每一种选择器类型的 `数值` 决定。
+
+- 而当优先级与多个 CSS 声明中任意一个声明的优先级相等的时候，CSS 中最后的那个声明将会被应用到元素上。
+
+- 当同一个元素有多个声明的时候，优先级才会有意义。因为每一个直接作用于元素的 CSS 规则总是会接管/覆盖（take over）该元素从祖先元素继承而来的规则。
+
+
+**选择器类型**
+
+下面列表中，选择器类型的优先级是递增的：
+
+1. 类型选择器（例如，h1）和伪元素（例如，::before）
+2. 类选择器 (例如，.example)，属性选择器（例如，[type="radio"]）和伪类（例如，:hover）
+3. ID 选择器（例如，#example）。
+
+通配选择符（*）关系选择符（+, >, ~, ' ', ||）和 否定伪类（:not()）**对优先级没有影响**。（但是，在 :not() 内部声明的选择器会影响优先级）。
+
+给元素添加的**内联样式** (例如，`style="font-weight:bold"`) 总会覆盖外部样式表的任何样式 ，因此可看作是具有最高的优先级。
+
+**规则**
+
+```js
+ `!important `> `作为style属性行内样式`>`ID选择器` > `类选择器 = 属性选择器 = 伪类选择器` > `标签选择器= 伪元素选择器` > `通配符选择器` > `继承选择器` > `浏览器默认属性`
+```
+
+对于同一优先级选择器，后写的会覆盖先写的样式
+
+当有多个级别组合的选择器时，往往利用上述优先级排序无法得出优先级，故有以下优先级计算方式：
+
+- 每个选择器对应一个初始"四位数"：0、0、0、0
+
+- 若是 **行内选择器**，则加1、0、0、0
+
+- 若是 **ID选择器**，则加0、1、0、0
+
+- 若是 **类选择器/属性选择器/伪类选择符**，则分别加0、0、1、0
+
+- 若是 **标签选择器/伪元素选择器**，则分别加0、0、0、1
+
+最终优先级由级别权重与出现次数决定，统计元素对应的所有选择器的权重与次数，最终得到的”四位数“，从左到右进行比较，大的优先级越高。
+
+到具体的计算层⾯，优先级是由 A 、B、C、D 的值来决定的，其中它们的值计算规则如下：
+
+- 如果存在内联样式，那么 A = 1, 否则 A = 0
+- B的值等于 ID选择器出现的次数
+- C的值等于 类选择器 和 属性选择器 和 伪类 出现的总次数
+- D 的值等于 标签选择器 和 伪元素 出现的总次数
+
+```css
+#nav-global > ul > li > a.nav-link
+```
+
+套用上面的算法，依次求出 `A` `B` `C` `D` 的值：
+
+- 因为没有内联样式 ，所以 A = 0
+- ID选择器总共出现了1次， B = 1
+- 类选择器出现了1次， 属性选择器出现了0次，伪类选择器出现0次，所以 C = (1 + 0 + 0) = 1
+- 标签选择器出现了3次， 伪元素出现了0次，所以 D = (3 + 0) = 3
+
+上面算出的`A` 、 `B`、`C`、`D` 可以简记作：`(0, 1, 1, 3)`
+
+知道了优先级是如何计算之后，就来看看比较规则：
+
+- 从左往右依次进行比较 ，较大者优先级更高
+- 如果相等，则继续往右移动一位进行比较
+- 如果4位全部相等，则后面的会覆盖前面的
+
+经过上面的优先级计算规则，我们知道内联样式的优先级最高，如果外部样式需要覆盖内联样式，就需要使用`!important`
+
+需注意：
+
+- !important的优先级是最高的，但出现冲突时则需比较“四位数”
+- 通配符选择器、子选择器、相邻选择器、同胞选择器权重值为0
+- 优先级相同时，**则采用就近原则，选择最后出现的样式**
+
+----
+
+### !important 例外规则
+
+当在一个样式声明中使用一个 `!important` 规则时，此声明将覆盖任何其他声明。虽然，从技术上讲，`!important` 与优先级无关，但它与最终的结果直接相关。使用 `!important` 是一个**坏习惯**，应该尽量避免，**因为这破坏了样式表中的固有的级联规则** 使得调试找bug变得更加困难了。当两条相互冲突的带有 `!important` 规则的声明被应用到相同的元素上时，拥有更大优先级的声明将会被采用。
+
+**一些经验法则：**
+
+- **一定**要优先考虑使用样式规则的优先级来解决问题而不是 `!important`
+- **只有**在需要覆盖全站或外部 CSS 的特定页面中使用 `!important`
+- **永远不要**在你的插件中使用 `!important`
+- **永远不要**在全站范围的 CSS 代码中使用 `!important`
+
+- **与其使用** **`!important`****，你可以：**
+
+1. 更好地利用 CSS 级联属性
+
+2. 使用更具体的规则。在您选择的元素之前，增加一个或多个其他元素，使选择器变得更加具体，并获得更高的优先级。
+
+   ```html
+   <div id="test">
+     <span>Text</span>
+   </div>
+   ```
+
+   ```css
+   div#test span { color: green; }
+   div span { color: blue; }
+   span { color: red; }
+   ```
+
+   无论 css 语句的顺序是什么样的，文本都会是绿色的（green），因为这一条规则是最有针对性、优先级最高的。（同理，无论语句顺序怎样，蓝色 blue 的规则都会覆盖红色 red 的规则）
+
+3. 对于（2）的一种特殊情况，当您无其他要指定的内容时，请复制简单的选择器以增加特异性。
+
+   ```css
+   #myId #myId span { color: yellow; }
+   .myClass .myClass span { color: orange; }
+   ```
+
+   
+
+### 什么的情况下可以使用 `!important`：
+
+A) **覆盖内联样式**
+
+你的网站上有一个设定了全站样式的 CSS 文件，同时你（或是你同事）写了一些很差的内联样式。
+
+全局的CSS文件会在全局范围内设置网站的外观，而直接在各个元素上定义的内联样式可能会覆盖您的全局CSS文件。 **内联样式和!important都被认为是非常不好的做法**，但是有时你可以在CSS文件里用!important去覆盖内联样式。
+
+在这种情况下，你就可以在你全局的 CSS 文件中写一些 `!important` 的样式来**覆盖掉那些直接写在元素上的行内样式**。
+
+```css
+<div class="foo" style="color: red;">What color am I?</div>
+```
+
+```css
+.foo[style*="color: red"] {
+  color: firebrick !important;
+}
+```
+
+许多JavaScript框架和库都添加了内联样式。 有时候可以用`!important`与优先级高的选择器一起使用，**以重写覆盖这些内联样式**。
+
+B) **覆盖优先级高的选择器**
+
+```css
+#someElement p {
+  color: blue;
+}
+p.awesome {
+  color: red;
+}
+```
+
+在外层有 `#someElement` 的情况下，你怎样能使 `awesome `的段落变成红色呢？这种情况下，如果不使用 `!important` ，第一条规则永远比第二条的优先级更高
+
+### 怎样覆盖 `!important`
+
+A) 很简单，只需再添加一条 带 `!important` 的CSS规则，**再给这个给选择器更高的优先级**（添加一个标签，ID或类）；或是添加一样选择器，**把它的位置放在原有声明的后面。**
+
+一些拥有更高优先级的例子：
+
+```css
+   table td { height: 50px !important; }
+.myTable td { height: 50px !important; }
+#myTable td { height: 50px !important; }
+```
+
+B)或者**使用相同的选择器，但是置于已有的样式之后：**
+
+```css
+td { height: 50px !important; }
+```
+
+C) 或干脆改写原来的规则，以避免使用 `!important`。
+
+```css
+[id="someElement"] p {
+  color: blue;
+}
+
+p.awesome {
+  color: red;
+}
+```
+
+将id作为属性选择器的一部分而不是id选择器，将使其具有与类相同的特异性。 上面的两个选择器现在具有相同的权重。 在优先级相同情况下，后面定义的CSS样式会被应用。
+
+### :is() 和 :not() 例外规则
+
+:not 否定伪类在优先级计算中不会被看作是伪类。事实上，在计算选择器数量时还是会把其中的选择器当做普通选择器进行计数。
+
+
 
 ------
 
-#### 10.2 css预处理工具
-
-**参考答案**：
+## 9.css预处理工具
 
 **CSS 预处理器**是一个能让你通过预处理器自己独有的语法来生成CSS的程序。
 
@@ -122,53 +432,11 @@ css预处理器种类繁多，三种主流css预处理器是Less、Sass（Scss�
 
 2010年产生，来自Node.js社区，主要用来给Node项目进行CSS预处理支持，在此社区之内有一定支持者，在广泛的意义上人气还完全不如SASS和LESS。
 
-**比较**
 
-在使用 CSS 预处理器之前最重要的是理解语法，幸运的是基本上大多数预处理器的语法跟 CSS 都差不多。
-
-首先 Sass 和 Less 都使用的是标准的 CSS 语法，因此如果可以很方便的将已有的 CSS 代码转为预处理器代码，默认 Sass 使用 .sass 扩展名，而 Less 使用 .less 扩展名。
-
-```less
-h1 {
-  color: #0982C1;
-}
-```
-
-这是一个再普通不过的，不过 Sass 同时也支持老的语法，就是不包含花括号和分号的方式：
-
-```css
-h1
-color: #0982c1
-```
-
-而 Stylus 支持的语法要更多样性一点，它默认使用 .styl 的文件扩展名，下面是 Stylus 支持的语法
-
-```stylus
-/* style.styl */
-h1 {
-  color: #0982C1;
-}
-/* omit brackets */
-h1
-color: #0982C1;
-/* omit colons and semi-colons */
-h1
-color #0982C1
-```
-
-可以在同一个样式单中使用不同的变量，例如下面的写法也不会报错：
-
-```stylus
-h1 {
-  color #0982c1
-}
-h2
-font-size: 1.2em
-```
 
 ------
 
-#### 10.3 行内元素和块级元素什么区别，然后怎么相互转换
+## 10.3 行内元素和块级元素什么区别，然后怎么相互转换
 
 **参考答案:**
 
@@ -204,11 +472,7 @@ font-size: 1.2em
 
 ------
 
-#### 10.4 块元素哪些属性可以继承？
 
-**参考答案**：
-
-text-indent、text-align、visibility、cursor
 
 ------
 
@@ -2946,203 +3210,7 @@ display：inline 块级元素——>行内元素
 
 ----
 
-## 1.4 请问CSS选择器有哪些，应该如何计算优先级？
 
-CSS选择器可将CSS样式表与HTML元素进行一一绑定，实现一对一，一对多、多对一的样式控制。CSS样式具有三大特性：继承、 优先级和层叠
-
-**继承**：即子类元素继承父类的样式
-
-**优先级**：指不同类别样式的权重比较
-
-**层叠**：当数量相同时，后者覆盖前者
-
-CSS选择器分类众多，主要可分为以下几类：
-
-| 标签选择器                 | 如：body,div,p,ul,li                                   |
-| -------------------------- | ------------------------------------------------------ |
-| 类选择器                   | 如：class="head",class="head_logo"                     |
-| ID选择器                   | 如：id="name",id="name_txt"                            |
-| 全局选择器（通配符选择器） | 如：*号                                                |
-| 组合选择器                 | 如：.head .head_logo（各选择器用空格键分开）           |
-| 后代选择器                 | 如：#head .nav ul li 从父集到子孙集的选择器            |
-| 群组选择器                 | div,span,img {color:Red} 即具有相同样式的标签分组显示  |
-| 继承选择器                 | 如：div p（各选择器用空格键分开）                      |
-| 伪类选择器                 | 如：a元素的伪类，4种状态：link、visited、active、hover |
-| 字符串匹配属性选择器       | 如：^  $  *三种，分别对应开始、结尾、包含              |
-| 子选择器                   | 如：div>p （大于号>分隔）                              |
-| 相邻选择器                 | 如：h1+p（加号+分隔）                                  |
-
-CSS优先级算法：
-
-对于同一优先级选择器，后写的会覆盖先写的样式
-
-当两个不同选择器都作用到同一个HTML元素时，如果定义的属性值有冲突，那么应该受哪个选择器控制？CSS有一套固定的优先级排序：
-
-属性后面使用!important > 作为style属性行内样式>ID选择器 > 类选择器 = 属性选择器 = 伪类选择器 > 标签选择器= 伪元素选择器 > 通配符选择器 > 继承选择器 > 浏览器默认属性
-
-当有多个级别组合的选择器时，往往利用上述优先级排序无法得出优先级，故有以下优先级计算方式：
-
-每个选择器对应一个初始"四位数"：0、0、0、0
-
-若是 行内选择器，则加1、0、0、0
-
-若是 ID选择器，则加0、1、0、0
-
-若是 类选择器/属性选择器/伪类选择符，则分别加0、0、1、0
-
-若是 标签选择器/伪元素选择器，则分别加0、0、0、1
-
-最终优先级由级别权重与出现次数决定，统计元素对应的所有选择器的权重与次数，最终得到的”四位数“，从左到右进行比较，大的优先级越高。
-
-需注意：
-
-- !important的优先级是最高的，但出现冲突时则需比较“四位数”
-- 通配符选择器、子选择器、相邻选择器、同胞选择器权重值为0
-- 优先级相同时，则采用就近原则，选择最后出现的样式
-
----
-
-### 1.优先级
-
-浏览器通过**优先级**来判断哪些属性值与一个元素最为相关，从而在该元素上应用这些属性值。优先级是基于不同种类[选择器](https://developer.mozilla.org/en-US/CSS/CSS_Reference#selectors)组成的匹配规则。
-
-优先级就是分配给指定的 CSS 声明的一个权重，它由 匹配的选择器中的 每一种选择器类型的 数值 决定。
-
-而当优先级与多个 CSS 声明中任意一个声明的优先级相等的时候，CSS 中最后的那个声明将会被应用到元素上。
-
-当同一个元素有多个声明的时候，优先级才会有意义。因为每一个直接作用于元素的 CSS 规则总是会接管/覆盖（take over）该元素从祖先元素继承而来的规则。
-
-[选择器类型](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Specificity#选择器类型)
-
-下面列表中，选择器类型的优先级是递增的：
-
-1. [类型选择器](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors)（例如，`h1`）和伪元素（例如，`::before`）
-2. [类选择器](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) (例如，`.example`)，属性选择器（例如，`[type="radio"]`）和伪类（例如，`:hover`）
-3. [ID 选择器](https://developer.mozilla.org/en-US/docs/Web/CSS/ID_selectors)（例如，`#example`）。
-
-**通配选择符**（universal selector）（[`*`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Universal_selectors)）**关系选择符**（combinators）（[`+`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Adjacent_sibling_combinator), [`>`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Child_combinator), [`~`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/General_sibling_combinator), ['` `'](https://developer.mozilla.org/en-US/docs/Web/CSS/Descendant_combinator), [`||`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Column_combinator)）和 **否定伪类**（negation pseudo-class）（[`:not()`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/:not)）对优先级没有影响。（但是，在 `:not()` 内部声明的选择器会影响优先级）。
-
-给元素添加的**内联样式** (例如，`style="font-weight:bold"`) 总会覆盖外部样式表的任何样式 ，因此可看作是具有最高的优先级。
-
----
-
-### 2. [`!important` 例外规则](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Specificity#!important_例外规则)
-
-当在一个样式声明中使用一个 `!important` 规则时，此声明将覆盖任何其他声明。虽然，从技术上讲，`!important` 与优先级无关，但它与最终的结果直接相关。使用 `!important` 是一个**坏习惯**，应该尽量避免，因为这破坏了样式表中的固有的级联规则 使得调试找bug变得更加困难了。当两条相互冲突的带有 `!important` 规则的声明被应用到相同的元素上时，拥有更大优先级的声明将会被采用。
-
-**一些经验法则：**
-
-- **一定**要优先考虑使用样式规则的优先级来解决问题而不是 `!important`
-- **只有**在需要覆盖全站或外部 CSS 的特定页面中使用 `!important`
-- **永远不要**在你的插件中使用 `!important`
-- **永远不要**在全站范围的 CSS 代码中使用 `!important`
-
-- **与其使用** **`!important`****，你可以：**
-
-1. 更好地利用 CSS 级联属性
-
-2. 使用更具体的规则。在您选择的元素之前，增加一个或多个其他元素，使选择器变得更加具体，并获得更高的优先级。
-
-   ```html
-   <div id="test">
-     <span>Text</span>
-   </div>
-   ```
-
-   
-
-   ```css
-   div#test span { color: green; }
-   div span { color: blue; }
-   span { color: red; }
-   ```
-
-   
-
-   无论 css 语句的顺序是什么样的，文本都会是绿色的（green），因为这一条规则是最有针对性、优先级最高的。（同理，无论语句顺序怎样，蓝色 blue 的规则都会覆盖红色 red 的规则）
-
-3. 对于（2）的一种特殊情况，当您无其他要指定的内容时，请复制简单的选择器以增加特异性。
-
-   ```css
-   #myId#myId span { color: yellow; }
-   .myClass.myClass span { color: orange; }
-   ```
-
-   
-
-什么的情况下可以使用 `!important`：
-
-A) 覆盖内联样式
-
-你的网站上有一个设定了全站样式的 CSS 文件，同时你（或是你同事）写了一些很差的内联样式。
-
-全局的CSS文件会在全局范围内设置网站的外观，而直接在各个元素上定义的内联样式可能会覆盖您的全局CSS文件。 内联样式和!important都被认为是非常不好的做法，但是有时你可以在CSS文件里用!important去覆盖内联样式。
-
-在这种情况下，你就可以在你全局的 CSS 文件中写一些 `!important` 的样式来**覆盖掉那些直接写在元素上的行内样式**。
-
-```css
-<div class="foo" style="color: red;">What color am I?</div>
-```
-
-
-
-```css
-.foo[style*="color: red"] {
-  color: firebrick !important;
-}
-```
-
-
-
-许多JavaScript框架和库都添加了内联样式。 有时候可以用`!important`与优先级高的选择器一起使用，**以重写覆盖这些内联样式**。
-
-B) 覆盖优先级高的选择器
-
-```css
-#someElement p {
-  color: blue;
-}
-
-p.awesome {
-  color: red;
-}
-```
-
-在外层有 `#someElement` 的情况下，你怎样能使 `awesome `的段落变成红色呢？这种情况下，如果不使用 `!important` ，第一条规则永远比第二条的优先级更高
-
-**怎样覆盖** `!important`
-
-A)很简单，只需再添加一条 带 `!important` 的CSS规则，再给这个给选择器更高的优先级（添加一个标签，ID或类）；或是添加一样选择器，把它的位置放在原有声明的后面。
-
-一些拥有更高优先级的例子：
-
-```css
-   table td { height: 50px !important; }
-.myTable td { height: 50px !important; }
-#myTable td { height: 50px !important; }
-```
-
-
-
-B)或者使用相同的选择器，但是置于已有的样式之后：
-
-```css
-td { height: 50px !important; }
-```
-
-C)或干脆改写原来的规则，以避免使用 `!important`。
-
-```css
-[id="someElement"] p {
-  color: blue;
-}
-
-p.awesome {
-  color: red;
-}
-```
-
-将id作为属性选择器的一部分而不是id选择器，将使其具有与类相同的特异性。 上面的两个选择器现在具有相同的权重。 在优先级相同情况下，后面定义的CSS样式会被应用。
 
 ---
 
