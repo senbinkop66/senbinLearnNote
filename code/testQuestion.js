@@ -1,45 +1,36 @@
 /**
- * // Definition for a Node.
- * function Node(val, next) {
- *     this.val = val;
- *     this.next = next;
- * };
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
  */
-
 /**
- * @param {Node} head
- * @param {number} insertVal
- * @return {Node}
+ * @param {TreeNode} root
+ * @return {number[]}
  */
-var insert = function(head, insertVal) {
-    const node = new Node(insertVal);
-    if (!head) {
-        // 没有结点
-        node.next = node;
-        return node;
-    }
-    if (head.next === head) {
-        // 只有一个结点
-        head.next = node;
-        node.next = head;
-        return head;
-    }
-
-    let curr = head, next = head.next;
-    while (next !== head) {
-        if (insertVal >= curr.val && insertVal <= next.val) {
-            break;
+var findFrequentTreeSum = function(root) {
+    const sums = new Map();
+    let ans = [];
+    let maxSumCount = 0;
+    const dfs = (root) => {
+        let sum = root.val;
+        if (root.left !== null) {
+            sum += dfs(root.left);
         }
-        if (curr.val > next.val) {
-            //尾结点
-            if (insertVal > curr.val || insertVal < next.val) {
-                break;
-            }
+        if (root.right !== null) {
+            sum += dfs(root.right);
         }
-        curr = curr.next;
-        next = next.next;
+        sums.set(sum, sums.has(sum) ? sums.get(sum) + 1 : 1);
+        if (sums.get(sum) > maxSumCount) {
+            maxSumCount = sums.get(sum);
+            ans = [sum];
+        }else if (sums.get(sum) === maxSumCount) {
+            ans.push(sum);
+        }
+        return sum;
     }
-    curr.next = node;
-    node.next = next;
-    return head;
+    dfs(root);
+    return ans;
 };

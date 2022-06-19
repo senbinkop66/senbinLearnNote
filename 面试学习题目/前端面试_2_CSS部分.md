@@ -957,7 +957,17 @@ CSS选择器的解析是**从右向左解析的**。
 
 而在 CSS解析完毕后,需要将解析的结果与DOM Tree的内容-起进行分析建立一棵Render Tree，最终用来进行绘图。在建立Render Tree时(WebKit 中的「Attachment」过程)， 浏览器就要为每个DOM Tree中的元素根据CSS的解析结果(Style Rules)来确定生成怎样的Render Tree。
 
+CSS匹配发生在Render Tree构建时（Chrome Dev Tools将其归属于Layout过程）。此时浏览器构建出了DOM，而且拿到了CSS样式，此时要做的就是把样式跟DOM上的节点对应上，浏览器为了提高性能需要做的就是快速匹配。
 
+首先要明确一点，浏览器此时是给一个"可见"节点找对应的规则，这和jQuery选择器不同，后者是使用一个规则去找对应的节点，这样从左到右或许更快。但是对于前者，由于CSS的庞大，一个CSS文件中或许有上千条规则，而且对于当前节点来说，大多数规则是匹配不上的，稍微想一下就知道，如果从右开始匹配（也是从更精确的位置开始），能更快排除不合适的大部分节点，而如果从左开始，只有深入了才会发现匹配失败，如果大部分规则层级都比较深，就比较浪费资源了。
+
+除了上面这点，我们前面还提到DOM构建是"循序渐进的"，而且DOM不阻塞Render Tree构建（只有CSSOM阻塞），这样也是为了能让页面更早有元素呈现。
+
+考虑如下情况，如果我们此时构建的只是部分DOM，而CSSOM构建完成，浏览器就会构建Render Tree。
+
+这个时候对每一个节点，如果找到一条规则从右向左匹配，我们只需要逐层观察该节点父节点是否匹配，而此时其父节点肯定已经在DOM上。
+
+但是反过来，我们可能会匹配到一个DOM上尚未存在的节点，此时的匹配过程就浪费了资源。
 
 ----
 
@@ -4387,7 +4397,391 @@ $color-tabs-background: $color-red;
 
 ## 57.如何使用css完成视差滚动效果?
 
+视差滚动（Parallax Scrolling）是指多层背景以不同的速度移动，形成立体的运动效果，带来非常出色的视觉体验
 
+我们可以把网页解刨成：背景层、内容层、悬浮层
+
+![img](E:\pogject\学习笔记\image\css\视差滚动1)
+
+当滚动鼠标滑轮的时候，各个图层以不同的速度移动，形成视觉差的效果
+
+使用`css`形式实现视觉差滚动效果的方式有：
+
+- background-attachment
+- transform:translate3D
+
+### background-attachment
+
+作用是设置背景图像是否固定或者随着页面的其余部分滚动
+
+值分别有如下：
+
+- scroll：默认值，背景图像会随着页面其余部分的滚动而移动
+- fixed：当页面的其余部分滚动时，背景图像不会移动
+- inherit：继承父元素background-attachment属性的值
+
+**完成滚动视觉差就需要将`background-attachment`属性设置为`fixed`，**让背景相对于视口固定。及时一个元素有滚动机制，背景也不会随着元素的内容而滚动
+
+也就是说，**背景一开始就已经被固定在初始的位置**
+
+核心的`css`代码如下：
+
+```html
+    <style type="text/css">
+      div {
+        height: 100vh;
+        background: rgb(0, 0, 0, 0.7);
+        color: #fff;
+        line-height: 100vh;
+        text-align: center;
+        font-size: 20vh;
+      }
+      .img {
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center center;
+      }
+      .img1 {
+        background-image: url("./image1/bg1.jpg");
+      }
+      .img2 {
+        background-image: url("./image1/bg2.jpg");
+      }
+      .img3 {
+        background-image: url("./image1/bg3.png");
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="text">1</div>
+    <div class="img1 img">2</div>
+    <div class="text">3</div>
+    <div class="img2 img">4</div>
+    <div class="a-text">5</div>
+    <div class="img3 img">6</div>
+    <div class="text">7</div>
+  </body>
+```
+
+
+
+### transform:translate3D
+
+同样，让我们先来看一下两个概念`transform`和`perspective`：
+
+- transform: css3 属性，可以对元素进行变换(2d/3d)，包括平移 translate,旋转 rotate,缩放 scale,等等
+- perspective: css3 属性，当元素涉及 3d 变换时，perspective 可以定义我们眼睛看到的 3d 立体效果，即空间感
+
+```html
+    <style type="text/css">
+      html {
+        overflow: hidden;
+        height: 100%;
+      }
+      body {
+        /* 视差元素的父级需要3D视角 */
+        perspective: 1px;
+        transform-style: preserve-3d;
+        height: 100%;
+        overflow-y: scroll;
+        overflow-x: hidden;
+      }
+      #app {
+        width: 100vw;
+        height: 200vh;
+        background: skyblue;
+        padding-top: 100px;
+      }
+      .item {
+        width: 500px;
+        height: 200px;
+      }
+      .one {
+        background-color: #409eff;
+        transform: translateZ(0px);
+        margin-bottom: 50px;
+      }
+      .two {
+        background-color: #67c23a;
+        transform: translateZ(-1px);
+        margin-bottom: 150px;
+      }
+      .three {
+        background-color: #e6a23c;
+        transform: translateZ(-2px);
+        margin-bottom: 150px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="one item">one</div>
+      <div class="two item">two</div>
+      <div class="three item">three</div>
+    </div>
+  </body>
+```
+
+而这种方式实现视觉差动的原理如下：
+
+- 容器设置上 transform-style: preserve-3d 和 perspective: xpx，那么处于这个容器的子元素就将位于3D空间中，
+- 子元素设置不同的 transform: translateZ()，这个时候，不同元素在 3D Z轴方向距离屏幕（我们的眼睛）的距离也就不一样
+- 滚动滚动条，由于子元素设置了不同的 transform: translateZ()，那么他们滚动的上下距离 translateY 相对屏幕（我们的眼睛），也是不一样的，这就达到了滚动视差的效果
+
+
+
+----
+
+## 58.canvas在标签上设置宽高，与在style中设置宽高有什么区别？
+
+- canvas标签的width和height是**画布实际宽度和高度**，绘制的图形都是在这个上面。
+- 而style的width和height是canvas在**浏览器中被渲染的高度和宽度**。
+- 如果canvas的width和height没指定或值不正确，就被设置成默认值。
+
+
+
+----
+
+## 59. 页面导入样式时，使用link和@import有什么区别？
+
+- link属于HTML标签，而@import是css提供的；
+- 页面被加载时，link会同时被加载，而@import引用的css会等到页面被加载完再加载；
+- @import只在IE5以上才能识别，而link是XHTML标签，无兼容问题；
+- **link方式的样式的权重高于**@import的权重。
+
+
+
+---
+
+##  60.前端项目中为什么要初始化CSS样式？
+
+因为浏览器的兼容问题，**不同浏览器对标签的默认值是不同的**，如果没有对浏览器的CSS初始化，会造成相同页面在不同浏览器的显示存在差异。
+
+----
+
+## 61. CSS3新增伪类有那些？
+
+- p:first-of-type 选择属于其父元素的首个元素
+- p:last-of-type 选择属于其父元素的最后元素
+- p:only-of-type 选择属于其父元素唯一的元素
+- p:only-child 选择属于其父元素的唯一子元素
+- p:nth-child(2) 选择属于其父元素的第二个子元素
+- :enabled :disabled 表单控件的禁用状态。
+- :checked 单选框或复选框被选中。
+
+
+
+---
+
+## 62.为什么会出现浮动？什么时候需要清除浮动？清除浮动的方式有哪些？
+
+浮动元素碰到包含它的边框或者浮动元素的边框停留。**由于浮动元素不在文档流中**，所以**文档流的块框表现得就像浮动框不存在一样。**浮动元素会漂浮在文档流的块框上。
+
+浮动带来的问题：
+
+- 父元素的高度无法被撑开，影响与父元素同级的元素
+- 与浮动元素同级的**非浮动元素**（内联元素）会跟随其后
+- **若非第一个元素浮动，则该元素之前的元素也需要浮动，否则会影响页面显示的结构。**
+
+清除浮动的方式：
+
+- 父级div定义height
+- **最后一个浮动元素后加空div标签** 并添加样式clear:both。
+- 包含浮动元素的父标签添加样式overflow为hidden或auto。
+- 父级div定义zoom
+
+
+
+---
+
+## 63.什么是CSS媒体查询?
+
+媒体查询(Media Queries)早在在css2时代就存在,经过css3的洗礼后变得更加强大bootstrap的响应式特性就是从此而来的.
+
+简单的来讲媒体查询是一种用于修饰css何时起作用的语法.
+
+> Media Queries 的引入，其作用就是允许添加表达式用以确定媒体的环境情况，以此来应用不同的样式表。换句话说，其允许我们在不改变内容的情况下，改变页面的布局以精确适应不同的设备。
+
+
+
+-----
+
+## 64.margin和padding分别适合什么场景使用？
+
+何时使用margin：
+
+- 需要在border**外侧**添加空白
+- 空白处**不需要背景色**
+- **上下相连的两个盒子之间的空白，需要相互抵消时**。
+
+何时使用padding：
+
+- 需要在border**内侧**添加空白
+- **空白处需要背景颜色**
+- 上下相连的两个盒子的空白，**希望为两者之和**。
+
+
+
+----
+
+## 65.CSS优化、提高性能的方法有哪些？
+
+- 避免过度约束
+- 避免后代选择符
+- 避免链式选择符
+- 使用紧凑的语法
+- 避免不必要的命名空间
+- 避免不必要的重复
+- **最好使用表示语义的名字**。一个好的类名应该是描述他是什么而不是像什么
+- 避免！important，可以选择其他选择器
+- 尽可能的精简规则，你可以合并不同类里的重复规则
+
+
+
+----
+
+## 66.元素竖向的百分比设定是相对于容器的高度吗？
+
+当按百分比设定一个元素的宽度时，它是相对于父容器的宽度计算的，但是，对于一些表示竖向距离的属性，例如 padding-top , padding-bottom , margin-top , margin-bottom 等，当按百分比设定它们时，**依据的也是父容器的宽度**，而不是高度。
+
+
+
+---
+
+## 67. ::before 和 :after中双冒号和单冒号有什么区别？解释一下这2个伪元素的作用
+
+- 单冒号(:)用于CSS3伪类，双冒号(::)用于CSS3伪元素。
+- ::before就是以一个子元素的存在，定义在元素主体内容之前的一个伪元素。**并不存在于dom之中，只存在在页面之中。**
+
+
+
+---
+
+## 68.如果需要手动写动画，你认为最小时间间隔是多久，为什么？
+
+多数显示器默认频率是60Hz，即1秒刷新60次，所以理论上最小间隔为1/60＊1000ms ＝ 16.7ms。
+
+----
+
+## 69两个同级的相邻元素之间，有看不见的空白间隔，是什么原因引起的？有什么解决办法？
+
+行框的排列会受到**中间空白（回车空格）**等的影响，**因为空格也属于字符**,这些空白也会被应用样式，占据空间，所以会有间隔，把字符大小设为0，就没有空格了。
+
+解决方法：
+
+- 相邻元素代码代码全部写在一排
+- 浮动元素，float:left;
+- 在父级元素中用font-size:0;
+
+
+
+----
+
+## 70. style标签写在body后与body前有什么区别？
+
+**页面加载自上而下** 当然是先加载样式。
+
+写在body标签后由于浏览器以逐行方式对HTML文档进行解析，当解析到写在尾部的样式表（外联或写在style标签）会导致浏览器停止之前的渲染，等待加载且解析样式表完成之后重新渲染，**在windows的IE下可能会出现FOUC现象（即样式失效导致的页面闪烁问题）**
+
+
+
+---
+
+## 71.什么是CSS Sprites？
+
+将一个页面涉及到的所有图片都包含到一张大图中去，然后利用CSS的 `background-image`，`background-repeat`，`background-position` 的组合进行背景定位。 利用`CSS Sprites`**能很好地减少网页的http请求**，从而大大的提高页面的性能。
+
+
+
+----
+
+## 72.css加载会造成阻塞吗？
+
+先说下结论：
+
+- css加载**不会阻塞DOM树的解析**
+- css加载**会阻塞DOM树的渲染**
+- css加载**会阻塞后面js语句的执行**
+
+为了避免让用户看到长时间的白屏时间，我们应该尽可能的提高css加载速度，比如可以使用以下几种方法:
+
+- 使用CDN(因为CDN会根据你的网络状况，替你挑选最近的一个具有缓存内容的节点为你提供资源，因此可以减少加载时间)
+- 对css进行压缩(可以用很多打包工具，比如webpack,gulp等，也可以通过开启gzip压缩)
+- 合理的使用缓存(设置cache-control,expires,以及E-tag都是不错的，不过要注意一个问题，就是文件更新后，你要避免缓存而带来的影响。其中一个解决防范是在文件名字后面加一个版本号)
+- 减少http请求数，将多个css文件合并，或者是干脆直接写成内联样式(内联样式的一个缺点就是不能缓存)
+
+
+
+浏览器渲染的流程如下：
+
+- HTML解析文件，生成DOM Tree，解析CSS文件生成CSSOM Tree
+- 将Dom Tree和CSSOM Tree结合，生成Render Tree(渲染树)
+- 根据Render Tree渲染绘制，将像素渲染到屏幕上。
+
+从流程我们可以看出来:
+
+- DOM解析和CSS解析是两个并行的进程，所以这也**解释了为什么CSS加载不会阻塞DOM的解析**。
+- 然而，由于Render Tree是依赖于DOM Tree和CSSOM Tree的，所以他必须等待到CSSOM Tree构建完成，**也就是CSS资源加载完成(或者CSS资源加载失败)后，才能开始渲染。**因此，CSS加载是会阻塞Dom的渲染的。
+- 由于js可能会操作之前的Dom节点和css样式，因此浏览器会维持html中css和js的顺序。因此，**样式表会在后面的js执行前先加载执行完毕。**所以css会阻塞后面js的执行。
+
+
+
+----
+
+##  73.CSS中的1像素问题是什么？有哪些解决方案？
+
+### 1px 边框问题的由来
+
+苹果 iPhone4 首次提出了 Retina Display（视网膜屏幕）的概念，在 iPhone4 使用的视网膜屏幕中，把 2x2 个像素当 1 个物理像素使用，即使用 2x2 个像素显示原来 1 个物理像素显示的内容，从而让 UI 显示更精致清晰，这 2x2 个像素叫做逻辑像素。
+
+像这种像素比（像素比（即dpr）＝ 物理像素 / 逻辑像素）为 2 的视网膜屏幕也被称为二倍屏，目前市面上还有像素比更高的三倍屏、四倍屏。
+
+而 CSS 中 1px 指的是物理像素，因此，设置为 1px 的边框在 dpr = 2 的视网膜屏幕中实际占用了 2 个逻辑像素的宽度，这就导致了界面边框变粗的视觉体验。
+
+### 使用 transform 解决
+
+**通过设置元素的 box-sizing 为 border-box，然后构建伪元素，再使用 CSS3 的 transform 缩放**，这是目前市面上最受推崇的解决方法。这种方法可以满足所有的场景，而且修改灵活，唯一的缺陷是，对于已使用伪元素的元素要多嵌套一个无用元素。具体的实现如下：
+
+```css
+.one-pixel-border {
+  position: relative;
+  box-sizing: border-box;
+}
+
+.one-pixel-border::before {
+  display: block;
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 200%;
+  border: 1px solid red;
+  transform: translate(-50%, -50%) scale(0.5, 0.5);
+}
+```
+
+这样就可以得到 0.5px 的边框。
+
+还可以结合媒体查询（@media）解决不同 dpr 值屏幕的边框问题，如下：
+
+```css
+@media screen and (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  ...
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 3), (min-resolution: 3dppx) {
+  ...
+}
+```
+
+当然还有不少其他的解决方案：border-image、background-image、viewport + rem + js、box-shadow等，但都有各自的缺点.
+
+----
+
+## 74.Atom CSS 是什么？
 
 
 
@@ -4397,7 +4791,7 @@ $color-tabs-background: $color-red;
 
 ---
 
-#### 11.3 设置斑马线表格(纯css)
+#### 11.3 纯css设置斑马线表格
 
    ```html
    <!DOCTYPE html>
