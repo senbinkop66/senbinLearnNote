@@ -414,7 +414,23 @@ p.awesome {
 
 ------
 
-## 9.css预处理工具
+## 9. 说说对 CSS 预编语言的理解，以及它们之间的区别
+
+`Css` 作为一门标记性语言，语法相对简单，对使用者的要求较低，但同时也带来一些问题
+
+需要书写大量看似没有逻辑的代码，不方便维护及扩展，不利于复用，尤其对于非前端开发工程师来讲，往往会因为缺少 `Css` 编写经验而很难写出组织良好且易于维护的 `Css` 代码
+
+`Css`预处理器便是针对上述问题的解决方案
+
+#### 预处理语言
+
+扩充了 `Css` 语言，增加了诸如变量、混合（mixin）、函数等功能，让 `Css` 更易维护、方便
+
+本质上，预处理是`Css`的超集
+
+包含一套自定义的语法及一个解析器，根据这些语法定义自己的样式规则，这些规则最终会通过解析器，编译生成对应的 `Css` 文件
+
+
 
 **CSS 预处理器**是一个能让你通过预处理器自己独有的语法来生成CSS的程序。
 
@@ -422,15 +438,25 @@ css预处理器种类繁多，三种主流css预处理器是Less、Sass（Scss�
 
 **Sass：**
 
-2007年诞生，最早也是最成熟的CSS预处理器，拥有ruby社区的支持和compass这一最强大的css框架，目前受LESS影响，已经进化到了全面兼容CSS的SCSS（SCSS 需要使用分号和花括号而不是换行和缩进）。
+2007年诞生，最早也是最成熟的CSS预处理器，拥有ruby社区的支持和compass这一最强大的css框架，目前受LESS影响，已经进化到了全面兼容CSS的SCSS（SCSS 需要使用分号和花括号而不是换行和缩进）。文件后缀名为`.sass`与`scss`，可以严格按照 sass 的缩进方式省去大括号和分号
 
 **Less**：
 
-2009年出现，受SASS的影响较大，但又使用CSS的语法，让大部分开发者和设计师更容易上手，在ruby社区之外支持者远超过SASS。其缺点是比起SASS来，可编程功能不够。优点是简单和兼容CSS，反过来也影响了SASS演变到了SCSS的时代，著名的Twitter Bootstrap就是采用LESS做底层语言的。
+2009年出现，受SASS的影响较大，但又使用CSS的语法，让大部分开发者和设计师更容易上手，在ruby社区之外支持者远超过SASS。其缺点是比起SASS来，可编程功能不够。优点是简单和兼容CSS，反过来也影响了SASS演变到了SCSS的时代，著名的Twitter Bootstrap就是采用LESS做底层语言的。其缺点是比起 `SASS `来，可编程功能不够，不过优点是简单和兼容 `Css`，反过来也影响了 `SASS `演变到了` Scss` 的时代
 
 **Stylus**：
 
-2010年产生，来自Node.js社区，主要用来给Node项目进行CSS预处理支持，在此社区之内有一定支持者，在广泛的意义上人气还完全不如SASS和LESS。
+2010年产生，来自Node.js社区，主要用来给Node项目进行CSS预处理支持，在此社区之内有一定支持者，在广泛的意义上人气还完全不如SASS和LESS。所以` Stylus` 是一种新型语言，可以创建健壮的、动态的、富有表现力的` Css`。比较年轻，其本质上做的事情与`SASS/LESS`等类似
+
+**区别**
+
+虽然各种预处理器功能强大，但使用最多的，还是以下特性：
+
+- 变量（variables）
+- 作用域（scope）
+- 代码混合（ mixins）
+- 嵌套（nested rules）
+- 代码模块化（Modules）
 
 
 
@@ -1559,6 +1585,11 @@ img{vertical-align:top;}
 
 - **px：**Pixel CSS像素，是web页面图像显示的基本单元，区别于物理像素，不是一个确定的物理量，也不是一个点或者小方块，而是CSS中的一个抽象概念，是一个相对单位，受上下文影响，默认情况（zoom100%）下1个CSS像素等于1个物理像素，若手动将页面放大或缩小，1个CSS像素就不等于1个物理像素。
 
+| CSS单位      |                                        |
+| ------------ | -------------------------------------- |
+| 相对长度单位 | em、ex、ch、rem、vw、vh、vmin、vmax、% |
+| 绝对长度单位 | cm、mm、in、px、pt、pc                 |
+
 在一些高PPI（每英寸像素数）的设备上，1个CSS像素默认相当于多个物理像素。比如iPhone的屏幕对比一般的手机屏幕会看起来更精细清晰一些，iPhone6、7、8都是两倍屏手机，1个CSS像素等于2个物理像素，对比一般的手机屏幕会看起来更清晰一些。
 
 - **rem：**Root element meter 通过根文档（ body/html ）内文本的字体尺寸计算尺寸，如下代码示例，若未指定字体大小则为浏览器默认字体大小（浏览器默认字体大小为16px)。
@@ -1606,6 +1637,16 @@ body {
   - line-hight设置内联元素垂直居中时，%**相对于文本的行高**进行计算，非父元素
 
 - **vh vw：**view height/view width，相对于视口的高度和宽度，视口指屏幕可见范围，1vh 等于1/100的视口高度，1vw 等于1/100的视口宽度。假设浏览器高度950px，宽度为1920px, 1 vh = 950px/100 = 9.5 px，1vw = 1920px/100 =19.2 px
+
+**总结**
+
+**px**：绝对单位，页面按精确像素展示
+
+**em**：相对单位，基准点为父节点字体的大小，如果自身定义了`font-size`按自身来计算，整个页面内`1em`不是一个固定的值
+
+**rem**：相对单位，可理解为`root em`, 相对根节点`html`的字体大小来计算
+
+**vh、vw**：主要用于页面视口大小布局，在页面布局上更加方便简单
 
 
 
@@ -2114,9 +2155,7 @@ href和src的区别
 
 ----
 
-#### 11.12 移动端 1px 问题
-
-**参考答案**：
+## 36.移动端 1px 问题
 
 **问题**：1px 的边框，在高清屏下，移动端的1px 会很粗
 
@@ -2128,19 +2167,19 @@ href和src的区别
 window.devicePixelRatio=物理像素 /CSS像素
 ```
 
-目前主流的屏幕DPR=2 （iPhone 8）,或者3 （iPhone 8 Plus）。拿2倍屏来说，设备的物理像素要实现1像素，而DPR=2，所以css 像素只能是 0.5。一般设计稿是按照750来设计的，它上面的1px是以750来参照的，**而我们写css样式是以设备375为参照的**，所以我们应该写的0.5px就好了啊！ 试过了就知道，iOS 8+系统支持，安卓系统不支持。
+目前主流的屏幕DPR=2 （iPhone 8）,或者3 （iPhone 8 Plus）。拿2倍屏来说，设备的物理像素要实现1像素，而DPR=2，所以css 像素只能是 0.5。**一般设计稿是按照750来设计的**，它上面的1px是以750来参照的，**而我们写css样式是以设备375为参照的**，所以我们应该写的0.5px就好了啊！ 试过了就知道，iOS 8+系统支持，安卓系统不支持。
 
 **解决方案**
 
 1. WWDC对iOS统给出的方案
 
-   在 WWDC大会上，给出来了1px方案，当写 0.5px的时候，就会显示一个物理像素宽度的 border，而不是一个css像素的 border。 所以在iOS下，你可以这样写。
+   在 WWDC大会上，给出来了1px方案，**当写 0.5px的时候，就会显示一个物理像素宽度的 border**，而不是一个css像素的 border。 所以在iOS下，你可以这样写。
 
    ```css
    border:0.5px solid #E5E5E5
    ```
 
-   可能你会问为什么在3倍屏下，不是0.3333px 这样的？经过测试，在Chrome上模拟iPhone 8Plus，发现小于0.46px的时候是显示不出来。
+   可能你会问为什么在3倍屏下，不是0.3333px 这样的？经过测试，**在Chrome上模拟iPhone 8Plus，发现小于0.46px的时候是显示不出来。**
 
    **总结：**
 
@@ -2157,7 +2196,7 @@ window.devicePixelRatio=物理像素 /CSS像素
    **总结：**
 
    - 优点：没有副作用
-   - 缺点：border颜色变了就得重新制作图片；圆角会比较模糊。
+   - 缺点：**border颜色变了就得重新制作图片**；圆角会比较模糊。
 
 3. 使用box-shadow实现
 
@@ -2195,7 +2234,7 @@ window.devicePixelRatio=物理像素 /CSS像素
    }
    ```
 
-   可以看到，将伪元素设置绝对定位，并且和父元素的左上角对齐，将width 设置100%，height设置为1px，然后进行在Y方向缩小0.5倍。
+   **可以看到，将伪元素设置绝对定位，并且和父元素的左上角对齐**，将width 设置100%，height设置为1px，然后进行在Y方向缩小0.5倍。
 
    4 条border
 
@@ -2219,12 +2258,12 @@ window.devicePixelRatio=物理像素 /CSS像素
    
    ```
 
-   同样为伪元素设置绝对定位，并且和父元素左上角对其。将伪元素的长和宽先放大2倍，然后再设置一个边框，以左上角为中心，缩放到原来的0.5倍
+   同样为伪元素设置绝对定位，并且和父元素左上角对其。**将伪元素的长和宽先放大2倍，然后再设置一个边框，以左上角为中心，缩放到原来的0.5倍**
 
    **总结：**
 
    - 优点：全机型兼容，实现了真正的1px，而且可以圆角。
-   - 缺点：暂用了after 伪元素，可能影响清除浮动。
+   - 缺点：暂用了after 伪元素，**可能影响清除浮动。**
 
 5. 设置viewport的scale值
 
@@ -2249,7 +2288,7 @@ window.devicePixelRatio=物理像素 /CSS像素
           }
 
           .a,.b {
-                      box-sizing: border-box;
+              box-sizing: border-box;
               margin-top: 1rem;
               padding: 1rem;                
               font-size: 1.4rem;
@@ -2294,15 +2333,11 @@ window.devicePixelRatio=物理像素 /CSS像素
 - 优点：全机型兼容，直接写1px不能再方便
 - 缺点：适用于新的项目，老项目可能改动大
 
-------
 
-1. 
 
 ------
 
-#### 11.14 移动端适配方案
-
-**参考答案：**
+## 37.移动端适配方案
 
 适配思路
 
@@ -2320,9 +2355,9 @@ window.devicePixelRatio=物理像素 /CSS像素
 2. 按照设计稿的标准开发页面，在手机上部分内容根据屏幕宽度等比缩放，部分内容按需要变化，需要缩放的元素使用 rem, vw 相对单位，不需要缩放的使用 px
 3. 固定尺寸+弹性布局，不需要缩放
 
-**viewport 适配**
+### viewport 适配
 
-根据设计稿标准（750px 宽度）开发页面，写完后页面及元素自动缩小，适配 375 宽度的屏幕
+根据设计稿标准（750px 宽度）开发页面，**写完后页面及元素自动缩小，适配 375 宽度的屏幕**
 
 在 head 里设置如下代码
 
@@ -2356,9 +2391,9 @@ initial-scale = 屏幕的宽度 / 设计稿的宽度
 
 ```
 
-缺点就是边线问题，不同尺寸下，边线的粗细是不一样的（等比缩放后），全部元素都是等比缩放，实际显示效果可能不太好
+**缺点就是边线问题，不同尺寸下，边线的粗细是不一样的**（等比缩放后），**全部元素都是等比缩放**，实际显示效果可能不太好
 
-**vw 适配（部分等比缩放）**
+### vw 适配（部分等比缩放）
 
 1. 开发者拿到设计稿（假设设计稿尺寸为750px，设计稿的元素标注是基于此宽度标注）
 2. 开始开发，对设计稿的标注进行转换，把px换成vw。比如页面元素字体标注的大小是32px，换成vw为 (100/750)*32 vw
@@ -2391,7 +2426,7 @@ header {
 
 实现了按需缩放
 
-**rem 适配**
+### rem 适配
 
 1. 开发者拿到设计稿（假设设计稿尺寸为750px，设计稿的元素标是基于此宽度标注）
 2. 开始开发，对设计稿的标注进行转换
@@ -2424,7 +2459,7 @@ header {
 </head>
 ```
 
-对于需要等比缩放的元素，CSS使用转换后的单位
+**对于需要等比缩放的元素，CSS使用转换后的单位**
 
 ```css
 header {
@@ -2457,9 +2492,9 @@ header {
 }
 ```
 
-以上的三种适配方案，都是等比缩放，放到 ipad 上时（设计稿以手机屏幕设计的），页面元素会很大很丑，有些场景下，并不需要页面整体缩放（viewport 自动处理的也很好了），所以有时只需要合理的布局即可。
+以上的三种适配方案，都是等比缩放，放到 ipad 上时（设计稿以手机屏幕设计的），页面元素会很大很丑，**有些场景下，并不需要页面整体缩放（viewport 自动处理的也很好了），所以有时只需要合理的布局即可。**
 
-**弹性盒适配（合理布局）**
+### 弹性盒适配（合理布局）
 
 ```html
 <meta name="viewport" content="width=device-width">
@@ -2473,7 +2508,7 @@ section {
 }
 ```
 
-总结一下，什么样的页面需要做适配（等比缩放）呢
+总结一下，**什么样的页面需要做适配（等比缩放）**呢
 
 - 页面中的布局是栅格化的
 
@@ -2485,19 +2520,19 @@ section {
 
 比如大屏，需要适配很多的电视尺寸，要求撑满屏幕，不能有滚动条，此时若换个屏幕
 
-此时需要考虑小元素用 vh, 宽和高都用 vh 去表示，中间的大块去自适应，这就做到了大屏的适配，屏幕变小了，整体变小了（体验更好），中间这块撑满了屏幕
+**此时需要考虑小元素用 vh, 宽和高都用 vh 去表示，中间的大块去自适应**，这就做到了大屏的适配，屏幕变小了，整体变小了（体验更好），中间这块撑满了屏幕
 
 对于更复杂的场景，需要更灵活考虑，没有一种适配方式可以囊括所有场景。
 
+
+
 ---
 
-#### 11.15 relative如何定位
+## 38.relative如何定位
 
-(相对于自身偏移)
+relative (相对于自身偏移)
 
-relative
-
-该关键字下，元素先放置在未添加定位时的位置，再在不改变页面布局的前提下调整元素位置（因此会在此元素未添加定位时所在位置留下空白）。position:relative 对 table-*-group, table-row, table-column, table-cell, table-caption 元素无效。
+该关键字下，元素先放置在未添加定位时的位置，**再在不改变页面布局的前提下调整元素位置**（因此会在此元素未添加定位时所在位置留下空白）。position:relative 对 table-*-group, table-row, table-column, table-cell, table-caption 元素无效。
 
 相对定位的元素是**在文档中的正常位置偏移给定的值**，但是不影响其他元素的偏移。下面的例子中，注意未应用定位的其它元素是按照 "Two" 在正常位置的情况下进行布局的。
 
@@ -2526,318 +2561,1171 @@ relative
   <div class="box" id="four">Four</div>
 ```
 
+----
+
+## 39.请问定位布局position属性有哪些取值？
+
+定位布局：页面元素CSS样式采用position属性，可在top/bottom/right/left四个方向进行位置移动，从而达到定位效果，position属性可取以下7个值：
+
+###   (1) 相对定位 relative
+
+- **不会使元素脱离文档流**（原本位置会被保留，即改变位置也不会占用新位置）
+
+- 相对于自身原本位置移动（没有定位偏移量则对元素无影响）
+
+- 不影响元素本身特性（无论块级元素或行内元素，保留其原本特性）
+
+- 常用于提升层级，从而改变元素覆盖关系，若两个都为定位元素，后面的会覆盖前面
+
+### (2) 绝对定位 absolute
+
+- **使元素完全脱离文档流**（在文档流中不再占原来位置）
+
+- 行内元素设置定位效果后，支持设置宽高
+
+- 区块元素设置定位效果后，未设置宽度时由内容撑开宽度
+
+- **相对于最近一个有定位的父元素进行偏移**，如果不存在就逐级向上排查，直到相对于body元素，即相对于浏览器窗口（必须有参照物）
+
+- **子绝父相，一般配合相对定位使用**，（将父元素设置相对定位，子元素相对于父元素偏移）
+
+- 可提升层级
+
+### (3) 固定定位 fixed
+
+- 直接相对于浏览器窗口进行“绝对定位”
+
+- 浮动在页面中，**元素位置不会随浏览器窗口滚动条滚动而变化**
+
+- **不会受文档流动影响**
+
+### (4) 粘性定位 sticky
+
+- 基于用户的滚动来定位，**在相对定位与绝对定位两者间切换**。滚动前相当于position:relative，当页面滚动超出目标区域时，相当于position:fixed，会将元素固定在目标位置
+
+- **相对于离它最近的具有滚动框的父级元素**，如果父级元素都不可以滚动，那相对于浏览器窗口计算偏移量
+
+- 如top: 50px，**在sticky元素到达距离相对定位的元素顶部50px的位置时固定，无论怎么滚动，都不再向上移动**
+
+- 兼容性不好，如Internet Explorer, Edge 15 及更早 IE 版本不支持 sticky 定位，通常需要结合CSS3兼容方案
+
+### (5) 静态定位 static
+
+- **默认定位，遵循正常的文档流**
+
+- 元素不会受到影响
+
+### (6) 继承值 inherit
+
+- 从父元素继承 position 属性值
+
+### (7) 初始值 initial
+
+- initial 关键字可用于任何 HTML 元素上任何 CSS 属性
+
+- 可将所有CSS属性恢复到初始状态
+
 ---
 
+##  40.fixed定位会出现失效情况吗？有什么解决办法吗？
 
+存在常见3种fixed定位失效情况：
 
-------
+(1) **父元素的transform属性值不为none时，子元素的fixed失效**（比较常见，仅在部分浏览器中失效）
 
-#### 11.3 设置斑马线表格(纯css)
+失效原因：当元素祖先的 transform 属性非 none 时，**定位容器由视口改为该祖先**（摘自MDN）
 
-   ```html
-   <!DOCTYPE html>
-   <html lang="en">
-   <head>
-    <meta charset="UTF-8">
-    <title>斑马线表格</title>
-    <style type="text/css">
-    *{
-     margin: 0;
-     padding: 0;
-     /*清处浏览器默认设置*/
-    }
-    table{
-     /*表格的外边距和大小*/
-     margin: 10px 0 0 0;
-     width: 100%;
-     border-spacing: 0;
-     border-collapse: collapse;
-     /*collapse 表格单元格边框合并 
-      border-spacing 表格单元格间距为零
-     */
-    }
-    caption{
-     font: 30px "楷体";
-     padding: 5px;
-     /*表格标题*/
-    }
-    td{
-     width: 32%;
-     height: 50px;
-     /*单元格大小*/
-    }
-    tbody td{
-      border: 1px solid;
-      /*表格主体的边框*/
-    }
-    thead{
-     background-color: #A2A5A7;
-     /*表格头部*/
-    }
-    tr:hover{
-     background-color: #66D9EF;
-     cursor: pointer;
-     /*鼠标悬停在表格上时，表格的背景和鼠标的形状*/
-    }
-    table tbody tr:nth-child(even){
-     background-color: #8F908A;
-     box-shadow: inset 0 5px rgba(255,255,255,0.5);
-     /*even为偶数行 odd为奇数行
-       设置表格的主体部分偶数行的样式
-       shadow 阴影  inset将外部阴影改为内部阴影
-     */
-    }
-    thead tr th:first-child
-    {
-     /*表头部分th 第一个th左上角设置圆角*/
-     border-radius: 15px 0 0 0;
-    }
-    thead tr td:last-child{
-     /*最后一个单元格右上角设置圆角*/
-     border-radius: 0 15px 0 0;
-    }
-    </style>
-   </head>
-   <body>
-    <table>
-    <caption>斑马线表格</caption>
-    <thead>
-     <tr>
-      <th></th>
-      <td></td>
-      <td></td>
-     </tr>
-    </thead>
-    <tbody>
-     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
-     </tr>
-     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
-     </tr>
-     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
-     </tr>
-     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
-     </tr>
-     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
-     </tr>
-     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
-     </tr>
-    </tbody>
-     <tfoot>
-      <tr>
-       <td></td>
-       <td></td>
-       <td></td>
-      </tr>
-     </tfoot>
-    </table>
-   </body>
-   </html>
-   
-   ```
+解决办法：
 
-------
+经过实验发现，absolute定位在该情况下不会失效，**可利用absolute定位模拟fixed效果**，
 
-   11.4 文本元素如何居中
-
-**参考答案：**
-
-1. CSS设置文字水平居中
-
-   在CSS中可以使用text-align属性来设置文字水平居中。该属性规定元素中的文本的水平对齐方式，通过使用center值设置文本居中。
-
-   text-align是一个基本的属性，它会影响一个元素中的文本行互相间的对齐方式。值left、right和center会导致元素中的文本分别左对齐、右对齐和居中，想要使文本居中，直接使用center即可。
-
-   该属性设置文本和img标签等一些内联对象（或与之类似的元素）的居中。
-
-   该属性有如下几个**特点**：
-
-   1）text-align的center应用在一个容器上，它**只针对容器里面的文字以及容器里面的display为inline或者inline-block的容器**，如果里面的容器display为block，则里面的容器的内容不会居中。
-
-   2）text-align**具有向下传递性**，会不断地向子元素传递。如果设置一个div，则其子div中的内容也会居中。
-
-   ```html
-   <!DOCTYPE html>
-   <html>
-       <head>
-           <meta charset="UTF-8">
-           <title>css 水平居中</title>
-           <style>
-               .box {
-                   width: 400px;
-                   height: 100px;
-                   background: pink;
-                   text-align:center;
-               }
-           </style>
-       </head>
-       <body>
-           <div class="box">css 水平居中了--文本文字</div>
-       </body>
-   
-   </html>
-   
-   ```
-
-2. CSS设置字体垂直居中
-
-   2.1 **单行文字垂直居中**
-
-   对于单行文本，我们只需要将文本行高(line-height属性)和所在区域高度(height)设置一致就可以了
-
-   ```html
-   <!DOCTYPE html>
-   <html>
-       <head>
-           <meta charset="UTF-8">
-           <title>css 垂直居中</title>
-           <style>
-               .box {
-                   width: 300px;
-                   height: 300px;
-                   background: paleturquoise;
-                   line-height:300px;
-               }
-           </style>
-       </head>
-       <body>
-           <div class="box">css 垂直居中了--文本文字</div>
-       </body>
-   </html>
-   
-   ```
-
-   2.2 **多行文本垂直居中**
-
-   说明：多行文本垂直居中分为两种情况，一个是父级元素高度不固定，随着内容变化；另一个是父级元素高度固定。
-
-   (1) **父级元素高度不固定**
-
-   父级高度不固定的时，高度只能通过内部文本来撑开。所以，我们可以通过设置内填充（padding）的值来使文本看起来垂直居中，只需设置padding-top和padding-bottom的值相等：
-
-   ```html
-   <!DOCTYPE html>
-   <html>
-       <head>
-           <meta charset="UTF-8">
-           <title>css 垂直居中</title>
-           <style>
-               .box {
-                   width: 300px;
-                   margin: 50px auto;
-                   background: paleturquoise;
-                   padding: 50px 20px;
-               }
-           </style>
-       </head>
-       <body>
-           <div class="box">css 垂直居中了--文本文字,文本文字,文本文字,文本文字,文本文字,文本文字</div>
-       </body>
-   </html>
-   
-   ```
-   
-   (2) **父级元素高度固定**
-
-使用vertical-align:middle +display:table-cell 使文字垂直居中
-
-```html
-   <!DOCTYPE html>
-   <html>
-       <head>
-           <meta charset="UTF-8">
-           <title>css 垂直居中</title>
-           <style>
-               .box {
-                   width: 300px;
-                   height: 300px;
-                   background: paleturquoise;
-                   vertical-align:middle;
-                   display:table-cell;
-               }
-           </style>
-
-       </head>
-
-       <body>
-           <div class="box">css 垂直居中了--文本文字,文本文字,文本文字,文本文字,文本文字,文本文字。</div>
-
-       </body>
-
-   </html>
+主要**实现思路**：将html的滚动条禁用，开启body滚动条，对该元素absolute定位，**并不设置父级元素定位，会相对document定位**，但其滚动条未开启，不会受body滚动影响
 
 ```
 
-说明：vertical-align:middle +display:table-cell能够使单行文字、多行文字都居中。但是因为 table-cell 是 inline 类型，所以会导致原来的块级元素每个 div 一行移动到了同一行。如果需要分列两行，需要在外面额外添加容器对位置进行控制。
+```
 
--------
+ (2)  **perspective属性值不为none时**（不常见）
 
-#### 11.5 用flex实现九宫格讲思路
+浏览器都不支持 perspective 属性，Chrome 和 Safari 支持替代的 -webkit-perspective 属性，目前可行办法就是删掉perspective属性
 
-**参考答案：**
+(3)  元素的will-change中指定了任意 CSS 属性
 
-利用了padding-top和flex-wrap:wrap，当设置background-color时，是包括盒子模型中的content和padding的，但是为什么不设置height呢？因为父元素没有高度，所以定义height:30%是没有用的，且若想每个block都为正方形，最好的方式就是设置padding-top/padding-bottom：a%，因为此时的百分比是父元素宽度的百分比，而width也为父元素宽度的百分比，所以block可以成为正方形。
+目前可行办法就是尽量避免给fixed定位元素设置will-change
+
+
+
+---
+
+## 41.请问你了解浮动布局float属性吗？
+
+浮动布局：为方便页面设计，**给元素设置float属性，将元素脱离文档流，浮动框进行左右移动**，**直至外边缘遇到包含框或者另一个浮动框边缘**，**再通过margin属性调整位置**，float属性可取3个值：left：左浮动、right：右浮动、none：不浮动（默认）
+
+浮动的影响：
+
+- **改变块级元素的排列方式**，内容从上下排列显示变成水平排列显示
+- **浮动元素会脱离文档流**，**不占位**，**盒子重叠**，内容不重叠
+- **浮动的块级元素的宽度由内容撑开**，行内元素可设宽高、margin和padding均有效，**可理解为隐式转换为inline-block元素**
+
+
+
+---
+
+## 42.浮动布局最常产生什么问题？
+
+通常父级盒子不设置高度时，高度将由内容或子元素撑开，**当子元素浮动脱离文档流后， 父盒子就会出现高度塌陷**，边框变成一条线，**通常需要清除浮动来解决该问题**
+
+
+
+---
+
+## 43怎么理解css文档流/元素脱离文档流后有什么特点
+
+**文档流处在文档的最底层，它规定了一个页面的位置和元素布局等规则。**
+
+我们所创建的元素都处在文档流中，文档流所指定的规则比如块级元素独占一行，内联元素不会独占一行，内联元素不能设置高宽，父元素的高度由子元素撑开等。**文档流之所以称为流，是它的布局像流一样从上到下在从左到右。**
+
+**而元素脱离文档流之后，该元素便不再遵循文档流的规则**，比如块级元素不再独占一行，**内联元素脱离文档流之后可以设置高宽**，脱离的元素不能撑开父元素，不再在文档流中占有位置等。
+
+而脱离文档流的设置有两种：float，position：absolute
+
+### (1)float
+
+（理解是通过设置float来脱离文档流，脱离后的元素会遵循文档流之外的另一套规则，暂且称为**浮动规则**）。
+规则如下：
+①、产生字围效果，元素不会盖住文字，文字会绕着元素布局。
+②、**元素层级提高，会盖住非浮动的元素。**
+③、父元素的垂直外边距不会和子元素重叠。
+④、**浮动元素不会超过超过上面的非浮动元素，会排列在非浮动块元素的下一行。**
+⑤、元素浮动后会尽量向页面的左上或右上浮动，直到遇到父元素边框或其它浮动元素（**浮动的元素不会脱离父元素，浮动还是相对于父元素浮动**）。
+⑥、浮动的元素不会超过它上边的兄弟元素，最多一边齐。
+⑦、文档流中子元素的宽度默认为父元素的100%，**脱离文档流之后，块元素的高宽度都只能由内容撑开**，而且**浮动的子元素无法撑开父元素（除非父元素也是浮动元素）。**
+⑧、内联元素浮动后会变成块级元素。
+
+### (2) position:absolute
+
+（理解是通过设置绝对定位来脱离文档流，脱离后的元素会遵循文档流之外的另一套规则，暂且称为**绝对定位规则**）。
+规则如下：
+①、 绝对定位是相对于**离他最近的开启了定位的祖先元素**进行定位的，没有这种祖先元素，则相对于浏览器窗口（以左上角为坐标（0，0））
+②、定位元素会提高一个层级。
+③、**内联元素变块级元素，高宽都只能由内容撑开。**
+④、当一个文档流中的元素前的一个元素开启了绝对定位，**则这个文档流中的元素会向上移动，被前元素覆盖**。（其实跟浮动规则差不多），如果没有这样的情况，则开启了绝对定位的元素如果不设置偏移量，位置不会发生变化。
+
+浮动规则≠绝对定位规则，两者不相通
+这句话的意思是一个浮动元素和一个定位元素会重叠，且**绝对定位元素的层级高于浮动元素的层级**（按照浮动规则，浮动的兄弟元素是不会相互覆盖的）。
 
 ```html
 <!DOCTYPE html>
 <html>
-<style>
-.block {
-    padding-top: 30%;
-    margin-top: 3%;
-    border-radius: 10%;
-    background-color: orange;
-    width: 30%;
-}
-.container-flex2  {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-}
-</style>
-<body>
-   <div class="container-flex2">
-        <div class="block"></div>
-        <div class="block"></div>
-        <div class="block"></div>
-        <div class="block"></div>
-        <div class="block"></div>
-        <div class="block"></div>
-        <div class="block"></div>
-        <div class="block"></div>
-        <div class="block"></div>
-    </div>
-</body>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<style type="text/css">
+		#box1{
+			width: 400px;
+			height: 400px;
+			/* position: absolute; */
+			float: left;
+			background-color: red;
+		}
+		#box2{
+			width: 100px;
+		    height: 100px;
+			background: green;
+			float:left;
+			/* position: absolute; */
+	</style>
+	<body>
+		<div id="box1">	
+		</div>
+		<div id="box2">
+		</div>
+	</body>
 </html>
 
 ```
 
+（当两个元素都开启绝对定位且不设置偏移量时，**两个元素也会像上面这个图一样相互覆盖**）
+
+
+
 ---
 
-#### 11.6 CSS实现一个等腰三角形
+## 44.设备像素、css像素、设备独立像素、dpr、ppi 之间有什么区别？
 
-**参考答案**：
+在`css`中我们通常使用px作为单位，在PC浏览器中`css`的1个像素都是对应着电脑屏幕的1个物理像素
 
-主要是通过把宽高设置成0，边框宽度设置宽一些，设置其中三个边透明，只留一个边显示
+这会造成一种错觉，我们会认为`css`中的像素就是设备的物理像素
 
-等边三角形是特殊的等腰三角形，它的三条边都相等，顶角为60度，而高是边长的3^(1/2)/2倍，约等于0.866……假设底为160px，则高约为138.56px，因此要做边长为160px的等边三角形，可以这么做：
+但实际情况却并非如此，`css`中的像素只是一个抽象的单位，在不同的设备或不同的环境中，`css`中的1px所代表的设备物理像素是不同的
+
+当我们做移动端开发时，同为1px的设置，在不同分辨率的移动设备上显示效果却有很大差异
+
+这背后就涉及了css像素、设备像素、设备独立像素、dpr、ppi的概念
+
+### CSS像素
+
+CSS像素（css pixel, px）: 适用于web编程，在 CSS 中以 px 为后缀，是一个长度单位
+
+在 CSS 规范中，长度单位可以分为两类，绝对单位以及相对单位
+
+**px是一个相对单位**，相对的是设备像素（device pixel）
+
+**一般情况，页面缩放比为1，1个CSS像素等于1个设备独立像素**
+
+`CSS`像素又具有**两个方面的相对性**：
+
+- 在同一个设备上，每1个 CSS 像素所代表的设备像素是可以变化的（比如调整屏幕的分辨率）
+- 在不同的设备之间，每1个 CSS 像素所代表的设备像素是可以变化的（比如两个不同型号的手机）
+
+在页面进行缩放操作也会 引起`css`中`px`的变化，假设页面放大一倍，原来的 1px 的东西变成 2px，在实际宽度不变的情况下1px 变得跟原来的 2px 的长度（长宽）一样了（元素会占据更多的设备像素）
+
+假设原来需要 320px 才能填满的宽度现在只需要 160px
+
+px会受到下面的因素的影响而变化：
+
+- 每英寸像素（PPI）
+- 设备像素比（DPR）
+
+### 设备像素
+
+设备像素（device pixels），又称为物理像素
+
+**指设备能控制显示的最小物理单位**，不一定是一个小正方形区块，也没有标准的宽高，**只是用于显示丰富色彩的一个“点”而已**
+
+从屏幕在工厂生产出的那天起，它上面设备像素点就固定不变了，单位为`pt`
+
+### 设备独立像素
+
+设备独立像素（Device Independent Pixel）：与设备无关的逻辑像素，**代表可以通过程序控制使用的虚拟像素**，是一个总体概念，包括了CSS像素
+
+在`javaScript`中可以通过`window.screen.width/ window.screen.height` 查看
+
+比如我们会说“电脑屏幕在 2560x1600分辨率下不适合玩游戏，我们把它调为 1440x900”，这里的“分辨率”（非严谨说法）指的就是设备独立像素
+
+**一个设备独立像素里可能包含1个或者多个物理像素点**，包含的越多则屏幕看起来越清晰
+
+至于为什么出现设备独立像素这种虚拟像素单位概念，下面举个例子：
+
+iPhone 3GS 和 iPhone 4/4s 的尺寸都是 3.5 寸，但 iPhone 3GS 的分辨率是 320x480，iPhone 4/4s 的分辨率是 640x960
+
+这意味着，iPhone 3GS 有 320 个物理像素，iPhone 4/4s 有 640 个物理像素
+
+如果我们按照真实的物理像素进行布局，比如说我们按照 320 物理像素进行布局，到了 640 物理像素的手机上就会有一半的空白，**为了避免这种问题，就产生了虚拟像素单位**
+
+我们统一 iPhone 3GS 和 iPhone 4/4s 都是 320 个虚拟像素，只是在 iPhone 3GS 上，最终 1 个虚拟像素换算成 1 个物理像素，在 iphone 4s 中，1 个虚拟像素最终换算成 2 个物理像素
+
+**至于 1 个虚拟像素被换算成几个物理像素，这个数值我们称之为设备像素比**，也就是下面介绍的`dpr`
+
+### dpr
+
+dpr（device pixel ratio），设备像素比，**代表设备独立像素到设备像素的转换关系**，在`JavaScript`中可以通过 `window.devicePixelRatio` 获取
+
+计算公式如下：
+
+```
+dpr = 设备像素 / 设备独立像素
+```
+
+当设备像素比为1:1时，使用1（1×1）个设备像素显示1个CSS像素
+
+当设备像素比为2:1时，使用**4（2×2）个设备像素**显示1个CSS像素
+
+当设备像素比为3:1时，使用9（3×3）个设备像素显示1个CSS像素
+
+当`dpr`为3，那么`1px`的`CSS`像素宽度对应`3px`的物理像素的宽度，1px的`CSS`像素高度对应`3px`的物理像素高度
+
+### ppi
+
+ppi （pixel per inch），每英寸像素，**表示每英寸所包含的像素点数目**，更确切的说法应该是**像素密度**。数值越高，说明屏幕能以更高密度显示图像
+
+计算公式如下：
+
+![img](E:\pogject\学习笔记\image\css\PPI)
+
+**总结**
+
+无缩放情况下，1个CSS像素等于1个设备独立像素
+
+设备像素由屏幕生产之后就不发生改变，而设备独立像素是一个虚拟单位会发生改变
+
+PC端中，1个设备独立像素 = 1个设备像素 （在100%，未缩放的情况下）
+
+在移动端中，标准屏幕（160ppi）下 1个设备独立像素 = 1个设备像素
+
+设备像素比（dpr） = 设备像素 / 设备独立像素
+
+每英寸像素（ppi），值越大，图像越清晰
+
+
+
+----
+
+## 45. CSS中，有哪些方式可以隐藏页面元素？有什么区别?
+
+通过`css`实现隐藏元素方法有如下：
+
+- display:none
+- visibility:hidden
+- opacity:0
+- 设置height、width模型属性为0
+- position:absolute
+- clip-path
+
+### display:none
+
+设置元素的`display`为`none`是最常用的隐藏元素的方法
+
+```css
+.hide {
+    display:none;
+}
+```
+
+将元素设置为`display:none`后，元素在页面上将彻底消失
+
+元素本身占有的空间就会被其他元素占有，**也就是说它会导致浏览器的重排和重绘**
+
+消失后，自身绑定的事件不会触发，也不会有过渡效果
+
+特点：元素不可见，不占据空间，无法响应点击事件
+
+
+
+### visibility:hidden
+
+设置元素的`visibility`为`hidden`也是一种常用的隐藏元素的方法
+
+从页面上仅仅是隐藏该元素，DOM结果均会存在，只是当时在一个不可见的状态，不会触发重排，但是会触发重绘
+
+```css
+.hidden{
+    visibility:hidden
+}
+```
+
+给人的效果是隐藏了，**所以他自身的事件不会触发**
+
+特点：元素不可见，占据页面空间，无法响应点击事件
+
+
+
+### opacity:0
+
+`opacity`属性表示元素的透明度，**将元素的透明度设置为0后，在我们用户眼中，元素也是隐藏的**
+
+不会引发重排，**一般情况下也会引发重绘**
+
+> 如果利用 animation 动画，对 opacity 做变化（animation会默认触发GPU加速）**，则只会触发 GPU 层面的 composite，不会触发重绘**
+
+```css
+.transparent {
+    opacity:0;
+}
+```
+
+由于其仍然是存在于页面上的，**所以他自身的的事件仍然是可以触发的**，但**被他遮挡的元素是不能触发其事件的**
+
+需要注意的是：其子元素不能设置opacity来达到显示的效果
+
+特点：改变元素透明度，元素不可见，占据页面空间，**可以响应点击事件**
+
+
+
+### 设置height、width属性为0
+
+将元素的`margin`，`border`，`padding`，`height`和`width`等**影响元素盒模型的属性设置成0**，如果元素内有子元素或内容，**还应该设置其`overflow:hidden`来隐藏其子元素**
+
+```css
+.hiddenBox {
+    margin:0;     
+    border:0;
+    padding:0;
+    height:0;
+    width:0;
+    overflow:hidden;
+}
+```
+
+特点：元素不可见，**不占据页面空间，无法响应点击事件**
+
+
+
+### position:absolute
+
+将元素移出可视区域
+
+```css
+.hide {
+   position: absolute;
+   top: -9999px;
+   left: -9999px;
+}
+```
+
+特点：元素不可见，**不影响页面布局**
+
+
+
+### clip-path
+
+通过裁剪的形式
+
+```css
+.hide {
+  clip-path: polygon(0px 0px,0px 0px,0px 0px,0px 0px);
+}
+```
+
+特点：元素不可见，**占据页面空间，无法响应点击事件**
+
+
+
+### 区别
+
+最常用的还是`display:none`和`visibility:hidden`，其他的方式只能认为是奇招，它们的真正用途并不是用于隐藏元素，所以并不推荐使用它们
+
+关于`display: none`、` visibility: hidden`、`opacity: 0`的区别，如下表所示：
+
+|                        | display: none | visibility: hidden | opacity: 0 |
+| :--------------------- | :------------ | :----------------- | ---------- |
+| 页面中                 | 不存在        | 存在               | 存在       |
+| 重排                   | 会            | 不会               | 不会       |
+| 重绘                   | 会            | 会                 | 不一定     |
+| 自身绑定事件           | 不触发        | 不触发             | 可触发     |
+| transition             | 不支持        | 支持               | 支持       |
+| 子元素可复原           | 不能          | 能                 | 不能       |
+| 被遮挡的元素可触发事件 | 能            | 能                 | 不能       |
+
+
+
+---
+
+## 46.怎么使用 CSS3 实现动画？
+
+CSS动画（CSS Animations）是为层叠样式表建议的允许可扩展标记语言（XML）元素使用CSS的动画的模块
+
+即指元素从一种样式逐渐过渡为另一种样式的过程
+
+常见的动画效果有很多，如平移、旋转、缩放等等，复杂动画则是多个简单动画的组合
+
+`css`实现动画的方式，有如下几种：
+
+- transition 实现渐变动画
+- transform 转变动画
+- animation 实现自定义动画
+
+| 属性               | 含义                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| transition（过度） | 用于设置元素的样式过度，和animation有着类似的效果，但细节上有很大的不同 |
+| transform（变形）  | 用于元素进行旋转、缩放、移动或倾斜，和设置样式的动画并没有什么关系，就相当于color一样用来设置元素的“外表” |
+| translate（移动）  | 只是transform的一个属性值，即移动                            |
+| animation（动画）  | 用于设置动画属性，他是一个简写的属性，包含6个属性            |
+
+
+
+----
+
+## 47.怎么理解回流跟重绘？什么场景下会触发？
+
+### 概念
+
+在`HTML`中，每个元素都可以理解成一个盒子，在浏览器解析过程中，会涉及到回流与重绘：
+
+- 回流：布局引擎会根据各种样式计算每个盒子在页面上的大小与位置
+- 重绘：当计算好盒模型的位置、大小及其他属性后，浏览器根据每个盒子特性进行绘制
+
+具体的浏览器解析渲染机制如下所示：
+
+![img](E:\pogject\学习笔记\image\css\渲染过程)
+
+- 解析HTML，生成DOM树，解析CSS，生成CSSOM树
+- 将DOM树和CSSOM树结合，生成渲染树(Render Tree)
+- Layout(回流):根据生成的渲染树，进行回流(Layout)，得到节点的几何信息（位置，大小）
+- Painting(重绘):根据渲染树以及回流得到的几何信息，得到节点的绝对像素
+- Display:将像素发送给GPU，展示在页面上
+
+在页面初始渲染阶段，回流不可避免的触发，可以理解成页面一开始是空白的元素，后面添加了新的元素使页面布局发生改变
+
+当我们对 `DOM` 的修改引发了 `DOM `几何尺寸的变化（比如修改元素的宽、高或隐藏元素等）时，浏览器需要重新计算元素的几何属性，然后再将计算的结果绘制出来
+
+当我们对 `DOM `的修改导致了样式的变化（`color`或`background-color`），却并未影响其几何属性时，浏览器不需重新计算元素的几何属性、直接为该元素绘制新的样式，这里就仅仅触发了回流
+
+
+
+### 如何触发
+
+要想减少回流和重绘的次数，首先要了解回流和重绘是如何触发的
+
+#### 回流触发时机
+
+回流这一阶段主要是计算节点的位置和几何信息，那么**当页面布局和几何信息发生变化的时候，就需要回流**，如下面情况：
+
+- 添加或删除可见的DOM元素
+- 元素的位置发生变化
+- 元素的尺寸发生变化（包括外边距、内边框、边框大小、高度和宽度等）
+- 内容发生变化，比如文本变化或图片被另一个不同尺寸的图片所替代
+- 页面一开始渲染的时候（这避免不了）
+- 浏览器的窗口尺寸变化（因为回流是根据视口的大小来计算元素的位置和大小的）
+
+还有一些容易被忽略的操作：获取一些特定属性的值
+
+> offsetTop、offsetLeft、 offsetWidth、offsetHeight、scrollTop、scrollLeft、scrollWidth、scrollHeight、clientTop、clientLeft、clientWidth、clientHeight
+
+**这些属性有一个共性，就是需要通过即时计算得到**。因此**浏览器为了获取这些值，也会进行回流**
+
+除此还包括`getComputedStyle `方法，原理是一样的
+
+#### 重绘触发时机
+
+触发回流一定会触发重绘
+
+可以把页面理解为一个黑板，黑板上有一朵画好的小花。现在我们要把这朵从左边移到了右边，那我们要先确定好右边的具体位置，画好形状（回流），再画上它原有的颜色（重绘）
+
+除此之外还有一些其他引起重绘行为：
+
+- 颜色的修改
+- 文本方向的修改
+- 阴影的修改
+
+#### 浏览器优化机制
+
+由于每次重排都会造成额外的计算消耗，因此大多数浏览器都会通过队列化修改并批量执行来优化重排过程。浏览器会将修改操作放入到队列里，直到过了一段时间或者操作达到了一个阈值，才清空队列
+
+**当你获取布局信息的操作的时候，会强制队列刷新**，包括前面讲到的`offsetTop`等方法都会返回最新的数据
+
+因此浏览器不得不清空队列，触发回流重绘来返回正确的值
+
+
+
+### 如何减少
+
+我们了解了如何触发回流和重绘的场景，下面给出避免回流的经验：
+
+- 如果想设定元素的样式，通过改变元素的 `class` 类名 (**尽可能在 DOM 树的最里层**)
+- **避免设置多项内联样式**
+- 应用元素的动画，使用 `position` 属性的 `fixed` 值或 `absolute` 值
+- 避免使用 `table` 布局，**`table` 中每个元素的大小以及内容的改动，都会导致整个 `table` 的重新计算**
+- 对于那些复杂的动画，对其设置 `position: fixed/absolute`，尽可能地使元素脱离文档流，从而减少对其他元素的影响
+- **使用css3硬件加速**，可以让`transform`、`opacity`、`filters`这些动画不会引起回流重绘
+- 避免使用 CSS 的 `JavaScript` 表达式
+
+- 在使用 `JavaScript` 动态插入多个节点时, 可以使用`DocumentFragment`. 创建后一次插入. 就能避免多次的渲染性能
+
+但有时候，我们会无可避免地进行回流或者重绘，我们可以更好使用它们
+
+例如，多次修改一个把元素布局的时候，我们很可能会如下操作
+
+```js
+const el = document.getElementById('el')
+for(let i=0;i<10;i++) {
+    el.style.top  = el.offsetTop  + 10 + "px";
+    el.style.left = el.offsetLeft + 10 + "px";
+}
+```
+
+每次循环都需要获取多次`offset`属性，比较糟糕，**可以使用变量的形式缓存起来，待计算完毕再提交给浏览器发出重计算请求**
+
+```js
+// 缓存offsetLeft与offsetTop的值
+const el = document.getElementById('el') 
+let offLeft = el.offsetLeft, offTop = el.offsetTop
+
+// 在JS层面进行计算
+for(let i=0;i<10;i++) {
+  offLeft += 10
+  offTop  += 10
+}
+
+// 一次性将计算结果应用到DOM上
+el.style.left = offLeft + "px"
+el.style.top = offTop  + "px"
+```
+
+**我们还可避免改变样式，使用类名去合并样式**
+
+```js
+const container = document.getElementById('container')
+container.style.width = '100px'
+container.style.height = '200px'
+container.style.border = '10px solid red'
+container.style.color = 'red'
+```
+
+使用类名去合并样式
+
+```html
+<style>
+    .basic_style {
+        width: 100px;
+        height: 200px;
+        border: 10px solid red;
+        color: red;
+    }
+</style>
+<script>
+    const container = document.getElementById('container')
+    container.classList.add('basic_style')
+</script>
+```
+
+前者每次单独操作，都去触发一次渲染树更改（新浏览器不会），都去触发一次渲染树更改，从而导致相应的回流与重绘过程
+
+**合并之后，等于我们将所有的更改一次性发出**
+
+我们还可以通过通过设置元素属性`display: none`，将其从页面上去掉，然后再进行后续操作，这些后续操作也不会触发回流与重绘，这个过程称为**离线操作**
+
+```js
+const container = document.getElementById('container')
+container.style.width = '100px'
+container.style.height = '200px'
+container.style.border = '10px solid red'
+container.style.color = 'red'
+```
+
+离线操作后
+
+```js
+let container = document.getElementById('container')
+container.style.display = 'none'
+container.style.width = '100px'
+container.style.height = '200px'
+container.style.border = '10px solid red'
+container.style.color = 'red'
+...（省略了许多类似的后续操作）
+container.style.display = 'block'
+```
+
+
+
+----
+
+## 48. 如果使用CSS提高页面性能？
+
+实现方式有很多种，主要有如下：
+
+- 内联首屏关键CSS
+- 异步加载CSS
+- 资源压缩
+- 合理使用选择器
+- 减少使用昂贵的属性
+- 不要使用@import
+
+### 内联首屏关键CSS
+
+在打开一个页面，页面首要内容出现在屏幕的时间影响着用户的体验，**而通过内联`css`关键代码能够使浏览器在下载完`html`后就能立刻渲染**
+
+而如果外部引用`css`代码，在解析`html`结构过程中遇到外部`css`文件，才会开始下载`css`代码，再渲染
+
+**所以，`CSS`内联使用使渲染时间提前**
+
+注意：但是较大的`css`代码并不合适内联（初始拥塞窗口、没有缓存），而其余代码则采取外部引用方式
+
+### 异步加载CSS
+
+在`CSS`文件请求、下载、解析完成之前，`CSS`会阻塞渲染，浏览器将不会渲染任何已处理的内容
+
+前面加载内联代码后，后面的外部引用`css`则没必要阻塞浏览器渲染。**这时候就可以采取异步加载的方案**，主要有如下：
+
+- 使用javascript将link标签插到head标签最后
+
+```js
+// 创建link标签
+const myCSS = document.createElement( "link" );
+myCSS.rel = "stylesheet";
+myCSS.href = "mystyles.css";
+// 插入到header的最后位置
+document.head.insertBefore( myCSS, document.head.childNodes[ document.head.childNodes.length - 1 ].nextSibling );
+```
+
+- 设置link标签media属性为noexis，浏览器会认为当前样式表不适用当前类型，会在不阻塞页面渲染的情况下再进行下载。**加载完成后，将`media`的值设为`screen`或`all`，从而让浏览器开始解析CSS**
+
+```html
+<link rel="stylesheet" href="mystyles.css" media="noexist" onload="this.media='all'">
+```
+
+- 通过rel属性将link元素标记为alternate可选样式表，也能实现浏览器异步加载。同样别忘了加载完成之后，将rel设回stylesheet
+
+```html
+<link rel="alternate stylesheet" href="mystyles.css" onload="this.rel='stylesheet'">
+```
+
+### 资源压缩
+
+利用`webpack`、`gulp/grunt`、`rollup`等模块化工具，将`css`代码进行压缩，使文件变小，大大降低了浏览器的加载时间
+
+### 合理使用选择器
+
+`css`匹配的规则是从右往左开始匹配，例如`#markdown .content h3`匹配规则如下：
+
+- 先找到h3标签元素
+- 然后去除祖先不是.content的元素
+- 最后去除祖先不是#markdown的元素
+
+如果嵌套的层级更多，页面中的元素更多，那么匹配所要花费的时间代价自然更高
+
+所以我们**在编写选择器的时候，可以遵循以下规则：**
+
+- 不要嵌套使用过多复杂选择器，最好不要三层以上
+- 使用id选择器就没必要再进行嵌套
+- **通配符和属性选择器效率最低**，避免使用
+
+### 减少使用昂贵的属性
+
+在页面发生重绘的时候，昂贵属性如`box-shadow`/`border-radius`/`filter`/透明度/`:nth-child`等，会降低浏览器的渲染性能
+
+### 不要使用@import
+
+css样式文件有两种引入方式，一种是`link`元素，另一种是`@import`
+
+`@import`会影响浏览器的并行下载，使得页面在加载时增加额外的延迟，增添了额外的往返耗时
+
+而且多个`@import`可能会导致下载顺序紊乱
+
+比如一个css文件`index.css`包含了以下内容：`@import url("reset.css")`
+
+那么浏览器就必须先把`index.css`下载、解析和执行后，才下载、解析和执行第二个文件`reset.css`
+
+### 其他
+
+- 减少重排操作，以及减少不必要的重绘
+- 了解哪些属性可以继承而来，避免对这些属性重复编写
+- cssSprite，合成所有icon图片，用宽高加上backgroud-position的背景图方式显现出我们要的icon图，减少了http请求
+- 把小的icon图片转成base64编码
+- CSS3动画或者过渡尽量使用transform和opacity来实现动画，不要使用left和top属性
+
+`css`实现性能的方式可以从选择器嵌套、属性特性、减少`http`这三面考虑，同时还要注意`css`代码的加载顺序
+
+-----
+
+## 49.怎么让Chrome支持小于12px 的文字？
+
+Chrome 中文版浏览器会默认设定页面的最小字号是12px，英文版没有限制
+
+**原由 Chrome 团队认为汉字小于12px就会增加识别难度**
+
+- 中文版浏览器
+
+与网页语言无关，取决于用户在Chrome的设置里（chrome://settings/languages）把哪种语言设置为默认显示语言
+
+- 系统级最小字号
+
+浏览器默认设定页面的最小字号，用户可以前往 chrome://settings/fonts 根据需求更改
+
+而我们在实际项目中，不能奢求用户更改浏览器设置
+
+对于文本需要以更小的字号来显示，就需要用到一些小技巧
+
+
+
+常见的解决方案有：
+
+- zoom
+- -webkit-transform:scale()
+- -webkit-text-size-adjust:none
+
+### Zoom
+
+`zoom` 的字面意思是“变焦”，**可以改变页面上元素的尺寸**，属于真实尺寸
+
+其支持的值类型有：
+
+- zoom:50%，表示缩小到原来的一半
+- zoom:0.5，表示缩小到原来的一半
+
+使用 `zoom` 来”支持“ 12px 以下的字体
+
+代码如下：
+
+```html
+<style type="text/css">
+    .span1{
+        font-size: 12px;
+        display: inline-block;
+        zoom: 0.8;
+    }
+    .span2{
+        display: inline-block;
+        font-size: 12px;
+    }
+</style>
+<body>
+    <span class="span1">测试10px</span>
+    <span class="span2">测试12px</span>
+</body>
+```
+
+需要注意的是，`Zoom` 并不是标准属性，需要考虑其兼容性
+
+
+
+### -webkit-transform:scale()
+
+针对`chrome`浏览器,加`webkit`前缀，用`transform:scale()`这个属性进行放缩
+
+注意的是，**使用`scale`属性只对可以定义宽高的元素生效**，所以，下面代码中将`span`元素转为行内块元素
+
+实现代码如下：
+
+```html
+<style type="text/css">
+    .span1{
+        font-size: 12px;
+        display: inline-block;
+        -webkit-transform:scale(0.8);
+    }
+    .span2{
+        display: inline-block;
+        font-size: 12px;
+    }
+</style>
+<body>
+    <span class="span1">测试10px</span>
+    <span class="span2">测试12px</span>
+</body>
+```
+
+
+
+### -webkit-text-size-adjust:none
+
+该属性**用来设定文字大小是否根据设备(浏览器)来自动调整显示大小**
+
+属性值：
+
+- percentage：字体显示的大小；
+- auto：默认，字体大小会根据设备/浏览器来自动调整；
+- none:字体大小不会自动调整
+
+```css
+html { -webkit-text-size-adjust: none; }
+```
+
+这样设置之后会有一个问题，就是当你放大网页时，一般情况下字体也会随着变大，而设置了以上代码后，字体只会显示你当前设置的字体大小，不会随着网页放大而变大了
+
+所以，**我们不建议全局应用该属性，而是单独对某一属性使用**
+
+> 需要注意的是，自从`chrome 27`之后，就取消了对这个属性的支持。同时，该属性只对英文、数字生效，对中文不生效
+
+
+
+`Zoom` 非标属性，有兼容问题，缩放会改变了元素占据的空间大小，触发重排
+
+`-webkit-transform:scale()` 大部分现代浏览器支持，并且对英文、数字、中文也能够生效，缩放不会改变了元素占据的空间大小，页面布局不会发生变化
+
+`-webkit-text-size-adjust`对谷歌浏览器有版本要求，在27之后，就取消了该属性的支持，并且只对英文、数字生效
+
+
+
+-----
+
+## 50.如何实现单行／多行文本溢出的省略样式？
+
+在日常开发展示页面，如果一段文本的数量过长，受制于元素宽度的因素，有可能不能完全显示，为了提高用户的使用体验，这个时候就需要我们把溢出的文本显示成省略号
+
+对于文本的溢出，我们可以分成两种形式：
+
+- 单行文本溢出
+- 多行文本溢出
+
+### 单行文本溢出省略
+
+理解也很简单，**即文本在一行内显示，超出部分以省略号的形式展现**
+
+实现方式也很简单，涉及的`css`属性有：
+
+- text-overflow：规定当文本溢出时，显示省略符号来代表被修剪的文本
+- white-space：设置文字在一行显示，不能换行
+- overflow：文字长度超出限定宽度，则隐藏超出的内容
+
+`overflow`设为`hidden`，普通情况用在块级元素的外层隐藏内部溢出元素，或者配合下面两个属性实现文本溢出省略
+
+`white-space:nowrap`，作用是设置文本不换行，是`overflow:hidden`和`text-overflow：ellipsis`生效的基础
+
+`text-overflow`属性值有如下：
+
+- clip：当对象内文本溢出部分裁切掉
+- ellipsis：当对象内文本溢出时显示省略标记（...）
+
+**`text-overflow`只有在设置了`overflow:hidden`和`white-space:nowrap`才能够生效的**
+
+举个例子
+
+```html
+<style>
+    p{
+        overflow: hidden;
+        line-height: 40px;
+        width:400px;
+        height:40px;
+        border:1px solid red;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+<p 这是一些文本这是一些文本这是一些文本这是一些文本这是一些文本这是一些文本这是一些文本这是一些文本这是一些文本这是一些文本</p >
+```
+
+可以看到，设置单行文本溢出较为简单，并且省略号显示的位置较好
+
+
+
+### 多行文本溢出省略
+
+多行文本溢出的时候，我们可以分为两种情况：
+
+- 基于高度截断
+- 基于行数截断
+
+#### 基于高度截断
+
+#### 伪元素 + 定位
+
+核心的`css`代码结构如下：
+
+- position: relative：为伪元素绝对定位
+- overflow: hidden：文本溢出限定的宽度就隐藏内容）
+- position: absolute：给省略号绝对定位
+- line-height: 20px：结合元素高度,高度固定的情况下,设定行高, 控制显示行数
+- height: 40px：设定当前元素高度
+- ::after {} ：设置省略号样式
+
+代码如下所示：
+
+```html
+<style>
+    .demo {
+        position: relative;
+        line-height: 20px;
+        height: 40px;
+        overflow: hidden;
+    }
+    .demo::after {
+        content: "...";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        padding: 0 20px 0 10px;
+    }
+</style>
+
+<body>
+    <div class='demo'>这是一段很长的文本</div>
+</body>
+```
+
+实现原理很好理解，**就是通过伪元素绝对定位到行尾并遮住文字**，再通过 `overflow: hidden` 隐藏多余文字
+
+这种实现具有以下**优点**：
+
+- 兼容性好，对各大主流浏览器有好的支持
+- 响应式截断，根据不同宽度做出调整
+
+一般文本存在英文的时候，可以设置`word-break: break-all`使一个单词能够在换行时进行拆分
+
+#### 基于行数截断
+
+纯`css`实现也非常简单，核心的`css`代码如下：
+
+- -webkit-line-clamp: 2：用来限制在一个块元素显示的文本的行数，为了实现该效果，它需要组合其他的WebKit属性）
+- display: -webkit-box：和1结合使用，将对象作为弹性伸缩盒子模型显示
+- -webkit-box-orient: vertical：和1结合使用 ，设置或检索伸缩盒对象的子元素的排列方式
+- overflow: hidden：文本溢出限定的宽度就隐藏内容
+- text-overflow: ellipsis：多行文本的情况下，用省略号“…”隐藏溢出范围的文本
+
+```html
+<style>
+    p {
+        width: 400px;
+        border-radius: 1px solid red;
+        -webkit-line-clamp: 2;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+<p>
+    这是一些文本这是一些文本这是一些文本这是一些文本这是一些文本
+    这是一些文本这是一些文本这是一些文本这是一些文本这是一些文本
+</p >
+```
+
+可以看到，上述使用了`webkit`的`CSS`属性扩展，所以兼容浏览器范围是`PC`端的`webkit`内核的浏览器，**由于移动端大多数是使用`webkit`，所以移动端常用该形式**
+
+需要注意的是，如果文本为一段很长的英文或者数字，则需要添加`word-wrap: break-word`属性
+
+还能通过使用`javascript`实现配合`css`，实现代码如下所示：
+
+css结构如下：
+
+```css
+p {
+    position: relative;
+    width: 400px;
+    line-height: 20px;
+    overflow: hidden;
+
+}
+.p-after:after{
+    content: "..."; 
+    position: absolute; 
+    bottom: 0; 
+    right: 0; 
+    padding-left: 40px;
+    background: -webkit-linear-gradient(left, transparent, #fff 55%);
+    background: -moz-linear-gradient(left, transparent, #fff 55%);
+    background: -o-linear-gradient(left, transparent, #fff 55%);
+    background: linear-gradient(to right, transparent, #fff 55%);
+}
+```
+
+javascript代码如下：
+
+```js
+$(function(){
+ //获取文本的行高，并获取文本的高度，假设我们规定的行数是五行，那么对超过行数的部分进行限制高度，并加上省略号
+   $('p').each(function(i, obj){
+        var lineHeight = parseInt($(this).css("line-height"));
+        var height = parseInt($(this).height());
+        if((height / lineHeight) >3 ){
+            $(this).addClass("p-after")
+            $(this).css("height","60px");
+        }else{
+            $(this).removeClass("p-after");
+        }
+    });
+})
+```
+
+
+
+----
+
+## 51. 怎么使用 CSS 如何画一个三角形
+
+在前端开发的时候，我们有时候会需要用到一个三角形的形状，比如地址选择或者播放器里面播放按钮
+
+通常情况下，我们会使用图片或者`svg`去完成三角形效果图，但如果单纯使用`css`如何完成一个三角形呢？
+
+实现过程似乎也并不困难，通过边框就可完成
+
+### 实现过程
+
+在以前也讲过盒子模型，默认情况下是一个矩形，实现也很简单
+
+```html
+<style>
+    .border {
+        width: 50px;
+        height: 50px;
+        border: 2px solid;
+        border-color: #96ceb4 #ffeead #d9534f #ffad60;
+    }
+</style>
+<div class="border"></div>
+```
+
+
+
+白色区域则为`width`、`height`，这时候只需要你将白色区域部分宽高逐渐变小，最终变为0，则变成如下图所示：
+
+这时候就已经能够看到4个不同颜色的三角形，如果需要下方三角形，只需要将上、左、右边框设置为0就可以得到下方的红色三角形
+
+但这种方式，虽然视觉上是实现了三角形，但实际上，隐藏的部分任然占据部分高度，需要将上方的宽度去掉
+
+最终实现代码如下：
+
+```css
+.border {
+    width: 0;
+    height: 0;
+    border-style:solid;
+    border-width: 0 50px 50px;
+    border-color: transparent transparent #d9534f;
+}
+```
+
+如果想要实现一个只有边框是空心的三角形，由于这里不能再使用`border`属性，**所以最直接的方法是利用伪类新建一个小一点的三角形定位上去**
+
+```css
+.border {
+    width: 0;
+    height: 0;
+    border-style:solid;
+    border-width: 0 50px 50px;
+    border-color: transparent transparent #d9534f;
+    position: relative;
+}
+.border:after{
+    content: '';
+    border-style:solid;
+    border-width: 0 40px 40px;
+    border-color: transparent transparent #96ceb4;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+```
+
+伪类元素定位参照对象的内容区域宽高都为0，则内容区域即可以理解成中心一点，**所以伪元素相对中心这点定位**
+
+**将元素定位进行微调以及改变颜色**，就能够完成下方效果图：
+
+```css
+.border:after {
+    content: '';
+    border-style: solid;
+    border-width: 0 40px 40px;
+    border-color: transparent transparent #96ceb4;
+    position: absolute;
+    top: 6px;
+    left: -40px;
+}
+```
+
+
+
+可以看到，边框是实现三角形的部分，边框实际上并不是一个直线，如果我们将四条边设置不同的颜色，将边框逐渐放大，可以得到每条边框都是一个梯形
+
+
+
+### 原理分析
+
+可以看到，边框是实现三角形的部分，边框实际上并不是一个直线，如果我们将四条边设置不同的颜色，**将边框逐渐放大，可以得到每条边框都是一个梯形**
+
+当分别取消边框的时候，发现下面几种情况：
+
+- 取消一条边的时候，与这条边相邻的两条边的接触部分会变成直的
+- 当仅有邻边时， 两个边会变成对分的三角
+- 当保留边没有其他接触时，极限情况所有东西都会消失
+
+通过利用旋转、隐藏，以及设置内容宽高等属性，就能够实现其他类型的三角形，如设置直角三角形
+
+```css
+.box {
+    /* 内部大小 */
+    width: 0px;
+    height: 0px;
+    /* 边框大小 只设置两条边*/
+    border-top: #4285f4 solid;
+    border-right: transparent solid;
+    border-width: 85px; 
+    /* 其他设置 */
+    margin: 50px;
+}
+```
+
+
+
+----
+
+## 52.CSS实现一个等腰三角形
+
+主要是通过把宽高设置成0，边框宽度设置宽一些，**设置其中三个边透明，只留一个边显示**
+
+等边三角形是特殊的等腰三角形，它的三条边都相等，顶角为60度**，而高是边长的3^(1/2)/2倍，约等于0.866**……假设底为160px，则高约为138.56px，因此要做边长为160px的等边三角形，可以这么做：
 
 等腰三角形
 
@@ -2849,10 +3737,13 @@ relative
     <title>测试</title>
     <style type="text/css">
         div {
-             width:160px;height:160px;margin:100px auto;
-             border-left:80px solid transparent; 
-             border-right:80px solid transparent; 
-             border-bottom:138.56px solid #A962CE; /*--三角形的高--*/
+     width:160px;
+     height:160px;
+     margin:100px auto;
+     border-left:80px solid transparent; 
+     border-right:80px solid transparent; 
+     border-bottom:138.56px solid #A962CE; /*--三角形的高--*/
+
         }
     </style>
 </head>
@@ -2921,16 +3812,14 @@ relative
 
 ---
 
-#### 11.7 实现扇形、圆形
-
-**参考答案**：
+## 53.css实现扇形、圆形
 
 圆形：
 
 border-radius圆角的四个值按顺序取值分别为：左上、右上、右下、左下。这里只设置一个值，代表四个角的取值都为为50%
 
 原理：border-radius: 50% 弯曲元素的边框以创建圆。
-由于圆在任何给定点具有相同的半径，故宽和高都需要保证一样的值，不同的值将创建椭圆。
+由于圆在任何给定点具有相同的半径，故宽和高都需要保证一样的值，**不同的值将创建椭圆**。
 
 ```html
 <div class="circle"></div>
@@ -2939,7 +3828,7 @@ border-radius圆角的四个值按顺序取值分别为：左上、右上、右�
           border-radius: 50%;
           width: 80px;
           height: 80px;
-           background: #666;
+          background: #666;
     }
 </style>
 
@@ -2951,7 +3840,7 @@ border-radius圆角的四个值按顺序取值分别为：左上、右上、右�
 
    原理：
 
-   左上角是圆角，其余三个角都是直角：左上角的值为宽和高一样的值，其他三个角的值不变（等于0）。
+   **左上角是圆角，其余三个角都是直角**：左上角的值为宽和高一样的值，其他三个角的值不变（等于0）。
 
 ```html
 <div class="sector"></div>
@@ -3048,9 +3937,7 @@ border-radius圆角的四个值按顺序取值分别为：左上、右上、右�
 
 ------
 
-#### 11.8 旋转45度
-
-**参考答案**：
+## 54.旋转45度
 
 CSS中使用**rotate**方法来实现对元素的旋转，在参数中加入角度值，旋转方式为顺时针旋转。
 
@@ -3084,13 +3971,15 @@ CSS中使用**rotate**方法来实现对元素的旋转，在参数中加入角�
 
 ```
 
+
+
+
+
 ------
 
-#### 11.9 画 0.5px 的直线
+## 55.画 0.5px 的直线
 
-**参考答案**：
-
-1. 使用scale缩放
+### 使用scale缩放
 
 ```html
 <!DOCTYPE html>
@@ -3123,7 +4012,7 @@ Chrome/Safari都变虚了，只有Firefox比较完美看起来是实的而且还
 }
 ```
 
-2.线性渐变linear-gradient
+### 线性渐变linear-gradient
 
 ```html
 <style>
@@ -3133,12 +4022,12 @@ Chrome/Safari都变虚了，只有Firefox比较完美看起来是实的而且还
 }
 </style>
 <p>linear-gradient(0deg, #fff, #000)</p>
-<div class="hr gradient"></div>
+<hr class="hr gradient" />
 ```
 
-linear-gradient(0deg, #fff, #000)的意思是：渐变的角度从下往上，从白色#fff渐变到黑色#000，而且是线性的，在高清屏上，1px的逻辑像素代表的物理（设备）像素有2px，由于是线性渐变，所以第1个px只能是#fff，而剩下的那个像素只能是#000，这样就达到了画一半的目的。
+linear-gradient(0deg, #fff, #000)的意思是：渐变的角度从下往上，从白色#fff渐变到黑色#000，而且是线性的，**在高清屏上，1px的逻辑像素代表的物理（设备）像素有2px，由于是线性渐变，所以第1个px只能是#fff，而剩下的那个像素只能是#000**，这样就达到了画一半的目的。
 
-3. boxshadow
+### boxshadow
 
 ```html
 <style>
@@ -3152,19 +4041,21 @@ linear-gradient(0deg, #fff, #000)的意思是：渐变的角度从下往上，�
 <div class="hr boxshadow"></div>
 ```
 
-4. viewport
+### viewport
 
 ```html
 <meta name="viewport" content="width=device-width,initial-sacle=0.5">
 ```
 
-其中width=device-width表示将viewport视窗的宽度调整为设备的宽度，这个宽度通常是指物理上宽度。默认的缩放比例为1时，如iphone 6竖屏的宽度为750px，它的dpr=2，用2px表示1px，这样设置之后viewport的宽度就变成375px。但是我们可以改成0.5，viewport的宽度就是原本的750px，所以1个px还是1px，正常画就行，但这样也意味着UI需要按2倍图的出，整体面面的单位都会放大一倍。
+其中width=device-width表示将viewport视窗的宽度调整为设备的宽度，这个宽度通常是指物理上宽度。默认的缩放比例为1时，如iphone 6竖屏的宽度为750px，它的dpr=2，用2px表示1px，这样设置之后viewport的宽度就变成375px。但是**我们可以改成0.5，viewport的宽度就是原本的750px，所以1个px还是1px，正常画就行，**但这样也意味着UI需要按2倍图的出，整体面面的单位都会放大一倍。
+
+
+
+
 
 ---
 
-#### 11.10 css 切换主题
-
-**参考答案**：
+## 56.css 切换主题
 
 方式一：**主题层**
 
@@ -3492,6 +4383,321 @@ $color-tabs-background: $color-red;
 
 
 
+---
+
+## 57.如何使用css完成视差滚动效果?
+
+
+
+
+
+
+
+
+
+---
+
+#### 11.3 设置斑马线表格(纯css)
+
+   ```html
+   <!DOCTYPE html>
+   <html lang="en">
+   <head>
+    <meta charset="UTF-8">
+    <title>斑马线表格</title>
+    <style type="text/css">
+    *{
+     margin: 0;
+     padding: 0;
+     /*清处浏览器默认设置*/
+    }
+    table{
+     /*表格的外边距和大小*/
+     margin: 10px 0 0 0;
+     width: 100%;
+     border-spacing: 0;
+     border-collapse: collapse;
+     /*collapse 表格单元格边框合并 
+      border-spacing 表格单元格间距为零
+     */
+    }
+    caption{
+     font: 30px "楷体";
+     padding: 5px;
+     /*表格标题*/
+    }
+    td{
+     width: 32%;
+     height: 50px;
+     /*单元格大小*/
+    }
+    tbody td{
+      border: 1px solid;
+      /*表格主体的边框*/
+    }
+    thead{
+     background-color: #A2A5A7;
+     /*表格头部*/
+    }
+    tr:hover{
+     background-color: #66D9EF;
+     cursor: pointer;
+     /*鼠标悬停在表格上时，表格的背景和鼠标的形状*/
+    }
+    table tbody tr:nth-child(even){
+     background-color: #8F908A;
+     box-shadow: inset 0 5px rgba(255,255,255,0.5);
+     /*even为偶数行 odd为奇数行
+       设置表格的主体部分偶数行的样式
+       shadow 阴影  inset将外部阴影改为内部阴影
+     */
+    }
+    thead tr th:first-child
+    {
+     /*表头部分th 第一个th左上角设置圆角*/
+     border-radius: 15px 0 0 0;
+    }
+    thead tr td:last-child{
+     /*最后一个单元格右上角设置圆角*/
+     border-radius: 0 15px 0 0;
+    }
+    </style>
+   </head>
+   <body>
+    <table>
+    <caption>斑马线表格</caption>
+    <thead>
+     <tr>
+      <th></th>
+      <td></td>
+      <td></td>
+     </tr>
+    </thead>
+    <tbody>
+     <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+    </tbody>
+     <tfoot>
+      <tr>
+       <td></td>
+       <td></td>
+       <td></td>
+      </tr>
+     </tfoot>
+    </table>
+   </body>
+   </html>
+   
+   ```
+
+------
+
+   11.4 文本元素如何居中
+
+**参考答案：**
+
+1. CSS设置文字水平居中
+
+   在CSS中可以使用text-align属性来设置文字水平居中。该属性规定元素中的文本的水平对齐方式，通过使用center值设置文本居中。
+
+   text-align是一个基本的属性，它会影响一个元素中的文本行互相间的对齐方式。值left、right和center会导致元素中的文本分别左对齐、右对齐和居中，想要使文本居中，直接使用center即可。
+
+   该属性设置文本和img标签等一些内联对象（或与之类似的元素）的居中。
+
+   该属性有如下几个**特点**：
+
+   1）text-align的center应用在一个容器上，它**只针对容器里面的文字以及容器里面的display为inline或者inline-block的容器**，如果里面的容器display为block，则里面的容器的内容不会居中。
+
+   2）text-align**具有向下传递性**，会不断地向子元素传递。如果设置一个div，则其子div中的内容也会居中。
+
+   ```html
+   <!DOCTYPE html>
+   <html>
+       <head>
+           <meta charset="UTF-8">
+           <title>css 水平居中</title>
+           <style>
+               .box {
+                   width: 400px;
+                   height: 100px;
+                   background: pink;
+                   text-align:center;
+               }
+           </style>
+       </head>
+       <body>
+           <div class="box">css 水平居中了--文本文字</div>
+       </body>
+   
+   </html>
+   
+   ```
+
+2. CSS设置字体垂直居中
+
+   2.1 **单行文字垂直居中**
+
+   对于单行文本，我们只需要将文本行高(line-height属性)和所在区域高度(height)设置一致就可以了
+
+   ```html
+   <!DOCTYPE html>
+   <html>
+       <head>
+           <meta charset="UTF-8">
+           <title>css 垂直居中</title>
+           <style>
+               .box {
+                   width: 300px;
+                   height: 300px;
+                   background: paleturquoise;
+                   line-height:300px;
+               }
+           </style>
+       </head>
+       <body>
+           <div class="box">css 垂直居中了--文本文字</div>
+       </body>
+   </html>
+   
+   ```
+
+   2.2 **多行文本垂直居中**
+
+   说明：多行文本垂直居中分为两种情况，一个是父级元素高度不固定，随着内容变化；另一个是父级元素高度固定。
+
+   (1) **父级元素高度不固定**
+
+   父级高度不固定的时，高度只能通过内部文本来撑开。所以，我们可以通过设置内填充（padding）的值来使文本看起来垂直居中，只需设置padding-top和padding-bottom的值相等：
+
+   ```html
+   <!DOCTYPE html>
+   <html>
+       <head>
+           <meta charset="UTF-8">
+           <title>css 垂直居中</title>
+           <style>
+               .box {
+                   width: 300px;
+                   margin: 50px auto;
+                   background: paleturquoise;
+                   padding: 50px 20px;
+               }
+           </style>
+       </head>
+       <body>
+           <div class="box">css 垂直居中了--文本文字,文本文字,文本文字,文本文字,文本文字,文本文字</div>
+       </body>
+   </html>
+   
+   ```
+   
+   (2) **父级元素高度固定**
+
+使用vertical-align:middle +display:table-cell 使文字垂直居中
+
+```html
+   <!DOCTYPE html>
+   <html>
+       <head>
+           <meta charset="UTF-8">
+           <title>css 垂直居中</title>
+           <style>
+               .box {
+                   width: 300px;
+                   height: 300px;
+                   background: paleturquoise;
+                   vertical-align:middle;
+                   display:table-cell;
+               }
+           </style>
+
+       </head>
+
+       <body>
+           <div class="box">css 垂直居中了--文本文字,文本文字,文本文字,文本文字,文本文字,文本文字。</div>
+
+       </body>
+
+   </html>
+
+```
+
+说明：vertical-align:middle +display:table-cell能够使单行文字、多行文字都居中。但是因为 table-cell 是 inline 类型，所以会导致原来的块级元素每个 div 一行移动到了同一行。如果需要分列两行，需要在外面额外添加容器对位置进行控制。
+
+-------
+
+#### 11.5 用flex实现九宫格讲思路
+
+**参考答案：**
+
+利用了padding-top和flex-wrap:wrap，当设置background-color时，是包括盒子模型中的content和padding的，但是为什么不设置height呢？因为父元素没有高度，所以定义height:30%是没有用的，且若想每个block都为正方形，最好的方式就是设置padding-top/padding-bottom：a%，因为此时的百分比是父元素宽度的百分比，而width也为父元素宽度的百分比，所以block可以成为正方形。
+
+```html
+<!DOCTYPE html>
+<html>
+<style>
+.block {
+    padding-top: 30%;
+    margin-top: 3%;
+    border-radius: 10%;
+    background-color: orange;
+    width: 30%;
+}
+.container-flex2  {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+</style>
+<body>
+   <div class="container-flex2">
+        <div class="block"></div>
+        <div class="block"></div>
+        <div class="block"></div>
+        <div class="block"></div>
+        <div class="block"></div>
+        <div class="block"></div>
+        <div class="block"></div>
+        <div class="block"></div>
+        <div class="block"></div>
+    </div>
+</body>
+</html>
+
+```
+
+---
+
+
+
 ------
 
 #### 11.11 布局: 三栏布局(平均分布)
@@ -3556,199 +4762,7 @@ flex 百分比
 
 
 
----
 
-# 页面布局
-
----
-
-## 3.1 请问定位布局position属性有哪些取值？
-
-定位布局：页面元素CSS样式采用position属性，可在top/bottom/right/left四个方向进行位置移动，从而达到定位效果，position属性可取以下7个值：
-
-  **1. 相对定位 relative**
-
-- 不会使元素脱离文档流（原本位置会被保留，即改变位置也不会占用新位置）
-- 相对于自身原本位置移动（没有定位偏移量则对元素无影响）
-- 不影响元素本身特性（无论块级元素或行内元素，保留其原本特性）
-- 常用于提升层级，从而改变元素覆盖关系，若两个都为定位元素，后面的会覆盖前面
-
-  **2. 绝对定位 absolute**
-
-- 使元素完全脱离文档流（在文档流中不再占原来位置）
-- 行内元素设置定位效果后，支持设置宽高
-- 区块元素设置定位效果后，未设置宽度时由内容撑开宽度
-- **相对于最近一个有定位的父元素进行偏移**，如果不存在就逐级向上排查，直到相对于body元素，即相对于浏览器窗口（必须有参照物）
-- 子绝父相，一般配合相对定位使用，（将父元素设置相对定位，子元素相对于父元素偏移）
-- 可提升层级
-
-  **3. 固定定位 fixed**
-
-- 直接相对于浏览器窗口进行“绝对定位”
-- 浮动在页面中，元素位置不会随浏览器窗口滚动条滚动而变化
-- 不会受文档流动影响
-
-  **4. 粘性定位 sticky**
-
-- 基于用户的滚动来定位，在相对定位与绝对定位两者间切换。滚动前相当于position:relative，当页面滚动超出目标区域时，相当于position:fixed，会将元素固定在目标位置
-- 相对于离它最近的具有滚动框的父级元素，如果父级元素都不可以滚动，那相对于浏览器窗口计算偏移量
-- 如top: 50px，在sticky元素到达距离相对定位的元素顶部50px的位置时固定，无论怎么滚动，都不再向上移动
-- 兼容性不好，如Internet Explorer, Edge 15 及更早 IE 版本不支持 sticky 定位，通常需要结合CSS3兼容方案
-
-  **5. 静态定位 static**
-
-- 默认定位，遵循正常的文档流
-- 元素不会受到影响
-
-  **6. 继承值 inherit**
-
-- 从父元素继承 position 属性值
-
-  **7. 初始值 initial**
-
-- initial 关键字可用于任何 HTML 元素上任何 CSS 属性
-- 可将所有CSS属性恢复到初始状态
-
----
-
-###  **1. fixed定位会出现失效情况吗？有什么解决办法吗？**
-
-存在常见3种fixed定位失效情况：
-
-    (1) 父元素的transform属性值不为none时，子元素的fixed失效（比较常见，仅在部分浏览器中失效）
-    
-    失效原因：当元素祖先的 transform 属性非 none 时，**定位容器由视口改为该祖先**（摘自MDN）
-    
-    解决办法：
-    
-    经过实验发现，absolute定位在该情况下不会失效，**可利用absolute定位模拟fixed效果**，
-
-主要**实现思路**：将html的滚动条禁用，开启body滚动条，对该元素absolute定位，并不设置父级元素定位，会相对document定位，但其滚动条未开启，不会受body滚动影响
-
-```
-
-```
-
-   (2)  perspective属性值不为none时（不常见）
-
-    浏览器都不支持 perspective 属性，Chrome 和 Safari 支持替代的 -webkit-perspective 属性，目前可行办法就是删掉perspective属性
-    
-    (3)  元素的will-change中指定了任意 CSS 属性
-    
-    目前可行办法就是尽量避免给fixed定位元素设置will-change
-
----
-
-## 3.2 请问你了解浮动布局float属性吗？
-
-浮动布局：为方便页面设计，给元素设置float属性，将元素脱离文档流，浮动框进行左右移动，直至外边缘遇到包含框或者另一个浮动框边缘，**再通过margin属性调整位置**，float属性可取3个值：left：左浮动、right：右浮动、none：不浮动（默认）
-
-浮动的影响：
-
-- 改变块级元素的排列方式，内容从上下排列显示变成水平排列显示
-- 浮动元素会脱离文档流，**不占位**，盒子重叠，内容不重叠
-- 浮动的块级元素的宽度由内容撑开，行内元素可设宽高、margin和padding均有效，**可理解为隐式转换为inline-block元素**
-
----
-
-### 1. 浮动布局最常产生什么问题？
-
-通常父级盒子不设置高度时，高度将由内容或子元素撑开，当子元素浮动脱离文档流后， 父盒子就会出现高度塌陷，边框变成一条线，通常需要清除浮动来解决该问题
-
----
-
-### 2.怎么理解css文档流/元素脱离文档流后有什么特点
-
-文档流处在文档的最底层，它规定了一个页面的位置和元素布局等规则。
-我们所创建的元素都处在文档流中，文档流所指定的规则比如块级元素独占一行，内联元素不会独占一行，内联元素不能设置高宽，父元素的高度由子元素撑开等。文档流之所以称为流，是它的布局像流一样从上到下在从左到右。
-而元素脱离文档流之后，该元素便不再遵循文档流的规则，比如块级元素不再独占一行，内联元素脱离文档流之后可以设置高宽，脱离的元素不能撑开父元素，不再在文档流中占有位置等。
-而脱离文档流的设置有两种：float，position：absolute
-
-1、float
-（我的理解是通过设置float来脱离文档流，脱离后的元素会遵循文档流之外的另一套规则，暂且称为浮动规则）。
-规则如下：
-①、产生字围效果，元素不会盖住文字，文字会绕着元素布局。
-②、元素层级提高，会盖住非浮动的元素。
-③、父元素的垂直外边距不会和子元素重叠。
-④、浮动元素不会超过超过上面的非浮动元素，会排列在非浮动块元素的下一行。
-⑤、元素浮动后会尽量向页面的左上或右上浮动，直到遇到父元素边框或其它浮动元素（浮动的元素不会脱离父元素，浮动还是相对于父元素浮动）。
-⑥、浮动的元素不会超过它上边的兄弟元素，最多一边齐。
-⑦、文档流中子元素的宽度默认为父元素的100%，脱离文档流之后，块元素的高宽度都只能由内容撑开，而且浮动的子元素无法撑开父元素（除非父元素也是浮动元素）。
-⑧、内联元素浮动后会变成块级元素。
-
-2、position:absolute
-（我的理解是通过设置绝对定位来脱离文档流，脱离后的元素会遵循文档流之外的另一套规则，暂且称为绝对定位规则）。
-规则如下：
-①、 绝对定位是相对于离他最近的开启了定位的祖先元素进行定位的，没有这种祖先元素，则相对于浏览器窗口（以左上角为坐标（0，0））
-②、定位元素会提高一个层级。
-③、内联元素变块级元素，高宽都只能由内容撑开。
-④、当一个文档流中的元素前的一个元素开启了绝对定位，则这个文档流中的元素会向上移动，被前元素覆盖。（其实跟浮动规则差不多），如果没有这样的情况，则开启了绝对定位的元素如果不设置偏移量，位置不会发生变化。
-
-浮动规则≠绝对定位规则，两者不相通
-这句话的意思是一个浮动元素和一个定位元素会重叠，且绝对定位元素的层级高于浮动元素的层级（按照浮动规则，浮动的兄弟元素是不会相互覆盖的）。
-
-```html
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title></title>
-	</head>
-	<style type="text/css">
-		#box1{
-			width: 400px;
-			height: 400px;
-			/* position: absolute; */
-			float: left;
-			background-color: red;
-		}
-		#box2{
-			width: 100px;
-		    height: 100px;
-			background: green;
-			float:left;
-			/* position: absolute; */
-	</style>
-	<body>
-		<div id="box1">	
-		</div>
-		<div id="box2">
-		</div>
-	</body>
-</html>
-
-```
-
-（当两个元素都开启绝对定位且不设置偏移量时，两个元素也会像上面这个图一样相互覆盖）
-
----
-
-## 3.3 请问BFC布局有哪些特点、触发条件以及实际应用？
-
-BFC（Block Formatting Context）：格式化上下文，也称BFC布局，是Web页面中盒模型布局的CSS渲染模式，**指一个独立的渲染区域，与其他元素隔离，不受外部布局影响**
-
-BFC布局特点：
-
-- 在BFC区域内，内部盒子会在垂直方向上一个接一个地放置
-- 在BFC区域内，内部盒子垂直方向上的距离由margin决定。（可理解为：属于同一个BFC的两个相邻盒子的上下margin会发生重叠）
-- 同一个BFC区域内，**设置了float属性的盒子不会重叠**
-- BFC就是页面上的一个隔离的独立容器，容器内外元素互不影响
-- 计算BFC的高度时，区域内的浮动元素也参与计算
-
-BFC布局触发条件（满足任意一个即可形成BFC）：
-
-- 根元素<html>
-- 浮动元素：float不为none
-- 绝对定位元素：position（absolute、fixed）
-- display为inline-block、table-cells、table-caption、flex、inline-flex
-- overflow不为visible（hidden、auto、scroll）
-
-BFC布局实际应用：
-
-- 清除浮动，通过设置overflow:hidden解决父元素坍塌问题
-- 垂直margin合并，BFC区域内两个相邻元素的垂直外边距会发生叠加，**叠加后的外边距为两者外边距的最大值。这样可保持各区域间上下间距一致**，比如多个段落之间与顶部底部的边距保持一致
-- 防止垂直 margin 合并，**反之可以在元素外层包裹一层容器，并触发该容器生成一个新的BFC布局**，与相邻元素隔离开来
-- 实现自适应双栏、三栏布局，利用浮动、定位、Flex布局原理可实现多种自适应布局
 
 
 
