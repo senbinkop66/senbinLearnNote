@@ -1045,9 +1045,9 @@ MVVM 表示的是 Model-View-ViewModel
 
 ### 如何追踪变化
 
-当你把一个普通的 JavaScript 对象传入 Vue 实例作为 `data` 选项，Vue 将遍历此对象所有的 property，并使用 [`Object.defineProperty`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty) 把这些 property 全部转为 [getter/setter](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Working_with_Objects#定义_getters_与_setters)。`Object.defineProperty` 是 ES5 中一个无法 shim 的特性，这也就是 Vue 不支持 IE8 以及更低版本浏览器的原因。
+当你把一个普通的 JavaScript 对象传入 Vue 实例作为 `data` 选项，Vue 将遍历此对象所有的 property，并使用 [`Object.defineProperty`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty) 把这些 property 全部转为 [getter/setter](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Working_with_Objects#定义_getters_与_setters)。`Object.defineProperty` 是 ES5 中一个无法 shim 的特性，**这也就是 Vue 不支持 IE8 以及更低版本浏览器的原因。**
 
-这些 getter/setter 对用户来说是不可见的，但是在内部它们让 Vue 能够追踪依赖，在 property 被访问和修改时通知变更。这里需要注意的是不同浏览器在控制台打印数据对象时对 getter/setter 的格式化并不同，所以建议安装 [vue-devtools](https://github.com/vuejs/vue-devtools) 来获取对检查数据更加友好的用户界面。
+**这些 getter/setter 对用户来说是不可见的**，但是在内部它们让 Vue 能够追踪依赖，在 property 被访问和修改时通知变更。这里需要注意的是不同浏览器在控制台打印数据对象时对 getter/setter 的格式化并不同，所以建议安装 [vue-devtools](https://github.com/vuejs/vue-devtools) 来获取对检查数据更加友好的用户界面。
 
 每个组件实例都对应一个 **watcher** 实例，它**会在组件渲染的过程中把“接触”过的数据 property 记录为依赖**。之后当依赖项的 setter 触发时，会通知 watcher，从而使它关联的组件重新渲染。
 
@@ -1055,9 +1055,9 @@ MVVM 表示的是 Model-View-ViewModel
 
 由于 JavaScript 的限制，Vue **不能检测**数组和对象的变化。尽管如此我们还是有一些办法来回避这些限制并保证它们的响应性。
 
-### [对于数组](https://cn.vuejs.org/v2/guide/reactivity.html#对于数组)
+### 对于对象
 
-Vue 无法检测 property 的添加或移除。**由于 Vue 会在初始化实例时对 property 执行 getter/setter 转化**，**所以 property 必须在 `data` 对象上存在才能让 Vue 将它转换为响应式的。**
+Vue 无法检测 property 的添加或移除。**由于 Vue 会在初始化实例时对 property 执行 getter/setter 转化**，所以 property **必须在 `data` 对象上存在**才能让 Vue 将它**转换为响应式的**。
 
 ```js
 var vm = new Vue({
@@ -1091,7 +1091,7 @@ this.$set(this.someObject,'b',2)
 this.someObject = Object.assign({}, this.someObject, { a: 1, b: 2 })
 ```
 
-### [对于数组](https://cn.vuejs.org/v2/guide/reactivity.html#对于数组)
+### 对于数组
 
 Vue 不能检测以下数组的变动：
 
@@ -1150,7 +1150,7 @@ vm.message = 'Hello!'
 
 **如果你未在 `data` 选项中声明 `message`，Vue 将警告你渲染函数正在试图访问不存在的 property。**
 
-这样的限制在背后是有其技术原因的，**它消除了在依赖项跟踪系统中的一类边界情况**，也使 Vue 实例能更好地配合类型检查系统工作。但与此同时在代码可维护性方面也有一点重要的考虑：`data` 对象就像组件状态的结构 (schema)。提前声明所有的响应式 property，可以让组件代码在未来修改或给其他开发人员阅读时更易于理解。
+这样的限制在背后是有其技术原因的，**它消除了在依赖项跟踪系统中的一类边界情况**，也使 Vue 实例能更好地配合类型检查系统工作。但与此同时在代码可维护性方面也有一点重要的考虑：`data` 对象就像组件状态的结构 (schema)。**提前声明所有的响应式 property，可以让组件代码在未来修改或给其他开发人员阅读时更易于理解。**
 
 ### [异步更新队列](https://cn.vuejs.org/v2/guide/reactivity.html#异步更新队列)
 
@@ -1234,7 +1234,7 @@ console.log(sum) //sum依旧是3，非响应式
 - 依赖收集：**知道sum依赖哪些数据**，例子中sum依赖了num1、num2，则要建立它们的依赖关系
 - 派发更新：**当依赖的数据num1、num2发生改变时，要通知响应对象sum重新运算**
 
-vue**3通过Proxy拦截数据的读取和设置（数据劫持）**
+**vue3通过Proxy拦截数据的读取和设置**（数据劫持）
 
 - 当数据读取时，通过**track**函数触发依赖的收集；
 - 当数据被设置时，通过**trigger**函数去派发更新。
@@ -1462,13 +1462,13 @@ vue2 核心 diff 算法 采用的是`双端比较算法`
 
 vue3 核心 diff 算法采用的是`去头尾的最长递增子序列算法`
 
-在计算机科学中，最长递增子序列（longest increasing subsequence）问题是指，在一个给定的数值序列中，找到一个子序列，使得这个子序列元素的数值依次递增，并且这个子序列的长度尽可能地大。最长递增子序列中的元素在原序列中不一定是连续的。解决最长递增子序列问题的算法最低要求O(n log n)的时间复杂度，这里n表示输入序列的规模。
+在计算机科学中，**最长递增子序列**（longest increasing subsequence）问题是指，在一个给定的数值序列中，找到一个子序列，使得这个子序列元素的数值依次递增，并且这个子序列的长度尽可能地大。最长递增子序列中的元素在原序列中不一定是连续的。解决最长递增子序列问题的算法最低要求O(n log n)的时间复杂度，这里n表示输入序列的规模。
 
-多数解法是使用动态规划的思想，算法的时间复杂度是 O(n2)，而 Vue.js 内部使用的是“贪心 + 二分查找”的算法，贪心算法的时间复杂度是 O(n)，二分查找的时间复杂度是 O(logn)，所以它的总时间复杂度是 `O(nlogn)`。
+多数解法是使用动态规划的思想，算法的时间复杂度是 O(n2)，而 Vue.js 内部使用的是“**贪心 + 二分查找**”的算法，贪心算法的时间复杂度是 O(n)，二分查找的时间复杂度是 O(logn)，所以它的总时间复杂度是 `O(nlogn)`。
 
 
 
-Diff算法即差异查找算法。
+Diff算法即**差异查找算法**。
 
 ### Vue的diff策略
 
@@ -1477,22 +1477,22 @@ Diff算法即差异查找算法。
 
 ### Vue Diff算法的基于什么策略
 
-- Web UI 中 DOM 节点跨层级的移动操作特别少，可以忽略不计 （tree-diff）
-- 拥有相同类的两个组件将会生成相似的树形结构，拥有不同类的两个组件将会生成不同的树形结（component diff）
-- 对于同一层级的一组子节点，它们可以通过唯一 id 进行区分（element-diff）
+- Web UI 中 DOM 节点**跨层级的移动操作特别少**，可以忽略不计 （tree-diff）
+- 拥有**相同类的两个组件将会生成相似的树形结构**，拥有不同类的两个组件将会生成不同的树形结（component diff）
+- **对于同一层级的一组子节点**，它们**可以通过唯一 id 进行区分**（element-diff）
 
 ### Vue Diff算法的原因以及目的
 
-Vue diff算法是vue2中引入虚拟DOM的产物，它的出现是为了通过对比新旧节点计算出需要改动的最小变化。 **核心思想：尽可能的复用老节点**
+Vue diff算法是vue2中引入虚拟DOM的产物，它的出现是**为了通过对比新旧节点计算出需要改动的最小变化**。 **核心思想：尽可能的复用老节点**
 
 ### Vue2 diff流程
 
-### 新老节点不同
+#### 新老节点不同
 
 - 创建新节点 以当前旧节点为参考 插入到DOM
 - 删除旧节点
 
-### 新老节点相同
+#### 新老节点相同
 
 - 如果两个节点引用一致 直接返回
 - 内部都是文本节点 新旧不同 更新文本节点的内容
@@ -1511,41 +1511,41 @@ Vue diff算法是vue2中引入虚拟DOM的产物，它的出现是为了通过�
 
 ### Vue3的diff流程
 
-### 新旧节点不同
+#### 新旧节点不同
 
 - 销毁旧节点
 - 根据新节点的类型 去挂载不同的节点
 
-### 处理组件
+#### 处理组件
 
 - 先判断子组件是否需要更新
 - 如果需要则递归执行子组件的副渲染函数来更新
 - 否则仅仅更新一些 vnode 的属性，并让子组件实例保留对组件 vnode 的引用
 
-### 处理元素
+#### 处理元素
 
 - 更新props
 - 更新子节点 子节点有三种类型 纯文本 Vnode数组 和 空
 
-**旧节点是纯文本：**
+#### 旧节点是纯文本：
 
 - 新节点也是 做简单的替换
 - 新节点是空 删除
 - 新节点是Vnode数组 批量添加
 
-**旧节点是空：**
+#### 旧节点是空：
 
 - 如果新子节点是纯文本，那么在旧子节点的父容器下添加新文本节点即可；
 - 如果新子节点也是空，那么什么都不需要做
 - 如果新子节点是 vnode 数组，那么直接去旧子节点的父容器下添加多个新子节点即可。
 
-**旧子节点是 vnode 数组：**
+#### 旧子节点是 vnode 数组：
 
 - 如果新子节点是纯文本，那么先删除旧子节点，再去旧子节点的父容器下添加新文本节点；
 - 如果新子节点是空，那么删除旧子节点即可
-- 如果新子节点也是 vnode 数组，那么就需要做完整的 diff 新旧子节点了，这是最复杂的情况，内部运用了核心 diff 算法
+- **如果新子节点也是 vnode 数组，那么就需要做完整的 diff 新旧子节点了**，这是最复杂的情况，内部运用了核心 diff 算法
 
-### 新旧节点都是数组
+#### 新旧节点都是数组
 
 新旧数组之间的对比，无非是通过更新、删除、添加和移除节点来完成的，diff算法的核心以**较低的成本完成子节点的更新为目的**，求解生成新子节点 DOM 的系列操作。 过程：
 
@@ -1555,13 +1555,13 @@ Vue diff算法是vue2中引入虚拟DOM的产物，它的出现是为了通过�
 - 删除多余节点 旧节点有剩余
 - 处理未知子序列
 
-### 处理未知子序列
+#### 处理未知子序列
 
 有时会碰到比较复杂的未知子序列：对于移动、删除、添加、更新这些操作，其中最复杂的就是移动操作，`Vue针对未知子序列的核心是通过最长递增子序列查找到需要移动的最小值`。
 
 在查找过程中需要对比新旧子序列，那么我们就要遍历某个序列，如果在遍历旧子序列的过程中需要判断某个节点是否在新子序列中存在，这就需要双重循环，而双重循环的复杂度是 O(n2) ，为了优化这个复杂度，我们可以用一种空间换时间的思路，建立索引图，把时间复杂度降低到 O(n)。
 
-#### 建立索引图
+建立索引图
 
 - 根据for循环中的key建立新子序列中的索引图
 - 然后再创建一个新旧子序列索引的映射关系，用于确定**最长递增子序列**、
@@ -1612,8 +1612,6 @@ http {  //在 http中配置如下代码，
 
 8. 添加loading效果，给用户一种进度感受
 
----
-
 
 
 ---
@@ -1653,7 +1651,7 @@ test127.html:258 toJSON: function toJSON() { [native code] }
 
 ### 什么是首屏加载
 
-首屏时间（First Contentful Paint），指的是浏览器从响应用户输入网址地址，到首屏内容渲染完成的时间，此时整个网页不一定要全部渲染完成，但需要展示当前视窗需要的内容
+首屏时间（First Contentful Paint），**指的是浏览器从响应用户输入网址地址，到首屏内容渲染完成的时间**，此时整个网页不一定要全部渲染完成，但需要展示当前视窗需要的内容
 
 首屏加载可以说是用户体验中**最重要**的环节
 
@@ -1666,7 +1664,7 @@ test127.html:258 toJSON: function toJSON() { [native code] }
 - 资源是否重复发送请求去加载了
 - 加载脚本的时候，渲染内容堵塞了
 
-## 解决方案
+### 解决方案
 
 常见的几种SPA首屏优化方式
 
@@ -1678,7 +1676,7 @@ test127.html:258 toJSON: function toJSON() { [native code] }
 - 开启GZip压缩
 - 使用SSR
 
-### 减小入口文件体积
+#### 减小入口文件体积
 
 常用的手段是路由懒加载，把不同路由对应的组件分割成不同的代码块，待路由被请求的时候会单独打包路由，使得入口文件变小，加载速度大大增加
 
@@ -1694,7 +1692,7 @@ routes:[
 
 以函数的形式加载路由，这样就可以把各自的路由文件分别打包，只有在解析给定的路由时，才会加载路由组件
 
-### 静态资源本地缓存
+#### 静态资源本地缓存
 
 后端返回资源问题：
 
@@ -1703,7 +1701,7 @@ routes:[
 
 前端合理利用`localStorage`
 
-### UI框架按需加载
+#### UI框架按需加载
 
 在日常使用`UI`框架，例如`element-UI`、或者`antd`，我们经常性直接引用整个`UI`库
 
@@ -1721,7 +1719,7 @@ Vue.use(Input)
 Vue.use(Pagination)
 ```
 
-### 组件重复打包
+#### 组件重复打包
 
 假设`A.js`文件是一个常用的库，现在有多个路由使用了`A.js`文件，这就造成了重复下载
 
@@ -1733,7 +1731,7 @@ minChunks: 3
 
 `minChunks`为3表示会把使用3次及以上的包抽离出来，放进公共依赖文件，避免了重复加载组件
 
-### 图片资源的压缩
+#### 图片资源的压缩
 
 图片资源虽然不在编码过程中，但它却是对页面性能影响最大的因素
 
@@ -1741,7 +1739,7 @@ minChunks: 3
 
 对页面上使用到的`icon`，可以使用在线字体图标，或者雪碧图，将众多小图标合并到同一张图上，用以减轻`http`请求压力。
 
-### 开启GZip压缩
+#### 开启GZip压缩
 
 拆完包之后，我们再用`gzip`做一下压缩 安装`compression-webpack-plugin`
 
@@ -1751,21 +1749,23 @@ cnmp i compression-webpack-plugin -D
 
 在服务器我们也要做相应的配置 如果发送请求的浏览器支持`gzip`，就发送给它`gzip`格式的文件 我的服务器是用`express`框架搭建的 只要安装一下`compression`就能使用
 
-### 使用SSR
+#### 使用SSR
 
 SSR（Server side ），也就是服务端渲染，组件或页面通过服务器生成html字符串，再发送到浏览器
 
 从头搭建一个服务端渲染是很复杂的，`vue`应用建议使用`Nuxt.js`实现服务端渲染
 
+
+
 ---
 
-## 1.48 虚拟DOM
+## 2.10 虚拟DOM
 
 ### 什么是虚拟DOM
 
 Virtual dom, 即虚拟DOM节点。**它通过`JS`的Object对象模拟DOM中的节点，然后再通过特定的render方法将其渲染成真实的DOM节点**。
 
-*所谓虚拟DOM，是一个用于表示真实 DOM 结构和属性的 `JavaScript` 对象，这个对象用于对比前后虚拟 DOM 的差异化，然后进行局部渲染从而实现性能上的优化。在`Vue.js` 中虚拟 DOM 的 `JavaScript` 对象就是 VNode。*
+*所谓虚拟DOM，**是一个用于表示真实 DOM 结构和属性的 `JavaScript` 对象**，这个对象用于对比前后虚拟 DOM 的差异化，然后进行局部渲染从而实现性能上的优化。在`Vue.js` 中虚拟 DOM 的 `JavaScript` 对象就是 VNode。*
 
 ```
 1.     虚拟dom就是通过一个对象描述一个html结构
@@ -1778,7 +1778,7 @@ Virtual dom, 即虚拟DOM节点。**它通过`JS`的Object对象模拟DOM中的�
 
 实际上它只是一层对真实`DOM`的抽象，以`JavaScript` 对象 (`VNode` 节点) 作为基础的树，**用对象的属性来描述节点**，最终可以通过一系列操作使这棵树映射到真实环境上
 
-在`Javascript`对象中，虚拟`DOM` 表现为一个 `Object`对象。并且最少包含标**签名** (`tag`)、**属性** (`attrs`) 和**子元素对象** (`children`) 三个属性，不同框架对这三个属性的名命可能会有差别
+在`Javascript`对象中，虚拟`DOM` 表现为一个 `Object`对象。并且最少包含**标签名** (`tag`)、**属性** (`attrs`) 和**子元素对象** (`children`) 三个属性，不同框架对这三个属性的名命可能会有差别
 
 创建虚拟`DOM`就是为了更好将虚拟的节点渲染到页面视图中，所以**虚拟`DOM`对象的节点与真实`DOM`的属性一一照应**
 
@@ -1828,11 +1828,11 @@ const app = new Vue({
 
 ### 为什么需要虚拟DOM
 
-`DOM`是很慢的，其元素非常庞大，页面的性能问题，大部分都是由`DOM`操作引起的
+`DOM`是很慢的，其元素非常庞大，**页面的性能问题，大部分都是由`DOM`操作引起的**
 
 由此可见，操作`DOM`的代价仍旧是昂贵的，频繁操作还是会出现页面卡顿，影响用户的体验
 
-浏览器在生成dom树的时候，非常消耗资源，因此引入虚拟dom概念通过一定的算法优化之后能够非常快捷的根据数据生成真实的html节点现在`vue`和`react`都是使用的虚拟dom
+浏览器在生成dom树的时候，非常消耗资源，因此引入虚拟dom概念通过一定的算法优化之后能够非常快捷的根据数据生成真实的html节点，现在`vue`和`react`都是使用的虚拟dom
 
 **举个例子：**
 
@@ -1842,7 +1842,7 @@ const app = new Vue({
 
 而通过`VNode`，同样更新10个`DOM`节点，虚拟`DOM`不会立即操作`DOM`，**而是将这10次更新的`diff`内容保存到本地的一个`js`对象中，最终将这个`js`对象一次性`attach`到`DOM`树上，避免大量的无谓计算**
 
-> 很多人认为虚拟 DOM 最大的优势是 diff 算法，减少 JavaScript 操作真实 DOM 的带来的性能消耗。虽然这一个虚拟 DOM 带来的一个优势，但并不是全部。**虚拟 DOM 最大的优势在于抽象了原本的渲染过程，实现了跨平台的能力**，而不仅仅局限于浏览器的 DOM，可以是安卓和 IOS 的原生组件，可以是近期很火热的小程序，也可以是各种GUI
+> 很多人认为虚拟 DOM 最大的优势是 diff 算法**，减少 JavaScript 操作真实 DOM 的带来的性能消耗**。虽然这一个虚拟 DOM 带来的一个优势，但并不是全部。**虚拟 DOM 最大的优势在于抽象了原本的渲染过程，实现了跨平台的能力**，而不仅仅局限于浏览器的 DOM，可以是安卓和 IOS 的原生组件，可以是近期很火热的小程序，也可以是各种GUI
 
 集中操作dom的话，会减少重排和重绘的次数，重排开销是比较大的，为什么重排开销大？因为重排会导致浏览器重新生成渲染树
 
@@ -1860,12 +1860,13 @@ React 从来没有说过 “React 比原生操作 DOM 快”。**React 的基本
 
 （2）Virtual DOM: render Virtual DOM + diff O(template size) + 必要的 DOM 更新 O(DOM change)
 
-Virtual DOM render + diff 显然比渲染 html 字符串要慢，但是！它依然是纯 js 层面的计算，比起后面的 DOM 操作来说，依然便宜了太多。可以看到，innerHTML 的总计算量不管是 js 计算还是 DOM 操作都是和整个界面的大小相关，**但 Virtual DOM 的计算量里面，只有 js 计算和界面大小相关**，DOM 操作是和数据的变动量相关的。前面说了，**和 DOM 操作比起来，js 计算是极其便宜的**。这才是为什么要有 Virtual DOM：它保证了 1）不管你的数据变化多少，每次重绘的性能都可以接受；2) 你依然可以用类似 innerHTML 的思路去写你的应用。
+Virtual DOM render + diff 显然比渲染 html 字符串要慢，但是！它依然是纯 js 层面的计算，比起后面的 DOM 操作来说，依然便宜了太多。可以看到，innerHTML 的总计算量不管是 js 计算还是 DOM 操作都是和整个界面的大小相关，**但 Virtual DOM 的计算量里面，只有 js 计算和界面大小相关**，DOM 操作是和数据的变动量相关的。前面说了，**和 DOM 操作比起来，js 计算是极其便宜的**。
+
+这才是为什么要有 Virtual DOM：它保证了 1）不管你的数据变化多少，每次重绘的性能都可以接受；2) 你依然可以用类似 innerHTML 的思路去写你的应用。
 
 **MVVM vs. Virtual DOM**
 
-相比起 React，其他 MVVM 系框架比如 Angular, Knockout 以及 Vue、Avalon 采用的都是数据绑定：通过 Directive/Binding 对象，观察数据变化并保留对实际 DOM 元素的引用，当有数据变化时进行对应的操作。MVVM 的变化检查是**数据层面**的，而 React 的检查是 DOM 结构层面的。MVVM 的性能也根据变动检测的实现原理有所不同：Angular 的脏检查使得任何变动都有固定的
-O(watcher count) 的代价；Knockout/Vue/Avalon 都采用了依赖收集，在 js 和 DOM 层面都是 O(change)：
+相比起 React，其他 MVVM 系框架比如 Angular, Knockout 以及 Vue、Avalon 采用的都是数据绑定：通过 Directive/Binding 对象，观察数据变化并保留对实际 DOM 元素的引用，当有数据变化时进行对应的操作。MVVM 的变化检查是**数据层面**的，而 React 的检查是 DOM 结构层面的。MVVM 的性能也根据变动检测的实现原理有所不同：Angular 的脏检查使得任何变动都有固定的O(watcher count) 的代价；Knockout/Vue/Avalon 都采用了依赖收集，在 js 和 DOM 层面都是 O(change)：
 
 （1）脏检查：scope digest O(watcher count) + 必要 DOM 更新 O(DOM change)
 
@@ -1887,17 +1888,17 @@ Angular 和 Vue 都提供了列表重绘的优化机制，也就是 “提示”
 
 （3）大量数据更新：脏检查 + 优化 >= 依赖收集 + 优化 > Virtual DOM（无法/无需优化）>> MVVM 无优化
 
-不要天真地以为 Virtual DOM 就是快，diff 不是免费的，batching 么 MVVM 也能做，而且最终 patch 的时候还不是要用原生 API。在我看来 Virtual DOM 真正的价值从来都不是性能，而是它
+**不要天真地以为 Virtual DOM 就是快，diff 不是免费的**，batching 么 MVVM 也能做，而且最终 patch 的时候还不是要用原生 API。在我看来 Virtual DOM 真正的价值从来都不是性能，而是它
 
 (1) 为函数式的 UI 编程方式打开了大门；(2) 可以渲染到 DOM 以外的 backend，比如 ReactNative。
 
 注：react本身遵循的就是 UI = fn(state) 这样的一个公式，这里的fn 就是函数，通过state去触发fn（在这个过程是有很多复杂的计算操作，比如Virtual DOM对比），最后导致UI的更新，不知道我理解的对不对。
 
+
+
 ---
 
-#### 4.1 mvc和mvvm的区别
-
-**参考答案：**
+## 2.11 mvc和mvvm的区别
 
 MVC: MVC是应用最广泛的软件架构之一,一般MVC分为:Model(模型),View(视图),Controller(控制器)。 这主要是基于分层的目的,让彼此的职责分开.View一般用过Controller来和Model进行联系。Controller是Model和View的协调者,View和Model不直接联系。基本都是单向联系。
 
@@ -1909,11 +1910,11 @@ MVVM和MVC的区别:
 - MVVM通过数据来显示视图层而不是节点操作
 - MVVM主要解决了MVC中大量的dom操作使页面渲染性能降低,加载速度变慢,影响用户体验
 
+
+
 ---
 
-#### 4.2 单页应用优缺点
-
-**参考答案：**
+## 2.12 单页应用优缺点
 
 优点
 
@@ -1960,38 +1961,17 @@ MVVM和MVC的区别:
 
 - 服务端渲染:服务器合成完整的 html 文件再输出到浏览器
 - 页面预渲染
-- 路由采用h5 history模式
+- **路由采用h5 history模式**
 
 1. 不适合开发大型项目
 
 大型项目中可能会涉及大量的DOM操作、复杂的动画效果，也就不适合使用Vue、react框架进行开发。
 
----
 
-#### 4.3 虚拟DOM和Diff算法
-
-**参考答案：**
-
-虚拟dom是什么？
-
-Virtual dom, 即虚拟DOM节点。它通过JS的Object对象模拟DOM中的节点，然后再通过特定的render方法将其渲染成真实的DOM节点。比操作真实dom减少性能开销
-
-diff算法又是什么？
-
-**传统的 Diff 算法也是一直都有的**; diff算法，会对比新老虚拟DOM，记录下他们之间的变化，然后将变化的部分更新到视图上。其实之前的diff算法，是通过循环递归每个节点，然后进行对比，复杂程度为O(n^3)，n是树中节点的总数，这样性能是非常差的。
-
-dom-diff的原理？
-
-dom-diff算法会比较前后虚拟DOM，从而得到patches(补丁)，然后与老Virtual DOM进行对比，将其应用在需要更新的地方，将 O(n^3) 复杂度的问题转换成 O(n^1=n) 复杂度的问题，得到新的Virtual DOM。降低时间复杂度的方法：
-
-1. 两个不同类型的元素会产生不同的树
-2. 对于同一层级的一组子节点，它们可以通过唯一 key 进行区分
 
 ---
 
-#### 4.4 框架带来的好处和弊端
-
-**参考答案：**
+## 2.13 框架带来的好处和弊端
 
 优势：
 
@@ -2009,9 +1989,7 @@ dom-diff算法会比较前后虚拟DOM，从而得到patches(补丁)，然后与
 
 ---
 
-#### 4.5 模块化、组件化、工程化
-
-**参考答案：**
+## 2.14 模块化、组件化、工程化
 
 工程化：
 
@@ -2038,9 +2016,7 @@ js模块化方案很多有AMD、CommonJS、UMD、ES6 Module等。css模块化开
 
 ---
 
-#### 4.6 谈谈对 MVC、MVP、MVVM 模式的理解
-
-**参考答案**：
+## 2.15 谈谈对 MVC、MVP、MVVM 模式的理解
 
 在开发图形界面应用程序的时候，会把管理用户界面的层次称为 View，应用程序的数据为 Model，Model 提供数据操作的接口，执行相应的业务逻辑。
 
@@ -2066,23 +2042,146 @@ MVVM 的调用关系和 MVP 一样。但是，在 ViewModel 当中会有一个�
 
 ----
 
+## 2.16 elementui 有什么用?
+
+**Element-UI**：是一套采用 Vue 2.0 作为基础框架实现的组件库，一套为开发者、设计师和产品经理准备的基于 Vue 2.0 的组件库，提供了配套设计资源，帮助网站快速成型
+
+Element-UI特点：
+
+一致性 Consistency
+
+- 与现实生活一致：与现实生活的流程、逻辑保持一致，遵循用户习惯的语言和概念；
+- 在界面中一致：所有的元素和结构需保持一致，比如：设计样式、图标和文本、元素的位置等。
+
+反馈 Feedback
+
+- 控制反馈：通过界面样式和交互动效让用户可以清晰的感知自己的操作；
+- 页面反馈：操作后，通过页面元素的变化清晰地展现当前状态。
+
+效率 Efficiency
+
+- 简化流程：设计简洁直观的操作流程；
+- 清晰明确：语言表达清晰且表意明确，让用户快速理解进而作出决策；
+- 帮助用户识别：界面简单直白，让用户快速识别而非回忆，减少用户记忆负担。
+
+可控 Controllability
+
+- 用户决策：根据场景可给予用户操作建议或安全提示，但不能代替用户进行决策；
+- 结果可控：用户可以自由的进行操作，包括撤销、回退和终止当前操作等。
+
+----
+
+## 2.16修改ElementUI 样式的几种方式?
+
+**参考答案：**
+
+修改ElementUI 样式的方式有四种：
+
+1. 新建全局样式表
+
+   新建 global.css 文件，并在 main.js 中引入。 global.css 文件一般都放在 src->assets 静态资源文件夹下的 style 文件夹下，在 main.js 的引用写法如下：
+
+   ```css
+   import "./assets/style/global.css"
+   ```
+
+   在 global.css 文件中写的样式，无论在哪一个 vue 单页面都会覆盖 ElementUI 默认的样式。
+
+2. 在当前-vue-单页面中添加一个新的style标签
+
+   在当前的vue单页面的style标签后，添加一对新的style标签，新的style标签中不要添加scoped属性。在有写scoped的style标签中书写的样式不会覆盖 ElementUI 默认的样式。
+
+3. 使用/deep/深度修改标签样式
+
+   找到需要修改的 ElementUI 标签的类名，然后在类名前加上/deep/，可以强制修改默认样式。这种方式可以直接用到有scoped属性的 style 标签中。
+
+   ```css
+   // 修改级联选择框的默认宽度
+   /deep/ .el-cascader {
+     width: 100%;
+   }
+   
+   ```
+
+   
+
+4. 通过内联样式 或者 绑定类样式覆盖默认样式
+
+   通过内联样式 style ，绑定类样式的方式，可以在**某些标签**中可以直接覆盖默认样式，不是很通用。具体实例如下：
+
+```html
+   <el-button :style="selfstyle">默认按钮</el-button>
+   <script>
+       export default {
+         data() {
+           return {
+               selfstyle: {
+                   color: "white",
+                   marginTop: "10px",
+                   width: "100px",
+                   backgroundColor: "cadetblue"
+               }
+           };
+         }
+       }
+   </script>
+
+```
+
+通过绑定修改样式方式修改：
+
+```html
+   <el-button :class="[selfbutton]">默认按钮</el-button>
+   <script>
+     export default {
+       data() {
+         return {
+           selfbutton: "self-button"
+         };
+       } 
+     }
+   </script>
+   <style lang="stylus" rel="stylesheet/stylus" scoped>
+   .self-button {
+       color: white;
+       margin-top: 10px;
+       width: 100px;
+       background-Color: cadetblue;
+   }
+   </style>
+
+```
+
+**扩展：**
+
+第一种全局引入css文件的方式，适合于对elementUI整体的修改，比如整体配色的修改；
+第二种添加一个style标签的形式，也能够实现修改默认样式的效果，但实际上因为是修改了全局的样式，因此 在不同的vue组件中修改同一个样式有可能会有冲突。
+第三种方式通过 /deep/ 的方式可以很方便的在vue组件中修改默认样式，也不会于其他页面有冲突。
+第四种方式局限性比较大，可以使用，但不推荐使用。
+
+----
+
+
+
+
+
+-----
+
 # vuex
 
 -----
 
-#### 1.5 Vuex是什么，每个属性是干嘛的，如何使用
-
-**参考答案：**
+## 3.1 Vuex是什么，每个属性是干嘛的，如何使用
 
 Vuex是什么？
 
-Vuex是专门为Vuejs应用程序设计的**状态管理工具**。它采用集中式存储管理应用的所有组件的状态，并以相应的规则保证状态以一种可预测的方式发生变化
+Vuex是专门为Vuejs应用程序设计的**状态管理工具**。它采用**集中式存储管理应用的所有组件的状态**，并**以相应的规则保证状态以一种可预测的方式发生变化**
 
-具体工作：vuex是一种状态管理机制，将全局组件的共享状态抽取出来为一个store，以一个单例模式存在，应用任何一个组件中都可以使用，vuex更改state的唯一途径是通过mutation，mutation需要commit触发, action实际触发是mutation，其中mutation处理同步任务，action处理异步任务。
+具体工作：vuex是一种状态管理机制，将全局组件的共享状态抽取出来为一个store，以一个**单例模式**存在，应用任何一个组件中都可以使用，vuex更改state的唯一途径是通过mutation，mutation需要commit触发, action实际触发是mutation，其中**mutation处理同步任务**，**action处理异步任务**。
 
 Vuex每个属性是干嘛的？
 
-![img](https://uploadfiles.nowcoder.com/images/20220301/4107856_1646128565972/EB5115B586566907B3B642BA58A4482A)
+![img](E:\pogject\学习笔记\image\vue\EB5115B586566907B3B642BA58A4482A)
 
 Vuex的属性包含以下6个：
 
@@ -2092,7 +2191,7 @@ state是存储的单一状态，是存储的基本数据。
 
 2）Getters
 
-getters是store的计算属性，对state的加工，是派生出来的数据。就像computed计算属性一样，getter返回的值会根据它的依赖被缓存起来，且只有当它的依赖值发生改变才会被重新计算。
+getters是store的计算属性，对state的加工，是派生出来的数据。就像computed计算属性一样，getter返回的值会根据它的依赖被缓存起来，**且只有当它的依赖值发生改变才会被重新计算。**
 
 3）Mutations
 
@@ -2137,7 +2236,7 @@ Vuex提供了mapState、MapGetters、MapActions、mapMutations等辅助函数给
 
 Vuex的使用方法？
 
-![img](https://uploadfiles.nowcoder.com/images/20220301/4107856_1646128588464/5ACC9FABB642EADBED3478A9397CEF15)
+![img](E:\pogject\学习笔记\image\vue\5ACC9FABB642EADBED3478A9397CEF15)
 
 ```js
 import Vuex from 'vuex';
@@ -2158,19 +2257,7 @@ new Vue({ // 3.注入store, 挂载vue实例
 
 ---
 
-
-
-
-
------
-
-# 路由
-
------
-
-#### 1.6 Vuex实现原理
-
-**参考答案：**
+## 3.2 Vuex实现原理
 
 通过以下三个方面来阐述vuex的实现原理：
 
@@ -2339,9 +2426,7 @@ new Vue({ // 3.注入store, 挂载vue实例
 
 ---
 
-#### 1.7 mutation和action有什么区别？
-
-**参考答案：**
+## 3.3 mutation和action有什么区别？
 
 **mutation**：更改 Vuex 的 store 中的状态的唯一方法是提交 mutation。Vuex 中的 mutation 非常类似于件： 每个 mutation 都有一个字符串的 事件类型 (type) 和 一个 回调函数 (handler)。这个回调函数就是我们实际进 行状态更改的地方，并且它会接受 state 作为第一个参数
 
@@ -2399,132 +2484,31 @@ vuex 真正限制你的只有 mutation 必须是同步的这一点（在 redux �
 
 ----
 
-#### 1.8 修改ElementUI 样式的几种方式?
-
-**参考答案：**
-
-修改ElementUI 样式的方式有四种：
-
-1. 新建全局样式表
-
-   新建 global.css 文件，并在 main.js 中引入。 global.css 文件一般都放在 src->assets 静态资源文件夹下的 style 文件夹下，在 main.js 的引用写法如下：
-
-   ```css
-   import "./assets/style/global.css"
-   ```
-
-   在 global.css 文件中写的样式，无论在哪一个 vue 单页面都会覆盖 ElementUI 默认的样式。
-
-2. 在当前-vue-单页面中添加一个新的style标签
-
-   在当前的vue单页面的style标签后，添加一对新的style标签，新的style标签中不要添加scoped属性。在有写scoped的style标签中书写的样式不会覆盖 ElementUI 默认的样式。
-
-3. 使用/deep/深度修改标签样式
-
-   找到需要修改的 ElementUI 标签的类名，然后在类名前加上/deep/，可以强制修改默认样式。这种方式可以直接用到有scoped属性的 style 标签中。
-
-   ```css
-   // 修改级联选择框的默认宽度
-   /deep/ .el-cascader {
-     width: 100%;
-   }
-   
-   ```
-
-   
-
-4. 通过内联样式 或者 绑定类样式覆盖默认样式
-
-   通过内联样式 style ，绑定类样式的方式，可以在**某些标签**中可以直接覆盖默认样式，不是很通用。具体实例如下：
-
-```html
-   <el-button :style="selfstyle">默认按钮</el-button>
-   <script>
-       export default {
-         data() {
-           return {
-               selfstyle: {
-                   color: "white",
-                   marginTop: "10px",
-                   width: "100px",
-                   backgroundColor: "cadetblue"
-               }
-           };
-         }
-       }
-   </script>
-
-```
-
-通过绑定修改样式方式修改：
-
-```html
-   <el-button :class="[selfbutton]">默认按钮</el-button>
-   <script>
-     export default {
-       data() {
-         return {
-           selfbutton: "self-button"
-         };
-       } 
-     }
-   </script>
-   <style lang="stylus" rel="stylesheet/stylus" scoped>
-   .self-button {
-       color: white;
-       margin-top: 10px;
-       width: 100px;
-       background-Color: cadetblue;
-   }
-   </style>
-
-```
-
-**扩展：**
-
-第一种全局引入css文件的方式，适合于对elementUI整体的修改，比如整体配色的修改；
-第二种添加一个style标签的形式，也能够实现修改默认样式的效果，但实际上因为是修改了全局的样式，因此 在不同的vue组件中修改同一个样式有可能会有冲突。
-第三种方式通过 /deep/ 的方式可以很方便的在vue组件中修改默认样式，也不会于其他页面有冲突。
-第四种方式局限性比较大，可以使用，但不推荐使用。
+# 路由
 
 ----
 
-#### 1.9 elementui 有什么用?
+## 4. Vue router 原理, 哪个模式不会请求服务器
 
-**参考答案：**
+Vue router 的两种方法，hash模式不会请求服务器
 
-**Element-UI**：是一套采用 Vue 2.0 作为基础框架实现的组件库，一套为开发者、设计师和产品经理准备的基于 Vue 2.0 的组件库，提供了配套设计资源，帮助网站快速成型
+**解析：**
 
-**扩展：**
+1. url的hash，就是通常所说的锚点#，javascript通过hashChange事件来监听url的变化，IE7以下需要轮询。比如这个 URL：http://www.abc.com/#/hello，hash 的值为#/hello。它的特点在于：hash 虽然出现在 URL 中，但不会被包括在 HTTP 请求中，对后端完全没有影响，因此**改变 hash 不会重新加载页面**。
+2. HTML5的History模式，它使url看起来像普通网站那样，以“/”分割，没有#，单页面并没有跳转。不过使用这种模式需要服务端支持，服务端在接收到所有请求后，都只想同一个html文件，不然会出现404。因此单页面应用只有一个html，整个网站的内容都在这一个html里，通过js来处理。
 
-Element-UI特点：
+---
 
-一致性 Consistency
+## 4. 路由跳转和location.href的区别？
 
-- 与现实生活一致：与现实生活的流程、逻辑保持一致，遵循用户习惯的语言和概念；
-- 在界面中一致：所有的元素和结构需保持一致，比如：设计样式、图标和文本、元素的位置等。
+使用location.href='/url'来跳转，简单方便，但是刷新了页面；
+使用路由方式跳转，无刷新页面，静态跳转；
 
-反馈 Feedback
 
-- 控制反馈：通过界面样式和交互动效让用户可以清晰的感知自己的操作；
-- 页面反馈：操作后，通过页面元素的变化清晰地展现当前状态。
 
-效率 Efficiency
+---
 
-- 简化流程：设计简洁直观的操作流程；
-- 清晰明确：语言表达清晰且表意明确，让用户快速理解进而作出决策；
-- 帮助用户识别：界面简单直白，让用户快速识别而非回忆，减少用户记忆负担。
-
-可控 Controllability
-
-- 用户决策：根据场景可给予用户操作建议或安全提示，但不能代替用户进行决策；
-- 结果可控：用户可以自由的进行操作，包括撤销、回退和终止当前操作等。
-
-----
-
-#### 1.10 路由守卫
-
-**参考答案：**
+## 4. 路由守卫
 
 路由守卫主要用来**通过跳转或取消的方式守卫导航**。
 
@@ -2664,9 +2648,7 @@ onError() 注册过的回调。
 
 ---
 
-#### 1.11 路由守卫进行判断登录
-
-**参考答案：**
+## 4. 路由守卫进行判断登录
 
 在vue项目中，切换路由时肯定会碰到需要登录的路由，其原理就是在切换路径之前进行判断，你不可能进入页面再去判断有无登录重新定向到login，那样的话会导致页面已经渲染以及它的各种请求已经发出。
 
@@ -2778,7 +2760,7 @@ onError() 注册过的回调。
 
 ----
 
-#### 1.12 vue-router 实现懒加载
+## 4. vue-router 实现懒加载
 
 **参考答案：**
 
@@ -2818,7 +2800,7 @@ onError() 注册过的回调。
 
    ---
 
-#### 1.13 js是如何监听HistoryRouter的变化的
+## 4.  js是如何监听HistoryRouter的变化的
 
    **参考答案：**
 
@@ -2903,7 +2885,7 @@ history.replaceState =  addHistoryMethod('replaceState');
 
 ---
 
-#### 1.14 HashRouter 和 HistoryRouter的区别和原理
+## 4. HashRouter 和 HistoryRouter的区别和原理
 
 **参考答案：**
 
@@ -2954,22 +2936,3 @@ history.replaceState =  addHistoryMethod('replaceState');
 
 ---
 
-#### 1.15 Vue router 原理, 哪个模式不会请求服务器
-
-**参考答案：**
-
-Vue router 的两种方法，hash模式不会请求服务器
-
-**解析：**
-
-1. url的hash，就是通常所说的锚点#，javascript通过hashChange事件来监听url的变化，IE7以下需要轮询。比如这个 URL：http://www.abc.com/#/hello，hash 的值为#/hello。它的特点在于：hash 虽然出现在 URL 中，但不会被包括在 HTTP 请求中，对后端完全没有影响，因此**改变 hash 不会重新加载页面**。
-2. HTML5的History模式，它使url看起来像普通网站那样，以“/”分割，没有#，单页面并没有跳转。不过使用这种模式需要服务端支持，服务端在接收到所有请求后，都只想同一个html文件，不然会出现404。因此单页面应用只有一个html，整个网站的内容都在这一个html里，通过js来处理。
-
----
-
-#### 1.37 路由跳转和location.href的区别？
-
-**参考答案**：
-
-使用location.href='/url'来跳转，简单方便，但是刷新了页面；
-使用路由方式跳转，无刷新页面，静态跳转；
