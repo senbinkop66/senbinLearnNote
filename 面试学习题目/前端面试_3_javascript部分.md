@@ -1,5 +1,1048 @@
 ------
 
+# 基础部分
+
+----
+
+## 1.1 请问在JS中有哪些数据类型？
+
+JavaScript 语言中类型集合由原始值和对象组成。
+
+**原始值**（直接表示在语言底层的不可变数据）
+
+除对象类型（object）以外的其它任何类型定义的不可变的值（值本身无法被改变）。例如（与 C 语言不同），JavaScript 中字符串是不可变的（译注：如，JavaScript 中**对字符串的操作一定返回了一个新字符串**，原始字符串并没有被改变）。我们称这些类型的值为“*原始值*”。
+
+- 布尔类型
+- Null 类型
+- Undefined 类型
+- 数字类型
+- BigInt 类型
+- 字符串类型
+- 符号类型(symbol)
+
+符号（Symbols）类型是**唯一**且**不可修改**的原始值，并且可以用来作为对象的键(key)，在某些语言当中也有与之相似的类型（原子类型，atoms）。
+
+**对象**（一组属性的集合）
+
+在计算机科学中, 对象（object）是指内存中的可以被[标识符](https://developer.mozilla.org/zh-CN/docs/Glossary/Identifier)引用的一块区域。
+
+
+
+JS数据类型一共有7种，分为基本数据类型和引用数据类型
+
+### 基本数据类型
+
+- **基本数据类型**：字符串（String）、数字(Number)、布尔(Boolean)、空（Null）、未定义（Undefined）、Symbol、BigInt
+
+Symbol：ES6引入了一种新的原始数据类型，表示独一无二的值，**主要用于解决属性名冲突的问题**，做为标记
+
+BigInt：新增数据类型，是ES2020新增加的，精度大于 2^53 - 1， 是比Number类型支持的范围更大的整数值，在对**大整数**执行运算时，使用BigInt，会减少整数溢出问题
+
+创建方式：BigInt(value)、在一个整数字面量后面加 n 
+
+```js
+let a = 10n; 
+let b = BigInt(10);  
+console.log(a === b);     // true
+```
+
+注意：由于在Number 与 BigInt 之间进行转换会损失精度，**建议仅在值可能大于2^53 时使用 BigInt类型**，并且不在两种类型之间进行相互转换。
+
+与Number不同点：
+
+（1）**不能用于 Math 对象中的方法**；
+
+（2）**不能和任何 Number 实例混合运算，两者必须转换成同一种类型**（ BigInt 变量在转换成 Number 变量时可能会丢失精度）
+
+### 引用数据类型
+
+- **引用数据类型**：对象(Object)，其中包含了日期（Date）、函数（Function)、数组（Array）、正则（RegExp）等
+
+### 两者区别
+
+（1）声明变量时不同的内存分配：
+
+- 基本：存储在栈中的简单数据段，它们的值直接存储在变量访问的位置
+
+  ​	原因：**基本类型数据占据的空间是固定的**，所以将他们存储在较小的内存区域——栈，便于迅速查寻变量的值
+
+- 引用：存储在堆中的对象，存储在变量处的值是一个指针，指向存储对象的内存地址
+
+  ​	 原因：**引用类型数据的大小会改变**，不能把它放在栈中，否则会降低变量查寻速度，**相反，地址的大小是固定的，可以存在栈中**
+
+
+（2）不同的内存分配机制也带来了不同的访问机制
+
+- 引用：js中不允许直接访问保存在堆内存中的对象，在访问一个对象时，**首先得到对象在堆内存中的地址**，按照这个地址去获得对象中的值（引用访问）
+
+- 基本：可直接访问
+
+
+（3）复制变量时的不同
+
+- 基本：变量复制时，会将原始值的副本赋值给新变量，此后两变量是完全独立的，他们只是拥有相同的值而已（深拷贝）
+
+- 引用：变量复制时，会把内存地址赋值给新变量，新旧变量都指向了堆内存中的同一个对象，任何一个作出的改变都会影响另一个（浅拷贝）
+
+
+（4）参数传递的不同（把实参复制给形参的过程）由于内存分配的差别，两者在传参时也有区别
+
+- 基本：只是把变量里的值传递给参数，**之后参数和这个变量互不影响**
+
+- 引用：**传递的值也就是这个内存地址**，这也就是为什么函数内部对这个参数的修改会体现在外部，因为它们都指向同一个对象
+
+
+
+----
+
+## 1.2 请问Undefined与Null有何异同点？
+
+共同点：都是基本类型，保存在栈中
+
+不同点：
+
+Undefined表示"缺少值"，**就是此处应该有一个值，但是还没有定义**，转为数值时为NaN。典型用法：
+
+- 变量被声明了，但没有赋值时，就等于undefined
+- 调用函数时，应该提供的参数没有提供，该参数等于undefined
+- 对象没有赋值的属性，该属性的值为undefined
+- 函数没有返回值时，默认返回undefined
+
+Null：
+
+表示"没有对象"，**即该处不应该有值**，转为数值时为0。典型用法是：
+
+- 作为函数的参数，**表示该函数的参数不是对象**
+- **作为对象原型链的终点**
+
+注意：
+
+```js
+undefined == null; //true
+undefined === null; //false
+```
+
+ECMAScript 规范： null 和  undefined 的行为很相似，并且**都表示 一个无效的值**，那么它们所表示的内容也具有相似性，故他们相等。
+
+全等操作 === 在比较相等性的时候，两者不是同一类型值，会发生类型转换，故两者不全等。
+
+```js
+Number(undefined); // NaN
+Number(null); // 0
+
+```
+
+---
+
+## 1.3 请问如何判断js变量的数据类型？
+
+常见判断方法有以下四种：
+
+### (1) typeof varName
+
+返回一个字符串（小写），用来判断：Undefined、String、Number、Boolean、Symbol、Object、Function，无法检测引用类型里的Array
+
+```bash
+> typeof(undefined)
+'undefined'
+> typeof("abc")
+'string'
+> typeof(100)
+'number'
+> typeof(false)
+'boolean'
+> typeof(Symbol(2))
+'symbol'
+
+> typeof(BigInt(200))
+'bigint'
+```
+
+优点：**可区分Object与Function**
+
+缺点：
+
+（1）对于 Null ，返回 object 类型
+
+```js
+> typeof(null)
+'object'
+```
+
+原因：Null类型只有一个null值，该值表示一个**空对象指针**（出自JavaScript高级程序设计）
+
+**typeof的检测原理**：不同的对象在底层都表示为二进制，在js中二进制前**（低）三位存储其类型信息**为：000: Object、100：String、110： Boolean、1： Number。**null的二进制表示全为0，自然前三位也是0，所以执行typeof时会返回"object"。**
+
+  （2） 对于Array、Date、RegExp都会返回object，不能更详细的区分
+
+```js
+var fn=function(){};
+let obj={a:1};
+let arr=[1,2,3];
+let now=new Date();
+let reg=/abc/;
+
+console.log(typeof(fn));  //function  可区分函数
+console.log(typeof(obj));  //object
+console.log(typeof(arr));  //object
+console.log(typeof(now));  //object
+console.log(typeof(reg));  //object
+```
+
+### (2) xx instanceof xx
+
+返回true/false，**只能判断引用类型** ，无法检测基本类型
+
+判断原理：**判断一个构造函数的prototype属性所指向的对象是否存在另外一个要检测对象的原型链上**。简单来说：能验证new构造函数创建出来的实例，左边的对象是否是右边的类的实例，**属于验证式判断类型**
+
+缺点：**只能用来判断两个对象是否属于实例关系**， 而不能判断一个对象实例具体属于哪种类型（**原型链上的都会返回true**）
+
+```js
+console.log('abc' instanceof String);// false 
+console.log( String('abc') instanceof String);// true 
+
+console.log(12 instanceof Number);// false 
+console.log(new Number(12) instanceof Number);// true 
+
+console.log(true instanceof Boolean);// false 
+console.log(new Boolean(true) instanceof Boolean);// true 
+
+console.log({name:'yy'} instanceof Object);// true 
+console.log(new Object({name:'yy'}) instanceof Object);// true 
+
+console.log(['12','123'] instanceof Object);// true 
+console.log(['12','123'] instanceof Array);// true 
+console.log(new Array('12',32) instanceof Object);// true 
+console.log(new Array('12',32) instanceof Array);// true 
+
+console.log(function(){} instanceof Object);// true 
+console.log(function(){} instanceof Function);// true 
+console.log(new Function() instanceof Function);// true 
+
+console.log(new Date() instanceof Object);// true 
+console.log(new RegExp instanceof Object);// true 
+
+console.log(new String('abc') instanceof Object);// true 
+console.log(new Number(12) instanceof Object);// true
+
+console.log(null instanceof Object);  //false
+console.log(undefined instanceof Object);  //false
+console.log(Symbol(2) instanceof Object);  //false
+console.log(BigInt(2) instanceof Object);  //false
+```
+
+
+
+### (3) xx.constructor === xx
+
+返回true/false，判断原理：
+
+当一个函数F被定义时，JS引擎会为F添加prototype原型，然后再在prototype上添加一个constructor属性，并让其指向F的引用
+
+具体来说：当 var f = new F() 时，F被当成了构造函数，f是F的实例对象，**此时F原型上的constructor传递到了f上，因此f.constructor === F**
+
+缺点：不可判断Null、Undefined是无效的对象，**没有constructor存在**
+
+constructor 是不稳定的，如创建的对象更改了原型，无法检测到最初的类型
+
+```js
+console.log("abc".constructor===String);  //true
+console.log(new Number(2).constructor===Number);  //true
+console.log([1,2,3].constructor===Array);  //true
+console.log(false.constructor===Boolean);  //true
+console.log(new Function().constructor===Function);  //true
+console.log(new Date().constructor===Date);  //true
+console.log(/abc/.constructor===RegExp);  //true
+
+console.log(document.constructor===HTMLDocument);  //true
+```
+
+### (4) Object.prototype.toString.call(xx)
+
+返回“[object type]”（字符串），**能判断所有类型**，万金油方法
+
+判断原理：**JS中的所有对象都是继承自Object对象的**，通过call方法（显式绑定）改变this指向，利用Object.prototype上的原生toString()方法判断数据类型
+
+```js
+console.log(Object.prototype.toString.call(123));  // [object Number]
+console.log(Object.prototype.toString.call("abc"));  //[object String]
+console.log(Object.prototype.toString.call(undefined));  //[object Undefined]
+console.log(Object.prototype.toString.call(null));  //[object Null]
+console.log(Object.prototype.toString.call(false));  //[object Boolean]
+
+console.log(Object.prototype.toString.call(Symbol(2)));  //[object Symbol]
+console.log(Object.prototype.toString.call(100n));  //[object BigInt]
+
+console.log(Object.prototype.toString.call({}));  //[object Object]
+console.log(Object.prototype.toString.call([]));  //[object Array]
+
+console.log(Object.prototype.toString.call(new Date()));  //[object Date]
+console.log(Object.prototype.toString.call(new RegExp("abc","g")));  //[object RegExp]
+
+console.log(Object.prototype.toString.call(function(){}));  //[object Function]
+```
+
+
+
+-----
+
+## 1.4 请问===与==有何区别？相等与全等的区别
+
+==：相等(值)
+
+**先转换再比较**（强制转换）
+
+- 有布尔值，把false->0， true->1， 调用Number()方法
+- 字符串 和 数值，字符串转数值 ；调用Number()方法
+- 对象 和 非对象，调用对象的valueOf()和toString()方法把对象转换成基础类型的值再比较，**除Date对象外，会优先尝试使用valueOf()方法**
+- **有一个是NaN， 则返回false**。 即使两个都是NaN，也返回false，**因为按照规则，NaN不等于NaN**
+- 两个操作数都是对象，则比较他们是不是同一个对象，如果指向的是同一个对象，则返回ture 因为对象存的是地址值
+- 比较相等性之前， **不能将 null和 undefined转换成其他任何值**
+
+```bash
+> 1==true
+true
+> 2==false
+false
+> 2===true
+false
+> 1=="1"
+true
+> []==""
+true
+
+> []==false
+true
+> []=={}
+false
+> []==[]
+false
+> {}=={}
+false
+> null==undefined
+true
+> 1==NaN
+false
+
+> 0==undefined
+false
+> 0==null
+false
+
+> false==0
+true
+> false==null
+false
+> false==undefined
+false
+
+
+```
+
+**=== ： 全等(类型和值）**
+
+**先判断类型再比较**， 类型不同直接不等，不转换类型
+
+```bash
+> 0===0
+true
+> []===[]
+false
+> 2===2
+true
+```
+
+---
+
+## 1.5 请问你了解js作用域吗？
+
+**1，js作用域**
+
+作用域：在运行时代码中的某些特定部分中变量、函数和对象的**可访问性**。换句话说，作用域决定了代码区块中变量和其他资源的可见性，作用域就是一个独立的地盘，让变量不会外泄、暴露出去。
+
+**作用域最大作用**：隔离变量，不同作用域下同名变量不会有冲突
+
+作用域是分层的，**内层作用域可以访问外层作用域的变量**，反之不行
+
+**2， JavaScript 没有块级作用域（ES6之前）**，只有全局作用域和函数作用域，ES6引入块级作用域（相关知识会在第5章中分析）
+
+全局作用域（浏览器）：window
+
+- 最外层函数 和在最外层函数外面定义的变量拥有全局作用域
+
+- **所有末定义直接赋值的变量自动声明为拥有全局作用域**
+- 所有window对象的属性拥有全局作用域，如window.name、window.location、window.top等
+
+- nodejs 的全局对象：global，**声明全局变量的方式为: global.变量名**
+
+- 在各个模块下都可以直接访问 global 对象
+
+- 一个文件就是一个模块，通过 require 引入模块
+
+
+函数作用域：
+
+- 声明在函数内部的变量
+
+
+**3，作用域链**
+
+当我们需要某个变量的值时，先去它最近的作用域去找，如果找不到，就找它的上级作用域，依次类推，直到找到全局，如全都未定义，那就抛出一个错误，如下代码所示
+
+```js
+var a = 1
+function A(){
+    function B(){
+        console.log(a);
+    }
+    return B();
+}
+A();//1
+
+```
+
+常见面试题：
+
+```js
+var a=10;
+function A(){
+    alert(a);
+};
+function B(){
+    var a=20;
+    A();
+}
+B();//10
+
+```
+
+为什么输出10，而不是20？**js中变量的作用域链与定义时的环境有关，与执行时无关**。调用函数B，B中调用了函数A，函数A里面没定义变量a，函数A只是被B调用且不传参，因此函数A无权使用函数B的局部变量a，而在上方还有一个全局变量a，因此这里输出10
+
+---
+
+## 1.6 请问什么是变量提升？什么是函数提升？
+
+js区别于C、C++、Java语言，在ES6之前，JavaScript没有块级作用域，只有**全局作用域**和**函数作用域**。
+
+这题在面试时尽量用具体代码举例说明
+
+先看下面代码：
+
+```js
+console.log(a);
+
+var a=2;  //undefined
+```
+
+变量 a 在使用前没有先进行声明，会抛出 ReferenceError异常?还是输出 2 ？事实上都不对，正确答案是输出 undefined（已声明未定义值）
+
+这就是一个典型的 **变量提升** 现象
+
+js 实际上会将 var a = 2 看成两个声明： var a和 a = 2。第一个定义声明在**编译阶段**进行，**第二个赋值声明被留在原地等待执行阶段**
+
+因此上面代码会以如下形式进行处理：
+
+```js
+var a; 
+console.log(a); 
+a = 2;
+```
+
+**所有的声明（变量和函数）都会被“移动”到各自作用域的最前端**，这个过程被称为 **变量（函数）提升**
+
+再看一个高频考题：
+
+```js
+var a=true;
+
+foo();  //undefined
+
+function foo(){   //函数声明
+	if (a) {
+		var a=10;
+	}
+	console.log(a);
+}
+```
+
+最终的答案是 undefined，代码实际js执行情况如下：
+
+```js
+function foo() { 	
+    var a; 	
+    if(a) { 		
+    	a = 10; 	
+    } 	
+    console.log(a); 
+} 
+var a;  
+a = true;  
+foo();
+
+```
+
+首先， foo(...) {} 的位置被移到了 foo();的前面，**这是函数发生了提升**，在 foo(...) {} 中，为什么会输出 undefined，而不是10？
+
+原因：**JavaScript 中没有块级作用域，**所以 var a = 10会被 JavaScript 分为两步：var a; **会被提升到函数作用域中的最顶端**，声明了一个局部变量 a，在 foo(...) {} 的函数作用域中，**这个重名局部变量 a 会屏蔽全局变量 a**，换句话说，在对 a 的赋值声明之前，在 foo(...) {}中，a 的值都是 undefined，无法进入 if(a) {...} 中，所以最后打印出来 undefined
+
+注意：在 JavaScript 中，函数有两种方式进行声明，函数声明会被提升，**但函数表达式却不会被提升**
+
+```js
+var a = true; 
+foo();  //TypeError: foo is not a function
+
+var foo = function() { 	//函数表达式
+    if(a) { 		
+    	var a = 10; 	
+	} 	
+	console.log(a); 
+}
+
+```
+
+```js
+var a; 
+var foo；  
+a = true; 
+foo();  
+foo = function() { 
+    if(a) {      
+    	var a = 10;    
+    } 
+    console.log(a); 
+}
+```
+
+当执行到foo()时，foo 还没有赋值（如果它是一个函数声明而不是函数表达式，那么就会赋值）。foo()对 undefined 值进行函数调用而导致非法操作，因此会抛出 TypeError 异常
+
+函数优先：函数声明和变量声明都会被提升。**但函数会首先被提升，然后才是变量提升**
+
+```js
+foo();  // 1
+
+function foo(){  //函数声明
+	console.log("1");
+}
+
+foo();  // 1
+
+var foo = function() { 	//函数表达式
+	console.log("2"); 
+}
+
+
+foo();  //2
+```
+
+输出 1 而不是 2！这段代码片段会被引擎理解为：
+
+```js
+function foo() { 	
+    console.log('1'); 
+}  
+var foo;
+foo();  
+foo = function() {
+ 	console.log('2'); 
+ }
+```
+
+---
+
+## 1.7 请问js有哪些常见报错类型？它们有什么区别？
+
+在js中常有6种错误类型：TypeError、ReferenceError、SyntaxError、RangeError、EvalError、URIError。其中 TypeError 和 ReferenceError 日常开发会经常碰到。
+
+**TypeError：**类型错误(调用不存在的方法)，变量或参数不是预期类型时发生的错误
+
+```js
+var a;
+
+console.log(a.b); //TypeError: Cannot read properties of undefined (reading 'b')
+```
+
+变量 a 存在，但a的b属性不存在
+
+**ReferenceError：**引用错误(要用的变量没找到)
+
+```js
+console.log(b)  //ReferenceError: b is not defined
+```
+
+对 b 进行 **RHS**查询，在所有嵌套作用域中遍寻不到变量
+
+**SyntaxError：**语法错误（给关键字赋值、变量名不符合规范）
+
+```js
+//var 1;  //SyntaxError: Unexpected number
+
+function=1;  //SyntaxError: Unexpected token '='
+```
+
+**RangeError：**范围错误(参数超范围)，主要有：数组长度为负数、Number对象的方法参数超出范围、函数堆栈超过最大值
+
+```js
+// 1、数组长度为负数
+[].length = -5      // Uncaught RangeError: Invalid array length
+
+// 2、Number对象的方法参数超出范围
+var num = new Number(12.34)
+console.log(num.toFixed(-1))   //RangeError: toFixed() digits argument must be between 0 and 100    at Number.toFixed (<anonymous>)
+
+```
+
+**EvalError：**非法调用 eval()，eval()函数没有被正确执行
+
+```js
+var myEval = eval;
+myEval("alert('call eval')");
+// 需要注意的是：ES5以上的JavaScript中已经不再抛出该错误，但依然可以通过new关键字来自定义该类型的错误提示。
+
+new Error([message[fileName[lineNumber]]])
+// 第一个参数是错误提示信息，第二个是文件名，第三个是行号。
+
+```
+
+**URIError：**URI不合法，相关函数的参数不正确。
+
+```js
+decodeURI("%")     // URIError: URI malformed
+```
+
+---
+
+### **1、什么是LHS和RHS查询？**
+
+如上所说，对于var a = 2， js引擎会将它分为两步完成：var a 和 a = 2
+
+变量的赋值操作会执行两个动作：首先编译器会在当前作用域中声明一个变量（如果之前没有声明过），然后在运行时引擎会在引用域中查找该变量，如果能够找到就会对它赋值
+
+LHS和RHS就是js对变量的两种查找操作， 查找的过程是由作用域（词法作用域）进行协助，在编译的第二步中执行
+
+LHS（Left-hand Side）和RHS（Right-hand Side）通常是指**等号（赋值运算）**的**左右边的查询**，但并不一定意味就是"="的左侧和右侧，赋值操作还有其他几种形式，因此在概念上最好将其理解为：**“赋值操作的目标是谁**（LHS）”以及“**谁是赋值操作的源头**（RHS）”
+
+可以参考下面代码加以理解：
+
+```js
+function foo(a) { 	
+    var b = a; 	
+    return a + b; 
+}  
+var c = foo(2);
+```
+
+代码中一共有3个LHS查询和4个RHS查询
+
+LHS：
+
+```
+第2、5行中的b = ...、c = ...，变量在赋值操作的左边，对 b、c 需要 LHS 查询
+
+第5行调用 foo(2) 时，需要将实参2赋值给形参a，所以对 a 需要 LHS 查询
+```
+
+RHS：
+
+```
+第2行 b = a， a 在赋值操作的右边，需要知道 a的值，对 a 需要 RHS 查询
+
+第3行 reutrn a + b， 需要知道 a 和 b 的值， 分别对 a 和 b 都进行 RHS 查询
+
+第6行 c = foo(2)，foo(2) 在赋值操作的右边，需要知道 foo(2)的值，对 foo(2) 需要 RHS 查询
+```
+
+当**RHS****查询不成功**时：会抛出 ReferenceError异常
+
+当**LHS查询不成功**时：会自动隐式地创建一个全局变量（非严格模式下），该变量使用LHS查询的目标作为标识符，或者抛出 ReferenceError 异常（严格模式下）
+
+---
+
+## 2.1 请问你了解js中的闭包吗？
+
+概念一：闭包是指有权访问另一个函数作用域中的变量的函数（概念出自《JavaScript高级程序设计》）
+
+概念二：一个函数和对其周围状态（词法环境）的引用捆绑在一起（或者说函数被引用包围），这样的组合就是闭包，也就是说，闭包让你可以在一个内层函数中访问到其外层函数的作用域。（概念出自MDN）
+
+可以简单理解为：闭包就是一个函数，一个外部函数通过调用函数并return返回出内部函数，此内部函数就是一个闭包
+
+js作用域只能函数内部向外层访问，闭包就是将函数内部和函数外部连接起来的一座桥梁，能够在函数外部访问到函数内部作用域的局部变量的函数
+
+```js
+function f1(){
+	var n=10;
+	function f2(){  //f2函数就是闭包
+		console.log(n);  
+	}
+	return f2;  //重点在这里，将闭包函数作为返回值，做到f1能访问到f2的内部局部变量
+}
+
+var result=f1();
+result();  //10
+```
+
+此时f2函数形成了一个闭包，因f2函数里需要访问f1作用域下的n变量，但他们不处于同一个作用域，故两者相互牵引，需要输出n，f1中的变量n就必须存在，作用域链在f1中找到n，输出n时，垃圾回收机制会认为f2还没有执行完成，但此时作用域链查找已经到了f1作用域下，所以n的内存空间不会被垃圾回收机制清除
+
+闭包**优点**：
+
+- 可以读取函数内部的变量
+- 延长局部变量寿命，不被垃圾回收机制销毁
+- 封装变量（模仿块级作用域）
+
+高频考题：
+
+```js
+for(var i=0;i<5;i++){
+      setTimeout(function(){
+            console.log(i); //输出5个5
+      });
+} 
+```
+
+预期应该是输出0、1、2、3、4，但实际是输出5个5，因为setTimeout事件是被异步触发的，当事件被触发的时候，for循环早已经结束
+
+可利用闭包解决该问题：将每次循环的i值封闭起来， 当沿着作用域链从内到外查找变量i时，会先找到被封闭在闭包环境中的i
+
+```js
+//1、在setTimeout外部创建一个自执行函数，并将i当作参数传递进闭包
+for(var i=0;i<5;i++){
+    (function(num){
+        setTimeout(function(){
+            console.log(num);   // 输出0，1，2，3，4         
+        }, num*1000);
+      }
+    )(i)
+}
+
+//2、在setTimeout内部函数创建一个闭包，并将i当作参数传递进去
+for(var i=0;i<5;i++){
+        setTimeout(function(num){
+            return function(){ //用匿名函数打造一个num变量副本
+            	console.log(num);   // 输出0，1，2，3，4 
+            }
+        }(i), i*1000);
+} 
+```
+
+**闭包缺点：**
+
+- 闭包会导致变量不会被垃圾回收机制所清除，会大量消耗内存
+- 使用不恰当可能会造成**内存泄漏**的问题
+
+**避免闭包引起的内存泄漏**：
+
+1、在退出函数之前，将不使用的局部变量全部删除或者赋值为null
+
+将变量设置为null：切断变量与它此前引用的值之间的连接，当垃圾回收器下次运行时，会删除这些值并回收它们占用的内存
+
+2、避免变量的循环赋值和引用
+
+----
+
+## 2.2 请问js垃圾回收机制是什么工作原理？
+
+js语言有 自动垃圾回收机制，执行环境会管理 代码执行过程中使用的内存，垃圾收集器会定期（周期性）找出不再继续使用的变量，然后释放其内存
+
+不再使用的变量：**生命周期结束的变量**（局部变量），**全局变量的生命周期直至浏览器卸载页面才会结束**
+
+**栈内存 垃圾回收：**
+
+栈内存中的垃圾回收其实就是**销毁执行栈中的执行上下文**，**栈顶**就是正在执行函数的执行上下文， 当函数执行完毕后，执行栈中对应的执行上下文会被销毁
+
+**ESP** 是执行栈中用来记录当前执行状态的指针， 当执行完一行后**，ESP 指针下移**，即**该行对应的上下文被回收**。 可理解为js引擎就是通过ESP指针的下移操作完成栈内存中的垃圾回收
+
+**堆内存 垃圾回收：**
+
+js中堆内存的垃圾回收主要建立在 代际假说 和 分代收集 两个概念上
+
+**代际假说：**
+
+- 大部分对象的存活时间都很短，分配完内存以后很快就变得不可访问
+- “不死”的对象，存活时间都很长
+
+**分代收集：**
+
+- 堆内存分为 新生代 和 老生代 两个区域
+- **新生代**区域：存放的都是存活时间比较短，占内存比较小的对象
+- **老生代**区域：存放的都是存活时间比较长，占内存比较大的对象
+
+**主垃圾回收器和副垃圾回收器：**
+
+新生代区域：副垃圾回收器
+
+老生代区域：主垃圾回收器
+
+这两个垃圾回收器的大致工作流程是相同的，可以简化为三步：
+
+（1）、标记待回收的内存
+
+（2）、垃圾内存回收
+
+（3）、内存碎片整理（频繁的垃圾回收后，会产生很多不连续的内存空间，不利于后续数据的存储）
+
+副垃圾回收器 工作流程
+
+主要是对**新生代区域**进行垃圾回收，新生代区域的内存空间比较小，大约是 1~8M
+
+采用的是 Scavenge 算法 进行垃圾回收，主要是将新生代区域 分成两部分：**空闲区域** 和**对象区域**， Scavenge 算法具体工作流程：
+
+（1）、所有进入新生代区域新产生的对象都会存放到对象区域中
+
+（2）、当对象区域被写满的时候会进行垃圾回收
+
+（3）、垃圾回收器会标记垃圾数据（使用“标记清除算法”）
+
+（4）、标记完成后对象区域会**将有效数据按照一定顺序存放到空闲区域的一端**
+
+（5）、存放好后，对象区域和空闲区域会角色互换
+
+（6）、清空当前的空闲区域的内存空间
+
+其中，因为是对象区域的有效数据按照一定顺序放到了空闲区域中，所以也顺便完成内存碎片的整理
+
+注意：新生代区域的空间很小，经常很快被填满，js有一个对象晋升策略解决这种情况：
+
+对象晋升策略规定**：两次垃圾回收还存活的对象就会被移动到老生代区域**
+
+**主垃圾回收器 工作流程**
+
+对老生代区域进行垃圾回收，老生代区域的内存空间要大很多，用 Scavenge算法 效率明要低很多，还是按照以下三步进行垃圾回收：
+
+（1）、通过标记清除算法，标记垃圾数据
+
+（2）、标记垃圾数据后，主垃圾回收器开始进行垃圾回收，**把可回收对象加入到空闲列表中**
+
+（3）、 剩下就是内存碎片整理，主垃圾回收器会将存活的对象移动到一端，然后清理掉边界以外的内存
+
+---
+
+### **1、什么是标记清除算法与引用计数算法？**
+
+两算法都是针对垃圾数据标记的
+
+**标记清除：**js中**最常用**的垃圾回收方式，当变量进入环境时，（一般是在函数中声明一个变量），将这个变量标记为“进入环境”。而当变量离开环境时，则将其标记为“离开环境”。**逻辑上讲，永远不能回收 进入环境的变量 所占用的内存，因为当执行流进入相应的环境，就可能会用到它们**
+
+```js
+function test(){
+    var a =10;//被标记 ，进入环境
+    var b =20;//被标记 ，进入环境
+}
+test();//执行完毕 之后 a、b又被标离开环境，被回收
+```
+
+**引用计数：**跟踪记录每个值被引用的次数。当声明了一个变量并将一个引用类型值赋给该变量时，这个值的引用次数是1；若同一个值又被赋给另一个变量，则该值的引用次数再加1。相反，如果包含对这个值引用的变量又取得了另外一个值，则这个值的引用次数减1
+
+当这个值的**引用次数变成0时**，则表示没有办法再访问这个值了，其占用的内存空间可回收
+
+```js
+function test(){
+    var a ={};//a的引用次数为0
+    var b = a ;//a的引用次数加1，为1 
+    var c = a;//a的引用次数再加1，为2
+    var b ={};//a的引用次数减1，为1
+}
+```
+
+注意：引用计数算法是js早期的垃圾标记算法，现在几乎不怎么用，该算法存在一个问题：**无法应对互相引用的情况**，当两个对象互相引用时，就会永远无法被回收，从而造成内存泄漏。 基于这个问题，后来提出了标记-清除算法
+
+---
+
+## 2.3 请问js有哪几种常见的内存泄露情况？
+
+**1、闭包**
+
+闭包可以延长局部变量寿命，若使用不当则会导致内存泄露
+
+**2、意外的全局变量**
+
+js中如果不用var声明变量，该变量将被视为window对象(全局对象)的属性，也就是全局变量，**目前开发场景中：主要还是使用let和const较多**
+
+```js
+function foo(arg) {
+    bar = "this is a hidden global variable";
+}
+function foo(arg) {
+    window.bar = "this is an explicit global variable";
+}
+```
+
+上面代码中两个函数是等价的，**调用完函数后，变量仍然存在，会导致泄漏**
+
+如果不注意this的话，也可能发生内存泄露：
+
+```js
+function foo() {
+    this.variable = "potential accidental global";
+}
+foo();// 没有对象调用foo, 也没有给它绑定this, 所以this是window
+```
+
+解决办法：加上“use strict”，**启用严格模式来避免**，**严格模式会组织创建意外的全局变量**
+
+**3、被遗忘的定时器或者回调**
+
+```js
+var someResource = getData();
+setInterval(function() {
+    var node = document.getElementById('Node');
+    if(node) {
+        node.innerHTML = JSON.stringify(someResource));
+    }
+}, 1000);
+```
+
+如上代码，**若id为Node的元素从DOM中被移除，但定时器仍会存在**，因为回调函数中包含对someResource的引用，定时器外面的someResource也不会被释放
+
+**4、没有清理的DOM元素引用**
+
+```js
+var elements = {
+    button: document.getElementById('button'),
+    image: document.getElementById('image'),
+    text: document.getElementById('text')
+};
+function doStuff() {
+    image.src = 'http://some.url/image';
+    button.click();
+    console.log(text.innerHTML);
+}
+function removeButton(){
+	document.body.removeChild(document.getElementById('button'));
+}
+```
+
+虽用removeChild移除了button，但是还在elements对象里保存着button的引用，DOM元素还在内存里面
+
+---
+
+## 2.4 请问你了解js的原型链吗？
+
+与其他面向对象语言不同，ES6之前js没有引入类（class）的概念，js并非通过类而是直接通过构造函数来创建实例
+
+**构造函数与实例原型**
+
+在js中，每当定义一个函数(普通函数、类)时候，都会天生自带一个prototype属性，这个属性**指向函数的原型对象**，并且这个属性是一个对象数据类型的值
+
+![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632988937142/6792CAEEBFCDBCFC9E66B7976460013F)
+
+
+
+原型对象可看作一个公共的区域，**所有同一个类的实例都可以访问到原型对象**，可将对象都有的内容，统一设置到原型对象中
+
+`__proto__`
+
+**每个对象**(除null外)都会有`__proto__`属性，这个属性会指向该对象的原型
+
+注意：`__proto__ `是 ES 标准中 [[proto]] 指针，**不建议在代码中直接编写` proto `属性**，应该通过 **Object.getPrototypeOf(）**来获取原型
+
+**`person.__proto__ === Person.prototype `![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632988972481/CE5C7C6471A9A7C318E42BC23AE5A324)**
+
+
+
+**constructor**
+
+**每个原型都有一个constructor属性**，**指向该关联的构造函数**
+
+![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632988988342/C2935E207F25D2B293E277867849672F)
+
+**原型链**
+
+在JavaScript中万物都是对象，对象和对象之间也有关系，并不是孤立存在的。对象之间的继承关系，在JavaScript中是通过prototype对象指向父类对象，直到指向Object对象为止，这样就形成了一个原型指向的链条，专业术语称之为**原型链**
+
+注意：Object是js中所有**对象数据类型**的基类（最顶层的类），Object.prototype 没有原型，（`Object.prototype.__proto__ `的值为 null）
+
+```js
+console.log(Object.prototype);  // [Object: null proto
+console.log(Object.prototype.__proto__);  // null
+
+let a = 1;
+console.log(a.__proto__);  // {}
+```
+
+像下图中：person → Person → Object ，普通人继承人类，人类继承对象类
+
+当访问**对象的一个属性或方法时**，会先在对象自身中寻找，如果有则直接使用，**如果没有则会去原型对象中寻找**，如果找到则直接使用。如果没有则去原型的原型中寻找，直到找到Object对象的原型，Object对象的原型没有原型，如果在Object原型中依然没有找到，则返回undefined
+
+![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632989014554/847EB5079F1C884C1E9B01D4CDD52E60)
+
+
+
+看一道经典面试题：
+
+```js
+var F=function(){}
+
+Object.prototype.a=function(){
+	console.log("a()");
+}
+
+Function.prototype.b=function(){
+	console.log("b()")
+}
+
+var f=new F();
+
+F.a();  //a()
+F.b();  //b()
+f.a();  //a()
+f.b();  //TypeError: f.b is not a function
+```
+
+这道题有几个考点：1、原型与原型链 2、实例对象、构造函数、Object、Function的关系
+
+代码分析：F是个构造函数，而f是构造函数F的一个实例
+
+有：
+
+```js
+console.log(F instanceof Object);  //true
+console.log(F instanceof Function);  //true
+```
+
+F是Object 和 Function两个的实例，即F既能访问到a，也能访问到b
+
+故：F.a() 输出 a()   F.b()  输出  b()
+
+
+
+对于f，并不是Function的实例，**因为它本来就不是构造函数**，只能访问Object原型链
+
+有：
+
+```js
+console.log(f instanceof Object);  //true
+console.log(f instanceof Function);  //false
+```
+
+故：f.a() 输出  a() f.b()报错
+
+具体分析下，它们是如何在原型链上查找的：
+
+**F.a() 查找路径：**
+
+F自身：没有 → `F.__proto__`(Function.prototype)：没有 → `F.__proto__.__proto__`(Object.prototype)：输出 a()
+
+```js
+console.log(F.__proto__);  //{ b: [Function (anonymous)] }
+console.log(F.__proto__.__proto__);  //[Object: null prototype] { a: [Function (anonymous)] }
+```
+
+**F.b() 查找路径：**
+
+F自身：没有 → `F.__proto__`(Function.prototype)：b()
+
+**f.a的查找路径：**
+
+f自身：没有 → `f.__proto__`(Object.prototype)：输出a()
+
+```js
+console.log(Object.getPrototypeOf(f));  //{}
+console.log(f.__proto__.__proto__);  //[Object: null prototype] { a: [Function (anonymous)] }
+```
+
+**f.b的查找路径：**
+
+f自身：没有 → `f.__proto`__(Object.prototype)：没有 → f.`__proto__.__proto__ `(Object.prototype.`__proto__`)：找不到，所以报错
+
 #### 2.1 let const var 相关
 
 **参考答案：**
@@ -1484,1041 +2527,11 @@ null被当成复合对象，**由于null没有valueOf与toString方法**，因�
 
 ---
 
-# js部分
+# 高级部分
 
 ---
 
-## 1.1 请问在JS中有哪些数据类型？
 
-JavaScript 语言中类型集合由原始值和对象组成。
-
-**原始值**（直接表示在语言底层的不可变数据）
-
-除对象类型（object）以外的其它任何类型定义的不可变的值（值本身无法被改变）。例如（与 C 语言不同），JavaScript 中字符串是不可变的（译注：如，JavaScript 中**对字符串的操作一定返回了一个新字符串**，原始字符串并没有被改变）。我们称这些类型的值为“*原始值*”。
-
-- 布尔类型
-- Null 类型
-- Undefined 类型
-- 数字类型
-- BigInt 类型
-- 字符串类型
-- 符号类型(symbol)
-
-符号（Symbols）类型是**唯一**且**不可修改**的原始值，并且可以用来作为对象的键(key)，在某些语言当中也有与之相似的类型（原子类型，atoms）。
-
-**对象**（一组属性的集合）
-
-在计算机科学中, 对象（object）是指内存中的可以被[标识符](https://developer.mozilla.org/zh-CN/docs/Glossary/Identifier)引用的一块区域。
-
-
-
-JS数据类型一共有7种，分为基本数据类型和引用数据类型
-
-- **基本数据类型**：字符串（String）、数字(Number)、布尔(Boolean)、空（Null）、未定义（Undefined）、Symbol、BigInt
-
-Symbol：ES6引入了一种新的原始数据类型，表示独一无二的值，**主要用于解决属性名冲突的问题**，做为标记
-
-BigInt：新增数据类型，是ES2020新增加的，精度大于 2^53 - 1， 是比Number类型支持的范围更大的整数值，在对大整数执行运算时，使用BigInt，会减少整数溢出问题
-
-创建方式：BigInt(value)、在一个整数字面量后面加 n 
-
-```js
-let a = 10n; 
-let b = BigInt(10);  
-console.log(a === b);     // true
-```
-
-注意：由于在Number 与 BigInt 之间进行转换会损失精度，**建议仅在值可能大于2^53 时使用 BigInt类型**，并且不在两种类型之间进行相互转换。
-
-与Number不同点：
-
-（1）不能用于 Math 对象中的方法；
-
-（2）不能和任何 Number 实例混合运算，两者必须转换成同一种类型（ BigInt 变量在转换成 Number 变量时可能会丢失精度）
-
-
-
-- **引用数据类型**：对象(Object)，其中包含了日期（Date）、函数（Function)、数组（Array）、正则（RegExp）等
-
-两者总结区别：
-
-（1）声明变量时不同的内存分配：
-
-基本：存储在栈中的简单数据段，它们的值直接存储在变量访问的位置
-
-原因：**基本类型数据占据的空间是固定的**，所以将他们存储在较小的内存区域——栈，便于迅速查寻变量的值
-
-引用：存储在堆中的对象，存储在变量处的值是一个指针，指向存储对象的内存地址
-
- 原因：**引用类型数据的大小会改变**，不能把它放在栈中，否则会降低变量查寻速度，**相反，地址的大小是固定的，可以存在栈中**
-
-（2）不同的内存分配机制也带来了不同的访问机制
-
-引用：js中不允许直接访问保存在堆内存中的对象，在访问一个对象时，**首先得到对象在堆内存中的地址**，按照这个地址去获得对象中的值（引用访问）
-
-基本：可直接访问
-
-（3）复制变量时的不同
-
-基本：变量复制时，会将原始值的副本赋值给新变量，此后两变量是完全独立的，他们只是拥有相同的值而已（深拷贝）
-
-引用：变量复制时，会把内存地址赋值给新变量，新旧变量都指向了堆内存中的同一个对象，任何一个作出的改变都会影响另一个（浅拷贝）（深拷贝浅拷贝对比详见下3.3）
-
-（4）参数传递的不同（把实参复制给形参的过程）
-
-由于内存分配的差别，两者在传参时也有区别
-
-基本：只是把变量里的值传递给参数，**之后参数和这个变量互不影响**
-
-引用：**传递的值也就是这个内存地址**，这也就是为什么函数内部对这个参数的修改会体现在外部，因为它们都指向同一个对象
-
-----
-
-## 1.2 请问Undefined与Null有何异同点？
-
-共同点：都是基本类型，保存在栈中
-
-不同点：
-
-Undefined表示"缺少值"，**就是此处应该有一个值，但是还没有定义**，转为数值时为NaN。典型用法：
-
-- 变量被声明了，但没有赋值时，就等于undefined
-- 调用函数时，应该提供的参数没有提供，该参数等于undefined
-- 对象没有赋值的属性，该属性的值为undefined
-- 函数没有返回值时，默认返回undefined
-
-Null：
-
-表示"没有对象"，**即该处不应该有值**，转为数值时为0。典型用法是：
-
-- 作为函数的参数，表示该函数的参数不是对象
-- 作为对象原型链的终点
-
-注意：
-
-```js
-undefined == null; //true
-undefined === null; //false
-```
-
-ECMAScript 规范： null 和  undefined 的行为很相似，并且**都表示 一个无效的值**，那么它们所表示的内容也具有相似性，故他们相等。
-
-全等操作 === 在比较相等性的时候，两者不是同一类型值，会发生类型转换，故两者不全等。
-
-```js
-Number(undefined); // NaN
-Number(null); // 0
-
-```
-
----
-
-## 1.3 请问如何判断js变量的数据类型？
-
-常见判断方法有以下四种：
-
-- **typeof xx**
-
-返回一个字符串（小写），用来判断：Undefined、String、Number、Boolean、Symbol、Object、Function，无法检测引用类型里的Array
-
-```bash
-> typeof(undefined)
-'undefined'
-> typeof("abc")
-'string'
-> typeof(100)
-'number'
-> typeof(false)
-'boolean'
-> typeof(Symbol(2))
-'symbol'
-
-> typeof(BigInt(200))
-'bigint'
-```
-
-优点：可区分Object与Function
-
-缺点：
-
-（1）对于 Null ，返回 object 类型
-
-```js
-> typeof(null)
-'object'
-```
-
-原因：Null类型只有一个null值，该值表示一个**空对象指针**（出自JavaScript高级程序设计）
-
-**typeof的检测原理**：不同的对象在底层都表示为二进制，在js中二进制前**（低）三位存储其类型信息**为：000: Object、100：String、110： Boolean、1： Number。**null的二进制表示全为0，自然前三位也是0，所以执行typeof时会返回"object"。**
-
-  （2） 对于Array、Date、RegExp都会返回object，不能更详细的区分
-
-```js
-var fn=function(){};
-let obj={a:1};
-let arr=[1,2,3];
-let now=new Date();
-let reg=/abc/;
-
-console.log(typeof(fn));  //function
-console.log(typeof(obj));  //object
-console.log(typeof(arr));  //object
-console.log(typeof(now));  //object
-console.log(typeof(reg));  //object
-```
-
-- **xx instanceof xx**
-
-返回true/false，**只能判断引用类型** ，无法检测基本类型
-
-判断原理：**判断一个构造函数的prototype属性所指向的对象是否存在另外一个要检测对象的原型链上**。简单来说：能验证new构造函数创建出来的实例，左边的对象是否是右边的类的实例，**属于验证式判断类型**
-
-缺点：**只能用来判断两个对象是否属于实例关系**， 而不能判断一个对象实例具体属于哪种类型（**原型链上的都会返回true**）
-
-```js
-console.log('abc' instanceof String);// false 
-console.log( String('abc') instanceof String);// true 
-
-console.log(12 instanceof Number);// false 
-console.log(new Number(12) instanceof Number);// true 
-
-console.log(true instanceof Boolean);// false 
-console.log(new Boolean(true) instanceof Boolean);// true 
-
-console.log({name:'yy'} instanceof Object);// true 
-console.log(new Object({name:'yy'}) instanceof Object);// true 
-
-console.log(['12','123'] instanceof Object);// true 
-console.log(['12','123'] instanceof Array);// true 
-console.log(new Array('12',32) instanceof Object);// true 
-console.log(new Array('12',32) instanceof Array);// true 
-
-console.log(function(){} instanceof Object);// true 
-console.log(function(){} instanceof Function);// true 
-console.log(new Function() instanceof Function);// true 
-
-console.log(new Date() instanceof Object);// true 
-console.log(new RegExp instanceof Object);// true 
-
-console.log(new String('abc') instanceof Object);// true 
-console.log(new Number(12) instanceof Object);// true
-
-console.log(null instanceof Object);  //false
-console.log(undefined instanceof Object);  //false
-console.log(Symbol(2) instanceof Object);  //false
-console.log(BigInt(2) instanceof Object);  //false
-```
-
-
-
-- **xx.constructor === xx**
-
-返回true/false，判断原理：
-
-当一个函数F被定义时，JS引擎会为F添加prototype原型，然后再在prototype上添加一个constructor属性，并让其指向F的引用
-
-具体来说：当 var f = new F() 时，F被当成了构造函数，f是F的实例对象，**此时F原型上的constructor传递到了f上，因此f.constructor === F**
-
-缺点：不可判断Null、Undefined是无效的对象，**没有constructor存在**
-
-constructor 是不稳定的，如创建的对象更改了原型，无法检测到最初的类型
-
-```js
-console.log("abc".constructor===String);  //true
-console.log(new Number(2).constructor===Number);  //true
-console.log([1,2,3].constructor===Array);  //true
-console.log(false.constructor===Boolean);  //true
-console.log(new Function().constructor===Function);  //true
-console.log(new Date().constructor===Date);  //true
-console.log(/abc/.constructor===RegExp);  //true
-
-console.log(document.constructor===HTMLDocument);  //true
-```
-
-- **Object.prototype.toString.call(xx)**
-
-返回“[object type]”（字符串），**能判断所有类型**，万金油方法
-
-判断原理：**JS中的所有对象都是继承自Object对象的**，通过call方法（显式绑定）改变this指向，利用Object.prototype上的原生toString()方法判断数据类型
-
-```js
-console.log(Object.prototype.toString.call(123));  // [object Number]
-console.log(Object.prototype.toString.call("abc"));  //[object String]
-console.log(Object.prototype.toString.call(undefined));  //[object Undefined]
-console.log(Object.prototype.toString.call(null));  //[object Null]
-console.log(Object.prototype.toString.call(false));  //[object Boolean]
-
-console.log(Object.prototype.toString.call(Symbol(2)));  //[object Symbol]
-console.log(Object.prototype.toString.call(100n));  //[object BigInt]
-
-console.log(Object.prototype.toString.call({}));  //[object Object]
-console.log(Object.prototype.toString.call([]));  //[object Array]
-
-console.log(Object.prototype.toString.call(new Date()));  //[object Date]
-console.log(Object.prototype.toString.call(new RegExp("abc","g")));  //[object RegExp]
-
-console.log(Object.prototype.toString.call(function(){}));  //[object Function]
-```
-
------
-
-## 1.4 请问===与==有何区别？相等与全等的区别
-
-==：相等(值)
-
-**先转换再比较**（强制转换）
-
-- 有布尔值，把false->0， true->1， 调用Number()方法
-- 字符串 和 数值，字符串转数值 ；调用Number()方法
-- 对象 和 非对象，调用对象的valueOf()和toString()方法把对象转换成基础类型的值再比较，**除Date对象外，会优先尝试使用valueOf()方法**
-- 有一个是NaN， 则返回false。 即使两个都是NaN，也返回false，**因为按照规则，NaN不等于NaN**
-- 两个操作数都是对象，则比较他们是不是同一个对象，如果指向的是同一个对象，则返回ture 因为对象存的是地址值
-- 比较相等性之前， **不能将 null和 undefined转换成其他任何值**
-
-```bash
-> 1==true
-true
-> 2==false
-false
-> 2===true
-false
-> 1=="1"
-true
-> []==""
-true
-
-> []==false
-true
-> []=={}
-false
-> []==[]
-false
-> {}=={}
-false
-> null==undefined
-true
-> 1==NaN
-false
-
-> 0==undefined
-false
-> 0==null
-false
-
-> false==0
-true
-> false==null
-false
-> false==undefined
-false
-
-
-```
-
-**=== ： 全等(类型和值）**
-
-**先判断类型再比较**， 类型不同直接不等，不转换类型
-
-```bash
-> 0===0
-true
-> []===[]
-false
-> 2===2
-true
-```
-
----
-
-## 1.5 请问你了解js作用域吗？
-
-**1，js作用域**
-
-作用域：在运行时代码中的某些特定部分中变量、函数和对象的**可访问性**。换句话说，作用域决定了代码区块中变量和其他资源的可见性，作用域就是一个独立的地盘，让变量不会外泄、暴露出去。
-
-**作用域最大作用**：隔离变量，不同作用域下同名变量不会有冲突
-
-作用域是分层的，**内层作用域可以访问外层作用域的变量**，反之不行
-
-**2， JavaScript 没有块级作用域（ES6之前）**，只有全局作用域和函数作用域，ES6引入块级作用域（相关知识会在第5章中分析）
-
-全局作用域（浏览器）：window
-
-- 最外层函数 和在最外层函数外面定义的变量拥有全局作用域
-
-- **所有末定义直接赋值的变量自动声明为拥有全局作用域**
-- 所有window对象的属性拥有全局作用域，如window.name、window.location、window.top等
-
-- nodejs 的全局对象：global，**声明全局变量的方式为: global.变量名**
-
-- 在各个模块下都可以直接访问 global 对象
-
-- 一个文件就是一个模块，通过 require 引入模块
-
-
-函数作用域：
-
-- 声明在函数内部的变量
-
-
-**3，作用域链**
-
-当我们需要某个变量的值时，先去它最近的作用域去找，如果找不到，就找它的上级作用域，依次类推，直到找到全局，如全都未定义，那就抛出一个错误，如下代码所示
-
-```js
-var a = 1
-function A(){
-    function B(){
-        console.log(a);
-    }
-    return B();
-}
-A();//1
-
-```
-
-常见面试题：
-
-```js
-var a=10;
-function A(){
-    alert(a);
-};
-function B(){
-    var a=20;
-    A();
-}
-B();//10
-
-```
-
-为什么输出10，而不是20？**js中变量的作用域链与定义时的环境有关，与执行时无关**。调用函数B，B中调用了函数A，函数A里面没定义变量a，函数A只是被B调用且不传参，因此函数A无权使用函数B的局部变量a，而在上方还有一个全局变量a，因此这里输出10
-
----
-
-## 1.6 请问什么是变量提升？什么是函数提升？
-
-js区别于C、C++、Java语言，在ES6之前，JavaScript没有块级作用域，只有**全局作用域**和**函数作用域**。
-
-这题在面试时尽量用具体代码举例说明
-
-先看下面代码：
-
-```js
-console.log(a);
-
-var a=2;  //undefined
-```
-
-变量 a 在使用前没有先进行声明，会抛出 ReferenceError异常?还是输出 2 ？事实上都不对，正确答案是输出 undefined（已声明未定义值）
-
-这就是一个典型的 **变量提升** 现象
-
-js 实际上会将 var a = 2 看成两个声明： var a和 a = 2。第一个定义声明在**编译阶段**进行，**第二个赋值声明被留在原地等待执行阶段**
-
-因此上面代码会以如下形式进行处理：
-
-```js
-var a; 
-console.log(a); 
-a = 2;
-```
-
-**所有的声明（变量和函数）都会被“移动”到各自作用域的最前端**，这个过程被称为 **变量（函数）提升**
-
-再看一个高频考题：
-
-```js
-var a=true;
-
-foo();  //undefined
-
-function foo(){   //函数声明
-	if (a) {
-		var a=10;
-	}
-	console.log(a);
-}
-```
-
-最终的答案是 undefined，代码实际js执行情况如下：
-
-```js
-function foo() { 	
-    var a; 	
-    if(a) { 		
-    	a = 10; 	
-    } 	
-    console.log(a); 
-} 
-var a;  
-a = true;  
-foo();
-
-```
-
-首先， foo(...) {} 的位置被移到了 foo();的前面，**这是函数发生了提升**，在 foo(...) {} 中，为什么会输出 undefined，而不是10？
-
-原因：**JavaScript 中没有块级作用域，**所以 var a = 10会被 JavaScript 分为两步：var a; **会被提升到函数作用域中的最顶端**，声明了一个局部变量 a，在 foo(...) {} 的函数作用域中，**这个重名局部变量 a 会屏蔽全局变量 a**，换句话说，在对 a 的赋值声明之前，在 foo(...) {}中，a 的值都是 undefined，无法进入 if(a) {...} 中，所以最后打印出来 undefined
-
-注意：在 JavaScript 中，函数有两种方式进行声明，函数声明会被提升，**但函数表达式却不会被提升**
-
-```js
-var a = true; 
-foo();  //TypeError: foo is not a function
-
-var foo = function() { 	//函数表达式
-    if(a) { 		
-    	var a = 10; 	
-	} 	
-	console.log(a); 
-}
-
-```
-
-```js
-var a; 
-var foo；  
-a = true; 
-foo();  
-foo = function() { 
-    if(a) {      
-    	var a = 10;    
-    } 
-    console.log(a); 
-}
-```
-
-当执行到foo()时，foo 还没有赋值（如果它是一个函数声明而不是函数表达式，那么就会赋值）。foo()对 undefined 值进行函数调用而导致非法操作，因此会抛出 TypeError 异常
-
-函数优先：函数声明和变量声明都会被提升。**但函数会首先被提升，然后才是变量提升**
-
-```js
-foo();  // 1
-
-function foo(){  //函数声明
-	console.log("1");
-}
-
-foo();  // 1
-
-var foo = function() { 	//函数表达式
-	console.log("2"); 
-}
-
-
-foo();  //2
-```
-
-输出 1 而不是 2！这段代码片段会被引擎理解为：
-
-```js
-function foo() { 	
-    console.log('1'); 
-}  
-var foo;
-foo();  
-foo = function() {
- 	console.log('2'); 
- }
-```
-
----
-
-## 1.7 请问js有哪些常见报错类型？它们有什么区别？
-
-在js中常有6种错误类型：TypeError、ReferenceError、SyntaxError、RangeError、EvalError、URIError。其中 TypeError 和 ReferenceError 日常开发会经常碰到。
-
-**TypeError：**类型错误(调用不存在的方法)，变量或参数不是预期类型时发生的错误
-
-```js
-var a;
-
-console.log(a.b); //TypeError: Cannot read properties of undefined (reading 'b')
-```
-
-变量 a 存在，但a的b属性不存在
-
-**ReferenceError：**引用错误(要用的变量没找到)
-
-```js
-console.log(b)  //ReferenceError: b is not defined
-```
-
-对 b 进行 **RHS**查询，在所有嵌套作用域中遍寻不到变量
-
-**SyntaxError：**语法错误（给关键字赋值、变量名不符合规范）
-
-```js
-//var 1;  //SyntaxError: Unexpected number
-
-function=1;  //SyntaxError: Unexpected token '='
-```
-
-**RangeError：**范围错误(参数超范围)，主要有：数组长度为负数、Number对象的方法参数超出范围、函数堆栈超过最大值
-
-```js
-// 1、数组长度为负数
-[].length = -5      // Uncaught RangeError: Invalid array length
-
-// 2、Number对象的方法参数超出范围
-var num = new Number(12.34)
-console.log(num.toFixed(-1))   //RangeError: toFixed() digits argument must be between 0 and 100    at Number.toFixed (<anonymous>)
-
-```
-
-**EvalError：**非法调用 eval()，eval()函数没有被正确执行
-
-```js
-var myEval = eval;
-myEval("alert('call eval')");
-// 需要注意的是：ES5以上的JavaScript中已经不再抛出该错误，但依然可以通过new关键字来自定义该类型的错误提示。
-
-new Error([message[fileName[lineNumber]]])
-// 第一个参数是错误提示信息，第二个是文件名，第三个是行号。
-
-```
-
-**URIError：**URI不合法，相关函数的参数不正确。
-
-```js
-decodeURI("%")     // URIError: URI malformed
-```
-
----
-
-### **1、什么是LHS和RHS查询？**
-
-如上所说，对于var a = 2， js引擎会将它分为两步完成：var a 和 a = 2
-
-变量的赋值操作会执行两个动作：首先编译器会在当前作用域中声明一个变量（如果之前没有声明过），然后在运行时引擎会在引用域中查找该变量，如果能够找到就会对它赋值
-
-LHS和RHS就是js对变量的两种查找操作， 查找的过程是由作用域（词法作用域）进行协助，在编译的第二步中执行
-
-LHS（Left-hand Side）和RHS（Right-hand Side）通常是指**等号（赋值运算）**的**左右边的查询**，但并不一定意味就是"="的左侧和右侧，赋值操作还有其他几种形式，因此在概念上最好将其理解为：**“赋值操作的目标是谁**（LHS）”以及“**谁是赋值操作的源头**（RHS）”
-
-可以参考下面代码加以理解：
-
-```js
-function foo(a) { 	
-    var b = a; 	
-    return a + b; 
-}  
-var c = foo(2);
-```
-
-代码中一共有3个LHS查询和4个RHS查询
-
-LHS：
-
-```
-第2、5行中的b = ...、c = ...，变量在赋值操作的左边，对 b、c 需要 LHS 查询
-
-第5行调用 foo(2) 时，需要将实参2赋值给形参a，所以对 a 需要 LHS 查询
-```
-
-RHS：
-
-```
-第2行 b = a， a 在赋值操作的右边，需要知道 a的值，对 a 需要 RHS 查询
-
-第3行 reutrn a + b， 需要知道 a 和 b 的值， 分别对 a 和 b 都进行 RHS 查询
-
-第6行 c = foo(2)，foo(2) 在赋值操作的右边，需要知道 foo(2)的值，对 foo(2) 需要 RHS 查询
-```
-
-当**RHS****查询不成功**时：会抛出 ReferenceError异常
-
-当**LHS查询不成功**时：会自动隐式地创建一个全局变量（非严格模式下），该变量使用LHS查询的目标作为标识符，或者抛出 ReferenceError 异常（严格模式下）
-
----
-
-## 2.1 请问你了解js中的闭包吗？
-
-概念一：闭包是指有权访问另一个函数作用域中的变量的函数（概念出自《JavaScript高级程序设计》）
-
-概念二：一个函数和对其周围状态（词法环境）的引用捆绑在一起（或者说函数被引用包围），这样的组合就是闭包，也就是说，闭包让你可以在一个内层函数中访问到其外层函数的作用域。（概念出自MDN）
-
-可以简单理解为：闭包就是一个函数，一个外部函数通过调用函数并return返回出内部函数，此内部函数就是一个闭包
-
-js作用域只能函数内部向外层访问，闭包就是将函数内部和函数外部连接起来的一座桥梁，能够在函数外部访问到函数内部作用域的局部变量的函数
-
-```js
-function f1(){
-	var n=10;
-	function f2(){  //f2函数就是闭包
-		console.log(n);  
-	}
-	return f2;  //重点在这里，将闭包函数作为返回值，做到f1能访问到f2的内部局部变量
-}
-
-var result=f1();
-result();  //10
-```
-
-此时f2函数形成了一个闭包，因f2函数里需要访问f1作用域下的n变量，但他们不处于同一个作用域，故两者相互牵引，需要输出n，f1中的变量n就必须存在，作用域链在f1中找到n，输出n时，垃圾回收机制会认为f2还没有执行完成，但此时作用域链查找已经到了f1作用域下，所以n的内存空间不会被垃圾回收机制清除
-
-闭包**优点**：
-
-- 可以读取函数内部的变量
-- 延长局部变量寿命，不被垃圾回收机制销毁
-- 封装变量（模仿块级作用域）
-
-高频考题：
-
-```js
-for(var i=0;i<5;i++){
-      setTimeout(function(){
-            console.log(i); //输出5个5
-      });
-} 
-```
-
-预期应该是输出0、1、2、3、4，但实际是输出5个5，因为setTimeout事件是被异步触发的，当事件被触发的时候，for循环早已经结束
-
-可利用闭包解决该问题：将每次循环的i值封闭起来， 当沿着作用域链从内到外查找变量i时，会先找到被封闭在闭包环境中的i
-
-```js
-//1、在setTimeout外部创建一个自执行函数，并将i当作参数传递进闭包
-for(var i=0;i<5;i++){
-    (function(num){
-        setTimeout(function(){
-            console.log(num);   // 输出0，1，2，3，4         
-        }, num*1000);
-      }
-    )(i)
-}
-
-//2、在setTimeout内部函数创建一个闭包，并将i当作参数传递进去
-for(var i=0;i<5;i++){
-        setTimeout(function(num){
-            return function(){ //用匿名函数打造一个num变量副本
-            	console.log(num);   // 输出0，1，2，3，4 
-            }
-        }(i), i*1000);
-} 
-```
-
-**闭包缺点：**
-
-- 闭包会导致变量不会被垃圾回收机制所清除，会大量消耗内存
-- 使用不恰当可能会造成**内存泄漏**的问题
-
-**避免闭包引起的内存泄漏**：
-
-1、在退出函数之前，将不使用的局部变量全部删除或者赋值为null
-
-将变量设置为null：切断变量与它此前引用的值之间的连接，当垃圾回收器下次运行时，会删除这些值并回收它们占用的内存
-
-2、避免变量的循环赋值和引用
-
-----
-
-## 2.2 请问js垃圾回收机制是什么工作原理？
-
-js语言有 自动垃圾回收机制，执行环境会管理 代码执行过程中使用的内存，垃圾收集器会定期（周期性）找出不再继续使用的变量，然后释放其内存
-
-不再使用的变量：**生命周期结束的变量**（局部变量），**全局变量的生命周期直至浏览器卸载页面才会结束**
-
-**栈内存 垃圾回收：**
-
-栈内存中的垃圾回收其实就是**销毁执行栈中的执行上下文**，**栈顶**就是正在执行函数的执行上下文， 当函数执行完毕后，执行栈中对应的执行上下文会被销毁
-
-**ESP** 是执行栈中用来记录当前执行状态的指针， 当执行完一行后**，ESP 指针下移**，即**该行对应的上下文被回收**。 可理解为js引擎就是通过ESP指针的下移操作完成栈内存中的垃圾回收
-
-**堆内存 垃圾回收：**
-
-js中堆内存的垃圾回收主要建立在 代际假说 和 分代收集 两个概念上
-
-**代际假说：**
-
-- 大部分对象的存活时间都很短，分配完内存以后很快就变得不可访问
-- “不死”的对象，存活时间都很长
-
-**分代收集：**
-
-- 堆内存分为 新生代 和 老生代 两个区域
-- **新生代**区域：存放的都是存活时间比较短，占内存比较小的对象
-- **老生代**区域：存放的都是存活时间比较长，占内存比较大的对象
-
-**主垃圾回收器和副垃圾回收器：**
-
-新生代区域：副垃圾回收器
-
-老生代区域：主垃圾回收器
-
-这两个垃圾回收器的大致工作流程是相同的，可以简化为三步：
-
-（1）、标记待回收的内存
-
-（2）、垃圾内存回收
-
-（3）、内存碎片整理（频繁的垃圾回收后，会产生很多不连续的内存空间，不利于后续数据的存储）
-
-副垃圾回收器 工作流程
-
-主要是对**新生代区域**进行垃圾回收，新生代区域的内存空间比较小，大约是 1~8M
-
-采用的是 Scavenge 算法 进行垃圾回收，主要是将新生代区域 分成两部分：**空闲区域** 和**对象区域**， Scavenge 算法具体工作流程：
-
-（1）、所有进入新生代区域新产生的对象都会存放到对象区域中
-
-（2）、当对象区域被写满的时候会进行垃圾回收
-
-（3）、垃圾回收器会标记垃圾数据（使用“标记清除算法”）
-
-（4）、标记完成后对象区域会**将有效数据按照一定顺序存放到空闲区域的一端**
-
-（5）、存放好后，对象区域和空闲区域会角色互换
-
-（6）、清空当前的空闲区域的内存空间
-
-其中，因为是对象区域的有效数据按照一定顺序放到了空闲区域中，所以也顺便完成内存碎片的整理
-
-注意：新生代区域的空间很小，经常很快被填满，js有一个对象晋升策略解决这种情况：
-
-对象晋升策略规定**：两次垃圾回收还存活的对象就会被移动到老生代区域**
-
-**主垃圾回收器 工作流程**
-
-对老生代区域进行垃圾回收，老生代区域的内存空间要大很多，用 Scavenge算法 效率明要低很多，还是按照以下三步进行垃圾回收：
-
-（1）、通过标记清除算法，标记垃圾数据
-
-（2）、标记垃圾数据后，主垃圾回收器开始进行垃圾回收，**把可回收对象加入到空闲列表中**
-
-（3）、 剩下就是内存碎片整理，主垃圾回收器会将存活的对象移动到一端，然后清理掉边界以外的内存
-
----
-
-### **1、什么是标记清除算法与引用计数算法？**
-
-两算法都是针对垃圾数据标记的
-
-**标记清除：**js中**最常用**的垃圾回收方式，当变量进入环境时，（一般是在函数中声明一个变量），将这个变量标记为“进入环境”。而当变量离开环境时，则将其标记为“离开环境”。**逻辑上讲，永远不能回收 进入环境的变量 所占用的内存，因为当执行流进入相应的环境，就可能会用到它们**
-
-```js
-function test(){
-    var a =10;//被标记 ，进入环境
-    var b =20;//被标记 ，进入环境
-}
-test();//执行完毕 之后 a、b又被标离开环境，被回收
-```
-
-**引用计数：**跟踪记录每个值被引用的次数。当声明了一个变量并将一个引用类型值赋给该变量时，这个值的引用次数是1；若同一个值又被赋给另一个变量，则该值的引用次数再加1。相反，如果包含对这个值引用的变量又取得了另外一个值，则这个值的引用次数减1
-
-当这个值的**引用次数变成0时**，则表示没有办法再访问这个值了，其占用的内存空间可回收
-
-```js
-function test(){
-    var a ={};//a的引用次数为0
-    var b = a ;//a的引用次数加1，为1 
-    var c = a;//a的引用次数再加1，为2
-    var b ={};//a的引用次数减1，为1
-}
-```
-
-注意：引用计数算法是js早期的垃圾标记算法，现在几乎不怎么用，该算法存在一个问题：**无法应对互相引用的情况**，当两个对象互相引用时，就会永远无法被回收，从而造成内存泄漏。 基于这个问题，后来提出了标记-清除算法
-
----
-
-## 2.3 请问js有哪几种常见的内存泄露情况？
-
-**1、闭包**
-
-闭包可以延长局部变量寿命，若使用不当则会导致内存泄露
-
-**2、意外的全局变量**
-
-js中如果不用var声明变量，该变量将被视为window对象(全局对象)的属性，也就是全局变量，**目前开发场景中：主要还是使用let和const较多**
-
-```js
-function foo(arg) {
-    bar = "this is a hidden global variable";
-}
-function foo(arg) {
-    window.bar = "this is an explicit global variable";
-}
-```
-
-上面代码中两个函数是等价的，**调用完函数后，变量仍然存在，会导致泄漏**
-
-如果不注意this的话，也可能发生内存泄露：
-
-```js
-function foo() {
-    this.variable = "potential accidental global";
-}
-foo();// 没有对象调用foo, 也没有给它绑定this, 所以this是window
-```
-
-解决办法：加上“use strict”，**启用严格模式来避免**，**严格模式会组织创建意外的全局变量**
-
-**3、被遗忘的定时器或者回调**
-
-```js
-var someResource = getData();
-setInterval(function() {
-    var node = document.getElementById('Node');
-    if(node) {
-        node.innerHTML = JSON.stringify(someResource));
-    }
-}, 1000);
-```
-
-如上代码，**若id为Node的元素从DOM中被移除，但定时器仍会存在**，因为回调函数中包含对someResource的引用，定时器外面的someResource也不会被释放
-
-**4、没有清理的DOM元素引用**
-
-```js
-var elements = {
-    button: document.getElementById('button'),
-    image: document.getElementById('image'),
-    text: document.getElementById('text')
-};
-function doStuff() {
-    image.src = 'http://some.url/image';
-    button.click();
-    console.log(text.innerHTML);
-}
-function removeButton(){
-	document.body.removeChild(document.getElementById('button'));
-}
-```
-
-虽用removeChild移除了button，但是还在elements对象里保存着button的引用，DOM元素还在内存里面
-
----
-
-## 2.4 请问你了解js的原型链吗？
-
-与其他面向对象语言不同，ES6之前js没有引入类（class）的概念，js并非通过类而是直接通过构造函数来创建实例
-
-**构造函数与实例原型**
-
-在js中，每当定义一个函数(普通函数、类)时候，都会天生自带一个prototype属性，这个属性**指向函数的原型对象**，并且这个属性是一个对象数据类型的值
-
-![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632988937142/6792CAEEBFCDBCFC9E66B7976460013F)
-
-
-
-原型对象可看作一个公共的区域，**所有同一个类的实例都可以访问到原型对象**，可将对象都有的内容，统一设置到原型对象中
-
-`__proto__`
-
-**每个对象**(除null外)都会有`__proto__`属性，这个属性会指向该对象的原型
-
-注意：`__proto__ `是 ES 标准中 [[proto]] 指针，**不建议在代码中直接编写` proto `属性**，应该通过 **Object.getPrototypeOf(）**来获取原型
-
-**`person.__proto__ === Person.prototype `![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632988972481/CE5C7C6471A9A7C318E42BC23AE5A324)**
-
-
-
-**constructor**
-
-**每个原型都有一个constructor属性**，**指向该关联的构造函数**
-
-![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632988988342/C2935E207F25D2B293E277867849672F)
-
-**原型链**
-
-在JavaScript中万物都是对象，对象和对象之间也有关系，并不是孤立存在的。对象之间的继承关系，在JavaScript中是通过prototype对象指向父类对象，直到指向Object对象为止，这样就形成了一个原型指向的链条，专业术语称之为**原型链**
-
-注意：Object是js中所有**对象数据类型**的基类（最顶层的类），Object.prototype 没有原型，（`Object.prototype.__proto__ `的值为 null）
-
-```js
-console.log(Object.prototype);  // [Object: null proto
-console.log(Object.prototype.__proto__);  // null
-
-let a = 1;
-console.log(a.__proto__);  // {}
-```
-
-像下图中：person → Person → Object ，普通人继承人类，人类继承对象类
-
-当访问**对象的一个属性或方法时**，会先在对象自身中寻找，如果有则直接使用，**如果没有则会去原型对象中寻找**，如果找到则直接使用。如果没有则去原型的原型中寻找，直到找到Object对象的原型，Object对象的原型没有原型，如果在Object原型中依然没有找到，则返回undefined
-
-![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632989014554/847EB5079F1C884C1E9B01D4CDD52E60)
-
-
-
-看一道经典面试题：
-
-```js
-var F=function(){}
-
-Object.prototype.a=function(){
-	console.log("a()");
-}
-
-Function.prototype.b=function(){
-	console.log("b()")
-}
-
-var f=new F();
-
-F.a();  //a()
-F.b();  //b()
-f.a();  //a()
-f.b();  //TypeError: f.b is not a function
-```
-
-这道题有几个考点：1、原型与原型链 2、实例对象、构造函数、Object、Function的关系
-
-代码分析：F是个构造函数，而f是构造函数F的一个实例
-
-有：
-
-```js
-console.log(F instanceof Object);  //true
-console.log(F instanceof Function);  //true
-```
-
-F是Object 和 Function两个的实例，即F既能访问到a，也能访问到b
-
-故：F.a() 输出 a()   F.b()  输出  b()
-
-
-
-对于f，并不是Function的实例，**因为它本来就不是构造函数**，只能访问Object原型链
-
-有：
-
-```js
-console.log(f instanceof Object);  //true
-console.log(f instanceof Function);  //false
-```
-
-故：f.a() 输出  a() f.b()报错
-
-具体分析下，它们是如何在原型链上查找的：
-
-**F.a() 查找路径：**
-
-F自身：没有 → `F.__proto__`(Function.prototype)：没有 → `F.__proto__.__proto__`(Object.prototype)：输出 a()
-
-```js
-console.log(F.__proto__);  //{ b: [Function (anonymous)] }
-console.log(F.__proto__.__proto__);  //[Object: null prototype] { a: [Function (anonymous)] }
-```
-
-**F.b() 查找路径：**
-
-F自身：没有 → `F.__proto__`(Function.prototype)：b()
-
-**f.a的查找路径：**
-
-f自身：没有 → `f.__proto__`(Object.prototype)：输出a()
-
-```js
-console.log(Object.getPrototypeOf(f));  //{}
-console.log(f.__proto__.__proto__);  //[Object: null prototype] { a: [Function (anonymous)] }
-```
-
-**f.b的查找路径：**
-
-f自身：没有 → `f.__proto`__(Object.prototype)：没有 → f.`__proto__.__proto__ `(Object.prototype.`__proto__`)：找不到，所以报错
 
 ---
 
@@ -3707,9 +3720,7 @@ console.log(ans);  //[1, 2, 3, 4, 5, 2, 3, 5 ]
 
 ```
 
----
-
-# js高级
+# 难点
 
 ----
 
@@ -4355,9 +4366,9 @@ strictMode() // 将报错
 
 ---
 
+# 异步相关
 
-
-## 异步相关
+-----
 
 #### 3.1 promise和 async await 区别
 
@@ -6687,6 +6698,16 @@ Web Workers 可以与主线程交换消息，但是它们具有自己的变量�
 Web Workers 没有访问 DOM 的权限，因此，它们对于同时使用多个 CPU 内核的计算非常有用。
 
 ------
+
+----
+
+# 手写题
+
+
+
+
+
+-----
 
 ## 应用
 
