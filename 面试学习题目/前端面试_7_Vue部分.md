@@ -480,6 +480,66 @@ inject:['foo'] // 获取到祖先组件传递过来的值
 
 ----
 
+##  1.14 Vue 模板是如何编译的
+
+```js
+new Vue({
+  render: h => h(App)
+})
+```
+
+这个大家都熟悉，调用 render 就会得到传入的模板(`.vue`文件)对应的虚拟 DOM，那么这个 render 是哪来的呢？它是怎么把 `.vue` 文件转成浏览器可识别的代码的呢？
+
+render 函数是怎么来的有两种方式
+
+- 第一种就是经过模板编译生成 render 函数
+- 第二种是我们自己在组件里定义了 render 函数，这种会跳过模板编译的过程
+
+我们知道 `<template></template>` 这个是模板，不是真实的 HTML，浏览器是不认识模板的，所以我们需要把它编译成浏览器认识的原生的 HTML
+
+这一块的主要流程就是
+
+1. 提取出模板中的原生 HTML 和非原生 HTML，比如绑定的属性、事件、指令等等
+2. 经过一些处理生成 render 函数
+3. render 函数再将模板内容生成对应的 vnode
+4. 再经过 patch 过程( Diff )得到要渲染到视图中的 vnode
+5. 最后根据 vnode 创建真实的 DOM 节点，也就是原生 HTML 插入到视图中，完成渲染
+
+上面的 1、2、3 条就是模板编译的过程了
+
+---
+
+## 1.15 vue3中怎么设置全局变量？
+
+### 方法一 config.globalProperties
+
+`vue2.x`挂载全局是使用 `Vue.prototype.$xxxx=xxx` 的形式来挂载，然后通过 `this.$xxx`来获取挂载到全局的变量或者方法。
+
+这在 `Vue 3` 中，就等同于 `config.globalProperties`。这些 `property` 将被复制到应用中作为实例化组件的一部分。
+
+```js
+// 之前 (Vue 2.x)
+Vue.prototype.$http = () => {}
+
+// 之后 (Vue 3.x)
+const app = createApp({})
+app.config.globalProperties.$http = () => {}
+```
+
+### 方法二 Provide / Inject
+
+vue3新的 `provide/inject` 功能可以穿透多层组件，实现数据从父组件传递到子组件。
+
+可以将全局变量放在根组件的 `provide` 中，这样所有的组件都能使用到这个变量。
+
+**如果需要变量是响应式的，就需要在 `provide` 的时候使用 `ref` 或者 `reactive` 包装变量。**
+
+
+
+----
+
+
+
 
 
 
@@ -921,28 +981,212 @@ console.log(arr2)    //[1,2]
 
 ## 1.36 computed和watch的区别
 
-computed
+computed 和 watch看似都能实现对数据的监听
 
-计算结果并返回，**只有当被计算的属性发生改变时才会触发**（即：计算属性的结果会被缓存，除非依赖的响应属性变化才会重新计算）
+### computed 计算属性
 
-watch
+#### 其他属性计算而来
 
-**监听某一个值**，当被监听的值发生变化时，执行相关操作。
-
-与computed的区别是，**watch更加适用于监听某一个值的变化，并做对应操作**，比如请求后的接口等。**而computed适用于计算已有的值并返回结果**。 监听简单数据类型：
+计算属性基于 data 中声明过或者父组件传递的 props 中的数据通过计算得到的一个**新值**，这个新值只会根据已知值的变化而变化，简言之：这个属性依赖其他属性，由**其他属性计算而来**的。
 
 ```js
-data(){      
-    return{        
-        'first':2     
-    }   
-},   
- watch:{      
-     first(){        
-         console.log(this.first)    
-    }   
- },
+<p>姓名：{{ fullName }}</p>
+... ...
+data: {
+    firstName: 'David',
+    lastName: 'Beckham'
+},
+computed: {
+    fullName: function() { //方法的返回值作为属性值
+            return this.firstName + ' ' + this.lastName
+    }
+}
 ```
+
+在 computed 属性对象中定义计算属性的方法，和取data对象里的数据属性一样以**属性访问**的形式调用，即在页面中使用 {{ 方法名 }} 来显示计算的结果。
+
+> **注**：计算属性 fullName 不能在 data 中定义，而计算属性值的相关已知值在data中；如果 fullName 在 data 中定义了会报错.
+
+因为如果 computed 属性值是一个函数，那么默认会走 get 方法，**必须要有一个返回值，函数的返回值就是属性的属性值**。计算属性定义了 fullName 并返回对应的结果给这个变量，**变量不可被重复定义和赋值**。
+
+#### computed 带有缓存功能
+
+在官方文档中，还强调了 computed 一个重要的特点，就是 **computed 带有缓存功能**。比如我在页面中多次显示 fullName：
+
+```js
+<p>姓名：{{ fullName }}</p>
+<p>姓名：{{ fullName }}</p>
+<p>姓名：{{ fullName }}</p>
+<p>姓名：{{ fullName }}</p>
+<p>姓名：{{ fullName }}</p>
+... ... 
+
+computed: {
+    fullName: function () {
+         console.log('computed') // 在控制台只打印了一次
+         return this.firstName + ' ' + this.lastName
+    }
+}
+```
+
+我们知道 computed 内定义的 function 只执行一次，**仅当初始化显示或者相关的 data、props 等属性数据发生变化的时候调用**；
+而 **computed 属性值默认会缓存计算结果**，计算属性是基于它们的响应式依赖进行缓存的；
+只有当 computed 属性被使用后，才会执行 computed 的代码，**在重复的调用中，只要依赖数据不变，直接取缓存中的计算结果**。只有**依赖型数据**发生**改变**，computed 才会重新计算。
+
+#### 计算属性的高级：
+
+在computed 中的属性都有一个 **get** 和一个 **set** 方法，当数据变化时，调用 set 方法。下面我们通过计算属性的 getter/setter 方法来**实现对属性数据的显示和监视，即双向绑定。**
+
+```js
+computed: {
+    fullName: {
+        get() { //读取当前属性值的回调，根据相关的数据计算并返回当前属性的值
+            return this.firstName + ' ' + this.lastName
+        },
+        set(val) { // 当属性值发生改变时回调，更新相关的属性数据，val就是fullName的最新属性值
+            const names = val ? val.split(' ') : [];
+            this.firstName = names[0]
+            this.lastName = names[1]
+        }
+    }
+}
+```
+
+
+
+### watch 监听属性
+
+通过 vm 对象的 $watch() 或 watch 配置来监听 Vue 实例上的属性变化，或某些特定数据的变化，然后执行某些具体的业务逻辑操作**。当属性变化时，回调函数自动调用，在函数内部进行计算。**其可以监听的数据来源：data，props，computed 内的数据。
+
+以上示例通过 watch 来实现：
+
+```js
+watch: {
+    // 监听 data 中的 firstName，如果发生了变化，就把变化的值给 data 中的 fullName， val 就是 firstName 的最新值
+    firstName: function(val) { 
+        this.fullName = val + ' ' + this.lastName
+    },
+    lastName: function(val) {
+        this.fullName = this.firstName + ' ' + val
+    }    
+}
+// 由上可以看出 watch 要监听两个数据，而且代码是同类型的重复的，所以相比用 computed 更简洁
+```
+
+**注：** 监听函数有两个参数，第一个参数是**最新的值**，第二个参数是**输入之前的值**，顺序一定是**新值，旧值**，如果只写一个参数，那就是最新属性值。
+
+在使用时选择 watch 还是 computed，还有一个参考点就是官网说的：**当需要在数据变化时执行异步或开销较大的操作时，watch方式是最有用的。**所以 watch 一定是**支持异步**的。
+
+上面仅限监听简单数据类型，监听复杂数据类型就需要用到深度监听 deep。
+
+**deep：**为了发现对象内部值的变化，可以在选项参数中指定 deep: true。**注意监听数组的变更不需要这么做。**
+
+```js
+data: {
+    fullName: {
+        firstName: 'David',
+        lastName: 'Beckham'
+    }
+},
+watch: {
+    fullName: {
+        handler(newVal, oldVal) {
+            console.log(newVal);
+            console.log(oldVal);
+        },
+        deep: true
+    }
+}
+```
+
+打印出来的 newVal 和 oldVal 值是一样的，所以深度监听虽然可以监听到对象的变化，**但是无法监听到对象里面哪个具体属性的变化**。这是因为它们的**引用指向同一个**对象/数组。**Vue 不会保留变更之前值的副本**。
+
+若果要监听对象的单个属性的变化，有两种方法：
+1.直接监听对象的属性
+
+```js
+watch:{
+    fullName.firstName: function(newVal,oldVal){
+        console.log(newVal,oldVal);
+    }
+}
+```
+
+2.与 computed 属性配合使用，computed 返回想要监听的属性值，watch 用来监听
+
+```js
+computed: {
+    firstNameChange() {
+    	return this.fullName.firstName
+    }
+},
+watch: {
+    firstNameChange() {
+        console.log(this.fullName)
+    }
+}
+```
+
+
+
+### 总结
+
+**watch和computed都是以Vue的依赖追踪机制为基础**的，当某一个依赖型数据（**依赖型数据**：简单理解即放在 data 等对象下的实例数据）发生变化的时候，所有依赖这个数据的相关数据会自动发生变化，即自动调用相关的函数，来实现数据的变动。
+
+**当依赖的值变化时，在watch中，是可以做一些复杂的操作的，**而computed中的依赖，**仅仅是一个值依赖于另一个值，是值上的依赖。**
+
+### 应用场景
+
+computed：用于处理复杂的逻辑运算；**一个数据受一个或多个数据影响**；用来处理watch和methods无法处理的，或处理起来不方便的情况。例如处理模板中的复杂表达式、购物车里面的商品数量和总金额之间的变化关系等。
+
+watch：用来处理当一个属性发生变化时，需要执行某些具体的业务逻辑操作，**或要在数据变化时执行异步或开销较大的操作**；**一个数据改变影响多个数据**。例如用来监控路由、inpurt 输入框值的特殊处理等。
+
+### 区别
+
+**computed**
+
+- 初始化显示或者相关的 data、props 等属性数据发生变化的时候调用；
+- 计算属性不在 data 中，它是基于data 或 props 中的数据通过计算得到的一个新值，这个新值根据已知值的变化而变化；
+- 在 computed 属性对象中定义计算属性的方法，和取data对象里的数据属性一样，以属性访问的形式调用；
+- **如果 computed 属性值是函数，那么默认会走 get 方法，必须要有一个返回值**，函数的返回值就是属性的属性值；
+- computed 属性值默认会**缓存**计算结果，在重复的调用中，只要依赖数据不变，直接取缓存中的计算结果，只有**依赖型数据**发生**改变**，computed 才会重新计算；
+- 在computed中的，**属性都有一个 get 和一个 set 方法**，当数据变化时，调用 set 方法。
+
+**watch**
+
+- 主要用来监听某些特定数据的变化，从而进行某些具体的业务逻辑操作，**可以看作是 computed 和 methods 的结合体**；
+- 可以监听的数据来源：data，props，computed内的数据；
+- watch**支持异步**；
+- **不支持缓存**，监听的数据改变，直接会触发相应的操作；
+- 监听函数有两个参数，第一个参数是最新的值，第二个参数是输入之前的值，顺序一定是新值，旧值。
+
+
+
+---
+
+## 1.37 computed怎么实现的缓存
+
+
+
+
+
+
+
+---
+
+
+
+----
+
+## 1.40说说Vue 页面渲染流程
+
+![img](E:\pogject\学习笔记\image\vue\aTr1W4.png)
+
+
+
+
+
+
 
 ---
 
@@ -1038,6 +1282,130 @@ MVVM 表示的是 Model-View-ViewModel
   - 双向数据绑定指令`v-model`
 
 没有指令之前我们是怎么做的？是不是先要获取到DOM然后在....
+
+----
+
+##  1.43 Vue2.0为什么不能检查数组的变化，该怎么解决？
+
+我们都知道，Vue2.0对于响应式数据的实现有一些不足：
+
+- 无法检测数组/对象的新增
+- 无法检测通过索引改变数组的操作。
+
+**分析**
+
+- 无法检测数组/对象的新增？
+
+Vue检测数据的变动是通过Object.defineProperty实现的，所以无法监听数组的添加操作是可以理解的，因为是在构造函数中就已经为所有属性做了这个检测绑定操作。
+
+- 无法检测通过索引改变数组的操作。即vm.items[indexOfItem] = newValue？
+
+**官方文档**中对于这两点都是简要的概括为“由于JavaScript的限制”无法实现，而Object.defineProperty是实现检测数据改变的方案，这个限制是指Object.defineProperty
+
+**vm.items[indexOfItem] = newValue真的不能被监听么？**
+
+> Vue对数组的7个变异方法（push、pop、shift、unshift、splice、sort、reverse）实现了响应式
+
+们测试一下通过索引改变数组的操作，能不能被监听到。遍历数组，用Object.defineProperty对每一项进行监测
+
+```js
+function defineReactive(data, key, value) {
+	 Object.defineProperty(data, key, {
+		 enumerable: true,
+		 configurable: true,
+		 get: function defineGet() {
+			 console.log(`get key: ${key} value: ${value}`)
+			 return value
+		 },
+		 set: function defineSet(newVal) {
+			 console.log(`set key: ${key} value: ${newVal}`)
+			 value = newVal
+		 }
+	 })
+}
+ 
+function observe(data) {
+	Object.keys(data).forEach(function(key) {
+		defineReactive(data, key, data[key])
+	})
+}
+ 
+let arr = [1, 2, 3]
+observe(arr)
+
+arr[1] = 100;
+// set key: 1 value: 100
+```
+
+通过索引改变arr[1]，我们发现触发了set，也就是Object.defineProperty是可以检测到通过索引改变数组的操作的，那Vue2.0为什么没有实现呢？
+
+**小结**：是出于对性能原因的考虑，没有去实现它。而不是不能实现。
+
+对于对象而言，每一次的数据变更都会对对象的属性进行一次枚举，一般对象本身的属性数量有限，所以对于遍历枚举等方式产生的性能损耗可以忽略不计，但是对于数组而言呢？数组包含的元素量是可能达到成千上万，假设对于每一次数组元素的更新都触发了枚举/遍历，其带来的性能损耗将与获得的用户体验不成正比，故vue无法检测数组的变动。
+
+不过Vue3.0用proxy代替了defineProperty之后就解决了这个问题。
+
+**解决方案**
+
+**数组**
+
+1. this.$set(array, index, data)
+
+```js
+//这是个深度的修改，某些情况下可能导致你不希望的结果，因此最好还是慎用
+this.dataArr = this.originArr
+this.$set(this.dataArr, 0, {data: '修改第一个元素'})
+console.log(this.dataArr)        
+console.log(this.originArr)  //同样的 源数组也会被修改 在某些情况下会导致你不希望的结果 
+```
+
+1. splice
+
+   ```js
+   this.dataArr.splice(index,1)
+   //因为splice会被监听有响应式，而splice又可以做到增删改。
+   ```
+
+2. 利用临时变量进行中转
+
+   ```js
+   let tempArr = [...this.targetArr]
+   tempArr[0] = {data: 'test'}
+   this.targetArr = tempArr
+   ```
+
+**对象**
+
+1. this.$set(obj, key ,value) - 可实现增、改
+
+   ```
+   
+   ```
+
+   
+
+2. watch时添加`deep：true`深度监听，**只能监听到属性值的变化**，新增、删除属性无法监听
+
+   ```js
+   this.$watch('blog', this.getCatalog, {
+       deep: true
+       // immediate: true // 是否第一次触发
+     });
+   ```
+
+3. watch时直接监听某个key
+
+   ```js
+   watch: {
+     'obj.name'(curVal, oldVal) {
+       // TODO
+     }
+   }
+   ```
+
+
+
+
 
 ---
 
@@ -1282,6 +1650,24 @@ console.log(sum)  //应该为120
 
 ----
 
+## 1.45 说说 Vue 中 CSS scoped 的原理
+
+在日常的Vue项目开发过程中，为了让项目更好的维护一般都会使用模块化开发的方式进行。也就是每个组件维护独立的`template`，`script`，`style`。今天主要介绍一下使用`<style scoped>`为什么在页面渲染完后样式之间并不会造成污染。
+
+1. 每个组件都会拥有一个`[data-v-hash:8]`插入HTML标签，子组件标签上也具体父组件`[data-v-hash:8]`;
+2. 如果style标签加了`scoped属性`，里面的选择器都会变成`(Attribute Selector) [data-v-hash:8]`;
+3. 如果子组件选择器跟父组件选择器完全一样，那么就会出现子组件样式被父组件覆盖，因为`子组件会优先于父组件mounted`
+
+----
+
+## 
+
+
+
+
+
+---
+
 # vue性能
 
 ---
@@ -1411,6 +1797,12 @@ vue开发：
 
 ## 2.5Vue和React对比
 
+React 是由Facebook创建的JavaScript UI框架，React推广了 Virtual DOM( 虚拟 DOM )并创造了 JSX 语法。JSX 语法的出现允许我们在 javascript 中书写 HTML 代码。
+
+VUE 是由尤雨溪开发的，VUE 使用了**模板系统**而不是JSX，因其实模板系统都是用的普通的 HTML，所以对应用的升级更方便、更容易，而不需要整体重构。
+
+VUE 相较于 React 更容易上手，如果是一个有一定开发经验的开发者，甚至都不需要花额外的时间去学习，直接一遍开发一遍查文挡即可。
+
 ### 相同点
 
 - 都有**组件化思想**
@@ -1426,6 +1818,35 @@ vue开发：
 - 数据变化的实现原理不同。`react`使用的是**不可变数据**，而`Vue`使用的是**可变的数据**
 - 组件化通信的不同。`react`中我们通过使用**回调函数**来进行通信的，而`Vue`中子组件向父组件传递消息有两种方式：**事件和回调函数**
 - diff算法不同。`react`主要使用**diff队列**保存需要更新哪些DOM，得到patch树，再统一操作批量更新DOM。`Vue` 使用**双向指针**，边对比，边更新DOM
+
+### 优势
+
+**React**
+
+- 灵活性和响应性：它提供最大的灵活性和响应能力。
+- 丰富的JavaScript库：来自世界各地的贡献者正在努力添加更多功能。
+- 可扩展性：由于其灵活的结构和可扩展性，**React已被证明对大型应用程序更好。**
+- 不断发展： React得到了Facebook专业开发人员的支持，他们不断寻找改进方法。
+- Web或移动平台： React提供React Native平台，可通过相同的React组件模型为iOS和Android开发本机呈现的应用程序。
+
+**Vue**
+
+- 易于使用： Vue.js包含基于HTML的标准模板，可以更轻松地使用和修改现有应用程序。
+- 更顺畅的集成：无论是单页应用程序还是复杂的Web界面，Vue.js都可以更平滑地集成更小的部件，而不会对整个系统产生任何影响。
+- 更好的性能，更小的尺寸：它占用更少的空间，并且往往比其他框架提供更好的性能。
+- 精心编写的文档：通过详细的文档提供简单的学习曲线，无需额外的知识; HTML和JavaScript将完成工作。
+- 适应性：整体声音设计和架构使其成为一种流行的JavaScript框架。
+- 它提供无障碍的迁移，简单有效的结构和可重用的模板。
+
+如上所说的 Vue 的响应式机制也有问题，当 state 特别多的时候，Watcher 会很多，会导致卡顿，所以大型应用（状态特别多的）一般用 React，更加可控。
+
+可对于易用性来说，VUE 是更容易上手的，对于项目来说新人更容易接手。
+
+所以，技术没有哪个更好或者是更优秀，只要适合自己的才是最合适的。
+
+
+
+
 
 ----
 
@@ -2071,7 +2492,7 @@ Element-UI特点：
 
 ----
 
-## 2.16修改ElementUI 样式的几种方式?
+## 2.17 修改ElementUI 样式的几种方式?
 
 **参考答案：**
 
@@ -2160,6 +2581,212 @@ Element-UI特点：
 第四种方式局限性比较大，可以使用，但不推荐使用。
 
 ----
+
+##  2.18 说下Vite的原理
+
+### 共存的模块化标准
+
+为什么`JavaScript`会有多种共存的模块化标准？因为js在设计之初并没有模块化的概念，随着前端业务复杂度不断提高，模块化越来越受到开发者的重视，社区开始涌现多种模块化解决方案，它们相互借鉴，也争议不断，形成多个派系，从`CommonJS`开始，到`ES6`正式推出`ES Modules`规范结束，所有争论，终成历史，`ES Modules`也成为前端重要的基础设施。
+
+- **CommonJS**：现主要用于Node.js（Node@13.2.0开始支持直接使用ES Module）
+- **AMD**：`require.js` 依赖前置，市场存量不建议使用
+- **CMD**：`sea.js` 就近执行，市场存量不建议使用
+- **ES Module**：**ES语言规范，标准，趋势，未来**
+
+### 当前工程化痛点
+
+现在常用的构建工具如`Webpack`，主要是通过抓取-编译-构建整个应用的代码（也就是常说的打包过程），生成一份编译、优化后能良好兼容各个浏览器的的生产环境代码。在开发环境流程也基本相同，需要先将整个应用构建打包后，再把打包后的代码交给`dev server`（开发服务器）。
+
+`Webpack`等构建工具的诞生给前端开发带来了极大的便利，但随着前端业务的复杂化，js代码量呈指数增长，打包构建时间越来越久，`dev server`（开发服务器）性能遇到瓶颈：
+
+- **缓慢的服务启动：** 大型项目中`dev server`启动时间达到几十秒甚至几分钟。
+- **缓慢的HMR热更新：** 即使采用了 HMR 模式，其热更新速度也会随着应用规模的增长而显著下降，已达到性能瓶颈，无多少优化空间。
+
+**缓慢的开发环境，大大降低了开发者的幸福感，在以上背景下`Vite`应运而生。**
+
+### 什么是Vite？
+
+**基于esbuild与Rollup，依靠浏览器自身ESM编译功能， 实现极致开发体验的新一代构建工具！**
+
+#### 概念
+
+先介绍以下文中会经常提到的一些基础概念：
+
+- **依赖：** 指开发不会变动的部分(npm包、UI组件库)，esbuild进行预构建。
+- **源码：** 浏览器不能直接执行的非js代码(.jsx、.css、.vue等)，vite只在浏览器请求相关源码的时候进行转换，以提供ESM源码。
+
+#### 开发环境
+
+- 利用浏览器原生的`ES Module`编译能力，省略费时的编译环节，直给浏览器开发环境源码，`dev server`只提供轻量服务。
+- 浏览器执行ESM的`import`时，会向`dev server`发起该模块的`ajax`请求，服务器对源码做简单处理后返回给浏览器。
+- `Vite`中HMR是在原生 ESM 上执行的。当编辑一个文件时，Vite 只需要精确地使已编辑的模块失活，使得无论应用大小如何，HMR 始终能保持快速更新。
+- 使用`esbuild`处理项目依赖，`esbuild`使用go编写，比一般`node.js`编写的编译器快几个数量级。
+
+#### 生产环境
+
+- 集成`Rollup`打包生产环境代码，依赖其成熟稳定的生态与更简洁的插件机制。
+
+#### 处理流程对比
+
+`Webpack`通过先将整个应用打包，再将打包后代码提供给`dev server`，开发者才能开始开发。
+
+![img](E:\pogject\学习笔记\image\vue\webpack流程)
+
+`Vite`直接将源码交给浏览器，实现`dev server`秒开，浏览器显示页面需要相关模块时，再向`dev server`发起请求，服务器简单处理后，将该模块返回给浏览器，实现真正意义的按需加载。
+
+![img](E:\pogject\学习笔记\image\vue\vite流程)
+
+### 基本用法
+
+#### 创建vite项目
+
+```bash
+$ npm create vite@latest
+```
+
+#### 选取模板
+
+`Vite` 内置6种常用模板与对应的TS版本，可满足前端大部分开发场景，可以点击下列表格中模板直接在 [StackBlitz](https://vite.new/) 中在线试用，还有其他更多的 [社区维护模板](https://github.com/vitejs/awesome-vite#templates)可以使用。
+
+| JavaScript                          | TypeScript                                |
+| ----------------------------------- | ----------------------------------------- |
+| [vanilla](https://vite.new/vanilla) | [vanilla-ts](https://vite.new/vanilla-ts) |
+| [vue](https://vite.new/vue)         | [vue-ts](https://vite.new/vue-ts)         |
+| [react](https://vite.new/react)     | [react-ts](https://vite.new/react-ts)     |
+| [preact](https://vite.new/preact)   | [preact-ts](https://vite.new/preact-ts)   |
+| [lit](https://vite.new/lit)         | [lit-ts](https://vite.new/lit-ts)         |
+| [svelte](https://vite.new/svelte)   | [svelte-ts](https://vite.new/svelte-ts)   |
+
+#### 启动
+
+```json
+{
+  "scripts": {
+    "dev": "vite", // 启动开发服务器，别名：`vite dev`，`vite serve`
+    "build": "vite build", // 为生产环境构建产物
+    "preview": "vite preview" // 本地预览生产构建产物
+  }
+}
+```
+
+### 实现原理
+
+#### ESbuild 编译
+
+`esbuild` 使用go编写，cpu密集下更具性能优势，编译速度更快
+
+#### 依赖预构建
+
+- **模块化兼容：** 如开头背景所写，现仍共存多种模块化标准代码，`Vite`在预构建阶段将依赖中各种其他模块化规范(CommonJS、UMD)转换 成ESM，以提供给浏览器。
+- **性能优化：** npm包中大量的ESM代码，大量的`import`请求，会造成网络拥塞。`Vite`使用`esbuild`，将有大量内部模块的ESM关系转换成单个模块，以减少 `import`模块请求次数。
+
+#### 按需加载
+
+- 服务器只在接受到import请求的时候，才会编译对应的文件，将ESM源码返回给浏览器，实现真正的按需加载。
+
+#### 缓存
+
+- **HTTP缓存：** 充分利用`http`缓存做优化，依赖（不会变动的代码）部分用max-age,immutable **强缓存**，源码部分用304**协商缓存**，提升页面打开速度。
+- **文件系统缓存：** `Vite`在预构建阶段，将构建后的依赖缓存到`node_modules/.vite` ，相关配置更改时，或手动控制时才会重新构建，以提升预构建速度。
+
+#### 重写模块路径
+
+浏览器`import`只能引入相对/绝对路径，而开发代码经常使用`npm`包名直接引入`node_module`中的模块，需要做路径转换后交给浏览器。
+
+- `es-module-lexer` 扫描 import 语法
+- `magic-string` 重写模块的引入路径
+
+```js
+// 开发代码
+import { createApp } from 'vue'
+
+// 转换后
+import { createApp } from '/node_modules/vue/dist/vue.js'
+```
+
+### 优势
+
+- 快！快！非常快！！
+- 高度集成，开箱即用。
+- 基于ESM急速热更新，无需打包编译。
+- 基于`esbuild`的依赖预处理，比`Webpack`等node编写的编译器快几个数量级。
+- 兼容`Rollup`庞大的插件机制，插件开发更简洁。
+- 不与`Vue`绑定，支持`React`等其他框架，独立的构建工具。
+- 内置SSR支持。
+- 天然支持TS。
+
+### 不足
+
+- `Vue`仍为第一优先支持，量身定做的编译插件，对`React`的支持不如`Vue`强大。
+
+- 虽然已经推出2.0正式版，已经可以用于正式线上生产，但目前市场上实践少。
+
+- 生产环境集成`Rollup`打包，与开发环境最终执行的代码不一致。
+
+  
+
+### 与 webpack 对比
+
+由于`Vite`主打的是开发环境的极致体验，生产环境集成`Rollup`，这里的对比主要是`Webpack-dev-server`与`Vite-dev-server`的对比：
+
+- 到目前很长时间以来`Webpack`在前端工程领域占统治地位，`Vite`推出以来备受关注，社区活跃，GitHub star 数量激增
+- `Webpack`配置丰富使用极为灵活但上手成本高，`Vite`开箱即用配置高度集成
+- `Webpack`启动服务需打包构建，速度慢，`Vite`免编译可秒开
+- `Webpack`热更新需打包构建，速度慢，`Vite`毫秒响应
+- `Webpack`成熟稳定、资源丰富、大量实践案例，`Vite`实践较少
+- `Vite`使用`esbuild`编译，构建速度比`webpack`快几个数量级
+
+### 兼容性
+
+- 默认目标浏览器是在`script`标签上支持原生 ESM 和 原生 ESM 动态导入
+- 可使用官方插件 `@vitejs/plugin-legacy`，转义成传统版本和相对应的`polyfill`
+
+
+
+---
+
+## 2.19 VNode 有哪些属性？
+
+Vue内部定义的Vnode对象包含了以下属性：
+
+- __v_isVNode: *true*，内部属性，有该属性表示为Vnode
+- __v_skip: true，内部属性，表示跳过响应式转换，reactive转换时会根据此属性进行判断
+- isCompatRoot?: *true*，用于是否做了兼容处理的判断
+- type: VNodeTypes，虚拟节点的类型
+- props: (VNodeProps & ExtraProps) | *null*，虚拟节点的props
+- key: *string* | *number* | *null*，虚拟阶段的key，可用于diff
+- ref: VNodeNormalizedRef | *null*，虚拟阶段的引用
+- scopeId: *string* | *null*，仅限于SFC(单文件组件)，在设置currentRenderingInstance当前渲染实例时，一期设置
+- slotScopeIds: *string*[] | *null*，仅限于单文件组件，与单文件组件的插槽有关
+- children: VNodeNormalizedChildren，子节点
+- component: ComponentInternalInstance | null，组件实例
+- dirs: DirectiveBinding[] | null，当前Vnode绑定的指令
+- transition: TransitionHooks<HostElement> | null，TransitionHooks
+- DOM相关属性
+  - el: HostNode | *null*，宿主阶段
+  - anchor: HostNode | *null* // fragment anchor
+  - target: HostElement | *null* ，teleport target 传送的目标
+  - targetAnchor: HostNode | *null* // teleport target anchor
+  - staticCount: *number*，包含的静态节点的数量
+- suspense 悬挂有关的属性
+  - suspense: SuspenseBoundary | *null*
+  - ssContent: VNode | *null*
+  - ssFallback: VNode | *null*
+- optimization only 用于优化的属性
+  - shapeFlag: *number*
+  - patchFlag: *number*
+  - dynamicProps: *string*[] | *null*
+  - dynamicChildren: VNode[] | *null*
+- 根节点会有的属性
+  - appContext: AppContext | *null*，实例上下文
+
+可以看到在Vue内部，对于一个Vnode描述对象的属性大概有二十多个。
+
+Vue为了给用于减轻一定的负担，但又不至于太封闭，就创建了渲染h。可以在用户需要的时候，通过h函数创建对应的Vnode即可。
+
+
+
+---
 
 
 
@@ -2482,13 +3109,85 @@ const store = new Vuex.Store({
 
 vuex 真正限制你的只有 mutation 必须是同步的这一点（在 redux 里面就好像 reducer 必须同步返回下一个状态一样）。同步的意义在于这样每一个 mutation 执行完成后都可以对应到一个新的状态（和 reducer 一样），这样 devtools 就可以打个 snapshot 存下来，然后就可以随便 time-travel 了。如果你开着 devtool 调用一个异步的 action，你可以清楚地看到它所调用的 mutation 是何时被记录下来的，并且可以立刻查看它们对应的状态。
 
+
+
+---
+
+## 3.4 刷新浏览器后，Vuex的数据是否存在？如何解决？
+
+在vue项目中用vuex来做全局的状态管理， 发现当刷新网页后，保存在vuex实例store里的数据会丢失。
+
+原因：**因为 `store` 里的数据是保存在运行内存中的**，当页面刷新时，**页面会重新加载vue实例，store里面的数据就会被重新赋值初始化。**
+
+我们有两种方法解决该问题：
+
+1. 使用 `vuex-along`
+2. 使用 `localStorage` 或者 `sessionStroage`
+
+### 使用vuex-along
+
+`vuex-along` 的实质也是将 `vuex` 中的数据存放到 `localStorage` 或者 `sessionStroage` 中，**只不过这个存取过程组件会帮我们完成**，我们只需要用vuex的读取数据方式操作就可以了，简单介绍一下 `vuex-along` 的使用方法。
+
+安装 `vuex-along`:
+
+```bash
+npm install vuex-along --save
+```
+
+配置 `vuex-along`: 在 `store/index.js` 中最后添加以下代码:
+
+```js
+import VueXAlong from 'vuex-along' //导入插件
+export default new Vuex.Store({
+    //modules: {
+        //controler  //模块化vuex
+    //},
+    plugins: [VueXAlong({
+        name: 'store',     //存放在localStroage或者sessionStroage 中的名字
+        local: false,      //是否存放在local中  false 不存放 如果存放按照下面session的配置
+        session: { list: [], isFilter: true } //如果值不为false 那么可以传递对象 其中 当isFilter设置为true时， list 数组中的值就会被过滤调,这些值不会存放在seesion或者local中
+    })]
+});
+```
+
+### 使用 `localStorage` 或者 `sessionStroage`
+
+```js
+created() {
+    //在页面加载时读取sessionStorage里的状态信息
+    if (sessionStorage.getItem("store")) {
+      this.$store.replaceState(
+        Object.assign(
+          {},
+          this.$store.state,
+          JSON.parse(sessionStorage.getItem("store"))
+        )
+      );
+    }
+    //在页面刷新时将vuex里的信息保存到sessionStorage里
+    window.addEventListener("beforeunload", () => {
+      sessionStorage.setItem("store", JSON.stringify(this.$store.state));
+    });
+},
+```
+
+
+
+----
+
+
+
+
+
+
+
 ----
 
 # 路由
 
 ----
 
-## 4. Vue router 原理, 哪个模式不会请求服务器
+## 4. 1 Vue router 原理, 哪个模式不会请求服务器
 
 Vue router 的两种方法，hash模式不会请求服务器
 
@@ -2499,7 +3198,7 @@ Vue router 的两种方法，hash模式不会请求服务器
 
 ---
 
-## 4. 路由跳转和location.href的区别？
+## 4.2  路由跳转和location.href的区别？
 
 使用location.href='/url'来跳转，简单方便，但是刷新了页面；
 使用路由方式跳转，无刷新页面，静态跳转；
@@ -2508,7 +3207,7 @@ Vue router 的两种方法，hash模式不会请求服务器
 
 ---
 
-## 4. 路由守卫
+## 4.3  路由守卫
 
 路由守卫主要用来**通过跳转或取消的方式守卫导航**。
 
@@ -2648,7 +3347,7 @@ onError() 注册过的回调。
 
 ---
 
-## 4. 路由守卫进行判断登录
+## 4.4  路由守卫进行判断登录
 
 在vue项目中，切换路由时肯定会碰到需要登录的路由，其原理就是在切换路径之前进行判断，你不可能进入页面再去判断有无登录重新定向到login，那样的话会导致页面已经渲染以及它的各种请求已经发出。
 
@@ -2760,7 +3459,7 @@ onError() 注册过的回调。
 
 ----
 
-## 4. vue-router 实现懒加载
+## 4.5 vue-router 实现懒加载
 
 **参考答案：**
 
@@ -2800,7 +3499,7 @@ onError() 注册过的回调。
 
    ---
 
-## 4.  js是如何监听HistoryRouter的变化的
+## 4.6  js是如何监听HistoryRouter的变化的
 
    **参考答案：**
 
@@ -2885,29 +3584,121 @@ history.replaceState =  addHistoryMethod('replaceState');
 
 ---
 
-## 4. HashRouter 和 HistoryRouter的区别和原理
+## 4.7 HashRouter 和 HistoryRouter的区别和原理
 
-**参考答案：**
+前端路由有两种模式：hash 模式和 history 模式。
 
 **vue-router**是Vue官方的路由管理器。它和 Vue.js 的核心深度集成，让构建单页面应用变得易如反掌。vue-router默认 hash 模式，还有一种是history模式。
 
+### hash 模式
+
+hash 模式是一种把前端路由的路径用井号 `#` 拼接在真实 URL 后面的模式。当井号 `#` 后面的路径发生变化时，浏览器并不会重新发起请求，而是会触发 `hashchange` 事件。
+
+我们新建一个 `hash.html` 文件，内容为：
+
+```html
+<a href="#/a">A页面</a>
+<a href="#/b">B页面</a>
+<div id="app"></div>
+<script>
+  function render() {
+    app.innerHTML = window.location.hash
+  }
+  window.addEventListener('hashchange', render)
+  render()
+</script>
+```
+
+在上面的例子中，我们利用 `a` 标签设置了两个路由导航，把 `app` 当做视图渲染容器，当切换路由的时候触发视图容器的更新，这其实就是大多数前端框架哈希路由的实现原理。
+
 原理：
 
-1. hash路由：hash模式的工作原理是hashchange事件，可以在window监听hash的变化。我们在url后面随便添加一个#xx触发这个事件。vue-router默认的是hash模式—使用URL的hash来模拟一个完整的URL,于是当URL改变的时候,页面不会重新加载,也就是单页应用了,当#后面的hash发生变化,不会导致浏览器向服务器发出请求,浏览器不发出请求就不会刷新页面,并且会触发hasChange这个事件,通过监听hash值的变化来实现更新页面部分内容的操作
+hash路由：hash模式的工作原理是hashchange事件，可以在window监听hash的变化。我们在url后面随便添加一个#xx触发这个事件。vue-router默认的是hash模式—使用URL的hash来模拟一个完整的URL,于是当URL改变的时候,页面不会重新加载,也就是单页应用了,当#后面的hash发生变化,不会导致浏览器向服务器发出请求,浏览器不发出请求就不会刷新页面,并且会触发hasChange这个事件,**通过监听hash值的变化来实现更新页面部分内容的操作**
 
-   对于hash模式会创建hashHistory对象,在访问不同的路由的时候,会发生两件事:
-   HashHistory.push()将新的路由添加到浏览器访问的历史的栈顶,和HasHistory.replace()替换到当前栈顶的路由
+对于hash模式会创建hashHistory对象,在访问不同的路由的时候,会发生两件事:
 
-2. history路由：
+- HashHistory.push()将新的路由添加到浏览器访问的历史的栈顶
+- HasHistory.replace()替换到当前栈顶的路由
 
-   主要使用HTML5的pushState()和replaceState()这两个api结合window.popstate事件（监听浏览器前进后退）来实现的,pushState()可以改变url地址且不会发送请求,replaceState()可以读取历史记录栈,还可以对浏览器记录进行修改
+总结一下 hash 模式的优缺点：
 
-区别：
+- **优点**：浏览器兼容性较好，连 IE8 都支持
+- **缺点**：路径在井号 `#` 的后面，比较丑
 
-1. hash模式较丑，history模式较优雅
-2. pushState设置的新URL可以是与当前URL同源的任意URL；而hash只可修改#后面的部分，故只可设置与当前同文档的URL
-3. pushState设置的新URL可以与当前URL一模一样，这样也会把记录添加到栈中；而hash设置的新值必须与原来不一样才会触发记录添加到栈中
-4. pushState通过stateObject可以添加任意类型的数据到记录中；而hash只可添加短字符串
+
+
+### history 模式
+
+history API 是 H5 提供的新特性，允许开发者直接更改前端路由，即更新浏览器 URL 地址而不重新发起请求。
+
+我们新建一个 `history.html`，内容为：
+
+```html
+<a href="javascript:toA();">A页面</a>
+<a href="javascript:toB();">B页面</a>
+<div id="app"></div>
+<script>
+  function render() {
+    app.innerHTML = window.location.pathname
+  }
+  function toA() {
+    history.pushState({}, null, '/a')
+    render()
+  }
+  function toB() {
+    history.pushState({}, null, '/b')
+    render()
+  }
+  window.addEventListener('popstate', render)
+</script>
+```
+
+原理：
+
+history路由：主要使用HTML5的pushState()和replaceState()这两个api结合window.popstate事件（监听浏览器前进后退）来实现的,pushState()可以改变url地址且不会发送请求,replaceState()可以读取历史记录栈,还可以对浏览器记录进行修改
+
+history API 提供了丰富的函数供开发者调用，我们不妨把控制台打开，然后输入下面的语句来观察浏览器地址栏的变化：
+
+```js
+history.replaceState({}, null, '/b') // 替换路由
+history.pushState({}, null, '/a') // 路由压栈
+history.back() // 返回
+history.forward() // 前进
+history.go(-2) // 后退2次
+```
+
+上面的代码监听了 `popstate` 事件，该事件能监听到：
+
+- 用户点击浏览器的前进和后退操作
+- 手动调用 history 的 `back`、`forward` 和 `go` 方法
+
+监听不到：
+
+- history 的 `pushState` 和 `replaceState`方法
+
+**这也是为什么上面的 `toA` 和 `toB` 函数内部需要手动调用 `render` 方法的原因**。另外，大家可能也注意到 `light-server` 的命令多了 `--historyindex '/history.html'` 参数，这是干什么的呢？
+
+浏览器在刷新的时候，会按照路径发送真实的资源请求，如果这个路径是前端通过 history API 设置的 URL，那么在服务端往往不存在这个资源，于是就返回 404 了。**上面的参数的意思就是如果后端资源不存在就返回 `history.html` 的内容。**
+
+因此在线上部署基于 history API 的单页面应用的时候，一定要后端配合支持才行，否则会出现大量的 404。以最常用的 Nginx 为例，只需要在配置的 `location /` 中增加下面一行即可：
+
+```apl
+try_files $uri /index.html;
+```
+
+总结一下 history 模式的优缺点：
+
+- **优点**：路径比较正规，没有井号 `#`
+- **缺点**：兼容性不如 hash，且需要服务端支持，否则一刷新页面就404了
+
+
+
+### 区别
+
+1. hash模式较丑，**history模式较优雅**
+2. pushState设置的新URL可以是与当前URL同源的任意URL；**而hash只可修改#后面的部分，故只可设置与当前同文档的URL**
+3. pushState设置的新URL可以与当前URL一模一样，这样也会把记录添加到栈中；**而hash设置的新值必须与原来不一样才会触发记录添加到栈中**
+4. pushState通过stateObject可以添加任意类型的数据到记录中；**而hash只可添加短字符串**
 5. pushState可额外设置title属性供后续使用
 6. hash兼容IE8以上，history兼容IE10以上
 7. history模式需要后端配合将所有访问都指向index.html，否则用户刷新页面，会导致404错误
@@ -2921,6 +3712,7 @@ history.replaceState =  addHistoryMethod('replaceState');
         window.addEventListener('hashchange',()=>{
             div.innerHTML = location.hash.slice(1)
         })
+    
         // history路由原理************************
         // 利用html5的history的pushState方法结合window.popstate事件（监听浏览器前进后退）
         function routerChange (pathname){
@@ -2935,4 +3727,51 @@ history.replaceState =  addHistoryMethod('replaceState');
 ```
 
 ---
+
+##  4.8 vue 中 $route 和 $router 有什么区别？
+
+**this.$router**
+
+是 router 实例
+
+通过 `this.$router` 访问路由器,**相当于获取了整个路由文件**，在`$router.option.routes`中，或查看到当前项目的整个路由结构 具有实例方法
+
+```js
+// 导航守卫
+router.beforeEach((to, from, next) => {
+  /* 必须调用 `next` */
+})
+router.beforeResolve((to, from, next) => {
+  /* 必须调用 `next` */
+})
+router.afterEach((to, from) => {})
+
+// 动态导航到新路由
+router.push
+router.replace
+router.go
+router.back
+router.forward
+```
+
+
+
+**this.$route**
+
+**当前激活的路由信息对象**。这个属性是只读的，里面的属性是 immutable (不可变) 的，不过可以 watch (监测变化) 它。
+
+通过 `this.$route` 访问的是当前路由，获取和当前路由有关的信息
+
+```json
+fullPath: ""  // 当前路由完整路径，包含查询参数和 hash 的完整路径
+hash: "" // 当前路由的 hash 值 (锚点)
+matched: [] // 包含当前路由的所有嵌套路径片段的路由记录 
+meta: {} // 路由文件中自赋值的meta信息
+name: "" // 路由名称
+params: {}  // 一个 key/value 对象，包含了动态片段和全匹配片段就是一个空对象。
+path: ""  // 字符串，对应当前路由的路径
+query: {}  // 一个 key/value 对象，表示 URL 查询参数。跟随在路径后用'?'带的参数
+```
+
+
 

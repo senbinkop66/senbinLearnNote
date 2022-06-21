@@ -1,36 +1,21 @@
 /**
- * Definition for a binary tree node.
- * function TreeNode(val, left, right) {
- *     this.val = (val===undefined ? 0 : val)
- *     this.left = (left===undefined ? null : left)
- *     this.right = (right===undefined ? null : right)
- * }
+ * @param {number[]} nums
+ * @return {number}
  */
-/**
- * @param {TreeNode} root
- * @return {number[]}
- */
-var findFrequentTreeSum = function(root) {
-    const sums = new Map();
-    let ans = [];
-    let maxSumCount = 0;
-    const dfs = (root) => {
-        let sum = root.val;
-        if (root.left !== null) {
-            sum += dfs(root.left);
-        }
-        if (root.right !== null) {
-            sum += dfs(root.right);
-        }
-        sums.set(sum, sums.has(sum) ? sums.get(sum) + 1 : 1);
-        if (sums.get(sum) > maxSumCount) {
-            maxSumCount = sums.get(sum);
-            ans = [sum];
-        }else if (sums.get(sum) === maxSumCount) {
-            ans.push(sum);
-        }
-        return sum;
+var maxProduct = function(nums) {
+    let n=nums.length;
+    let maxF=nums[0];
+    let minF=nums[0];
+    let ans=nums[0];
+    for (let i=1;i<n;i++){
+        let mx=maxF,mn=minF;
+        maxF=Math.max(mx*nums[i], nums[i], mn*nums[i]);
+        ans = Math.max(maxF,ans);
+        minF=Math.min(mx*nums[i], nums[i], mn*nums[i]);
     }
-    dfs(root);
     return ans;
 };
+
+let nums=[2,3,-2,4];
+let result=maxProduct(nums);
+console.log(result);
