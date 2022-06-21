@@ -1,21 +1,7 @@
 /**
- * @param {number[]} nums
- * @return {number}
+ * @param {string} address
+ * @return {string}
  */
-var maxProduct = function(nums) {
-    let n=nums.length;
-    let maxF=nums[0];
-    let minF=nums[0];
-    let ans=nums[0];
-    for (let i=1;i<n;i++){
-        let mx=maxF,mn=minF;
-        maxF=Math.max(mx*nums[i], nums[i], mn*nums[i]);
-        ans = Math.max(maxF,ans);
-        minF=Math.min(mx*nums[i], nums[i], mn*nums[i]);
-    }
-    return ans;
+var defangIPaddr = function(address) {
+    return address.replace(/\./g, "[.]");
 };
-
-let nums=[2,3,-2,4];
-let result=maxProduct(nums);
-console.log(result);
