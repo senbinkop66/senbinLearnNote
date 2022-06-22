@@ -2098,28 +2098,131 @@ if (!Array.prototype.find) {
 
 ### Array.prototype.findIndex()
 
+findIndex()方法返回数组中满足提供的测试函数的第一个元素的索引。若没有找到对应元素则返回-1。
+
 #### 语法
+
+```
+arr.findIndex(callback[, thisArg])
+```
 
 
 
 #### 参数
 
+callback
 
+针对数组中的每个元素，都会执行该回调函数，执行时会自动传入下面三个参数：
+
+- `element`
+
+  当前元素。
+
+- `index`
+
+  当前元素的索引。
+
+- `array`
+
+  调用`findIndex`的数组。
+
+thisArg
+
+可选。执行`callback`时作为`this`对象的值。
 
 #### 返回值
 
-
+ 数组中通过提供测试函数的第一个元素的**索引**。否则，返回-1
 
 #### 描述
 
+`findIndex`方法对数组中的每个数组索引`0..length-1`（包括）执行一次`callback`函数，直到找到一个`callback`函数返回真实值（强制为`true`）的值。如果找到这样的元素，`findIndex`会立即返回该元素的索引。如果回调从不返回真值，或者数组的`length`为 0，则`findIndex`返回-1。 与某些其他数组方法（如 Array#some）不同，在稀疏数组中，即使对于数组中不存在的条目的索引也会调用回调函数。
 
+回调函数调用时有三个参数：元素的值，元素的索引，以及被遍历的数组。
+
+如果一个 `thisArg` 参数被提供给 `findIndex`, 它将会被当作`this`使用在每次回调函数被调用的时候。如果没有被提供，将会使用[`undefined`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/undefined)。
+
+`findIndex`不会修改所调用的数组。
+
+在第一次调用`callback`函数时会确定元素的索引范围，因此在`findIndex`方法开始执行之后添加到数组的新元素将不会被`callback`函数访问到。如果数组中一个尚未被`callback`函数访问到的元素的值被`callback`函数所改变，那么当`callback`函数访问到它时，它的值是将是根据它在数组中的索引所访问到的当前值。**被删除的元素仍然会被访问到。**
 
 #### 示例
 
-返回数组中满足提供的测试函数的第一个元素的索引。若没有找到对应元素则返回 -1
+##### 查找数组中首个质数元素的索引
+
+以下示例查找数组中素数的元素的索引（如果不存在素数，则返回-1）。
+
+```js
+const isPrime = (element) => {
+  let start = 2;
+  while (start <= Math.sqrt(element)) {
+    if (element % start++ < 1) {
+      return false;
+    }
+  }
+  return element > 1;
+}
+
+console.log([4, 6, 8, 12].findIndex(isPrime)); // -1
+console.log([4, 6, 7, 12].findIndex(isPrime)); // 2
+```
+
+#### polyfill
+
+```js
+// https://tc39.github.io/ecma262/#sec-array.prototype.findIndex
+if (!Array.prototype.findIndex) {
+  Object.defineProperty(Array.prototype, 'findIndex', {
+    value: function(predicate) {
+     // 1. Let O be ? ToObject(this value).
+      if (this == null) {
+        throw new TypeError('"this" is null or not defined');
+      }
+
+      var o = Object(this);
+
+      // 2. Let len be ? ToLength(? Get(O, "length")).
+      var len = o.length >>> 0;
+
+      // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+      if (typeof predicate !== 'function') {
+        throw new TypeError('predicate must be a function');
+      }
+
+      // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+      var thisArg = arguments[1];
+
+      // 5. Let k be 0.
+      var k = 0;
+
+      // 6. Repeat, while k < len
+      while (k < len) {
+        // a. Let Pk be ! ToString(k).
+        // b. Let kValue be ? Get(O, Pk).
+        // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+        // d. If testResult is true, return k.
+        var kValue = o[k];
+        if (predicate.call(thisArg, kValue, k, o)) {
+          return k;
+        }
+        // e. Increase k by 1.
+        k++;
+      }
+
+      // 7. Return -1.
+      return -1;
+    }
+  });
+}
+
+```
+
+-----
 
 ### Array.prototype.flat()
 
+flat() 方法会按照一个可指定的深度递归遍历数组，并将所有元素与遍历到的子数组中的元素合并为一个新数组返回。
+
 #### 语法
 
 
@@ -2138,7 +2241,11 @@ if (!Array.prototype.find) {
 
 #### 示例
 
-按照一个可指定的深度递归遍历数组，并将所有元素与遍历到的子数组中的元素合并为一个新数组返回
+```
+
+```
+
+
 
 ### Array.prototype.flatMap()
 
@@ -2160,95 +2267,765 @@ if (!Array.prototype.find) {
 
 #### 示例
 
-使用映射函数映射每个元素，然后将结果压缩成一个新数组
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
 
 ### Array.prototype.forEach()
 
 对数组的每个元素执行一次给定的函数
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
+
 ### Array.prototype.includes()
 
 判断一个数组是否包含一个指定的值，如果包含则返回 true，否则返回 false
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
 
 ### Array.prototype.indexOf()
 
 返回在数组中可以找到一个给定元素的第一个索引，如果不存在，则返回 -1
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
+
 ### Array.prototype.join()
 
 将一个数组的所有元素连接成一个字符串并返回这个字符串
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
 
 ### Array.prototype.keys()
 
 返回一个包含数组中每个索引键的 Array Iterator 对象
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
+
 ### Array.prototype.lastIndexOf()
 
 返回指定元素在数组中的最后一个的索引，如果不存在则返回 -1
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
 
 ### Array.prototype.map()
 
 返回一个新数组，其结果是该数组中的每个元素是调用一次提供的函数后的返回值
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
+
 ### Array.prototype.pop()
 
 从数组中删除最后一个元素，并返回该元素的值
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
 
 ### Array.prototype.push()
 
 将一个或多个元素添加到数组的末尾，并返回该数组的新长度
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
+
 ### Array.prototype.reduce()
 
 对数组中的每个元素执行一个由您提供的 reducer 函数（升序执行），将其结果汇总为单个返回值
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
 
 ### Array.prototype.reduceRight()
 
 接受一个函数作为累加器（accumulator）和数组的每个值（从右到左）将其减少为单个值
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
+
 ### Array.prototype.reverse()
 
 将数组中元素的位置颠倒，并返回该数组。该方法会改变原数组
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
 
 ### Array.prototype.shift()
 
 从数组中删除第一个元素，并返回该元素的值
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
+
 ### Array.prototype.slice()
 
 提取源数组的一部分并返回一个新数组
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
 
 ### Array.prototype.some()
 
 测试数组中是不是至少有一个元素通过了被提供的函数测试
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
+
 ### Array.prototype.sort()
 
 对数组元素进行原地排序并返回此数组
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
 
 ### Array.prototype.splice()
 
 通过删除或替换现有元素或者原地添加新的元素来修改数组，并以数组形式返回被修改的内容
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
+
 ### Array.prototype.toLocaleString()
 
 返回一个字符串表示数组中的元素。数组中的元素将使用各自的 Object.prototype.toLocaleString() 方法转成字符串
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
 
 ### Array.prototype.toString()
 
 返回一个字符串表示指定的数组及其元素。数组中的元素将使用各自的 Object.prototype.toString() 方法转成字符串
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
+
 ### Array.prototype.unshift()
 
 将一个或多个元素添加到数组的头部，并返回该数组的新长度
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
 
 ### Array.prototype.values()
 
 返回一个新的 Array Iterator 对象，该对象包含数组每个索引的值
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
+
 ### Array.prototype[@@iterator]()
 
 返回一个新的 Array Iterator 对象，该对象包含数组每个索引的值
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
 
 -----
 
@@ -2258,15 +3035,129 @@ if (!Array.prototype.find) {
 
 返回给定索引处的数组项。接受负整数，从最后一项开始倒数。
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
+
+
 ### Array.prototype.groupBy()
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
 
 
 
 ### Array.prototype.groupByToMap()
 
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
+
 
 
 ### Array.prototype.toSource()
+
+#### 语法
+
+
+
+#### 参数
+
+
+
+#### 返回值
+
+
+
+#### 描述
+
+
+
+#### 示例
+
+```
+
+```
+
+#### polyfill
+
+```
+1
+```
 
 
 

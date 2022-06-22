@@ -415,6 +415,12 @@ npx create-react-app redux-essentials-example --template redux
 
 你已经知道了应用的功能，现在看一下代码实现。
 
+### 不使用redux实现
+
+```
+
+```
+
 以下是构成此应用程序的关键文件：
 
 ```
