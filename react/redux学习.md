@@ -6,6 +6,8 @@
 
 **Redux 是一个使用叫做“action”的事件来管理和更新应用状态的模式和工具库** 它以集中式Store（centralized store）的方式对整个应用中使用的状态进行集中管理，**其规则确保状态只能以可预测的方式更新。**
 
+![redux原理图](E:\pogject\学习笔记\image\react\redux原理图.png)
+
 ### 为什么要使用 Redux？
 
 Redux 帮你管理“全局”状态 - 哪些应用程序的许多部分都需要的状态。
@@ -513,7 +515,21 @@ export default class Counter extends Component {
 		 (4).备注：异步action不是必须要写的，完全可以自己等待异步任务的结果了再去分发同步action。
 ```
 
+### 求和案例_react-redux基本使用
 
+​    ![react-redux模型图](E:\pogject\学习笔记\image\react\react-redux模型图.png)
+
+```
+			(1).明确两个概念：
+						1).UI组件:不能使用任何redux的api，只负责页面的呈现、交互等。
+						2).容器组件：负责和redux通信，将结果交给UI组件。
+			(2).如何创建一个容器组件————靠react-redux 的 connect函数
+							connect(mapStateToProps,mapDispatchToProps)(UI组件)
+								-mapStateToProps:映射状态，返回值是一个对象
+								-mapDispatchToProps:映射操作状态的方法，返回值是一个对象
+			(3).备注1：容器组件中的store是靠props传进去的，而不是在容器组件中直接引入
+			(4).备注2：mapDispatchToProps，也可以是一个对象
+```
 
 
 
