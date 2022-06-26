@@ -1783,3 +1783,371 @@ let application = function() {
 ```
 
 在这个重写的 application 单例对象的例子中，首先定义了私有变量和私有函数，跟之前例子中 一样。主要区别在于这里创建了一个名为 app 的变量，其中保存了 BaseComponent 组件的实例。**这是 最终要变成 application 的那个对象的局部版本**。在给这个局部变量 app 添加了能够访问私有变量的 公共方法之后，匿名函数返回了这个对象。然后，这个对象被赋值给 application。
+
+
+
+
+
+----
+
+# 纯函数
+
+## 纯函数的概念
+
+纯函数是这样一种函数，即相同的输入，总是会的到相同的输出，并且在执行过程中没有任何副作用。
+
+他的**重点在于“相同的输入，永远会得到相同的输出”**，后面所说的副作用也是为了满足这一点。
+
+### 可变数据类型和不可变数据类型
+
+在详细说明纯函数之前，先讲两个其他的概念：**可变数据类型和不可变数据类型。**
+
+我们知道，在JavaScript中，基本数据类型都是不可变的，**他们只能被替换，不能被修改**。例如当我们在对字符串进行操作的时候，我们并不能改变这个字符串本身。
+
+```js
+let str = "hello world";
+
+console.log(str.toUpperCase());  // HELLO WORLD
+console.log(str);  //  hello world
+```
+
+我们能做的只有把返回的新字符串重新赋值给变量。
+
+```js
+let str = "hello world";
+
+str = str.toUpperCase();
+console.log(str);  //  HELLO WORLD
+```
+
+而引用数据类型都是可变的，存在变量中的仅仅就是一个地址。对于可变特性，facebook的immutable.js做了针对性的强化处理，此外还有clojurescript这样更加彻底的方式。
+
+为什么要说这两个概念呢？
+
+先不说在JS运行的系统环境中可能会产生副作用，单单看这些可变的数据类型，就会增加我们写纯函数的难度，要十分注意，个别情况我们只能选择接受。
+
+这样的话，在JS中，我们不妨把纯函数换一种方式理解，不要把它当做一个只有“完全满足要求”和“不满足要求”的标准，而要把它想象成一个范围，在这里有高低不同程度的纯函数。
+
+### 如何理解“相同的输入，永远会得到相同的输出”
+
+概念中的“永远”可能会让你疑惑，要把它放在词法作用域中考虑，也就是说不考虑再下次执行之前修改常量这一类的情况。
+
+```js
+let a = 10;
+
+function add(x) {
+    return x + a;
+}
+
+add(1);  // 11
+```
+
+上面这个函数就**不是一个纯函数**，因为在我们程序执行的过程中，变量`a`很可能会发生改变，当变量a发生改变时，我们同样执行`add(1)`时得到的输出也就不同了。
+
+```js
+const a = 10;
+
+function add(x) {
+    return x + a;
+}
+
+add(1);  // 11
+```
+
+这**是纯函数**，确定的输入，确定的输出。
+
+```js
+function sum(x, y) {
+    return x + y;
+}
+
+sum(10, 20);
+```
+
+在这个例子中，符合相同的输入得到相同的输出这个概念,`sum`是一个纯函数。
+
+```js
+const obj = {a: 1};
+
+function add(_obj, x) {
+    return _obj.a + x;
+}
+
+add(obj, 10);  //
+```
+
+函数A**基本上是纯函数**，为什么说是“基本上”？因为有极端情况如下
+
+```js
+const obj = {
+    get a() {
+        return Math.random();
+    }
+};
+
+function add(_obj, x) {
+    return _obj.a + x;
+}
+
+console.log(add(obj, 10));  //
+```
+
+注意，obj在传进函数add之前是确定的，`getter`是在取值的时候才会执行，但是返回的结果是不确定的，所以这个时候函数A就不是纯函数了。**随机数和`Date`都会造成函数不纯，使用的时候要注意。**
+
+除此之外，由于对象是可变数据类型，我们在每次输入变量`obj`到函数add中时，**并不具有绝对的自信会返回确定的值**。可对于函数add来说，它只关心传进来的数据是什么，**而对于那个数据来说，只要不是上面的极端情况，返回的是确定的值**。
+
+```js
+const obj = {a: 5};
+function add(x) {
+  return obj.a + x;
+}
+A(5);
+```
+
+这个很明显很不纯
+
+```js
+const obj = Object.freeze({a: 5});
+
+function add( x) {
+    return obj.a + x;
+}
+
+console.log(add(10));  //
+```
+
+这样就纯多了，可是需要注意的是，`Object.freeze()`这个方法无法冻结嵌套的对象，例如
+
+```js
+const obj = Object.freeze({a: {a: 5}});
+
+obj.a.a = 10
+
+function add( x) {
+    return obj.a.a + x;
+}
+
+console.log(add(10));  //
+```
+
+不是纯函数
+
+```js
+function foo(x) {
+    return bar(x);
+}
+
+function bar(y) {
+    return y + 1;
+}
+
+foo(10);
+```
+
+foo和bar都是纯函数
+
+```js
+function A(a) {
+    return function(b) {
+        return a + b;
+    }
+}
+
+let B = A(5);
+
+B(10);
+```
+
+函数A和函数B是纯函数吗？首先来看函数A，每次输入一个参数，都会得到一个用这个参数组成的函数，得到的函数是固定的，所以**函数A是纯函数**；
+
+再来看函数B虽然看起来好像使用了一个自己外部的变量a，而且这个变量a可能会经常改变，可是，**函数B一定要在调用了函数A之后才能得到，并且得到了之后，变量a是无法改变的**，这就**很纯**了。
+
+即便在返回函数B之前修改了a，例如
+
+```js
+function A(a) {
+    a = 15;
+    return function(b) {
+        return a + b;
+    }
+}
+
+let B = A(5);
+
+console.log(B(10));  //  25
+console.log(B(10));  //  25
+```
+
+结论也是一样的。
+
+可如果这样写
+
+```js
+function A(a) {
+    return function(b) {
+        return a = a + b;
+    }
+}
+
+let B = A(5);
+
+console.log(B(10));  //  15
+console.log(B(10));  //  25
+```
+
+就不是
+
+
+
+### 执行过程中没有任何副作用
+
+这里我们要搞清楚什么是副作用，这里的副作用指的是函数在执行过程中产生了**外部可观察变化**。
+
+1. 发起HTTP请求
+2. 操作DOM
+3. 修改外部数据
+4. console.log()打印数据
+5. 调用Date.now()或者Math.random()
+
+上面一系列操作都可以被称为是副作用。下面可以接着看一个修改外部数据从而产生副作用的例子：
+
+```js
+let a = 1;
+function func() {
+    a = 'b';
+};
+func();
+console.log(a); // b
+```
+
+我们运行了`func`函数，外部的变量`a`的值发生了改变，这就是产生了所谓的副作用，所以`func`不是一个纯函数。当我们这样进行修改：
+
+```js
+function func2() {
+    let a = 1;
+    a = 'a';
+    return a
+};
+func(); // a
+```
+
+函数`fun2`**不会对产生外部可观察变化**，也就不会产生副作用，它就是一个纯函数。
+
+一个纯函数，上面所说的两个条件缺一不可。
+
+## 纯函数的好处
+
+通过了解纯函数的概念已经能感觉到纯函数的一些的好处了：
+
+- 更容易进行测试，结果只依赖输入，测试时可以确保输出稳定
+- 更容易维护和重构，我们可以写出质量更高的代码
+- 更容易调用，我们不用担心函数会有什么副作用
+- 结果可以缓存，因为相同的输入总是会得到相同的输出
+
+
+
+## 纯函数运用的经典案例
+
+### 数组的基本方法
+
+数组的很多基本方法都是纯函数，例如`map`,`forEach`,`filter`,`reduce`等等。
+
+### redux中的reducer
+
+Redux中三大原则之一[使用纯函数来执行修改](https://link.segmentfault.com/?enc=QMh622gq4ihMB6zdt0%2BxHw%3D%3D.BCo5OdrelWOOWyoCjXNhMROX8zB%2FnBY1KCGkbUh4V3EkNCK43CQ65znftchLZH7snCEp1%2BvwxqWmFpSJkDTrLA%3D%3D)，其中就运用了[Reducer](https://link.segmentfault.com/?enc=PvId1mLb9fUpxd1ukY2OPw%3D%3D.vwHNG6FxhGomi3Fs8sGoFkcjN%2FRvnYanNqSnsf5jp8K8jpUlBbl%2BonmigH5Sp0vnH8lV4g4wPE5NKMR0n2oSSA%3D%3D)来描述 action 如何改变 state tree。
+
+> Reducer 只是一些纯函数，它接收先前的 state 和 action，并返回新的 state。
+
+### Lodash
+
+[Lodash ](https://link.segmentfault.com/?enc=2yb9vPw2EN8xC1su2ryYNg%3D%3D.F2dC8Cl05PnFLWVOiC4sJC%2BvReblTWN9Bc8BaF9A7Is%3D)是一个一致性、模块化、高性能的 JavaScript 实用工具库。这也是纯函数代表。
+
+
+
+## 如何合理去使用函数
+
+在实际开发中，我们可以合理的去运用纯函数来提高我们的开发效率和代码质量。
+
+### 纯函数组件
+
+我们可以使用纯函数的的方式来创建组件：
+
+```jsx
+function Header(props) {
+    return <h2>{props.text}</h2>
+}
+```
+
+对比一下使用Class(类)组件的方式创建组件：
+
+```jsx
+class Header extends React.Component {
+  render() {
+    return <h1>{this.props.text}</h1>
+  }
+}
+```
+
+我们可以总结出纯函数组件的一些优点：
+
+- 无副作用，我们不用担心副作用带来的一些难以捕捉的问题
+- 语法更简洁，可读性好，代码量相对较小，易复用
+- 占用内存小，无生命周期和状态管理，提升了性能
+
+当然纯函数组件也有自己的**缺点**，例如：没有生命周期。
+
+生命周期有时候并不可少，所幸现在我们也已经有了很好的解决方案——[react-hooks](https://link.segmentfault.com/?enc=tEAtAsjpxwAcJvDsM6M4cw%3D%3D.9c01CcyorycRoMjlyMUggjgrRpayQUK1CNgdhd56ko4%2BIBrIFicqV5%2B5uL74Psr4ALqmjGAULcHMrL%2FFLd94XQ%3D%3D)。利用hooks函数，**我们可以在函数组件中使用等价于生命周期，状态管理等方法。**
+
+### 合理运用纯函数编写公共方法
+
+在编写公共方法的时候，我们尽量用纯函数来进行编写。
+
+假设我们要编写一个把数组中的小写字母转为大写字母的公共方法：
+
+```javascript
+let lists = ["q","w","e"];
+let upperCaseLists = () => {
+    let arr = [];
+    for (let i=0, length= lists.length; i<length; i++) {
+        let item = lists[i];
+        arr.push(item.toUpperCase());
+    }
+    lists = arr;
+}
+```
+
+上面这个函数虽然可以实现逻辑复用，但是有副作用，肯定是不适合用来做公共方法的，所以我们要优化它：
+
+```javascript
+let upperCaseLists = (value) => {
+    let arr = [];
+    for (let i=0, length= value.length; i<length; i++) {
+        let item = value[i];
+        arr.push(item.toUpperCase());
+    }
+    return arr;
+}
+```
+
+使用可读性更好的`forEach`来优化：
+
+```javascript
+let upperCaseLists = (value) => {
+    let arr = [];
+    value.forEach((item) => {
+        arr.push(item.toUpperCase());
+    })
+    return arr;
+}
+```
+
+继续用map进一步优化:
+
+```javascript
+let upperCaseLists = (value) => {
+    return value.map((item) => item.toUpperCase())
+}
+```
+
+是不是很简洁？具体方法怎么优化要根据实际情况和业务需求来。
+

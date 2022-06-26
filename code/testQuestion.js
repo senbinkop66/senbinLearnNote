@@ -1,50 +1,39 @@
 /**
- * @param {string} s
- * @param {string[]} words
- * @return {number[]}
+ * @param {number} n
+ * @param {number[]} blacklist
  */
-var findSubstring = function(s, words) {
-    let ans = [];
-    let i  = 0;
-    let n = words.length;
-    let m = words[0].length;
-    let lenS = s.length;
-    for (let i = 0; i < m; i++) {
-        if (i + n * m > lenS) {
-            break;
-        }
-        const differ = new Map();
-        for (let j = 0; j < n; j++) {
-            let word = s.substring(i + j * m, i + (j + 1) * m);
-            differ.set(word, (differ.get(word) || 0) + 1);
-        }
-        for (let word of words) {
-            differ.set(word, (differ.get(word) || 0) - 1);
-            if (differ.get(word) === 0) {
-                differ.delete(word);
-            }
-        }
-        for (let start = i; start < lenS - n * m + 1; start += m) {
-            if (start !== i) {
-                let word = s.substring(start + (n - 1) * m, start + n * m);
-                differ.set(word, (differ.get(word) || 0) + 1);
-                if (differ.get(word) === 0) {
-                    differ.delete(word);
-                }
-                word = s.substring(start - m, start);
-                differ.set(word, (differ.get(word) || 0) - 1);
-                if (differ.get(word) === 0) {
-                    differ.delete(word);
-                }
-            }
-            if (differ.size === 0) {
-                ans.push(start);
-            }
+var Solution = function(n, blacklist) {
+    this.b2w = new Map();
+    const m = blacklist.length;
+    this.bound = n - m;
+    const black = new Set();
+    for (let b of blacklist) {
+        if (b >= this.bound) {
+            black.add(b);
         }
     }
-    return ans;
+    let w = this.bound;
+    for (let b of blacklist) {
+        if (b < this.bound) {
+            while (black.has(w)) {
+                ++w;
+            }
+            this.b2w.set(b, w);
+            ++w;
+        }
+    }
 };
 
-let s = "barfoofoobarthefoobarman", words = ["bar","foo","the"];
-let result = findSubstring(s, words);
-console.log(result);
+/**
+ * @return {number}
+ */
+Solution.prototype.pick = function() {
+    let x = Math.floor(Math.random() * this.bound);
+    return this.b2w.get(x) || x;
+};
+
+/**
+ * Your Solution object will be instantiated and called as such:
+ * var obj = new Solution(n, blacklist)
+ * var param_1 = obj.pick()
+ */
