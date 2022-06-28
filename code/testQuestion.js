@@ -1,39 +1,20 @@
 /**
- * @param {number} n
- * @param {number[]} blacklist
+ * @param {number[]} nums
+ * @return {void} Do not return anything, modify nums in-place instead.
  */
-var Solution = function(n, blacklist) {
-    this.b2w = new Map();
-    const m = blacklist.length;
-    this.bound = n - m;
-    const black = new Set();
-    for (let b of blacklist) {
-        if (b >= this.bound) {
-            black.add(b);
-        }
-    }
-    let w = this.bound;
-    for (let b of blacklist) {
-        if (b < this.bound) {
-            while (black.has(w)) {
-                ++w;
-            }
-            this.b2w.set(b, w);
-            ++w;
+var wiggleSort = function(nums) {
+    const arr = [...nums];
+    arr.sort((a, b) => a - b);
+    const n = nums.length;
+    const x = Math.floor((n + 1) / 2);
+    for (let i = 0, j = x - 1, k = n - 1; i < n; i += 2, j--, k--) {
+        nums[i] = arr[j];
+        if (i + 1 < n) {
+            nums[i + 1] = arr[k];
         }
     }
 };
 
-/**
- * @return {number}
- */
-Solution.prototype.pick = function() {
-    let x = Math.floor(Math.random() * this.bound);
-    return this.b2w.get(x) || x;
-};
-
-/**
- * Your Solution object will be instantiated and called as such:
- * var obj = new Solution(n, blacklist)
- * var param_1 = obj.pick()
- */
+let nums = [1,5,1,1,6,4];
+wiggleSort(nums)
+console.log(nums);
