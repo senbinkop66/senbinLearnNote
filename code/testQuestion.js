@@ -1,20 +1,47 @@
 /**
- * @param {number[]} nums
- * @return {void} Do not return anything, modify nums in-place instead.
+ * Encodes a URL to a shortened URL.
+ *
+ * @param {string} longUrl
+ * @return {string}
  */
-var wiggleSort = function(nums) {
-    const arr = [...nums];
-    arr.sort((a, b) => a - b);
-    const n = nums.length;
-    const x = Math.floor((n + 1) / 2);
-    for (let i = 0, j = x - 1, k = n - 1; i < n; i += 2, j--, k--) {
-        nums[i] = arr[j];
-        if (i + 1 < n) {
-            nums[i + 1] = arr[k];
+var encode = function(longUrl) {
+    const K1 = 1117;
+    const K2 = 1000000007;
+    this.dataBase = new Map();
+    this.urlToKey = new Map();
+
+    if (this.urlToKey.has(longUrl)) {
+            return `http://tinyurl.com/` + this.urlToKey.get(longUrl);
         }
-    }
+        let key = 0;
+        let base = 1;
+        for (let i = 0; i < longUrl.length; i++) {
+            const c = longUrl[i];
+            key = (key + c * base) % K2;
+            base = (base * K1) % K2;
+        }
+        while (dataBase.has(key)) {
+            key = (key + 1) % K2;
+        }
+        dataBase.set(key, longUrl);
+        urlToKey.set(longUrl, key);
+        return `http://tinyurl.com/` + key;
+
 };
 
-let nums = [1,5,1,1,6,4];
-wiggleSort(nums)
-console.log(nums);
+/**
+ * Decodes a shortened URL to its original URL.
+ *
+ * @param {string} shortUrl
+ * @return {string}
+ */
+var decode = function(shortUrl) {
+    const p = shortUrl.lastIndexOf('/') + 1;
+    const key = parseInt(shortUrl.substring(p));
+    return this.dataBase.get(key);
+};
+
+/**
+ * Your functions will be called as such:
+ * decode(encode(url));
+ */
