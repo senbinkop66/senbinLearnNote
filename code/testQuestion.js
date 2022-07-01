@@ -1,47 +1,39 @@
 /**
- * Encodes a URL to a shortened URL.
- *
- * @param {string} longUrl
- * @return {string}
+ * @param {number} n
+ * @return {number}
  */
-var encode = function(longUrl) {
-    const K1 = 1117;
-    const K2 = 1000000007;
-    this.dataBase = new Map();
-    this.urlToKey = new Map();
 
-    if (this.urlToKey.has(longUrl)) {
-            return `http://tinyurl.com/` + this.urlToKey.get(longUrl);
+const MOD = 1000000007;
+var numPrimeArrangements = function(n) {
+    let numPrimes = 0;
+    for (let i = 2; i <= n; i++) {
+        if (isPrime(i)) {
+            numPrimes++;
         }
-        let key = 0;
-        let base = 1;
-        for (let i = 0; i < longUrl.length; i++) {
-            const c = longUrl[i];
-            key = (key + c * base) % K2;
-            base = (base * K1) % K2;
-        }
-        while (dataBase.has(key)) {
-            key = (key + 1) % K2;
-        }
-        dataBase.set(key, longUrl);
-        urlToKey.set(longUrl, key);
-        return `http://tinyurl.com/` + key;
-
+    }
+    let res = 1;
+    let m = n - numPrimes;
+    while(numPrimes > 0) {
+        res = res % MOD;
+        res *= numPrimes;
+        numPrimes--;
+    }
+    while (m > 0) {
+        res = res % MOD;
+        res *= m;
+        m--;
+    }
+    return res;
 };
 
-/**
- * Decodes a shortened URL to its original URL.
- *
- * @param {string} shortUrl
- * @return {string}
- */
-var decode = function(shortUrl) {
-    const p = shortUrl.lastIndexOf('/') + 1;
-    const key = parseInt(shortUrl.substring(p));
-    return this.dataBase.get(key);
-};
-
-/**
- * Your functions will be called as such:
- * decode(encode(url));
- */
+const isPrime = (n) => {
+    if (n === 1) {
+        return false;
+    }
+    for (let i = 2; i * i <= n; i++) {
+        if (n % i === 0) {
+            return false;
+        }
+    }
+    return true;
+}

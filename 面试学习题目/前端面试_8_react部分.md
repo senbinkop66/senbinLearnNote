@@ -90,6 +90,235 @@ export const Footer = () => {
 }
 ```
 
+---
+
+##  说说react中引入css的方式有哪几种？区别？
+
+组件式开发选择合适的`css`解决方案尤为重要
+
+通常会遵循以下规则：
+
+- 可以编写局部css，不会随意污染其他组件内的原生；
+- 可以编写动态的css，可以获取当前组件的一些状态，根据状态的变化生成不同的css样式；
+- 支持所有的css特性：伪类、动画、媒体查询等；
+- 编写起来简洁方便、最好符合一贯的css风格特点
+
+在这一方面，`vue`使用`css`起来更为简洁：
+
+- 通过 style 标签编写样式
+- scoped 属性决定编写的样式是否局部有效
+- lang 属性设置预处理器
+- 内联样式风格的方式来根据最新状态设置和改变css
+
+而在`react`中，引入`CSS`就不如`Vue`方便简洁，其引入`css`的方式有很多种，各有利弊
+
+常见的`CSS`引入方式有以下：
+
+- 在组件内直接使用
+- 组件中引入 .css 文件
+- 组件中引入 .module.css 文件
+- CSS in JS
+
+
+
+### 在组件内直接使用
+
+直接在组件中书写`css`样式，通过`style`属性直接引入，如下：
+
+```jsx
+import React, { Component } from "react";
+
+const div1 = {
+  width: "300px",
+  margin: "30px auto",
+  backgroundColor: "#44014C",  //驼峰法
+  minHeight: "200px",
+  boxSizing: "border-box"
+};
+
+class Test extends Component {
+  constructor(props, context) {
+    super(props);
+  }
+ 
+  render() {
+    return (
+     <div>
+       <div style={div1}>123</div>
+       <div style={{backgroundColor:"red"}}>
+     </div>
+    );
+  }
+}
+
+export default Test;
+```
+
+上面可以看到，`css`属性需要转换成驼峰写法
+
+这种方式优点：
+
+- 内联样式, 样式之间不会有冲突
+- 可以动态获取当前state中的状态
+
+缺点：
+
+- 写法上都需要使用驼峰标识
+- 某些样式没有提示
+- 大量的样式, 代码混乱
+- 某些样式无法编写(比如伪类/伪元素)
+
+### 组件中引入css文件
+
+将`css`单独写在一个`css`文件中，然后在组件中直接引入
+
+`App.css`文件：
+
+```css
+.title {
+  color: red;
+  font-size: 20px;
+}
+
+.desc {
+  color: green;
+  text-decoration: underline;
+}
+```
+
+组件中引入：
+
+```jsx
+import React, { PureComponent } from 'react';
+
+import Home from './Home';
+
+import './App.css';
+
+export default class App extends PureComponent {
+  render() {
+    return (
+      <div className="app">
+        <h2 className="title">我是App的标题</h2>
+        <p className="desc">我是App中的一段文字描述</p >
+        <Home/>
+      </div>
+    )
+  }
+}
+```
+
+这种方式存在不好的地方在于**样式是全局生效，样式之间会互相影响**
+
+### 组件中引入 .module.css 文件
+
+将`css`文件作为一个模块引入，**这个模块中的所有`css`，只作用于当前组件**。不会影响当前组件的后代组件
+
+这种方式是`webpack`特供的方案，只需要配置`webpack`配置文件中`modules:true`即可
+
+```jsx
+import React, { PureComponent } from 'react';
+
+import Home from './Home';
+
+import './App.module.css';
+
+export default class App extends PureComponent {
+  render() {
+    return (
+      <div className="app">
+        <h2 className="title">我是App的标题</h2>
+        <p className="desc">我是App中的一段文字描述</p >
+        <Home/>
+      </div>
+    )
+  }
+}
+```
+
+这种方式能够解决局部作用域问题，但也有一定的缺陷：
+
+- 引用的类名，不能使用连接符(.xxx-xx)，在 JavaScript 中是不识别的
+- 所有的 className 都必须使用 {style.className} 的形式来编写
+- 不方便动态来修改某些样式，依然需要使用内联样式的方式；
+
+### CSS in JS
+
+CSS-in-JS， 是指一种模式，其中`CSS`由 `JavaScript `生成而不是在外部文件中定义
+
+此功能并不是 React 的一部分，而是由第三方库提供，例如：
+
+- styled-components
+- emotion
+- glamorous
+
+下面主要看看`styled-components`的基本使用
+
+**本质是通过函数的调用，最终创建出一个组件**：
+
+- 这个组件会被自动添加上一个不重复的class
+- styled-components会给该class添加相关的样式
+
+基本使用如下：
+
+创建一个`style.js`文件用于存放样式组件：
+
+```js
+export const SelfLink = styled.div`
+  height: 50px;
+  border: 1px solid red;
+  color: yellow;
+`;
+
+export const SelfButton = styled.div`
+  height: 150px;
+  width: 150px;
+  color: ${props => props.color};
+  background-image: url(${props => props.src});
+  background-size: 150px 150px;
+`;
+```
+
+引入样式组件也很简单：
+
+```jsx
+import React, { Component } from "react";
+
+import { SelfLink, SelfButton } from "./style";
+
+class Test extends Component {
+  constructor(props, context) {
+    super(props);
+  }  
+ 
+  render() {
+    return (
+     <div>
+       <SelfLink title="People's Republic of China">app.js</SelfLink>
+       <SelfButton color="palevioletred" style={{ color: "pink" }} src={fist}>
+          SelfButton
+        </SelfButton>
+     </div>
+    );
+  }
+}
+
+export default Test;
+```
+
+### 区别
+
+通过上面四种样式的引入，可以看到：
+
+- 在组件内直接使用`css`该方式编写方便，容易能够根据状态修改样式属性，但是大量的演示编写容易导致代码混乱
+- 组件中引入 .css 文件符合我们日常的编写习惯，但是作用域是全局的，样式之间会层叠
+- 引入.module.css 文件能够解决局部作用域问题，但是不方便动态修改样式，需要使用内联的方式进行样式的编写
+- 通过css in js 这种方法，可以满足大部分场景的应用，可以类似于预处理器一样样式嵌套、定义、修改状态等
+
+至于使用`react`用哪种方案引入`css`，并没有一个绝对的答案，可以根据各自情况选择合适的方案
+
+
+
 
 
 ---
@@ -504,6 +733,227 @@ React 的开发和生产构建版本在 componentDidCatch() 的方式上有轻�
 
 
 
+----
+
+## react中，父子组件的生命周期执行顺序是怎么样的？
+
+观察父子组件的挂载生命周期函数，可以发现挂载时，**子组件的挂载钩子先被触发**；卸载时，**子组件的卸载钩子后被触发**。
+
+我们经常在挂载函数上注册监听器，说明此时是可以与页面交互的，也就是说**其实所有挂载钩子都是在父组件实际挂载到dom树上才触发的，不过是在父组件挂载后依次触发子组件的 componentDidmount ，最后再触发自身的挂载钩子**，说白了，componentDidMount 其实是**异步钩子**。
+
+相反，**卸载的时候父节点先被移除**，再从上至下依次触发子组件的卸载钩子；
+
+但是我们也经常在卸载钩子上卸载监听器，**这说明 componentWillUnmount 其实在父组件从dom树上卸载前触发的，先触发自身的卸载钩子，但此时并未从dom树上剥离**，然后依次尝试触发所有子组件的卸载钩子，**最后，父组件从dom树上完成实际卸载**。
+
+
+
+
+
+
+
+-----
+
+## 说说React render方法的原理？在什么时候会被触发？
+
+### 原理
+
+首先，`render`函数在`react`中有两种形式：
+
+在类组件中，指的是`render`方法：
+
+```jsx
+class Foo extends React.Component {
+    render() {
+        return <h1> Foo </h1>;
+    }
+}
+```
+
+在函数组件中，指的是函数组件本身：
+
+```jsx
+function Foo() {
+    return <h1> Foo </h1>;
+}
+```
+
+在`render`中，我们会编写`jsx`，**`jsx`通过`babel`编译后就会转化成我们熟悉的`js`格式**，如下：
+
+```jsx
+return (
+  <div className='cn'>
+    <Header> hello </Header>
+    <div> start </div>
+    Right Reserve
+  </div>
+)
+```
+
+`babel`编译后：
+
+```js
+return (
+  React.createElement(
+    'div',
+    {
+      className : 'cn'
+    },
+    React.createElement(
+      Header,
+      null,
+      'hello'
+    ),
+    React.createElement(
+      'div',
+      null,
+      'start'
+    ),
+    'Right Reserve'
+  )
+)
+```
+
+从名字上来看，`createElement`方法用来创建元素的
+
+**在`react`中，这个元素就是虚拟`DOM`树的节点，接收三个参数**：
+
+- type：标签
+- attributes：标签属性，若无则为null
+- children：标签的子节点
+
+这些虚拟`DOM`树最终会渲染成真实`DOM`
+
+在`render`过程中，`React` 将新调用的 `render `函数返回的树与旧版本的树进行比较，这一步是决定如何更新 `DOM` 的必要步骤，然后进行 `diff` 比较，更新 `DOM `树
+
+### 触发时机
+
+`render`的执行时机主要分成了两部分：
+
+- 类组件调用 setState 修改状态
+
+```jsx
+class Foo extends React.Component {
+  state = { count: 0 };
+
+  increment = () => {
+    const { count } = this.state;
+
+    const newCount = count < 10 ? count + 1 : count;
+
+    this.setState({ count: newCount });
+  };
+
+  render() {
+    const { count } = this.state;
+    console.log("Foo render");
+
+    return (
+      <div>
+        <h1> {count} </h1>
+        <button onClick={this.increment}>Increment</button>
+      </div>
+    );
+  }
+}
+```
+
+点击按钮，则调用`setState`方法，无论`count`如何发生变化，控制台都会输出`Foo render`，证明`render`执行了
+
+- 函数组件通过`useState hook`修改状态
+
+```jsx
+function Foo() {
+  const [count, setCount] = useState(0);
+
+  function increment() {
+    const newCount = count < 10 ? count + 1 : count;
+    setCount(newCount);
+  }
+
+  console.log("Foo render");
+  
+  return (
+    <div>
+      <h1> {count} </h1>
+      <button onClick={increment}>Increment</button>
+    </div>
+  );
+}
+```
+
+函数组件通过`useState`这种形式更新数据，当数组的值不发生改变了，就不会触发`render`
+
+- 类组件重新渲染
+
+```jsx
+class App extends React.Component {
+  state = { name: "App" };
+  render() {
+    return (
+      <div className="App">
+        <Foo />
+        <button onClick={() => this.setState({ name: "App" })}>
+          Change name
+        </button>
+      </div>
+    );
+  }
+}
+
+function Foo() {
+  console.log("Foo render");
+
+  return (
+    <div>
+      <h1> Foo </h1>
+    </div>
+  );
+}
+```
+
+只要点击了 `App` 组件内的 `Change name` 按钮，**不管 `Foo` 具体实现是什么，都会被重新`render`渲染**
+
+- 函数组件重新渲染
+
+```jsx
+function App(){
+    const [name,setName] = useState('App')
+
+    return (
+        <div className="App">
+            <Foo />
+            <button onClick={() => setName("aaa")}>
+                { name }
+            </button>
+      </div>
+    )
+}
+
+function Foo() {
+  console.log("Foo render");
+
+  return (
+    <div>
+      <h1> Foo </h1>
+    </div>
+  );
+}
+```
+
+可以发现，使用`useState`来更新状态的时候，**只有首次会触发`Foo render`**，后面并不会导致`Foo render`
+
+### 总结
+
+render`函数里面可以编写`JSX`，转化成`createElement`这种形式，用于生成虚拟`DOM`，最终转化成真实`DOM
+
+在` React` 中，**类组件只要执行了 `setState` 方法，就一定会触发 `render` 函数执行**，函数组件使用`useState`更改状态不一定导致重新`render`
+
+组件的` props` 改变了，不一定触发 `render` 函数的执行，但是如果 `props` 的值来自于父组件或者祖先组件的 `state`。在这种情况下，父组件或者祖先组件的 `state` 发生了改变，就会导致子组件的重新渲染
+
+所以，一旦执行了`setState`就会执行`render`方法，**`useState` 会判断当前值有无发生改变确定是否执行`render`方法**，一旦父组件发生渲染，子组件也会渲染
+
+
+
 
 
 ----
@@ -545,6 +995,115 @@ class ReferenceDemo extends React.Component{
 - 与第三方 DOM 库集成
 
 ---
+
+##  React构建组件的方式有哪些？有什么区别？
+
+组件就是把图形、非图形的各种逻辑均抽象为一个统一的概念（组件）来实现开发的模式
+
+在`React`中，一个类、一个函数都可以视为一个组件
+
+组件所存在的优势：
+
+- 降低整个系统的耦合度，在保持接口不变的情况下，我们可以替换不同的组件快速完成需求，例如输入框，可以替换为日历、时间、范围等组件作具体的实现
+- 调试方便，由于整个系统是通过组件组合起来的，在出现问题的时候，可以用排除法直接移除组件，或者根据报错的组件快速定位问题，之所以能够快速定位，是因为每个组件之间低耦合，职责单一，所以逻辑会比分析整个系统要简单
+- 提高可维护性，由于每个组件的职责单一，并且组件在系统中是被复用的，所以对代码进行优化可获得系统的整体升级
+
+在`React`目前来讲，组件的创建主要分成了三种方式：
+
+- 函数式创建
+- 通过 React.createClass 方法创建
+- 继承 React.Component 创建
+
+### 函数式创建
+
+在`React Hooks`出来之前，函数式组件可以视为**无状态组件**，只负责根据传入的`props`来展示视图，不涉及对`state`状态的操作
+
+大多数组件可以写为无状态组件，通过简单组合构建其他组件
+
+在`React`中，通过函数简单创建组件的示例如下：
+
+```jsx
+function HelloComponent(props, /* context */) {
+  return <div>Hello {props.name}</div>
+}
+```
+
+### 通过 React.createClass 方法创建
+
+`React.createClass`是react刚开始推荐的创建组件的方式，目前这种创建方式已经不怎么用了
+
+像上述通过函数式创建的组件的方式，最终会通过`babel`转化成`React.createClass`这种形式，转化成如下：
+
+```js
+function HelloComponent(props) /* context */{
+  return React.createElement(
+    "div",
+    null,
+    "Hello ",
+    props.name
+  );
+}
+```
+
+由于上述的编写方式过于冗杂，目前基本上不使用上
+
+### 继承 React.Component 创建
+
+同样在`react hooks`出来之前，**有状态的组件**只能通过继承`React.Component`这种形式进行创建
+
+有状态的组件**也就是组件内部存在维护的数据**，在类创建的方式中通过`this.state`进行访问
+
+当调用`this.setState`修改组件的状态时，组件会再次会调用`render()`方法进行重新渲染
+
+通过继承`React.Component`创建一个时钟示例如下：
+
+```jsx
+class Timer extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { seconds: 0 };
+  }
+
+  tick() {
+    this.setState(state => ({
+      seconds: state.seconds + 1
+    }));
+  }
+
+  componentDidMount() {
+    this.interval = setInterval(() => this.tick(), 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  render() {
+    return (
+      <div>
+        Seconds: {this.state.seconds}
+      </div>
+    );
+  }
+}
+```
+
+### 区别
+
+由于`React.createClass `创建的方式过于冗杂，并不建议使用
+
+而像函数式创建和类组件创建的区别主要在于需要创建的组件**是否需要为有状态组件**：
+
+- 对于一些无状态的组件创建，建议使用函数式创建的方式
+- 由于`react hooks`的出现，函数式组件创建的组件**通过使用`hooks`方法也能使之成为有状态组件**，再加上目前推崇函数式编程，所以这里建议都使用函数式的方式来创建组件
+
+在考虑组件的选择原则上，**能用无状态组件则用无状态组件**
+
+
+
+
+
+----
 
 ## 9. React中的类组件和函数组件之间有什么区别？
 
@@ -720,6 +1279,12 @@ React并不是将click事件绑在该div的真实DOM上，而是在document处�
 
 ### 非受控组件
 
+非受控组件，简单来讲，就是不受我们控制的组件
+
+一般情况是**在初始化的时候接受外部数据**，然后自己在内部存储其自身状态
+
+当需要时，可以使用`ref` 查询 `DOM `并查找其当前值，如下：
+
 非受控组件，即**组件的状态不受React控制的组件**，例如下边这个
 
 ```jsx
@@ -741,7 +1306,34 @@ ReactDOM.render(<Demo1/>, document.getElementById('content'))
 
 ps: 此处如果使用value代替defaultValue,会发现输入框的值无法改变
 
+```jsx
+import React, { Component } from 'react';
+
+export class UnControll extends Component {
+  constructor (props) {
+    super(props);
+    this.inputRef = React.createRef();
+  }
+  handleSubmit = (e) => {
+    console.log('我们可以获得input内的值为', this.inputRef.current.value);
+    e.preventDefault();
+  }
+  render () {
+    return (
+      <form onSubmit={e => this.handleSubmit(e)}>
+        <input defaultValue="lindaidai" ref={this.inputRef} />
+        <input type="submit" value="提交" />
+      </form>
+    )
+  }
+}
+```
+
+
+
 ### 受控组件
+
+受控组件，简单来讲，就是受我们控制的组件，组件的状态全程响应外部数据
 
 受控组件就是组件的状态受React控制。上面提到过，既然通过设置input的value属性, 无法改变输入框值,那么我们把它和state结合在一起,再绑定onChange事件,实时更新value值就行了。
 
@@ -767,6 +1359,46 @@ class Demo1 extends Component {
     }
 }
 ```
+
+```jsx
+class TestComponent extends React.Component {
+  constructor (props) {
+    super(props);
+    this.state = { username: 'lindaidai' };
+  }
+  render () {
+    return <input name="username" value={this.state.username} />
+  }
+}
+```
+
+这时候当我们在输入框输入内容的时候，会发现输入的内容并无法显示出来，也就是`input`标签是一个可读的状态
+
+这是因为`value`被`this.state.username`所控制住。当用户输入新的内容时，`this.state.username`并不会自动更新，这样的话`input`内的内容也就不会变了
+
+**如果想要解除被控制，可以为`input`标签设置`onChange`事件，输入的时候触发事件函数**，在函数内部实现`state`的更新，从而导致`input`框的内容页发现改变
+
+因此，受控组件我们一般**需要初始状态**和**一个状态更新事件函数**
+
+
+
+### 应用场景
+
+大部分时候**推荐使用受控组件**来实现表单，因为在受控组件中，表单数据由`React`组件负责处理
+
+如果选择非受控组件的话，控制能力较弱，表单数据就由`DOM`本身处理，但更加方便快捷，代码量少
+
+针对两者的区别，其应用场景如下图所示：
+
+
+
+![img](E:\pogject\学习笔记\image\react\受控组件)
+
+
+
+
+
+
 
 
 
@@ -801,6 +1433,246 @@ class MyComponent extends React.Component {
 
 
 **浏览器只能处理 JavaScript 对象**，而不能读取常规 JavaScript 对象中的 JSX。所以为了使浏览器能够读取 JSX，首先，需要用像 Babel 这样的 JSX 转换器将 JSX 文件转换为 JavaScript 对象，然后再将其传给浏览器。
+
+----
+
+## 说说React Jsx转换成真实DOM过程？
+
+**是什么**
+
+`react`通过将组件编写的`JSX`映射到屏幕，以及组件中的状态发生了变化之后 `React`会将这些「变化」更新到屏幕上
+
+在前面文章了解中，`JSX`通过`babel`最终转化成`React.createElement`这种形式，例如：
+
+```jsx
+<div>
+  <img src="avatar.png" className="profile" />
+  <Hello />
+</div>
+```
+
+会被`bebel`转化成如下：
+
+```js
+React.createElement(
+  "div",
+  null,
+  React.createElement("img", {
+    src: "avatar.png",
+    className: "profile"
+  }),
+  React.createElement(Hello, null)
+);
+```
+
+在转化过程中，`babel`在编译时会判断 JSX 中组件的首字母：
+
+- **当首字母为小写时，其被认定为原生 `DOM` 标签**，`createElement` 的第一个变量被编译为字符串
+- **当首字母为大写时，其被认定为自定义组件**，createElement 的第一个变量被编译为对象
+
+最终都会通过`RenderDOM.render(...)`方法进行挂载，如下：
+
+```jsx
+ReactDOM.render(<App />,  document.getElementById("root"));
+```
+
+**过程**
+
+在`react`中，节点大致可以分成四个类别：
+
+- 原生标签节点
+- 文本节点
+- 函数组件
+- 类组件
+
+如下所示：
+
+```jsx
+class ClassComponent extends Component {
+  static defaultProps = {
+    color: "pink"
+  };
+  render() {
+    return (
+      <div className="border">
+        <h3>ClassComponent</h3>
+        <p className={this.props.color}>{this.props.name}</p >
+      </div>
+    );
+  }
+}
+
+function FunctionComponent(props) {
+  return (
+    <div className="border">
+      FunctionComponent
+      <p>{props.name}</p >
+    </div>
+  );
+}
+
+const jsx = (
+  <div className="border">
+    <p>xx</p >
+    < a href=" ">xxx</ a>
+    <FunctionComponent name="函数组件" />
+    <ClassComponent name="类组件" color="red" />
+  </div>
+);
+```
+
+这些类别最终都会被转化成`React.createElement`这种形式
+
+`React.createElement`其被调用时会传⼊标签类型`type`，标签属性`props`及若干子元素`children`，作用是生成一个虚拟`Dom`对象，如下所示：
+
+```js
+function createElement(type, config, ...children) {
+    if (config) {
+        delete config.__self;
+        delete config.__source;
+    }
+    // ! 源码中做了详细处理，⽐如过滤掉key、ref等
+    const props = {
+        ...config,
+        children: children.map(child =>
+   typeof child === "object" ? child : createTextNode(child)
+  )
+    };
+    return {
+        type,
+        props
+    };
+}
+
+function createTextNode(text) {
+    return {
+        type: TEXT,
+        props: {
+            children: [],
+            nodeValue: text
+        }
+    };
+}
+export default {
+    createElement
+};
+```
+
+`createElement`会根据传入的节点信息进行一个判断：
+
+- 如果是原生标签节点， **type 是字符串**，如div、span
+- 如果是文本节点， **type就没有**，这里是 TEXT
+- 如果是函数组件，**type 是函数名**
+- 如果是类组件，**type 是类名**
+
+虚拟`DOM`会通过`ReactDOM.render`进行渲染成真实`DOM`，使用方法如下：
+
+```jsx
+ReactDOM.render(element, container[, callback])
+```
+
+当首次调用时，容器节点里的所有 `DOM` 元素都会被替换，后续的调用则会使用 `React` 的 `diff`算法进行高效的更新
+
+如果提供了可选的回调函数`callback`，该回调将在组件被渲染或更新之后被执行
+
+`render`大致实现方法如下：
+
+```js
+function render(vnode, container) {
+    console.log("vnode", vnode); // 虚拟DOM对象
+    // vnode _> node
+    const node = createNode(vnode, container);
+    container.appendChild(node);
+}
+
+// 创建真实DOM节点
+function createNode(vnode, parentNode) {
+    let node = null;
+    const {type, props} = vnode;
+    if (type === TEXT) {
+        node = document.createTextNode("");
+    } else if (typeof type === "string") {
+        node = document.createElement(type);
+    } else if (typeof type === "function") {
+        node = type.isReactComponent
+            ? updateClassComponent(vnode, parentNode)
+        : updateFunctionComponent(vnode, parentNode);
+    } else {
+        node = document.createDocumentFragment();
+    }
+    reconcileChildren(props.children, node);
+    updateNode(node, props);
+    return node;
+}
+
+// 遍历下子vnode，然后把子vnode->真实DOM节点，再插入父node中
+function reconcileChildren(children, node) {
+    for (let i = 0; i < children.length; i++) {
+        let child = children[i];
+        if (Array.isArray(child)) {
+            for (let j = 0; j < child.length; j++) {
+                render(child[j], node);
+            }
+        } else {
+            render(child, node);
+        }
+    }
+}
+function updateNode(node, nextVal) {
+    Object.keys(nextVal)
+        .filter(k => k !== "children")
+        .forEach(k => {
+        if (k.slice(0, 2) === "on") {
+            let eventName = k.slice(2).toLocaleLowerCase();
+            node.addEventListener(eventName, nextVal[k]);
+        } else {
+            node[k] = nextVal[k];
+        }
+    });
+}
+
+// 返回真实dom节点
+// 执行函数
+function updateFunctionComponent(vnode, parentNode) {
+    const {type, props} = vnode;
+    let vvnode = type(props);
+    const node = createNode(vvnode, parentNode);
+    return node;
+}
+
+// 返回真实dom节点
+// 先实例化，再执行render函数
+function updateClassComponent(vnode, parentNode) {
+    const {type, props} = vnode;
+    let cmp = new type(props);
+    const vvnode = cmp.render();
+    const node = createNode(vvnode, parentNode);
+    return node;
+}
+export default {
+    render
+};
+```
+
+## 三、总结
+
+在`react`源码中，虚拟`Dom`转化成真实`Dom`整体流程如下图所示：
+
+
+
+![img](E:\pogject\学习笔记\image\react\28824fa0-f00a-11eb-ab90-d9ae814b240d.png)
+
+其渲染流程如下所示：
+
+- 使用React.createElement或JSX编写React组件，实际上所有的 JSX 代码**最后都会转换成React.createElement(...)** ，Babel帮助我们完成了这个转换的过程。
+- createElement函数对key和ref等特殊的props进行处理，并获取defaultProps对默认props进行赋值，并且对传入的孩子节点进行处理，最终构造成一个虚拟DOM对象
+- ReactDOM.render将生成好的虚拟DOM渲染到指定容器上，其中采用了批处理、事务等机制并且对特定浏览器进行了性能优化，最终转换为真实DOM
+
+
+
+---
+
+
 
 
 
@@ -884,6 +1756,83 @@ props和state是普通的 JS 对象。虽然它们都包含影响渲染输出的
 - props 是外部传入的数据参数，不可变；
 - 没有state的叫做**无状态组件**，有state的叫做**有状态组件**；
 - **多用 props，少用 state**，也就是多写无状态组件。
+
+### state
+
+一个组件的显示形态可以由数据状态和外部参数所决定，而数据状态就是`state`，一般在 `constructor` 中初始化
+
+当需要修改里面的值的状态需要通过调用`setState`来改变，从而达到更新组件内部数据的作用，并且重新调用组件`render`方法，如下面的例子：
+
+```jsx
+class Button extends React.Component {
+    constructor() {
+        super();
+        this.state = {
+            count: 0,
+        };
+    }
+
+    updateCount() {
+        this.setState((prevState, props) => {
+            return { count: prevState.count + 1 }
+        });
+    }
+
+    render() {
+        return (<button
+                    onClick={() => this.updateCount()}
+                    >
+                Clicked {this.state.count} times
+            </button>);
+    }
+}
+```
+
+`setState`还可以接受第二个参数，它是一个函数，会在`setState`调用完成并且组件开始重新渲染时被调用，可以用来监听渲染是否完成
+
+```js
+this.setState({
+  name:'JS每日一题'
+},()=>console.log('setState finished'))
+```
+
+### props
+
+`React`的核心思想就是组件化思想，页面会被切分成一些独立的、可复用的组件
+
+**组件从概念上看就是一个函数，可以接受一个参数作为输入值，这个参数就是`props`**，所以可以把`props`理解为从外部传入组件内部的数据
+
+`react`具有单向数据流的特性，所以他的主要作用是从父组件向子组件中传递数据
+
+`props`除了可以传字符串，数字，还可以传递对象，数组甚至是回调函数，如下：
+
+```jsx
+class Welcome extends React.Component {
+  render() {
+    return <h1>Hello {this.props.name}</h1>;
+  }
+}
+
+const element = <Welcome name="Sara" onNameChanged={this.handleName} />;
+```
+
+上述`name`属性与`onNameChanged`方法都能在子组件的`props`变量中访问
+
+**在子组件中，`props`在内部不可变的**，如果想要改变它看，只能通过外部组件传入新的`props`来重新渲染子组件，否则子组件的`props`和展示形式不会改变
+
+### 区别
+
+相同点：
+
+- 两者都是 JavaScript 对象
+- 两者都是用于保存信息
+- props 和 state 都能触发渲染更新
+
+区别：
+
+- props 是外部传递给组件的，而 state 是在组件内被组件自己管理的，一般在 constructor 中初始化
+- props 在组件内部是不可修改的，但 state 在组件内部可以进行修改
+- state 是多变的、可以修改
 
 
 
@@ -1119,6 +2068,63 @@ React 的合成事件层，并没有将事件直接绑定到 DOM 元素上，所
 - **事件类型**：`React 是 原生事件类型 的一个子集`（React 只是实现了 DOM level3 的事件接口，有些事件 React 并没有实现，比如 window 的 resize 事件。）阻止 React 事件冒泡的行为只能用于 React 合成事件系统，但是 在原生事件中的阻止冒泡行为，却可以阻止 React 合成事件的传播。
 - **事件的绑定方式**：原生事件系统中支持多种不同的绑定事件的方式，**React 中只有一种**
 - **事件对象**：原生中存在 IE 的兼容性问题，React 做了兼容处理。
+
+
+
+---
+
+##  说说React事件和原生事件的执行顺序
+
+```jsx
+  componentDidMount() {
+    this.parent.addEventListener('click', (e) => {
+      console.log('dom parent');
+    })
+    this.child.addEventListener('click', (e) => {
+      console.log('dom child');
+    })
+    document.addEventListener('click', (e) => {
+      console.log('document');
+    })
+  }
+
+  childClick = (e) => {
+    console.log('react child');
+  }
+
+  parentClick = (e) => {
+    console.log('react parent');
+  }
+
+  render() {
+    return (
+      <div onClick={this.parentClick} ref={ref => this.parent = ref}>
+        <div onClick={this.childClick} ref={ref => this.child = ref}>
+          test
+        </div>
+      </div>)
+  }
+
+```
+
+```js
+// 点击后执行顺序
+dom child
+dom parent
+react child
+react parent
+document
+```
+
+由上面的流程我们可以理解：
+
+- react的所有事件都挂载在document中
+- 当真实dom触发后冒泡到document后才会对react事件进行处理
+- **所以原生的事件会先执行**
+- 然后执行react合成事件
+- 最后执行真正在document上挂载的事件
+
+
 
 
 
@@ -2012,6 +3018,645 @@ app.listen(3001, () => console.log('Exampleapp listening on port 3001!'))
 
 ##  说说你在React项目是如何捕获错误的？
 
+错误在我们日常编写代码是非常常见的
+
+举个例子，在`react`项目中去编写组件内`JavaScript`代码错误会导致 `React` 的内部状态被破坏，导致整个应用崩溃，这是不应该出现的现象
+
+作为一个框架，`react`也有自身对于错误的处理的解决方案
+
+### **错误边界**
+
+为了解决出现的错误导致整个应用崩溃的问题，`react16`引用了**错误边界**新的概念
+
+错误边界是一种 `React` 组件，**这种组件可以捕获发生在其子组件树任何位置的 `JavaScript` 错误，并打印这些错误，同时展示降级 `UI`**，而并不会渲染那些发生崩溃的子组件树
+
+错误边界在渲染期间、生命周期方法和整个组件树的构造函数中捕获错误
+
+形成错误边界组件的两个条件：
+
+- 使用了 static getDerivedStateFromError()
+- 使用了 componentDidCatch()
+
+抛出错误后，请使用 `static getDerivedStateFromError()` **渲染备用 UI** ，使用 `componentDidCatch()` **打印错误信息**，如下：
+
+```jsx
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    // 更新 state 使下一次渲染能够显示降级后的 UI
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // 你同样可以将错误日志上报给服务器
+    logErrorToMyService(error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // 你可以自定义降级后的 UI 并渲染
+      return <h1>Something went wrong.</h1>;
+    }
+
+    return this.props.children; 
+  }
+}
+```
+
+然后就可以把自身组件的作为错误边界的子组件，如下：
+
+```jsx
+<ErrorBoundary>
+  <MyWidget />
+</ErrorBoundary>
+```
+
+下面这些情况无法捕获到异常：
+
+- 事件处理
+- 异步代码
+- 服务端渲染
+- 自身抛出来的错误
+
+在`react 16`版本之后，会把渲染期间发生的所有错误打印到控制台
+
+除了错误信息和 JavaScript 栈外，React 16 还提供了组件栈追踪。现在你可以准确地查看发生在组件树内的错误信息：
+
+
+
+可以看到在错误信息下方文字中存在一个组件栈，便于我们追踪错误
+
+对于错误边界无法捕获的异常，如事件处理过程中发生问题并不会捕获到，是因为其不会在渲染期间触发
+
+这种情况可以使用`js`的`try...catch...`语法，如下：
+
+```jsx
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick() {
+    try {
+      // 执行操作，如有错误则会抛出
+    } catch (error) {
+      this.setState({ error });
+    }
+  }
+
+  render() {
+    if (this.state.error) {
+      return <h1>Caught an error.</h1>
+    }
+    return <button onClick={this.handleClick}>Click Me</button>
+  }
+}
+```
+
+除此之外还可以通过监听`onerror`事件
+
+```js
+window.addEventListener('error', function(event) { ... })
+```
+
+
+
+----
+
+## 说说你对immutable的理解？如何应用在react项目中？
+
+### immutable是什么
+
+Immutable，不可改变的，在计算机中，即指一旦创建，就不能再被更改的数据
+
+对 `Immutable `对象的任何修改或添加删除操作都会返回一个新的 `Immutable `对象
+
+`Immutable` 实现的原理是 `Persistent Data Structure`（持久化数据结构）:
+
+- 用一种数据结构来保存数据
+- 当数据被修改时，会返回一个对象，**但是新的对象会尽可能的利用之前的数据结构而不会对内存造成浪费**
+
+也就是使用旧数据创建新数据时，要保证旧数据同时可用且不变，同时为了避免 `deepCopy `把所有节点都复制一遍带来的性能损耗，`Immutable` 使用了 `Structural Sharing`（结构共享）
+
+如果对象树中一个节点发生变化，只修改这个节点和受它影响的父节点，其它节点则进行共享
+
+如下图所示：
+
+
+
+![img](E:\pogject\学习笔记\image\react\2b4c801a7b40eefcd4ee6767fb984fdf_720w.gif)
+
+
+
+### 如何使用
+
+使用`Immutable`对象最主要的库是`immutable.js`
+
+immutable.js 是一个完全独立的库，无论基于什么框架都可以用它
+
+**其出现场景在于弥补 Javascript 没有不可变数据结构的问题**，通过 structural sharing来解决的性能问题
+
+内部提供了一套完整的 Persistent Data Structure，还有很多易用的数据类型，如`Collection`、`List`、`Map`、`Set`、`Record`、`Seq`，其中：
+
+- List: 有序索引集，类似 JavaScript 中的 Array
+- Map: 无序索引集，类似 JavaScript 中的 Object
+- Set: 没有重复值的集合
+
+主要的方法如下：
+
+- fromJS()：将一个js数据转换为Immutable类型的数据
+
+```js
+const obj = Immutable.fromJS({a:'123',b:'234'})
+```
+
+- toJS()：将一个Immutable数据转换为JS类型的数据
+- is()：对两个对象进行比较
+
+```js
+import { Map, is } from 'immutable'
+
+const map1 = Map({ a: 1, b: 1, c: 1 })
+const map2 = Map({ a: 1, b: 1, c: 1 })
+
+map1 === map2   //false
+Object.is(map1, map2) // false
+
+is(map1, map2) // true
+```
+
+- get(key)：对数据或对象取值
+- getIn([]) ：对嵌套对象或数组取值，传参为数组，表示位置
+
+```js
+let abs = Immutable.fromJS({a: {b:2}});
+abs.getIn(['a', 'b']) // 2
+abs.getIn(['a', 'c']) // 子级没有值
+
+let arr = Immutable.fromJS([1 ,2, 3, {a: 5}]);
+arr.getIn([3, 'a']); // 5
+arr.getIn([3, 'c']); // 子级没有值
+```
+
+- setIn(key, value)
+
+如下例子：使用方法如下：
+
+```js
+import Immutable from 'immutable';
+foo = Immutable.fromJS({a: {b: 1}});
+bar = foo.setIn(['a', 'b'], 2);   // 使用 setIn 赋值
+
+console.log(foo.getIn(['a', 'b']));  // 使用 getIn 取值，打印 1
+console.log(foo === bar);  //  打印 false
+```
+
+如果换到原生的`js`，则对应如下：
+
+```js
+let foo = {a: {b: 1}};
+let bar = foo;
+bar.a.b = 2;
+console.log(foo.a.b);  // 打印 2
+console.log(foo === bar);  //  打印 true
+```
+
+### 在React中应用
+
+使用 `Immutable `可以给 `React` 应用带来性能的优化，主要体现在减少渲染的次数
+
+在做`react`性能优化的时候，为了避免重复渲染，我们会在`shouldComponentUpdate()`中做对比，当返回`true`执行`render`方法
+
+`Immutable`通过`is`方法则可以完成对比，而无需`cloneDeep`像一样通过深度比较的方式比较
+
+在使用`redux`过程中也可以结合`Immutable`，**不使用`Immutable`前修改一个数据需要做一个深拷贝**
+
+```js
+import '_' from 'lodash';
+
+const Component = React.createClass({
+  getInitialState() {
+    return {
+      data: { times: 0 }
+    }
+  },
+  handleAdd() {
+    let data = _.cloneDeep(this.state.data);
+    data.times = data.times + 1;
+    this.setState({ data: data });
+  }
+}
+```
+
+使用 Immutable 后：
+
+```js
+getInitialState() {
+  return {
+    data: Map({ times: 0 })
+  }
+},
+  handleAdd() {
+    this.setState({ data: this.state.data.update('times', v => v + 1) });
+    // 这时的 times 并不会改变
+    console.log(this.state.data.get('times'));
+  }
+```
+
+同理，在`redux`中也可以将数据进行`fromJS`处理
+
+```js
+import * as constants from './constants'
+import {fromJS} from 'immutable'
+const defaultState = fromJS({ //将数据转化成immutable数据
+    home:true,
+    focused:false,
+    mouseIn:false,
+    list:[],
+    page:1,
+    totalPage:1
+})
+
+export default(state=defaultState,action)=>{
+    switch(action.type){
+        case constants.SEARCH_FOCUS:
+            return state.set('focused',true) //更改immutable数据
+        case constants.CHANGE_HOME_ACTIVE:
+            return state.set('home',action.value)
+        case constants.SEARCH_BLUR:
+            return state.set('focused',false)
+        case constants.CHANGE_LIST:
+            // return state.set('list',action.data).set('totalPage',action.totalPage)
+            //merge效率更高，执行一次改变多个数据
+            return state.merge({
+                list:action.data,
+                totalPage:action.totalPage
+            })
+        case constants.MOUSE_ENTER:
+            return state.set('mouseIn',true)
+        case constants.MOUSE_LEAVE:
+            return state.set('mouseIn',false)
+        case constants.CHANGE_PAGE:
+            return state.set('page',action.page)
+        default:
+            return state
+    }
+}
+```
+
+
+
+----
+
+## 在react中怎么实现组件间的过渡动画？
+
+在日常开发中，页面切换时的转场动画是比较基础的一个场景
+
+当一个组件在显示与消失过程中存在过渡动画，可以很好的增加用户的体验
+
+在`react`中实现过渡动画效果会有很多种选择，如`react-transition-group`，`react-motion`，`Animated`，以及原生的`CSS`都能完成切换动画
+
+在`react`中，`react-transition-group`是一种很好的解决方案，其为元素添加`enter`，`enter-active`，`exit`，`exit-active`这一系列勾子
+
+可以帮助我们方便的实现组件的入场和离场动画
+
+其主要提供了三个主要的组件：
+
+- CSSTransition：在前端开发中，结合 CSS 来完成过渡动画效果
+- SwitchTransition：两个组件显示和隐藏切换时，使用该组件
+- TransitionGroup：将多个动画组件包裹在其中，一般用于列表中元素的动画
+
+### CSSTransition
+
+其实现**动画的原理**在于，当`CSSTransition`的`in`属性置为`true`时，`CSSTransition`首先会给其子组件加上`xxx-enter`、`xxx-enter-active`的`class`执行动画
+
+当动画执行结束后，会移除两个`class`，并且添加`-enter-done`的`class`
+
+所以可以利用这一点，通过`css`的`transition`属性，让元素在两个状态之间平滑过渡，从而得到相应的动画效果
+
+当`in`属性置为`false`时，`CSSTransition`会给子组件加上`xxx-exit`和`xxx-exit-active`的`class`，然后开始执行动画，当动画结束后，移除两个`class`，然后添加`-enter-done`的`class`
+
+如下例子：
+
+```jsx
+export default class App2 extends React.PureComponent {
+
+  state = {show: true};
+
+  onToggle = () => this.setState({show: !this.state.show});
+
+  render() {
+    const {show} = this.state;
+    return (
+      <div className={'container'}>
+        <div className={'square-wrapper'}>
+          <CSSTransition
+            in={show}
+            timeout={500}
+            classNames={'fade'}
+            unmountOnExit={true}
+          >
+            <div className={'square'} />
+          </CSSTransition>
+        </div>
+        <Button onClick={this.onToggle}>toggle</Button>
+      </div>
+    );
+  }
+}
+```
+
+对应`css`样式如下：
+
+```css
+.fade-enter {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 500ms;
+}
+
+.fade-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: all 500ms;
+}
+```
+
+### SwitchTransition
+
+`SwitchTransition`可以完成两个组件之间切换的炫酷动画
+
+比如有一个按钮需要在`on`和`off`之间切换，我们希望看到`on`先从左侧退出，`off`再从右侧进入
+
+`SwitchTransition`中主要有一个属性`mode`，对应两个值：
+
+- in-out：表示新组件先进入，旧组件再移除；
+- out-in：表示就组件先移除，新组建再进入
+
+**`SwitchTransition`组件里面要有`CSSTransition`**，不能直接包裹你想要切换的组件
+
+里面的`CSSTransition`组件不再像以前那样接受`in`属性来判断元素是何种状态，**取而代之的是`key`属性**
+
+下面给出一个按钮入场和出场的示例，如下：
+
+```jsx
+import { SwitchTransition, CSSTransition } from "react-transition-group";
+
+export default class SwitchAnimation extends PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isOn: true
+    }
+  }
+
+  render() {
+    const {isOn} = this.state;
+    return (
+      <SwitchTransition mode="out-in">
+        <CSSTransition classNames="btn"
+                       timeout={500}
+                       key={isOn ? "on" : "off"}>
+          {
+          <button onClick={this.btnClick.bind(this)}>
+            {isOn ? "on": "off"}
+          </button>
+        }
+        </CSSTransition>
+      </SwitchTransition>
+    )
+  }
+
+  btnClick() {
+    this.setState({isOn: !this.state.isOn})
+  }
+}
+```
+
+`css`文件对应如下：
+
+```css
+.btn-enter {
+  transform: translate(100%, 0);
+  opacity: 0;
+}
+
+.btn-enter-active {
+  transform: translate(0, 0);
+  opacity: 1;
+  transition: all 500ms;
+}
+
+.btn-exit {
+  transform: translate(0, 0);
+  opacity: 1;
+}
+
+.btn-exit-active {
+  transform: translate(-100%, 0);
+  opacity: 0;
+  transition: all 500ms;
+}
+```
+
+### TransitionGroup
+
+当有一组动画的时候，就可将这些`CSSTransition`放入到一个`TransitionGroup`中来完成动画
+
+同样`CSSTransition`里面没有`in`属性，**用到了`key`属性**
+
+`TransitionGroup`在感知`children`发生变化的时候，先保存移除的节点，当动画结束后才真正移除
+
+其处理方式如下：
+
+- 插入的节点，先渲染dom，然后再做动画
+- 删除的节点，先做动画，然后再删除dom
+
+如下：
+
+```jsx
+import React, { PureComponent } from 'react'
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+
+export default class GroupAnimation extends PureComponent {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      friends: []
+    }
+  }
+
+  render() {
+    return (
+      <div>
+        <TransitionGroup>
+          {
+            this.state.friends.map((item, index) => {
+              return (
+                <CSSTransition classNames="friend" timeout={300} key={index}>
+                  <div>{item}</div>
+                </CSSTransition>
+              )
+            })
+          }
+        </TransitionGroup>
+        <button onClick={e => this.addFriend()}>+friend</button>
+      </div>
+    )
+  }
+
+  addFriend() {
+    this.setState({
+      friends: [...this.state.friends, "coderwhy"]
+    })
+  }
+}
+```
+
+对应`css`如下：
+
+```css
+.friend-enter {
+    transform: translate(100%, 0);
+    opacity: 0;
+}
+
+.friend-enter-active {
+    transform: translate(0, 0);
+    opacity: 1;
+    transition: all 500ms;
+}
+
+.friend-exit {
+    transform: translate(0, 0);
+    opacity: 1;
+}
+
+.friend-exit-active {
+    transform: translate(-100%, 0);
+    opacity: 0;
+    transition: all 500ms;
+}
+```
+
+
+
+---
+
+## React 中怎么实现状态自动保存（KeepAlive）？
+
+### 什么是状态保存？
+
+假设有下述场景：
+
+移动端中，用户访问了一个列表页，上拉浏览列表页的过程中，随着滚动高度逐渐增加，数据也将采用触底分页加载的形式逐步增加，列表页浏览到某个位置，用户看到了感兴趣的项目，点击查看其详情，进入详情页，**从详情页退回列表页时，需要停留在离开列表页时的浏览位置上**
+
+类似的数据或场景还有已填写但未提交的表单、管理系统中可切换和可关闭的功能标签等，这类数据随着用户交互逐渐变化或增长，这里理解为状态，在交互过程中，因为某些原因需要临时离开交互场景，则需要对状态进行保存
+
+在 React 中，我们通常会使用路由去管理不同的页面，而在切换页面时，路由将会卸载掉未匹配的页面组件，所以上述列表页例子中，当用户从详情页退回列表页时，会回到列表页顶部，因为列表页组件被路由卸载后重建了，状态被丢失。
+
+### 如何实现 React 中的状态保存
+
+在 Vue 中，我们可以非常便捷地通过 `<keep-alive> `标签实现状态的保存，该标签会缓存不活动的组件实例，而不是销毁它们
+
+而在 React 中并没有这个功能，曾经有人在官方提过相关 issue ，但官方认为这个功能容易造成内存泄露，表示暂时不考虑支持，所以我们需要自己想办法了。
+
+#### 常见的解决方式：手动保存状态
+
+手动保存状态，是比较常见的解决方式，可以配合 React 组件的 componentWillUnmount 生命周期通过 redux 之类的状态管理层对数据进行保存，通过 componentDidMount 周期进行数据恢复
+
+在需要保存的状态较少时，这种方式可以比较快地实现我们所需功能，但在数据量大或者情况多变时，手动保存状态就会变成一件麻烦事了
+
+作为程序员，当然是尽可能懒啦，为了不需要每次都关心如何对数据进行保存恢复，我们需要研究如何自动保存状态
+
+#### 通过路由实现自动状态保存（通常使用 react-router）
+
+既然 React 中状态的丢失是由于路由切换时卸载了组件引起的，那可以尝试从路由机制上去入手，**改变路由对组件的渲染行为**
+
+我们有以下的方式去实现这个功能：
+
+- 重写 `<Route>` 组件，可参考 [react-live-route](https://github.com/fi3ework/react-live-route)。重写可以实现我们想要的功能，但成本也比较高，需要注意对原始 `<Route>` 功能的保存，以及多个 react-router 版本的兼容
+- 重写路由库，可参考 [react-keeper](https://github.com/lanistor/react-keeper) 。重写路由库成本是一般开发者无法承受的，且完全替换掉路由方案是一个风险较大的事情，需要较为慎重地考虑。
+- 基于 `<Route>` 组件现有行为做拓展，可参考 [react-router-cache-route](https://github.com/CJY0208/react-router-cache-route) 。在阅读了 `<Route>` 的源码后发现，如果使用 component 或者 render 属性，都无法避免路由在不匹配时被卸载掉的命运。但将 children 属性当作方法来使用，我们就有手动控制渲染的行为的可能。
+
+上面几种方案，主要通过路由入手实现自动状态保存的可能，但终究不是真实的、纯粹的 KeepAlive 功能。
+
+#### 模拟真实的 `<KeepAlive> `功能
+
+以下是期望的使用方式
+
+```jsx
+function App() {
+  const [show, setShow] = useState(true)
+
+  return (
+    <div>
+      <button onClick={() => setShow(show => !show)}>Toggle</button>
+      {show && (
+        <KeepAlive>
+          <Test />
+        </KeepAlive>
+      )}
+    </div>
+  )
+}
+```
+
+下面简单介绍下 [react-activation](https://github.com/CJY0208/react-activation) 的实现原理：由于 React 会卸载掉处于固有组件层级内的组件，所以我们需要将 `<KeepAlive>` 中的组件，也就是其 children 属性抽取出来，渲染到一个不会被卸载的组件 `<Keeper>` 内，再使用 DOM 操作将 `<Keeper>` 内的真实内容移入对应 `<KeepAlive>`，就可以实现此功能。
+
+
+
+---
+
+## 在 React 中可以做哪些性能优化？
+
+- **使用 shouldComponentUpdate 避免不需要的渲染**，但是如果对 props 和 state 做深比较，代价很大，所以需要根据业务进行些取舍；在有子组件的情况下，为了避免子组件的重复渲染，可以通过父组件来判断子组件是否需要 PureRender。
+- **将 props 设置为数组或对象**：**每次调用 React 组件都会创建新组件**，就算传入的数组或对象的值没有改变，他们的引用地址也会发生改变，比如，如果按照如下的写法，那么每次渲染时 style 都是一个新对象
+
+```js
+// 不推荐
+<button style={{ color: 'red' }} />
+
+// 推荐
+const style = { color: 'red' }
+<button style={style} />
+
+// 不推荐
+<button style={this.props.style || {} } />  
+
+// 推荐
+const defaultStyle = {}
+<button style={this.props.style || defaultStyle } />   
+```
+
+- **将函数的绑定移动到构造函数内**：**可以避免每次都绑定事件**。
+- **使用 immutable 不可变数据**，在我们项目中使用引用类型时，为了避免对原始数据的影响，一般建议使用 shallowCopy 和 deepCopy 对数据进行处理，但是这样会造成 CPU 和 内存的浪费，所以推荐使用 immutable，**优点**如下
+  - 降低了“可变”带来的复杂度
+  - 节省内存，immutable 使用结构共享尽量复用内存，没有被引用的对象会被垃圾回收
+  - 可以更好的做撤销/重做，复制/粘贴，时间旅行
+  - 不会有并发问题（因为数据本身就是不可变的）
+  - 拥抱函数式编程
+- **给子组件设置一个唯一的 key**，因为在 diff 算法中，会用 key 作为唯一标识优化渲染
+
+
+
 
 
 
@@ -2203,6 +3848,460 @@ React.lazy() 和 React.Suspense 的提出为现代 React 应用的性能优化�
 
 ----
 
+## 说说你对React Router的理解？常用的Router组件有哪些？
+
+### React Router是什么
+
+`react-router`等前端路由的原理大致相同，**可以实现无刷新的条件下切换显示不同的页面**
+
+路由的本质就是页面的`URL`发生改变时，页面的显示结果可以根据`URL`的变化而变化，但是页面不会刷新
+
+因此，可以通过前端路由可以实现单页(SPA)应用
+
+`react-router`主要分成了几个不同的包：
+
+- react-router: 实现了路由的核心功能
+- react-router-dom： 基于 react-router，加入了在浏览器运行环境下的一些功能
+- react-router-native：基于 react-router，加入了 react-native 运行环境下的一些功能
+- react-router-config: 用于配置静态路由的工具库
+
+### 有哪些组件
+
+这里主要讲述的是`react-router-dom`的常用`API`，主要是提供了一些组件：
+
+- BrowserRouter、HashRouter
+- Route
+- Link、NavLink
+- switch
+- redirect
+
+#### BrowserRouter、HashRouter
+
+`Router`中包含了对路径改变的监听，并且会将相应的路径传递给子组件
+
+`BrowserRouter`是`history`模式，`HashRouter`是`hash`模式
+
+使用两者作为最顶层组件包裹其他组件
+
+```jsx
+import { BrowserRouter as Router } from "react-router-dom";
+
+export default function App() {
+  return (
+    <Router>
+      <main>
+        <nav>
+          <ul>
+            <li>
+              < a href=" ">Home</ a>
+            </li>
+            <li>
+              < a href="/about">About</ a>
+            </li>
+            <li>
+              < a href="/contact">Contact</ a>
+            </li>
+          </ul>
+        </nav>
+      </main>
+    </Router>
+  );
+}
+```
+
+#### Route
+
+`Route`用于路径的匹配，然后进行组件的渲染，对应的属性如下：
+
+- path 属性：用于设置匹配到的路径
+- component 属性：设置匹配到路径后，渲染的组件
+- render 属性：设置匹配到路径后，渲染的内容
+- exact 属性：开启精准匹配，只有精准匹配到完全一致的路径，才会渲染对应的组件
+
+```jsx
+import { BrowserRouter as Router, Route } from "react-router-dom";
+
+export default function App() {
+  return (
+    <Router>
+      <main>
+        <nav>
+          <ul>
+            <li>
+              < a href="/">Home</ a>
+            </li>
+            <li>
+              < a href="/about">About</ a>
+            </li>
+            <li>
+              < a href="/contact">Contact</ a>
+            </li>
+          </ul>
+        </nav>
+        <Route path="/" render={() => <h1>Welcome!</h1>} />
+      </main>
+    </Router>
+  );
+}
+```
+
+#### Link、NavLink
+
+通常路径的跳转是使用`Link`组件，最终会被渲染成`a`元素，其中属性`to`代替`a`标标签的`href`属性
+
+`NavLink`是在`Link`基础之上增加了一些样式属性，例如组件被选中时，发生样式变化，则可以设置`NavLink`的一下属性：
+
+- activeStyle：活跃时（匹配时）的样式
+- activeClassName：活跃时添加的class
+
+如下：
+
+```jsx
+<NavLink to="/" exact activeStyle={{color: "red"}}>首页</NavLink>
+<NavLink to="/about" activeStyle={{color: "red"}}>关于</NavLink>
+<NavLink to="/profile" activeStyle={{color: "red"}}>我的</NavLink>
+```
+
+如果需要实现`js`实现页面的跳转，那么可以通过下面的形式：
+
+通过`Route`作为顶层组件包裹其他组件后,页面组件就可以接收到一些路由相关的东西，比如`props.history`
+
+```jsx
+const Contact = ({ history }) => (
+  <Fragment>
+    <h1>Contact</h1>
+    <button onClick={() => history.push("/")}>Go to home</button>
+    <FakeText />
+  </Fragment>
+);
+```
+
+#### redirect
+
+用于路由的重定向，当这个组件出现时，就会执行跳转到对应的`to`路径中，如下例子：
+
+```jsx
+const About = ({
+  match: {
+    params: { name },
+  },
+}) => (
+  // props.match.params.name
+  <Fragment>
+    {name !== "tom" ? <Redirect to="/" /> : null}
+    <h1>About {name}</h1>
+    <FakeText />
+  </Fragment>
+)
+```
+
+上述组件当接收到的路由参数`name` 不等于 `tom` 的时候，将会自动重定向到首页
+
+#### switch
+
+`swich`组件的作用适用于**当匹配到第一个组件的时候，后面的组件就不应该继续匹配**
+
+如下例子：
+
+```jsx
+<Switch>
+  <Route exact path="/" component={Home} />
+  <Route path="/about" component={About} />
+  <Route path="/profile" component={Profile} />
+  <Route path="/:userid" component={User} />
+  <Route component={NoMatch} />
+</Switch>
+```
+
+
+
+
+
+除了一些路由相关的组件之外，`react-router`还提供一些`hooks`，如下：
+
+- useHistory
+- useParams
+- useLocation
+
+#### useHistory
+
+`useHistory`可以让组件内部直接访问`history`，无须通过`props`获取
+
+```jsx
+import { useHistory } from "react-router-dom";
+
+const Contact = () => {
+  const history = useHistory();
+  return (
+    <Fragment>
+      <h1>Contact</h1>
+      <button onClick={() => history.push("/")}>Go to home</button>
+    </Fragment>
+  );
+};
+```
+
+#### useParams
+
+```jsx
+const About = () => {
+  const { name } = useParams();
+  return (
+    // props.match.params.name
+    <Fragment>
+      {name !== "John Doe" ? <Redirect to="/" /> : null}
+      <h1>About {name}</h1>
+      <Route component={Contact} />
+    </Fragment>
+  );
+};
+```
+
+#### useLocation
+
+`useLocation` 会返回当前 `URL `的 `location `对象
+
+```jsx
+import { useLocation } from "react-router-dom";
+
+const Contact = () => {
+  const { pathname } = useLocation();
+
+  return (
+    <Fragment>
+      <h1>Contact</h1>
+      <p>Current URL: {pathname}</p >
+    </Fragment>
+  );
+};
+```
+
+### 参数传递
+
+这些路由传递参数主要分成了三种形式：
+
+- 动态路由的方式
+- search传递参数
+- to传入对象
+
+#### 动态路由
+
+动态路由的概念指的是路由中的路径并不会固定
+
+例如将`path`在`Route`匹配时写成`/detail/:id`，那么 `/detail/abc`、`/detail/123`都可以匹配到该`Route`
+
+```jsx
+<NavLink to="/detail/abc123">详情</NavLink>
+
+<Switch>
+    ... 其他Route
+    <Route path="/detail/:id" component={Detail}/>
+    <Route component={NoMatch} />
+</Switch>
+```
+
+获取参数方式如下：
+
+```js
+console.log(props.match.params.xxx)
+```
+
+#### search传递参数
+
+在跳转的路径中添加了一些query参数；
+
+```jsx
+<NavLink to="/detail2?name=why&age=18">详情2</NavLink>
+
+<Switch>
+  <Route path="/detail2" component={Detail2}/>
+</Switch>
+```
+
+获取形式如下：
+
+```js
+console.log(props.location.search)
+```
+
+#### to传入对象
+
+传递方式如下：
+
+```jsx
+<NavLink to={{
+    pathname: "/detail2", 
+    query: {name: "kobe", age: 30},
+    state: {height: 1.98, address: "洛杉矶"},
+    search: "?apikey=123"
+  }}>
+  详情2
+</NavLink>
+```
+
+获取参数的形式如下：
+
+```
+console.log(props.location)
+```
+
+
+
+---
+
+##  说说React Router有几种模式，以及实现原理？
+
+
+
+在单页应用中，一个`web`项目只有一个`html`页面，一旦页面加载完成之后，就不用因为用户的操作而进行页面的重新加载或者跳转，其特性如下：
+
+- 改变 url 且不让浏览器像服务器发送请求
+- 在不刷新页面的前提下动态改变浏览器地址栏中的URL地址
+
+其中主要分成了两种模式：
+
+- hash 模式：在url后面加上#，如http://127.0.0.1:5500/home/#/page1
+- history 模式：允许操作浏览器的曾经在标签页或者框架里访问的会话历史记录
+
+
+
+`React Router`对应的`hash`模式和`history`模式对应的组件为：
+
+- HashRouter
+- BrowserRouter
+
+这两个组件的使用都十分的简单，作为最顶层组件包裹其他组件，如下所示
+
+```jsx
+import React from 'react';
+import {
+  BrowserRouter as Router,
+  // HashRouter as Router  
+  Switch,
+  Route,
+} from "react-router-dom";
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Backend from './pages/Backend';
+import Admin from './pages/Admin';
+
+
+function App() {
+  return (
+    <Router>
+        <Route path="/login" component={Login}/>
+        <Route path="/backend" component={Backend}/>
+        <Route path="/admin" component={Admin}/>
+        <Route path="/" component={Home}/>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+
+
+路由描述了 `URL` 与 `UI `之间的映射关系，**这种映射是单向的，即 URL 变化引起 UI 更新（无需刷新页面）**
+
+下面以`hash`模式为例子，改变`hash`值并不会导致浏览器向服务器发送请求，浏览器不发出请求，也就不会刷新页面
+
+`hash` 值改变，触发全局 `window` 对象上的 `hashchange` 事件。**所以 `hash` 模式路由就是利用 `hashchange` 事件监听 `URL` 的变化**，从而进行 `DOM` 操作来模拟页面跳转
+
+`react-router`也是基于这个特性实现路由的跳转
+
+### HashRouter
+
+`HashRouter`包裹了整应用，
+
+通过`window.addEventListener('hashChange',callback)`监听`hash`值的变化，并传递给其嵌套的组件
+
+然后通过`context`将`location`数据往后代组件传递，如下：
+
+```jsx
+import React, { Component } from 'react';
+import { Provider } from './context'
+// 该组件下Api提供给子组件使用
+class HashRouter extends Component {
+  constructor() {
+    super()
+    this.state = {
+      location: {
+        pathname: window.location.hash.slice(1) || '/'
+      }
+    }
+  }
+  // url路径变化 改变location
+  componentDidMount() {
+    window.location.hash = window.location.hash || '/'
+    window.addEventListener('hashchange', () => {
+      this.setState({
+        location: {
+          ...this.state.location,
+          pathname: window.location.hash.slice(1) || '/'
+        }
+      }, () => console.log(this.state.location))
+    })
+  }
+  render() {
+    let value = {
+      location: this.state.location
+    }
+    return (
+      <Provider value={value}>
+        {
+          this.props.children
+        }
+      </Provider>
+    );
+  }
+}
+
+export default HashRouter;
+
+```
+
+### Router
+
+`Router`组件主要做的是通过`BrowserRouter`传过来的当前值，通过`props`传进来的`path`与`context`传进来的`pathname`进行匹配，然后决定是否执行渲染组件
+
+```jsx
+import React, { Component } from 'react';
+import { Consumer } from './context'
+const { pathToRegexp } = require("path-to-regexp");
+class Route extends Component {
+  render() {
+    return (
+      <Consumer>
+        {
+          state => {
+            console.log(state)
+            let {path, component: Component} = this.props
+            let pathname = state.location.pathname
+            let reg = pathToRegexp(path, [], {end: false})
+            // 判断当前path是否包含pathname
+            if(pathname.match(reg)) {
+              return <Component></Component>
+            }
+            return null
+          }
+        }
+      </Consumer>
+    );
+  }
+}
+export default Route;
+
+```
+
+
+
+
+
+
+
+----
+
 # redux
 
 ----
@@ -2270,6 +4369,105 @@ Store 是一个 JavaScript 对象，它可以保存程序的状态，并提供�
 - 组织 - Redux 准确地说明了代码的组织方式，这使得代码在团队使用时更加一致和简单。
 
 ---
+
+## 说说你对Redux的理解？其工作原理？
+
+**目的**
+
+`React`是用于构建用户界面的，帮助我们解决渲染`DOM`的过程
+
+而在整个应用中会存在很多个组件，每个组件的`state`是由自身进行管理，包括组件定义自身的`state`、组件之间的通信通过`props`传递、使用`Context`实现数据共享
+
+如果让每个组件都存储自身相关的状态，理论上来讲不会影响应用的运行，但在开发及后续维护阶段，我们将花费大量精力去查询状态的变化过程
+
+这种情况下，如果将所有的状态进行集中管理，当需要更新状态的时候，仅需要对这个管理集中处理，而不用去关心状态是如何分发到每一个组件内部的
+
+`redux`就是一个实现上述集中管理的容器，遵循三大基本原则：
+
+- 单一数据源
+- state 是只读的
+- 使用纯函数来执行修改
+
+注意的是，`redux`并不是只应用在`react`中，还与其他界面库一起使用，如`Vue`
+
+**工作原理**
+
+`redux `要求我们把数据都放在 `store `公共存储空间
+
+一个组件改变了 `store` 里的数据内容，其他组件就能感知到 `store `的变化，再来取数据，从而间接的实现了这些数据传递的功能
+
+工作流程图如下所示：
+
+
+
+![img](E:\pogject\学习笔记\image\react\27b2e930-e56b-11eb-85f6-6fac77c0c9b3.png)
+
+
+
+
+
+根据流程图，可以想象，`React Components` 是借书的用户， `Action Creactor` 是借书时说的话(借什么书)， `Store` 是图书馆管理员，`Reducer` 是记录本(借什么书，还什么书，在哪儿，需要查一下)， `state` 是书籍信息
+
+整个流程就是借书的用户需要先存在，然后需要借书，需要一句话来描述借什么书，图书馆管理员听到后需要查一下记录本，了解图书的位置，最后图书馆管理员会把这本书给到这个借书人
+
+转换为代码是，`React Components` 需要获取一些数据, 然后它就告知 `Store` 需要获取数据，这就是就是 `Action Creactor` , `Store` 接收到之后去 `Reducer` 查一下， `Reducer` 会告诉 `Store` 应该给这个组件什么数据
+
+```js
+const redux = require('redux');
+
+const initialState = {
+  counter: 0
+}
+
+// 创建reducer
+const reducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "INCREMENT":
+      return {...state, counter: state.counter + 1};
+    case "DECREMENT":
+      return {...state, counter: state.counter - 1};
+    case "ADD_NUMBER":
+      return {...state, counter: state.counter + action.number}
+    default: 
+      return state;
+  }
+}
+
+// 根据reducer创建store
+const store = redux.createStore(reducer);
+
+store.subscribe(() => {
+  console.log(store.getState());
+})
+
+// 修改store中的state
+store.dispatch({
+  type: "INCREMENT"
+})
+// console.log(store.getState());
+
+store.dispatch({
+  type: "DECREMENT"
+})
+// console.log(store.getState());
+
+store.dispatch({
+  type: "ADD_NUMBER",
+  number: 5
+})
+// console.log(store.getState());
+```
+
+- createStore可以帮助创建 store
+- store.dispatch 帮助派发 action , action 会传递给 store
+- store.getState 这个方法可以帮助获取 store 里边所有的数据内容
+- store.subscrible 方法订阅 store 的改变，只要 store 发生改变， store.subscrible 这个函数接收的这个回调函数就会被执行
+
+
+
+
+
+----
 
 ## 2. redux-saga 和 mobx 的比较
 
@@ -2349,9 +4547,526 @@ Store 是一个 JavaScript 对象，它可以保存程序的状态，并提供�
 
 ----
 
+##  说说对Redux中间件的理解？常用的中间件有哪些？实现原理？
+
+### 中间件是什么
+
+中间件（Middleware）是介于应用系统和系统软件之间的一类软件，**它使用系统软件所提供的基础服务（功能），衔接网络上应用系统的各个部分或不同的应用，能够达到资源共享、功能共享的目的**
+
+了解了`Redux`整个工作流程，当`action`发出之后，`reducer`立即算出`state`，整个过程是一个同步的操作
+
+那么如果需要支持异步操作，或者支持错误处理、日志监控，这个过程就可以用上中间件
+
+`Redux`中，**中间件就是放在就是在`dispatch`过程**，在分发`action`进行拦截处理，如下图：
 
 
 
+![img](E:\pogject\学习笔记\image\react\57edf750-e699-11eb-ab90-d9ae814b240d.png)
+
+
+
+其本质上一个函数，对`store.dispatch`方法进行了改造，在发出 `Action `和执行 `Reducer `这两步之间，添加了其他功能
+
+### 常用的中间件
+
+有很多优秀的`redux`中间件，如：
+
+- redux-thunk：用于异步操作
+- redux-logger：用于日志记录
+
+上述的中间件都需要通过`applyMiddlewares`进行注册，**作用是将所有的中间件组成一个数组，依次执行**
+
+然后作为第二个参数传入到`createStore`中
+
+```js
+const store = createStore(
+  reducer,
+  applyMiddleware(thunk, logger)
+);
+```
+
+#### redux-thunk
+
+`redux-thunk`是官网推荐的异步处理中间件
+
+默认情况下的`dispatch(action)`，`action`需要是一个`JavaScript`的对象
+
+`redux-thunk`中间件**会判断你当前传进来的数据类型**，如果是一个函数，将会给函数传入参数值（dispatch，getState）
+
+- dispatch函数用于我们之后再次派发action
+- getState函数考虑到我们之后的一些操作需要依赖原来的状态，用于让我们可以获取之前的一些状态
+
+所以`dispatch`可以写成下述函数的形式：
+
+```js
+const getHomeMultidataAction = () => {
+  return (dispatch) => {
+    axios.get("http://xxx.xx.xx.xx/test").then(res => {
+      const data = res.data.data;
+      dispatch(changeBannersAction(data.banner.list));
+      dispatch(changeRecommendsAction(data.recommend.list));
+    })
+  }
+}
+```
+
+#### redux-logger
+
+如果想要实现一个日志功能，则可以使用现成的`redux-logger`
+
+```js
+import { applyMiddleware, createStore } from 'redux';
+import createLogger from 'redux-logger';
+const logger = createLogger();
+
+const store = createStore(
+  reducer,
+  applyMiddleware(logger)
+);
+```
+
+这样我们就能简单通过中间件函数实现日志记录的信息
+
+### 实现原理
+
+首先看看`applyMiddlewares`的源码
+
+```js
+export default function applyMiddleware(...middlewares) {
+  return (createStore) => (reducer, preloadedState, enhancer) => {
+    var store = createStore(reducer, preloadedState, enhancer);
+    var dispatch = store.dispatch;
+    var chain = [];
+
+    var middlewareAPI = {
+      getState: store.getState,
+      dispatch: (action) => dispatch(action)
+    };
+    chain = middlewares.map(middleware => middleware(middlewareAPI));
+    dispatch = compose(...chain)(store.dispatch);
+
+    return {...store, dispatch}
+  }
+}
+```
+
+所有中间件被放进了一个数组`chain`，然后嵌套执行，最后执行`store.dispatch`。可以看到，中间件内部（`middlewareAPI`）可以拿到`getState`和`dispatch`这两个方法
+
+在上面的学习中，我们了解到了`redux-thunk`的基本使用
+
+内部会将`dispatch`进行一个判断，然后执行对应操作，原理如下：
+
+```js
+function patchThunk(store) {
+    let next = store.dispatch;
+
+    function dispatchAndThunk(action) {
+        if (typeof action === "function") {
+            action(store.dispatch, store.getState);
+        } else {
+            next(action);
+        }
+    }
+
+    store.dispatch = dispatchAndThunk;
+}
+```
+
+实现一个日志输出的原理也非常简单，如下：
+
+```js
+let next = store.dispatch;
+
+function dispatchAndLog(action) {
+  console.log("dispatching:", addAction(10));
+  next(addAction(5));
+  console.log("新的state:", store.getState());
+}
+
+store.dispatch = dispatchAndLog;
+```
+
+
+
+----
+
+## 你在React项目中是如何使用Redux的? 项目结构是如何划分的？
+
+`redux`是用于数据状态管理，而`react`是一个视图层面的库
+
+如果将两者连接在一起，可以使用官方推荐`react-redux`库，其具有高效且灵活的特性
+
+`react-redux`将组件分成：
+
+- 容器组件：存在逻辑处理
+- UI 组件：只负责现显示和交互，内部不处理逻辑，状态由外部控制
+
+通过`redux`将整个应用状态存储到`store`中，组件可以派发`dispatch`行为`action`给`store`
+
+其他组件通过订阅`store`中的状态`state`来更新自身的视图
+
+
+
+使用`react-redux`分成了两大核心：
+
+- Provider
+- connection
+
+### Provider
+
+在`redux`中存在一个`store`用于存储`state`，如果将这个`store`存放在顶层元素中，其他组件都被包裹在顶层元素之上
+
+**那么所有的组件都能够受到`redux`的控制**，都能够获取到`redux`中的数据
+
+使用方式如下：
+
+```html
+<Provider store = {store}>
+    <App />
+<Provider>
+```
+
+### connection
+
+connect`方法将`store`上的`getState `和 `dispatch `包装成组件的`props
+
+导入`conect`如下：
+
+```js
+import { connect } from "react-redux";
+```
+
+用法如下：
+
+```js
+connect(mapStateToProps, mapDispatchToProps)(MyComponent)
+```
+
+可以传递两个参数：
+
+- mapStateToProps
+- mapDispatchToProps
+
+#### mapStateToProps
+
+把`redux`中的数据映射到`react`中的`props`中去
+
+如下：
+
+```js
+const mapStateToProps = (state) => {
+    return {
+        // prop : state.xxx  | 意思是将state中的某个数据映射到props中
+        foo: state.bar
+    }
+}
+```
+
+组件内部就能够通过`props`获取到`store`中的数据
+
+```jsx
+class Foo extends Component {
+    constructor(props){
+        super(props);
+    }
+    render(){
+        return(
+         // 这样子渲染的其实就是state.bar的数据了
+            <div>this.props.foo</div>
+        )
+    }
+}
+Foo = connect()(Foo)
+export default Foo
+```
+
+#### mapDispatchToProps
+
+将`redux`中的`dispatch`映射到组件内部的`props`中
+
+```js
+const mapDispatchToProps = (dispatch) => { // 默认传递参数就是dispatch
+  return {
+    onClick: () => {
+      dispatch({
+        type: 'increatment'
+      });
+    }
+  };
+}
+
+```
+
+```jsx
+class Foo extends Component {
+    constructor(props){
+        super(props);
+    }
+    render(){
+        return(
+         
+             <button onClick = {this.props.onClick}>点击increase</button>
+        )
+    }
+}
+Foo = connect()(Foo);
+export default Foo;
+```
+
+
+
+**小结**
+
+整体流程图大致如下所示：
+
+
+
+![img](E:\pogject\学习笔记\image\react\3e47db10-e7dc-11eb-85f6-6fac77c0c9b3.png)
+
+
+
+### 项目结构
+
+可以根据项目具体情况进行选择，以下列出两种常见的组织结构
+
+
+
+#### 按角色组织（MVC）
+
+角色如下：
+
+- reducers
+- actions
+- components
+- containers
+
+参考如下：
+
+```
+reducers/
+  todoReducer.js
+  filterReducer.js
+actions/
+  todoAction.js
+  filterActions.js
+components/
+  todoList.js
+  todoItem.js
+  filter.js
+containers/
+  todoListContainer.js
+  todoItemContainer.js
+  filterContainer.js
+```
+
+#### 按功能组织
+
+使用`redux`使用功能组织项目，也就是把完成同一应用功能的代码放在一个目录下，一个应用功能包含多个角色的代码
+
+`Redux`中，不同的角色就是`reducer`、`actions`和视图，而应用功能对应的就是用户界面的交互模块
+
+参考如下：
+
+```
+todoList/
+  actions.js
+  actionTypes.js
+  index.js
+  reducer.js
+  views/
+    components.js
+    containers.js
+filter/
+  actions.js
+  actionTypes.js
+  index.js
+  reducer.js
+  views/
+    components.js
+    container.js
+```
+
+每个功能模块对应一个目录，每个目录下包含同样的角色文件：
+
+- actionTypes.js 定义action类型
+- actions.js 定义action构造函数
+- reducer.js 定义这个功能模块如果响应actions.js定义的动作
+- views 包含功能模块中所有的React组件，包括展示组件和容器组件
+- index.js 把所有的角色导入，统一导出
+
+其中`index`模块用于导出对外的接口
+
+```js
+import * as actions from './actions.js';
+import reducer from './reducer.js';
+import view from './views/container.js';
+
+export { actions, reducer, view };
+```
+
+导入方法如下：
+
+```js
+import { actions, reducer, view as TodoList } from './xxxx'
+```
+
+
+
+---
+
+## Redux 中异步的请求怎么处理
+
+一般的异步请求，可以在 `componentDidmount` 中直接进⾏请求，⽆须借助redux。
+
+但是在⼀定规模的项⽬中,上述⽅法很难进⾏异步流的管理,通常情况下我们会借助redux的异步中间件进⾏异步处理。
+
+redux异步流中间件其实有很多，当下主流的异步中间件有两种`redux-thunk`、`redux-saga`。
+
+### 使用react-thunk中间件
+
+redux-thunk优点:
+
+- 体积⼩: redux-thunk的实现⽅式很简单，只有不到20⾏代码
+- 使⽤简单: redux-thunk没有引⼊像`redux-saga`或者`redux-observable`额外的范式，上⼿简单
+
+redux-thunk缺陷:
+
+- 样板代码过多: 与redux本身⼀样,通常⼀个请求需要⼤量的代码,⽽且很多都是重复性质的
+- 耦合严重: 异步操作与redux的action偶合在⼀起,不⽅便管理
+- 功能孱弱: 有⼀些实际开发中常⽤的功能需要⾃⼰进⾏封装
+
+### 使用redux-saga中间件
+
+redux-saga优点:
+
+- 异步解耦: 异步操作被被转移到单独 saga.js 中，不再是掺杂在 action.js 或 component.js 中
+- action摆脱`thunk function`: dispatch 的参数依然是⼀个纯粹的 action (FSA)，⽽不是充满 “⿊魔法” thunk function
+- 异常处理: 受益于 `generator function` 的 saga 实现，代码异常/请求失败 都可以直接通过 `try/catch` 语法直接捕获处理
+- 功能强⼤: `redux-saga`提供了⼤量的 Saga 辅助函数和 Effect 创建器供开发者使⽤,开发者⽆须封装或者简单封装即可使⽤
+- 灵活: redux-saga可以将多个Saga可以串⾏/并⾏组合起来,形成⼀个⾮常实⽤的异步flow
+- 易测试，提供了各种case的测试⽅案，包括mock task，分⽀覆盖等等
+
+redux-saga缺陷:
+
+- 额外的学习成本: `redux-saga`不仅在使⽤难以理解的 `generator function`，⽽且有数⼗个API，学习成本远超redux-thunk。最重要的是你的额外学习成本是只服务于这个库的，与`redux-observable`不同，`redux-observable`虽然也有额外学习成本但是背后是rxjs和⼀整套思想
+- 体积庞⼤: 体积略⼤,代码近2000⾏，min版25KB左右
+- 功能过剩: 实际上并发控制等功能很难⽤到，但是我们依然需要引⼊这些代码
+- ts⽀持不友好: yield⽆法返回TS类型
+
+`redux-saga`可以捕获action，然后执行一个函数，那么可以把异步代码放在这个函数中。
+
+
+
+---
+
+##  Redux 状态管理器和变量挂载到 window 中有什么区别？
+
+两者都是存储数据以供后期使用。**但是Redux状态更改可回溯——`Time travel`**，数据多了的时候可以很清晰的知道改动在哪里发生，完整的提供了一套状态管理模式。
+
+随着 JavaScript 单页应用开发日趋复杂，JavaScript 需要管理比任何时候都要多的 state （状态）。 这些 state 可能包括服务器响应、缓存数据、本地生成尚未持久化到服务器的数据，也包括 UI状态，如激活的路由，被选中的标签，是否显示加载动效或者分页器等等。
+
+管理不断变化的 state 非常困难。如果一个 model 的变化会引起另一个 model 变化，那么当 view 变化时，就可能引起对应 model 以及另一个model 的变化，依次地，可能会引起另一个 view 的变化。直至你搞不清楚到底发生了什么。state 在什么时候，由于什么原因，如何变化已然不受控制。 当系统变得错综复杂的时候，想重现问题或者添加新功能就会变得举步维艰。
+
+如果这还不够糟糕，考虑一些来自前端开发领域的新需求，如更新调优、服务端渲染、路由跳转前请求数据等等。前端开发者正在经受前所未有的复杂性，难道就这么放弃了吗?当然不是。
+
+这里的复杂性很大程度上来自于：我们总是将两个难以理清的概念混淆在一起：变化和异步。 可以称它们为曼妥思和可乐。如果把二者分开，能做的很好，但混到一起，就变得一团糟。一些库如 React 视图在视图层禁止异步和直接操作 DOM来解决这个问题。美中不足的是，React 依旧把处理 state 中数据的问题留给了你。Redux就是为了帮你解决这个问题。
+
+
+
+---
+
+## Redux中的connect有什么作用？
+
+connect负责连接React和Redux
+
+**获取state**
+
+connect 通过 context获取 Provider 中的 store，通过 store.getState() 获取整个store tree 上所有state
+
+**包装原组件**
+
+将state和action通过props的方式传入到原组件内部 `wrapWithConnect` 返回—个 `ReactComponent` 对象 Connect，Connect重新 render 外部传入的原组件 `WrappedComponent` ，并把 connect 中传入的 `mapStateToProps`，`mapDispatchToProps`与组件上原有的 props 合并后，通过属性的方式传给 `WrappedComponent`
+
+**监听store tree变化**
+
+connect缓存了`store tree`中state的状态，通过当前state状态 和变更前 state 状态进行比较，从而确定是否调用 `this.setState()`方法触发 Connect 及其子组件的重新渲染
+
+
+
+---
+
+## mobx 和 redux 有什么区别？
+
+### 共同点
+
+- 为了解决状态管理混乱、无法有效同步的问题，统一维护管理应用状态
+- 某一状态只有一个可信数据来源（通常命名为store，指状态容器）
+- 操作更新状态方式统一，并且可控（通常以action方式提供更新状态的途径）
+- 支持将store与React组件连接，如`react-redux`，`mobx-react`
+
+### 区别
+
+Redux更多的是遵循Flux模式的一种实现，是一个 JavaScript 库，它关注点主要是以下几方面∶
+
+- Action∶ 一个JavaScript对象，描述动作相关信息，主要包含type属性和payload属性∶
+- Reducer∶ 定义应用状态如何响应不同动作（action），如何更新状态;
+- Store∶ 管理action和reducer及其关系的对象，主要提供以下功能∶
+  - 维护应用状态并支持访问状态(getState());
+  - 支持监听action的分发，更新状态(dispatch(action));
+  - 支持订阅store的变更(subscribe(listener));
+- 异步流∶ 由于Redux所有对store状态的变更，都应该通过action触发，异步任务（通常都是业务或获取数据任务）也不例外，而为了不将业务或数据相关的任务混入React组件中，就需要使用其他框架配合管理异步任务流程，如redux-thunk，redux-saga等;
+
+Mobx是一个透明函数响应式编程的状态管理库，它使得状态管理简单可伸缩∶
+
+- Action∶定义改变状态的动作函数，包括如何变更状态;
+- Store∶ 集中管理模块状态（State）和动作(action)
+- Derivation（衍生）∶ 从应用状态中派生而出，且没有任何其他影响的数据
+
+### 对比总结
+
+- redux将数据保存在单一的store中，mobx将数据保存在分散的多个store中
+- redux使用`plain object`保存数据，需要手动处理变化后的操作;mobx适用`observable`保存数据，数据变化后自动处理响应的操作
+- redux使用不可变状态，这意味着状态是只读的，不能直接去修改它，而是应该返回一个新的状态，同时使用纯函数;mobx中的状态是可变的，可以直接对其进行修改
+- mobx相对来说比较简单，在其中有很多的抽象，mobx更多的使用面向对象的编程思维;redux会比较复杂，因为其中的函数式编程思想掌握起来不是那么容易，同时需要借助一系列的中间件来处理异步和副作用
+- mobx中有更多的抽象和封装，调试会比较困难，同时结果也难以预测;而redux提供能够进行时间回溯的开发工具，同时其纯函数以及更少的抽象，让调试变得更加的容易
+
+
+
+---
+
+## Redux 和 Vuex 有什么区别，它们有什么共同思想吗？
+
+### 相同点
+
+- state 共享数据
+- 流程一致：定义全局state，触发，修改state
+- 原理相似，通过全局注入store。
+
+### 不同点
+
+- 从实现原理上来说：
+  - Redux 使用的是**不可变数据**，而Vuex的数据是**可变的**。Redux每次都是**用新的state替换旧的state**，而Vuex是直接修改
+  - Redux 在检测数据变化的时候，是**通过 diff 的方式**比较差异的，而Vuex其实和Vue的原理一样，是**通过 getter/setter来比较**的
+- 从表现层来说：
+  - vuex定义了state、getter、mutation、action四个对象；redux定义了state、reducer、action。
+  - vuex中state统一存放，方便理解；redux 的state依赖所有reducer的初始值
+  - vuex有getter,目的是快捷得到state；redux没有这层，react-redux mapStateToProps参数做了这个工作。
+  - vuex中mutation**只是单纯赋值(**很浅的一层)；redux中reducer**只是单纯设置新state**(很浅的一层)。他俩作用类似，但书写方式不同
+  - vuex中action有较为复杂的异步ajax请求；redux中action中可简单可复杂,简单就直接发送数据对象（{type:xxx, your-data}）,复杂需要调用异步ajax（依赖redux-thunk插件）。
+  - vuex触发方式有两种**commit同步**和**dispatch异步**；redux **同步和异步都使用dispatch**
+
+通俗点理解就是，vuex 弱化 dispatch，通过commit进行 store状态的一次更变；取消了action概念，不必传入特定的 action形式进行指定变更；弱化reducer，基于commit参数直接对数据进行转变，使得框架更加简易;
+
+## 共同思想
+
+- 单一的数据源
+- 变化可以预测
+
+本质上∶ redux与vuex都是对mvvm思想的服务，将数据从视图中抽离的一种方案。
+
+
+
+----
 
 
 
@@ -2489,4 +5204,927 @@ useEffect(() => {
 
 
 ----
+
+## 使用 useState （const [test, setTest] = useState([])）是，为什么连续调用 setTest({...test, newValue}) 会出现值的丢失？
+
+useState是**异步执行的**，也就是执行 setTest 后，不会立即更新 test 的结果，多次调用时，出现了值覆盖的情况。
+
+**如果本次的状态更新依赖于上一次最近的状态更新**，那么我们可以给 setTest 传递一个函数进去，函数的参数即为最后一次更新的状态的值：
+
+```js
+setTest(prevState => ([
+	...prevState,
+    newValue
+]))
+```
+
+
+
+----
+
+## 为什么 useState 返回的是数组而不是对象？
+
+useState 的用法：
+
+```js
+const [count, setCount] = useState(0)
+```
+
+可以看到 useState 返回的是一个数组，那么为什么是返回数组而不是返回对象呢？
+
+要回答这个问题得弄明白 ES6 的解构赋值(destructring assignment)语法 , 来看 2 个简单的示例：
+
+- 数组的解构赋值：
+
+```js
+const foo = ['one', 'two', 'three'];
+
+const [red, yellow, green] = foo;
+console.log(red); // "one"
+console.log(yellow); // "two"
+console.log(green); // "three"
+```
+
+- 对象的解构赋值：
+
+```js
+const user = {
+    id: 42,
+    is_verified: true
+};
+
+const { id, is_verified } = user;
+
+console.log(id); // 42
+console.log(is_verified); // true 
+```
+
+搞清楚了解构赋值，那上面的问题就比较好解释了。
+
+**如果 `useState` 返回数组，那么你可以顺便对数组中的变量命名，代码看起来也比较干净**。而如果是对象的话返回的值必须和 `useState` 内部实现返回的对象同名，这样你只能在 `function component` 中使用一次，想要多次使用 `useState` 必须得重命名返回值。
+
+```js
+// 第一次使用
+const { state, setState } = useState(false)
+// 第二次使用
+const { state: counter, setState: setCounter} = useState(0)
+```
+
+当然事情总是有两面性的，使用 array 也存在一些问题：
+
+- **返回值强顺序，灵活性比较低**。array[0] 为值，array[1] 为改变值的方法。
+- **返回的值基本都得使用，对于有些返回值不想使用的话代码看起来有些怪**，比如只想用 setState, 就得这么写：`const [, setState] = useState(false)`。
+- **返回的参数不能太多**，否则处理上面 2 个场景会很麻烦。
+
+如果在自定义的Hook中遇到了以上几个问题，不妨试试返回 object。
+
+简单总结一下，在自定义 hook 的时候可以遵循一个简单原则：**当参数大于 2 个的时候返回值的类型返回 `object`**， 否则返回数组。
+
+
+
+----
+
+## React Hooks 在使用上有哪些限制？
+
+React Hooks 的限制主要有两条：
+
+- 不要在循环、条件或嵌套函数中调用 Hook；
+- 在 React 的函数组件中调用 Hook。
+
+那为什么会有这样的限制呢？就得从 Hooks 的设计说起。Hooks 的设计初衷是为了改进 React 组件的开发模式。在旧有的开发模式下遇到了三个问题。
+
+- **组件之间难以复用状态逻辑**。过去常见的解决方案是高阶组件、render props 及状态管理框架。
+- **复杂的组件变得难以理解**。生命周期函数与业务逻辑耦合太深，导致关联部分难以拆分。
+- **人和机器都很容易混淆类**。常见的有 `this` 的问题，但在 React 团队中还有类难以优化的问题，他们希望在编译优化层面做出一些改进。
+
+这三个问题在一定程度上阻碍了 React 的后续发展，所以为了解决这三个问题，Hooks 基于函数组件开始设计。**然而第三个问题决定了 Hooks 只支持函数组件。**
+
+那为什么不要在循环、条件或嵌套函数中调用 Hook 呢？因为 Hooks 的设计是基于数组实现。在调用时按顺序加入数组中，**如果使用循环、条件或嵌套函数很有可能导致数组取值错位，执行错误的 Hook**。当然，实质上 React 的源码里不是数组，是**链表**。
+
+这些限制会在编码上造成一定程度的心智负担，新手可能会写错，为了避免这样的情况，可以引入 ESLint 的 Hooks 检查插件进行预防。
+
+
+
+----
+
+## useEffect 与 useLayoutEffect 有什么区别？
+
+**共同点**
+
+- 运用效果： useEffect 与 useLayoutEffect 两者都是用于处理副作用，**这些副作用包括改变 DOM、设置订阅、操作定时器等**。在函数组件内部操作副作用是不被允许的，所以需要使用这两个函数去处理。
+- 使用方式： useEffect 与 useLayoutEffect 两者底层的函数签名是完全一致的，都是调用的 mountEffectImpl方法，在使用上也没什么差异，基本可以直接替换。
+
+**不同点**
+
+- **使用场景**： useEffect 在 React 的**渲染过程中是被异步调用**的，用于绝大多数场景；而 useLayoutEffect 会**在所有的 DOM 变更之后同步调用**，主要用于处理 DOM 操作、调整样式、避免页面闪烁等问题。也正因为是同步处理，所以需要避免在 useLayoutEffect 做计算量较大的耗时任务从而造成阻塞。
+- **使用效果**： useEffect是按照顺序执行代码的，改变屏幕像素之后执行（先渲染，后改变DOM），当改变屏幕内容时可能会产生闪烁；useLayoutEffect是改变屏幕像素之前就执行了（会推迟页面显示的事件，先改变DOM后渲染），不会产生闪烁。**useLayoutEffect总是比useEffect先执行。**
+
+在未来的趋势上，两个 API 是会长期共存的，暂时没有删减合并的计划，需要开发者根据场景去自行选择。React 团队的建议非常实用，**如果实在分不清，先用 useEffect**，一般问题不大；**如果页面有异常，再直接替换为 useLayoutEffect 即可。**
+
+
+
+----
+
+## 下面函数组件的输出分别是什么？
+
+下面是一个简单的函数组件，有两个按钮：“alert”、“add”。
+
+如果先点击“alert”按钮，再点击一次“add”按钮，那么弹窗框中的值和页面中展示`value`分别是什么？
+
+```jsx
+const FunctionComponent = () => {
+  const [value, setValue] = useState(1)
+
+  const log = () => {
+    setTimeout(() => {
+      alert(value)
+    }, 3000);
+  }
+
+  return (
+    <div>
+      <p>FunctionComponent</p>
+      <div>value: {value}</div>
+      <button onClick={log}>alert</button>
+      <button onClick={() => setValue(value + 1)}>add</button>
+    </div>
+  )
+}
+```
+
+弹出的值是 **1**，页面显示的值是 **2**
+
+我们发现弹出的值和当前页面显示的值不相同。
+
+换句话说：**log 方法内的 value 和点击动作触发那一刻的 value 相同，value 的后续变化不会对 log 方法内的 value 造成影响**。
+
+这种现象被称为“闭包陷阱”或者被叫做“Capture Value” ：**函数式组件每次render 都会生产一个新的 log 函数**，这个新的 log 函数会产生一个在当前这个阶段 value 值的闭包。
+
+上面例子 “闭包陷阱” 的分析：
+
+1. 初始次渲染，生成一个 log 函数（value = 1）
+2. value 为 1 时，点击 alert 按钮执行 log 函数（value = 1）
+3. 点击按钮增加 value，比如 value 增加到 6，组件 render ，生成一个新的 log 函数（value = 6）
+4. 计时器触发，log 函数（value = 1）弹出闭包内的 value 为 1
+
+如何让弹窗中展示最新的value值呢？
+
+### 使用 useRef 解决闭包陷阱的问题
+
+```jsx
+const FunctionComponent = () => {
+  const [value, setValue] = useState(1)
+  const countRef = useRef(value)
+
+  const log = () => {
+    setTimeout(() => {
+      alert(countRef.current)
+    }, 3000);
+  }
+
+  useEffect(() => {
+    countRef.current = value
+  }, [value])
+
+  return (
+    <div>
+      <p>FunctionComponent</p>
+      <div>value: {value}</div>
+      <button onClick={log}>alert</button>
+      <button onClick={() => setValue(value + 1)}>add</button>
+    </div>
+  )
+}
+```
+
+**useRef** 每次 render 时都会返回**同一个引用类型的对象**，我们设置值和读取值都在这个对象上处理，这样就能获取到最新的 value 值了。
+
+
+
+----
+
+## 为什么不能在循环、条件或嵌套函数中调用 Hooks？
+
+如果在条件语句中使用hooks，React会抛出 error。
+
+这与React Hooks的底层设计的数据结构相关，先抛出结论：**react用链表来严格保证hooks的顺序**。
+
+一个典型的useState使用场景：
+
+```js
+const [name,setName] = useState('leo');
+......
+setName('Lily');
+```
+
+那么hooks在这两条语句分别作了什么？
+
+![img](E:\pogject\学习笔记\image\react\89d2fa7124b06495bbbfd4b5758bd6e5.png)
+
+上图是 `useState` 首次渲染的路径，其中，跟我们问题相关的是 `mountState` 这个过程，简而言之，这个过程初始化了一个hooks，并且将其追加到链表结尾。
+
+```js
+// 进入 mounState 逻辑
+
+function mountState(initialState) {
+
+  // 将新的 hook 对象追加进链表尾部
+  var hook = mountWorkInProgressHook();
+
+  // initialState 可以是一个回调，若是回调，则取回调执行后的值
+
+  if (typeof initialState === 'function') {
+
+    // $FlowFixMe: Flow doesn't like mixed types
+
+    initialState = initialState();
+  }
+
+  // 创建当前 hook 对象的更新队列，这一步主要是为了能够依序保留 dispatch
+
+  const queue = hook.queue = {
+
+    last: null,
+
+    dispatch: null,
+
+    lastRenderedReducer: basicStateReducer,
+
+    lastRenderedState: (initialState: any),
+
+  };
+
+  // 将 initialState 作为一个“记忆值”存下来
+
+  hook.memoizedState = hook.baseState = initialState;
+
+  // dispatch 是由上下文中一个叫 dispatchAction 的方法创建的，这里不必纠结这个方法具体做了什么
+
+  var dispatch = queue.dispatch = dispatchAction.bind(null, currentlyRenderingFiber$1, queue);
+
+  // 返回目标数组，dispatch 其实就是示例中常常见到的 setXXX 这个函数，想不到吧？哈哈
+
+  return [hook.memoizedState, dispatch];
+}
+
+```
+
+从这段源码中我们可以看出，mounState 的主要工作是初始化 Hooks。在整段源码中，最需要关注的是 `mountWorkInProgressHook` 方法，它为我们道出了 Hooks 背后的数据结构组织形式。以下是 `mountWorkInProgressHook` 方法的源码：
+
+```js
+function mountWorkInProgressHook() {
+
+  // 注意，单个 hook 是以对象的形式存在的
+  var hook = {
+
+    memoizedState: null,
+
+    baseState: null,
+
+    baseQueue: null,
+
+    queue: null,
+
+    next: null
+
+  };
+
+  if (workInProgressHook === null) {
+    // 这行代码每个 React 版本不太一样，但做的都是同一件事：将 hook 作为链表的头节点处理
+    firstWorkInProgressHook = workInProgressHook = hook;
+  } else {
+    // 若链表不为空，则将 hook 追加到链表尾部
+    workInProgressHook = workInProgressHook.next = hook;
+  }
+  // 返回当前的 hook
+  return workInProgressHook;
+}
+
+```
+
+到这里可以看出，hook 相关的所有信息收敛在一个 hook 对象里，而 hook 对象之间以单向链表的形式相互串联。
+
+接着，我们来看更新过程
+
+![img](E:\pogject\学习笔记\image\react\1cc5bd4c72e4f22d1aa828df3c831f2d.png)
+
+上图中，需要注意的是updateState的过程：按顺序去遍历之前构建好的链表，取出对应的数据信息进行渲染。
+
+我们把 mountState 和 updateState 做的事情放在一起来看：mountState（首次渲染）构建链表并渲染；updateState 依次遍历链表并渲染。
+
+hooks 的渲染是通过“依次遍历”来定位每个 hooks 内容的。**如果前后两次读到的链表在顺序上出现差异，那么渲染的结果自然是不可控的。**
+
+这个现象有点像我们构建了一个长度确定的数组，数组中的每个坑位都对应着一块确切的信息，后续每次从数组里取值的时候，只能够通过索引（也就是位置）来定位数据。也正因为如此，在许多文章里，都会直截了当地下这样的定义：**Hooks 的本质就是数组。但读完这一课时的内容你就会知道，Hooks 的本质其实是链表。**
+
+我们举个例子：
+
+```js
+    let mounted = false;
+    
+    if(!mounted){
+        // eslint-disable-next-line
+        const [name,setName] = useState('leo');
+        const [age,setAge] = useState(18);
+        mounted = true;
+    }
+    const [career,setCareer] = useState('码农');
+    console.log('career',career);
+    ......
+    
+    <div onClick={()=>setName('Lily')}>
+    点我点我点我
+    <div>
+```
+
+点击div后，我们期望的输出是 "码农"，然而事实上(尽管会error，但是打印还是执行)打印的为 "Lily"
+
+原因是，三个useState在初始化的时候已经构建好了一个三个节点的链表结构，依次为： `name('leo') --> age(18) --> career('码农')`
+
+每个节点都已经派发了一个与之对应的update操作，因此执行setName时候，三个节点就修改为了 `name('Lily') --> age(18) --> career('码农')`
+
+然后执行update渲染操作，从链表依次取出值，此时，条件语句的不再执行，第一个取值操作会从链表的第一个，也就是name对应的hooks对象进行取值：此时取到的为 `name:Lily`
+
+必须按照顺序调用从根本上来说是因为 useState 这个钩子在设计层面并没有“状态命名”这个动作，也就是说你每生成一个新的状态，React 并不知道这个状态名字叫啥，所以需要通过顺序来索引到对应的状态值
+
+
+
+---
+
+## 说说你对 useContext 的理解
+
+### 什么是Context
+
+`context`（上下文）可以看成是扩大版的`props`，它可以将全局的数据通过`provider`接口传递value给局部的组件，让包围在`provider`中的局部组件可以获取到全局数据的读写接口
+
+全局变量可以看成是全局的上下文
+
+**而上下文则是局部的全局变量**，因为只有包围在`provider`中的局部组件才可以获取到这些全局变量的读写接口
+
+### 用法
+
+- 创建context
+- 设置`provider`并通过value接口传递state
+- 局部组件获取读写接口
+
+### 案例理解
+
+案例理解是最快的方式，我在下面的代码中，将设置一个父组件，一个子组件，通过useContext来传递state，并在子组件上设置一个按钮来改变全局state
+
+```jsx
+import React, { createContext, useContext, useState } from "react";
+const initialState = { m: 100, n: 50 }; // 定义初始state
+const X = createContext(); // 创建Context
+let a = 0;
+export default function App() {
+  console.log(`render了${a}次`);//用来检查执行App函数多少次
+  const [state, setState] = useState(initialState); // 创建state读写接口
+  a += 1;
+  return (
+    <X.Provider value={{ state, setState }}> // 通过provider提供value给包围里内部组件，只有包围里的组件才有效
+      <Father></Father>
+    </X.Provider>
+  );
+}
+
+const Father = (props) => {
+  const { state, setState } = useContext(X);//拿到 名字为X的上下文的value，用两个变量来接收读写接口
+  const addN = () => {
+    setState((state) => {
+      return { ...state, n: state.n + 1 };
+    });
+  };
+  const addM = () => {
+    setState((state) => {
+      return { ...state, m: state.m + 1 };
+    });
+  };
+  return (
+    <div>
+      爸爸组件
+      <div>n:{state.n}</div>
+      <Child />
+      <button onClick={addN}>设置n</button>
+      <button onClick={addM}>设置m</button>
+    </div>
+  );
+};
+const Child = (props) => {
+  const { state } = useContext(X); // 读取state
+  return (
+    <div>
+      儿子组件
+      <div>m:{state.m}</div>
+    </div>
+  );
+};
+```
+
+拿到读写接口的组件就可以控制state数据
+
+> tips：注意到最上层的变量a没？这是用来测试的，我发现点击按钮后会触发App函数并更新页面，**说明react下使用`context`来修改数据的时候，都会重新进行全局执行，而不是数据响应式的。**
+
+### 总结
+
+我们学习到`Context`上下文的基本概念和作用，并且通过小案例总结得出`context`的使用方法：
+
+- 使用`creacteContext`创建一个上下文
+- 设置`provider`并通过`value`接口传递`state`数据
+- 局部组件从`value`接口中传递的数据对象中获取读写接口
+
+
+
+---
+
+## 说说你对 useMemo 的理解
+
+在class的时代，我们一般是通过pureComponent来对数据进行一次浅比较，引入Hook特性后，我们可以使用Memo进行性能提升。
+
+在此之前，我们来做一个实验
+
+```jsx
+import React, { useState } from "react";
+import ReactDOM from "react-dom";
+
+import "./styles.css";
+
+function App() {
+  const [n, setN] = useState(0);
+  const [m, setM] = useState(10);
+  console.log("执行最外层盒子了");
+  return (
+    <>
+      <div>
+        最外层盒子
+        <Child1 value={n} />
+        <Child2 value={m} />
+        <button
+          onClick={() => {
+            setN(n + 1);
+          }}
+        >
+          n+1
+        </button>
+        <button
+          onClick={() => {
+            setM(m + 1);
+          }}
+        >
+          m+1
+        </button>
+      </div>
+    </>
+  );
+}
+function Child1(props) {
+  console.log("执行子组件1了");
+  return <div>子组件1上的n：{props.value}</div>;
+}
+function Child2(props) {
+  console.log("执行子组件2了");
+  return <div>子组件2上的m：{props.value}</div>;
+}
+
+const rootElement = document.getElementById("root");
+ReactDOM.render(<App />, rootElement);
+```
+
+上面的代码我设置了两个子组件，分别读取父组件上的n跟m，然后父组件上面设置两个点击按钮，当点击后分别让设置的n、m加1。以下是第一次渲染时log控制台的结果
+
+```!
+执行最外层盒子了 
+执行子组件1了 
+执行子组件2了 
+```
+
+跟想象中一样，render时先进入App函数，执行，发现里面的两个child函数，执行，创建虚拟dom，创建实体dom，最后将画面渲染到页面上。
+
+### 使用Memo优化
+
+当我点击n+1按钮时，此时state里面的n必然+1，也会重新引发render渲染，并把新的n更新到视图中。
+
+们再看控制台
+
+```!
+执行最外层盒子了 
+执行子组件1了 
+执行子组件2了 
++ 执行最外层盒子了 
++ 执行子组件1了 
++ 执行子组件2了 //为什么组件2也渲染了，里面的m没有变化 
+```
+
+你会发现子组件2也渲染了，显然react重新把所有的函数都执行了一遍，把未曾有n数据的子组件2也重新执行了。
+
+如何优化？我们可以使用`memo`把子组件改成以下代码
+
+```jsx
+const Child1 = React.memo((props) => {
+  console.log("执行子组件1了");
+  return <div>子组件1上的n：{props.value}</div>;
+});
+
+const Child2 = React.memo((props) => {
+  console.log("执行子组件2了");
+  return <div>子组件2上的m：{props.value}</div>;
+});
+```
+
+再重新点击试试？
+
+```!
+执行最外层盒子了 
+执行子组件1了 
+执行子组件2了 
++ 执行最外层盒子了 
++ 执行子组件1了 
+```
+
+会发现没有执行子组件2了
+
+这样的话react就会只执行对应state变化的组件，而没有变化的组件，则复用上一次的函数，也许memo也有memory的意思，代表记忆上一次的函数，不重新执行
+
+### 出现bug
+
+上面的代码虽然已经优化好了性能，但是会有一个bug
+
+上面的代码是由父组件控制`<button>`的，如果我把控制state的函数传递给子组件，会怎样呢？
+
+```jsx
+<Child2 value={m} onClick={addM} /> //addM是修改M的函数
+```
+
+点击按钮让n+1
+
+```!
+执行最外层盒子了 
+执行子组件1了 
+执行子组件2了 
++ 执行最外层盒子了 
++ 执行子组件1了 
++ 执行子组件2了 
+```
+
+又重新执行子组件2。
+
+为什么会这样？因为App重新执行了，它会修改addM函数的地址（函数是复杂数据类型），而addM又作为props传递给子组件2，那么就会引发子组件2函数的重新执行。
+
+### useMemo
+
+这时候就要用useMemo解决问题。
+
+```
+useMemo(()=>{},[])
+```
+
+useMemo接收两个参数，分别是函数和一个数组（实际上是依赖），函数里return 函数,数组内存放依赖。
+
+```jsx
+const addM = useMemo(() => {
+    return () => {
+      setM({ m: m.m + 1 });
+    };
+  }, [m]); //表示监控m变化
+```
+
+使用方式就跟useEffect似的。
+
+### useCallback
+
+上面的代码很奇怪有没有
+
+```js
+useMemo(() => {
+    return () => {
+      setM({ m: m.m + 1 });
+    };
+  }, [m])
+```
+
+react就给我们准备了语法糖，useCallback。它是这样写的
+
+```js
+  const addM = useCallback(() => {
+    setM({ m: m.m + 1 });
+  }, [m]);
+```
+
+是不是看上去正常多了？
+
+### 最终代码
+
+```jsx
+import React, { useCallback, useMemo, useState } from "react";
+import ReactDOM from "react-dom";
+
+import "./styles.css";
+
+function App() {
+  const [n, setN] = useState(0);
+  const [m, setM] = useState({ m: 1 });
+  console.log("执行最外层盒子了");
+  const addN = useMemo(() => {
+    return () => {
+      setN(n + 1);
+    };
+  }, [n]);
+  const addM = useCallback(() => {
+    setM({ m: m.m + 1 });
+  }, [m]);
+  return (
+    <>
+      <div>
+        最外层盒子
+        <Child1 value={n} click={addN} />
+        <Child2 value={m} click={addM} />
+        <button onClick={addN}>n+1</button>
+        <button onClick={addM}>m+1</button>
+      </div>
+    </>
+  );
+}
+const Child1 = React.memo((props) => {
+  console.log("执行子组件1了");
+  return <div>子组件1上的n：{props.value}</div>;
+});
+
+const Child2 = React.memo((props) => {
+  console.log("执行子组件2了");
+  return <div>子组件2上的m：{props.value.m}</div>;
+});
+
+const rootElement = document.getElementById("root");
+ReactDOM.render(<App />, rootElement);
+```
+
+- 使用`memo`可以帮助我们优化性能，让`react`没必要执行不必要的函数
+- 由于复杂数据类型的地址可能发生改变，于是传递给子组件的`props`也会发生变化，这样还是会执行不必要的函数，所以就用到了`useMemo`这个api
+- `useCallback`是`useMemo`的语法糖
+
+
+
+---
+
+## 说说你对自定义hook的理解
+
+通过自定义 Hook，可以将组件逻辑提取到可重用的函数中。
+
+可以理解成Hook就是用来放一些重复代码的函数。
+
+下面我将做手动实现一个列表渲染、删除的组件，然后把它做成自定义Hook。
+
+定义数据列表
+
+```js
+const initialState = [
+  { id: 1, name: "qiu" },
+  { id: 2, name: "yan" },
+  { id: 2, name: "xi" }
+];
+```
+
+创建一个App组件并渲染它
+
+```jsx
+function App(props) {
+  const [state, setState] = useState(initialState);
+  const deleteLi = (index) => {
+    setState((state) => {
+      const newState = JSON.parse(JSON.stringify(state));//深拷贝数据
+      newState.splice(index, 1);
+      return newState;
+    });
+  };
+  return (
+    <>
+      <ul>
+        {state
+          ? state.map((v, index) => {
+              return (
+                <li key={index}>
+                  {index + "、"}
+                  {v.name}
+                  <button
+                    onClick={() => {
+                      deleteLi(index);
+                    }}
+                  >
+                    X
+                  </button>
+                </li>
+              );
+            })
+          : \"加载中\"}
+      </ul>
+    </>
+  );
+}
+```
+
+上面的代码，我对一个数组进行渲染+删除操作，当点击按钮时，就会删除数组的对应index的数据，从而执行页面更新
+
+### 封装成Hook
+
+```jsx
+const useList = () => {
+  const [state, setState] = useState(initialState);
+  const deleteLi = (index) => {
+    setState((state) => {
+      const newState = JSON.parse(JSON.stringify(state));
+      newState.splice(index, 1);
+      return newState;
+    });
+  };
+  return { state, setState, deleteLi };//返回查、改、删
+};
+```
+
+我把上面的业务逻辑都放在`useList`这个函数中，并将查、改、删的API给放在一个对象中return出去。这样就形成了一个自定义Hook
+
+### 使用自定义Hook
+
+一般可以将自定义Hook给单独放在一个文件中，如果要使用，就引过来
+
+```js
+import useList from "./useList";
+```
+
+在需要使用的App组件中执行自定义Hook并接收API
+
+```js
+function App(props) {
+  const { state, deleteLi } = useList();//这里接收return出来的查、删API
+  return (
+ 	... //这里跟最开始的App组件里是一样的，为了页面整洁，就不贴代码了
+  );
+}
+```
+
+
+
+所谓的自定义Hook，**实际上就是把很多重复的逻辑都放在一个函数里面，通过闭包的方式给`return`出来**，这是非常高级的方式，程序员崇尚代码简洁，如果说以后业务开发时需要大量的重复代码，我们就可以将它封装成自定义Hook。
+
+
+
+---
+
+##  如何让 useEffect 支持 async/await？
+
+大家在使用 `useEffect` 的时候，**假如回调函数中使用 `async...await...` 的时候，会报错**
+
+看报错，我们知道 `effect function` 应该返回一个销毁函数（`return`返回的 `cleanup` 函数），如果 `useEffect` 第一个参数传入 `async`，返回值则变成了 `Promise`，会导致 `react` 在调用销毁函数的时候报错**。
+
+### React 为什么要这么做？
+
+`useEffect` 作为 `Hooks` 中一个很重要的 `Hooks`，可以让你在函数组件中执行副作用操作。
+
+它能够完成之前 `Class Component` 中的生命周期的职责。它返回的函数的执行时机如下：
+
+- 首次渲染不会进行清理，**会在下一次渲染，清除上一次的副作用**。
+- **卸载阶段也会执行清除操作**。
+
+不管是哪个，我们都不希望这个返回值是异步的，这样我们无法预知代码的执行情况，很容易出现难以定位的 Bug。
+
+所以 React 就**直接限制了不能** useEffect 回调函数中不能支持 async...await...
+
+### useEffect 怎么支持 async...await...
+
+既然 useEffect 的回调函数不能使用 `async...await`，那我直接在它内部使用。
+
+做法一：创建一个异步函数（`async...await` 的方式），然后执行该函数。
+
+```js
+useEffect(() => {
+  const asyncFun = async () => {
+    setPass(await mockCheck());
+  };
+  asyncFun();
+}, []);
+```
+
+做法二：也可以使用 `IIFE`，如下所示：
+
+```js
+useEffect(() => {
+  (async () => {
+    setPass(await mockCheck());
+  })();
+}, []);
+```
+
+### 自定义 hooks
+
+既然知道了怎么解决，我们完全可以将其封装成一个 hook，让使用更加的优雅。我们来看下 ahooks 的 `useAsyncEffect`，它支持所有的异步写法，包括 `generator function`。
+
+思路跟上面一样，入参跟 useEffect 一样，一个回调函数（不过这个回调函数支持异步），另外一个依赖项 deps。**内部还是 useEffect，将异步的逻辑放入到它的回调函数里面。**
+
+```js
+function useAsyncEffect(
+  effect: () => AsyncGenerator<void, void, void> | Promise<void>,
+  // 依赖项
+  deps?: DependencyList,
+) {
+  // 判断是 AsyncGenerator
+  function isAsyncGenerator(
+    val: AsyncGenerator<void, void, void> | Promise<void>,
+  ): val is AsyncGenerator<void, void, void> {
+    // Symbol.asyncIterator: https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator
+    // Symbol.asyncIterator 符号指定了一个对象的默认异步迭代器。如果一个对象设置了这个属性，它就是异步可迭代对象，可用于for await...of循环。
+    return isFunction(val[Symbol.asyncIterator]);
+  }
+  useEffect(() => {
+    const e = effect();
+    // 这个标识可以通过 yield 语句可以增加一些检查点
+    // 如果发现当前 effect 已经被清理，会停止继续往下执行。
+    let cancelled = false;
+    // 执行函数
+    async function execute() {
+      // 如果是 Generator 异步函数，则通过 next() 的方式全部执行
+      if (isAsyncGenerator(e)) {
+        while (true) {
+          const result = await e.next();
+          // Generate function 全部执行完成
+          // 或者当前的 effect 已经被清理
+          if (result.done || cancelled) {
+            break;
+          }
+        }
+      } else {
+        await e;
+      }
+    }
+    execute();
+    return () => {
+      // 当前 effect 已经被清理
+      cancelled = true;
+    };
+  }, deps);
+}
+```
+
+`async...await` 我们之前已经提到了，重点看看实现中变量 `cancelled` 的实现的功能。 它的作用是**中断执行**。
+
+> 通过 `yield` 语句可以增加一些检查点，如果发现当前 `effect` 已经被清理，会停止继续往下执行。
+
+试想一下，有一个场景，用户频繁的操作，可能现在这一轮操作 a 执行还没完成，就已经开始开始下一轮操作 b。这个时候，操作 a 的逻辑已经失去了作用了，那么我们就可以停止往后执行，直接进入下一轮操作 b 的逻辑执行。这个 `cancelled` 就是用来取消当前正在执行的一个标识符。
+
+### 还可以支持 useEffect 的清除机制么？
+
+可以看到上面的 `useAsyncEffect`，内部的 `useEffect` 返回函数只返回了如下：
+
+```
+return () => {
+  // 当前 effect 已经被清理
+  cancelled = true;
+};
+```
+
+这说明，你**通过 useAsyncEffect 没有 useEffect 返回函数中执行清除副作用的功能**。
+
+你可能会觉得，我们将 `effect`(`useAsyncEffect` 的回调函数)的结果，放入到 `useAsyncEffect` 中不就可以了？
+
+实现最终类似如下：
+
+```js
+function useAsyncEffect(effect: () => Promise<void | (() => void)>, dependencies?: any[]) {
+  return useEffect(() => {
+    const cleanupPromise = effect()
+    return () => { cleanupPromise.then(cleanup => cleanup && cleanup()) }
+  }, dependencies)
+}
+```
+
+有人认为这种**延迟清除机制**是不对的，应该是一种**取消机制**。否则，在钩子已经被取消之后，回调函数仍然有机会对外部状态产生影响。他的实现和例子我也贴一下，跟 `useAsyncEffect` 其实思路是一样的，如下：
+
+实现：
+
+```js
+function useAsyncEffect(effect: (isCanceled: () => boolean) => Promise<void>, dependencies?: any[]) {
+  return useEffect(() => {
+    let canceled = false;
+    effect(() => canceled);
+    return () => { canceled = true; }
+  }, dependencies)
+}
+```
+
+Demo:
+
+```js
+useAsyncEffect(async (isCanceled) => {
+  const result = await doSomeAsyncStuff(stuffId);
+  if (!isCanceled()) {
+    // TODO: Still OK to do some effect, useEffect hasn't been canceled yet.
+  }
+}, [stuffId]);
+```
+
+其实归根结底，**我们的清除机制不应该依赖于异步函数，否则很容易出现难以定位的 bug**。
+
+### 总结与思考
+
+由于 `useEffect` 是在函数式组件中承担执行副作用操作的职责，它的返回值的执行操作应该是可以预期的，而不能是一个异步函数，所以不支持回调函数 `async...await` 的写法。
+
+我们可以将 `async...await` 的逻辑封装在 `useEffect` 回调函数的内部，这就是 ahooks `useAsyncEffect` 的实现思路，而且它的范围更加广，它支持的是所有的异步函数，包括 `generator function`。
+
+
 
