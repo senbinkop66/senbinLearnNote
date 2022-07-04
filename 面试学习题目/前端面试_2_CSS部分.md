@@ -6776,4 +6776,40 @@ css代码：
 </body>
 ```
 
----
+
+
+----
+
+## 102. CSS中宽度随内容自适应，如何实现
+
+在实际应用中，可能有这样的需求，那就是需要div根据内容进行宽度自适应。有很多开发者可能误以为如果不设定div的宽度就可以实现宽度随内容自适应，其实这是错误的，因为在默认状态下，div的宽度值是百分之百，也就是会占满整个父元素宽度。
+
+
+
+```css
+div{
+    display:inline-block; 
+	*display:inline; 
+    *zoom:1;
+}
+```
+
+`fit-content`
+
+取以下两种值中的较大值：
+
+- 固有的最小宽度
+- 固有首选宽度（max-content）和可用宽度（available）两者中的较小值
+
+可表示为：`min(max-content, max(min-content, <length-percentage>))`
+
+```css
+div{
+    width: fit-content;
+}
+```
+
+
+
+
+

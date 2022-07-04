@@ -4,7 +4,7 @@
 
 ----
 
-## 1.1 请问在JS中有哪些数据类型？
+## 1. 请问在JS中有哪些数据类型？
 
 JavaScript 语言中类型集合由原始值和对象组成。
 
@@ -95,7 +95,7 @@ console.log(a === b);     // true
 
 ----
 
-## 1.2 请问Undefined与Null有何异同点？
+## 2. 请问Undefined与Null有何异同点？
 
 共同点：都是基本类型，保存在栈中
 
@@ -134,11 +134,11 @@ Number(null); // 0
 
 ---
 
-## 1.3 请问如何判断js变量的数据类型？
+## 3.  请问如何判断js变量的数据类型？
 
 常见判断方法有以下四种：
 
-### (1) typeof varName
+### (1) typeof var Name
 
 返回一个字符串（小写），用来判断：Undefined、String、Number、Boolean、Symbol、Object、Function，无法检测引用类型里的Array
 
@@ -171,7 +171,7 @@ Number(null); // 0
 
 原因：Null类型只有一个null值，该值表示一个**空对象指针**（出自JavaScript高级程序设计）
 
-**typeof的检测原理**：不同的对象在底层都表示为二进制，在js中二进制前**（低）三位存储其类型信息**为：000: Object、100：String、110： Boolean、1： Number。**null的二进制表示全为0，自然前三位也是0，所以执行typeof时会返回"object"。**
+**typeof的检测原理**：不同的对象在底层都表示为二进制，在js中二进制前**（低）三位存储其类型信息**为：000: Object、100：String、110： Boolean、111： Number。**null的二进制表示全为0，自然前三位也是0，所以执行typeof时会返回"object"。**
 
   （2） 对于Array、Date、RegExp都会返回object，不能更详细的区分
 
@@ -286,17 +286,17 @@ console.log(Object.prototype.toString.call(function(){}));  //[object Function]
 
 -----
 
-## 1.4 请问===与==有何区别？相等与全等的区别
+## 4. 请问===与==有何区别？相等与全等的区别
 
 ==：相等(值)
 
 **先转换再比较**（强制转换）
 
 - 有布尔值，把false->0， true->1， 调用Number()方法
-- 字符串 和 数值，字符串转数值 ；调用Number()方法
-- 对象 和 非对象，调用对象的valueOf()和toString()方法把对象转换成基础类型的值再比较，**除Date对象外，会优先尝试使用valueOf()方法**
+- 字符串 和 数值，**字符串转数值** ；调用Number()方法
+- 对象 和 非对象，**调用对象的valueOf()和toString()方法**把对象转换成基础类型的值再比较，**除Date对象外，会优先尝试使用valueOf()方法**
 - **有一个是NaN， 则返回false**。 即使两个都是NaN，也返回false，**因为按照规则，NaN不等于NaN**
-- 两个操作数都是对象，则比较他们是不是同一个对象，如果指向的是同一个对象，则返回ture 因为对象存的是地址值
+- 两个操作数都是对象，则比较他们是不是同一个对象，**如果指向的是同一个对象**，则返回ture 因为对象存的是地址值
 - 比较相等性之前， **不能将 null和 undefined转换成其他任何值**
 
 ```bash
@@ -313,12 +313,14 @@ true
 
 > []==false
 true
+
 > []=={}
 false
 > []==[]
 false
 > {}=={}
 false
+
 > null==undefined
 true
 > 1==NaN
@@ -354,9 +356,13 @@ true
 
 ---
 
-## 1.5 请问你了解js作用域吗？
+## 5. 请问你了解js作用域吗？
 
 **1，js作用域**
+
+**概念：**作用域就是一个独立的地盘，让变量不会外泄、暴露出去。也就是说**作用域最大的用处就是隔离变量**，不同作用域下同名变量不会有冲突。
+
+ES6 之前 JavaScript 没有块级作用域,只有**全局作用域**和**函数作用域**。ES6 的到来，为我们提供了‘**块级作用域**’,可通过新增命令 let 和 const 来体现。
 
 作用域：在运行时代码中的某些特定部分中变量、函数和对象的**可访问性**。换句话说，作用域决定了代码区块中变量和其他资源的可见性，作用域就是一个独立的地盘，让变量不会外泄、暴露出去。
 
@@ -364,9 +370,9 @@ true
 
 作用域是分层的，**内层作用域可以访问外层作用域的变量**，反之不行
 
-**2， JavaScript 没有块级作用域（ES6之前）**，只有全局作用域和函数作用域，ES6引入块级作用域（相关知识会在第5章中分析）
+**2， JavaScript 没有块级作用域（ES6之前）**，只有全局作用域和函数作用域，ES6引入块级作用域
 
-全局作用域（浏览器）：window
+**全局作用域**（浏览器）：window
 
 - 最外层函数 和在最外层函数外面定义的变量拥有全局作用域
 
@@ -379,8 +385,7 @@ true
 
 - 一个文件就是一个模块，通过 require 引入模块
 
-
-函数作用域：
+**函数作用域**：
 
 - 声明在函数内部的变量
 
@@ -412,15 +417,66 @@ function B(){
     var a=20;
     A();
 }
+
 B();//10
 
 ```
 
-为什么输出10，而不是20？**js中变量的作用域链与定义时的环境有关，与执行时无关**。调用函数B，B中调用了函数A，函数A里面没定义变量a，函数A只是被B调用且不传参，因此函数A无权使用函数B的局部变量a，而在上方还有一个全局变量a，因此这里输出10
+为什么输出10，而不是20？**js中变量的作用域链与定义时的环境有关，与执行时无关**。调用函数B，B中调用了函数A，函数A里面没定义变量a，**函数A只是被B调用且不传参，因此函数A无权使用函数B的局部变量a**，而在上方还有一个全局变量a，因此这里输出10
+
+
+
+Scope（作用域）
+
+当前的执行上下文。[值 (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/Value)和**表达式**在其中 "可见" 或可被访问到的上下文。如果一个**[变量 (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/Variable)**或者其他表达式不 "在当前的作用域中"，那么它就是不可用的。 作用域也可以根据代码层次分层，以便子作用域可以访问父作用域，通常是指沿着链式的作用域链查找，而不能从父作用域引用子作用域中的变量和引用。
+
+当然，一个 [Function](https://developer.mozilla.org/zh-CN/docs/Glossary/Function) 将生成一个闭包（通常是返回一个函数引用），这个函数引用从外部作用域（在当前环境下）可以访问闭包内部的作用域。例如，下面的代码是无效的，并不是闭包的形式）：
+
+```js
+function exampleFunction() {
+    var x = "declared inside function";  // x只能在 exampleFunction 函数中使用
+    console.log("Inside function");
+    console.log(x);
+}
+
+console.log(x);  // 引发error
+```
+
+但是，由于变量在函数外被声明为全局变量，因此下面的代码是有效的（当前作用域不存在的变量和引用，就沿着作用域链继续寻找）：
+
+```js
+var x = "declared outside function";
+
+exampleFunction();
+
+function exampleFunction() {
+    console.log("Inside function");
+    console.log(x);
+}
+
+console.log("Outside function");
+console.log(x);
+```
+
+英文原文中，只提到了闭包的简单特例，也就是父作用域引用子作用域的变量或者引用。这儿做一个补充，当一个函数（foo）执行返回一个内部函数（bar）引用时，bar 将会保存 foo 的作用域引用。例如：
+
+```js
+function foo() {
+    const str = "bar in foo";
+    return function bar() {
+        return str;
+    }
+}
+
+var fun = foo();
+fun(); // "bar in foo"
+```
+
+
 
 ---
 
-## 1.6 请问什么是变量提升？什么是函数提升？
+## 6. 请问什么是变量提升？什么是函数提升？
 
 js区别于C、C++、Java语言，在ES6之前，JavaScript没有块级作用域，只有**全局作用域**和**函数作用域**。
 
@@ -453,15 +509,15 @@ a = 2;
 再看一个高频考题：
 
 ```js
-var a=true;
+var a = true;
 
-foo();  //undefined
+foo();  // undefined
 
-function foo(){   //函数声明
-	if (a) {
-		var a=10;
-	}
-	console.log(a);
+function foo() {
+    if (a) {
+        var a = 10;
+    }
+    console.log(a);
 }
 ```
 
@@ -515,6 +571,79 @@ foo = function() {
 
 当执行到foo()时，foo 还没有赋值（如果它是一个函数声明而不是函数表达式，那么就会赋值）。foo()对 undefined 值进行函数调用而导致非法操作，因此会抛出 TypeError 异常
 
+**变量提升的原理**
+
+JavaScript是单线程语言，所以执行肯定是按顺序执行。但是并不是逐行的分析和执行，而是一段一段地分析执行，会先进行编译阶段然后才是执行阶段。**在编译阶段，代码真正执行前的几毫秒，会检测到所有的变量和函数声明**，**所有这些函数和变量声明都被添加到名为Lexical Environment(词法环境)的JavaScript数据结构内的内存中**。所以**这些变量和函数能在它们真正被声明之前使用**。
+
+变量提升（Hoisting）被认为是， Javascript中执行上下文 （特别是创建和执行阶段）工作方式的一种认识。在 [ECMAScript® 2015 Language Specification](https://www.ecma-international.org/ecma-262/6.0/index.html) 之前的JavaScript文档中找不到变量提升（Hoisting）这个词。不过，需要注意的是，开始时，这个概念可能比较难理解，甚至恼人。
+
+例如，从概念的字面意义上说，“变量提升”意味着变量和函数的声明会在物理层面移动到代码的最前面，但这么说并不准确。**实际上变量和函数声明在代码里的位置是不会动的，而是在编译阶段被放入内存中。**
+
+JavaScript 在执行任何代码段之前，将函数声明放入内存中的优点之一是，你可以在声明一个函数之前使用该函数。
+
+```js
+/**
+* 不推荐的方式：先调用函数，再声明函数
+*/
+
+catName("Chloe");
+
+function catName(name) {
+    console.log("我的猫名叫 " + name);
+}
+
+/*
+代码执行的结果是: "我的猫名叫 Chloe"
+*/
+```
+
+即使我们在定义这个函数之前调用它，函数仍然可以工作。这是因为在 JavaScript 中**执行上下文**的工作方式造成的。
+
+变量提升也适用于其他数据类型和变量。变量可以在声明之前进行初始化和使用。但是如果没有初始化，就不能使用它们。
+
+译者注： 函数和变量相比，会被优先提升。**这意味着函数会被提升到更靠前的位置**。
+
+[只有声明被提升](https://developer.mozilla.org/zh-CN/docs/Glossary/Hoisting#只有声明被提升)
+
+JavaScript 只会提升声明，**不会提升其初始化**。如果一个变量先被使用再被声明和赋值的话，使用时的值是 undefined。参见例子：
+
+```js
+console.log(num); // Returns undefined
+var num;
+num = 6;
+```
+
+如果你先赋值、再使用、最后声明该变量，使用时能获取到所赋的值
+
+```js
+num = 6;
+console.log(num); // returns 6
+var num;
+```
+
+再来看几个类似的例子：
+
+```js
+// Example 1 - only y is hoisted
+var x = 1;                 // 声明 + 初始化 x
+console.log(x + " " + y);  // '1 undefined'
+var y = 2;                 // 声明 + 初始化 y
+
+// Example 2 - Hoists
+var num1 = 3;                   // Declare and initialize num1
+num2 = 4;                       // Initialize num2
+console.log(num1 + " " + num2); //'3 4'
+var num2;                       // Declare num2 for hoisting
+
+// Example 3 - Hoists
+a = 'Cran';              // Initialize a
+b = 'berry';             // Initialize b
+console.log(a + "" + b); // 'Cranberry'
+var a, b;                // Declare both a & b for hoisting
+```
+
+
+
 函数优先：函数声明和变量声明都会被提升。**但函数会首先被提升，然后才是变量提升**
 
 ```js
@@ -547,9 +676,11 @@ foo = function() {
  }
 ```
 
+
+
 ---
 
-## 1.7 请问js有哪些常见报错类型？它们有什么区别？
+## 7. 请问js有哪些常见报错类型？它们有什么区别？
 
 在js中常有6种错误类型：TypeError、ReferenceError、SyntaxError、RangeError、EvalError、URIError。其中 TypeError 和 ReferenceError 日常开发会经常碰到。
 
@@ -609,13 +740,17 @@ new Error([message[fileName[lineNumber]]])
 decodeURI("%")     // URIError: URI malformed
 ```
 
+
+
+
+
 ---
 
-### **1、什么是LHS和RHS查询？**
+## 8. 什么是LHS和RHS查询？
 
 如上所说，对于var a = 2， js引擎会将它分为两步完成：var a 和 a = 2
 
-变量的赋值操作会执行两个动作：首先编译器会在当前作用域中声明一个变量（如果之前没有声明过），然后在运行时引擎会在引用域中查找该变量，如果能够找到就会对它赋值
+变量的赋值操作会执行两个动作：首先编译器会在当前作用域中声明一个变量（如果之前没有声明过），然后在运行时引擎会在引用域中查找该变量，如果能够找到就会对它赋值。
 
 LHS和RHS就是js对变量的两种查找操作， 查找的过程是由作用域（词法作用域）进行协助，在编译的第二步中执行
 
@@ -651,21 +786,23 @@ RHS：
 第6行 c = foo(2)，foo(2) 在赋值操作的右边，需要知道 foo(2)的值，对 foo(2) 需要 RHS 查询
 ```
 
-当**RHS****查询不成功**时：会抛出 ReferenceError异常
+当**RHS**查询不成功**时：会抛出 ReferenceError异常
 
 当**LHS查询不成功**时：会自动隐式地创建一个全局变量（非严格模式下），该变量使用LHS查询的目标作为标识符，或者抛出 ReferenceError 异常（严格模式下）
 
+
+
 ---
 
-## 2.1 请问你了解js中的闭包吗？
+## 9.  请问你了解js中的闭包吗？
 
 概念一：闭包是指有权访问另一个函数作用域中的变量的函数（概念出自《JavaScript高级程序设计》）
 
 概念二：一个函数和对其周围状态（词法环境）的引用捆绑在一起（或者说函数被引用包围），这样的组合就是闭包，也就是说，闭包让你可以在一个内层函数中访问到其外层函数的作用域。（概念出自MDN）
 
-可以简单理解为：闭包就是一个函数，一个外部函数通过调用函数并return返回出内部函数，此内部函数就是一个闭包
+可以简单理解为：闭包就是一个函数，一个外部函数通过调用函数并return返回出内部函数，此**内部函数就是一个闭包**
 
-js作用域只能函数内部向外层访问，闭包就是将函数内部和函数外部连接起来的一座桥梁，能够在函数外部访问到函数内部作用域的局部变量的函数
+js作用域只能函数内部向外层访问，**闭包**就是**将函数内部和函数外部连接起**来的一座桥梁，能够**在函数外部访问到函数内部作用域的局部变量**的函数
 
 ```js
 function f1(){
@@ -691,11 +828,11 @@ result();  //10
 高频考题：
 
 ```js
-for(var i=0;i<5;i++){
-      setTimeout(function(){
-            console.log(i); //输出5个5
-      });
-} 
+for(var i = 0; i < 5; i++){
+    setTimeout(function(){
+        console.log(i); // 输出5个5
+    });
+}
 ```
 
 预期应该是输出0、1、2、3、4，但实际是输出5个5，因为setTimeout事件是被异步触发的，当事件被触发的时候，for循环早已经结束
@@ -704,23 +841,23 @@ for(var i=0;i<5;i++){
 
 ```js
 //1、在setTimeout外部创建一个自执行函数，并将i当作参数传递进闭包
-for(var i=0;i<5;i++){
+for(var i = 0; i < 5; i++){
     (function(num){
         setTimeout(function(){
             console.log(num);   // 输出0，1，2，3，4         
         }, num*1000);
       }
-    )(i)
+    )(i);
 }
 
 //2、在setTimeout内部函数创建一个闭包，并将i当作参数传递进去
-for(var i=0;i<5;i++){
-        setTimeout(function(num){
-            return function(){ //用匿名函数打造一个num变量副本
-            	console.log(num);   // 输出0，1，2，3，4 
-            }
-        }(i), i*1000);
-} 
+for(var i = 0;i < 5; i++){
+    setTimeout(function(num){
+        return function(){ //用匿名函数打造一个num变量副本
+            console.log(num);   // 输出0，1，2，3，4 
+        }
+    }(i), i*1000);
+}
 ```
 
 **闭包缺点：**
@@ -732,13 +869,15 @@ for(var i=0;i<5;i++){
 
 1、在退出函数之前，将不使用的局部变量全部删除或者赋值为null
 
-将变量设置为null：切断变量与它此前引用的值之间的连接，当垃圾回收器下次运行时，会删除这些值并回收它们占用的内存
+**将变量设置为null：切断变量与它此前引用的值之间的连接**，当垃圾回收器下次运行时，会删除这些值并回收它们占用的内存
 
 2、避免变量的循环赋值和引用
 
+
+
 ----
 
-## 2.2 请问js垃圾回收机制是什么工作原理？
+## 10. 请问js垃圾回收机制是什么工作原理？
 
 js语言有 自动垃圾回收机制，执行环境会管理 代码执行过程中使用的内存，垃圾收集器会定期（周期性）找出不再继续使用的变量，然后释放其内存
 
@@ -767,9 +906,9 @@ js中堆内存的垃圾回收主要建立在 代际假说 和 分代收集 两�
 
 **主垃圾回收器和副垃圾回收器：**
 
-新生代区域：副垃圾回收器
+新生代区域：**副垃圾回收器**
 
-老生代区域：主垃圾回收器
+老生代区域：**主垃圾回收器**
 
 这两个垃圾回收器的大致工作流程是相同的，可以简化为三步：
 
@@ -813,9 +952,11 @@ js中堆内存的垃圾回收主要建立在 代际假说 和 分代收集 两�
 
 （3）、 剩下就是内存碎片整理，主垃圾回收器会将存活的对象移动到一端，然后清理掉边界以外的内存
 
+
+
 ---
 
-### **1、什么是标记清除算法与引用计数算法？**
+## 11. 什么是标记清除算法与引用计数算法？
 
 两算法都是针对垃圾数据标记的
 
@@ -844,9 +985,11 @@ function test(){
 
 注意：引用计数算法是js早期的垃圾标记算法，现在几乎不怎么用，该算法存在一个问题：**无法应对互相引用的情况**，当两个对象互相引用时，就会永远无法被回收，从而造成内存泄漏。 基于这个问题，后来提出了标记-清除算法
 
+
+
 ---
 
-## 2.3 请问js有哪几种常见的内存泄露情况？
+## 12. 请问js有哪几种常见的内存泄露情况？
 
 **1、闭包**
 
@@ -912,17 +1055,19 @@ function removeButton(){
 
 虽用removeChild移除了button，但是还在elements对象里保存着button的引用，DOM元素还在内存里面
 
+
+
 ---
 
-## 2.4 请问你了解js的原型链吗？
+## 13. 请问你了解js的原型链吗？
 
 与其他面向对象语言不同，ES6之前js没有引入类（class）的概念，js并非通过类而是直接通过构造函数来创建实例
 
 **构造函数与实例原型**
 
-在js中，每当定义一个函数(普通函数、类)时候，都会天生自带一个prototype属性，这个属性**指向函数的原型对象**，并且这个属性是一个对象数据类型的值
+在js中，每当定义一个函数(普通函数、类)时候，**都会天生自带一个prototype属性**，这个属性**指向函数的原型对象**，并且这个属性是一个对象数据类型的值
 
-![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632988937142/6792CAEEBFCDBCFC9E66B7976460013F)
+![img](E:\pogject\学习笔记\image\js\6792CAEEBFCDBCFC9E66B7976460013F)
 
 
 
@@ -934,7 +1079,7 @@ function removeButton(){
 
 注意：`__proto__ `是 ES 标准中 [[proto]] 指针，**不建议在代码中直接编写` proto `属性**，应该通过 **Object.getPrototypeOf(）**来获取原型
 
-**`person.__proto__ === Person.prototype `![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632988972481/CE5C7C6471A9A7C318E42BC23AE5A324)**
+**`person.__proto__ === Person.prototype `![img](E:\pogject\学习笔记\image\js\CE5C7C6471A9A7C318E42BC23AE5A324)**
 
 
 
@@ -942,7 +1087,7 @@ function removeButton(){
 
 **每个原型都有一个constructor属性**，**指向该关联的构造函数**
 
-![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632988988342/C2935E207F25D2B293E277867849672F)
+![img](E:\pogject\学习笔记\image\js\C2935E207F25D2B293E277867849672F)
 
 **原型链**
 
@@ -951,7 +1096,7 @@ function removeButton(){
 注意：Object是js中所有**对象数据类型**的基类（最顶层的类），Object.prototype 没有原型，（`Object.prototype.__proto__ `的值为 null）
 
 ```js
-console.log(Object.prototype);  // [Object: null proto
+console.log(Object.prototype);  // [Object: null prototype] {}
 console.log(Object.prototype.__proto__);  // null
 
 let a = 1;
@@ -960,9 +1105,9 @@ console.log(a.__proto__);  // {}
 
 像下图中：person → Person → Object ，普通人继承人类，人类继承对象类
 
-当访问**对象的一个属性或方法时**，会先在对象自身中寻找，如果有则直接使用，**如果没有则会去原型对象中寻找**，如果找到则直接使用。如果没有则去原型的原型中寻找，直到找到Object对象的原型，Object对象的原型没有原型，如果在Object原型中依然没有找到，则返回undefined
+当访问**对象的一个属性或方法时**，会先在对象自身中寻找，如果有则直接使用，**如果没有则会去原型对象中寻找**，如果找到则直接使用。如果没有则去原型的原型中寻找，**直到找到Object对象的原型**，Object对象的原型没有原型，如果在Object原型中依然没有找到，则返回undefined
 
-![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632989014554/847EB5079F1C884C1E9B01D4CDD52E60)
+![img](E:\pogject\学习笔记\image\js\847EB5079F1C884C1E9B01D4CDD52E60)
 
 
 
@@ -983,6 +1128,7 @@ var f=new F();
 
 F.a();  //a()
 F.b();  //b()
+
 f.a();  //a()
 f.b();  //TypeError: f.b is not a function
 ```
@@ -1043,9 +1189,11 @@ console.log(f.__proto__.__proto__);  //[Object: null prototype] { a: [Function (
 
 f自身：没有 → `f.__proto`__(Object.prototype)：没有 → f.`__proto__.__proto__ `(Object.prototype.`__proto__`)：找不到，所以报错
 
-#### 2.1 let const var 相关
 
-**参考答案：**
+
+----
+
+## 14. let const var 相关
 
 var ——ES5 变量声明方式
 
@@ -1056,47 +1204,18 @@ let——ES6变量声明方式
 
 1. 在变量未声明前直接使用会报错
 2. 作用域——let为**块作用域**——通常let比var 范围要小
-3. let禁止重复声明变量，否则会报错；var可以重复声明
+3. let禁止重复声明变量，否则会报错；**var可以重复声明**
 
 const——ES6变量声明方式
 
 1. const为常量声明方式；**声明变量时必须初始化**，在后面出现的代码中不能再修改该常量的值
 2. const实际上保真的，并不是变量的值不得改动，**而是变量指向的那个内存地址不得改动**
 
-------
 
-#### 2.2 js数据类型，区别
-
-**参考答案：**
-
-基本数据类型：
-
-Number，String，Boolean，null，undefined，symbol，bigint（后两个为ES6新增）
-
-引用数据类型：
-
-object，function（**proto** Function.prototype）
-
-object：普通对象，数组对象，正则对象，日期对象，Math数学函数对象。
-
-两种数据存储方式：
-
-基本数据类型是直接存储在**栈**中的简单数据段，占据空间小、大小固定，属于被频繁使用的数据。栈是存储基 本类型值和执行代码的空间。
-
-引用数据类型是存储在**堆内存**中，占据空间大、大小不固定。引用数据类型在栈中存储了指针，该指针指向堆 中该实体的起始地址，当解释器寻找引用值时，会检索其在栈中的地址，取得地址后从堆中获得实体。
-
-两种数据类型的区别：
-
-1. 堆比栈空间大，栈比堆运行速度快。
-2. 堆内存是无序存储，可以根据引用直接获取。
-3. 基础数据类型比较稳定，而且相对来说占用的内存小。
-4. 引用数据类型大小是动态的，而且是无限的。
 
 ------
 
-#### 2.3 Object.assign的理解
-
-**参考答案：**
+## 15. Object.assign的理解
 
 作用：Object.assign可以实现对象的合并。
 
@@ -1108,23 +1227,23 @@ object：普通对象，数组对象，正则对象，日期对象，Math数学�
 2. 后续的source会覆盖前面的source的同名属性。
 3. Object.assign复制的是**属性值**，如果属性值是一个引用类型，**那么复制的其实是引用地址**，就会存在引用共享的问题。
 
+
+
 ------
 
-#### 2.4 constructor的理解
-
-**参考答案：**
+## 16. constructor的理解
 
 创建的每个函数都有一个prototype（原型）对象，这个属性是一个指针，指向一个对象。
 
-在默认情况下，所有原型对象都会自动获得一个constructor（构造函数）属性，这**个属性是一个指向prototype属性所在函数的指针**。当调用构造函数创建一个新实例后，该实例的内部将包含一个指针（继承自构造函数的prototype），指向构造函数的原型对象。注意当将构造函数的prototype设置为等于一个以对象字面量形式创建的新对象时，constructor属性不再指向该构造函数。
+在默认情况下，**所有原型对象都会自动获得一个constructor**（构造函数）属性，这**个属性是一个指向prototype属性所在函数的指针**。当调用构造函数创建一个新实例后，该实例的内部将包含一个指针（继承自构造函数的prototype），指向构造函数的原型对象。**注意当将构造函数的prototype设置为等于一个以对象字面量形式创建的新对象时，constructor属性不再指向该构造函数。**
 
 **构造函数**属于被实例化的特定类[对象](https://developer.mozilla.org/zh-CN/docs/Glossary/Object) 。构造函数初始化这个对象，并提供可以访问其私有信息的方法。构造函数的概念可以应用于大多数[面向对象](https://developer.mozilla.org/zh-CN/docs/Glossary/OOP)的编程语言。本质上，[JavaScript](https://developer.mozilla.org/zh-CN/docs/Glossary/JavaScript) 中的构造函数通常在[类](https://developer.mozilla.org/zh-CN/docs/Glossary/Class)的实例中声明。
 
+
+
 ------
 
-#### 2.5 map 和 forEach 的区别
-
-**参考答案：**
+## 17. map 和 forEach 的区别
 
 相同点：
 
@@ -1140,9 +1259,7 @@ object：普通对象，数组对象，正则对象，日期对象，Math数学�
 
 ------
 
-#### 2.6 for of 可以遍历哪些对象
-
-**参考答案：**
+## 18. for of 可以遍历哪些对象
 
 for..of..: 它是es6新增的一个遍历方法，但**只限于迭代器(iterator)**, 所以普通的对象用for..of遍历
 是会报错的。
@@ -1151,9 +1268,7 @@ for..of..: 它是es6新增的一个遍历方法，但**只限于迭代器(iterat
 
 ------
 
-#### 2.7 js静态类型检查
-
-**参考答案：**
+## 19. js静态类型检查
 
 **js是动态类型语言**
 
@@ -1166,7 +1281,7 @@ for..of..: 它是es6新增的一个遍历方法，但**只限于迭代器(iterat
 
 **Flow**是Facebook开发和发布的一个开源的静态类型检查库，它允许你逐渐地向JavaScript代码中添加类型。
 
-**TypeScript**是一个会编译为JavaScript的超集（尽管它看起来几乎像一种新的静态类型语言）
+**TypeScript**是一个会编译为**JavaScript的超集**（尽管它看起来几乎像一种新的静态类型语言）
 
 **使用静态类型的优势**
 
@@ -1183,17 +1298,17 @@ for..of..: 它是es6新增的一个遍历方法，但**只限于迭代器(iterat
 - 代码冗长
 - 需要花时间去掌握类型
 
+
+
 ------
 
-#### 2.8 indexof
-
-**参考答案：**
+## 20. 关于indexof
 
 语法：str.indexOf(searchValue [, fromIndex])
 
 参数：searchValue：要被查找的字符串值。
 
-如果没有提供确切地提供字符串，[searchValue 会被强制设置为"undefined"， 然后在当前字符串中查 找这个值。
+如果没有提供确切地提供字符串，**[searchValue 会被强制设置为"undefined"**， 然后在当前字符串中查 找这个值。
 
 举个例子：**'undefined'.indexOf()将会返回0**，因为undefined在位置0处被找到，但是'undefine'.indexOf()将会返回 -1 ，因为字符串'undefined'未被找到
 
@@ -1218,33 +1333,11 @@ fromIndex：可选
 1. 严格区分大小写
 2. 在使用indexOf检索数组时，用‘===’去匹配，意味着会检查数据类型
 
-------
 
-#### 2.9 iframe有什么优点、缺点
-
-**参考答案：**
-
-优点：
-
-1. iframe能够原封不动的把嵌入的网页展现出来。
-2. 如果有多个网页引用iframe，那么你只需要修改iframe的内容，就可以实现调用的每一个页面内容的更改，方便快捷。
-3. 网页如果为了统一风格，头部和版本都是一样的，就可以写成一个页面，用iframe来嵌套，可以增加代码的可重用。
-4. 如果遇到加载缓慢的第三方内容如图标和广告，这些问题可以由iframe来解决。
-
-缺点：
-
-1. iframe会阻塞主页面的onload事件；
-2. iframe和主页面共享连接池，而浏览器对相同域的连接有限制，所以会影响页面的并行加载。会产生很多页面，不容易管理。
-3. iframe框架结构有时会让人感到迷惑，如果框架个数多的话，可能会出现上下、左右滚动条，会分散访问者的注意力，用户体验度差。
-4. 代码复杂，无法被一些搜索引擎索引到，这一点很关键，现在的搜索引擎爬虫还不能很好的处理iframe中的内容，所以使用iframe会不利于搜索引擎优化（SEO）。
-5. 很多的移动设备无法完全显示框架，设备兼容性差。
-6. iframe框架页面会增加服务器的http请求，对于大型网站是不可取的。
 
 ------
 
-#### 2.10 webComponents
-
-**参考答案：**
+## 21. webComponents
 
 **Web Components** 总的来说是提供一整套完善的封装机制来把 Web 组件化这个东西标准化，每个框架实现 的组件都统一标准地进行输入输出，这样可以更好推动组件的复用
 
@@ -1276,178 +1369,25 @@ fromIndex：可选
 
 ------
 
-#### 2.11 dva的数据流流向是怎么样的
-
-**参考答案：**
+## 22. dva的数据流流向是怎么样的
 
 数据的改变发生通常是通过用户交互行为或者浏览器行为（如路由跳转等）触发的，当此类行为会改变数据 的时候可以通过dispatch发起一个 action，如果是同步行为会直接通过Reducers改变State，如果是 异步行为（副作用）会先触发Effects然后流向Reducers最终改变State，所以在 dva 中，数据流向非 常清晰简明，并且思路基本跟开源社区保持一致。
 
 ![dva数据流动](E:\pogject\学习笔记\image\js\dva数据流动.png)
 
-------
-
-#### 2.12 变量提升
-
-**参考答案：**
-
-JavaScript是单线程语言，所以执行肯定是按顺序执行。但是并不是逐行的分析和执行，而是一段一段地分析执行，会先进行编译阶段然后才是执行阶段。**在编译阶段，代码真正执行前的几毫秒，会检测到所有的变量和函数声明**，**所有这些函数和变量声明都被添加到名为Lexical Environment(词法环境)的JavaScript数据结构内的内存中**。所以**这些变量和函数能在它们真正被声明之前使用**。
-
-变量提升（Hoisting）被认为是， Javascript中执行上下文 （特别是创建和执行阶段）工作方式的一种认识。在 [ECMAScript® 2015 Language Specification](https://www.ecma-international.org/ecma-262/6.0/index.html) 之前的JavaScript文档中找不到变量提升（Hoisting）这个词。不过，需要注意的是，开始时，这个概念可能比较难理解，甚至恼人。
-
-例如，从概念的字面意义上说，“变量提升”意味着变量和函数的声明会在物理层面移动到代码的最前面，但这么说并不准确。实际上变量和函数声明在代码里的位置是不会动的，而是在编译阶段被放入内存中。
-
-JavaScript 在执行任何代码段之前，将函数声明放入内存中的优点之一是，你可以在声明一个函数之前使用该函数。
-
-```js
-/**
-* 不推荐的方式：先调用函数，再声明函数
-*/
-
-catName("Chloe");
-
-function catName(name) {
-    console.log("我的猫名叫 " + name);
-}
-
-/*
-代码执行的结果是: "我的猫名叫 Chloe"
-*/
-```
-
-即使我们在定义这个函数之前调用它，函数仍然可以工作。这是因为在 JavaScript 中**执行上下文**的工作方式造成的。
-
-变量提升也适用于其他数据类型和变量。变量可以在声明之前进行初始化和使用。但是如果没有初始化，就不能使用它们。
-
-译者注： 函数和变量相比，会被优先提升。**这意味着函数会被提升到更靠前的位置**。
-
-[只有声明被提升](https://developer.mozilla.org/zh-CN/docs/Glossary/Hoisting#只有声明被提升)
-
-JavaScript 只会提升声明，**不会提升其初始化**。如果一个变量先被使用再被声明和赋值的话，使用时的值是 undefined。参见例子：
-
-```js
-console.log(num); // Returns undefined
-var num;
-num = 6;
-```
-
-如果你先赋值、再使用、最后声明该变量，使用时能获取到所赋的值
-
-```js
-num = 6;
-console.log(num); // returns 6
-var num;
-```
-
-再来看几个类似的例子：
-
-```js
-// Example 1 - only y is hoisted
-var x = 1;                 // 声明 + 初始化 x
-console.log(x + " " + y);  // '1 undefined'
-var y = 2;                 // 声明 + 初始化 y
-
-// Example 2 - Hoists
-var num1 = 3;                   // Declare and initialize num1
-num2 = 4;                       // Initialize num2
-console.log(num1 + " " + num2); //'3 4'
-var num2;                       // Declare num2 for hoisting
-
-// Example 3 - Hoists
-a = 'Cran';              // Initialize a
-b = 'berry';             // Initialize b
-console.log(a + "" + b); // 'Cranberry'
-var a, b;                // Declare both a & b for hoisting
-```
-
-------
-
-#### 2.13 作用域
-
-**参考答案：**
-
-**概念：**作用域就是一个独立的地盘，让变量不会外泄、暴露出去。也就是说**作用域最大的用处就是隔离变量**，不同作用域下同名变量不会有冲突。
-
-ES6 之前 JavaScript 没有块级作用域,只有**全局作用域**和**函数作用域**。ES6 的到来，为我们提供了‘**块级作用域**’,可通过新增命令 let 和 const 来体现。
-
-**扩展：**
-
-var ——ES5 变量声明方式
-
-1. 在变量未赋值时，变量undefined（未使用声明变量时也为undefined）
-2. 作用域——var的作用域为**方法作用域**；只要在方法内定义了，整个方法内的定义变量后的代码都可以使用
-
-let——ES6变量声明方式
-
-1. 在变量为声明前直接使用会报错
-2. 作用域——let为块作用域——通常let比var 范围要小
-3. let禁止重复声明变量，否则会报错；var可以重复声明
-
-const——ES6变量声明方式
-
-1. const为常量声明方式；**声明变量时必须初始化**，在后面出现的代码中不能再修改该常量的值
-2. const实际上保真的，并不是变量的值不得改动，而是变量指向的那个内存地址不得改动
 
 
+-----
 
-Scope（作用域）
+## 23. HashMap 和 Array 有什么区别？
 
-当前的执行上下文。[值 (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/Value)和**表达式**在其中 "可见" 或可被访问到的上下文。如果一个**[变量 (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/Variable)**或者其他表达式不 "在当前的作用域中"，那么它就是不可用的。 作用域也可以根据代码层次分层，以便子作用域可以访问父作用域，通常是指沿着链式的作用域链查找，而不能从父作用域引用子作用域中的变量和引用。
+**ArrayMap**是一个<key,value>映射的数据结构，它设计上更多的是考虑内存的优化，**内部是使用两个数组进行数据存储**，一个数组记录key的hash值，另外一个数组记录Value值，它和SparseArray一样，**也会对key使用二分法进行从小到大排序**，在添加、删除、查找数据的时候都是**先使用二分查找法得到相应的index**，然后通过index来进行添加、查找、删除等操作，所以，应用场景和SparseArray的一样，如果在数据量比较大的情况下，那么它的性能将退化至少50%。
 
-当然，一个 [Function](https://developer.mozilla.org/zh-CN/docs/Glossary/Function) 将生成一个闭包（通常是返回一个函数引用），这个函数引用从外部作用域（在当前环境下）可以访问闭包内部的作用域。例如，下面的代码是无效的，并不是闭包的形式）：
-
-```js
-function exampleFunction() {
-    var x = "declared inside function";  // x只能在 exampleFunction 函数中使用
-    console.log("Inside function");
-    console.log(x);
-}
-
-console.log(x);  // 引发error
-```
-
-但是，由于变量在函数外被声明为全局变量，因此下面的代码是有效的（当前作用域不存在的变量和引用，就沿着作用域链继续寻找）：
-
-```js
-var x = "declared outside function";
-
-exampleFunction();
-
-function exampleFunction() {
-    console.log("Inside function");
-    console.log(x);
-}
-
-console.log("Outside function");
-console.log(x);
-```
-
-英文原文中，只提到了闭包的简单特例，也就是父作用域引用子作用域的变量或者引用。这儿做一个补充，当一个函数（foo）执行返回一个内部函数（bar）引用时，bar 将会保存 foo 的作用域引用。例如：
-
-```js
-function foo() {
-    const str = "bar in foo";
-    return function bar() {
-        return str;
-    }
-}
-
-var fun = foo();
-fun(); // "bar in foo"
-```
-
-------
-
-#### 2.14 HashMap 和 Array 有什么区别？
-
-ArrayMap是一个<key,value>映射的数据结构，它设计上更多的是考虑内存的优化，内部是使用两个数组进行数据存储，一个数组记录key的hash值，另外一个数组记录Value值，它和SparseArray一样，也会对key使用二分法进行从小到大排序，在添加、删除、查找数据的时候都是先使用二分查找法得到相应的index，然后通过index来进行添加、查找、删除等操作，所以，应用场景和SparseArray的一样，如果在数据量比较大的情况下，那么它的性能将退化至少50%。
-
-HashMap内部是使用一个默认容量为16的数组来存储数据的，而数组中每一个元素却又是一个链表的头结点，所以，更准确的来说，HashMap内部存储结构是使用哈希表的拉链结构（数组+链表），这种存储数据的方法叫做拉链法 。
-
-**参考答案：**
+HashMap内部是使用一个默认容量为16的数组来存储数据的，而数组中每一个元素却又是一个链表的头结点，所以，更准确的来说，**HashMap内部存储结构是使用哈希表的拉链结构（数组+链表）**，这种存储数据的方法叫做**拉链法** 。
 
 1. 查找效率
    HashMap因为其根据hashcode的值直接算出index,所以**其查找效率是随着数组长度增大而增加的**。
-   ArrayMap使用的是二分法查找，所以当数组长度每增加一倍时，就需要多进行一次判断，效率下降
+   ArrayMap使用的是二分法查找，**所以当数组长度每增加一倍时，就需要多进行一次判断**，效率下降
 2. 扩容数量
    HashMap初始值16个长度，每次扩容的时候，直接申请双倍的数组空间。
    ArrayMap每次扩容的时候，如果size长度大于8时申请size*1.5个长度，大于4小于8时申请8个，小于4时申 请4个。这样比较ArrayMap其实是申请了更少的内存空间，但是扩容的频率会更高。因此，**如果数据量比较大的时候，还是使用HashMap更合适，因为其扩容的次数要比ArrayMap少很多。**
@@ -1462,26 +1402,22 @@ HashMap内部是使用一个默认容量为16的数组来存储数据的，而�
 
 ------
 
-#### 2.15 HashMap和Object
-
-**参考答案：**
+## 24. HashMap和Object
 
 Objects和Maps类似的是，它们都允许你按键存取一个值、删除键、检测一个键是否绑定了值。因此（并且也没有其他内建的替代方式了）过去我们一直都把对象当成Maps使用。不过Maps和Objects有一些重要的区别，在下列情况里使用Map会是更好的选择：
 
 |          | Map                                                          | Object                                                       |
 | :------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| 意外的键 | Map默认情况不包含任何键。只包含显式插入的键。                | 一个Object有一个原型, 原型链上的键名有可能和你自己在对象上的设置的键名产生冲突。**注意:** 虽然 ES5 开始可以用Object.create(null)来创建一个没有原型的对象，但是这种用法不太常见。 |
+| 意外的键 | Map默认情况不包含任何键。只包含显式插入的键。                | 一个Object有一个原型, **原型链上的键名有可能和你自己在对象上的设置的键名产生冲突**。**注意:** 虽然 ES5 开始可以用Object.create(null)来创建一个没有原型的对象，但是这种用法不太常见。 |
 | 键的类型 | 一个Map的键可以是**任意值**，包括函数、对象或任意基本类型。  | 一个Object的键必须是一个 [String](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/String) 或是[Symbol](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol)。 |
-| 键的顺序 | Map中的 key 是有序的。因此，当迭代的时候，一个Map对象以插入的顺序返回键值。 | 一个Object的键是无序的注意：自ECMAScript 2015规范以来，对象*确实*保留了字符串和Symbol键的创建顺序； 因此，在只有字符串键的对象上进行迭代将按插入顺序产生键。 |
+| 键的顺序 | Map中的 key 是有序的。因此，当迭代的时候，一个Map对象以插入的顺序返回键值。 | 一个Object的键是无序的注意：自ECMAScript 2015规范以来，对象*确实*保留了字符串和Symbol键的创建顺序； 因此，**在只有字符串键的对象上进行迭代将按插入顺序产生键。** |
 | Size     | Map的键值对个数可以轻易地通过[size](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Map/size) 属性获取 | Object的键值对个数**只能手动计算**                           |
-| 迭代     | Map是 [iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/iterable) 的，所以可以直接被迭代。 | 迭代一个Object需要以某种方式获取它的键然后才能迭代。         |
+| 迭代     | Map是 [iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/iterable) 的，所以可以直接被迭代。 | **迭代一个Object需要以某种方式获取它的键**然后才能迭代。     |
 | 性能     | 在频繁增删键值对的场景下表现更好。                           | 在频繁添加和删除键值对的场景下未作出优化。                   |
 
 ------
 
-#### 2.16 javascript中arguments相关的问题
-
-**参考答案：**
+## 25.  javascript中arguments相关的问题
 
 **arguments**
 
@@ -1495,7 +1431,7 @@ Javascrip中每个函数都会有一个Arguments对象实例arguments，引用�
 
 有了arguments这个对象之后，我们可以不用给函数预先设定形参了**，可以动态地通过arguments为函数加入参数**
 
-`arguments`对象是所有（非箭头）函数中都可用的**局部变量**。你可以使用`arguments`对象在函数中引用函数的参数。此对象包含传递给函数的每个参数，第一个参数在索引0处。例如，如果一个函数传递了三个参数，你可以以如下方式引用他们：
+`arguments`对象是所有（非箭头）函数中都可用的**局部变量**。你可以使用`arguments`对象在函数中引用函数的参数。**此对象包含传递给函数的每个参数，第一个参数在索引0处。**例如，如果一个函数传递了三个参数，你可以以如下方式引用他们：
 
 ```js
 arguments[0]
@@ -1503,7 +1439,7 @@ arguments[1]
 arguments[2]
 ```
 
-参数也可以被设置：
+**参数也可以被设置：**
 
 ```js
 arguments[1] = 'new value';
@@ -1522,7 +1458,7 @@ const args = [...arguments];
 
 如果调用的参数多于正式声明接受的参数，则可以使用`arguments`对象。这种技术对于可以传递可变数量的参数的函数很有用。使用 `arguments.length`来确定传递给函数参数的个数，然后使用`arguments`对象来处理每个参数。要确定函数[签名](https://developer.mozilla.org/zh-CN/docs/Glossary/Signature/Function)中（输入）参数的数量，请使用`Function.length`属性。
 
-[属性](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/arguments#properties)
+属性
 
 - `arguments.callee`
 
@@ -1534,20 +1470,18 @@ const args = [...arguments];
 
 - `arguments[@@iterator]`
 
-  返回一个新的[Array 迭代器](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/@@iterator) 对象，该对象包含参数中每个索引的值。
+  返回一个新的`Array 迭代器` 对象，该对象包含参数中每个索引的值。
+
+
 
 ------
 
-#### 2.17 instanceOf 原理，手动实现 function isInstanceOf (child, Parent)
-
-**参考答案**：
+## 26  instanceOf 原理，手动实现 function isInstanceOf (child, Parent)
 
 instanceof主要作用就是判断一个实例是否属于某种类型
 
 ```js
-let person = function(){
-
-}
+let person = function(){}
 let no = new person()
 no instanceof person//true
 ```
@@ -1574,7 +1508,7 @@ function new_instance_of(leftVaule, rightVaule) {
 
 同时还要了解js的原型继承原理
 
-我们知道每个 JavaScript 对象均有一个隐式的 proto 原型属性，而显式的原型属性是 prototype，只有 Object.prototype.proto 属性在未修改的情况下为 null 值
+我们知道每个 JavaScript 对象均有一个**隐式的 proto 原型属性**，而**显式的原型属性是 prototype**，只有 Object.prototype.proto 属性在未修改的情况下为 null 值
 
 手动实现
 
@@ -1605,6 +1539,7 @@ console.log(instance_of(a, Array)) // true
 console.log(instance_of(b, Object)) // true
 console.log(instance_of(b, Array)) // false
 console.log(instance_of(a, Object)) // true
+
 console.log(instance_of(c, Foo)) // true
 console.log(instance_of(d, child)) // true
 console.log(instance_of(d, father)) // true
@@ -1613,7 +1548,11 @@ console.log(instance_of(d, father)) // true
 
 **`instanceof`** **运算符**用于检测构造函数的 `prototype` 属性是否出现在某个实例对象的原型链上。
 
-需要注意的是，如果表达式 `obj instanceof Foo` 返回 `true`，则并不意味着该表达式会永远返回 `true`，因为 `Foo.prototype` 属性的值有可能会改变，改变之后的值很有可能不存在于 `obj` 的原型链上，这时原表达式的值就会成为 `false`。另外一种情况下，原表达式的值也会改变，就是改变对象 `obj` 的原型链的情况，虽然在目前的ES规范中，我们只能读取对象的原型而不能改变它，但借助于非标准的 `__proto__` 伪属性，是可以实现的。比如执行 `obj.__proto__ = {}` 之后，`obj instanceof Foo` 就会返回 `false` 了。
+需要注意的是，如果表达式 `obj instanceof Foo` 返回 `true`，**则并不意味着该表达式会永远返回 `true`**，因为 `Foo.prototype` 属性的值有可能会改变，改变之后的值很有可能不存在于 `obj` 的原型链上，这时原表达式的值就会成为 `false`。
+
+另外一种情况下，**原表达式的值也会改变，就是改变对象 `obj` 的原型链的情况**，虽然在目前的ES规范中，我们只能读取对象的原型而不能改变它，但借助于非标准的 `__proto__` 伪属性，是可以实现的。比如执行 `obj.__proto__ = {}` 之后，`obj instanceof Foo` 就会返回 `false` 了。
+
+
 
 ------
 
