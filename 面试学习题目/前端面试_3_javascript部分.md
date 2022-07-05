@@ -132,6 +132,22 @@ Number(null); // 0
 
 ```
 
+当检测 `null` 或 `undefined` 时，注意[相等（==）与全等（===）两个操作符的区别](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators) ，前者会执行类型转换：
+
+```js
+typeof null        // "object" (因为一些以前的原因而不是'null')
+typeof undefined   // "undefined"
+null === undefined // false
+null  == undefined // true
+null === null // true
+null == null // true
+!null //true
+isNaN(1 + null) // false
+isNaN(1 + undefined) // true
+```
+
+
+
 ---
 
 ## 3.  请问如何判断js变量的数据类型？
@@ -1472,335 +1488,62 @@ const args = [...arguments];
 
   返回一个新的`Array 迭代器` 对象，该对象包含参数中每个索引的值。
 
+----
+
+## 26.JS小数精度问题
+
+了解 JavaScript 精度问题对我们业务有什么帮助呢？举个业务场景：比如有个订单号后端 Java 同学定义的是 long 类型，但是当这个订单号转换成 JavaScript 的 Number 类型时候精度会丢失了，那没有以上知识铺垫那就理解不了精度为什么会丢失。
+
+解决方案大致有以下几种：
+
+1.针对大数的整数可以考虑使用 bigint 类型(目前在 stage 3 阶段)；
+
+2.使用 [bigNumber](https://link.segmentfault.com/?enc=JPLjlLOfJ9chWdUTAPgXgw%3D%3D.HymxswTVTz65vQslptk4XNygkv0vhjck8oI5CDc4zqTGn1MNyNupbGfAfd8tEQm4)，它的思想是转化成 string 进行处理，这种方式对性能有一定影响；
+
+3.可以考虑使用 [long.js](https://link.segmentfault.com/?enc=Y3coKE7gF4OWDAhTvOx0hg%3D%3D.Y3RgnOf3cXhMtsXzLpi%2BPeK2gaWq2%2FR3xo3x8wWfaLy9v31lwe94LOTW2U%2BTbiSA)，它的思想是将 long 类型的值转化成两个 32 位的双精度类型的值。
+
+4.针对小数可以考虑 [JavaScript 浮点数陷阱及解法](https://link.segmentfault.com/?enc=lolEqWD9vdttTpab8e4Ecw%3D%3D.r0O68zfrPVfwfYD7Gm0R9VAvAX8BuKYECS2%2BsloIw5LRHNhXn9ReisMV%2FXE4jPwk) 里面提到的方案；
 
 
-------
-
-## 26  instanceOf 原理，手动实现 function isInstanceOf (child, Parent)
-
-instanceof主要作用就是判断一个实例是否属于某种类型
-
-```js
-let person = function(){}
-let no = new person()
-no instanceof person//true
-```
-
-instanceOf 原理
-
-```js
-function new_instance_of(leftVaule, rightVaule) { 
-    let rightProto = rightVaule.prototype; // 取右表达式的 prototype 值
-    leftVaule = leftVaule.__proto__; // 取左表达式的__proto__值
-    while (true) {
-        if (leftVaule === null) {
-            return false;    
-        }
-        if (leftVaule === rightProto) {
-            return true;    
-        } 
-        leftVaule = leftVaule.__proto__ 
-    }
-}
-```
-
-其实 instanceof 主要的**实现原理就是只要右边变量的 prototype 在左边变量的原型链上即可**。因此，instanceof 在查找的过程中会遍历左边变量的原型链，直到找到右边变量的 prototype，如果查找失败，则会返回 false，告诉我们左边变量并非是右边变量的实例。
-
-同时还要了解js的原型继承原理
-
-我们知道每个 JavaScript 对象均有一个**隐式的 proto 原型属性**，而**显式的原型属性是 prototype**，只有 Object.prototype.proto 属性在未修改的情况下为 null 值
-
-手动实现
-
-```js
-function instance_of(L, R) {//L 表示左表达式，R 表示右表达式
-    var O = R.prototype;
-    L = L.__proto__;
-    while (true) { 
-        if (L === null) 
-        return false; 
-        if (O === L) // 这里重点：当 O 严格等于 L 时，返回true 
-        return true; 
-        L = L.__proto__; 
-    } 
-}
-// 开始测试
-var a = []
-var b = {}
-
-function Foo(){}
-var c = new Foo()
-function child(){}
-function father(){}
-child.prototype = new father() 
-var d = new child()
-
-console.log(instance_of(a, Array)) // true
-console.log(instance_of(b, Object)) // true
-console.log(instance_of(b, Array)) // false
-console.log(instance_of(a, Object)) // true
-
-console.log(instance_of(c, Foo)) // true
-console.log(instance_of(d, child)) // true
-console.log(instance_of(d, father)) // true
-
-```
-
-**`instanceof`** **运算符**用于检测构造函数的 `prototype` 属性是否出现在某个实例对象的原型链上。
-
-需要注意的是，如果表达式 `obj instanceof Foo` 返回 `true`，**则并不意味着该表达式会永远返回 `true`**，因为 `Foo.prototype` 属性的值有可能会改变，改变之后的值很有可能不存在于 `obj` 的原型链上，这时原表达式的值就会成为 `false`。
-
-另外一种情况下，**原表达式的值也会改变，就是改变对象 `obj` 的原型链的情况**，虽然在目前的ES规范中，我们只能读取对象的原型而不能改变它，但借助于非标准的 `__proto__` 伪属性，是可以实现的。比如执行 `obj.__proto__ = {}` 之后，`obj instanceof Foo` 就会返回 `false` 了。
 
 
 
 ------
 
-#### 2.18 数组去重
+## 27. setTimeout的替代方法
 
-**参考答案：**
 
-**1. 利用ES6 Set去重（ES6中最常用）**
 
 ```js
-function unique (arr) {
-  return Array.from(new Set(arr))
-}
-var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-console.log(unique(arr))
- //[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {}, {}]
-```
-
-不考虑兼容性，这种去重的方法代码最少。这种方法还无法去掉“{}”空对象，后面的高阶方法会添加去掉重复“{}”的方法。
-
-**2. 利用for嵌套for，然后splice去重（ES5中最常用）**
-
-```js
-function unique(arr){            
-        for(var i=0; i<arr.length; i++){
-            for(var j=i+1; j<arr.length; j++){
-                if(arr[i]==arr[j]){         //第一个等同于第二个，splice方法删除第二个
-                    arr.splice(j,1);
-                    j--;
-                }
-            }
-        }
-return arr;
-}
-var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-    console.log(unique(arr))
-    //[1, "true", 15, false, undefined, NaN, NaN, "NaN", "a", {…}, {…}]     //NaN和{}没有去重，两个null直接消失了
-```
-
-双层循环，外层循环元素，内层循环时比较值。值相同时，则删去这个值。
-
-**3. 利用indexOf去重**
-
-```js
-function unique(arr) {
-    if (!Array.isArray(arr)) {
-        console.log('type error!')
-        return
+function createOnFrame(duration, callback) {
+  let count = 0;
+  const _onFrame = function () {
+    if (count < duration) {
+      count += 16.66667;
+      requestAnimationFrame(_onFrame);
+      return;
     }
-    var array = [];
-    for (var i = 0; i < arr.length; i++) {
-        if (array .indexOf(arr[i]) === -1) {
-            array .push(arr[i])
-        }
-    }
-    return array;
+
+    callback();
+  }
+  return _onFrame;
 }
-var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-console.log(unique(arr))
-   // [1, "true", true, 15, false, undefined, null, NaN, NaN, "NaN", 0, "a", {…}, {…}]  //NaN、{}没有去重
+
+const onFrame = createOnFrame(200, () => {
+  // do something
+  ....
+});
+
+const requestId = requestAnimationFrame(onFrame);
 ```
 
-新建一个空的结果数组，for 循环原数组，判断结果数组是否存在当前元素，如果有相同的值则跳过，不相同则push进数组。
 
-**4. 利用sort()**
-
-```js
-function unique(arr) {
-    if (!Array.isArray(arr)) {
-        console.log('type error!')
-        return;
-    }
-    arr = arr.sort()
-    var arrry= [arr[0]];
-    for (var i = 1; i < arr.length; i++) {
-        if (arr[i] !== arr[i-1]) {
-            arrry.push(arr[i]);
-        }
-    }
-    return arrry;
-}
-     var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-        console.log(unique(arr))
-// [0, 1, 15, "NaN", NaN, NaN, {…}, {…}, "a", false, null, true, "true", undefined]      //NaN、{}没有去重
-```
-
-利用sort()排序方法，然后根据排序后的结果进行遍历及相邻元素比对。
-
-**5. 利用对象的属性不能相同的特点进行去重（这种数组去重的方法有问题，不建议用，有待改进）**
-
-```js
-function unique(arr) {
-    if (!Array.isArray(arr)) {
-        console.log('type error!')
-        return
-    }
-    var arrry= [];
-     var  obj = {};
-    for (var i = 0; i < arr.length; i++) {
-        if (!obj[arr[i]]) {
-            arrry.push(arr[i])
-            obj[arr[i]] = 1
-        } else {
-            obj[arr[i]]++
-        }
-    }
-    return arrry;
-}
-    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-        console.log(unique(arr))
-//[1, "true", 15, false, undefined, null, NaN, 0, "a", {…}]    //两个true直接去掉了，NaN和{}去重
-```
-
-**6. 利用includes**
-
-```js
-function unique(arr) {
-    if (!Array.isArray(arr)) {
-        console.log('type error!')
-        return
-    }
-    var array =[];
-    for(var i = 0; i < arr.length; i++) {
-            if( !array.includes( arr[i]) ) {//includes 检测数组是否有某个值
-                    array.push(arr[i]);
-              }
-    }
-    return array
-}
-var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-    console.log(unique(arr))
-    //[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}, {…}]     //{}没有去重
-
-```
-
-**7. 利用hasOwnProperty**
-
-```js
-function unique(arr) {
-    var obj = {};
-    return arr.filter(function(item, index, arr){
-        return obj.hasOwnProperty(typeof item + item) ? false : (obj[typeof item + item] = true)
-    })
-}
-    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-        console.log(unique(arr))
-//[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}]   //所有的都去重了
-
-```
-
-利用hasOwnProperty 判断是否存在对象属性
-
-**8. 利用filter**
-
-```js
-function unique(arr) {
-  return arr.filter(function(item, index, arr) {
-    //当前元素，在原始数组中的第一个索引==当前索引值，否则返回当前元素
-    return arr.indexOf(item, 0) === index;
-  });
-}
-    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-        console.log(unique(arr))
-//[1, "true", true, 15, false, undefined, null, "NaN", 0, "a", {…}, {…}]
-//{}没有去重
-```
-
-**9. 利用递归去重**
-
-```js
-function unique(arr) {
-        var array= arr;
-        var len = array.length;
-
-    array.sort(function(a,b){   //排序后更加方便去重
-        return a - b;
-    })
-
-    function loop(index){
-        if(index >= 1){
-            if(array[index] === array[index-1]){
-                array.splice(index,1);
-            }
-            loop(index - 1);    //递归loop，然后数组去重
-        }
-    }
-    loop(len-1);
-    return array;
-}
- var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-console.log(unique(arr))
-//[1, "a", "true", true, 15, false, 1, {…}, null, NaN, NaN, "NaN", 0, "a", {…}, undefined]
-//{},NaN没有去重
-```
-
-**10. 利用Map数据结构去重**
-
-```js
-function arrayNonRepeatfy(arr) {
-  let map = new Map();
-  let array = new Array();  // 数组用于返回结果
-  for (let i = 0; i < arr.length; i++) {
-    if(map .has(arr[i])) {  // 如果有该key值
-      map .set(arr[i], true); 
-    } else { 
-      map .set(arr[i], false);   // 如果没有该key值
-      array .push(arr[i]);
-    }
-  } 
-  return array ;
-}
- var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-    console.log(arrayNonRepeatfy(arr))
-//[1, 'true', true,  15, false, undefined, null,  NaN, 'NaN', 0, 'a',   {}, {} ]
-//{}没有去重
-
-```
-
-创建一个空Map数据结构，遍历需要去重的数组，把数组的每一个元素作为key存到Map中。由于Map中不会出现相同的key值，所以最终得到的就是去重后的结果。
-
-**11. 利用reduce+includes**
-
-```js
-function unique(arr){
-    return arr.reduce((prev,cur) => prev.includes(cur) ? prev : [...prev,cur],[]);
-}
-var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-console.log(unique(arr));
-// [1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}, {…}]
-//{}没有去重
-```
-
-**12. [...new Set(arr)]**
-
-```js
-[...new Set(arr)] 
-//代码就是这么少----（其实，严格来说并不算是一种，相对于第一种方法来说只是简化了代码）
-//[1, 'true', true,  15, false, undefined, null,  NaN, 'NaN', 0, 'a',   {}, {} ] 
-// {}没有去重
-```
 
 
 
 ------
 
-#### 2.19 编码和字符集的区别
-
-**参考答案：**
+## 28. 编码和字符集的区别
 
 字符集是书写系统字母与符号的集合，而字符编码则是将字符映射为一特定的字节或字节序列，是一种规则。通常特定的字符集采用特定的编码方式（即一种字符集对应一种字符编码（例如：ASCII、IOS-8859-1、GB2312、GBK，都是即表示了字符集又表示了对应的字符编码，但Unicode不是，它采用现代的模型））
 
@@ -1822,50 +1565,11 @@ console.log(unique(arr));
 
 这就确保你在 HTML 文档中可以使用几乎任何一种人类语言中的字符，并且会稳定显示。
 
-------
-
-#### 2.20 null 和 undefined 的区别，如何让一个属性变为null
-
-**参考答案：**
-
-undefined 表示一个变量自然的、最原始的状态值，而 null 则表示一个变量被人为的设置为空对象，而不是原始状态。所以，**在实际使用过程中，为了保证变量所代表的语义，不要对一个变量显式的赋值 undefined**，**当需要释放一个对象时，直接赋值为 null 即可**。
-
-**解析：**
-
-**undefined** 的字面意思就是：未定义的值 。这个值的语义是，希望**表示一个变量最原始的状态，而非人为操作的结果 。** 这种原始状态会在以下 4 种场景中出现：
-
-1. 声明了一个变量，但没有赋值
-2. 访问对象上不存在的属性
-3. 函数定义了形参，但没有传递实参
-4. 使用 void 对表达式求值
-
-因此，undefined 一般都来自于某个表达式最原始的状态值，**不是人为操作的结果**。当然，你也可以手动给一个变量赋值 undefined，但这样做没有意义，因为一个变量不赋值就是 undefined 。
-
-**null** 的字面意思是：空值 。这个值的语义是，希望**表示 一个对象被人为的重置为空对象，而非一个变量最原始的状态 。** 在内存里的表示就是，栈中的变量没有指向堆中的内存对象
-
-null 有属于自己的类型 Null，而不属于Object类型，typeof 之所以会判定为 Object 类型，是**因为**JavaScript 数据类型在底层都是以二进制的形式表示的，**二进制的前三位为 0 会被 typeof 判断为对象类型**，而 null 的二进制位恰好都是 0 ，因此，**null 被误判断为 Object 类型**。
-
-当检测 `null` 或 `undefined` 时，注意[相等（==）与全等（===）两个操作符的区别](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators) ，前者会执行类型转换：
-
-```js
-typeof null        // "object" (因为一些以前的原因而不是'null')
-typeof undefined   // "undefined"
-null === undefined // false
-null  == undefined // true
-null === null // true
-null == null // true
-!null //true
-isNaN(1 + null) // false
-isNaN(1 + undefined) // true
-```
-
 
 
 ------
 
-#### 2.21 数组和伪数组的区别
-
-**参考答案**：
+## 29. 数组和伪数组的区别
 
 1. 定义
 
@@ -1972,245 +1676,7 @@ console.log(Array.prototype.slice.call(al2)); // [ 0, 1, <2 empty items> ]
 
 ------
 
-####  2.22 手写一个发布订阅
-
-**参考答案**：
-
-```js
-// 发布订阅中心, on-订阅, off取消订阅, emit发布, 内部需要一个单独事件中心caches进行存储;
-interface CacheProps {
-  [key: string]: Array<((data?: unknown) => void)>;
-}
-
-class Observer {
-  private caches: CacheProps = {}; // 事件中心
-  on (eventName: string, fn: (data?: unknown) => void){ // eventName事件名-独一无二, fn订阅后执行的自定义行为
-    this.caches[eventName] = this.caches[eventName] || [];
-    this.caches[eventName].push(fn);
-  }
-
-  emit (eventName: string, data?: unknown) { // 发布 => 将订阅的事件进行统一执行
-    if (this.caches[eventName]) {
-      this.caches[eventName].forEach((fn: (data?: unknown) => void) => fn(data));
-    }
-  }
-
-  off (eventName: string, fn?: (data?: unknown) => void) { // 取消订阅 => 若fn不传, 直接取消该事件所有订阅信息
-    if (this.caches[eventName]) {
-      const newCaches = fn ? this.caches[eventName].filter(e => e !== fn) : [];
-      this.caches[eventName] = newCaches;
-    }
-  }
-
-}
-
-```
-
-**定义**
-发布-订阅模式其实是一种对象间一对多的依赖关系，当一个对象的状态发送改变时，所有依赖于它的对象都将得到状态改变的通知。
-订阅者（Subscriber）把自己想订阅的事件注册（Subscribe）到调度中心（Event Channel），当发布者（Publisher）发布该事件（Publish Event）到调度中心，也就是该事件触发时，由调度中心统一调度（Fire Event）订阅者注册到调度中心的处理代码。
-
-**实现思路**
-
-1. 创建一个 EventEmitter 类
-2. 在该类上创建一个事件中心（Map）
-3. on 方法用来把函数 fn 都加到事件中心中（订阅者注册事件到调度中心）
-4. emit 方法取到 arguments 里第一个当做 event，根据 event 值去执行对应事件中心中的函数（发布者发布事件到调度中心，调度中心处理代码）
-5. off 方法可以根据 event 值取消订阅（取消订阅）
-6. once 方法只监听一次，调用完毕后删除缓存函数（订阅一次）
-7. 注册一个 newListener 用于监听新的事件订阅
-
-```js
-
-class EventEmitter{
-    //第一步，创建一个类，并初始化一个事件存储中心
-    constructor(){
-        // 用来存放注册的事件与回调
-        this._events={};
-    }
-
-    //第二步，实现事件的订阅方法 on
-    //将事件回调函数存储到对应的事件上
-    on(eventName,callback){
-        //第六步，注册一个 newListener 用于监听新的事件订阅
-        //在用户注册的事件的时候，发布一下newListener事件
-        // 如果绑定的事件不是newListener 就触发改回调
-        if (this._events[eventName]) {
-            if (this.eventName!=="newListener") {
-                this.emit("newListener",eventName);
-            }
-        }
-
-        //由于一个事件可能注册多个回调函数，所以使用数组来存储事件队列
-        const callbacks=this._events[eventName] || [];
-        callbacks.push(callback);
-        this._events[eventName]=callbacks;
-    }
-
-    //第三步，实现事件的发布方法 emit
-    //获取到事件对应的回调函数依次执行
-    emit(eventName,...args){
-        //args 用于收集发布事件时传递的参数
-        const callbacks=this._events[eventName]  || [];
-        callbacks.forEach(cb=>cb(...args));
-    }
-
-    //第四步，实现事件的取消订阅方法 off 
-    //找到事件对应的回调函数，删除对应的回调函数
-    off(eventName,callback){
-        const callbacks=this._events[eventName] || [];
-        /*fn.initialCallback!=callback 用于once的取消订阅 */
-        const newCallbacks=callbacks.filter(fn=>fn!=callback && fn.initialCallback!=callback);
-
-        this._events[eventName]=newCallbacks;
-    }
-
-    //第五步，实现事件的单次订阅方法 once
-    //1.先注册 2.事件执行后取消订阅
-    once(eventName,callback){
-        //由于需要在回调函数执行后，取消订阅当前事件，所以需要对传入的回调函数做一层包装,然后绑定包装后的函数
-        const one=(...args)=>{
-            // 执行回调函数
-            callback(...args);
-            //取消订阅当前事件
-            this.off(eventName,one);
-        }
-        // 考虑：如果当前事件在未执行，被用户取消订阅，能否取消？
-        // 由于：我们订阅事件的时候，修改了原回调函数的引用，所以，用户触发 off 的时候不能找到对应的回调函数
-        // 所以，我们需要在当前函数与用户传入的回调函数做一个绑定，我们通过自定义属性来实现
-        one.initialCallback=callback;
-        this.on(eventName,one);
-    }
-
-}
-
-//测试用例
-const events=new EventEmitter();
-
-events.on("newListener",function(eventName){
-    console.log("eventName: ",eventName);
-});
-
-events.on("hello",function(){
-    console.log("Hello World!");
-});
-
-let cb=function(){
-    console.log("cb");
-}
-events.on("hello",cb);
-events.off("hello",cb);
-
-function once(){
-    console.log("once");
-}
-events.on("hello",once);
-events.off("hello",once);
-
-events.emit("hello");
-events.emit("hello");
-
-```
-
-
-
-------
-
-#### 2.23 手写数组转树
-
-**参考答案**：
-
-**问题：**
-
-```js
-// 例如将 input 转成output的形式
-let input = [
-    {
-        id: 1, val: '学校', parentId: null
-    }, {
-        id: 2, val: '班级1', parentId: 1
-    }, {
-        id: 3, val: '班级2', parentId: 1
-    }, {
-        id: 4, val: '学生1', parentId: 2
-    }, {
-        id: 5, val: '学生2', parentId: 2
-    }, {
-        id: 6, val: '学生3', parentId: 3
-    },
-]
-
-let output = {
-    id: 1,
-    val: '学校',
-    children: [{
-        id: 2,
-        val: '班级1',
-        children: [
-            {
-                id: 4,
-                val: '学生1',
-                children: []
-            },
-            {
-                id: 5,
-                val: '学生2',
-                children: []
-            }
-        ]
-    }, {
-        id: 3,
-        val: '班级2',
-        children: [{
-            id: 6,
-            val: '学生3',
-            children: []
-        }]
-    }]
-}
-
-```
-
-**答案**：
-
-```js
-// 代码实现
-function arrayToTree(array) {
-    let root = array[0]
-    array.shift()
-    let tree = {
-        id: root.id,
-        val: root.val,
-        children: array.length > 0 ? toTree(root.id, array) : []
-    }
-    return tree;
-}
-
-function toTree(parenId, array) {
-    let children = []
-    let len = array.length
-    for (let i = 0; i < len; i++) {
-        let node = array[i]
-        if (node.parentId === parenId) {
-            children.push({
-                id: node.id,
-                val: node.val,
-                children: toTree(node.id, array)
-            })
-        }
-    }
-    return children
-}
-
-console.log(arrayToTree(input))
-
-```
-
-------
-
-#### 2.24 介绍下 Set、Map、WeakSet 和 WeakMap 的区别？
-
-**参考答案**：
+## 30.介绍下 Set、Map、WeakSet 和 WeakMap 的区别？
 
 **Set**
 
@@ -2220,7 +1686,7 @@ console.log(arrayToTree(input))
 
 **WeakSet**
 
-1. 成员都是对象（引用）；
+1. **成员都是对象（引用）**；
 2. 成员都是弱引用，随时可以消失（不计入垃圾回收机制）。可以用来保存 DOM 节点，不容易造成内存泄露；
 3. 不能遍历，方法有add、delete、has；
 
@@ -2231,7 +1697,7 @@ console.log(arrayToTree(input))
 
 **WeakMap**
 
-1. 只接收对象为键名（null 除外），不接受其他类型的值作为键名；
+1. **只接收对象为键名**（null 除外），不接受其他类型的值作为键名；
 2. 键名指向的对象，不计入垃圾回收机制；
 3. 不能遍历，方法同get、set、has、delete；
 
@@ -6640,7 +6106,606 @@ Web Workers 没有访问 DOM 的权限，因此，它们对于同时使用多个
 
 ----
 
+
+
+## 模块化
+
+------
+
+#### 9.1 CommonJS规范
+
+**参考答案：**
+
+CommonJS规范加载模块是同步的，只有加载完成，才能执行后面的操作。
+
+CommonJS规范中的module、exports和require
+
+- 每个文件就是一个模块，有自己的作用域。每个模块内部，module变量代表当前模块，是一个对象，它的exports属性（即module.exports）是对外的接口。
+- module.exports属性表示当前模块对外输出的接口，其他文件加载该模块，实际上就是读取module.exports变量。
+- 为了方便，Node为每个模块提供一个exports变量，指向module.exports。
+
+```js
+let exports = module.exports;
+```
+
+- require命令用于加载模块文件。
+
+使用示例：
+
+```js
+  //name.js
+  exports.name = function(){return '李婷婷'}; //导出
+  //getName.js
+  let getName = require('name'); //引入
+```
+
+注：不能直接将exports变量指向一个值，因为这样等于切断了exports与module.exports的联系：如下
+
+```js
+exports = function(x){console.log(x)}
+```
+
+如果一个模块的对外接口，就是一个单一的值，不能使用exports输出，只能使用module.exports输出。
+
+CommonJS模块导入用require，导出用module.exports。导出的对象需注意，如果是静态值，而且非常量，后期可能会有所改动的，请使用函数动态获取，否则无法获取修改值。导入的参数，是可以随意改动的，所以使用时要注意
+
+------
+
+#### 9.2 ES6 module 和 CommonJS module 的区别
+
+**参考答案**：
+
+- 为**CommonJS**的require语法是同步的，所以就导致了**CommonJS**模块规范只适合用在服务端，而ES6模块无论是在浏览器端还是服务端都是可以使用的，但是在服务端中，还需要遵循一些特殊的规则才能使用 ；
+- **CommonJS** 模块输出的是一个**值的拷贝**，而ES6 模块输出的是**值的引用**；
+- **CommonJS** 模块是运行时加载，而ES6 模块是编译时输出接口，使得对JS的模块进行静态分析成为了可能
+- 因为两个模块加载机制的不同，所以在对待循环加载的时候，它们会有不同的表现。**CommonJS**遇到循环依赖的时候，只会输出已经执行的部分，后续的输出或者变化，是不会影响已经输出的变量。而ES6模块相反，使用import加载一个变量，变量不会被缓存，真正取值的时候就能取到最终的值；
+- 关于模块顶层的this指向问题，在**CommonJS**顶层，this指向当前模块；而在ES6模块中，this指向undefined；
+- 关于两个模块互相引用的问题，在ES6模块当中，是支持加载**CommonJS**模块的。但是反过来，**CommonJS**并不能requireES6模块，在NodeJS中，两种模块方案是分开处理的。
+
+------
+
+#### 9.3 ES6 module、CommonJS module 循环引用的问题
+
+**参考答案：**
+
+循环加载指的是a脚本的执行依赖b脚本，b脚本的执行依赖a脚本
+
+1. CommonJS模块是加载时执行。一旦出现某个模块被“循环加载”，就只输出已经执行的部分，没有执行的部分不会输出。
+
+2. ES6模块对导出模块，变量，对象是动态引用，遇到模块加载命令import时不会去执行模块，只是生成一个指向被加载模块的引用。
+
+   CommonJS模块规范主要适用于后端Node.js，后端Node.js是同步模块加载，所以在模块循环引入时模块已经执行完毕。推荐前端工程中使用ES6的模块规范，通过安装Babel转码插件支持ES6模块引入的语法。
+
+**解析：**
+
+1. CommonJS模块的加载原理
+
+CommonJS模块就是一个脚本文件，require命令第一次加载该脚本时就会执行整个脚本，然后在内存中生成该模块的一个说明对象。
+
+```js
+{
+    id: '',  //模块名，唯一
+    exports: {  //模块输出的各个接口
+        ...
+    },
+    loaded: true,  //模块的脚本是否执行完毕
+    ...
+}
+```
+
+以后用到这个模块时，就会到对象的exports属性中取值。即使再次执行require命令，也不会再次执行该模块，而是到缓存中取值。
+
+**CommonJS模块是加载时执行，即脚本代码在require时就全部执行**。一旦出现某个模块被“循环加载”，就只输出已经执行的部分，没有执行的部分不会输出。
+
+案例说明：
+
+案例来源于Node官方说明：[nodejs.org/api/modules…](https://nodejs.org/api/modules.html#modules_cycles)
+
+```js
+//a.js
+exports.done = false;
+
+var b = require('./b.js');
+console.log('在a.js中，b.done = %j', b.done);
+
+exports.done = true;
+console.log('a.js执行完毕！')
+
+//b.js
+exports.done = false;
+
+var a = require('./a.js');
+console.log('在b.js中，a.done = %j', a.done);
+
+exports.done = true;
+console.log('b.js执行完毕！')
+
+//main.js
+var a = require('./a.js');
+var b = require('./b.js');
+
+console.log('在main.js中，a.done = %j, b.done = %j', a.done, b.done);
+
+```
+
+输出结果如下：
+
+```js
+//node环境下运行main.js
+node main.js
+
+在b.js中，a.done = false
+b.js执行完毕！
+在a.js中，b.done = true
+a.js执行完毕！
+在main.js中，a.done = true, b.done = true
+```
+
+JS代码执行顺序如下：
+
+1）main.js中先加载a.js，a脚本先输出done变量，值为false，然后加载b脚本，a的代码停止执行，等待b脚本执行完成后，才会继续往下执行。
+
+2）b.js执行到第二行会去加载a.js，这时发生循环加载，系统会去a.js模块对应对象的exports属性取值，因为a.js没执行完，从exports属性只能取回已经执行的部分，未执行的部分不返回，所以取回的值并不是最后的值。
+
+3）a.js已执行的代码只有一行，exports.done = false;所以对于b.js来说，require a.js只输出了一个变量done，值为false。往下执行console.log('在b.js中，a.done = %j', a.done);控制台打印出：
+
+```js
+在b.js中，a.done = false
+```
+
+4）b.js继续往下执行，done变量设置为true，console.log('b.js执行完毕！')，等到全部执行完毕，将执行权交还给a.js。此时控制台输出：
+
+```js
+b.js执行完毕！
+```
+
+5）执行权交给a.js后，a.js接着往下执行，执行console.log('在a.js中，b.done = %j', b.done);控制台打印出：
+
+```js
+在a.js中，b.done = true
+```
+
+6）a.js继续执行，变量done设置为true，直到a.js执行完毕。
+
+```
+a.js执行完毕！
+```
+
+7）main.js中第二行不会再次执行b.js，直接输出缓存结果。最后控制台输出：
+
+```
+在main.js中，a.done = true, b.done = true
+```
+
+总结：
+
+1）在b.js中，a.js没有执行完毕，只执行了第一行，所以循环加载中，只输出已执行的部分。
+
+2）main.js第二行不会再次执行，而是输出缓存b.js的执行结果。exports.done = true;
+
+1. ES6模块的循环加载
+
+ES6模块与CommonJS有本质区别，ES6模块对导出变量，方法，对象是动态引用，**遇到模块加载命令import时不会去执行模块，只是生成一个指向被加载模块的引用**，需要开发者保证真正取值时能够取到值，只要引用是存在的，代码就能执行。
+
+案例说明：
+
+```js
+//even.js
+import {odd} from './odd';
+
+var counter = 0;
+export function even(n){
+    counter ++;
+    console.log(counter);
+
+    return n == 0 || odd(n-1);
+}
+
+//odd.js
+import {even} from './even.js';
+
+export function odd(n){
+    return n != 0 && even(n-1);
+}
+
+//index.js
+import * as m from './even.js';
+
+var x = m.even(5);
+console.log(x);
+
+var y = m.even(4);
+console.log(y);
+
+```
+
+**执行index.js，输出结果如下：**
+
+```bash
+babel-node index.js
+
+1
+2
+3
+false
+4
+5
+6
+true
+
+```
+
+可以看出counter的值是累加的，ES6是动态引用。如果上面的引用改为CommonJS代码，会报错，因为在odd.js里，even.js代码并没有执行。改成CommonJS规范加载的代码为：
+
+```js
+//even.js
+var odd = require('./odd.js');
+
+var counter = 0;
+module.exports = function even(n){
+    counter ++;
+    console.log(counter);
+
+    return n == 0 || odd(n-1);
+}
+//odd.js
+var even = require('./even.js');
+
+module.exports = function odd(n){
+    return n != 0 && even(n-1);
+}
+//index.js
+var even = require('./even.js');
+
+var x = even(5);
+console.log(x);
+
+var y = even(5);
+console.log(y);
+
+```
+
+**执行index.js，输出结果如下：**
+
+```bash
+$ babel-node index.js
+1
+/Users/name/Projects/node/ES6/odd.1.js:6
+    return n != 0 && even(n - 1);
+                     ^
+
+TypeError: even is not a function
+    at odd (/Users/name/Projects/node/ES6/odd.1.js:4:22)
+
+```
+
+------
+
+
+
 # 手写题
+
+----
+
+#### 2.18 数组去重
+
+**参考答案：**
+
+**1. 利用ES6 Set去重（ES6中最常用）**
+
+```js
+function unique (arr) {
+  return Array.from(new Set(arr))
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr))
+ //[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {}, {}]
+```
+
+不考虑兼容性，这种去重的方法代码最少。这种方法还无法去掉“{}”空对象，后面的高阶方法会添加去掉重复“{}”的方法。
+
+**2. 利用for嵌套for，然后splice去重（ES5中最常用）**
+
+```js
+function unique(arr){            
+        for(var i=0; i<arr.length; i++){
+            for(var j=i+1; j<arr.length; j++){
+                if(arr[i]==arr[j]){         //第一个等同于第二个，splice方法删除第二个
+                    arr.splice(j,1);
+                    j--;
+                }
+            }
+        }
+return arr;
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+    console.log(unique(arr))
+    //[1, "true", 15, false, undefined, NaN, NaN, "NaN", "a", {…}, {…}]     //NaN和{}没有去重，两个null直接消失了
+```
+
+双层循环，外层循环元素，内层循环时比较值。值相同时，则删去这个值。
+
+**3. 利用indexOf去重**
+
+```js
+function unique(arr) {
+    if (!Array.isArray(arr)) {
+        console.log('type error!')
+        return
+    }
+    var array = [];
+    for (var i = 0; i < arr.length; i++) {
+        if (array .indexOf(arr[i]) === -1) {
+            array .push(arr[i])
+        }
+    }
+    return array;
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr))
+   // [1, "true", true, 15, false, undefined, null, NaN, NaN, "NaN", 0, "a", {…}, {…}]  //NaN、{}没有去重
+```
+
+新建一个空的结果数组，for 循环原数组，判断结果数组是否存在当前元素，如果有相同的值则跳过，不相同则push进数组。
+
+**4. 利用sort()**
+
+```js
+function unique(arr) {
+    if (!Array.isArray(arr)) {
+        console.log('type error!')
+        return;
+    }
+    arr = arr.sort()
+    var arrry= [arr[0]];
+    for (var i = 1; i < arr.length; i++) {
+        if (arr[i] !== arr[i-1]) {
+            arrry.push(arr[i]);
+        }
+    }
+    return arrry;
+}
+     var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+        console.log(unique(arr))
+// [0, 1, 15, "NaN", NaN, NaN, {…}, {…}, "a", false, null, true, "true", undefined]      //NaN、{}没有去重
+```
+
+利用sort()排序方法，然后根据排序后的结果进行遍历及相邻元素比对。
+
+**5. 利用对象的属性不能相同的特点进行去重（这种数组去重的方法有问题，不建议用，有待改进）**
+
+```js
+function unique(arr) {
+    if (!Array.isArray(arr)) {
+        console.log('type error!')
+        return
+    }
+    var arrry= [];
+     var  obj = {};
+    for (var i = 0; i < arr.length; i++) {
+        if (!obj[arr[i]]) {
+            arrry.push(arr[i])
+            obj[arr[i]] = 1
+        } else {
+            obj[arr[i]]++
+        }
+    }
+    return arrry;
+}
+    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+        console.log(unique(arr))
+//[1, "true", 15, false, undefined, null, NaN, 0, "a", {…}]    //两个true直接去掉了，NaN和{}去重
+```
+
+**6. 利用includes**
+
+```js
+function unique(arr) {
+    if (!Array.isArray(arr)) {
+        console.log('type error!')
+        return
+    }
+    var array =[];
+    for(var i = 0; i < arr.length; i++) {
+            if( !array.includes( arr[i]) ) {//includes 检测数组是否有某个值
+                    array.push(arr[i]);
+              }
+    }
+    return array
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+    console.log(unique(arr))
+    //[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}, {…}]     //{}没有去重
+
+```
+
+**7. 利用hasOwnProperty**
+
+```js
+function unique(arr) {
+    var obj = {};
+    return arr.filter(function(item, index, arr){
+        return obj.hasOwnProperty(typeof item + item) ? false : (obj[typeof item + item] = true)
+    })
+}
+    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+        console.log(unique(arr))
+//[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}]   //所有的都去重了
+
+```
+
+利用hasOwnProperty 判断是否存在对象属性
+
+**8. 利用filter**
+
+```js
+function unique(arr) {
+  return arr.filter(function(item, index, arr) {
+    //当前元素，在原始数组中的第一个索引==当前索引值，否则返回当前元素
+    return arr.indexOf(item, 0) === index;
+  });
+}
+    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+        console.log(unique(arr))
+//[1, "true", true, 15, false, undefined, null, "NaN", 0, "a", {…}, {…}]
+//{}没有去重
+```
+
+**9. 利用递归去重**
+
+```js
+function unique(arr) {
+        var array= arr;
+        var len = array.length;
+
+    array.sort(function(a,b){   //排序后更加方便去重
+        return a - b;
+    })
+
+    function loop(index){
+        if(index >= 1){
+            if(array[index] === array[index-1]){
+                array.splice(index,1);
+            }
+            loop(index - 1);    //递归loop，然后数组去重
+        }
+    }
+    loop(len-1);
+    return array;
+}
+ var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr))
+//[1, "a", "true", true, 15, false, 1, {…}, null, NaN, NaN, "NaN", 0, "a", {…}, undefined]
+//{},NaN没有去重
+```
+
+**10. 利用Map数据结构去重**
+
+```js
+function arrayNonRepeatfy(arr) {
+  let map = new Map();
+  let array = new Array();  // 数组用于返回结果
+  for (let i = 0; i < arr.length; i++) {
+    if(map .has(arr[i])) {  // 如果有该key值
+      map .set(arr[i], true); 
+    } else { 
+      map .set(arr[i], false);   // 如果没有该key值
+      array .push(arr[i]);
+    }
+  } 
+  return array ;
+}
+ var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+    console.log(arrayNonRepeatfy(arr))
+//[1, 'true', true,  15, false, undefined, null,  NaN, 'NaN', 0, 'a',   {}, {} ]
+//{}没有去重
+
+```
+
+创建一个空Map数据结构，遍历需要去重的数组，把数组的每一个元素作为key存到Map中。由于Map中不会出现相同的key值，所以最终得到的就是去重后的结果。
+
+**11. 利用reduce+includes**
+
+```js
+function unique(arr){
+    return arr.reduce((prev,cur) => prev.includes(cur) ? prev : [...prev,cur],[]);
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr));
+// [1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}, {…}]
+//{}没有去重
+```
+
+**12. [...new Set(arr)]**
+
+```js
+[...new Set(arr)] 
+//代码就是这么少----（其实，严格来说并不算是一种，相对于第一种方法来说只是简化了代码）
+//[1, 'true', true,  15, false, undefined, null,  NaN, 'NaN', 0, 'a',   {}, {} ] 
+// {}没有去重
+```
+
+
+
+----
+
+## 26  instanceOf 原理，手动实现 function isInstanceOf (child, Parent)
+
+instanceof主要作用就是判断一个实例是否属于某种类型
+
+```js
+let person = function(){}
+let no = new person()
+no instanceof person//true
+```
+
+instanceOf 原理
+
+```js
+function new_instance_of(leftVaule, rightVaule) { 
+    let rightProto = rightVaule.prototype; // 取右表达式的 prototype 值
+    leftVaule = leftVaule.__proto__; // 取左表达式的__proto__值
+    while (true) {
+        if (leftVaule === null) {
+            return false;    
+        }
+        if (leftVaule === rightProto) {
+            return true;    
+        } 
+        leftVaule = leftVaule.__proto__ 
+    }
+}
+```
+
+其实 instanceof 主要的**实现原理就是只要右边变量的 prototype 在左边变量的原型链上即可**。因此，instanceof 在查找的过程中会遍历左边变量的原型链，直到找到右边变量的 prototype，如果查找失败，则会返回 false，告诉我们左边变量并非是右边变量的实例。
+
+同时还要了解js的原型继承原理
+
+我们知道每个 JavaScript 对象均有一个**隐式的 proto 原型属性**，而**显式的原型属性是 prototype**，只有 Object.prototype.proto 属性在未修改的情况下为 null 值
+
+手动实现
+
+```js
+function instance_of(L, R) {//L 表示左表达式，R 表示右表达式
+    var O = R.prototype;
+    L = L.__proto__;
+    while (true) { 
+        if (L === null) 
+        return false; 
+        if (O === L) // 这里重点：当 O 严格等于 L 时，返回true 
+        return true; 
+        L = L.__proto__; 
+    } 
+}
+// 开始测试
+var a = []
+var b = {}
+
+function Foo(){}
+var c = new Foo()
+function child(){}
+function father(){}
+child.prototype = new father() 
+var d = new child()
+
+console.log(instance_of(a, Array)) // true
+console.log(instance_of(b, Object)) // true
+console.log(instance_of(b, Array)) // false
+console.log(instance_of(a, Object)) // true
+
+console.log(instance_of(c, Foo)) // true
+console.log(instance_of(d, child)) // true
+console.log(instance_of(d, father)) // true
+
+```
+
+**`instanceof`** **运算符**用于检测构造函数的 `prototype` 属性是否出现在某个实例对象的原型链上。
+
+需要注意的是，如果表达式 `obj instanceof Foo` 返回 `true`，**则并不意味着该表达式会永远返回 `true`**，因为 `Foo.prototype` 属性的值有可能会改变，改变之后的值很有可能不存在于 `obj` 的原型链上，这时原表达式的值就会成为 `false`。
+
+另外一种情况下，**原表达式的值也会改变，就是改变对象 `obj` 的原型链的情况**，虽然在目前的ES规范中，我们只能读取对象的原型而不能改变它，但借助于非标准的 `__proto__` 伪属性，是可以实现的。比如执行 `obj.__proto__ = {}` 之后，`obj instanceof Foo` 就会返回 `false` 了。
+
+
 
 
 
@@ -7241,6 +7306,243 @@ function debounce(fn, delay) {
 - 高频点击提交，表单重复提交
 
 ------
+
+####  2.22 手写一个发布订阅
+
+**参考答案**：
+
+```js
+// 发布订阅中心, on-订阅, off取消订阅, emit发布, 内部需要一个单独事件中心caches进行存储;
+interface CacheProps {
+  [key: string]: Array<((data?: unknown) => void)>;
+}
+
+class Observer {
+  private caches: CacheProps = {}; // 事件中心
+  on (eventName: string, fn: (data?: unknown) => void){ // eventName事件名-独一无二, fn订阅后执行的自定义行为
+    this.caches[eventName] = this.caches[eventName] || [];
+    this.caches[eventName].push(fn);
+  }
+
+  emit (eventName: string, data?: unknown) { // 发布 => 将订阅的事件进行统一执行
+    if (this.caches[eventName]) {
+      this.caches[eventName].forEach((fn: (data?: unknown) => void) => fn(data));
+    }
+  }
+
+  off (eventName: string, fn?: (data?: unknown) => void) { // 取消订阅 => 若fn不传, 直接取消该事件所有订阅信息
+    if (this.caches[eventName]) {
+      const newCaches = fn ? this.caches[eventName].filter(e => e !== fn) : [];
+      this.caches[eventName] = newCaches;
+    }
+  }
+
+}
+
+```
+
+**定义**
+发布-订阅模式其实是一种对象间一对多的依赖关系，当一个对象的状态发送改变时，所有依赖于它的对象都将得到状态改变的通知。
+订阅者（Subscriber）把自己想订阅的事件注册（Subscribe）到调度中心（Event Channel），当发布者（Publisher）发布该事件（Publish Event）到调度中心，也就是该事件触发时，由调度中心统一调度（Fire Event）订阅者注册到调度中心的处理代码。
+
+**实现思路**
+
+1. 创建一个 EventEmitter 类
+2. 在该类上创建一个事件中心（Map）
+3. on 方法用来把函数 fn 都加到事件中心中（订阅者注册事件到调度中心）
+4. emit 方法取到 arguments 里第一个当做 event，根据 event 值去执行对应事件中心中的函数（发布者发布事件到调度中心，调度中心处理代码）
+5. off 方法可以根据 event 值取消订阅（取消订阅）
+6. once 方法只监听一次，调用完毕后删除缓存函数（订阅一次）
+7. 注册一个 newListener 用于监听新的事件订阅
+
+```js
+class EventEmitter{
+    //第一步，创建一个类，并初始化一个事件存储中心
+    constructor(){
+        // 用来存放注册的事件与回调
+        this._events={};
+    }
+
+    //第二步，实现事件的订阅方法 on
+    //将事件回调函数存储到对应的事件上
+    on(eventName,callback){
+        //第六步，注册一个 newListener 用于监听新的事件订阅
+        //在用户注册的事件的时候，发布一下newListener事件
+        // 如果绑定的事件不是newListener 就触发改回调
+        if (this._events[eventName]) {
+            if (this.eventName!=="newListener") {
+                this.emit("newListener",eventName);
+            }
+        }
+
+        //由于一个事件可能注册多个回调函数，所以使用数组来存储事件队列
+        const callbacks=this._events[eventName] || [];
+        callbacks.push(callback);
+        this._events[eventName]=callbacks;
+    }
+
+    //第三步，实现事件的发布方法 emit
+    //获取到事件对应的回调函数依次执行
+    emit(eventName,...args){
+        //args 用于收集发布事件时传递的参数
+        const callbacks=this._events[eventName]  || [];
+        callbacks.forEach(cb=>cb(...args));
+    }
+
+    //第四步，实现事件的取消订阅方法 off 
+    //找到事件对应的回调函数，删除对应的回调函数
+    off(eventName,callback){
+        const callbacks=this._events[eventName] || [];
+        /*fn.initialCallback!=callback 用于once的取消订阅 */
+        const newCallbacks=callbacks.filter(fn=>fn!=callback && fn.initialCallback!=callback);
+
+        this._events[eventName]=newCallbacks;
+    }
+
+    //第五步，实现事件的单次订阅方法 once
+    //1.先注册 2.事件执行后取消订阅
+    once(eventName,callback){
+        //由于需要在回调函数执行后，取消订阅当前事件，所以需要对传入的回调函数做一层包装,然后绑定包装后的函数
+        const one=(...args)=>{
+            // 执行回调函数
+            callback(...args);
+            //取消订阅当前事件
+            this.off(eventName,one);
+        }
+        // 考虑：如果当前事件在未执行，被用户取消订阅，能否取消？
+        // 由于：我们订阅事件的时候，修改了原回调函数的引用，所以，用户触发 off 的时候不能找到对应的回调函数
+        // 所以，我们需要在当前函数与用户传入的回调函数做一个绑定，我们通过自定义属性来实现
+        one.initialCallback=callback;
+        this.on(eventName,one);
+    }
+
+}
+
+//测试用例
+const events=new EventEmitter();
+
+events.on("newListener",function(eventName){
+    console.log("eventName: ",eventName);
+});
+
+events.on("hello",function(){
+    console.log("Hello World!");
+});
+
+let cb=function(){
+    console.log("cb");
+}
+events.on("hello",cb);
+events.off("hello",cb);
+
+function once(){
+    console.log("once");
+}
+events.on("hello",once);
+events.off("hello",once);
+
+events.emit("hello");
+events.emit("hello");
+
+```
+
+
+
+------
+
+#### 2.23 手写数组转树
+
+**参考答案**：
+
+**问题：**
+
+```js
+// 例如将 input 转成output的形式
+let input = [
+    {
+        id: 1, val: '学校', parentId: null
+    }, {
+        id: 2, val: '班级1', parentId: 1
+    }, {
+        id: 3, val: '班级2', parentId: 1
+    }, {
+        id: 4, val: '学生1', parentId: 2
+    }, {
+        id: 5, val: '学生2', parentId: 2
+    }, {
+        id: 6, val: '学生3', parentId: 3
+    },
+]
+
+let output = {
+    id: 1,
+    val: '学校',
+    children: [{
+        id: 2,
+        val: '班级1',
+        children: [
+            {
+                id: 4,
+                val: '学生1',
+                children: []
+            },
+            {
+                id: 5,
+                val: '学生2',
+                children: []
+            }
+        ]
+    }, {
+        id: 3,
+        val: '班级2',
+        children: [{
+            id: 6,
+            val: '学生3',
+            children: []
+        }]
+    }]
+}
+
+```
+
+**答案**：
+
+```js
+// 代码实现
+function arrayToTree(array) {
+    let root = array[0]
+    array.shift()
+    let tree = {
+        id: root.id,
+        val: root.val,
+        children: array.length > 0 ? toTree(root.id, array) : []
+    }
+    return tree;
+}
+
+function toTree(parenId, array) {
+    let children = []
+    let len = array.length
+    for (let i = 0; i < len; i++) {
+        let node = array[i]
+        if (node.parentId === parenId) {
+            children.push({
+                id: node.id,
+                val: node.val,
+                children: toTree(node.id, array)
+            })
+        }
+    }
+    return children
+}
+
+console.log(arrayToTree(input))
+
+```
+
+------
+
+
 
 #### 8.4 浅拷贝，深拷贝(实现方式)
 
@@ -8770,276 +9072,5 @@ var threeSum = function(nums) {
 ```
 
 ------
-
-## 模块化
-
-------
-
-#### 9.1 CommonJS规范
-
-**参考答案：**
-
-CommonJS规范加载模块是同步的，只有加载完成，才能执行后面的操作。
-
-CommonJS规范中的module、exports和require
-
-- 每个文件就是一个模块，有自己的作用域。每个模块内部，module变量代表当前模块，是一个对象，它的exports属性（即module.exports）是对外的接口。
-- module.exports属性表示当前模块对外输出的接口，其他文件加载该模块，实际上就是读取module.exports变量。
-- 为了方便，Node为每个模块提供一个exports变量，指向module.exports。
-
-```js
-let exports = module.exports;
-```
-
-- require命令用于加载模块文件。
-
-使用示例：
-
-```js
-  //name.js
-  exports.name = function(){return '李婷婷'}; //导出
-  //getName.js
-  let getName = require('name'); //引入
-```
-
-注：不能直接将exports变量指向一个值，因为这样等于切断了exports与module.exports的联系：如下
-
-```js
-exports = function(x){console.log(x)}
-```
-
-如果一个模块的对外接口，就是一个单一的值，不能使用exports输出，只能使用module.exports输出。
-
-CommonJS模块导入用require，导出用module.exports。导出的对象需注意，如果是静态值，而且非常量，后期可能会有所改动的，请使用函数动态获取，否则无法获取修改值。导入的参数，是可以随意改动的，所以使用时要注意
-
-------
-
-#### 9.2 ES6 module 和 CommonJS module 的区别
-
-**参考答案**：
-
-- 为**CommonJS**的require语法是同步的，所以就导致了**CommonJS**模块规范只适合用在服务端，而ES6模块无论是在浏览器端还是服务端都是可以使用的，但是在服务端中，还需要遵循一些特殊的规则才能使用 ；
-- **CommonJS** 模块输出的是一个**值的拷贝**，而ES6 模块输出的是**值的引用**；
-- **CommonJS** 模块是运行时加载，而ES6 模块是编译时输出接口，使得对JS的模块进行静态分析成为了可能
-- 因为两个模块加载机制的不同，所以在对待循环加载的时候，它们会有不同的表现。**CommonJS**遇到循环依赖的时候，只会输出已经执行的部分，后续的输出或者变化，是不会影响已经输出的变量。而ES6模块相反，使用import加载一个变量，变量不会被缓存，真正取值的时候就能取到最终的值；
-- 关于模块顶层的this指向问题，在**CommonJS**顶层，this指向当前模块；而在ES6模块中，this指向undefined；
-- 关于两个模块互相引用的问题，在ES6模块当中，是支持加载**CommonJS**模块的。但是反过来，**CommonJS**并不能requireES6模块，在NodeJS中，两种模块方案是分开处理的。
-
-------
-
-#### 9.3 ES6 module、CommonJS module 循环引用的问题
-
-**参考答案：**
-
-循环加载指的是a脚本的执行依赖b脚本，b脚本的执行依赖a脚本
-
-1. CommonJS模块是加载时执行。一旦出现某个模块被“循环加载”，就只输出已经执行的部分，没有执行的部分不会输出。
-
-2. ES6模块对导出模块，变量，对象是动态引用，遇到模块加载命令import时不会去执行模块，只是生成一个指向被加载模块的引用。
-
-   CommonJS模块规范主要适用于后端Node.js，后端Node.js是同步模块加载，所以在模块循环引入时模块已经执行完毕。推荐前端工程中使用ES6的模块规范，通过安装Babel转码插件支持ES6模块引入的语法。
-
-**解析：**
-
-1. CommonJS模块的加载原理
-
-CommonJS模块就是一个脚本文件，require命令第一次加载该脚本时就会执行整个脚本，然后在内存中生成该模块的一个说明对象。
-
-```js
-{
-    id: '',  //模块名，唯一
-    exports: {  //模块输出的各个接口
-        ...
-    },
-    loaded: true,  //模块的脚本是否执行完毕
-    ...
-}
-```
-
-以后用到这个模块时，就会到对象的exports属性中取值。即使再次执行require命令，也不会再次执行该模块，而是到缓存中取值。
-
-**CommonJS模块是加载时执行，即脚本代码在require时就全部执行**。一旦出现某个模块被“循环加载”，就只输出已经执行的部分，没有执行的部分不会输出。
-
-案例说明：
-
-案例来源于Node官方说明：[nodejs.org/api/modules…](https://nodejs.org/api/modules.html#modules_cycles)
-
-```js
-//a.js
-exports.done = false;
-
-var b = require('./b.js');
-console.log('在a.js中，b.done = %j', b.done);
-
-exports.done = true;
-console.log('a.js执行完毕！')
-
-//b.js
-exports.done = false;
-
-var a = require('./a.js');
-console.log('在b.js中，a.done = %j', a.done);
-
-exports.done = true;
-console.log('b.js执行完毕！')
-
-//main.js
-var a = require('./a.js');
-var b = require('./b.js');
-
-console.log('在main.js中，a.done = %j, b.done = %j', a.done, b.done);
-
-```
-
-输出结果如下：
-
-```js
-//node环境下运行main.js
-node main.js
-
-在b.js中，a.done = false
-b.js执行完毕！
-在a.js中，b.done = true
-a.js执行完毕！
-在main.js中，a.done = true, b.done = true
-```
-
-JS代码执行顺序如下：
-
-1）main.js中先加载a.js，a脚本先输出done变量，值为false，然后加载b脚本，a的代码停止执行，等待b脚本执行完成后，才会继续往下执行。
-
-2）b.js执行到第二行会去加载a.js，这时发生循环加载，系统会去a.js模块对应对象的exports属性取值，因为a.js没执行完，从exports属性只能取回已经执行的部分，未执行的部分不返回，所以取回的值并不是最后的值。
-
-3）a.js已执行的代码只有一行，exports.done = false;所以对于b.js来说，require a.js只输出了一个变量done，值为false。往下执行console.log('在b.js中，a.done = %j', a.done);控制台打印出：
-
-```js
-在b.js中，a.done = false
-```
-
-4）b.js继续往下执行，done变量设置为true，console.log('b.js执行完毕！')，等到全部执行完毕，将执行权交还给a.js。此时控制台输出：
-
-```js
-b.js执行完毕！
-```
-
-5）执行权交给a.js后，a.js接着往下执行，执行console.log('在a.js中，b.done = %j', b.done);控制台打印出：
-
-```js
-在a.js中，b.done = true
-```
-
-6）a.js继续执行，变量done设置为true，直到a.js执行完毕。
-
-```
-a.js执行完毕！
-```
-
-7）main.js中第二行不会再次执行b.js，直接输出缓存结果。最后控制台输出：
-
-```
-在main.js中，a.done = true, b.done = true
-```
-
-总结：
-
-1）在b.js中，a.js没有执行完毕，只执行了第一行，所以循环加载中，只输出已执行的部分。
-
-2）main.js第二行不会再次执行，而是输出缓存b.js的执行结果。exports.done = true;
-
-1. ES6模块的循环加载
-
-ES6模块与CommonJS有本质区别，ES6模块对导出变量，方法，对象是动态引用，**遇到模块加载命令import时不会去执行模块，只是生成一个指向被加载模块的引用**，需要开发者保证真正取值时能够取到值，只要引用是存在的，代码就能执行。
-
-案例说明：
-
-```js
-//even.js
-import {odd} from './odd';
-
-var counter = 0;
-export function even(n){
-    counter ++;
-    console.log(counter);
-
-    return n == 0 || odd(n-1);
-}
-
-//odd.js
-import {even} from './even.js';
-
-export function odd(n){
-    return n != 0 && even(n-1);
-}
-
-//index.js
-import * as m from './even.js';
-
-var x = m.even(5);
-console.log(x);
-
-var y = m.even(4);
-console.log(y);
-
-```
-
-**执行index.js，输出结果如下：**
-
-```bash
-babel-node index.js
-
-1
-2
-3
-false
-4
-5
-6
-true
-
-```
-
-可以看出counter的值是累加的，ES6是动态引用。如果上面的引用改为CommonJS代码，会报错，因为在odd.js里，even.js代码并没有执行。改成CommonJS规范加载的代码为：
-
-```js
-//even.js
-var odd = require('./odd.js');
-
-var counter = 0;
-module.exports = function even(n){
-    counter ++;
-    console.log(counter);
-
-    return n == 0 || odd(n-1);
-}
-//odd.js
-var even = require('./even.js');
-
-module.exports = function odd(n){
-    return n != 0 && even(n-1);
-}
-//index.js
-var even = require('./even.js');
-
-var x = even(5);
-console.log(x);
-
-var y = even(5);
-console.log(y);
-
-```
-
-**执行index.js，输出结果如下：**
-
-```bash
-$ babel-node index.js
-1
-/Users/name/Projects/node/ES6/odd.1.js:6
-    return n != 0 && even(n - 1);
-                     ^
-
-TypeError: even is not a function
-    at odd (/Users/name/Projects/node/ES6/odd.1.js:4:22)
-
-```
 
 ------

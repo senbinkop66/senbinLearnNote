@@ -261,7 +261,7 @@ CSS选择器分类众多，主要可分为以下几类：
 
 - 若是 **标签选择器/伪元素选择器**，则分别加0、0、0、1
 
-最终优先级由级别权重与出现次数决定，统计元素对应的所有选择器的权重与次数，最终得到的”四位数“，从左到右进行比较，大的优先级越高。
+最终优先级由级别权重与出现次数决定，统计元素对应的所有选择器的权重与次数，**最终得到的”四位数“，从左到右进行比较，大的优先级越高。**
 
 到具体的计算层⾯，优先级是由 A 、B、C、D 的值来决定的，其中它们的值计算规则如下：
 
@@ -310,7 +310,7 @@ CSS选择器分类众多，主要可分为以下几类：
 - **永远不要**在你的插件中使用 `!important`
 - **永远不要**在全站范围的 CSS 代码中使用 `!important`
 
-- **与其使用** **`!important`****，你可以：**
+- **与其使用** **`!important`**，你可以:
 
 1. 更好地利用 CSS 级联属性
 
@@ -4146,6 +4146,72 @@ linear-gradient(0deg, #fff, #000)的意思是：渐变的角度从下往上，�
 其中width=device-width表示将viewport视窗的宽度调整为设备的宽度，这个宽度通常是指物理上宽度。默认的缩放比例为1时，如iphone 6竖屏的宽度为750px，它的dpr=2，用2px表示1px，这样设置之后viewport的宽度就变成375px。但是**我们可以改成0.5，viewport的宽度就是原本的750px，所以1个px还是1px，正常画就行，**但这样也意味着UI需要按2倍图的出，整体面面的单位都会放大一倍。
 
 
+
+----
+
+### 0.5px的边框如何实现
+
+有几种方法能实现0.5px边框：
+
+1. 直接设置 border-width: 0.5px；使用方便，但兼容性很差，不推荐使用。
+2. 用阴影代替边框，设置阴影box-shadow: 0 0 0 .5px #000; 使用方便，能正常展示圆角，兼容性一般。
+3. 给容器设置伪元素，设置绝对定位，高度为1px，背景图为线性渐变，一半有颜色，一半透明。视觉上宽度只有0.5px。这种方法适合设置一条边框，没法展示圆角。
+4. 给容器内**设置伪元素**，设置绝对定位，宽、高是200%，边框是1px，然后使用transform: scale(0.5) 让伪元素缩小原来的一半，这时候伪元素的边框和容器的边缘重合，视觉上宽度只有0.5px。这种方法兼容性最好，4个边框都能一次性设置，能正常展示圆角，**推荐使用**。
+
+做移动端开发的时候，如果边框直接设置 1px的宽度，可能视觉上还是太粗无法满足设计师的要求。下面是实现0.5px边框的几种方案。推荐方案4，复杂度中等，扩展性良好，兼容性好。
+
+```html
+<div class="box box1"> 1px 边框，作为对比 </div>
+<div class="box box2"> 方案1: 直接设置0.5px边框</div>
+<div class="box box3"> 方案2: 设置0.5px阴影扩散半径 </div>
+<div class="box box4"> 方案3: 使用背景渐变实现1px背景的一半</div>
+<div class="box box5"> 方案4: 伪元素2倍尺寸1px边框scale缩小一半</div>
+<style>
+  .box {
+  width: 200px;
+  height: 50px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+.box1 {
+  border: 1px solid #000;
+}
+.box2 {
+  border: 0.5px solid #000;
+}
+.box3 {
+  box-shadow: 0px 0px 0px 0.5px #000;
+}
+.box4 {
+  position: relative;
+}
+.box4::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background-image: linear-gradient(0deg, #000 50%, transparent 50%);
+}
+.box5 {
+  position: relative;
+}
+.box5::after {
+  position: absolute;
+  bottom: 0;
+  z-index: -1;
+  width: 200%;
+  height: 200%;
+  content: "";
+  display: block;
+  border: 1px solid #000;
+  border-radius: 10px;
+  transform: scale(0.5);
+  transform-origin: left bottom;
+}
+</style>
+```
 
 
 

@@ -1577,3 +1577,75 @@ async属性会使得script脚本异步的加载并在允许的情况下执行，
 
 ---
 
+## 43. 输入框宽度自适应
+
+**CSS实现该效果的原理：**
+
+1、用div嵌套“input”和“label”
+
+2、将“input”输入的内容同步到“label”中，并将“label”设置成不可见
+
+3、将“input”盖在“label”上
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+	<style type="text/css">
+		.container {
+			display: inline-flex;
+			align-items: center;
+			box-sizing: border-box;
+			position: relative;
+			border: 1px solid #000;
+			border-radius: 5px;
+			height: 40px;
+			min-width: 50px;
+			font-family: Arial,'microsoft yahei';
+			font-size: 14px;
+		}
+		.label {
+			display: inline-block;
+			font-size: inherit;
+			line-height: normal;
+			visibility: hidden;
+			font-family: inherit;
+			padding: 0 10px;
+		}
+		.input {
+			box-sizing: border-box;
+			position: absolute;
+			display: inline;
+			line-height: normal;
+			border-radius: inherit;
+			height: 100%;
+			width: 100%;
+			outline: 0;
+			border: 0;
+			margin: 0;
+			padding: 0 10px;
+		}
+	</style>
+
+<body>
+	<div id="app">
+		<div class="container">
+			<label id="label" class="label"></label>
+			<input type="text" id="input" class="input">
+		</div>
+	</div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+<script type="text/javascript">
+	document.getElementById("input").addEventListener("input", (e) => {
+		document.getElementById("label").innerHTML = e.target.value;
+	})
+</script>
+
+</html>
+```
+

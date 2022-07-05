@@ -3625,12 +3625,12 @@ hash 模式是一种把前端路由的路径用井号 `#` 拼接在真实 URL �
 
 原理：
 
-hash路由：hash模式的工作原理是hashchange事件，可以在window监听hash的变化。我们在url后面随便添加一个#xx触发这个事件。vue-router默认的是hash模式—使用URL的hash来模拟一个完整的URL,于是当URL改变的时候,页面不会重新加载,也就是单页应用了,当#后面的hash发生变化,不会导致浏览器向服务器发出请求,浏览器不发出请求就不会刷新页面,并且会触发hasChange这个事件,**通过监听hash值的变化来实现更新页面部分内容的操作**
+hash路由：hash模式的工作原理是hashchange事件，可以在window监听hash的变化。我们在url后面随便添加一个#xx触发这个事件。**vue-router默认的是hash模式**—使用URL的hash来模拟一个完整的URL,于是当URL改变的时候,页面不会重新加载,也就是单页应用了,当#后面的hash发生变化,不会导致浏览器向服务器发出请求,浏览器不发出请求就不会刷新页面,并且会触发hasChange这个事件,**通过监听hash值的变化来实现更新页面部分内容的操作**
 
 对于hash模式会创建hashHistory对象,在访问不同的路由的时候,会发生两件事:
 
-- HashHistory.push()将新的路由添加到浏览器访问的历史的栈顶
-- HasHistory.replace()替换到当前栈顶的路由
+- HashHistory.push() **将新的路由添加到浏览器访问的历史的栈顶**
+- HasHistory.replace() **替换到当前栈顶的路由**
 
 总结一下 hash 模式的优缺点：
 
@@ -3667,7 +3667,7 @@ history API 是 H5 提供的新特性，允许开发者直接更改前端路由�
 
 原理：
 
-history路由：主要使用HTML5的pushState()和replaceState()这两个api结合window.popstate事件（监听浏览器前进后退）来实现的,pushState()可以改变url地址且不会发送请求,replaceState()可以读取历史记录栈,还可以对浏览器记录进行修改
+history路由：**主要使用HTML5的pushState()和replaceState()这两个api**结合**window.popstate事件**（监听浏览器前进后退）来实现的, pushState()可以改变url地址且不会发送请求, replaceState()可以读取历史记录栈,还可以对浏览器记录进行修改
 
 history API 提供了丰富的函数供开发者调用，我们不妨把控制台打开，然后输入下面的语句来观察浏览器地址栏的变化：
 

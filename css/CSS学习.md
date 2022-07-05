@@ -2607,6 +2607,29 @@ cursor属性定义了鼠标指针放在一个元素边界范围内时所用的�
 
 ### z-index 属性
 
+`z-index` 属性设定了一个定位元素及其后代元素或 flex 项目的 z-order。当元素之间重叠的时候，z-index 较大的元素会覆盖较小的元素在上层进行显示。
+
+对于一个已经定位的盒子（即其 `position` 属性值不是 `static`，这里要注意的是 CSS 把元素看作盒子），`z-index` 属性指定：
+
+1. 盒子在当前堆叠上下文中的堆叠层级。
+2. 盒子是否创建一个本地堆叠上下文。
+
+```css
+/* 字符值 */
+z-index: auto;
+
+/* 整数值 */
+z-index: 0;
+z-index: 3;
+z-index: 289;
+z-index: -1;/* 使用负值降低优先级 */
+
+/* 全局值 */
+z-index: inherit;
+z-index: initial;
+z-index: unset;
+```
+
 设置图像的 z-index：
 
 ```css
