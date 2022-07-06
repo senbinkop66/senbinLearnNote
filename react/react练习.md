@@ -178,3 +178,81 @@ export default function TestDemo() {
 }
 ```
 
+
+
+----
+
+# 模糊加载
+
+
+
+```jsx
+import React, {useState, useEffect, useRef} from 'react';
+import "./index.css"
+
+
+export default function TestDemo() {
+	const [load, setLoad] = useState(0);
+	let interval = useRef();
+
+	useEffect(() => {
+		if(load < 100) {
+			interval.current = setInterval(() => {
+				setLoad(pre => pre + 1);
+			}, 30);
+		} else {
+			clearInterval(interval.current);
+		}
+		return () => clearInterval(interval.current);
+	}, [load]);
+
+	const scale = (num, in_min, in_max, out_min, out_max) => {
+		return ((num - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
+	}
+
+	return (
+		<div className='container'>
+			<section className='bg'  style={{filter: `blur(${scale(load, 0, 100, 30, 0)}px)`}}></section>
+			<div className='loading-text' style={{opacity: scale(load, 0, 100, 1, 0)}}>
+				{load}%
+			</div>
+		</div>
+	)
+}
+
+```
+
+```css
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css');
+@import url('https://fonts.googleapis.com/css?family=Ubuntu');
+
+.container {
+  font-family: 'Ubuntu', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow: hidden;
+  margin: 0;
+}
+.bg {
+  background: url('https://images.unsplash.com/photo-1576161787924-01bb08dad4a4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2104&q=80')
+    no-repeat center center/cover;
+  position: absolute;
+  top: -30px;
+  left: -30px;
+  width: calc(100vw + 60px);
+  height: calc(100vh + 60px);
+  z-index: -1;
+  filter: blur(0px);
+}
+.loading-text {
+  font-size: 50px;
+  color: #fff;
+}
+```
+
+
+
+----
+

@@ -167,3 +167,65 @@ article p:first-child::first-line {
 `::before`和`::after`伪元素与`content`属性的共同使用，在 CSS 中被叫做“生成内容”，而且你会见到这种技术被用于完成各种任务。[CSS Arrow Please](http://www.cssarrowplease.com/)网站就是一个著名的示例，它帮你用 CSS 生成一个箭头。在你创建你的箭头的时候看下 CSS，你将会看到实际使用的[`::before`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/::before)和[`::after`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/::after)伪元素。无论什么时候你看到了这些选择器，都要看下[`content`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/content)属性，以了解文档中添加了什么。
 
 ## 
+
+
+
+# filter
+
+[CSS](https://developer.mozilla.org/zh-CN/docs/Web/CSS)属性 **`filter`** 将模糊或颜色偏移等图形效果应用于元素。滤镜通常用于调整图像、背景和边框的渲染。
+
+CSS 标准里包含了一些已实现预定义效果的函数。你也可以参考一个 SVG 滤镜，通过一个 URL 链接到 SVG 滤镜元素（[SVG filter element](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Element/filter)）。
+
+## 语法
+
+```js
+/* URL to SVG filter */
+filter: url("filters.svg#filter-id");
+
+/* <filter-function> values */
+filter: blur(5px);
+filter: brightness(0.4);
+filter: contrast(200%);
+filter: drop-shadow(16px 16px 20px blue);
+filter: grayscale(50%);
+filter: hue-rotate(90deg);
+filter: invert(75%);
+filter: opacity(25%);
+filter: saturate(30%);
+filter: sepia(60%);
+
+/* Multiple filters */
+filter: contrast(175%) brightness(3%);
+
+/* Use no filter */
+filter: none;
+
+/* Global values */
+filter: inherit;
+filter: initial;
+filter: revert;
+filter: unset;
+```
+
+设置一种函数，方法如下：
+
+```js
+filter: <filter-function> [<filter-function>]* | none
+```
+
+给 SVG 元素 `filter` 引用滤镜，如下：
+
+```css
+filter: url(file.svg#filter-element-id)
+```
+
+### 插值
+
+如果起始和结束过滤器都有一个不含 [`url()`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/url) 的相同长度的函数列表，则会根据其指定的规则对其每个过滤器函数进行插值。如果它们的长度不同，较长列表中缺少的等效过滤器函数将使用空白的值添加到较短列表的尾部，然后所有的过滤器函数根据其特定的规则插值。如果一个过滤器是 `none` 则会使用过滤器函数的默认值替换函数列表，然后根据特定的规则进行插值，否则使用离散插值。
+
+## 函数
+
+使用 CSS 滤镜属性，你需要设定下面某一函数的值。如果该值无效，函数返回 `none`。除特殊说明外，函数的值如果接受百分比值（如 `34%`），那么该函数也接受小数值（如 `0.34`）。
+
+当单个 `filter` 属性具有两个或多个函数时，其结果将不同于把两个或多个 `filter` 属性分别应用于相同的函数时的结果。
+
