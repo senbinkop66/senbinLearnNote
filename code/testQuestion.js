@@ -1,17 +1,22 @@
-function myClass() {}
+/**
+ * @param {string[]} dictionary
+ * @param {string} sentence
+ * @return {string}
+ */
+var replaceWords = function(dictionary, sentence) {
+    const m = new Set(dictionary);
 
-myClass.prototype.x = 1;
+    sentence = sentence.split(" ");
+    for (let i = 0; i < sentence.length; i++) {
+        for (let j = 0; j < sentence[i].length; j++) {
+            if (m.has(sentence[i].slice(0, j + 1))) {
+                sentence[i] = sentence[i].slice(0, j + 1);
+                break;
+            }
+        }
+    }
+    return sentence.join(" ");
+};
 
-Object.defineProperty(myClass.prototype, 'y', {
-    value: 1,
-    writable: false
-});
-
-let a = new myClass();
-a.x = 2;
-console.log(a.x);  // 2
-console.log(myClass.prototype.x);  // 1
-
-a.y = 10;  // Ignored, throws in strict mode
-console.log(a.y);  // 1
-console.log(myClass.prototype.y);  // 1
+let dictionary = ["cat","bat","rat"], sentence = "the cattle was rattled by the battery";
+console.log(replaceWords(dictionary, sentence));
