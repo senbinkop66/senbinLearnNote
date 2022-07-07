@@ -1254,7 +1254,7 @@ state 和 props 主要的区别在于 **props** 是不可变的，**而 state �
 
 1. 通过标签属性从组件外向组件内传递变化的数据
 
-2. 注意: 组件内部不要修改props数据
+2. 注意: **组件内部不要修改props数据**
 
 ### 编码操作
 
@@ -1404,7 +1404,7 @@ ReactDOM.render(
 
 ## Props 的只读性
 
-组件无论是使用函数声明还是通过 class 声明，都决不能修改自身的 props。来看下这个 sum 函数：
+组件无论是使用函数声明还是通过 class 声明，**都决不能修改自身的 props**。来看下这个 sum 函数：
 
 ```js
 function sum(a, b) {
@@ -1467,22 +1467,26 @@ CustomButton.defaultProps = {
 您可以通过配置特定的 `defaultProps` 属性来定义 `props` 的默认值：实例如下：
 
 ```jsx
-class Greeting extends React.Component {
+import React, { Component } from 'react'
+import PropTypes from "prop-types"
+
+
+export default class Person extends Component {
   render() {
+    const {name, sex, age} = this.props;
     return (
-      <h1>Hello, {this.props.name}</h1>
-    );
+      <div>
+        <h2>{ name }--{ sex } --{ age }</h2>
+      </div>
+    )
   }
 }
 
-// 指定 props 的默认值：
-Greeting.defaultProps = {
-  name: 'Stranger'
-};
+Person.defaultProps = {
+  sex: "male",
+  age: 18
+}
 
-// 渲染出 "Hello, Stranger"：
-const root = ReactDOM.createRoot(document.getElementById('example')); 
-root.render(<Greeting />);
 ```
 
 如果你正在使用像 plugin-proposal-class-properties（之前名为 plugin-transform-class-properties）的 Babel 转换工具，你也可以在 React 组件类中声明 defaultProps 作为静态属性。此语法提案还没有最终确定，需要进行编译后才能在浏览器中运行。要了解更多信息，请查阅 class fields proposal。
@@ -1559,7 +1563,7 @@ ReactDOM.render(
 
 随着你的应用程序不断增长，你可以通过类型检查捕获大量错误。对于某些应用程序来说，你可以使用 [Flow](https://flow.org/) 或 [TypeScript](https://www.typescriptlang.org/) 等 JavaScript 扩展来对整个应用程序做类型检查。但即使你不使用这些扩展，React 也内置了一些类型检查的功能。要在组件的 props 上进行类型检查，你只需配置特定的 `propTypes` 属性：
 
-```js
+```jsx
 import PropTypes from 'prop-types';
 
 class Greeting extends React.Component {
@@ -1577,7 +1581,7 @@ Greeting.propTypes = {
 
 在此示例中，我们使用的是 class 组件，但是同样的功能也可用于函数组件，或者是由 [`React.memo`](https://zh-hans.reactjs.org/docs/react-api.html#reactmemo)/[`React.forwardRef`](https://zh-hans.reactjs.org/docs/react-api.html#reactforwardref) 创建的组件。
 
-`PropTypes` 提供一系列验证器，可用于确保组件接收到的数据类型是有效的。在本例中, 我们使用了 `PropTypes.string`。当传入的 `prop` 值类型不正确时，JavaScript 控制台将会显示警告。出于性能方面的考虑，`propTypes` 仅在开发模式下进行检查。
+**`PropTypes` 提供一系列验证器，可用于确保组件接收到的数据类型是有效的。**在本例中, 我们使用了 `PropTypes.string`。当传入的 `prop` 值类型不正确时，JavaScript 控制台将会显示警告。**出于性能方面的考虑，`propTypes` 仅在开发模式下进行检查。**
 
 ### 对Props进行限制
 
@@ -1835,30 +1839,31 @@ MyComponent.propTypes = {
 ## 函数式组件使用props
 
 ```jsx
-		//创建组件
-		function Person (props){
-			const {name,age,sex} = props
-			return (
-					<ul>
-						<li>姓名：{name}</li>
-						<li>性别：{sex}</li>
-						<li>年龄：{age}</li>
-					</ul>
-				)
-		}
-		Person.propTypes = {
-			name:PropTypes.string.isRequired, //限制name必传，且为字符串
-			sex:PropTypes.string,//限制sex为字符串
-			age:PropTypes.number,//限制age为数值
-		}
+//创建组件
+function Person (props){
+    const {name,age,sex} = props
+    return (
+        <ul>
+            <li>姓名：{name}</li>
+            <li>性别：{sex}</li>
+            <li>年龄：{age}</li>
+        </ul>
+        )
+}
 
-		//指定默认标签属性值
-		Person.defaultProps = {
-			sex:'男',//sex默认值为男
-			age:18 //age默认值为18
-		}
-		//渲染组件到页面
-		ReactDOM.render(<Person name="kop"/>,document.getElementById('test1'))
+Person.propTypes = {
+    name:PropTypes.string.isRequired, //限制name必传，且为字符串
+    sex:PropTypes.string,//限制sex为字符串
+    age:PropTypes.number,//限制age为数值
+}
+
+//指定默认标签属性值
+Person.defaultProps = {
+    sex:'男',//sex默认值为男
+    age:18 //age默认值为18
+}
+//渲染组件到页面
+ReactDOM.render(<Person name="kop"/>,document.getElementById('test1'))
 ```
 
 如果你在常规开发中使用函数组件，那你可能需要做一些适当的改动，以保证 PropsTypes 应用正常。
@@ -1901,6 +1906,34 @@ HelloWorldComponent.propTypes = {
 }
 
 export default HelloWorldComponent
+```
+
+
+
+```jsx
+import React from 'react'
+import PropTypes from "prop-types"
+
+function Person({name, sex, age}) {
+  return (
+    <div>
+      <h2>{ name }--{ sex } --{ age }</h2>
+    </div>
+  )
+}
+
+Person.defaultProps = {
+  sex: "male",
+  age: 18
+}
+
+Person.propTypes = {
+  name: PropTypes.string.isRequired,
+  sex: PropTypes.string,
+  age: PropTypes.number,
+}
+export default Person;
+
 ```
 
 
