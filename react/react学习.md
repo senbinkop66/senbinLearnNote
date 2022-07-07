@@ -64,11 +64,11 @@ ReactDOM.render(
 
 > **注意：**
 >
-> 如果我们需要使用 JSX，则 <script> 标签的 type 属性需要设置为 text/babel。
+> 如果我们需要使用 JSX，则 `<script>` 标签的 type 属性需要设置为 text/babel。
 
 或者使用 create-react-app 工具创建的 react 开发环境：
 
-```js
+```jsx
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -154,7 +154,6 @@ class App extends Component {
 }
 
 export default App;
-
 ```
 
 src/index.js 是一个入口文件，我们可以尝试直接修改 src/index.js 文件代码：
@@ -230,33 +229,31 @@ setInterval(tick,1000);
 React]()提供了一些API来创建一种 “特别” 的一般js对象
 
 ```js
-const VDOM = React.createElement('xx',{id:'xx'},'xx')
+const VDOM = React.createElement('xx', {id:'xx'}, 'xx')
 ```
 
 1. 上面创建的就是一个简单的虚拟DOM对象
 2. 虚拟DOM对象最终都会被React转换为真实的DOM
-3. 我们编码时基本只需要操作react的虚拟DOM相关数据, react会转换为真实DOM变化而更新界。
+3. 我们编码时基本只需要操作react的虚拟DOM相关数据, react会转换为真实DOM变化而更新界面。
 
 ```js
-		// 创建虚拟DOM
-		const VDOM = React.createElement("h1", {id: "title"}, React.createElement("span", {}, "Hello React"));
-		// 渲染虚拟DOM到页面
-		ReactDOM.render(VDOM, document.getElementById("test"));
+// 创建虚拟DOM
+const VDOM = React.createElement("h1", {id: "title"}, React.createElement("span", {}, "Hello React"));
+// 渲染虚拟DOM到页面
+ReactDOM.render(VDOM, document.getElementById("test"));
 ```
 
 ### JSX方式
 
-
-
 ```jsx
-		// 创建虚拟DOM
-		const VDOM = (
-			<h1 id="title">
-				<span>Hello,React</span>
-			</h1>
-		);  //此处一定不要写引号，因为不是字符串
-		// 渲染虚拟DOM到页面
-		ReactDOM.render(VDOM, document.getElementById("test"));
+// 创建虚拟DOM
+const VDOM = (
+    <h1 id="title">
+        <span>Hello,React</span>
+    </h1>
+);  //此处一定不要写引号，因为不是字符串
+// 渲染虚拟DOM到页面
+ReactDOM.render(VDOM, document.getElementById("test"));
 ```
 
 
@@ -264,32 +261,32 @@ const VDOM = React.createElement('xx',{id:'xx'},'xx')
 ## 虚拟DOM与真实DOM
 
 ```jsx
-		// 创建虚拟DOM
-		const VDOM = (
-			<h1 id="title">
-				<span>Hello,React</span>
-			</h1>
-		);
-		// 渲染虚拟DOM到页面
-		ReactDOM.render(VDOM, document.getElementById("test"));
-		
-		//虚拟DOM
-		console.log(VDOM); 
-		// {$$typeof: Symbol(react.element), type: 'h1', key: null, ref: null, props: {…}, …}
-		
-		//真实DOM
-		let tDOM = document.getElementById("demo");
-		console.log(tDOM);
-		// <div id="demo"></div>
+// 创建虚拟DOM
+const VDOM = (
+    <h1 id="title">
+        <span>Hello,React</span>
+    </h1>
+);
+// 渲染虚拟DOM到页面
+ReactDOM.render(VDOM, document.getElementById("test"));
 
-		console.log(typeof VDOM);  //object
-		console.log(VDOM instanceof Object);  //true
+//虚拟DOM
+console.log(VDOM); 
+// {$$typeof: Symbol(react.element), type: 'h1', key: null, ref: null, props: {…}, …}
+
+//真实DOM
+let tDOM = document.getElementById("demo");
+console.log(tDOM);
+// <div id="demo"></div>
+
+console.log(typeof VDOM);  //object
+console.log(VDOM instanceof Object);  //true
 ```
 
 关于虚拟DOM：
 	1.本质是Object类型的对象（一般对象）
 
-​	2.虚拟DOM比较“轻”，真实DOM比较“重”，因为虚拟DOM是React内部在用，无需真实DOM上那么多的属性。
+​	2.**虚拟DOM比较“轻”，真实DOM比较“重”**，因为虚拟DOM是React内部在用，无需真实DOM上那么多的属性。
 
 ​	3.虚拟DOM最终会被React转化为真实DOM，呈现在页面上。
 
@@ -299,66 +296,465 @@ const VDOM = React.createElement('xx',{id:'xx'},'xx')
 
 ----
 
-# React 元素渲染
+# React JSX
 
+React 使用 JSX 来替代常规的 JavaScript。  全称: JavaScript XML
 
+**JSX 是一个看起来很像 XML 的 JavaScript 语法扩展**。
 
+ JS + XML本质是**React.createElement(component, props, ...children)**方法的语法糖
 
+我们不需要一定使用 JSX，但它有以下**优点**：
 
-元素是构成 React 应用的最小单位，它用于描述屏幕上输出的内容。
+- JSX 执行更快，因为它在编译为 JavaScript 代码后进行了优化。
+- 它是类型安全的，在编译过程中就能发现错误。
+- 使用 JSX 编写模板更加简单快速。
+
+我们先看下以下代码：
 
 ```jsx
 const element = <h1>Hello, world!</h1>;
 ```
 
+这种看起来可能有些奇怪的标签语法**既不是字符串也不是 HTML**。
+
+它被称为 JSX， 一种 JavaScript 的语法扩展。 推荐在 React 中使用 JSX 来描述用户界面。JSX 可以很好地描述 UI 应该呈现出它应有交互的本质形式。JSX 可能会使人联想到模板语言，但它具有 JavaScript 的全部功能。JSX 可以生成 React “元素”。
+
+**JSX 是在 JavaScript 内部实现的。**
+
+我们知道**元素**是构成 React 应用的最小单位，JSX 就是用来声明 React 当中的元素。
+
 与浏览器的 DOM 元素不同，**React 当中的元素事实上是普通的对象**，React DOM 可以确保 浏览器 DOM 的数据内容与 React 元素保持一致。
 
-### 将元素渲染到 DOM 中
+要将 React 元素渲染到根 DOM 节点中，我们通过把它们都传递给 ReactDOM.render() 的方法来将其渲染到页面上：
 
-首先我们在一个 HTML 页面中添加一个 **id="example"** 的 **<div>**:
+```jsx
+var myDivElement = <div className="foo" />;
+ReactDOM.render(myDivElement, document.getElementById('example'));
+```
+
+> 注意: 由于 JSX 就是 JavaScript，一些标识符像 `class` 和 `for` 不建议作为 XML 属性名。作为替代，React DOM 使用 **`className` 和 `htmlFor` 来做对应的属性**。
+
+## 作用
+
+用来简化创建虚拟DOM
+
+## 语法
+
+```jsx
+const myId = "kop66";
+const myData = "YNWA";
+
+// 创建虚拟DOM
+const VDOM = (
+	<div>
+        <h2 className="title" id={myId.toLocaleLowerCase()}>
+            <span style={{color:"#430000", fontSize:"28px"}}>{myData}</span>
+        </h2>
+        UserName:<input type="text" name="userName" /><br/>
+        Age:<input type="text" name="userAge" />
+	</div>
+	);
+// 渲染虚拟DOM到页面
+ReactDOM.render(VDOM, document.getElementById("test"));
+/*
+jsx语法规则：
+	1.定义虚拟DOM时，不要写引号。
+	2.标签中混入JS表达式时要用{}。
+	3.样式的类名指定不要用class，要用className。
+	4.内联样式，要用style={{key:value}}的形式去写。
+	5.只有一个根标签
+	6.标签必须闭合
+	7.标签首字母
+		(1).若小写字母开头，则将该标签转为html中同名元素，若html中无该标签对应的同名元素，则报错。
+		(2).若大写字母开头，react就去渲染对应的组件，若组件没有定义，则报错。
+*/
+```
+
+#### 例子
+
+```jsx
+// 模拟一些数据
+const data = ["React","Vue","Angular","jQuery"];
+
+// 创建虚拟DOM
+const VDOM = (
+	<div>
+		<h1>前端JS框架</h1>
+		<ul>
+			{
+				data.map((item, index) => {
+					return <li key={index}>{item}</li>
+				})
+			}
+		</ul>
+	</div>
+	);
+
+// 渲染虚拟DOM到页面
+ReactDOM.render(VDOM, document.getElementById("test"));
+
+/* 
+    一定注意区分：【js语句(代码)】与【js表达式】
+            1.表达式：一个表达式会产生一个值，可以放在任何一个需要值的地方
+                        下面这些都是表达式：
+                                (1). a
+                                (2). a+b
+                                (3). demo(1)
+                                (4). arr.map() 
+                                (5). function test () {}
+            2.语句(代码)：
+                        下面这些都是语句(代码)：
+                                (1).if(){}
+                                (2).for(){}
+                                (3).switch(){case:xxxx}
+		
+	 */
+```
+
+
+
+## 为什么使用 JSX？
+
+React 认为渲染逻辑本质上与其他 UI 逻辑内在耦合，比如，在 UI 中需要绑定处理事件、在某些时刻状态发生变化时需要通知到 UI，以及需要在 UI 中展示准备好的数据。
+
+React 并没有采用将*标记与逻辑分离到不同文件*这种人为的分离方式，而是通过将二者共同存放在称之为“组件”的松散耦合单元之中，来实现[*关注点分离*](https://en.wikipedia.org/wiki/Separation_of_concerns)。
+
+React [不强制要求](https://zh-hans.reactjs.org/docs/react-without-jsx.html)使用 JSX，但是大多数人发现，在 JavaScript 代码中将 JSX 和 UI 放在一起时，会在视觉上有辅助作用。它还可以使 React 显示更多有用的错误和警告消息。
+
+
+
+## 使用 JSX
+
+JSX 看起来类似 HTML ，我们可以看下实例:
+
+```jsx
+ReactDOM.render(
+    <h1>Hello, world!</h1>,
+    document.getElementById('example')
+);
+```
+
+我们可以在以上代码中嵌套多个 HTML 标签，需要使用一个 div 元素包裹它，实例中的 p 元素添加了自定义属性 **data-myattribute**，添加自定义属性需要使用 **data-** 前缀。
+
+```jsx
+ReactDOM.render(
+    <div>
+        <h1>菜鸟教程</h1>
+        <h2>欢迎学习 React</h2>
+        <p data-myattribute = "somevalue">这是一个很不错的 JavaScript 库!</p>
+    </div>
+    ,
+    document.getElementById('example')
+);
+```
+
+### 独立文件
+
+你的 React JSX 代码可以放在一个独立文件上，例如我们创建一个 `helloworld_react.js` 文件，代码如下：
+
+```jsx
+ReactDOM.render(
+  <h1>Hello, world!</h1>,
+  document.getElementById('example')
+);
+```
+
+然后在 HTML 文件中引入该 JS 文件：
 
 ```html
-<div id="example"></div>
+<body>
+  <div id="example"></div>
+<script type="text/babel" src="helloworld_react.js"></script>
+</body>
+```
+
+### 在 JSX 中嵌入表达式
+
+我们可以在 JSX 中使用 JavaScript 表达式。表达式写在花括号 **{}** 中。实例如下：
+
+```jsx
+ReactDOM.render(
+    <div>
+      <h1>{ 1+1 }</h1>
+    </div>
+    ,
+    document.getElementById('example')
+);
+```
+
+在 JSX 语法中，你可以在大括号内放置任何有效的 [JavaScript 表达式](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Expressions_and_Operators#Expressions)。例如，`2 + 2`，`user.firstName` 或 `formatName(user)` 都是有效的 JavaScript 表达式。
+
+在下面的示例中，我们将调用 JavaScript 函数 `formatName(user)` 的结果，并将结果嵌入到 `<h1>` 元素中。
+
+```jsx
+function formatName(user) {
+  return user.firstName + ' ' + user.lastName;
+}
+
+const user = {
+  firstName: 'Harper',
+  lastName: 'Perez'
+};
+
+const element = (
+  <h1>
+    Hello, {formatName(user)}!
+  </h1>
+);
+```
+
+在 JSX 中不能使用 **if else** 语句，但可以使用 **conditional (三元运算)** 表达式来替代。以下实例中如果变量 **i** 等于 **1** 浏览器将输出 **true**, 如果修改 i 的值，则会输出 **false**.
+
+```jsx
+ReactDOM.render(
+    <div>
+      <h1>{i === 1 ? 'True!' : 'False'}</h1>
+    </div>
+    ,
+    document.getElementById('example')
+);
+```
+
+为了便于阅读，我们会将 JSX 拆分为多行。同时，**建议将内容包裹在括号中**，虽然这样做不是强制要求的，但是这可以避免遇到[自动插入分号](http://stackoverflow.com/q/2846283)陷阱。
+
+### JSX 也是一个表达式
+
+在编译之后，JSX 表达式会被转为普通 JavaScript 函数调用，并且对其取值后得到 JavaScript 对象。
+
+也就是说，你可以在 `if` 语句和 `for` 循环的代码块中使用 JSX，将 JSX 赋值给变量，把 JSX 当作参数传入，以及从函数中返回 JSX：
+
+```jsx
+function getGreeting(user) {
+  if (user) {
+    return <h1>Hello, {formatName(user)}!</h1>;
+  }
+  return <h1>Hello, Stranger.</h1>;
+}
+
+```
+
+### JSX 中指定属性
+
+你可以通过使用引号，来将属性值指定为字符串字面量：
+
+```jsx
+const element = <a href="https://www.reactjs.org"> link </a>;
+```
+
+也可以使用大括号，来在属性值中插入一个 JavaScript 表达式：
+
+```jsx
+const element = <img src={user.avatarUrl}></img>;
+```
+
+**在属性中嵌入 JavaScript 表达式时，不要在大括号外面加上引号**。你应该仅使用引号（对于字符串值）或大括号（对于表达式）中的一个，对于同一属性不能同时使用这两种符号。
+
+> **警告：**
+>
+> 因为 JSX 语法上更接近 JavaScript 而不是 HTML，所以 React DOM 使用 `camelCase`（小驼峰命名）来定义属性的名称，而不使用 HTML 属性名称的命名约定。
+>
+> 例如，JSX 里的 `class` 变成了 [`className`](https://developer.mozilla.org/en-US/docs/Web/API/Element/className)，而 `tabindex` 则变为 [`tabIndex`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/tabIndex)。
+
+### 使用 JSX 指定子元素
+
+假如一个标签里面没有内容，你可以使用 `/>` 来闭合标签，就像 XML 语法一样：
+
+```jsx
+const element = <img src={user.avatarUrl} />;
+```
+
+JSX 标签里能够包含很多子元素:
+
+```jsx
+const element = (
+  <div>
+    <h1>Hello!</h1>
+    <h2>Good to see you here.</h2>
+  </div>
+);
+```
+
+### JSX 防止注入攻击
+
+你可以安全地在 JSX 当中插入用户输入内容：
+
+```jsx
+const title = response.potentiallyMaliciousInput;
+// 直接使用是安全的：
+const element = <h1>{title}</h1>;
+```
+
+**React DOM 在渲染所有输入内容之前，默认会进行转义**。它可以确保在你的应用中，永远不会注入那些并非自己明确编写的内容。所有的内容在渲染之前都被转换成了字符串。这样可以有效地防止 [XSS（cross-site-scripting, 跨站脚本）](https://en.wikipedia.org/wiki/Cross-site_scripting)攻击。
+
+### JSX 表示对象
+
+Babel **会把 JSX 转译成一个名为 `React.createElement()` 函数调用**。
+
+以下两种示例代码完全等效：
+
+```jsx
+const element = (
+  <h1 className="greeting">
+    Hello, world!
+  </h1>
+);
+
+const element = React.createElement(
+  'h1',
+  {className: 'greeting'},
+  'Hello, world!'
+);
+```
+
+`React.createElement()` 会预先执行一些检查，以帮助你编写无错代码，但实际上它创建了一个这样的对象：
+
+```js
+// 注意：这是简化过的结构
+const element = {
+  type: 'h1',
+  props: {
+    className: 'greeting',
+    children: 'Hello, world!'
+  }
+};
+```
+
+**这些对象被称为 “React 元素”。**它们描述了你希望在屏幕上看到的内容。React 通过读取这些对象，然后使用它们来构建 DOM 以及保持随时更新。
+
+
+
+## 样式
+
+**React 推荐使用内联样式**。我们可以使用 **camelCase** 语法来设置内联样式. React 会在指定元素数字后自动添加 **px** 。以下实例演示了为 **h1** 元素添加 **myStyle** 内联样式：
+
+```jsx
+var myStyle = {
+    fontSize: 100,
+    color: '#FF0000'
+};
+ReactDOM.render(
+    <h1 style = {myStyle}>react教程</h1>,
+    document.getElementById('example')
+);
+```
+
+## 注释
+
+**注释需要写在花括号中**，实例如下：
+
+```jsx
+ReactDOM.render(
+    <div>
+    <h1>菜鸟教程</h1>
+    {/* 注释... */}
+     </div>,
+    document.getElementById('example')
+);
+```
+
+## 数组
+
+JSX 允许在模板中插入数组，**数组会自动展开所有成员**：
+
+```jsx
+var arr = [
+  <h1>react教程</h1>,
+  <h2>学的不仅是技术，更是梦想！</h2>,
+];
+ReactDOM.render(
+  <div>{ arr }</div>,
+  document.getElementById('example')
+);
+```
+
+```jsx
+
+export default class TestDemo extends Component {
+	render() {
+		return (
+			<div>
+				<h1>{this.props.name}</h1>
+				{ 
+					[1, 2, 3].map((item) => {
+							return <h2>{ item }</h2>
+					}) 
+				}
+			</div>
+		)
+	}
+}
+```
+
+
+
+----
+
+# React 元素渲染
+
+元素是构成 React 应用的最小单位，元素描述了你在屏幕上想看到的内容。
+
+```jsx
+const element = <h1>Hello, world!</h1>;
+```
+
+与浏览器的 DOM 元素不同，**React 元素是创建开销极小的普通对象**。React DOM 会负责更新 DOM 来与 React 元素保持一致。
+
+> **注意：** 你可能会将元素与另一个被熟知的概念——“组件”混淆起来。
+
+## 将一个元素渲染为 DOM
+
+首先我们在一个 HTML 页面中添加一个 **id="root"** 的 **`<div>`**:
+
+```html
+<div id="root"></div>
 ```
 
 在此 div 中的所有内容都将由 React DOM 来管理，所以我们**将其称为 "根" DOM 节点**。
 
-我们**用 React 开发应用时一般只会定义一个根节点**。但如果你是在一个已有的项目当中引入 React 的话，你可能会需要在不同的部分单独定义 React 根节点。
+仅使用 React 构建的应用**通常只有单一的根 DOM 节点**。如果你在将 React 集成进一个已有应用，**那么你可以在应用中包含任意多的独立根 DOM 节点。**
 
-要将React元素渲染到根DOM节点中，我们通过把它们都传递给 **ReactDOM.render()** 的方法来将其渲染到页面上：
+想要将一个 React 元素渲染到根 DOM 节点中，只需把它们一起传入 `ReactDOM.createRoot()`：
 
 ```jsx
 const element = <h1>Hello, world!</h1>;
 ReactDOM.render(
     element,
-    document.getElementById('example')
+    document.getElementById('root')
 );
 ```
 
-### 更新元素渲染
+## 更新已渲染的元素
 
-**React 元素都是不可变的**。当元素被创建之后，你是无法改变其内容或属性的。
+**React 元素都是不可变的**。
 
-目前更新界面的**唯一办法是创建一个新的元素**，然后将它传入 ReactDOM.render() 方法：
+**一旦被创建，你就无法更改它的子元素或者属性**。一个元素就像电影的单帧：它代表了某个特定时刻的 UI。
+
+目前更新UI界面的**唯一办法是创建一个新的元素**，然后将它传入 ReactDOM.render() 方法。
+
+考虑一个计时器的例子：
 
 ```react
+const root = ReactDOM.createRoot(
+  document.getElementById('root')
+);
+
 function tick() {
   const element = (
     <div>
       <h1>Hello, world!</h1>
-      <h2>现在是 {new Date().toLocaleTimeString()}.</h2>
+      <h2>It is {new Date().toLocaleTimeString()}.</h2>
     </div>
   );
-  ReactDOM.render(
-    element,
-    document.getElementById('example')
-  );
+  root.render(element);
 }
- 
+
 setInterval(tick, 1000);
 ```
 
-以上实例通过 setInterval() 方法，每秒钟调用一次 ReactDOM.render()。
+这个例子会在 `setInterval()` 回调函数，每秒都调用 `root.render()`。
+
+> **注意：**在实践中，大多数 React 应用只会调用一次 `root.render()`。
 
 我们可以将要展示的部分封装起来，以下实例用一个函数来表示：
 
@@ -411,244 +807,46 @@ setInterval(tick, 1000);
 
 值得注意的是 **React DOM 首先会比较元素内容先后的不同**，而在渲染过程中只会更新改变了的部分。
 
+React DOM 会将元素和它的子元素与它们之前的状态进行比较，并只会进行必要的更新来使 DOM 达到预期的状态。
 
+尽管每一秒我们都会新建一个描述整个 UI 树的元素，React DOM 只会更新实际改变了的内容，也就是例子中的文本节点。
+
+根据我们的经验，应该专注于 UI 在任意给定时刻的状态，而不是一视同仁地随着时间修改整个界面。
+
+```jsx
+import React, { Component } from 'react'
+
+let timer;
+export default class TestDemo extends Component {
+	constructor() {
+		super();
+		this.state = {
+			time: new Date().toLocaleDateString(),
+		}
+	}
+	componentDidMount(){
+		timer = setInterval(() => {
+			this.setState({time: new Date().toLocaleTimeString()})
+		}, 1000);
+	}
+	componentWillUnmount(){
+		clearInterval(timer);
+	}
+	render() {
+		return (
+			<div>
+				<h1>{this.props.name}</h1>
+				<h3 style={{"color": "#43dfff"}}>{this.state.time}</h3>
+			</div>
+		)
+	}
+}
+
+```
 
 
 
 ----
-
-# React JSX
-
-React 使用 JSX 来替代常规的 JavaScript。  全称: JavaScript XML
-
-**JSX 是一个看起来很像 XML 的 JavaScript 语法扩展**。
-
- JS + XML本质是**React.createElement(component, props, ...children)**方法的语法糖
-
-我们不需要一定使用 JSX，但它有以下**优点**：
-
-- JSX 执行更快，因为它在编译为 JavaScript 代码后进行了优化。
-- 它是类型安全的，在编译过程中就能发现错误。
-- 使用 JSX 编写模板更加简单快速。
-
-我们先看下以下代码：
-
-```jsx
-const element = <h1>Hello, world!</h1>;
-```
-
-这种看起来可能有些奇怪的标签语法既不是字符串也不是 HTML。
-
-它被称为 JSX， 一种 JavaScript 的语法扩展。 我们推荐在 React 中使用 JSX 来描述用户界面。
-
-**JSX 是在 JavaScript 内部实现的。**
-
-我们知道**元素**是构成 React 应用的最小单位，JSX 就是用来声明 React 当中的元素。
-
-与浏览器的 DOM 元素不同，**React 当中的元素事实上是普通的对象**，React DOM 可以确保 浏览器 DOM 的数据内容与 React 元素保持一致。
-
-要将 React 元素渲染到根 DOM 节点中，我们通过把它们都传递给 ReactDOM.render() 的方法来将其渲染到页面上：
-
-```jsx
-var myDivElement = <div className="foo" />;
-ReactDOM.render(myDivElement, document.getElementById('example'));
-```
-
-> 注意: 由于 JSX 就是 JavaScript，一些标识符像 `class` 和 `for` 不建议作为 XML 属性名。作为替代，React DOM 使用 **`className` 和 `htmlFor` 来做对应的属性**。
-
-## 作用
-
-用来简化创建虚拟DOM
-
-## 语法
-
-```jsx
-const myId = "kop66";
-const myData = "YNWA";
-
-// 创建虚拟DOM
-const VDOM = (
-	<div>
-	<h2 className="title" id={myId.toLocaleLowerCase()}>
-		<span style={{color:"#430000", fontSize:"28px"}}>{myData}</span>
-	</h2>
-	UserName:<input type="text" name="userName" /><br/>
-	Age:<input type="text" name="userAge" />
-		</div>
-	);
-// 渲染虚拟DOM到页面
-ReactDOM.render(VDOM, document.getElementById("test"));
-/*
-jsx语法规则：
-	1.定义虚拟DOM时，不要写引号。
-	2.标签中混入JS表达式时要用{}。
-	3.样式的类名指定不要用class，要用className。
-	4.内联样式，要用style={{key:value}}的形式去写。
-	5.只有一个根标签
-	6.标签必须闭合
-	7.标签首字母
-		(1).若小写字母开头，则将该标签转为html中同名元素，若html中无该标签对应的同名元素，则报错。
-		(2).若大写字母开头，react就去渲染对应的组件，若组件没有定义，则报错。
-*/
-```
-
-## 例子
-
-```jsx
-// 模拟一些数据
-const data = ["React","Vue","Angular","jQuery"];
-
-// 创建虚拟DOM
-const VDOM = (
-	<div>
-		<h1>前端JS框架</h1>
-		<ul>
-			{
-				data.map((item, index) => {
-					return <li key={index}>{item}</li>
-				})
-			}
-		</ul>
-	</div>
-	);
-
-// 渲染虚拟DOM到页面
-ReactDOM.render(VDOM, document.getElementById("test"));
-
-/* 
-			一定注意区分：【js语句(代码)】与【js表达式】
-					1.表达式：一个表达式会产生一个值，可以放在任何一个需要值的地方
-								下面这些都是表达式：
-										(1). a
-										(2). a+b
-										(3). demo(1)
-										(4). arr.map() 
-										(5). function test () {}
-					2.语句(代码)：
-								下面这些都是语句(代码)：
-										(1).if(){}
-										(2).for(){}
-										(3).switch(){case:xxxx}
-		
-	 */
-```
-
-
-
-## 使用 JSX
-
-JSX 看起来类似 HTML ，我们可以看下实例:
-
-```jsx
-ReactDOM.render(
-    <h1>Hello, world!</h1>,
-    document.getElementById('example')
-);
-```
-
-我们可以在以上代码中嵌套多个 HTML 标签，需要使用一个 div 元素包裹它，实例中的 p 元素添加了自定义属性 **data-myattribute**，添加自定义属性需要使用 **data-** 前缀。
-
-```jsx
-ReactDOM.render(
-    <div>
-        <h1>菜鸟教程</h1>
-        <h2>欢迎学习 React</h2>
-        <p data-myattribute = "somevalue">这是一个很不错的 JavaScript 库!</p>
-    </div>
-    ,
-    document.getElementById('example')
-);
-```
-
-### 独立文件
-
-你的 React JSX 代码可以放在一个独立文件上，例如我们创建一个 `helloworld_react.js` 文件，代码如下：
-
-```jsx
-ReactDOM.render(
-  <h1>Hello, world!</h1>,
-  document.getElementById('example')
-);
-```
-
-然后在 HTML 文件中引入该 JS 文件：
-
-```html
-<body>
-  <div id="example"></div>
-<script type="text/babel" src="helloworld_react.js"></script>
-</body>
-```
-
-## JavaScript 表达式
-
-我们可以在 JSX 中使用 JavaScript 表达式。表达式写在花括号 **{}** 中。实例如下：
-
-```jsx
-ReactDOM.render(
-    <div>
-      <h1>{1+1}</h1>
-    </div>
-    ,
-    document.getElementById('example')
-);
-```
-
-在 JSX 中不能使用 **if else** 语句，但可以使用 **conditional (三元运算)** 表达式来替代。以下实例中如果变量 **i** 等于 **1** 浏览器将输出 **true**, 如果修改 i 的值，则会输出 **false**.
-
-```jsx
-ReactDOM.render(
-    <div>
-      <h1>{i === 1 ? 'True!' : 'False'}</h1>
-    </div>
-    ,
-    document.getElementById('example')
-);
-```
-
-## 样式
-
-**React 推荐使用内联样式**。我们可以使用 **camelCase** 语法来设置内联样式. React 会在指定元素数字后自动添加 **px** 。以下实例演示了为 **h1** 元素添加 **myStyle** 内联样式：
-
-```jsx
-var myStyle = {
-    fontSize: 100,
-    color: '#FF0000'
-};
-ReactDOM.render(
-    <h1 style = {myStyle}>菜鸟教程</h1>,
-    document.getElementById('example')
-);
-```
-
-## 注释
-
-**注释需要写在花括号中**，实例如下：
-
-```jsx
-ReactDOM.render(
-    <div>
-    <h1>菜鸟教程</h1>
-    {/*注释...*/}
-     </div>,
-    document.getElementById('example')
-);
-```
-
-## 数组
-
-JSX 允许在模板中插入数组，**数组会自动展开所有成员**：
-
-```jsx
-var arr = [
-  <h1>菜鸟教程</h1>,
-  <h2>学的不仅是技术，更是梦想！</h2>,
-];
-ReactDOM.render(
-  <div>{arr}</div>,
-  document.getElementById('example')
-);
-```
 
 
 
@@ -688,8 +886,6 @@ ReactDOM.render(
 
 React 的组件可以定义为 class 或函数的形式。class 组件目前提供了更多的功能。
 
-
-
 ### 函数式组件
 
 定义组件最简单的方式就是编写 JavaScript 函数：
@@ -704,10 +900,10 @@ function MyComponent() {
 // 渲染组件到页面
 ReactDOM.render(<MyComponent/>, document.getElementById("test"));
 /* 
-	执行了ReactDOM.render(<MyComponent/>.......之后，发生了什么？
-		1.React解析组件标签，找到了MyComponent组件。
-		2.发现组件是使用函数定义的，随后调用该函数，将返回的虚拟DOM转为真实DOM，随后呈现在页面中。
-		*/
+执行了ReactDOM.render(<MyComponent/>.......之后，发生了什么？
+    1.React解析组件标签，找到了MyComponent组件。
+    2.发现组件是使用函数定义的，随后调用该函数，将返回的虚拟DOM转为真实DOM，随后呈现在页面中。
+*/
 
 ```
 
@@ -719,7 +915,7 @@ function Welcome(props) {
 
 该函数是一个有效的 React 组件，因为它接收唯一带有数据的 “props”（代表属性）对象与并返回一个 React 元素。这类组件被称为“函数组件”，**因为它本质上就是 JavaScript 函数。**
 
-我们封装一个输出 "Hello World！" 的组件，组件名为 HelloMessage：
+我们可以使用函数定义了一个组件：
 
 ```jsx
 function HelloMessage(props) {
@@ -734,16 +930,6 @@ ReactDOM.render(
 );
 ```
 
-#### 实例解析：
-
-1、我们可以使用函数定义了一个组件：
-
-```jsx
-function HelloMessage(props) {
-    return <h1>Hello World!</h1>;
-}
-```
-
 你也可以使用 ES6 class 来定义一个组件:
 
 ```jsx
@@ -754,7 +940,9 @@ class Welcome extends React.Component {
 }
 ```
 
-2、const element = `<HelloMessage />` 为用户自定义的组件。
+上述两个组件在 React 里是等效的。
+
+const element = `<HelloMessage />` 为用户自定义的组件。
 
 > 注意，原生 HTML 元素名以小写字母开头，**而自定义的 React 类名以大写字母开头**，比如 HelloMessage 不能写成 helloMessage。除此之外还需要注意组件类只能包含一个顶层标签，否则也会报错。
 
@@ -765,7 +953,7 @@ function HelloMessage(props) {
     return <h1>Hello {props.name}!</h1>;
 }
  
-const element = <HelloMessage name="Runoob"/>;
+const element = <HelloMessage name="kop"/>;
  
 ReactDOM.render(
     element,
@@ -789,15 +977,11 @@ class Welcome extends React.Component {
 }
 ```
 
-在 `React.Component` 的子类中有个必须定义的 [`render()`](https://zh-hans.reactjs.org/docs/react-component.html#render) 函数。
+在 `React.Component` 的子类中有个必须定义的 `render()` 函数。
 
-**我们强烈建议你不要创建自己的组件基类。** 在 React 组件中，[代码重用的主要方式是组合而不是继承](https://zh-hans.reactjs.org/docs/composition-vs-inheritance.html)。
+**强烈建议不要创建自己的组件基类。** 在 React 组件中，[代码重用的主要方式是组合而不是继承](https://zh-hans.reactjs.org/docs/composition-vs-inheritance.html)。
 
 > 注意: React 并不会强制你使用 ES6 的 class 语法。如果你倾向于不使用它，你可以使用 `create-react-class` 模块或类似的自定义抽象来代替。
-
-
-
-
 
 适用于 **复杂组件** 的定义
 
@@ -814,23 +998,62 @@ class MyComponent extends React.Component {
 
 // 渲染组件到页面
 ReactDOM.render(<MyComponent/>, document.getElementById("test"));
-		/* 
-			执行了ReactDOM.render(<MyComponent/>.......之后，发生了什么？
-					1.React解析组件标签，找到了MyComponent组件。
-					2.发现组件是使用类定义的，随后new出来该类的实例，并通过该实例调用到原型上的render方法。
-					3.将render返回的虚拟DOM转为真实DOM，随后呈现在页面中。
-		*/
+/* 
+    执行了ReactDOM.render(<MyComponent/>.......之后，发生了什么？
+            1.React解析组件标签，找到了MyComponent组件。
+            2.发现组件是使用类定义的，随后new出来该类的实例，并通过该实例调用到原型上的render方法。
+            3.将render返回的虚拟DOM转为真实DOM，随后呈现在页面中。
+*/
 ```
 
 #### 渲染类组件标签的基本流程
 
 1. React内部会创建组件实例对象
 2. 调用render()得到虚拟DOM, 并解析为真实DOM
-3. 插入到指定的页面元素内部
+3. 插入到指定的页面元素内部，随后呈现在页面中。
 
 
 
+## 渲染组件
 
+之前，我们遇到的 React 元素都只是 DOM 标签：
+
+```jsx
+const element = <div />;
+```
+
+不过，React 元素也可以是用户自定义的组件：
+
+```jsx
+const element = <Welcome name="Sara" />;
+```
+
+当 React 元素为用户自定义组件时，它会将 JSX 所接收的属性（attributes）以及子组件（children）转换为单个对象传递给组件，这个对象被称之为 “props”。
+
+例如，这段代码会在页面上渲染 “Hello, Sara”：
+
+```jsx
+function Welcome(props) {  
+    return <h1>Hello, {props.name}</h1>;
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+const element = <Welcome name="Sara" />;
+root.render(element);
+```
+
+让我们来回顾一下这个例子中发生了什么：
+
+1. 我们调用 `root.render()` 函数，并传入 `<Welcome name="Sara" />` 作为参数。
+2. React 调用 `Welcome` 组件，并将 `{name: 'Sara'}` 作为 props 传入。
+3. `Welcome` 组件将 `<h1>Hello, Sara</h1>` 元素作为返回值。
+4. React DOM 将 DOM 高效地更新为 `<h1>Hello, Sara</h1>`。
+
+>**注意：** 组件名称必须以大写字母开头。
+>
+>React 会将以小写字母开头的组件视为原生 DOM 标签。例如，`<div />` 代表 HTML 的 div 标签，而 `<Welcome />` 则代表一个组件，并且需在作用域内使用 `Welcome`。
+>
+>你可以在[深入 JSX](https://zh-hans.reactjs.org/docs/jsx-in-depth.html#user-defined-components-must-be-capitalized) 中了解更多关于此规范的原因。
 
 ## 组合组件
 
@@ -873,9 +1096,9 @@ function Nickname(props) {
 function App() {
     return (
     <div>
-        <Name name="菜鸟教程" />
-        <Url url="http://www.runoob.com" />
-        <Nickname nickname="Runoob" />
+        <Name name="react教程" />
+        <Url url="http://www.abc.com" />
+        <Nickname nickname="react" />
     </div>
     );
 }
@@ -887,6 +1110,14 @@ ReactDOM.render(
 ```
 
 实例中 App 组件使用了 Name、Url 和 Nickname 组件来输出对应的信息。
+
+
+
+
+
+
+
+
 
 ----
 
@@ -1001,568 +1232,11 @@ function Comment(props) {
 
 根据经验来看，**如果 UI 中有一部分被多次使用**（`Button`，`Panel`，`Avatar`），**或者组件本身就足够复杂**（`App`，`FeedStory`，`Comment`），那么它就是一个可提取出独立组件的候选项。
 
-----
-
-## 渲染组件
-
-之前，我们遇到的 React 元素都只是 DOM 标签：
-
-```jsx
-const element = <div />;
-```
-
-不过，React 元素也可以是用户自定义的组件：
-
-```jsx
-const element = <Welcome name="Sara" />;
-```
-
-当 React 元素为用户自定义组件时，它会将 JSX 所接收的属性（attributes）以及子组件（children）转换为单个对象传递给组件，这个对象被称之为 “props”。
-
-例如，这段代码会在页面上渲染 “Hello, Sara”：
-
-```jsx
-function Welcome(props) {  
-    return <h1>Hello, {props.name}</h1>;
-}
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-const element = <Welcome name="Sara" />;
-root.render(element);
-```
-
-让我们来回顾一下这个例子中发生了什么：
-
-1. 我们调用 `root.render()` 函数，并传入 `<Welcome name="Sara" />` 作为参数。
-2. React 调用 `Welcome` 组件，并将 `{name: 'Sara'}` 作为 props 传入。
-3. `Welcome` 组件将 `<h1>Hello, Sara</h1>` 元素作为返回值。
-4. React DOM 将 DOM 高效地更新为 `<h1>Hello, Sara</h1>`。
-
->**注意：** 组件名称必须以大写字母开头。
->
->React 会将以小写字母开头的组件视为原生 DOM 标签。例如，`<div />` 代表 HTML 的 div 标签，而 `<Welcome />` 则代表一个组件，并且需在作用域内使用 `Welcome`。
->
->你可以在[深入 JSX](https://zh-hans.reactjs.org/docs/jsx-in-depth.html#user-defined-components-must-be-capitalized) 中了解更多关于此规范的原因。
-
-
-
-
-
----
-
-
-
-# React State(状态)
-
-## 组件三大核心属性1: state
-
-React 把组件看成是一个**状态机**（State Machines）。通过与用户的交互，实现不同状态，然后渲染 UI，让用户界面和数据保持一致。
-
-React 里，**只需更新组件的 state，然后根据新的 state 重新渲染用户界面**（不要操作 DOM）。
-
-###  理解
-
-1.  state是组件对象最重要的属性, **值是对象**(可以包含多个key-value的组合)
-2.  组件被称为"状态机", **通过更新组件的state来更新对应的页面显示**(重新渲染组件)
-3.  State 与 props 类似，但是 state 是私有的，并且完全受控于当前组件。
-
-###  强烈注意
-
-1. 组件中**render方法中的this为组件实例对象**
-2. 组件**自定义的方法中this为undefined**，如何解决？
-
-​		a)   强制绑定this: 通过函数对象的bind()
-
-​		b)   箭头函数
-
-3.  状态数据，不能直接修改或更新
-
-```jsx
-/*
-需求: 定义一个展示天气信息的组件
-	1. 默认展示天气炎热 或 凉爽
-	2. 点击文字切换天气
-*/
-//App.js
-
-
-import './App.css';
-import React, {Component} from 'react';
-
-class Weather extends Component {
-  //构造器调用几次？ ———— 1次
-  constructor(props){
-    console.log("constructor");
-    super(props);
-    // 初始化状态
-    this.state = {isHot: true, wind: "大风"};
-
-    //解决changeWeather中this指向问题
-    this.changeWeather = this.changeWeather.bind(this);
-  }
-
-  //render调用几次？ ———— 1+n次 1是初始化的那次 n是状态更新的次数
-  render() {
-    // 读取状态
-    const {isHot, wind} = this.state;
-    return <h1 onClick={this.changeWeather}>今天天气很{isHot ? "炎热" : "凉爽"},{wind}</h1>
-  }
-
-  // changeWeather调用几次？ ———— 点几次调几次
-  changeWeather(){
-    // changeWeather放在哪里？ ———— Weather的原型对象上，供实例使用
-    // 由于changeWeather是作为onClick的回调，所以不是通过实例调用的，是直接调用
-    // 类中的方法默认开启了局部的严格模式，所以changeWeather中的this为undefined
-    console.log("changeWeather");
-    // 获取原来的 isHot 值
-    const isHot = this.state.isHot;
-    
-    //严重注意：状态必须通过setState进行更新,且更新是一种合并，不是替换。
-    this.setState({isHot: !isHot});
-    console.log(this);
-
-    //严重注意：状态(state)不可直接更改，下面这行就是直接更改！！！
-    //this.state.isHot = !isHot //这是错误的写法
-  }
-}
-
-export default Weather;
-
-```
-
-```jsx
-//index.js
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import Weather from './App';
-import reportWebVitals from './reportWebVitals';
-
-ReactDOM.render(
-   <React.StrictMode>
-     <Weather/>
-   </React.StrictMode>,
-   document.getElementById('root')
-);
-
-reportWebVitals();
-
-```
-
-### state简写方式
-
-```jsx
-class Weather extends Component {
-  // 初始化状态
-  state = {isHot: true, wind: "大风"};
-
-  //render调用几次？ ———— 1+n次 1是初始化的那次 n是状态更新的次数
-  render() {
-    // 读取状态
-    const {isHot, wind} = this.state;
-    return <h1 onClick={this.changeWeather}>今天天气很<span style={{color: isHot ? "#ff99ff" : "#843bfb"}}>{isHot ? "炎热" : "凉爽"}</span>,{wind}</h1>
-  }
-
-  // 自定义方法————要用赋值语句的形式+箭头函数
-  changeWeather = () => {
-    // 获取原来的 isHot 值
-    const isHot = this.state.isHot;
-    //严重注意：状态必须通过setState进行更新,且更新是一种合并，不是替换。
-    this.setState({isHot: !isHot});
-  }
-}
-
-//2.渲染组件到页面
-ReactDOM.render(<Weather/>, document.getElementById('test'))
-```
-
-----
-
-### 将函数组件转换成 class 组件
-
-```jsx
-const root = ReactDOM.createRoot(document.getElementById('root'));
-
-function Clock(props) {
-  return (
-    <div>
-      <h1>Hello, world!</h1>
-      <h2>It is {props.date.toLocaleTimeString()}.</h2>
-    </div>
-  );
-}
-
-function tick() {
-  root.render(<Clock date={new Date()} />);
-}
-
-setInterval(tick, 1000);
-```
-
-通过以下五步将 `Clock` 的函数组件转成 class 组件：
-
-1. 创建一个同名的 [ES6 class](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Classes)，并且继承于 `React.Component`。
-2. 添加一个空的 `render()` 方法。
-3. 将函数体移动到 `render()` 方法之中。
-4. 在 `render()` 方法中使用 `this.props` 替换 `props`。
-5. 删除剩余的空函数声明。
-
-```jsx
-class Clock extends React.Component {
-  render() {
-    return (
-      <div>
-        <h1>Hello, world!</h1>
-        <h2>It is {this.props.date.toLocaleTimeString()}.</h2>
-      </div>
-    );
-  }
-}
-```
-
-现在 `Clock` 组件被定义为 class，而不是函数。
-
-每次组件更新时 `render` 方法都会被调用，但只要在相同的 DOM 节点中渲染 `<Clock />` ，就仅有一个 `Clock` 组件的 class 实例被创建使用。这就使得我们可以使用如 state 或生命周期方法等很多其他特性。
-
-我们通过以下三步将 `date` 从 props 移动到 state 中：
-
-1. 把 `render()` 方法中的 `this.props.date` 替换成 `this.state.date` ：
-
-```jsx
-class Clock extends React.Component {
-  render() {
-    return (
-      <div>
-        <h1>Hello, world!</h1>
-        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
-      </div>
-    );
-  }
-}
-```
-
-2. 添加一个 [class 构造函数](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Classes#Constructor)，然后在该函数中为 `this.state` 赋初值：
-
-```jsx
-class Clock extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {date: new Date()};  }
-
-  render() {
-    return (
-      <div>
-        <h1>Hello, world!</h1>
-        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
-      </div>
-    );
-  }
-}
-```
-
-通过以下方式将 `props` 传递到父类的构造函数中：
-
-```js
-  constructor(props) {
-    super(props);
-    this.state = {date: new Date()};
-  }
-```
-
-Class 组件应该始终使用 `props` 参数来调用父类的构造函数。
-
-3. 移除 `<Clock />` 元素中的 `date` 属性：
-
-```jsx
-root.render(<Clock />);
-```
-
-代码如下：
-
-```jsx
-class Clock extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {date: new Date()};
-  }
-
-  render() {
-    return (
-      <div>
-        <h1>Hello, world!</h1>
-        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
-      </div>
-    );
-  }
-}
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<Clock />);
-```
-
-接下来，我们会设置 `Clock` 的计时器并每秒更新它。
-
-
-
-### 将生命周期方法添加到类中
-
-在具有许多组件的应用程序中，当组件被销毁时释放所占用的资源是非常重要的。
-
-当 Clock 组件第一次被渲染到 DOM 中的时候，就为其设置一个计时器。这在 React 中被称为“**挂载**（mount）”。
-
-同时，当 DOM 中 Clock 组件被删除的时候，应该清除计时器。这在 React 中被称为“**卸载**（unmount）”。
-
-我们可以为 class 组件声明一些特殊的方法，当组件挂载或卸载时就会去执行这些方法：
-
-```jsx
-class Clock extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {date: new Date()};
-  }
-
-  componentDidMount() {
-    this.timerID = setInterval(
-      () => this.tick(),
-      1000
-    );
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.timerID);
-  }
-
-  tick() {
-    this.setState({
-      date: new Date()
-    });
-  }
-
-  render() {
-    return (
-      <div>
-        <h1>Hello, world!</h1>
-        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
-      </div>
-    );
-  }
-}
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<Clock />);
-```
-
-**实例解析：**
-
-**componentDidMount()** 与 **componentWillUnmount()** 方法被称作生命周期钩子。
-
-`componentDidMount()` 方法会在组件已经被渲染到 DOM 中后运行，所以，最好在这里设置计时器
-
-接下来把计时器的 ID 保存在 `this` 之中（`this.timerID`）。
-
-尽管 `this.props` 和 `this.state` 是 React 本身设置的，且都拥有特殊的含义，但是其实你可以向 class 中随意添加不参与数据流（比如计时器 ID）的额外字段。
-
-我们会在 `componentWillUnmount()` 生命周期方法中清除计时器
-
-最后，我们会实现一个叫 `tick()` 的方法，`Clock` 组件每秒都会调用它。
-
-使用 `this.setState()` 来时刻更新组件 state：
-
-现在时钟每秒都会刷新。
-
-让我们来快速概括一下发生了什么和这些方法的调用顺序：
-
-1. 当 `<Clock />` 被传给 `root.render()`的时候，React 会调用 `Clock` 组件的构造函数。因为 `Clock` 需要显示当前的时间，所以它会用一个包含当前时间的对象来初始化 `this.state`。我们会在之后更新 state。
-2. 之后 React 会调用组件的 `render()` 方法。这就是 React 确定该在页面上展示什么的方式。然后 React 更新 DOM 来匹配 `Clock` 渲染的输出。
-3. 当 `Clock` 的输出被插入到 DOM 中后，React 就会调用 `ComponentDidMount()` 生命周期方法。在这个方法中，`Clock` 组件向浏览器请求设置一个计时器来每秒调用一次组件的 `tick()` 方法。
-4. 浏览器每秒都会调用一次 `tick()` 方法。 在这方法之中，`Clock` 组件会通过调用 `setState()` 来计划进行一次 UI 更新。得益于 `setState()` 的调用，React 能够知道 state 已经改变了，然后会重新调用 `render()` 方法来确定页面上该显示什么。这一次，`render()` 方法中的 `this.state.date` 就不一样了，**如此一来就会渲染输出更新过的时间。React 也会相应的更新 DOM。**
-5. 一旦 `Clock` 组件从 DOM 中被移除，React 就会调用 `componentWillUnmount()` 生命周期方法，这样计时器就停止了。
-
-----
-
-### 正确地使用 State
-
-关于 `setState()` 你应该了解三件事：
-
-#### 不要直接修改 State
-
-例如，此代码不会重新渲染组件：
-
-```js
-// Wrong
-this.state.comment = 'Hello';
-```
-
-而是应该使用 `setState()`:
-
-```js
-// Correct
-this.setState({comment: 'Hello'});
-```
-
-**构造函数是唯一可以给 `this.state` 赋值的地方。**
-
-#### State 的更新可能是异步的
-
-出于性能考虑，React 可能会把多个 `setState()` 调用合并成一个调用。
-
-因为 `this.props` 和 `this.state` 可能会异步更新，**所以你不要依赖他们的值来更新下一个状态。**
-
-例如，**此代码可能会无法更新计数器**：
-
-```js
-// Wrong
-this.setState({
-  counter: this.state.counter + this.props.increment,
-});
-```
-
-要解决这个问题，可以让 `setState()` 接收一个函数而不是一个对象。这个函数用上一个 state 作为第一个参数，将此次更新被应用时的 props 做为第二个参数：
-
-```js
-// Correct
-this.setState((state, props) => ({
-  counter: state.counter + props.increment
-}));
-```
-
-上面使用了[箭头函数](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions)，不过使用普通的函数也同样可以：
-
-```js
-// Correct
-this.setState(function(state, props) {
-  return {
-    counter: state.counter + props.increment
-  };
-});
-```
-
-### State 的更新会被合并
-
-当你调用 `setState()` 的时候，**React 会把你提供的对象合并到当前的 state**。
-
-例如，你的 state 包含几个独立的变量：
-
-```js
-  constructor(props) {
-    super(props);
-    this.state = {
-      posts: [],
-      comments: []
-    };
-  }
-```
-
-然后你可以分别调用 `setState()` 来单独地更新它们：
-
-```js
-  componentDidMount() {
-    fetchPosts().then(response => {
-      this.setState({
-        posts: response.posts
-      });
-    });
-
-    fetchComments().then(response => {
-      this.setState({
-        comments: response.comments
-      });
-    });
-  }
-```
-
-**这里的合并是浅合并**，所以 `this.setState({comments})` 完整保留了 `this.state.posts`， 但是完全替换了 `this.state.comments`。
-
 
 
 ----
 
-### 数据自顶向下流动
 
-不管是父组件或是子组件**都无法知道某个组件是有状态的还是无状态的**，并且它们也并不关心它是函数组件还是 class 组件。
-
-**这就是为什么称 state 为局部的或是封装的的原因**。除了拥有并设置了它的组件，其他组件都无法访问。
-
-组件**可以选择把它的 state 作为 props 向下传递到它的子组件中**：
-
-```jsx
-<FormattedDate date={this.state.date} />
-```
-
-`FormattedDate` 组件会在其 props 中接收参数 `date`，但是组件本身无法知道它是来自于 `Clock` 的 state，或是 `Clock` 的 props，还是手动输入的：
-
-```js
-function FormattedDate(props) {
-  return <h2>It is {props.date.toLocaleTimeString()}.</h2>;
-}
-```
-
-**这通常会被叫做“自上而下”或是“单向”的数据流**。
-
-任何的 state 总是所属于特定的组件，**而且从该 state 派生的任何数据或 UI 只能影响树中“低于”它们的组件**。
-
-如果你把一个以组件构成的树想象成一个 props 的数据瀑布的话，**那么每一个组件的 state 就像是在任意一点上给瀑布增加额外的水源，但是它只能向下流动。**
-
-为了证明每个组件都是真正独立的，我们可以创建一个渲染三个 `Clock` 的 `App` 组件：
-
-```jsx
-function FormattedDate(props) {
-  return <h2>现在是 {props.date.toLocaleTimeString()}.</h2>;
-}
- 
-class Clock extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {date: new Date()};
-  }
- 
-  componentDidMount() {
-    this.timerID = setInterval(
-      () => this.tick(),
-      1000
-    );
-  }
- 
-  componentWillUnmount() {
-    clearInterval(this.timerID);
-  }
- 
-  tick() {
-    this.setState({
-      date: new Date()
-    });
-  }
- 
-  render() {
-    return (
-      <div>
-        <h1>Hello, world!</h1>
-        <FormattedDate date={this.state.date} />
-      </div>
-    );
-  }
-}
- 
-function App() {
-  return (
-    <div>
-      <Clock />
-      <Clock />
-      <Clock />
-    </div>
-  );
-}
- 
-ReactDOM.render(<App />, document.getElementById('example'));
-```
-
-每个 `Clock` 组件都会单独设置它自己的计时器并且更新它。
-
-在 React 应用中**，组件是有状态组件还是无状态组件属于组件实现的细节**，它可能会随着时间的推移而改变。你可以在有状态的组件中使用无状态的组件，反之亦然。
-
-
-
-----
 
 # React Props
 
@@ -2228,6 +1902,522 @@ HelloWorldComponent.propTypes = {
 
 export default HelloWorldComponent
 ```
+
+
+
+----
+
+# React State(状态)
+
+## 组件三大核心属性1: state
+
+React 把组件看成是一个**状态机**（State Machines）。通过与用户的交互，实现不同状态，然后渲染 UI，让用户界面和数据保持一致。
+
+React 里，**只需更新组件的 state，然后根据新的 state 重新渲染用户界面**（不要操作 DOM）。
+
+###  理解
+
+1.  state是组件对象最重要的属性, **值是对象**(可以包含多个key-value的组合)
+2.  组件被称为"状态机", **通过更新组件的state来更新对应的页面显示**(重新渲染组件)
+3.  State 与 props 类似，但是 state 是私有的，并且完全受控于当前组件。
+
+###  强烈注意
+
+1. 组件中**render方法中的this为组件实例对象**
+2. 组件**自定义的方法中this为undefined**，如何解决？
+
+​		a)   强制绑定this: 通过函数对象的bind()
+
+​		b)   箭头函数
+
+3.  状态数据，不能直接修改或更新
+
+```jsx
+/*
+需求: 定义一个展示天气信息的组件
+	1. 默认展示天气炎热 或 凉爽
+	2. 点击文字切换天气
+*/
+//App.js
+
+
+import './App.css';
+import React, {Component} from 'react';
+
+class Weather extends Component {
+  //构造器调用几次？ ———— 1次
+  constructor(props){
+    console.log("constructor");
+    super(props);
+    // 初始化状态
+    this.state = {isHot: true, wind: "大风"};
+
+    //解决changeWeather中this指向问题
+    this.changeWeather = this.changeWeather.bind(this);
+  }
+
+  //render调用几次？ ———— 1+n次 1是初始化的那次 n是状态更新的次数
+  render() {
+    // 读取状态
+    const {isHot, wind} = this.state;
+    return <h1 onClick={this.changeWeather}>今天天气很{isHot ? "炎热" : "凉爽"},{wind}</h1>
+  }
+
+  // changeWeather调用几次？ ———— 点几次调几次
+  changeWeather(){
+    // changeWeather放在哪里？ ———— Weather的原型对象上，供实例使用
+    // 由于changeWeather是作为onClick的回调，所以不是通过实例调用的，是直接调用
+    // 类中的方法默认开启了局部的严格模式，所以changeWeather中的this为undefined
+    console.log("changeWeather");
+    // 获取原来的 isHot 值
+    const isHot = this.state.isHot;
+    
+    //严重注意：状态必须通过setState进行更新,且更新是一种合并，不是替换。
+    this.setState({isHot: !isHot});
+    console.log(this);
+
+    //严重注意：状态(state)不可直接更改，下面这行就是直接更改！！！
+    //this.state.isHot = !isHot //这是错误的写法
+  }
+}
+
+export default Weather;
+
+```
+
+```jsx
+//index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import Weather from './App';
+import reportWebVitals from './reportWebVitals';
+
+ReactDOM.render(
+   <React.StrictMode>
+     <Weather/>
+   </React.StrictMode>,
+   document.getElementById('root')
+);
+
+reportWebVitals();
+
+```
+
+### state简写方式
+
+```jsx
+class Weather extends Component {
+  // 初始化状态
+  state = {isHot: true, wind: "大风"};
+
+  //render调用几次？ ———— 1+n次 1是初始化的那次 n是状态更新的次数
+  render() {
+    // 读取状态
+    const {isHot, wind} = this.state;
+    return <h1 onClick={this.changeWeather}>今天天气很<span style={{color: isHot ? "#ff99ff" : "#843bfb"}}>{isHot ? "炎热" : "凉爽"}</span>,{wind}</h1>
+  }
+
+  // 自定义方法————要用赋值语句的形式+箭头函数
+  changeWeather = () => {
+    // 获取原来的 isHot 值
+    const isHot = this.state.isHot;
+    //严重注意：状态必须通过setState进行更新,且更新是一种合并，不是替换。
+    this.setState({isHot: !isHot});
+  }
+}
+
+//2.渲染组件到页面
+ReactDOM.render(<Weather/>, document.getElementById('test'))
+```
+
+----
+
+### 将函数组件转换成 class 组件
+
+```jsx
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+function Clock(props) {
+  return (
+    <div>
+      <h1>Hello, world!</h1>
+      <h2>It is {props.date.toLocaleTimeString()}.</h2>
+    </div>
+  );
+}
+
+function tick() {
+  root.render(<Clock date={new Date()} />);
+}
+
+setInterval(tick, 1000);
+```
+
+通过以下五步将 `Clock` 的函数组件转成 class 组件：
+
+1. 创建一个同名的 [ES6 class](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Classes)，并且继承于 `React.Component`。
+2. 添加一个空的 `render()` 方法。
+3. 将函数体移动到 `render()` 方法之中。
+4. 在 `render()` 方法中使用 `this.props` 替换 `props`。
+5. 删除剩余的空函数声明。
+
+```jsx
+class Clock extends React.Component {
+  render() {
+    return (
+      <div>
+        <h1>Hello, world!</h1>
+        <h2>It is {this.props.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+```
+
+现在 `Clock` 组件被定义为 class，而不是函数。
+
+每次组件更新时 `render` 方法都会被调用，但只要在相同的 DOM 节点中渲染 `<Clock />` ，就仅有一个 `Clock` 组件的 class 实例被创建使用。这就使得我们可以使用如 state 或生命周期方法等很多其他特性。
+
+我们通过以下三步将 `date` 从 props 移动到 state 中：
+
+1. 把 `render()` 方法中的 `this.props.date` 替换成 `this.state.date` ：
+
+```jsx
+class Clock extends React.Component {
+  render() {
+    return (
+      <div>
+        <h1>Hello, world!</h1>
+        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+```
+
+2. 添加一个 [class 构造函数](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Classes#Constructor)，然后在该函数中为 `this.state` 赋初值：
+
+```jsx
+class Clock extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {date: new Date()};  }
+
+  render() {
+    return (
+      <div>
+        <h1>Hello, world!</h1>
+        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+```
+
+通过以下方式将 `props` 传递到父类的构造函数中：
+
+```js
+  constructor(props) {
+    super(props);
+    this.state = {date: new Date()};
+  }
+```
+
+Class 组件应该始终使用 `props` 参数来调用父类的构造函数。
+
+3. 移除 `<Clock />` 元素中的 `date` 属性：
+
+```jsx
+root.render(<Clock />);
+```
+
+代码如下：
+
+```jsx
+class Clock extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {date: new Date()};
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>Hello, world!</h1>
+        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Clock />);
+```
+
+接下来，我们会设置 `Clock` 的计时器并每秒更新它。
+
+
+
+### 将生命周期方法添加到类中
+
+在具有许多组件的应用程序中，当组件被销毁时释放所占用的资源是非常重要的。
+
+当 Clock 组件第一次被渲染到 DOM 中的时候，就为其设置一个计时器。这在 React 中被称为“**挂载**（mount）”。
+
+同时，当 DOM 中 Clock 组件被删除的时候，应该清除计时器。这在 React 中被称为“**卸载**（unmount）”。
+
+我们可以为 class 组件声明一些特殊的方法，当组件挂载或卸载时就会去执行这些方法：
+
+```jsx
+class Clock extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {date: new Date()};
+  }
+
+  componentDidMount() {
+    this.timerID = setInterval(
+      () => this.tick(),
+      1000
+    );
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+  }
+
+  tick() {
+    this.setState({
+      date: new Date()
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>Hello, world!</h1>
+        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Clock />);
+```
+
+**实例解析：**
+
+**componentDidMount()** 与 **componentWillUnmount()** 方法被称作生命周期钩子。
+
+`componentDidMount()` 方法会在组件已经被渲染到 DOM 中后运行，所以，最好在这里设置计时器
+
+接下来把计时器的 ID 保存在 `this` 之中（`this.timerID`）。
+
+尽管 `this.props` 和 `this.state` 是 React 本身设置的，且都拥有特殊的含义，但是其实你可以向 class 中随意添加不参与数据流（比如计时器 ID）的额外字段。
+
+我们会在 `componentWillUnmount()` 生命周期方法中清除计时器
+
+最后，我们会实现一个叫 `tick()` 的方法，`Clock` 组件每秒都会调用它。
+
+使用 `this.setState()` 来时刻更新组件 state：
+
+现在时钟每秒都会刷新。
+
+让我们来快速概括一下发生了什么和这些方法的调用顺序：
+
+1. 当 `<Clock />` 被传给 `root.render()`的时候，React 会调用 `Clock` 组件的构造函数。因为 `Clock` 需要显示当前的时间，所以它会用一个包含当前时间的对象来初始化 `this.state`。我们会在之后更新 state。
+2. 之后 React 会调用组件的 `render()` 方法。这就是 React 确定该在页面上展示什么的方式。然后 React 更新 DOM 来匹配 `Clock` 渲染的输出。
+3. 当 `Clock` 的输出被插入到 DOM 中后，React 就会调用 `ComponentDidMount()` 生命周期方法。在这个方法中，`Clock` 组件向浏览器请求设置一个计时器来每秒调用一次组件的 `tick()` 方法。
+4. 浏览器每秒都会调用一次 `tick()` 方法。 在这方法之中，`Clock` 组件会通过调用 `setState()` 来计划进行一次 UI 更新。得益于 `setState()` 的调用，React 能够知道 state 已经改变了，然后会重新调用 `render()` 方法来确定页面上该显示什么。这一次，`render()` 方法中的 `this.state.date` 就不一样了，**如此一来就会渲染输出更新过的时间。React 也会相应的更新 DOM。**
+5. 一旦 `Clock` 组件从 DOM 中被移除，React 就会调用 `componentWillUnmount()` 生命周期方法，这样计时器就停止了。
+
+----
+
+### 正确地使用 State
+
+关于 `setState()` 你应该了解三件事：
+
+#### 不要直接修改 State
+
+例如，此代码不会重新渲染组件：
+
+```js
+// Wrong
+this.state.comment = 'Hello';
+```
+
+而是应该使用 `setState()`:
+
+```js
+// Correct
+this.setState({comment: 'Hello'});
+```
+
+**构造函数是唯一可以给 `this.state` 赋值的地方。**
+
+#### State 的更新可能是异步的
+
+出于性能考虑，React 可能会把多个 `setState()` 调用合并成一个调用。
+
+因为 `this.props` 和 `this.state` 可能会异步更新，**所以你不要依赖他们的值来更新下一个状态。**
+
+例如，**此代码可能会无法更新计数器**：
+
+```js
+// Wrong
+this.setState({
+  counter: this.state.counter + this.props.increment,
+});
+```
+
+要解决这个问题，可以让 `setState()` 接收一个函数而不是一个对象。这个函数用上一个 state 作为第一个参数，将此次更新被应用时的 props 做为第二个参数：
+
+```js
+// Correct
+this.setState((state, props) => ({
+  counter: state.counter + props.increment
+}));
+```
+
+上面使用了[箭头函数](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions)，不过使用普通的函数也同样可以：
+
+```js
+// Correct
+this.setState(function(state, props) {
+  return {
+    counter: state.counter + props.increment
+  };
+});
+```
+
+### State 的更新会被合并
+
+当你调用 `setState()` 的时候，**React 会把你提供的对象合并到当前的 state**。
+
+例如，你的 state 包含几个独立的变量：
+
+```js
+  constructor(props) {
+    super(props);
+    this.state = {
+      posts: [],
+      comments: []
+    };
+  }
+```
+
+然后你可以分别调用 `setState()` 来单独地更新它们：
+
+```js
+  componentDidMount() {
+    fetchPosts().then(response => {
+      this.setState({
+        posts: response.posts
+      });
+    });
+
+    fetchComments().then(response => {
+      this.setState({
+        comments: response.comments
+      });
+    });
+  }
+```
+
+**这里的合并是浅合并**，所以 `this.setState({comments})` 完整保留了 `this.state.posts`， 但是完全替换了 `this.state.comments`。
+
+
+
+----
+
+### 数据自顶向下流动
+
+不管是父组件或是子组件**都无法知道某个组件是有状态的还是无状态的**，并且它们也并不关心它是函数组件还是 class 组件。
+
+**这就是为什么称 state 为局部的或是封装的的原因**。除了拥有并设置了它的组件，其他组件都无法访问。
+
+组件**可以选择把它的 state 作为 props 向下传递到它的子组件中**：
+
+```jsx
+<FormattedDate date={this.state.date} />
+```
+
+`FormattedDate` 组件会在其 props 中接收参数 `date`，但是组件本身无法知道它是来自于 `Clock` 的 state，或是 `Clock` 的 props，还是手动输入的：
+
+```js
+function FormattedDate(props) {
+  return <h2>It is {props.date.toLocaleTimeString()}.</h2>;
+}
+```
+
+**这通常会被叫做“自上而下”或是“单向”的数据流**。
+
+任何的 state 总是所属于特定的组件，**而且从该 state 派生的任何数据或 UI 只能影响树中“低于”它们的组件**。
+
+如果你把一个以组件构成的树想象成一个 props 的数据瀑布的话，**那么每一个组件的 state 就像是在任意一点上给瀑布增加额外的水源，但是它只能向下流动。**
+
+为了证明每个组件都是真正独立的，我们可以创建一个渲染三个 `Clock` 的 `App` 组件：
+
+```jsx
+function FormattedDate(props) {
+  return <h2>现在是 {props.date.toLocaleTimeString()}.</h2>;
+}
+ 
+class Clock extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {date: new Date()};
+  }
+ 
+  componentDidMount() {
+    this.timerID = setInterval(
+      () => this.tick(),
+      1000
+    );
+  }
+ 
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+  }
+ 
+  tick() {
+    this.setState({
+      date: new Date()
+    });
+  }
+ 
+  render() {
+    return (
+      <div>
+        <h1>Hello, world!</h1>
+        <FormattedDate date={this.state.date} />
+      </div>
+    );
+  }
+}
+ 
+function App() {
+  return (
+    <div>
+      <Clock />
+      <Clock />
+      <Clock />
+    </div>
+  );
+}
+ 
+ReactDOM.render(<App />, document.getElementById('example'));
+```
+
+每个 `Clock` 组件都会单独设置它自己的计时器并且更新它。
+
+在 React 应用中**，组件是有状态组件还是无状态组件属于组件实现的细节**，它可能会随着时间的推移而改变。你可以在有状态的组件中使用无状态的组件，反之亦然。
+
+
+
+----
 
 
 
