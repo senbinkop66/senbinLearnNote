@@ -1,22 +1,18 @@
 /**
- * @param {string[]} dictionary
- * @param {string} sentence
- * @return {string}
+ * @param {number[]} position
+ * @return {number}
  */
-var replaceWords = function(dictionary, sentence) {
-    const m = new Set(dictionary);
-
-    sentence = sentence.split(" ");
-    for (let i = 0; i < sentence.length; i++) {
-        for (let j = 0; j < sentence[i].length; j++) {
-            if (m.has(sentence[i].slice(0, j + 1))) {
-                sentence[i] = sentence[i].slice(0, j + 1);
-                break;
-            }
+var minCostToMoveChips = function(position) {
+    let even = 0, odd = 0;
+    for (let pos of position) {
+        if ((pos & 1) !== 0) {
+            odd++;
+        } else {
+            even++;
         }
     }
-    return sentence.join(" ");
+    return Math.min(odd, even);
 };
 
-let dictionary = ["cat","bat","rat"], sentence = "the cattle was rattled by the battery";
-console.log(replaceWords(dictionary, sentence));
+let position = [2,2,2,3,3];
+console.log(minCostToMoveChips(position));
