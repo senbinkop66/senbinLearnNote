@@ -1,18 +1,11 @@
-/**
- * @param {number[]} position
- * @return {number}
- */
-var minCostToMoveChips = function(position) {
-    let even = 0, odd = 0;
-    for (let pos of position) {
-        if ((pos & 1) !== 0) {
-            odd++;
-        } else {
-            even++;
-        }
-    }
-    return Math.min(odd, even);
+let a={
+    [Symbol("a")]:1
 };
+let b=[];
+let c="";
 
-let position = [2,2,2,3,3];
-console.log(minCostToMoveChips(position));
+console.log(Object.getOwnPropertyNames(a).length===0);  // true
+console.log(Object.getOwnPropertyNames(b));  // 
+console.log(Object.getOwnPropertyNames(b).length===0);  // false
+console.log(Object.getOwnPropertyNames(c));  // 
+console.log(Object.getOwnPropertyNames(c).length===0);  // false

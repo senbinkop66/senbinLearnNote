@@ -1,10 +1,47 @@
 # Redux 概述和概念
 
+## 安装
+
+```
+cnpm install redux
+cnpm install react-redux
+```
+
+
+
 ## Redux 是什么？
 
 它有助于首先理解这个“Redux”的东西是什么。它有什么作用？它帮助我解决什么问题？我为什么要使用它？
 
 **Redux 是一个使用叫做“action”的事件来管理和更新应用状态的模式和工具库** 它以集中式Store（centralized store）的方式对整个应用中使用的状态进行集中管理，**其规则确保状态只能以可预测的方式更新。**
+
+Redux 是 JavaScript 应用的状态容器，提供可预测的状态管理。
+
+可以让你开发出行为稳定可预测的应用，运行于不同的环境（客户端、服务器、原生应用），并且易于测试。不仅于此，它还提供超爽的开发体验，比如有一个[时间旅行调试器可以编辑后实时预览](https://github.com/reduxjs/redux-devtools)。
+
+Redux 除了和 React 一起用外，还支持其它界面库。它体小精悍（只有2kB，包括依赖），却有很强大的插件扩展生态。
+
+-----
+
+## redux特点
+
+### 可预测
+
+Redux 让你开发出 **行为稳定可预测**、可运行在不同环境 （客户端、服务端和原生程序）、且 **易于测试** 的应用。
+
+### 集中管理
+
+集中管理应用的状态和逻辑可以让你开发出强大的功能，如 **撤销/重做**、 **状态持久化** 等等。
+
+### 可调试
+
+Redux DevTools 让你轻松追踪到 **应用的状态在何时、何处以及如何改变**。Redux 的架构让你记下每一次改变，借助于 **"时间旅行调试"**，你甚至可以把完整的错误报告发送给服务器。
+
+### 灵活
+
+Redux **可与任何 UI 层框架搭配使用**，并且有 **庞大的插件生态** 来实现你的需求.
+
+----
 
 ![redux原理图](E:\pogject\学习笔记\image\react\redux原理图.png)
 
@@ -196,7 +233,7 @@ const addTodo = text => {
 Reducer 必需符合以下规则：
 
 - 仅使用 `state` 和 `action` 参数计算新的状态值
-- 禁止直接修改 `state`。**必须通过复制现有的 `state` 并对复制的值进行更改的方式来做 *不可变更新**（immutable updates）*。
+- 禁止直接修改 `state`。**必须通过复制现有的 `state` 并对复制的值进行更改的方式来做 不可变更新**（immutable updates）。
 - 禁止任何异步逻辑、依赖随机值或导致其他“副作用”的代码
 
 稍后我们将更多地讨论 reducer 的规则，包括为什么它们很重要以及如何正确地遵循它们。
@@ -473,25 +510,25 @@ export default class Counter extends Component {
 ```js
 /*
 (1).去除Count组件自身的状态
-		(2).src下建立:
-            -redux
-                -store.js
-                -count_reducer.js
+(2).src下建立:
+    -redux
+        -store.js
+        -count_reducer.js
 
-		(3).store.js：
-            1).引入redux中的createStore函数，创建一个store
-            2).createStore调用时要传入一个为其服务的reducer
-            3).记得暴露store对象
+(3).store.js：
+    1).引入redux中的createStore函数，创建一个store
+    2).createStore调用时要传入一个为其服务的reducer
+    3).记得暴露store对象
 
-		(4).count_reducer.js：
-            1).reducer的本质是一个函数，接收：preState,action，返回加工后的状态
-            2).reducer有两个作用：初始化状态，加工状态
-            3).reducer被第一次调用时，是store自动触发的，
-                            传递的preState是undefined,
-                            传递的action是:{type:'@@REDUX/INIT_a.2.b.4}
+(4).count_reducer.js：
+    1).reducer的本质是一个函数，接收：preState,action，返回加工后的状态
+    2).reducer有两个作用：初始化状态，加工状态
+    3).reducer被第一次调用时，是store自动触发的，
+                    传递的preState是undefined,
+                    传递的action是:{type:'@@REDUX/INIT_a.2.b.4}
 
-		(5).在index.js中监测store中状态的改变，一旦发生改变重新渲染<App/>
-				备注：redux只负责管理状态，至于状态的改变驱动着页面的展示，要靠我们自己写。
+(5).在index.js中监测store中状态的改变，一旦发生改变重新渲染<App/>
+        备注：redux只负责管理状态，至于状态的改变驱动着页面的展示，要靠我们自己写。
 */				
 ```
 

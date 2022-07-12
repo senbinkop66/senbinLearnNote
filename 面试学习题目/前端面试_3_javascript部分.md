@@ -1071,6 +1071,8 @@ function removeButton(){
 
 虽用removeChild移除了button，但是还在elements对象里保存着button的引用，DOM元素还在内存里面
 
+**5、未被销毁的事件监听**
+
 
 
 ---
@@ -1705,201 +1707,19 @@ console.log(Array.prototype.slice.call(al2)); // [ 0, 1, <2 empty items> ]
 
 ------
 
-#### 2.25 简单说说 js 中有哪几种内存泄露的情况
+## 31 json和xml数据的区别
 
-**参考答案**：
-
-1. 意外的全局变量；
-2. 闭包；
-3. 未被清空的定时器；
-4. 未被销毁的事件监听；
-5. DOM 引用；
-
-------
-
-#### 2.26 异步笔试题
-
-请写出下面代码的运行结果：
-
-```js
-// 今日头条面试题
-
-async function async1() {
-
-  console.log('async1 start')
-
-  await async2()
-
-  console.log('async1 end')
-
-}
-
-async function async2() {
-
-  console.log('async2')
-
-}
-
-console.log('script start')
-
-setTimeout(function () {
-
-  console.log('settimeout')
-
-})
-
-async1()
-
-new Promise(function (resolve) {
-
-  console.log('promise1')
-
-  resolve()
-
-}).then(function () {
-
-  console.log('promise2')
-
-})
-
-console.log('script end')
-
-```
-
-题目的本质，就是考察setTimeout、promise、async await的实现及执行顺序，以及 JS 的事件循环的相关问题。
-
-答案：
-
-```js
-/*
-script start
-async1 start
-async2
-promise1
-script end
-async1 end
-promise2
-settimeout
-*/
-```
+1. 数据体积方面：xml是重量级的，**json是轻量级的，传递的速度更快些**。
+2. 数据传输方面：xml在传输过程中比较占带宽，**json占带宽少，易于压缩**。
+3. 数据交互方面：**json与javascript的交互更加方便，更容易解析处理**，更好的进行数据交互
+4. 数据描述方面：json对数据的**描述性比xml较差**
+5. xml和json都用在项目交互下，**xml多用于做配置文件**，json用于数据交互。
 
 
 
 ------
 
-#### 2.27 json和xml数据的区别
-
-**参考答案**：
-
-1. 数据体积方面：xml是重量级的，json是轻量级的，传递的速度更快些。
-2. 数据传输方面：xml在传输过程中比较占带宽，json占带宽少，易于压缩。
-3. 数据交互方面：json与javascript的交互更加方便，更容易解析处理，更好的进行数据交互
-4. 数据描述方面：json对数据的描述性比xml较差
-5. xml和json都用在项目交互下，xml多用于做配置文件，json用于数据交互。
-
-------
-
-#### 2.28 JavaScript有几种方法判断变量的类型?
-
-**参考答案**：
-
-1. 使用typeof检测当需要判断变量是否是number, string, boolean, function, undefined等类型时，可以使用typeof进行判断。
-2. 使用instanceof检测instanceof运算符与typeof运算符相似，用于识别正在处理的对象的类型。与typeof方法不同的是，**instanceof 方法要求开发者明确地确认对象为某特定类型。**
-3. 使用constructor检测constructor本来是原型对象上的属性，指向构造函数。但是根据实例对象寻找属性的顺序，若实例对象上没有实例属性或方法时，就去原型链上寻找，因此，实例对象也是能使用constructor属性的。
-
-
-
-------
-
-#### 2.29 代码解释题
-
-**参考答案**：
-
-题目：
-
-```js
-var min = Math.min();
-max = Math.max();
-console.log(min < max);
-// 写出执行结果，并解释原因
-
-//console.log(min,max)  //Infinity -Infinity
-```
-
-**答案**
-false
-
-**解析**
-
-- 按常规的思路，这段代码应该输出 true，毕竟最小值小于最大值。但是却输出 false
-- MDN 相关文档是这样解释的
-  - Math.min 的参数是 **0 个或者多个**，如果多个参数很容易理解，返回参数中最小的。**如果没有参数，则返回 Infinity，无穷大。**
-  - 而 Math.max **没有传递参数时返回的是-Infinity**.所以输出 false
-
-##### Math.max()
-
-由于 `max` 是 `Math` 的静态方法，所以应该像这样使用：`Math.max()`，而不是创建的 `Math` 实例的方法（`Math` 不是构造函数）。
-
-如果没有参数，则结果为 - [`Infinity`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Infinity)。
-
-如果有任一参数不能被转换为数值，则结果为 [`NaN`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/NaN)。
-
-##### Math.min()
-
-由于 `min` 是 `Math` 的静态方法，所以应该像这样使用：`Math.min()`，而不是作为你创建的 `Math` 实例的方法（Math 不是构造函数）。
-
-如果没有参数，结果为[`Infinity`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Infinity)。
-
-如果有任一参数不能被转换为数值，结果为 [`NaN`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/NaN)。
-
-------
-
-#### 2.30 代码解析题
-
-**题目**
-
-```js
-var company = {
-    address: 'beijing'
-}
-var yideng = Object.create(company);
-delete yideng.address
-console.log(yideng.address);
-// 写出执行结果，并解释原因
-
-```
-
-**答案**
-beijing
-
-**解析**
-这里的 yideng 通过 prototype 继承了 company的 address。**yideng自己并没有address属性。所以delete操作符的作用是无效的。**
-
-**扩展**
-1.delete使用原则：delete 操作符用来删除一个对象的属性。
-
-2.delete在删除一个不可配置的属性时在严格模式和非严格模式下的区别:
-（1）在严格模式中，如果属性是一个不可配置（non-configurable）属性，删除时会抛出异常;
-（2）非严格模式下返回 false。
-
-3.delete能删除隐式声明的全局变量：这个全局变量其实是global对象(window)的属性
-
-4.delete能删除的：
-（1）可配置对象的属性（2）隐式声明的全局变量 （3）用户定义的属性 （4）在ECMAScript 6中，通过 const 或 let 声明指定的 "temporal dead zone" (TDZ) 对 delete 操作符也会起作用
-
-5.delete不能删除的：
-（2）显式声明的全局变量 （2）内置对象的内置属性 （3）一个对象从原型继承而来的属性
-
-6.delete删除数组元素：
-（1）当你删除一个数组元素时，数组的 length 属性并不会变小，数组元素变成undefined
-（2）当用 delete 操作符删除一个数组元素时，被删除的元素已经完全不属于该数组。
-（3）如果你想让一个数组元素的值变为 undefined 而不是删除它，可以使用 undefined 给其赋值而不是使用 delete 操作符。此时数组元素是在数组中的
-
-7.delete 操作符与直接释放内存（只能通过解除引用来间接释放）没有关系。
-
-------
-
-#### 2.31 相等运算符隐藏的类型转换
+## 32. 相等运算符隐藏的类型转换
 
 相等运算符隐藏的类型转换，会带来一些违反直觉的结果
 
@@ -1919,7 +1739,7 @@ null == 0  // false
 ' \t\r\n' == 0 // true
 ```
 
-Number,Boolean,String,Undefined这几种基本类型混合比较时，会将其转换成数字再进行比较
+Number,Boolean,String,Undefined这几种基本类型混合比较时，**会将其转换成数字再进行比较**
 
 
 基本类型与复合对象进行比较时，会先将复合对象转换成基本类型（依次调用valueOf与toString方法）再进行比较 
@@ -1938,9 +1758,7 @@ null被当成复合对象，**由于null没有valueOf与toString方法**，因�
 
 
 
----
-
-## 2.5 请问js有哪些继承方式？
+## 1. 请问js有哪些继承方式？
 
 js常用继承方式主要有6种：原型链继承、构造函数继承、组合继承、原型式继承、寄生式继承、寄生组合式继承
 
@@ -1965,7 +1783,7 @@ function Sub(){
 
 ---
 
-### 1. 原型链继承
+### (1) 原型链继承
 
 （将 子类的原型对象 指向 超类型的实例）**函数式继承**
 
@@ -2004,20 +1822,20 @@ console.log(sub2.getSuper());  //[ 'super', 'sub1', 'sub2' ]
 
 ---
 
-### 2.构造函数继承
+### (2) 构造函数继承
 
 （子类中使用call调用超类）**函数式继承**
 
 ```js
 function Super(name){
-	this.name=name;
+	this.name = name;
 }
-Super.prototype.getSuper=function(){
+Super.prototype.getSuper = function(){
 	return this.name;
 }
 
 function Sub(name){
-	Super.call(this,name);  //在Sub中使用call去调用Super
+	Super.call(this, name);  //在Sub中使用call去调用Super
 }
 
 
@@ -2035,7 +1853,7 @@ var sup1=new Super();
 console.log(sup1.getSuper());  //undefined
 ```
 
-在Sub中用call调用Super，继承了Super的所有静态属性。在实例sub1、sub2中，各自对name的修改也互不影响，**实现了属性不共享，子类的实例也能向超类型构造函数传参**  
+在Sub中用call调用Super，**继承了Super的所有静态属性**。在实例sub1、sub2中，各自对name的修改也互不影响，**实现了属性不共享，子类的实例也能向超类型构造函数传参**  
 
 这种继承方式的**缺点**是：
 
@@ -2043,7 +1861,7 @@ console.log(sup1.getSuper());  //undefined
 
 ---
 
-### 3.组合继承
+### (3) 组合继承
 
 （原型链继承+构造函数继承）函数式继承
 
@@ -2056,10 +1874,10 @@ Super.prototype.getSuper=function(){
 }
 
 function Sub(name){
-	Super.call(this,name);  //第二次调用，构造函数继承
+	Super.call(this, name);  //第二次调用，构造函数继承
 }
 
-Sub.prototype=new Super();  //第一次调用，原型链继承
+Sub.prototype = new Super();  //第一次调用，原型链继承
 Sub.prototype.constructor=Sub;
 
 var sub1=new Sub("sub1");  //创建Sub的实例sub1,
@@ -2088,7 +1906,7 @@ console.log(sub2.name);  //sub2
 
 ---
 
-### 4.原型式继承
+### (4) 原型式继承
 
 创造了一个 临时的构造函数F，将 F的原型 指向传进来的对象参数，再返回F的实例）
 
@@ -2104,7 +1922,7 @@ var person={
 	friends:["css","ts"]
 }
 
-var people1=object(person);
+var people1 = object(person);
 // var people1 = Object.create(person);在传入一个参数的情况下，Object.create()和object()相同
 people1.name="python";
 people1.friends.push("pip");
@@ -2128,7 +1946,7 @@ console.log(person.friends);  //[ 'css', 'ts', 'pip', 'jar' ]
 
 ---
 
-### 5.寄生式继承
+### (5) 寄生式继承
 
 （基于原型式继承的封装）
 
@@ -2174,7 +1992,7 @@ people2.sayHi();  // hi
 
 ---
 
-### 6.寄生组合式继承
+### (6) 寄生组合式继承
 
 在组合继承中，**若需要优化一次调用，那一定是第一次调用**：原型链继承，利用原型式继承便可实现
 
@@ -2187,7 +2005,7 @@ function object(o){
 	return new F();
 }
 
-function inheritPrototype(subType,superType){
+function inheritPrototype(subType, superType){
 	//复制超类型的原型对象
 	var clone=object(superType.prototype);
 	//将构造函数指向子类型
@@ -2238,9 +2056,11 @@ console.log(sub2.name);  //sub2
 
 结合性记忆：原型链继承+构造函数继承 = 组合继承；为了优化: 组合继承→原型式继承→寄生式继承→寄生组合式继承
 
+
+
 ---
 
-## 2.6 请问js在new过程中到底做了什么？
+## 2 请问js在new过程中到底做了什么？
 
 在js日常开发中，常new一个构造函数或类得到对应实例，下面代码分别是利用ES5 构造函数与ES6 class类实现一个简单的创建实例
 
@@ -2291,9 +2111,11 @@ child.sayName() //echo
 3. 将步骤1新创建的对象作为`this`的上下文 ；
 4. 如果该函数没有返回对象，则返回`this`。
 
+
+
 ---
 
-## 2.7 请问如何js原生方法实现new方法？
+## 3. 请问如何js原生方法实现new方法？
 
 可根据上题中的new()操作步骤加以理解性记忆，下面是参考代码：
 
@@ -2323,7 +2145,7 @@ console.log(person.age);  //66
 
 ---
 
-## 3.1 请问你了解js中的this绑定机制吗？
+## 4. 请问你了解js中的this绑定机制吗？
 
 this特点：
 
@@ -2331,15 +2153,15 @@ this特点：
 2. 随着使用场合的不同，this的值会发生变化，并不是一成不变的
 3. this指向完全取决于：**什么地方以什么方式调用**，而不是 创建时
 
-this 4种绑定机制：默认绑定、隐式绑定、显示绑定、new绑定，箭头函数的this不适用于这4种绑定机制，需要单独分析，将会在后续ES6新特性章节中做重点分析
+this 4种绑定机制：默认绑定、隐式绑定、显示绑定、new绑定，箭头函数的this不适用于这4种绑定机制，需要单独分析
 
-### 1.默认绑定
+### (1) 默认绑定
 
 （函数调用时无任何调用前缀的情景）  没有其他绑定规则存在时的默认规则，**也是函数调用中最常见情况**
 
 ```js
 function fn1(){
-  let fn2=function(){
+  let fn2 = function(){
     console.log(this);  //Window
     fn3();
   };
@@ -2410,19 +2232,22 @@ fn2();
 
 ```
 
-### 2.隐式绑定
+### (2) 隐式绑定
 
 在函数调用时，前面存在调用它的对象，即函数的调用是在该对象上触发的，**调用位置上存在上下文对象，那this就会隐式绑定到该对象上**
 
 ```js
 function foo(){
-	console.log(this.a);
+    console.log(this.a);
 }
 
 var a=2;
+
+foo();  // 2
+
 var obj={
-	a:3,
-	foo:foo
+    a:3,
+    foo:foo
 };
 
 obj.foo();  // 3
@@ -2473,7 +2298,7 @@ obj2.obj3.foo();  // undefined
 
 在一些特殊情况下，**会存在隐式绑定丢失问题**，最常见：参数传递、变量赋值
 
-**参数传递**
+##### **参数传递**
 
 ```js
 function foo(){
@@ -2496,7 +2321,7 @@ fn1(obj1.foo);  // 2
 
 代码中将 obj.foo 作为参数传递进 fn1 中执行，**只是单纯地传递了一个函数而已**，this并没有跟函数绑在一起，**发生了隐式丢失**，this依旧指向window
 
-**变量赋值（本质上与传参相同）**
+##### **变量赋值（本质上与传参相同）**
 
 ```js
 function foo(){
@@ -2505,17 +2330,17 @@ function foo(){
 
 var a=2;
 
-var obj1={
+var obj1 = {
   a:4,
   foo:foo
 };
 
-let fn1=obj1.foo;
+let fn1 = obj1.foo;
 fn1();  // 2
 
 ```
 
-### 3.显式绑定（call、apply、bind）
+### (3) 显式绑定（call、apply、bind）
 
 ```js
 function foo(){
@@ -2541,6 +2366,10 @@ foo.apply(obj2);  // 2
 foo.bind(obj3)();  // 3
 
 foo.apply(null);  // 4
+
+
+
+
 foo.apply(undefined);  // 4
 foo.bind(null)();  // 4
 foo.bind(undefined)();  // 4
@@ -2552,23 +2381,23 @@ foo.bind(undefined)();  // 4
 
 注意：若使用函数应用的方法改变this指向时，**指向参数是null或者undefined，那么 this 将指向全局对象**
 
-### 4.new 绑定
+### (4) new 绑定
 
 ```js
 function Fn(){
 	this.a=1;
 }
 
-let obj=new Fn();
+let obj = new Fn();
 
 console.log(obj.a);  // 1
 ```
 
-代码中，构造函数调用创建了一个新对象obj，而在函数体内，this将指向新对象obj上（可以抽象理解为新对象就是this）
+代码中，构造函数调用创建了一个新对象obj，**而在函数体内，this将指向新对象obj上**（可以抽象理解为新对象就是this）
 
 ---
 
-**this绑定优先级**
+### **this绑定优先级**
 
 如果一个函数调用存在多种绑定方法，this最终指向是什么呢？this绑定优先级为：
 
@@ -2580,15 +2409,17 @@ new绑定 > 隐式绑定 > 默认绑定
 
 ---
 
-### **1、作用域链与原型链有什么区别？**
+## 5.作用域链与原型链有什么区别？
 
 作用域链：当**访问一个变量**时，首先在当前作用域查找标识符，如果没有找到就去**父作用域**找，作用域链**顶端**是全局对象window，如果window都没有这个变量则**报错**
 
 原型链：当**在对象上访问某属性**时，首先会查找当前对象，如果没有就顺着**原型链**往上找，原型链**顶端**是null，如果全程都没找到则**返回undefined**，而不是报错
 
+
+
 ---
 
-## 3.2 请问call、apply与bind有什么区别？
+## 6. 请问call、apply与bind有什么区别？
 
 call、apply与bind：都能用于改变this绑定
 
@@ -2633,7 +2464,7 @@ function fn(b,c){
 	console.log(this.a + b + c);
 }
 
-let fn1=fn.bind(obj1,2,3);
+let fn1=fn.bind(obj1, 2, 3);
 
 fn1();  //6
 
@@ -2646,9 +2477,11 @@ fn1.call(obj2);  //6
 
 代码中， 当执行fn1时，**本质上等于window.fn1()**，如果this还能被改变，那this岂不是得指向window，那bind方法就毫无意义了
 
+
+
 ----
 
-## 3.3 请问什么是浅拷贝？什么是深拷贝？两者有何区别？
+## 7. 请问什么是浅拷贝？什么是深拷贝？两者有何区别？
 
 深拷贝与浅拷贝简单区分方法：假设B复制了A，当修改A时，B是否改变，若B也跟着变化，说明是**浅拷贝**；若B没变化，则是**深拷贝**
 
@@ -2675,23 +2508,23 @@ fn1.call(obj2);  //6
 
 **引用数据类型**：名存在**栈内存**中，值存在于**堆内存**中，栈内存会提供一个引用的地址指向堆内存中的值
 
-![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632990546361/CED43FA80498C5A06F84AEBC056ECA6F)
+![img](E:\pogject\学习笔记\image\js\CED43FA80498C5A06F84AEBC056ECA6F)
 
 当b=a时，其实b复制了a的引用地址，而并非堆内存中的值
 
-![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632990559186/967F55AE7D26B8CCB6590C26CFCDAD2B)
+![img](E:\pogject\学习笔记\image\js\967F55AE7D26B8CCB6590C26CFCDAD2B)
 
 而当a[0]=1时进行数组修改时，由于a与b指向的是同一个地址，自然b也受影响，这就是所谓的浅拷贝
 
-![img](https://uploadfiles.nowcoder.com/images/20210930/897353_1632990569165/E829A2CEBAE11215E510B538F34432B5)
+![img](E:\pogject\学习笔记\image\js\E829A2CEBAE11215E510B538F34432B5)
 
 ----
 
-## 3.4 请问js如何实现深拷贝？
+## 8. 请问js如何实现深拷贝？
 
-1. 递归复制所有层级属性
+### (1) 递归复制所有层级属性
 
-   （面试高频撕代码题）
+（面试高频撕代码题）
 
 可理解为一层层地复制对象中的属性， 直到值为基础类型，缺点：代码较为复杂
 
@@ -2707,7 +2540,7 @@ function deepClone(obj){
 			if (obj.hasOwnProperty(key)) {
 				if (obj[key] && typeof obj[key] === "object") {
 					objClone[key]=deepClone(obj[key]);
-				}else{
+				} else {
 					objClone[key]=obj[key];
 				}
 			}
@@ -2733,7 +2566,7 @@ console.log(obj1.b.c);  //2
 console.log(obj2.b.c);  //66
 ```
 
-2. 借助JSON对象的parse和stringify
+### (2) 借助JSON对象的parse和stringify
 
 利用js的内置对象JSON来进行**数组对象**的深拷贝，缺点：无法实现对象中**方法**的深拷贝
 
@@ -2767,16 +2600,16 @@ stringify() → JavaScript对象序列化为JSON字符串
 
 parse() → 把JSON字符串解析为原生JavaScript值
 
-3. 通过jQuery的extend方法
+### (3) 通过jQuery的extend方法
 
 ```js
 var array = [1,2,3,4];
-var newArray = $.extend(true,[],array);    
+var newArray = $.extend(true,[],array);
 ```
 
-4. Object.assign()拷贝
+### (4) Object.assign()拷贝
 
-当对象中只有一级属性，没有二级属性的时候，此方法为深拷贝，但是对象中有对象的时候，**此方法，在二级属性以后就是浅拷贝**
+当对象中只有一级属性，**没有二级属性的时候，此方法为深拷贝**，但是对象中有对象的时候，**此方法，在二级属性以后就是浅拷贝**
 
 ```js
 
@@ -2801,15 +2634,13 @@ console.log(obj1.b.c);  //66
 console.log(obj2.b.c);  //66
 ```
 
-5. lodash函数库
+### (5) lodash函数库
 
 lodash是一个很热门的函数库，可利用lodash.cloneDeep()[实现深拷贝](https://www.lodashjs.com/docs/lodash.cloneDeep#_clonedeepvalue)
 
 ```bash
 $ cnpm i lodash --save
 ```
-
-
 
 ```js
 var _ = require("lodash");
@@ -2830,6 +2661,7 @@ obj2.a=10;
 
 console.log(obj1.a);  //1
 console.log(obj2.a);  //10
+
 console.log(obj1.b.c);  //2
 console.log(obj2.b.c);  //66
 ```
@@ -2838,9 +2670,9 @@ console.log(obj2.b.c);  //66
 
 ---
 
-## 3.5 请问js如何判断一个变量是空对象？
+## 9. 请问js如何判断一个变量是空对象？
 
-**1.for in** 
+### (1) for in 
 
 利用for in 循环遍历对象和对象原型上的**可枚举属性**
 
@@ -2865,10 +2697,10 @@ console.log(isEmptyObj(c));  // true
 
 
 
-  **2.** **Object.keys()** 
+### (2)  Object.keys() 
 
 ```js
-console.log(Object.keys(obj).length===0)
+console.log(Object.keys(obj).length === 0)
 ```
 
 Object.keys能返回对象自身上**所有可枚举属性的名称**所构成的数组，若数组长度为0，那就是一个空对象
@@ -2885,10 +2717,10 @@ console.log(Object.keys(b).length===0);  // true
 console.log(Object.keys(c).length===0);  // true
 ```
 
-  **3. 将对象转化为json字符串**
+### (3) 将对象转化为json字符串
 
 ```js
-console.log(JSON.stringify(obj)==='{}')
+console.log(JSON.stringify(obj) === '{}')
 ```
 
 ```js
@@ -2901,32 +2733,36 @@ console.log(JSON.stringify(b));  // []
 console.log(JSON.stringify(c));  // ""
 ```
 
-  **4.** **Object.getOwnPropertyNames()**
+### (4) Object.getOwnPropertyNames()
 
 ```js
-console.log(Object.getOwnPropertyNames(obj).length == 0)
+console.log(Object.getOwnPropertyNames(obj).length === 0)
 ```
 
-Object.getOwnPropertyNames方法获取到对象中的属性名，存到一个数组中，返回数组对象，若数组长度为0，则是空对象
+Object.getOwnPropertyNames方法获取到对象中的属性名，存到一个数组中，**返回数组对象**，若数组长度为0，则是空对象
 
 缺点：此方法是Object.keys的改进，**可获取到不可枚举属性**，**但该方法无法获取Symbol属性**
 
 ```js
 let a={
-	[Symbol("a")]:1
+    [Symbol("a")]:1
 };
 let b=[];
 let c="";
 
 console.log(Object.getOwnPropertyNames(a).length===0);  // true
+
+console.log(Object.getOwnPropertyNames(b));  // [ 'length' ]
 console.log(Object.getOwnPropertyNames(b).length===0);  // false
+
+console.log(Object.getOwnPropertyNames(c));  // [ 'length' ]
 console.log(Object.getOwnPropertyNames(c).length===0);  // false
 ```
 
-  **5. Reflect.ownKeys()**
+###   (5) Reflect.ownKeys()
 
 ```js
-console.log(Reflect.ownKeys(obj).length===0)
+console.log(Reflect.ownKeys(obj).length === 0)
 ```
 
 Reflect.ownKeys也可以返回对象自身属性名所构成的数组，**该方法可以返回不可枚举属性以及Symbol属性**
@@ -2945,13 +2781,13 @@ console.log(Reflect.ownKeys(c).length===0);  // TypeError: Reflect.ownKeys calle
 
 ---
 
-### **1、什么可枚举属性？什么是不可枚举属性？**
+## 10. 什么可枚举属性？什么是不可枚举属性？
 
 可枚举属性是指内部**可枚举标志**（enumerable）设置为true的属性，不可枚举属性即是enumerable为false（摘自MDN）
 
 ---
 
-### **2、js遍历对象各个方法区别总结**
+### **js遍历对象各个方法区别总结**
 
 | 方法                           | 基本属性 | 原型链属性 | 不可枚举属性 | symbol属性 |
 | ------------------------------ | -------- | ---------- | ------------ | ---------- |
@@ -2961,7 +2797,7 @@ console.log(Reflect.ownKeys(c).length===0);  // TypeError: Reflect.ownKeys calle
 | Object.getOwnPropertySymbols() | ✖        | ✖          | ✔            | ✔          |
 | Reflect.ownKeys()              | ✔        | ✖          | ✔            | ✔          |
 
-**for in （遍历key）**：可遍历到原型对象上的属性 ，用hasOwnProperty()方法过滤, 可遍历得到字符串类型的键值，通常不适用于数组遍历
+**for in （遍历key）**：可遍历到原型对象上的属性 ，用hasOwnProperty()方法过滤, 可遍历得到字符串类型的键值，**通常不适用于数组遍历**
 
 **Object.values() 、Object.keys() ：**可自动过滤原型链上的属性
 
@@ -2969,11 +2805,13 @@ console.log(Reflect.ownKeys(c).length===0);  // TypeError: Reflect.ownKeys calle
 
 **Reflect.ownkeys()：** 可遍历不可枚举的属性 和 Symbol属性
 
+
+
 ---
 
-## 3.6 请问js有哪些遍历数组的方法？
+## 11. 请问js有哪些遍历数组的方法？
 
- **1.** **for循环**
+###  (1) for循环
 
 用临时变量将长度缓存起来，避免重复获取数组长度，当数组较大时优化效果比较明显，写法比较繁琐
 
@@ -2983,9 +2821,9 @@ for(let j = 0,len=arr.length; j < len; j++) {
 }
 ```
 
-  **2.** **forEach（）**
+###  (2) forEach（）
 
-遍历数组中的每一项，没有返回值，即使有return，也不会返回任何值，对原数组没有影响，不支持IE浏览器，执行速度比map()快
+遍历数组中的每一项，没有返回值，即使有return，也不会返回任何值，对原数组没有影响，不支持IE浏览器，**执行速度比map()快**
 
 ```js
 //参数：item数组中的当前索引的值, index当前项的索引, array原始数组
@@ -2994,16 +2832,16 @@ arr.forEach((item,index,array)=>{
 })    
 ```
 
-  **3.** **map（）**
+###   (3) map（）
 
 **创建一个新的数组，新数组的每一个元素由调用数组中的每一个元素执行提供的函数得来**，有return返回值
 
 return的意义：不影响原来的数组，**只是把原数组克隆一份**，改变克隆的数组中的对应项
 
 ```js
-let a=[1,2,3,4,5];
+let a = [1,2,3,4,5];
 
-let b=a.map((item,index,arr)=>{
+let b = a.map((item,index,arr)=>{
 	return item**2;
 });
 
@@ -3013,13 +2851,13 @@ console.log(b);  // [ 1, 4, 9, 16, 25 ]
 
 
 
-  **5.** **for of**
+###   (4) for of
 
 遍历value，适用遍历数组对象、字符串、map、set等**拥有迭代器对象**的集合，**不能遍历对象**，**因为没有迭代器**
 
-与forEach()区别：可以正确响应break、continue和return语句
+与forEach()区别：**可以正确响应break、continue和return语句**
 
-与for in 区别：无法循环遍历对象，**不会遍历自定义属性**
+与for in 区别：**无法循环遍**历对象，**不会遍历自定义属性**
 
 ```js
 for (var value of arr) { 
@@ -3042,7 +2880,7 @@ for (let o of obj){  //TypeError: obj is not iterable
 }
 ```
 
-  **6.** **reduce()**
+### (5) reduce()
 
 接收一个函数作为累加器，数组中的每个值（从左到右）开始缩减，得出最终计算值
 
@@ -3051,8 +2889,6 @@ for (let o of obj){  //TypeError: obj is not iterable
 ```js
 arr.reduce(function(total, currentValue, currentIndex, arr), initialValue)
 ```
-
-
 
 各参数意义：
 
@@ -9074,3 +8910,159 @@ var threeSum = function(nums) {
 ------
 
 ------
+
+# 代码解析题
+
+----
+
+#### 2.26 异步笔试题
+
+请写出下面代码的运行结果：
+
+```js
+// 今日头条面试题
+
+async function async1() {
+
+  console.log('async1 start')
+
+  await async2()
+
+  console.log('async1 end')
+
+}
+
+async function async2() {
+
+  console.log('async2')
+
+}
+
+console.log('script start')
+
+setTimeout(function () {
+
+  console.log('settimeout')
+
+})
+
+async1()
+
+new Promise(function (resolve) {
+
+  console.log('promise1')
+
+  resolve()
+
+}).then(function () {
+
+  console.log('promise2')
+
+})
+
+console.log('script end')
+
+```
+
+题目的本质，就是考察setTimeout、promise、async await的实现及执行顺序，以及 JS 的事件循环的相关问题。
+
+答案：
+
+```js
+/*
+script start
+async1 start
+async2
+promise1
+script end
+async1 end
+promise2
+settimeout
+*/
+```
+
+#### 2.29 代码解释题
+
+**参考答案**：
+
+题目：
+
+```js
+var min = Math.min();
+max = Math.max();
+console.log(min < max);
+// 写出执行结果，并解释原因
+
+//console.log(min,max)  //Infinity -Infinity
+```
+
+**答案**
+false
+
+**解析**
+
+- 按常规的思路，这段代码应该输出 true，毕竟最小值小于最大值。但是却输出 false
+- MDN 相关文档是这样解释的
+  - Math.min 的参数是 **0 个或者多个**，如果多个参数很容易理解，返回参数中最小的。**如果没有参数，则返回 Infinity，无穷大。**
+  - 而 Math.max **没有传递参数时返回的是-Infinity**.所以输出 false
+
+##### Math.max()
+
+由于 `max` 是 `Math` 的静态方法，所以应该像这样使用：`Math.max()`，而不是创建的 `Math` 实例的方法（`Math` 不是构造函数）。
+
+如果没有参数，则结果为 - [`Infinity`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Infinity)。
+
+如果有任一参数不能被转换为数值，则结果为 [`NaN`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/NaN)。
+
+##### Math.min()
+
+由于 `min` 是 `Math` 的静态方法，所以应该像这样使用：`Math.min()`，而不是作为你创建的 `Math` 实例的方法（Math 不是构造函数）。
+
+如果没有参数，结果为[`Infinity`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Infinity)。
+
+如果有任一参数不能被转换为数值，结果为 [`NaN`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/NaN)。
+
+------
+
+#### 2.30 代码解析题
+
+**题目**
+
+```js
+var company = {
+    address: 'beijing'
+}
+var yideng = Object.create(company);
+delete yideng.address
+console.log(yideng.address);
+// 写出执行结果，并解释原因
+
+```
+
+**答案**
+beijing
+
+**解析**
+这里的 yideng 通过 prototype 继承了 company的 address。**yideng自己并没有address属性。所以delete操作符的作用是无效的。**
+
+**扩展**
+1.delete使用原则：delete 操作符用来删除一个对象的属性。
+
+2.delete在删除一个不可配置的属性时在严格模式和非严格模式下的区别:
+（1）在严格模式中，如果属性是一个不可配置（non-configurable）属性，删除时会抛出异常;
+（2）非严格模式下返回 false。
+
+3.delete能删除隐式声明的全局变量：这个全局变量其实是global对象(window)的属性
+
+4.delete能删除的：
+（1）可配置对象的属性（2）隐式声明的全局变量 （3）用户定义的属性 （4）在ECMAScript 6中，通过 const 或 let 声明指定的 "temporal dead zone" (TDZ) 对 delete 操作符也会起作用
+
+5.delete不能删除的：
+（2）显式声明的全局变量 （2）内置对象的内置属性 （3）一个对象从原型继承而来的属性
+
+6.delete删除数组元素：
+（1）当你删除一个数组元素时，数组的 length 属性并不会变小，数组元素变成undefined
+（2）当用 delete 操作符删除一个数组元素时，被删除的元素已经完全不属于该数组。
+（3）如果你想让一个数组元素的值变为 undefined 而不是删除它，可以使用 undefined 给其赋值而不是使用 delete 操作符。此时数组元素是在数组中的
+
+7.delete 操作符与直接释放内存（只能通过解除引用来间接释放）没有关系。

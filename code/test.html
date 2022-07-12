@@ -1,24 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
 </head>
-	
-
 <body>
-
-</body>
 <script type="text/javascript">
-const normalObj = {};  //create a normal object
-const nullProtoObj = Object.create(null);  // create an object with "null" prototype
 
-console.log("normalObj is: " + normalObj); // shows "normalObj is: [object Object]"
-// console.log("nullProtoObj is: " + nullProtoObj); // throws error: Cannot convert object to primitive value
+function foo(){
+    console.log(this.a);
+}
 
-console.log(normalObj.valueOf());  //   {}
-console.log(nullProtoObj.valueOf);  //  undefined
+var a=2;
+
+foo();  // 2
+
+var obj={
+    a:3,
+    foo:foo
+};
+
+obj.foo();  // 3
+
 </script>
-
+</body>
 </html>
