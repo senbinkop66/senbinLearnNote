@@ -2961,11 +2961,11 @@ console.log(ans);  //[1, 2, 3, 4, 5, 2, 3, 5 ]
 
 ```
 
-# 难点
+
 
 ----
 
-## 4.1 请问什么是函数防抖？什么是函数节流？
+## 12. 请问什么是函数防抖？什么是函数节流？
 
 **函数防抖**(debounce)：触发高频事件后n秒内，函数只会执行一次，如果n秒内高频事件再次被触发，则重新计算时间
 
@@ -3093,225 +3093,6 @@ function throttle (f, wait) {
 
 
 ----
-
-## 4.2 请问js有哪些数组去重方法？
-
-### **1.for循环（两次嵌套）+ 新数组**
-
-```js
-let nums=[1,2,3,2,4,5,3,2];
-
-function removeRepeatElementOfArray(arr){
-	let flag=true;  //元素是否存在重复
-	const result=new Array();
-	for(let i=0;i<arr.length;i++){
-		flag=true;
-		for(let j=i+1;j<arr.length;j++){
-			if (arr[i]===arr[j]) {
-				//遇到重复的退出该次循环,即保留的是重复元素中最后面的一个
-				flag=false;
-				break;
-			}
-		}
-		if (flag) {  //如果从该元素往后没有重复
-			result.push(arr[i]);
-		}
-	}
-	return result;
-}
-
-console.log(removeRepeatElementOfArray(nums));  // [ 1, 4, 5, 3, 2 ]
-```
-
-涉及到多次遍历，执行时间较长
-
-```js
-let nums=[1,2,3,2,4,5,3,2];
-
-function removeRepeatElementOfArray(arr){
-	if (arr.length===0){
-		return arr;
-	}
-	let flag=true;  //元素是否存在重复
-	const result=new Array();
-	result.push(arr[0]);
-
-	for(let i=1;i<arr.length;i++){
-		flag=true;
-		for(let j=0;j<result.length;j++){
-			if (arr[i]===result[j]) {  //比较新数组中是否存在
-				//存在则退出该次循环
-				flag=false;
-				break;
-			}
-		}
-		if (flag) {  //不存在则加入
-			result.push(arr[i]);
-		}
-	}
-	return result;
-}
-
-console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
-```
-
-### **2.for循环（两次嵌套）+ splice （ES5中最常用）**
-
-双层循环，外层循环元素，内层循环时比较值，值相同时，删除这个值
-
-```js
-let nums=[1,2,3,2,4,5,3,2];
-
-function removeRepeatElementOfArray(arr){
-	if (arr.length===0){
-		return arr;
-	}
-	for(let i=0;i<arr.length;i++){
-		for(let j=i+1;j<arr.length;j++){
-			if (arr[i]===arr[j]) {
-				//遇到重复的删除后一个
-				arr.splice(j,1);
-				j--;  //这个减一很关键
-			}
-		}
-	}
-	return arr;
-}
-
-console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
-```
-
-### **3.for 循环（一次） + indexOf() + 新数组**
-
-对方法1进行改进，对新数组判定是否有该字符，可以调用 Array.prototype.indexOf 函数，执行时间缩减了很多
-
-```js
-let nums=[1,2,3,2,4,5,3,2];
-
-function removeRepeatElementOfArray(arr){
-	if (arr.length===0){
-		return arr;
-	}
-	const result=new Array();
-	for(let i=0;i<arr.length;i++){
-		if (result.indexOf(arr[i])===-1) {
-			result.push(arr[i]);
-		}
-	}
-	return result;
-}
-
-console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
-```
-
-### **4.sort 排序后去重**
-
-利用sort()排序方法，然后根据排序后的结果进行遍历及相邻元素对比
-
-```js
-let nums=[1,2,3,2,4,5,3,2];
-
-function removeRepeatElementOfArray(arr){
-	if (arr.length===0){
-		return arr;
-	}
-	arr=arr.sort();
-	const result=new Array();
-	result.push(arr[0])
-	
-	for(let i=1;i<arr.length;i++){
-		if (arr[i]!==arr[i-1]) {
-			result.push(arr[i]);
-		}
-	}
-	return result;
-}
-
-console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
-```
-
-### **5.Map哈希映射**
-
-利用 ES6 中的 Map 集合替代前面方法中的新数组，调用Map.has替代indexOf()，Map.set 替代push()，执行速度比前面的方法都要快
-
-```js
-let nums=[1,2,3,2,4,5,3,2];
-
-function removeRepeatElementOfArray(arr){
-	if (arr.length===0){
-		return arr;
-	}
-	let m=new Map();
-	const result=new Array();
-
-	for(let i=0;i<arr.length;i++){
-		if (m.has(arr[i])) {
-			//map.set(arr[i], true);
-			m.set(arr[i],m.get(arr[i])+1);  //可以查看重复元素及其次数
-		}else{
-			//map.set(arr[i], false);   // 如果没有该key值
-			m.set(arr[i],1);
-			result.push(arr[i]);
-		}
-	}
-	console.log(m);  //Map(5) { 1 => 1, 2 => 3, 3 => 2, 4 => 1, 5 => 1 }
-	return result;
-}
-
-console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
-```
-
-### **6.new Set() + Array.from()**
-
-利用 ES6 中的 Set 集合，Set 集合是一种无重复元素的列表，new Set(arr)会自动剔除重复元素，Array.from(...)将 Set 集合转换为数组
-
-```js
-let nums=[1,2,3,2,4,5,3,2];
-
-function removeRepeatElementOfArray(arr){
-	return Array.from(new Set(arr));
-}
-
-console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
-```
-
-### **7.new Set() + …(展开运算符)**
-
-思路与方法6一致，只是将 Set 集合转换为数组的实现方法从 Array.from(...) 改成了 ...(展开运算符)
-
-```js
-let nums=[1,2,3,2,4,5,3,2];
-
-function removeRepeatElementOfArray(arr){
-	return [...new Set(arr)];
-}
-
-console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
-```
-
-### **8.for循环(一次) + 新对象**
-
-将创建一个新数组，**改成创建一个新对象**，判定对象的 key 值，存在跳过，不存在则将字符以对象的 key 值存储
-
-执行时间：所有的方法中最短的，**因为js对象的属性是基于Hash表实现**，对属性进行访问的时间复杂度可以达到O(1)，故此方法的时间复杂度为O(n) ；上述一般双重循环时间复杂度为O(n^2)
-
-```js
-let nums=[1,2,3,2,4,5,3,2];
-
-function removeRepeatElementOfArray(arr){
-	let obj={};
-	for (let i=0; i < arr.length; i++){
-		if (!obj[arr[i]]) {
-			obj[arr[i]]=1;
-		}
-	}
-	return Object.keys(obj);
-}
-
-console.log(removeRepeatElementOfArray(nums));  // [ '1', '2', '3', '4', '5' ]
-```
-
----
 
 ## 4.3 请问你了解js事件循环机制（Event Loop）吗？
 
@@ -6461,7 +6242,226 @@ console.log(unique(arr));
 // {}没有去重
 ```
 
+## 4.2 请问js有哪些数组去重方法？
 
+### **1.for循环（两次嵌套）+ 新数组**
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	let flag=true;  //元素是否存在重复
+	const result=new Array();
+	for(let i=0;i<arr.length;i++){
+		flag=true;
+		for(let j=i+1;j<arr.length;j++){
+			if (arr[i]===arr[j]) {
+				//遇到重复的退出该次循环,即保留的是重复元素中最后面的一个
+				flag=false;
+				break;
+			}
+		}
+		if (flag) {  //如果从该元素往后没有重复
+			result.push(arr[i]);
+		}
+	}
+	return result;
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 4, 5, 3, 2 ]
+```
+
+涉及到多次遍历，执行时间较长
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	if (arr.length===0){
+		return arr;
+	}
+	let flag=true;  //元素是否存在重复
+	const result=new Array();
+	result.push(arr[0]);
+
+	for(let i=1;i<arr.length;i++){
+		flag=true;
+		for(let j=0;j<result.length;j++){
+			if (arr[i]===result[j]) {  //比较新数组中是否存在
+				//存在则退出该次循环
+				flag=false;
+				break;
+			}
+		}
+		if (flag) {  //不存在则加入
+			result.push(arr[i]);
+		}
+	}
+	return result;
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **2.for循环（两次嵌套）+ splice （ES5中最常用）**
+
+双层循环，外层循环元素，内层循环时比较值，值相同时，删除这个值
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	if (arr.length===0){
+		return arr;
+	}
+	for(let i=0;i<arr.length;i++){
+		for(let j=i+1;j<arr.length;j++){
+			if (arr[i]===arr[j]) {
+				//遇到重复的删除后一个
+				arr.splice(j,1);
+				j--;  //这个减一很关键
+			}
+		}
+	}
+	return arr;
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **3.for 循环（一次） + indexOf() + 新数组**
+
+对方法1进行改进，对新数组判定是否有该字符，可以调用 Array.prototype.indexOf 函数，执行时间缩减了很多
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	if (arr.length===0){
+		return arr;
+	}
+	const result=new Array();
+	for(let i=0;i<arr.length;i++){
+		if (result.indexOf(arr[i])===-1) {
+			result.push(arr[i]);
+		}
+	}
+	return result;
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **4.sort 排序后去重**
+
+利用sort()排序方法，然后根据排序后的结果进行遍历及相邻元素对比
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	if (arr.length===0){
+		return arr;
+	}
+	arr=arr.sort();
+	const result=new Array();
+	result.push(arr[0])
+	
+	for(let i=1;i<arr.length;i++){
+		if (arr[i]!==arr[i-1]) {
+			result.push(arr[i]);
+		}
+	}
+	return result;
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **5.Map哈希映射**
+
+利用 ES6 中的 Map 集合替代前面方法中的新数组，调用Map.has替代indexOf()，Map.set 替代push()，执行速度比前面的方法都要快
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	if (arr.length===0){
+		return arr;
+	}
+	let m=new Map();
+	const result=new Array();
+
+	for(let i=0;i<arr.length;i++){
+		if (m.has(arr[i])) {
+			//map.set(arr[i], true);
+			m.set(arr[i],m.get(arr[i])+1);  //可以查看重复元素及其次数
+		}else{
+			//map.set(arr[i], false);   // 如果没有该key值
+			m.set(arr[i],1);
+			result.push(arr[i]);
+		}
+	}
+	console.log(m);  //Map(5) { 1 => 1, 2 => 3, 3 => 2, 4 => 1, 5 => 1 }
+	return result;
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **6.new Set() + Array.from()**
+
+利用 ES6 中的 Set 集合，Set 集合是一种无重复元素的列表，new Set(arr)会自动剔除重复元素，Array.from(...)将 Set 集合转换为数组
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	return Array.from(new Set(arr));
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **7.new Set() + …(展开运算符)**
+
+思路与方法6一致，只是将 Set 集合转换为数组的实现方法从 Array.from(...) 改成了 ...(展开运算符)
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	return [...new Set(arr)];
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+```
+
+### **8.for循环(一次) + 新对象**
+
+将创建一个新数组，**改成创建一个新对象**，判定对象的 key 值，存在跳过，不存在则将字符以对象的 key 值存储
+
+执行时间：所有的方法中最短的，**因为js对象的属性是基于Hash表实现**，对属性进行访问的时间复杂度可以达到O(1)，故此方法的时间复杂度为O(n) ；上述一般双重循环时间复杂度为O(n^2)
+
+```js
+let nums=[1,2,3,2,4,5,3,2];
+
+function removeRepeatElementOfArray(arr){
+	let obj={};
+	for (let i=0; i < arr.length; i++){
+		if (!obj[arr[i]]) {
+			obj[arr[i]]=1;
+		}
+	}
+	return Object.keys(obj);
+}
+
+console.log(removeRepeatElementOfArray(nums));  // [ '1', '2', '3', '4', '5' ]
+```
+
+---
+
+## 
 
 ----
 
@@ -9066,3 +9066,44 @@ beijing
 （3）如果你想让一个数组元素的值变为 undefined 而不是删除它，可以使用 undefined 给其赋值而不是使用 delete 操作符。此时数组元素是在数组中的
 
 7.delete 操作符与直接释放内存（只能通过解除引用来间接释放）没有关系。
+
+
+
+----
+
+函数，原型
+
+```js
+function Foo() {
+    getName = function() {
+        console.log("1")
+    }
+    return this;
+}
+Foo.getName = function() {
+    console.log("2");
+}
+Foo.prototype.getName = function() {
+    console.log("3");
+}
+
+var getName = function() {
+    console.log("4")
+}
+
+function getName() {
+    console.log("5");
+}
+
+Foo.getName();  // 2
+
+getName();  // 4
+
+new Foo.getName();  // 2
+
+new Foo().getName();  // 3
+
+new new Foo().getName();  // 3
+
+```
+
