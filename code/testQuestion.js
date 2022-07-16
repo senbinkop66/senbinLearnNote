@@ -1,14 +1,14 @@
-const obj = {
-  prop: 42,
-};
+function countPI(n) {
+    let pi = 0;
+    for (let i = 1; i <= n; i++) {
+        if (i % 2 === 0) {
+            pi -= 1/(i * 2 - 1)
+        } else {
+            pi += 1/(i * 2 - 1)
+        }
+    }
+    return pi * 4;
+}
 
-// Object.seal(obj);
-Object.defineProperty(obj, "b", {
-    value: 20,
-});
-
-obj.b = 30;
-
-obj.aa = 10;
-
-console.log(Object.getOwnPropertyDescriptors(obj));
+let PI = countPI(100000);
+console.log(PI);

@@ -62,6 +62,52 @@ var insert = function(head, insertVal) {
 
 ---
 
+## 剑指 Offer II 041. 滑动窗口的平均值
+
+给定一个整数数据流和一个窗口大小，根据该滑动窗口的大小，计算滑动窗口里所有数字的平均值。
+
+实现 MovingAverage 类：
+
+MovingAverage(int size) 用窗口大小 size 初始化对象。
+double next(int val) 成员函数 next 每次调用的时候都会往滑动窗口增加一个整数，请计算并返回数据流中最后 size 个值的移动平均值，即滑动窗口里所有数字的平均值。
+
+
+
+```js
+/**
+ * Initialize your data structure here.
+ * @param {number} size
+ */
+var MovingAverage = function(size) {
+	this.queue = [];
+    this.size = size;
+    this.sum = 0;
+};
+
+/** 
+ * @param {number} val
+ * @return {number}
+ */
+MovingAverage.prototype.next = function(val) {
+	if (this.queue.length === this.size) {
+        this.sum -= this.queue.shift();
+    }
+    this.queue.push(val);
+    this.sum += val;
+    return this.sum / this.queue.length;
+};
+
+/**
+ * Your MovingAverage object will be instantiated and called as such:
+ * var obj = new MovingAverage(size)
+ * var param_1 = obj.next(val)
+ */
+```
+
+
+
+----
+
 ## 剑指 Offer II 091. 粉刷房子
 
 假如有一排房子，共 n 个，每个房子可以被粉刷成红色、蓝色或者绿色这三种颜色中的一种，你需要粉刷所有的房子并且使其相邻的两个房子颜色不能相同。
