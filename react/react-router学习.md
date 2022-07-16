@@ -2063,3 +2063,186 @@ let [urlSearchParams] = useSearchParams();
 8. 历史[会](https://reactrouter.com/docs/en/v6/getting-started/concepts#history)更改 URL 并通知`<BrowserRouter>`.
 
 9. `<BrowserRouter>`重新渲染，从 (2) 开始！
+
+----
+
+# 路由器
+
+
+
+# `<BrowserRouter>`
+
+```js
+declare function BrowserRouter(
+  props: BrowserRouterProps
+): React.ReactElement;
+
+interface BrowserRouterProps {
+  basename?: string;
+  children?: React.ReactNode;
+  window?: Window;
+}
+```
+
+`<BrowserRouter>`是在 Web 浏览器中运行 React Router 的推荐界面。A`<BrowserRouter>`使用干净的 URL 将当前位置存储在浏览器的地址栏中，并使用浏览器的内置历史堆栈进行导航。
+
+`<BrowserRouter window>`默认使用当前[文档的`defaultView`](https://developer.mozilla.org/en-US/docs/Web/API/Document/defaultView)，但它也可以用于跟踪对另一个窗口 URL 的更改`<iframe>`，例如在 中。
+
+```jsx
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+import { BrowserRouter } from "react-router-dom";
+
+ReactDOM.render(
+  <BrowserRouter>
+    {/* The rest of your app goes here */}
+  </BrowserRouter>,
+  root
+);
+```
+
+# `<HashRouter>`
+
+```js
+declare function HashRouter(
+  props: HashRouterProps
+): React.ReactElement;
+
+interface HashRouterProps {
+  basename?: string;
+  children?: React.ReactNode;
+  window?: Window;
+}
+```
+
+`<HashRouter>`当 URL 由于某种原因不应该（或不能）发送到服务器时，用于 Web 浏览器。这可能发生在您无法完全控制服务器的某些共享托管方案中。在这些情况下，`<HashRouter>`可以将当前位置存储在`hash`当前 URL 的一部分中，因此它永远不会发送到服务器。
+
+`<HashRouter window>`默认使用当前[文档的`defaultView`](https://developer.mozilla.org/en-US/docs/Web/API/Document/defaultView)，但它也可以用于跟踪对另一个窗口 URL 的更改`<iframe>`，例如在 中。
+
+```jsx
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+import { HashRouter } from "react-router-dom";
+
+ReactDOM.render(
+  <HashRouter>
+    {/* The rest of your app goes here */}
+  </HashRouter>,
+  root
+);
+```
+
+> 我们强烈建议您不要使用`HashRouter`，除非您绝对必须这样做。
+
+# `<unstable_HistoryRouter>`
+
+`<unstable_HistoryRouter>`将[`history`](https://github.com/remix-run/history)库的一个实例作为道具。这允许您在非 React 上下文中使用该实例或将其用作全局变量。
+
+```jsx
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+import { unstable_HistoryRouter as HistoryRouter } from "react-router-dom";
+import { createBrowserHistory } from "history";
+
+const history = createBrowserHistory({ window });
+
+ReactDOM.render(
+  <HistoryRouter history={history}>
+    {/* The rest of your app goes here */}
+  </HistoryRouter>,
+  root
+);
+```
+
+> 这个 API 目前的前缀是`unstable_`因为你可能会无意中将两个版本的`history`库添加到你的应用程序中，一个是你添加到你的 package.json 中的，另一个是 React Router 内部使用的任何版本。如果您的工具允许，建议不要添加`history`为直接依赖项，而是依赖`react-router`包中的嵌套依赖项。一旦我们有了检测不匹配版本的机制，这个 API 就会删除它的`unstable_`前缀。
+
+# `<MemoryRouter>`
+
+`<MemoryRouter>`在内部将其位置存储在一个数组中。与`<BrowserHistory>`and`<HashHistory>`不同，它不依赖于外部源，例如浏览器中的历史堆栈。这使其非常适合需要完全控制历史堆栈的场景，例如测试。
+
+- `<MemoryRouter initialEntries>`默认为`["/"]`（根`/`URL 中的单个条目）
+- `<MemoryRouter initialIndex>`默认为最后一个索引`initialEntries`
+
+> **小费：**
+>
+> 大多数 React Router 的测试都是使用 a`<MemoryRouter>`作为事实来源编写的，因此您只需 [浏览我们的测试](https://github.com/remix-run/react-router/tree/main/packages/react-router/__tests__)即可看到一些使用它的好例子。
+
+```jsx
+import * as React from "react";
+import { create } from "react-test-renderer";
+import {
+  MemoryRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
+
+describe("My app", () => {
+  it("renders correctly", () => {
+    let renderer = create(
+      <MemoryRouter initialEntries={["/users/mjackson"]}>
+        <Routes>
+          <Route path="users" element={<Users />}>
+            <Route path=":id" element={<UserProfile />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(renderer.toJSON()).toMatchSnapshot();
+  });
+});
+```
+
+# `<NativeRouter>`
+
+`<NativeRouter>`[是在React Native](https://reactnative.dev/)应用程序中运行 React Router 的推荐接口。
+
+- `<NativeRouter initialEntries>`默认为`["/"]`（根`/`URL 中的单个条目）
+- `<NativeRouter initialIndex>`默认为最后一个索引`initialEntries`
+
+```jsx
+import * as React from "react";
+import { NativeRouter } from "react-router-native";
+
+function App() {
+  return (
+    <NativeRouter>
+      {/* The rest of your app goes here */}
+    </NativeRouter>
+  );
+}
+```
+
+# `<Router>`
+
+`<Router>``<BrowserRouter>`是所有路由器组件（如和）共享的低级接口`<StaticRouter>`。就 React 而言，`<Router>`它是一个[上下文提供者](https://reactjs.org/docs/context.html#contextprovider)，为应用程序的其余部分提供路由信息。
+
+您可能永远不需要`<Router>`手动渲染。相反，您应该根据您的环境使用更高级别的路由器之一。在给定的应用程序中，您只需要一个路由器。
+
+该`<Router basename>`道具可用于使您的应用程序中的所有路由和链接相对于它们都共享的 URL 路径名的“基本”部分。这在使用 React Router 仅渲染较大应用程序的一部分或当您的应用程序具有多个入口点时很有用。基本名称不区分大小写。
+
+# `<StaticRouter>`
+
+`<StaticRouter>`用于在[node](https://nodejs.org/)中渲染 React Router Web 应用程序。`location`通过道具提供当前位置。
+
+- `<StaticRouter location>`默认为`"/"`
+
+```jsx
+import * as React from "react";
+import * as ReactDOMServer from "react-dom/server";
+import { StaticRouter } from "react-router-dom/server";
+import http from "http";
+
+function requestHandler(req, res) {
+  let html = ReactDOMServer.renderToString(
+    <StaticRouter location={req.url}>
+      {/* The rest of your app goes here */}
+    </StaticRouter>
+  );
+
+  res.write(html);
+  res.end();
+}
+
+http.createServer(requestHandler).listen(3000);
+```
