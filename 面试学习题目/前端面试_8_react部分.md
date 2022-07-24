@@ -623,7 +623,7 @@ componentDidMount() 会在组件挂载后（插入 DOM 树中）立即调用。�
 
 这个方法是比较适合添加订阅的地方。如果添加了订阅，请不要忘记在 componentWillUnmount() 里取消订阅
 
-**你可以在 componentDidMount() 里直接调用 setState()。它将触发额外渲染**，但此渲染会发生在浏览器更新屏幕之前。如此保证了即使在 render() 两次调用的情况下，用户也不会看到中间状态。请谨慎使用该模式，因为它会导致性能问题。通常，你应该在 constructor() 中初始化 state。如果你的渲染依赖于 DOM 节点的大小或位置，比如实现 modals 和 tooltips 等情况下，你可以使用此方式处理。
+**你可以在 componentDidMount() 里直接调用 setState()。它将触发额外渲染**，但此渲染会发生在浏览器更新屏幕之前。如此保证了即使在 render() 两次调用的情况下，用户也不会看到中间状态。请谨慎使用该模式，因为它会导致性能问题。通常，你应该在 constructor() 中初始化 state。**如果你的渲染依赖于 DOM 节点的大小或位置，比如实现 modals 和 tooltips 等情况下，你可以使用此方式处理。**
 
 
 
@@ -692,7 +692,7 @@ getDerivedStateFromProps 会**在调用 render 方法之前调用**，并且在�
 
 ### getSnapshotBeforeUpdate()
 
-getSnapshotBeforeUpdate() **在最近一次渲染输出（提交到 DOM 节点）之前调用**。它使得组件能在发生更改之前从 DOM 中捕获一些信息（例如，滚动位置）。此生命周期方法的**任何返回值**将作为参数传递给 componentDidUpdate()。
+getSnapshotBeforeUpdate() **在最近一次渲染输出（提交到 DOM 节点）之前调用**。它使得组件**能在发生更改之前从 DOM 中捕获一些信息（例如，滚动位置）**。此生命周期方法的**任何返回值**将作为参数传递给 componentDidUpdate()。
 
 此用法并不常见，但它可能出现在 UI 处理中，如需要以特殊方式处理滚动位置的聊天线程等。
 
@@ -759,7 +759,7 @@ React 的开发和生产构建版本在 componentDidCatch() 的方式上有轻�
 
 首先，`render`函数在`react`中有两种形式：
 
-在类组件中，指的是`render`方法：
+在类组件中，**指的是`render`方法：**
 
 ```jsx
 class Foo extends React.Component {
@@ -769,7 +769,7 @@ class Foo extends React.Component {
 }
 ```
 
-在函数组件中，指的是函数组件本身：
+在函数组件中，**指的是函数组件本身：**
 
 ```jsx
 function Foo() {
@@ -857,7 +857,7 @@ class Foo extends React.Component {
 }
 ```
 
-点击按钮，则调用`setState`方法，无论`count`如何发生变化，控制台都会输出`Foo render`，证明`render`执行了
+点击按钮，则调用`setState`方法，**无论`count`如何发生变化，控制台都会输出`Foo render`**，证明`render`执行了
 
 - 函数组件通过`useState hook`修改状态
 
@@ -881,7 +881,7 @@ function Foo() {
 }
 ```
 
-函数组件通过`useState`这种形式更新数据，当数组的值不发生改变了，就不会触发`render`
+函数组件通过`useState`这种形式更新数据，**当数组的值不发生改变了，就不会触发`render`**
 
 - 类组件重新渲染
 
@@ -948,7 +948,7 @@ render`函数里面可以编写`JSX`，转化成`createElement`这种形式，�
 
 在` React` 中，**类组件只要执行了 `setState` 方法，就一定会触发 `render` 函数执行**，函数组件使用`useState`更改状态不一定导致重新`render`
 
-组件的` props` 改变了，不一定触发 `render` 函数的执行，但是如果 `props` 的值来自于父组件或者祖先组件的 `state`。在这种情况下，父组件或者祖先组件的 `state` 发生了改变，就会导致子组件的重新渲染
+**组件的` props` 改变了，不一定触发 `render` 函数的执行**，但是如果 `props` 的值来自于父组件或者祖先组件的 `state`。在这种情况下，父组件或者祖先组件的 `state` 发生了改变，就会导致子组件的重新渲染
 
 所以，一旦执行了`setState`就会执行`render`方法，**`useState` 会判断当前值有无发生改变确定是否执行`render`方法**，一旦父组件发生渲染，子组件也会渲染
 
