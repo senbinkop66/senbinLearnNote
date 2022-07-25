@@ -1533,6 +1533,8 @@ Already up to date.
 
 ```bash
 git pull
+
+git pull origin master  #合并远程分支到本地
 ```
 
 该命令就是在执行 git fetch 之后紧接着执行 git merge 远程分支到你所在的任意分支。

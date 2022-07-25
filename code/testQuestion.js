@@ -1,40 +1,63 @@
-<<<<<<< HEAD
 /**
- * @param {number[]} distance
- * @param {number} start
- * @param {number} destination
- * @return {number}
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
  */
-var distanceBetweenBusStops = function(distance, start, destination) {
-    if (start > destination) {
-        [start, destination] = [destination, start]
-    }
-    let sum1 = 0, sum2 = 0;
-    for (let i = 0; i < distance.length; i++) {
-        if (i >= start && i < destination) {
-            sum1 += distance[i];
-        } else {
-            sum2 += distance[i];
+/**
+ * @param {TreeNode} root
+ */
+var CBTInserter = function(root) {
+    this.candidate = [];
+    this.root = root;
+
+    const queue = [];
+    queue.push(root);
+
+    while (queue.length) {
+        const node = queue.shift();
+        if (node.left) {
+            queue.push(node.left);
+        }
+        if (node.right) {
+            queue.push(node.right);
+        }
+        if (!(node.left && node.right)) {
+            this.candidate.push(node);
         }
     }
-    return Math.min(sum1, sum2);
 };
 
-let distance = [1,2,3,4], start = 0, destination = 1;
-console.log(distanceBetweenBusStops(distance, start, destination));
-=======
-function countPI(n) {
-    let pi = 0;
-    for (let i = 1; i <= n; i++) {
-        if (i % 2 === 0) {
-            pi -= 1/(i * 2 - 1)
-        } else {
-            pi += 1/(i * 2 - 1)
-        }
+/** 
+ * @param {number} val
+ * @return {number}
+ */
+CBTInserter.prototype.insert = function(val) {
+    const child = new TreeNode(val);
+    const node = this.candidate[0];
+    let ret = node.val;
+    if (!node.left) {
+        node.left = child;
+    } else {
+        node.right = child;
+        this.candidate.shift();
     }
-    return pi * 4;
-}
+    this.candidate.push(child);
+    return ret;
+};
 
-let PI = countPI(100000);
-console.log(PI);
->>>>>>> 63569ce0d785f2e04480a49bd71751af1f3b9b1c
+/**
+ * @return {TreeNode}
+ */
+CBTInserter.prototype.get_root = function() {
+    return this.root;
+};
+
+/**
+ * Your CBTInserter object will be instantiated and called as such:
+ * var obj = new CBTInserter(root)
+ * var param_1 = obj.insert(val)
+ * var param_2 = obj.get_root()
+ */
