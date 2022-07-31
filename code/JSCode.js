@@ -1,1 +1,6 @@
-console.log(Math.max(...[1, 3, 4]))
+function foo() {
+    console.error('foo');
+}
+
+process.nextTick(foo);
+console.error('bar');

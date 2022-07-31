@@ -1,17 +1,39 @@
 /**
- * @param {number} m
- * @param {number} n
- * @param {number[][]} ops
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
  * @return {number}
  */
-var maxCount = function(m, n, ops) {
-    let mina = m, minb = n;
-    for (const op of ops) {
-        mina = Math.min(mina, op[0]);
-        minb = Math.min(minb, op[1]);
+var maxLevelSum = function(root) {
+    let ans = 1;
+    let maxSum = root.val;
+    let arr = [root];
+    let deep = 0;
+    while (arr.length) {
+        let len = arr.length;
+        let sum = 0;
+        while(len > 0) {
+            let node = arr.shift();
+            if (node.left !== null) {
+                arr.push(node.left);
+            }
+            if (node.right !== null) {
+                arr.push(node.right);
+            }
+            len--;
+            sum += node.val;
+        }
+        deep++;
+        if (sum > maxSum) {
+            ans = deep;
+            maxSum = sum;
+        }
     }
-    return mina * minb;
+    return ans;
 };
-
-let m = 3, n = 3, ops = [[2,2],[3,3]];
-console.log(maxCount(m, n, ops));
