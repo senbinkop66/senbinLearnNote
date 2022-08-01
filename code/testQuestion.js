@@ -1,39 +1,32 @@
 /**
- * Definition for a binary tree node.
- * function TreeNode(val, left, right) {
- *     this.val = (val===undefined ? 0 : val)
- *     this.left = (left===undefined ? null : left)
- *     this.right = (right===undefined ? null : right)
- * }
+ * @param {number[]} flowerbed
+ * @param {number} n
+ * @return {boolean}
  */
-/**
- * @param {TreeNode} root
- * @return {number}
- */
-var maxLevelSum = function(root) {
-    let ans = 1;
-    let maxSum = root.val;
-    let arr = [root];
-    let deep = 0;
-    while (arr.length) {
-        let len = arr.length;
-        let sum = 0;
-        while(len > 0) {
-            let node = arr.shift();
-            if (node.left !== null) {
-                arr.push(node.left);
+var canPlaceFlowers = function(flowerbed, n) {
+    let count = 0;
+    const m = flowerbed.length;
+    let prev = -1;
+    for (let i = 0; i < m; i++) {
+        if (flowerbed[i] === 1) {
+            if (prev < 0) {
+                count += Math.floor(i / 2);
+            } else {
+                count += Math.floor((i - prev - 2) / 2);
             }
-            if (node.right !== null) {
-                arr.push(node.right);
+            if (count >= n) {
+                return true;
             }
-            len--;
-            sum += node.val;
-        }
-        deep++;
-        if (sum > maxSum) {
-            ans = deep;
-            maxSum = sum;
+            prev = i;
         }
     }
-    return ans;
+    if (prev < 0) {
+        count += (m + 1) / 2;
+    } else {
+        count += (m - prev - 1) / 2;
+    }
+    return count >= n;
 };
+
+let flowerbed = [1,0,0,0,1], n = 1;
+console.log(canPlaceFlowers(flowerbed, n));
