@@ -1,6 +1,6 @@
-function foo() {
-    console.error('foo');
-}
+let arr1 = ['a', 'b'];
+let arr2 = ['c', 'd'];
+let arr3 = ['e', 'f'];
 
-process.nextTick(foo);
-console.error('bar');
+let arr = [...arr1, ...arr2, ...arr3];
+console.log(arr);  // 
