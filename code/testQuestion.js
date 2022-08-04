@@ -1,20 +1,10 @@
-/**
- * @param {string} s
- * @param {number} k
- * @return {string}
- */
-var orderlyQueue = function(s, k) {
-    if (k === 1) {
-        let ans = s;
-        for (let i = 0; i < s.length - 1; ++i) {
-            const n = s.length;
-            s = s.substring(1, n) + s[0];
-            ans = ans < s ? ans : s;
-        }
-        return ans;
-    }
-    return [...s].sort().join("");
-};
+function Person(name) {
+  if (new.target === Person) {
+    this.name = name;
+  } else {
+    throw new Error('必须使用 new 命令生成实例');
+  }
+}
 
-let s =  "baaca", k = 3;
-console.log(orderlyQueue(s, k));
+let obj = {}
+new Person.call(obj, 'red') // 此时使用非new的调用方式就会报错
