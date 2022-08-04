@@ -89,3 +89,15 @@ print	println	real	recover	string	true	uint	uint8	uintptr`
 ----
 
 ## Go 程序的基本结构和要素
+
+```go
+//hello_world.go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("hello, world")
+}
+```
+
