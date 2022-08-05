@@ -71,6 +71,116 @@ console.log(nums)
 
 
 
+---
+
+## 回溯法
+
+
+
+----
+
+## 3. 数组中重复的数字
+
+找出数组中重复的数字。
+
+
+在一个长度为 n 的数组 nums 里的所有数字都在 0～n-1 的范围内。数组中某些数字是重复的，但不知道有几个数字重复了，也不知道每个数字重复了几次。请找出数组中任意一个重复的数字。
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var findRepeatNumber = function(nums) {
+    let set = new Set();
+    for (let i = 0; i < nums.length; i++) {
+        if(set.has(nums[i])) {
+            return nums[i];
+        }
+        set.add(nums[i]);
+    }
+};
+
+let nums = [2, 3, 1, 0, 2, 5, 3];
+console.log(findRepeatNumber(nums));
+```
+
+
+
+---
+
+## 4. 二维数组中的查找
+
+在一个 n * m 的二维数组中，每一行都按照**从左到右递增**的顺序排序，**每一列都按照从上到下递增的顺序排序**。请完成一个高效的函数，输入这样的一个二维数组和一个整数，判断数组中是否含有该整数。
+
+**线性查找**
+由于给定的二维数组具备每行从左到右递增以及每列从上到下递增的特点，当访问到一个元素时，可以排除数组中的部分元素。
+
+从二维数组的右上角开始查找。如果当前元素等于目标值，则返回 true。如果当前元素大于目标值，则移到左边一列。如果当前元素小于目标值，则移到下边一行。
+
+可以证明这种方法不会错过目标值。如果当前元素大于目标值，说明当前元素的下边的所有元素都一定大于目标值，因此往下查找不可能找到目标值，往左查找可能找到目标值。如果当前元素小于目标值，说明当前元素的左边的所有元素都一定小于目标值，因此往左查找不可能找到目标值，往下查找可能找到目标值。
+
+```js
+/**
+ * @param {number[][]} matrix
+ * @param {number} target
+ * @return {boolean}
+ */
+var findNumberIn2DArray = function(matrix, target) {
+    if (matrix === null || matrix.length === 0 || matrix[0].length === 0) {
+        return false;
+    }
+    let m = matrix.length, n = matrix[0].length;
+    let row = 0, col = n - 1;
+    while (row < m && col >= 0) {
+        let num = matrix[row][col];
+        if (num === target) {
+            return true;
+        } else if (num > target) {
+            col--;
+        } else {
+            row++;
+        }
+    }
+    return false;
+};
+
+let nums = [
+  [1,   4,  7, 11, 15],
+  [2,   5,  8, 12, 19],
+  [3,   6,  9, 16, 22],
+  [10, 13, 14, 17, 24],
+  [18, 21, 23, 26, 30]
+];
+let target = 5;
+console.log(findNumberIn2DArray(nums, target));
+```
+
+
+
+----
+
+## 5. 替换空格
+
+请实现一个函数，把字符串 s 中的每个空格替换成"%20"。
+
+```js
+/**
+ * @param {string} s
+ * @return {string}
+ */
+var replaceSpace = function(s) {
+    return s.replace(/\s/g, "%20")
+};
+
+let s = "We are happy.";
+console.log(replaceSpace(s));
+```
+
+
+
+----
+
 ## 9. 两个栈实现队列
 
  ```js
@@ -144,44 +254,145 @@ console.log(nums)
 
 ## 11. 旋转数组的最小数字
 
+把一个数组最开始的若干个元素搬到数组的末尾，我们称之为数组的旋转。
+
+给你一个可能存在 重复 元素值的数组 numbers ，它原来是一个升序排列的数组，并按上述情形进行了一次旋转。请返回旋转数组的最小元素。例如，数组 [3,4,5,1,2] 为 [1,2,3,4,5] 的一次旋转，该数组的最小值为 1。  
+
+注意，数组 [a[0], a[1], a[2], ..., a[n-1]] 旋转一次 的结果为数组 [a[n-1], a[0], a[1], a[2], ..., a[n-2]] 。
+
+**二分查找**
+
 ```js
-const minNums = (nums, n) => {
+/**
+ * @param {number[]} numbers
+ * @return {number}
+ */
+var minArray = function(numbers) {
+    let n = numbers.length;
     let left = 0;
     let right = n - 1;
     let mid = 0;
-    while(nums[left] >= nums[right]) {
+    while(numbers[left] >= numbers[right]) {
         if (right - left === 1) {
             mid = right;
             break;
         }
         mid = left + Math.floor((right - left) / 2);
         // 如果left,right, mid指向的三个数字相等，只能顺序查找
-        if (nums[left] === nums[right] && nums[left] === nums[mid]) {
-            return minInOrder(nums, left, right);
+        if (numbers[left] === numbers[right] && numbers[left] === numbers[mid]) {
+            return minInOrder(numbers, left, right);
         }
 
-        if (nums[mid] >= nums[left]) {
+        if (numbers[mid] >= numbers[left]) {
             left = mid;
-        } else if (nums[mid] <= nums[right]) {
+        } else if (numbers[mid] <= numbers[right]) {
             right = mid;
         }
     }
-    return nums[mid];
+    return numbers[mid];
 }
 
-const minInOrder = (nums, left, right) => {
-    let result = nums[left];
+const minInOrder = (numbers, left, right) => {
+    let result = numbers[left];
     for (let i = left + 1; i <= right; ++i) {
-        if (result > nums[i]) {
-            result = nums[i];
+        if (result > numbers[i]) {
+            result = numbers[i];
         }
     }
     return result;
 }
 
-let nums = [1, 0, 1, 1, 1];
-// let nums = [3, 4, 5, 1, 2];
-console.log(minNums(nums, 5));
+let numbers = [1, 0, 1, 1, 1];
+// let numbers = [3, 4, 5, 1, 2];
+console.log(minArray(numbers, 5));
+```
+
+```js
+var minArray = function(numbers) {
+    let low = 0;
+    let high = numbers.length - 1;
+    while (low < high) {
+        const pivot = low + Math.floor((high - low) / 2);
+        if (numbers[pivot] < numbers[high]) {
+            high = pivot;
+        } else if (numbers[pivot] > numbers[high]) {
+            low = pivot + 1;
+        } else {
+            high -= 1;
+        }
+    }
+    return numbers[low];
+};
+
+```
+
+
+
+---
+
+## 12. 矩阵中的路径
+
+给定一个 m x n 二维字符网格 board 和一个字符串单词 word 。如果 word 存在于网格中，返回 true ；否则，返回 false 。
+
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。
+
+例如，在下面的 3×4 的矩阵中包含单词 "ABCCED"（单词中的字母已标出）。
+
+![img](https://assets.leetcode.com/uploads/2020/11/04/word2.jpg)
+
+```js
+//回溯法
+
+/**
+ * @param {character[][]} board
+ * @param {string} word
+ * @return {boolean}
+ */
+var exist = function(board, word) {
+    const h = board.length, w = board[0].length;
+    const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+    const visited = new Array(h);
+    for (let i = 0; i < h; i++) {
+        visited[i] = new Array(w).fill(false);
+    }
+
+    const check = (i, j, s, k) => {
+        if (board[i][j] !== s.charAt(k)) {
+            return false;
+        } else if (k === s.length - 1) {
+            return true;
+        }
+        visited[i][j] = true;
+        let result = false;
+        for (const [dx, dy] of directions) {
+            let x = i + dx, y = j + dy;
+            if (x >= 0 && x < h && y >= 0 && y < w) {
+                if (!visited[x][y]) {
+                    const flag = check(x, y, s, k + 1);
+                    if (flag) {
+                        result = true;
+                        break;
+                    }
+                }
+            }
+        }
+        visited[i][j] = false;
+        return result;
+    }
+    for (let i = 0; i < h; i++){
+        for (let j = 0; j < w; j++) {
+            const flag = check(i, j, word, 0);
+            if (flag) {
+                return true;
+            }
+        }
+    }
+    return false;
+};
+
+let board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCCED";
+console.log(exist(board, word));
+
 ```
 
 
