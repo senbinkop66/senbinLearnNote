@@ -1,8 +1,194 @@
+## 查找与排序
+
+顺序查找
+
+二分查找
+
+哈希表查找
+
+二叉树查找
+
+
+
+插入排序
+
+冒泡排序
+
+归并排序
+
+快速排序
+
+```js
+const partition = (nums, n, start, end) => {
+    if (n <= 0 || start < 0 || end >= n) {
+        return;
+    }
+    let index = randomInRange(start, end);
+    swap(nums, index, end);
+
+    let small = start - 1;
+    for (index = start; index < end; ++index) {
+        //这部思路还不理解
+        if (nums[index] < nums[end]) {
+            ++small;
+            if (small !== index) {
+                swap(nums, index, small);
+            }
+        }
+    }
+    ++small;
+    swap(nums, small, end);
+    return small;
+}
+
+const quickSort = (nums, n, start, end) => {
+    if (start === end) {
+        return;
+    }
+    let index = partition(nums, n, start, end);
+    if (index > start) {
+        quickSort(nums, n, start, index - 1);
+    }
+    if (index < end) {
+        quickSort(nums, n, index + 1, end);
+    }
+}
+
+const swap = (nums, i, j) => {
+    let temp = nums[i];
+    nums[i] = nums[j];
+    nums[j] = temp;
+}
+
+const randomInRange = (start, end) => {
+    return start + Math.floor(Math.random() * (end - start));
+}
+
+let nums = [1, 3, 9, 5, 7, 8, 4, 2, 6];
+quickSort(nums, 9, 0, 8);
+console.log(nums)
+```
+
+
+
+## 9. 两个栈实现队列
+
+ ```js
+    // 两个栈实现队列
+    function Queue() {
+        this.stack1 = [];
+        this.stack2 = [];
+    }
+    
+    Queue.prototype.appendTail = function(value) {
+        this.stack1.push(value)
+    }
+    
+    Queue.prototype.deleteHead = function() {
+        if (this.stack2.length === 0) {
+            while(this.stack1.length) {
+                this.stack2.push(this.stack1.pop())
+            }
+        }
+        if (this.stack2.length) {
+            return this.stack2.pop();
+        } else {
+            throw new Error("queue is empty");
+        }
+    }
+    
+ 
+ ```
+
+##     9.两个队列实现栈
+
+```js
+   //两个队列实现栈
+   function Stack() {
+       this.queue1 = [];
+       this.queue2 = [];
+   }
+   
+   Stack.prototype.push = function(value){
+       this.queue1.push(value);
+   }
+   
+   Stack.prototype.pop = function(){
+       while(this.queue1.length > 1) {
+           this.queue2.push(this.queue1.shift());
+       }
+       if (this.queue1.length) {
+           let top = this.queue1.shift();
+           let temp = this.queue1;
+           this.queue1 = this.queue2;
+           this.queue2 = temp;
+           return top;
+       } else {
+           throw new Error("stack is empty");
+       }
+       
+   }
+   
+   let stack = new Stack();
+   stack.push(2);
+   stack.push(3);
+   stack.push(4);
+   console.log(stack.pop())
+   stack.push(5);
+   console.log(stack)
+```
+
 
 
 ----
 
-## 剑指 Offer II 029. 排序的循环链表
+## 11. 旋转数组的最小数字
+
+```js
+const minNums = (nums, n) => {
+    let left = 0;
+    let right = n - 1;
+    let mid = 0;
+    while(nums[left] >= nums[right]) {
+        if (right - left === 1) {
+            mid = right;
+            break;
+        }
+        mid = left + Math.floor((right - left) / 2);
+        // 如果left,right, mid指向的三个数字相等，只能顺序查找
+        if (nums[left] === nums[right] && nums[left] === nums[mid]) {
+            return minInOrder(nums, left, right);
+        }
+
+        if (nums[mid] >= nums[left]) {
+            left = mid;
+        } else if (nums[mid] <= nums[right]) {
+            right = mid;
+        }
+    }
+    return nums[mid];
+}
+
+const minInOrder = (nums, left, right) => {
+    let result = nums[left];
+    for (let i = left + 1; i <= right; ++i) {
+        if (result > nums[i]) {
+            result = nums[i];
+        }
+    }
+    return result;
+}
+
+let nums = [1, 0, 1, 1, 1];
+// let nums = [3, 4, 5, 1, 2];
+console.log(minNums(nums, 5));
+```
+
+
+
+----
+
+## 29. 排序的循环链表
 
 给定循环单调非递减列表中的一个点，写一个函数向这个列表中插入一个新元素 insertVal ，使这个列表仍然是循环升序的。
 
@@ -60,9 +246,11 @@ var insert = function(head, insertVal) {
 };
 ```
 
----
 
-## 剑指 Offer II 041. 滑动窗口的平均值
+
+----
+
+## 41. 滑动窗口的平均值
 
 给定一个整数数据流和一个窗口大小，根据该滑动窗口的大小，计算滑动窗口里所有数字的平均值。
 
@@ -108,7 +296,7 @@ MovingAverage.prototype.next = function(val) {
 
 ----
 
-## 剑指 Offer II 091. 粉刷房子
+## 91. 粉刷房子
 
 假如有一排房子，共 n 个，每个房子可以被粉刷成红色、蓝色或者绿色这三种颜色中的一种，你需要粉刷所有的房子并且使其相邻的两个房子颜色不能相同。
 
@@ -154,7 +342,7 @@ console.log(minCost(costs));
 
 ---
 
-## 剑指 Offer II 114. 外星文字典
+## 114. 外星文字典
 
 现有一种使用英语字母的外星文语言，这门语言的字母顺序与英语顺序不同。
 
