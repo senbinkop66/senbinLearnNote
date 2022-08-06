@@ -1,10 +1,19 @@
 /**
- * @param {string} s
- * @return {string}
+ * @param {number} n
+ * @return {number}
  */
-var replaceSpace = function(s) {
-    return s.replace(/\s/g, "%20")
-};
+var numWays = function(n) {
+    const MOD = 1000000007;
+    if (n < 2) {
+        return 1;
+    }
+    let p = 1, q = 1, r = 0;
+    for (let i = 2; i <= n; i++) {
+        r = (p + q) % MOD;
+        p = q;
+        q = r;
+    }
+    return r;
+}
 
-let s = "We are happy.";
-console.log(replaceSpace(s));
+console.log(numWays(10));

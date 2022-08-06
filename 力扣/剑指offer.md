@@ -1,4 +1,38 @@
-## 查找与排序
+## 数据结构
+
+### 数组
+
+### 字符串
+
+### 链表
+
+### 树
+
+前序遍历
+
+中序遍历
+
+后序遍历
+
+宽度优先遍历
+
+二叉搜索树
+
+堆
+
+红黑树
+
+### 栈和队列
+
+---
+
+## 算法与数据操作
+
+### 递归和循环
+
+
+
+### 查找与排序
 
 顺序查找
 
@@ -73,7 +107,11 @@ console.log(nums)
 
 ---
 
-## 回溯法
+### 回溯法
+
+### 动态规划和贪婪算法
+
+----
 
 
 
@@ -99,6 +137,32 @@ var findRepeatNumber = function(nums) {
         }
         set.add(nums[i]);
     }
+};
+
+let nums = [2, 3, 1, 0, 2, 5, 3];
+console.log(findRepeatNumber(nums));
+```
+
+```js
+// O(1)的空间查找重复元素
+
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var findRepeatNumber = function(nums) {
+    for (let i = 0; i < nums.length; i++) {
+        while (nums[i] !== i) {
+            if (nums[i] === nums[nums[i]]) {
+                return nums[i];
+            }
+            let temp = nums[i];
+            nums[i] = nums[temp];
+            nums[temp] = temp;
+
+        }
+    }
+    return false;
 };
 
 let nums = [2, 3, 1, 0, 2, 5, 3];
@@ -181,36 +245,205 @@ console.log(replaceSpace(s));
 
 ----
 
-## 9. 两个栈实现队列
+## 6. 从尾到头打印链表
+
+输入一个链表的头节点，从尾到头反过来返回每个节点的值（用数组返回）。
+
+使用栈或递归
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @return {number[]}
+ */
+var reversePrint = function(head) {
+    let ans = [];
+    while (head !== null) {
+        ans.unshift(head.val);
+        head = head.next;
+    }
+    return ans;
+};
+```
+
+
+
+---
+
+## 7. 重建二叉树
+
+输入某二叉树的前序遍历和中序遍历的结果，请构建该二叉树并返回其根节点。
+
+假设输入的前序遍历和中序遍历的结果中都不含重复的数字。
+
+递归
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {number[]} preorderorder
+ * @param {number[]} inorder
+ * @return {TreeNode}
+ */
+var buildTree = function(preorder, inorder) {
+    let n = preorder.length;
+    return buildTreeCore(preorder, inorder, 0, n - 1, 0, n - 1);
+};
+
+const buildTreeCore = (preorder, inorder, preorder_left, preorder_right, inorder_left, inorder_right) => {
+    if (preorder_left > preorder_right) {
+        return null;
+    }
+    // 前序遍历中的第一个节点就是根节点
+    let preorder_root = preorder_left;
+    // 在中序遍历中定位根节点
+    let inorder_root = inorder.indexOf(preorder[preorder_root]);
+    // 先把根节点建立出来
+    let root = new TreeNode(preorder[preorder_root]);
+    // 得到左子树中的节点数目
+    let size_left_subtree = inorder_root - inorder_left;
+    // 递归地构造左子树，并连接到根节点
+    // 先序遍历中「从 左边界+1 开始的 size_left_subtree」个元素就对应了中序遍历中「从 左边界 开始到 根节点定位-1」的元素
+    root.left = buildTreeCore(preorder, inorder, preorder_left + 1, preorder_left + size_left_subtree, inorder_left, inorder_root - 1);
+    // 递归地构造右子树，并连接到根节点
+    // 先序遍历中「从 左边界+1+左子树节点数目 开始到 右边界」的元素就对应了中序遍历中「从 根节点定位+1 到 右边界」的元素
+    root.right = buildTreeCore(preorder, inorder, preorder_left + size_left_subtree + 1, preorder_right, inorder_root + 1, inorder_right);
+    return root;
+}
+```
+
+迭代
+
+```
+class Solution {
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        if (preorder == null || preorder.length == 0) {
+            return null;
+        }
+        TreeNode root = new TreeNode(preorder[0]);
+        Deque<TreeNode> stack = new LinkedList<TreeNode>();
+        stack.push(root);
+        int inorderIndex = 0;
+        for (int i = 1; i < preorder.length; i++) {
+            int preorderVal = preorder[i];
+            TreeNode node = stack.peek();
+            if (node.val != inorder[inorderIndex]) {
+                node.left = new TreeNode(preorderVal);
+                stack.push(node.left);
+            } else {
+                while (!stack.isEmpty() && stack.peek().val == inorder[inorderIndex]) {
+                    node = stack.pop();
+                    inorderIndex++;
+                }
+                node.right = new TreeNode(preorderVal);
+                stack.push(node.right);
+            }
+        }
+        return root;
+    }
+}
+
+
+```
+
+
+
+---
+
+## 8. 二叉树的下一个节点
+
+给定一个二叉树和其中的一个结点，请找出**中序遍历**顺序的下一个结点并且返回 。注意，树中的结点不仅包含左右子结点，同时包含指向父结点的指针。
+
+```js
+var getNext = function(p) {
+    if (p === null) {
+        return null;
+    }
+
+    let pNext = null;
+    if (p.right !== null) {
+        //有右子树
+        // 如果一个节点的右子树不为空，那么该节点的下一个节点是右子树的最左节点
+        let pRight = p.right;
+        while (pRight.left !== null) {
+            pRight = pRight.left;
+        }
+        pNext = pRight;
+    } else if (p.parent !== null) {
+        // 无右子树
+        // 否则，向上找第一个左链接指向的树包含该节点的祖先节点
+        let pCurrent = p;
+        let pParent = p.parent;
+        while (parent !== null && pCurrent === pParent.right) {
+            pCurrent = pParent;
+            pParent = pParent.parent;
+        }
+        pNext = pParent;
+    }
+    return pNext;
+}
+```
+
+
+
+----
+
+## 9. 1两个栈实现队列
+
+用两个栈实现一个队列。队列的声明如下，请实现它的两个函数 appendTail 和 deleteHead ，分别完成在队列尾部插入整数和在队列头部删除整数的功能。(若队列中没有元素，deleteHead 操作返回 -1 )
 
  ```js
-    // 两个栈实现队列
-    function Queue() {
-        this.stack1 = [];
-        this.stack2 = [];
-    }
-    
-    Queue.prototype.appendTail = function(value) {
-        this.stack1.push(value)
-    }
-    
-    Queue.prototype.deleteHead = function() {
-        if (this.stack2.length === 0) {
+ var CQueue = function() {
+     this.stack1 = [];
+     this.stack2 = [];
+ };
+ 
+ /** 
+  * @param {number} value
+  * @return {void}
+  */
+ CQueue.prototype.appendTail = function(value) {
+     this.stack1.push(value)
+ };
+ 
+ /**
+  * @return {number}
+  */
+ CQueue.prototype.deleteHead = function() {
+     if (this.stack2.length === 0) {
             while(this.stack1.length) {
                 this.stack2.push(this.stack1.pop())
             }
-        }
-        if (this.stack2.length) {
-            return this.stack2.pop();
-        } else {
-            throw new Error("queue is empty");
-        }
     }
-    
+    if (this.stack2.length) {
+        return this.stack2.pop();
+    } else {
+        return -1;
+    }
+ };
  
+ /**
+  * Your CQueue object will be instantiated and called as such:
+  * var obj = new CQueue()
+  * obj.appendTail(value)
+  * var param_2 = obj.deleteHead()
+  */
  ```
 
-##     9.两个队列实现栈
+##     9.2两个队列实现栈
 
 ```js
    //两个队列实现栈
@@ -246,6 +479,66 @@ console.log(replaceSpace(s));
    console.log(stack.pop())
    stack.push(5);
    console.log(stack)
+```
+
+----
+
+## 10- I. 斐波那契数列
+
+写一个函数，输入 n ，求斐波那契（Fibonacci）数列的第 n 项（即 F(N)）。斐波那契数列的定义如下：
+
+F(0) = 0,   F(1) = 1
+F(N) = F(N - 1) + F(N - 2), 其中 N > 1.
+斐波那契数列由 0 和 1 开始，之后的斐波那契数就是由之前的两数相加而得出。
+
+答案需要取模 1e9+7（1000000007），如计算初始结果为：1000000008，请返回 1。
+
+```js
+var fib = (n) => {
+    const MOD = 1000000007;
+    if (n < 2) {
+        return n;
+    }
+    let p = 0, q = 0, r = 1;
+    for (let i = 2; i <= n; i++) {
+        p = q;
+        q = r;
+        r = (p + q) % MOD;
+    }
+    return r;
+}
+
+console.log(fib(10));
+```
+
+----
+
+## 10- II. 青蛙跳台阶问题
+
+一只青蛙一次可以跳上1级台阶，也可以跳上2级台阶。求该青蛙跳上一个 n 级的台阶总共有多少种跳法。
+
+答案需要取模 1e9+7（1000000007），如计算初始结果为：1000000008，请返回 1。
+
+```js
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var numWays = function(n) {
+    const MOD = 1000000007;
+    if (n < 2) {
+        return 1;
+    }
+    let p = 1, q = 1, r = 0;
+    for (let i = 2; i <= n; i++) {
+        r = (p + q) % MOD;
+        p = q;
+        q = r;
+    }
+    return r;
+}
+
+console.log(numWays(10));
 ```
 
 
@@ -394,6 +687,73 @@ let board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABC
 console.log(exist(board, word));
 
 ```
+
+
+
+---
+
+## 13. 机器人的运动范围
+
+地上有一个m行n列的方格，从坐标 [0,0] 到坐标 [m-1,n-1] 。一个机器人从坐标 [0, 0] 的格子开始移动，它每次可以向左、右、上、下移动一格（不能移动到方格外），也不能进入行坐标和列坐标的数位之和大于k的格子。例如，当k为18时，机器人能够进入方格 [35, 37] ，因为3+5+3+7=18。但它不能进入方格 [35, 38]，因为3+5+3+8=19。请问该机器人能够到达多少个格子？
+
+ 回溯法
+
+```js
+/**
+ * @param {number} m
+ * @param {number} n
+ * @param {number} k
+ * @return {number}
+ */
+var movingCount = function(m, n, k) {
+    if (k < 0 || m <= 0 || n <= 0) {
+        return 0;
+    }
+    let visited = new Array(m);
+    for (let i = 0; i < m; i++) {
+        visited[i] = new Array(n).fill(false);
+    }
+
+    let count = movingCountCore(m, n, k, 0, 0, visited);
+    return count;
+};
+
+const movingCountCore = (m, n, k, row, col, visited) => {
+    let count = 0;
+    if (check(m, n, k, row, col, visited)) {
+        visited[row][col] = true;
+        count = 1 + movingCountCore(m, n, k, row + 1, col, visited) + movingCountCore(m, n, k, row, col + 1, visited); // 只需向右和向下运动
+    }
+    return count;
+}
+
+const check = (m, n, k, row, col, visited) => {
+    if (row >= 0 && row < m && col >= 0 && col < n && (getDigitSum(row) + getDigitSum(col) <= k) && !visited[row][col]) {
+        return true;
+    }
+    return false;
+}
+
+const getDigitSum = (number) => {
+    let sum = 0;
+    while(number > 0) {
+        sum += number % 10;
+        number = Math.floor(number/10);
+    }
+    return sum;
+}
+
+let m = 2, n = 3, k = 1;
+console.log(movingCount(m, n, k));
+```
+
+
+
+----
+
+
+
+
 
 
 
