@@ -111,6 +111,14 @@ console.log(nums)
 
 ### 动态规划和贪婪算法
 
+### 位运算
+
+与、或、异或、左移、右移
+
+
+
+
+
 ----
 
 
@@ -751,9 +759,129 @@ console.log(movingCount(m, n, k));
 
 ----
 
+## 14. 剪绳子
+
+给你一根长度为 n 的绳子，请把绳子剪成整数长度的 m 段（m、n都是整数，n>1并且m>1），每段绳子的长度记为 k[0],k[1]...k[m-1] 。请问 k[0]*k[1]*...*k[m-1] 可能的最大乘积是多少？例如，当绳子的长度是8时，我们把它剪成长度分别为2、3、3的三段，此时得到的最大乘积是18。
+
+**动态规划**
+
+```js
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var cuttingRope = function(n) {
+    const dp = new Array(n + 1).fill(0);
+    for (let i = 2; i <= n; i++) {
+        let curMax = 0;
+        for (let j = 1; j < i; j++) {
+            curMax = Math.max(curMax, Math.max(j * (i - j), j * dp[i - j]));
+        }
+        dp[i] = curMax;
+    }
+    return dp[n];
+};
+```
+
+**优化的动态规划**
+
+计算dp[i]的值只需考虑j=2和j=3的情况
+
+```js
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var cuttingRope = function(n) {
+    const dp = new Array(n + 1).fill(0);
+    dp[2] = 1;
+    for (let i = 3; i <= n; i++) {
+        dp[i] = Math.max(Math.max(2 * (i - 2), 2 * dp[i - 2]), Math.max(3 * (i - 3), 3 * dp[i - 3]));
+    }
+    return dp[n];
+};
+
+console.log(cuttingRope(10));
+```
 
 
 
+**贪婪算法**
+
+```js
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var cuttingRope = function(n) {
+    if (n < 4) {
+        return n - 1;
+    }
+    let timesOf3 = Math.floor(n / 3);  //  尽可能多的得到长度为3的绳子
+    // 当最后剩下长度为4的时候，不能再剪去长度为3，因为2x2 > 3x1
+    if (n - timesOf3 * 3 === 1) {
+        timesOf3 -= 1;
+    }
+    let timesOf2 = (n - timesOf3 * 3) / 2;
+    return Math.pow(3, timesOf3) * Math.pow(2, timesOf2);
+};
+
+console.log(cuttingRope(10));
+```
+
+
+
+----
+
+## 15.  二进制中1的个数
+
+编写一个函数，输入是一个无符号整数（以二进制串的形式），返回其二进制表达式中数字位数为 '1' 的个数（也被称为 汉明重量).）。
+
+ 提示：
+
+请注意，在某些语言（如 Java）中，没有无符号整数类型。在这种情况下，输入和输出都将被指定为有符号整数类型，并且不应影响您的实现，因为无论整数是有符号的还是无符号的，其内部的二进制表示形式都是相同的。
+在 Java 中，编译器使用 二进制补码 记法来表示有符号整数。因此，在上面的 示例 3 中，输入表示有符号整数 -3。
+
+**循环检查二进制位**
+
+```js
+/**
+ * @param {number} n - a positive integer
+ * @return {number}
+ */
+var hammingWeight = function(n) {
+    let ans = 0;
+    for (let i = 0; i < 32; i++) {
+        if ((n & (1 << i)) !== 0) {
+            ans++;
+        }
+    }
+    return ans;
+};
+
+let n = 11;
+console.log(hammingWeight(n));
+```
+
+**位运算优化**
+
+```js
+/**
+ * @param {number} n - a positive integer
+ * @return {number}
+ */
+var hammingWeight = function(n) {
+    let ans = 0;
+    while (n) {
+        n &= (n - 1);
+        ans++;
+    }
+    return ans;
+};
+
+let n = 11;
+console.log(hammingWeight(n));
+```
 
 
 

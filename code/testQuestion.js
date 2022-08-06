@@ -1,19 +1,15 @@
 /**
- * @param {number} n
+ * @param {number} n - a positive integer
  * @return {number}
  */
-var numWays = function(n) {
-    const MOD = 1000000007;
-    if (n < 2) {
-        return 1;
+var hammingWeight = function(n) {
+    let ans = 0;
+    while (n) {
+        n &= (n - 1);
+        ans++;
     }
-    let p = 1, q = 1, r = 0;
-    for (let i = 2; i <= n; i++) {
-        r = (p + q) % MOD;
-        p = q;
-        q = r;
-    }
-    return r;
-}
+    return ans;
+};
 
-console.log(numWays(10));
+let n = 11;
+console.log(hammingWeight(n));
