@@ -155,6 +155,12 @@ console.log(nums)
 
 
 
+### 代码的鲁棒性
+
+容错性
+
+防御性编程
+
 
 
 
@@ -1027,7 +1033,9 @@ console.log(printNumbers(3));
 
 ----
 
-## 18.  删除链表的节点
+## 18-1.  删除链表的节点
+
+
 
 给定单向链表的头指针和一个要删除的节点的值，定义一个函数删除该节点。
 
@@ -1042,8 +1050,422 @@ console.log(printNumbers(3));
 
 
 
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @param {number} val
+ * @return {ListNode}
+ */
+var deleteNode = function(head, val) {
+    let cur = new ListNode(null);
+    cur.next = head;
+    let prev = cur;  // 确保头结点
+    while (head) {
+        if (head.val === val) {
+            break;
+        }
+        head = head.next;
+        cur = cur.next;
+    }
+    if (cur.next) {
+        cur.next = cur.next.next;
+    }
+    return prev.next;
+};
 ```
 
+
+
+## 18-2. 在O(1)时间内删除链表节点
+
+给定单向链表的头指针和一个要删除的节点，定义一个函数删除该节点。
+
+返回删除后的链表的头节点。
+
+**和下一个节点交换**
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @param {number} val
+ * @return {ListNode}
+ */
+var deleteNode = function(head, deleteNode) {
+    if (!head || !deleteNode) {
+        return null;
+    }
+    
+    if (deleteNode.next !== null) {
+        // 要删除的节点不是尾节点
+        deleteNode.val = deleteNode.next.val;  // 把下一节点值赋值到要删除的节点
+        deleteNode.next = deleteNode.next.next;   // 删除下一结点
+    } else if (head.next === null && head === deleteNode) {
+        // 链表只有一个几点，删除头结点，也是尾节点
+        head = null;
+        deleteNode = null;
+    } else {
+        // 链表有多个节点，要删除的是尾节点
+        let p = head;
+        // 遍历到最后节点
+        while (p.next !== deleteNode) {
+            p = p.next;
+        }
+        p.next = null;
+        deleteNode = null;
+    }
+    return head;
+};
+```
+
+
+
+----
+
+## 19.  正则表达式匹配
+
+请实现一个函数用来匹配包含'. '和'*'的正则表达式。模式中的字符'.'表示任意一个字符，而'*'表示它前面的字符可以出现任意次（含0次）。在本题中，匹配是指字符串的所有字符匹配整个模式。例如，字符串"aaa"与模式"a.a"和"ab*ac*a"匹配，但与"aa.a"和"ab*a"均不匹配。
+
+**动态规划**
+
+```js
+/**
+ * @param {string} s
+ * @param {string} p
+ * @return {boolean}
+ */
+var isMatch = function(s, p) {
+    let m = s.length;
+    let n = p.length;
+
+    const dp = new Array(m +1);
+    for (let i = 0; i <= m; i++) {
+        dp[i] = new Array(n + 1).fill(false);
+    }
+    dp[0][0] = true;
+
+    for (let i = 0; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (p[j - 1] === "*") {
+                dp[i][j] = dp[i][j - 2];
+                if (matchs(s, p, i, j - 1)) {
+                    dp[i][j] = dp[i][j] || dp[i - 1][j];
+                }
+            } else {
+                if (matchs(s, p, i, j)) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                }
+            }
+        }
+    }
+    return dp[m][n];
+};
+
+const matchs = (s, p, i, j) => {
+    if (i === 0) {
+        return false;
+    }
+    if (p[j - 1] === ".") {
+        return true;
+    }
+    return s[i - 1] === p[j - 1];
+}
+
+let s = "aaa", p = "ab*ac*a";
+console.log(isMatch(s, p));
+```
+
+
+
+----
+
+## 20.  表示数值的字符串*
+
+请实现一个函数用来判断字符串是否表示数值（包括整数和小数）。
+
+数值（按顺序）可以分成以下几个部分：
+
+若干空格
+一个 小数 或者 整数
+（可选）一个 'e' 或 'E' ，后面跟着一个 整数
+若干空格
+小数（按顺序）可以分成以下几个部分：
+
+（可选）一个符号字符（'+' 或 '-'）
+下述格式之一：
+至少一位数字，后面跟着一个点 '.'
+至少一位数字，后面跟着一个点 '.' ，后面再跟着至少一位数字
+一个点 '.' ，后面跟着至少一位数字
+整数（按顺序）可以分成以下几个部分：
+
+（可选）一个符号字符（'+' 或 '-'）
+至少一位数字
+部分数值列举如下：
+
+["+100", "5e2", "-123", "3.1416", "-1E-16", "0123"]
+部分非数值列举如下：
+
+["12e", "1a3.14", "1.2.3", "+-5", "12e+5.4"]
+
+**确定有限状态自动机**
+
+![确定有限状态自动机](E:\pogject\学习笔记\image\leetcode\确定有限状态自动机.png)
+
+![fig1](https://assets.leetcode-cn.com/solution-static/jianzhi_20/jianzhi_20_fig1.png)
+
+```go
+type State int
+type CharType int
+
+const (
+    STATE_INITIAL State = iota
+    STATE_INT_SIGN
+    STATE_INTEGER
+    STATE_POINT
+    STATE_POINT_WITHOUT_INT
+    STATE_FRACTION
+    STATE_EXP
+    STATE_EXP_SIGN
+    STATE_EXP_NUMBER
+    STATE_END
+)
+
+const (
+    CHAR_NUMBER CharType = iota
+    CHAR_EXP
+    CHAR_POINT
+    CHAR_SIGN
+    CHAR_SPACE
+    CHAR_ILLEGAL
+)
+
+func toCharType(ch byte) CharType {
+    switch ch {
+    case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+        return CHAR_NUMBER
+    case 'e', 'E':
+        return CHAR_EXP
+    case '.':
+        return CHAR_POINT
+    case '+', '-':
+        return CHAR_SIGN
+    case ' ':
+        return CHAR_SPACE
+    default:
+        return CHAR_ILLEGAL
+    }
+}
+
+func isNumber(s string) bool {
+    transfer := map[State]map[CharType]State{
+        STATE_INITIAL: map[CharType]State{
+            CHAR_SPACE:  STATE_INITIAL,
+            CHAR_NUMBER: STATE_INTEGER,
+            CHAR_POINT:  STATE_POINT_WITHOUT_INT,
+            CHAR_SIGN:   STATE_INT_SIGN,
+        },
+        STATE_INT_SIGN: map[CharType]State{
+            CHAR_NUMBER: STATE_INTEGER,
+            CHAR_POINT:  STATE_POINT_WITHOUT_INT,
+        },
+        STATE_INTEGER: map[CharType]State{
+            CHAR_NUMBER: STATE_INTEGER,
+            CHAR_EXP:    STATE_EXP,
+            CHAR_POINT:  STATE_POINT,
+            CHAR_SPACE:  STATE_END,
+        },
+        STATE_POINT: map[CharType]State{
+            CHAR_NUMBER: STATE_FRACTION,
+            CHAR_EXP:    STATE_EXP,
+            CHAR_SPACE:  STATE_END,
+        },
+        STATE_POINT_WITHOUT_INT: map[CharType]State{
+            CHAR_NUMBER: STATE_FRACTION,
+        },
+        STATE_FRACTION: map[CharType]State{
+            CHAR_NUMBER: STATE_FRACTION,
+            CHAR_EXP:    STATE_EXP,
+            CHAR_SPACE:  STATE_END,
+        },
+        STATE_EXP: map[CharType]State{
+            CHAR_NUMBER: STATE_EXP_NUMBER,
+            CHAR_SIGN:   STATE_EXP_SIGN,
+        },
+        STATE_EXP_SIGN: map[CharType]State{
+            CHAR_NUMBER: STATE_EXP_NUMBER,
+        },
+        STATE_EXP_NUMBER: map[CharType]State{
+            CHAR_NUMBER: STATE_EXP_NUMBER,
+            CHAR_SPACE:  STATE_END,
+        },
+        STATE_END: map[CharType]State{
+            CHAR_SPACE: STATE_END,
+        },
+    }
+    state := STATE_INITIAL
+    for i := 0; i < len(s); i++ {
+        typ := toCharType(s[i])
+        if _, ok := transfer[state][typ]; !ok {
+            return false
+        } else {
+            state = transfer[state][typ]
+        }
+    }
+    return state == STATE_INTEGER || state == STATE_POINT || state == STATE_FRACTION || state == STATE_EXP_NUMBER || state == STATE_END
+}
+
+
+```
+
+
+
+----
+
+## 21.  调整数组顺序使奇数位于偶数前面
+
+输入一个整数数组，实现一个函数来调整该数组中数字的顺序，使得所有奇数在数组的前半部分，所有偶数在数组的后半部分。
+
+ **双指针**
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number[]}
+ */
+var exchange = function(nums) {
+    let left = 0, right = nums.length - 1;
+    while (left < right) {
+        while (left < right && !isEven(nums, left)) {
+            left++;
+        }
+        while (left < right && isEven(nums, right)) {
+            right--;
+        }
+        if (left < right) {
+            let temp = nums[left];
+            nums[left] = nums[right];
+            nums[right] = temp;
+        }
+    }
+    return nums;
+};
+
+const isEven = (nums, index) => {
+    if (nums[index] % 2 === 0) {
+        return true;
+    }
+}
+```
+
+
+
+----
+
+##  22.  链表中倒数第k个节点
+
+输入一个链表，输出该链表中倒数第k个节点。为了符合大多数人的习惯，本题从1开始计数，即链表的尾节点是倒数第1个节点。
+
+例如，一个链表有 6 个节点，从头节点开始，它们的值依次是 1、2、3、4、5、6。这个链表的倒数第 3 个节点是值为 4 的节点。
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @param {number} k
+ * @return {ListNode}
+ */
+var getKthFromEnd = function(head, k) {
+    if (head === null || k === 0) {
+        return null;
+    }
+    let fast = head, slow = head;
+    // fast在slow前k个节点
+    for (let i = 0; i < k - 1; i++) {
+        if (fast.next !== null) {
+            // 确保链表中有k个节点
+            fast = fast.next;
+        } else {
+            return null;
+        }
+    }
+    while (fast.next !== null) {
+        fast = fast.next;
+        slow = slow.next;
+    }
+    return slow;
+};
+```
+
+
+
+----
+
+## 23. 链表中环的入口节点
+
+给定一个链表，返回链表开始入环的第一个节点。 从链表的头节点开始沿着 next 指针进入环的第一个节点为环的入口节点。如果链表无环，则返回 null。
+
+为了表示给定链表中的环，我们使用整数 pos 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 pos 是 -1，则在该链表中没有环。注意，pos 仅仅是用于标识环的情况，并不会作为参数传递到函数中。
+
+说明：不允许修改给定的链表。
+
+![fig1](https://assets.leetcode-cn.com/solution-static/jianzhi_II_022/jianzhi_II_022_fig1.png)
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+
+/**
+ * @param {ListNode} head
+ * @return {ListNode}
+ */
+var detectCycle = function(head) {
+    if (head === null) {
+        return null;
+    }
+    let slow = head, fast = head;
+    while (fast !== null) {
+        slow = slow.next;
+        if (fast.next !== null) {
+            fast = fast.next.next;
+        } else {
+            return null;
+        }
+        if (slow === fast) {
+            //有环
+            let p = head;
+            while (p !== slow) {
+                p = p.next;
+                slow = slow.next;
+            }
+            return p;
+        }
+    }
+    return null;
+};
 ```
 
 
