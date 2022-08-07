@@ -133,11 +133,11 @@ console.log(nums)
 
 ### 代码的完整性
 
-功能测试
+功能测试(完成基本功能)
 
-边界测试
+边界测试(考虑边界条件)
 
-负面测试
+负面测试(做好错误处理)
 
 
 
@@ -159,9 +159,19 @@ console.log(nums)
 
 容错性
 
-防御性编程
+采取防御性编程
+
+处理无效的输入
 
 
+
+----
+
+## 解决面试题的思路
+
+
+
+### 画图让抽象问题形象化
 
 
 
@@ -1427,6 +1437,16 @@ var getKthFromEnd = function(head, k) {
 
 说明：不允许修改给定的链表。
 
+思路:
+
+找出环中任意一个节点
+
+得到环中节点的数目
+
+找到环的入口节点
+
+
+
 ![fig1](https://assets.leetcode-cn.com/solution-static/jianzhi_II_022/jianzhi_II_022_fig1.png)
 
 ```js
@@ -1467,6 +1487,346 @@ var detectCycle = function(head) {
     return null;
 };
 ```
+
+
+
+----
+
+## 24.  反转链表
+
+定义一个函数，输入一个链表的头节点，反转该链表并输出反转后链表的头节点。
+
+**迭代**
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @return {ListNode}
+ */
+var reverseList = function(head) {
+    let prev = null;
+    let cur = head;
+    while (cur !== null) {
+        let next = cur.next;
+        cur.next = prev;
+        prev = cur;
+        cur = next;
+    }
+    return prev;
+};
+```
+
+**递归**
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @return {ListNode}
+ */
+var reverseList = function(head) {
+    if (head === null || head.next === null) {
+        return head;
+    }
+    const newHead = reverseList(head.next);
+    head.next.next = head;  // 关键
+    head.next = null;
+    
+    return newHead;
+};
+```
+
+
+
+----
+
+##  25. 合并两个排序的链表
+
+输入两个递增排序的链表，合并这两个链表并使新链表中的节点仍然是递增排序的。
+
+**递归**
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+/**
+ * @param {ListNode} l1
+ * @param {ListNode} l2
+ * @return {ListNode}
+ */
+var mergeTwoLists = function(l1, l2) {
+    if (l1 === null) {
+        return l2;
+    } else if (l2 === null) {
+        return l1;
+    } else if (l1.val < l2.val) {
+        l1.next = mergeTwoLists(l1.next, l2);
+        return l1;
+    } else {
+        l2.next = mergeTwoLists(l1, l2.next);
+        return l2;
+    }
+};
+```
+
+**迭代**
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+/**
+ * @param {ListNode} l1
+ * @param {ListNode} l2
+ * @return {ListNode}
+ */
+var mergeTwoLists = function(l1, l2) {
+    const preHead = new ListNode(-1);
+
+    let prev = preHead;
+    while (l1 !== null && l2 !== null) {
+        if (l1.val <= l2.val) {
+            prev.next = l1;
+            l1 = l1.next;
+        } else {
+            prev.next = l2;
+            l2 = l2.next;
+        }
+        prev = prev.next;
+    }
+    //  合并后 l1 和 l2 最多只有一个还未被合并完，我们直接将链表末尾指向未合并完的链表即可
+    prev.next = l1 === null ? l2 : l1;
+    return preHead.next;
+};
+```
+
+
+
+----
+
+## 26. 树的子结构
+
+输入两棵二叉树A和B，判断B是不是A的子结构。(约定空树不是任意一个树的子结构)
+
+B是A的子结构， 即 A中有出现和B相同的结构和节点值。
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} A
+ * @param {TreeNode} B
+ * @return {boolean}
+ */
+var isSubStructure = function(A, B) {
+    let ans = false;
+    if (A !== null && B !== null) {
+        if (A.val === B.val) {
+            ans = dfs(A, B);
+        }
+        if (!ans) {
+            ans = isSubStructure(A.left, B);
+        }
+        if (!ans) {
+            ans = isSubStructure(A.right, B);
+        }
+    }
+    return ans;
+};
+
+const dfs = (root1, root2) => {
+    if (root2 === null) {
+        return true;
+    }
+    if (root1 === null) {
+        return false;
+    }
+    if (root1.val !== root2.val) {
+        return false;
+    }
+    return dfs(root1.left, root2.left) && dfs(root1.right, root2.right);
+}
+```
+
+
+
+----
+
+## 27. 二叉树的镜像
+
+请完成一个函数，输入一个二叉树，该函数输出它的镜像。
+
+递归
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {TreeNode}
+ */
+var mirrorTree = function(root) {
+    if (root === null) {
+        return null;
+    }
+    const left = mirrorTree(root.left);
+    const right = mirrorTree(root.right);
+    root.left = right;
+    root.right = left;
+    return root;
+};
+```
+
+迭代
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {TreeNode}
+ */
+var mirrorTree = function(root) {
+    if (root === null) {
+        return null;
+    }
+    let arr = [root];
+    while (arr.length) {
+        let n = arr.length;
+        while (n > 0) {
+            n--;
+            let node = arr.shift();
+            let temp = node.left;
+            node.left = node.right;
+            node.right = temp;
+            if (node.left !== null) {
+                arr.push(node.left);
+            }
+            if (node.right !== null) {
+                arr.push(node.right);
+            }
+        }
+    }
+    return root;
+};
+```
+
+
+
+----
+
+## 28. 对称的二叉树
+
+请实现一个函数，用来判断一棵二叉树是不是对称的。如果一棵二叉树和它的镜像一样，那么它是对称的。
+
+我们可以实现这样一个递归函数，通过「同步移动」两个指针的方法来遍历这棵树，p 指针和 q 指针一开始都指向这棵树的根，随后 p 右移时，q 左移，p 左移时，q 右移。每次检查当前 p 和 q 节点的值是否相等，如果相等再判断左右子树是否对称。
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {boolean}
+ */
+var isSymmetric = function(root) {
+    return check(root, root);
+};
+
+const check = (p, q) => {
+    if (p === null && q === null) {
+        return true;
+    }
+    if (p === null || q === null) {
+        return false;
+    }
+    return p.val === q.val && check(p.left, q.right) && check(p.right, q.left);
+}
+```
+
+用递归的方法实现了对称性的判断，那么如何用迭代的方法实现呢？首先我们引入一个队列，这是把递归程序改写成迭代程序的常用方法。初始化时我们把根节点入队两次。每次提取两个结点并比较它们的值（队列中每两个连续的结点应该是相等的，而且它们的子树互为镜像），然后将两个结点的左右子结点按相反的顺序插入队列中。当队列为空时，或者我们检测到树不对称（即从队列中取出两个不相等的连续结点）时，该算法结束。
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {boolean}
+ */
+var isSymmetric = function(root) {
+    return check(root, root);
+};
+
+const check = (p, q) => {
+    const arr = [];
+    arr.push(p);
+    arr.push(q);
+
+    while (arr.length) {
+        let u = arr.shift();
+        let v = arr.shift();
+        if (u === null && v === null) {
+            continue;
+        }
+        if ((u === null || v === null) || (u.val !== v.val)) {
+            return false;
+        }
+        arr.push(u.left);
+        arr.push(v.right);
+        arr.push(u.right);
+        arr.push(v.left);
+    }
+    return true;
+}
+```
+
+
 
 
 
