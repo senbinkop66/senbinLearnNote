@@ -1,35 +1,25 @@
 /**
- * Definition for a binary tree node.
- * function TreeNode(val) {
- *     this.val = val;
- *     this.left = this.right = null;
- * }
- */
-/**
- * @param {TreeNode} root
+ * @param {number[]} pushed
+ * @param {number[]} popped
  * @return {boolean}
  */
-var isSymmetric = function(root) {
-    return check(root, root);
+var validateStackSequences = function(pushed, popped) {
+    if (pushed.length === 0) {
+        return true;
+    }
+    const stack = [];
+    let n = pushed.length;
+    let j = 0;
+    for (let i = 0; i < n; i++) {
+        stack.push(pushed[i]);
+        while (stack.length && stack[stack.length - 1] === popped[j]) {
+            stack.pop();
+            j++;
+        }
+    }
+    return stack.length === 0;
 };
 
-const check = (p, q) => {
-    const arr = [];
-    arr.push(p);
-    arr.push(q);
+let pushed = [1,2,3,4,5], popped = [4,5,3,2,1];
 
-    while (arr.length) {
-        let u = arr.shift();
-        let v = arr.shift();
-        if (u === null && v === null) {
-            continue;
-        }
-        if ((u === null || v === null) || (u.val !== v.val)) {
-            return false;
-        }
-        arr.push(u.left);
-        arr.push(v.right);
-        arr.push(u.right);
-        arr.push(v.left);
-    }
-}
+console.log(validateStackSequences(pushed, popped));

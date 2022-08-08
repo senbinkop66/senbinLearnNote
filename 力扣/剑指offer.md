@@ -173,6 +173,10 @@ console.log(nums)
 
 ### 画图让抽象问题形象化
 
+### 举例让抽象问题具体化
+
+
+
 
 
 ----
@@ -1832,7 +1836,7 @@ const check = (p, q) => {
 
 ----
 
-## 29. 排序的循环链表
+## 29-1. 排序的循环链表
 
 给定循环单调非递减列表中的一个点，写一个函数向这个列表中插入一个新元素 insertVal ，使这个列表仍然是循环升序的。
 
@@ -1889,6 +1893,203 @@ var insert = function(head, insertVal) {
     return head;
 };
 ```
+
+
+
+
+
+----
+
+##  29-2. 顺时针打印矩阵
+
+输入一个矩阵，按照从外向里以顺时针的顺序依次打印出每一个数字。
+
+**模拟**
+
+使用一个与输入矩阵大小相同的辅助矩阵 visited，其中的每个元素表示该位置是否被访问过。当一个元素被访问时，将 visited 中的对应位置的元素设为已访问。
+
+```
+var spiralOrder = function(matrix) {
+    if (!matrix.length || !matrix[0].length) {
+        return [];
+    }
+    const rows = matrix.length, columns = matrix[0].length;
+    const visited = new Array(rows).fill(0).map(() => new Array(columns).fill(false));
+    const total = rows * columns;
+    const order = new Array(total).fill(0);
+
+    let directionIndex = 0, row = 0, column = 0;
+    const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+    for (let i = 0; i < total; i++) { 
+        order[i] = matrix[row][column];
+        visited[row][column] = true;
+        const nextRow = row + directions[directionIndex][0], nextColumn = column + directions[directionIndex][1];
+        if (!(0 <= nextRow && nextRow < rows && 0 <= nextColumn && nextColumn < columns && !(visited[nextRow][nextColumn]))) {
+            directionIndex = (directionIndex + 1) % 4;
+        }
+        row += directions[directionIndex][0];
+        column += directions[directionIndex][1];
+    }
+    return order;
+};
+
+```
+
+**按层模拟**
+
+可以将矩阵看成若干层，首先打印最外层的元素，其次打印次外层的元素，直到打印最内层的元素。
+
+![fig1](https://assets.leetcode-cn.com/solution-static/jianzhi_29/jianzhi_29_fig1.png)
+
+```js
+/**
+ * @param {number[][]} matrix
+ * @return {number[]}
+ */
+var spiralOrder = function(matrix) {
+    if (!matrix.length || !matrix[0].length) {
+        return [];
+    }
+
+    const ans = [];
+    const rows = matrix.length, columns = matrix[0].length;
+
+    let left = 0, right = columns - 1, top = 0, bottom = rows - 1;
+    while (left <= right && top <= bottom) {
+        for (let col = left; col <= right; col++) {
+            // 左到右
+            ans.push(matrix[top][col])
+        }
+        for (let row = top + 1; row <= bottom; row++) {
+            // 上到下
+            ans.push(matrix[row][right]);
+        }
+        if (left < right && top < bottom) {
+            for (let col = right - 1; col > left; col--) {
+                // 右到左
+                ans.push(matrix[bottom][col]);
+            }
+            for (let row = bottom; row > top; row--) {
+                // 下到上
+                ans.push(matrix[row][left]);
+            }
+        }
+        [left, right, top, bottom] = [left + 1, right - 1, top + 1, bottom - 1];
+    }
+    return ans;
+};
+
+let matrix = [[1,2,3,4],[5,6,7,8],[9,10,11,12]];
+console.log(spiralOrder(matrix));
+```
+
+
+
+----
+
+## 30. 包含min函数的栈
+
+定义栈的数据结构，请在该类型中实现一个能够得到栈的最小元素的 min 函数在该栈中，调用 min、push 及 pop 的时间复杂度都是 O(1)。
+
+```js
+/**
+ * initialize your data structure here.
+ */
+var MinStack = function() {
+    this.stack = [];
+    this.stackofMin = [];
+};
+
+/** 
+ * @param {number} x
+ * @return {void}
+ */
+MinStack.prototype.push = function(x) {
+    this.stack.push(x);
+    if (this.stackofMin.length) {
+        this.stackofMin.push(Math.min(x, this.stackofMin[this.stackofMin.length - 1]));
+    } else {
+        this.stackofMin.push(x);
+    }
+};
+
+/**
+ * @return {void}
+ */
+MinStack.prototype.pop = function() {
+    this.stack.pop();
+    this.stackofMin.pop();
+};
+
+/**
+ * @return {number}
+ */
+MinStack.prototype.top = function() {
+    return this.stack[this.stack.length - 1];
+};
+
+/**
+ * @return {number}
+ */
+MinStack.prototype.min = function() {
+    return this.stackofMin[this.stackofMin.length - 1];
+};
+
+/**
+ * Your MinStack object will be instantiated and called as such:
+ * var obj = new MinStack()
+ * obj.push(x)
+ * obj.pop()
+ * var param_3 = obj.top()
+ * var param_4 = obj.min()
+ */
+```
+
+
+
+---
+
+## 31. 栈的压入、弹出序列
+
+输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否为该栈的弹出顺序。假设压入栈的所有数字均不相等。例如，序列 {1,2,3,4,5} 是某栈的压栈序列，序列 {4,5,3,2,1} 是该压栈序列对应的一个弹出序列，但 {4,3,5,1,2} 就不可能是该压栈序列的弹出序列。
+
+```js
+/**
+ * @param {number[]} pushed
+ * @param {number[]} popped
+ * @return {boolean}
+ */
+var validateStackSequences = function(pushed, popped) {
+    if (pushed.length === 0) {
+        return true;
+    }
+    const stack = [];
+    let n = pushed.length;
+    let j = 0;
+    for (let i = 0; i < n; i++) {
+        stack.push(pushed[i]);
+        while (stack.length && stack[stack.length - 1] === popped[j]) {
+            stack.pop();
+            j++;
+        }
+    }
+    return stack.length === 0;
+};
+
+let pushed = [1,2,3,4,5], popped = [4,5,3,2,1];
+
+console.log(validateStackSequences(pushed, popped));
+```
+
+
+
+---
+
+## 32 - I. 从上到下打印二叉树
+
+
+
+
 
 
 

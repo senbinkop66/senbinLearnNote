@@ -22,6 +22,8 @@ v-model在内部**为不同的输入元素使用不同的属性并抛出不同�
 2. checkbox 和 radio 使用checked属性和change事件；
 3. select 字段将value作为 prop 并将change作为事件。
 
+
+
 ---
 
 ## 1.2 v-model 实现原理？
@@ -43,6 +45,8 @@ v-model只不过是一个语法糖而已,真正的实现靠的还是
 <!--在@input方法中，value => sth;-->
 <!--在:value中,sth => value;-->
 ```
+
+
 
 ---
 
@@ -1675,6 +1679,22 @@ console.log(sum)  //应该为120
 ---
 
 # vue性能
+
+----
+
+## 2.0 说说你对vue的理解?
+
+Vue.js（/vjuː/，或简称为Vue）是一个用于创建用户界面的开源JavaScript框架，也是一个创建单页应用的Web应用框架。
+
+Vue 是一套用于构建用户界面的渐进式MVVM框架。那怎么理解渐进式呢？渐进式含义：强制主张最少。
+
+Vue.js包含了声明式渲染、组件化系统、客户端路由、大规模状态管理、构建工具、数据持久化、跨平台支持等，但在实际开发中，并没有强制要求开发者之后某一特定功能，而是根据需求逐渐扩展。
+
+Vue所关注的核心是MVC模式中的视图层，同时，它也能方便地获取数据更新，并通过组件内部特定的方法实现视图与模型的交互。
+
+Vue.js的核心库只关心视图渲染，且由于渐进式的特性，Vue.js便于与第三方库或既有项目整合。Vue.js 实现了一套声明式渲染引擎，并在runtime或者预编译时将声明式的模板编译成渲染函数，挂载在观察者 Watcher 中，在渲染函数中（touch），响应式系统使用响应式数据的getter方法对观察者进行依赖收集（Collect as Dependency），使用响应式数据的setter方法通知（notify）所有观察者进行更新，此时观察者 Watcher 会触发组件的渲染函数（Trigger re-render），组件执行的 render 函数，生成一个新的 Virtual DOM Tree，此时 Vue 会对新老 Virtual DOM Tree 进行 Diff，查找出需要操作的真实 DOM 并对其进行更新。
+
+
 
 ---
 

@@ -3094,7 +3094,7 @@ function throttle (f, wait) {
 
 ----
 
-## 4.3 请问你了解js事件循环机制（Event Loop）吗？
+## 13.  请问你了解js事件循环机制（Event Loop）吗？
 
 js是一门主要运行在浏览器的脚本语言，主要用途之一是操作DOM元素
 
@@ -3121,7 +3121,7 @@ Event Loop(事件循环)：宏任务 > 所有微任务 > 宏任务（主要针�
 3. 更新render(每一次事件循环，浏览器都可能会去更新渲染)
 4. 重复以上步骤
 
-![img](https://uploadfiles.nowcoder.com/images/20211008/897353_1633673400290/7F695AB6524E72C0BC007BEFD17FC007)
+![img](E:\pogject\学习笔记\image\js\7F695AB6524E72C0BC007BEFD17FC007)
 
 一起看两道经典面试题：（主要考察执行顺序问题，考察频率极高）
 
@@ -3246,9 +3246,11 @@ new Promise(resolve => { resolve() })
 
 “script start”、“async2 end”、“Promise”、“script end”、“async1 end”、“promise1”、 “promise2 ”、“setTimeout”
 
+
+
 ----
 
-## 4.4 请问setTimeout与setInterval有何区别？
+## 14. 请问setTimeout与setInterval有何区别？
 
 setTimeout() 是在载入后，延迟指定时间后，去执行一次表达式，次数只有一次
 
@@ -3260,9 +3262,11 @@ setInterval() 是指定某个任务每隔一段时间就执行一次，可以无
 
 若队列前面还有其他任务，主线程被占用，那么就要等这些任务执行完再执行
 
+
+
 ---
 
-## 4.5 请问js有哪几种方式创建对象？
+## 15.  请问js有哪几种方式创建对象？
 
 1. 使用 Object 直接创建对象
 
@@ -3311,9 +3315,11 @@ Student.prototype.school="nongda";
 
 构造函数用于**定义实例的属性**，原型模式用于**定义方法和共享的属性**，可极大节约内存
 
+
+
 -----
 
-## 4.6 请问你了解js严格模式吗？
+## 16. 请问你了解js严格模式吗？
 
 设立"严格模式"的意义：
 
@@ -3321,11 +3327,11 @@ Student.prototype.school="nongda";
 - 消除代码运行的一些不安全之处，保证代码运行的安全
 - 提高编译器效率，增加运行速度
 
-使用"use strict"便可进入严格模式，通常有两种调用方法：
+使用"use strict"便可进入严格模式，通常有**两种**调用方法：
 
-**针对整个文件**：将"use strict"放在文件的第一行，则整个文件都将以"严格模式"运行。
+**针对整个文件**：将"use strict"放在文件的第一行，则**整个文件都将以"严格模式"运行**。
 
-**针对单个函数**：将"use strict"放在函数体的第一行，则整个函数以"严格模式"运行。
+**针对单个函数**：将"use strict"放在函数体的第一行，则**整个函数以"严格模式"运行**。
 
 严格模式与非严格模式的一些常见区别：
 
@@ -3336,7 +3342,7 @@ Student.prototype.school="nongda";
 a = 1 // 严格模式下将报错，非严格模式a变量会提升至全局作用域
 ```
 
-- 严格模式创建了第三种作用域：eval作用域
+- 严格模式**创建了第三种作用域：eval作用域**
 
 正常模式下，eval语句的作用域，取决于它处于全局作用域，还是处于函数作用域。**严格模式下，eval语句本身就是一个作用域**，不再能够生成全局变量了，**它所生成的变量只能用于eval内部**
 
@@ -3367,7 +3373,7 @@ function strictMode() {
 strictMode() // 将报错
 ```
 
-- 严格模式禁用with语法，使用将报错
+- 严格模式**禁用with语法**，使用将报错
 
 ```js
 function usualMode() {
@@ -3392,18 +3398,16 @@ strictMode() // 将报错
 
 -----
 
-#### 3.1 promise和 async await 区别
-
-**参考答案：**
+## 1. promise和 async await 区别
 
 - **概念**
-  **Promise** 是异步编程的一种解决方案，比传统的解决方案——回调函数和事件——更合理和更强大，简单地说，Promise好比容器，里面存放着一些未来才会执行完毕（异步）的事件的结果，而这些结果一旦生成是无法改变的
+  **Promise** 是异步编程的一种解决方案，比传统的解决方案——回调函数和事件——更合理和更强大，简单地说，**Promise好比容器，里面存放着一些未来才会执行完毕（异步）的事件的结果**，而这些结果一旦生成是无法改变的
 
   **async await**也是异步编程的一种解决方案，他遵循的是Generator 函数的语法糖，他拥有内置执行器，不需要额外的调用直接会自动执行并输出结果，它返回的是一个Promise对象。
 
 - ##### 两者的区别
 
-  1. Promise的出现解决了传统callback函数导致的“地域回调”问题，但它的语法导致了它向纵向发展行成了一个回调链，遇到复杂的业务场景，这样的语法显然也是不美观的。而async await代码看起来会简洁些，使得异步代码看起来像同步代码，await的本质是可以提供等同于”同步效果“的等待异步返回能力的语法糖，只有这一句代码执行完，才会执行下一句。
+  1. Promise的出现解决了传统callback函数导致的“回调地狱”问题，但它的语法导致了它向纵向发展行成了一个**回调链**，遇到复杂的业务场景，这样的语法显然也是不美观的。而async await代码看起来会简洁些，使得异步代码看起来像同步代码，**await的本质是可以提供等同于”同步效果“的等待异步返回能力的语法糖**，只有这一句代码执行完，才会执行下一句。
   2. async await与Promise一样，**是非阻塞的**。
   3. async await是基于Promise实现的，可以说是改良版的Promise，**它不能用于普通的回调函数**。
 
@@ -3411,9 +3415,7 @@ strictMode() // 将报错
 
 ------
 
-#### 3.2 defer和async区别
-
-**参考答案：**
+## 2. defer和async区别
 
 如果script标签中没有defer或async属性，浏览器在渲染中遇到script标签就会停止渲染，下载执行js代码，等待JS执行完毕后，浏览器再从中断的地方恢复渲染。这就会造成浏览器阻塞，如果你想首屏渲染的越快，就越不应该在首屏就加载 JS 文件，这也是都建议将 script 标签放在 body 标签底部的原因。当然在当下，并不是说 script 标签必须放在底部，因为你可以给 script 标签添加 defer 或者 async 属性，异步加载script。
 
@@ -3422,25 +3424,26 @@ strictMode() // 将报错
 
 而async则是在js加载好之后就会执行,并且多个async,哪个加载好就执行哪个
 
-##### async （异步加载）
+### async （异步加载）
 
-async属性表示异步执行引入的 JavaScript，即javaScript下载时html并未停止解析，等到javaScript下载完成，html就停止解析，执行javaScript代码，等待javaScript执行完毕，浏览器再继续渲染。需要注意的是，**这种方式加载的 JavaScript 依然会阻塞 load 事件**。换句话说，async-script 可能在 DOMContentLoaded 触发之前或之后执行，**但一定在 load 触发之前执行**。如果有多个js脚本，哪个先下载完成就先执行哪个，跟书写顺序没有关系。
+async属性表示异步执行引入的 JavaScript，**即javaScript下载时html并未停止解析**，等到javaScript下载完成，html就停止解析，执行javaScript代码，等待javaScript执行完毕，浏览器再继续渲染。
+
+需要注意的是，**这种方式加载的 JavaScript 依然会阻塞 load 事件**。换句话说，async-script 可能在 DOMContentLoaded 触发之前或之后执行，**但一定在 load 触发之前执行**。如果有多个js脚本，哪个先下载完成就先执行哪个，跟书写顺序没有关系。
 
 
-##### defer （延迟执行）
+### defer （延迟执行）
 
-defer 属性表示延迟执行引入的 JavaScript，即这段 JavaScript 加载时 HTML 并未停止解析，这两个过程是并行的。整个 document 解析完毕且 defer-script 也加载完成之后（这两件事情的顺序无关），会执行所有由 defer-script 加载的 JavaScript 代码，如果有多个defer的script标签，会按顺序执行，然后触发 DOMContentLoaded 事件。
+defer 属性表示延迟执行引入的 JavaScript，即这段 JavaScript 加载时 HTML 并未停止解析，这两个过程是并行的。整个 document 解析完毕且 defer-script 也加载完成之后（这两件事情的顺序无关），会执行所有由 defer-script 加载的 JavaScript 代码，如果有多个defer的script标签，会按顺序执行，**然后触发 DOMContentLoaded 事件**。
 
-（1) defer 是不会阻塞html解析的，它是等DOM加载完之后再去执行JavaScript代码；async是JavaScript下载完成，就会立即执行代码，等待执行完之后才继续解析HTML。
+(1) defer 是**不会阻塞html解析的**，它是**等DOM加载完之后再去执行JavaScript代码**；async是JavaScript下载完成，就会立即执行代码，等待执行完之后才继续解析HTML。
 (2) 在加载多个JS脚本的时候，async是无顺序的加载，而defer是有顺序的加载。
 
 应用场景
-defer：如果你的脚本代码依赖于页面中的DOM元素（文档是否解析完毕），或者被其他脚本文件依赖。
+defer：如果你的**脚本代码依赖于页面中的DOM元素**（文档是否解析完毕），或者被其他脚本文件依赖。
 
-async：如果你的脚本并不关心页面中的DOM元素（文档是否解析完毕），并且也不会产生其他脚本需要的数据。
+async：如果你的**脚本并不关心页面中的DOM元素**（文档是否解析完毕），并且也不会产生其他脚本需要的数据。
 
 总结：如果不能确定，使用defer要比async稳定一些。
-
 
 **解析：**
 
@@ -3452,7 +3455,7 @@ async：如果你的脚本并不关心页面中的DOM元素（文档是否解析
 
 async：有async的话,加载和渲染后续文档元素的过程将和 script.js 的加载与执行并行进行（异步）。
 
-async 属性的执行是在脚本下载完之后，在 window 的 load 事件发生之前。如果这个时候文档还没有解析完全意味着它们**可以阻止 DOM 构建。**
+async 属性的执行是在脚本下载完之后，在 window 的 **load 事件发生之前**。如果这个时候文档还没有解析完全意味着它们**可以阻止 DOM 构建。**
 
 **但是多个js文件的加载顺序不会按照书写顺序进行**
 
@@ -3514,9 +3517,7 @@ defer 属性的执行是在文档完全解析完成后进行的，在 window 的
 
 ------
 
-#### 3.3. 同步和异步
-
-**参考答案：**
+## 3. 同步和异步
 
 同步
 
@@ -3530,11 +3531,11 @@ defer 属性的执行是在文档完全解析完成后进行的，在 window 的
 - 程序的执行顺序和任务的排列顺序是**不一致**的，异步的。
 - 我们常用的setTimeout和setInterval函数，Ajax都是异步操作。
 
+
+
 ------
 
-#### 3.4 实现异步的方法
-
-**参考答案：**
+## 4. 实现异步的方法
 
 回调函数（Callback）、事件监听、发布订阅、Promise/A+、生成器Generators/ yield、async/await
 
@@ -3555,11 +3556,11 @@ defer 属性的执行是在文档完全解析完成后进行的，在 window 的
 
    - 内置执行器。 Generator 函数的执行必须靠执行器，所以才有了 co 函数库，而 async 函数自带执行器。也就是说，**async 函数的执行，与普通函数一模一样，只要一行**。
    - 更广的适用性。 co 函数库约定，yield 命令后面只能是 Thunk 函数或 Promise 对象，而 **async 函数的 await 命令后面，可以跟 Promise 对象和原始类型的值（数值、字符串和布尔值，但这时等同于同步操作）**。
-   - 更好的语义。 async 和 await，比起星号和 yield，语义更清楚了。async 表示函数里有异步操作，await 表示紧跟在后面的表达式需要等待结果。
+   - 更好的语义。 async 和 await，比起星号和 yield，语义更清楚了。**async 表示函数里有异步操作**，await **表示紧跟在后面的表达式需要等待结果。**
 
-**解析：**
 
-##### 1.回调函数（Callback）
+
+### (1) 回调函数（Callback）
 
 回调函数是异步操作最基本的方法。以下代码就是一个回调函数的例子：
 
@@ -3583,9 +3584,13 @@ ajax(url, () => {
 })
 ```
 
-回调函数的**优点**是简单、容易理解和实现，**缺点**是不利于代码的阅读和维护，各个部分之间高度耦合，使得程序结构混乱、流程难以追踪（尤其是多个回调函数嵌套的情况），而且每个任务只能指定一个回调函数。此外它不能使用 try catch 捕获错误，不能直接 return。
+回调函数的**优点**是简单、容易理解和实现。
 
-##### 2.事件监听
+**缺点**是不利于代码的阅读和维护，各个部分之间高度耦合，使得程序结构混乱、流程难以追踪（尤其是多个回调函数嵌套的情况），**而且每个任务只能指定一个回调函数**。此外它不能使用 try catch 捕获错误，不能直接 return。
+
+
+
+### (2) 事件监听
 
 这种方式下，**异步任务的执行不取决于代码的顺序，而取决于某个事件是否发生**。
 
@@ -3608,9 +3613,13 @@ function f1() {
 
 上面代码中，f1.trigger('done')表示，执行完成后，立即触发done事件，从而开始执行f2。
 
-这种方法的**优点**是比较容易理解，可以绑定多个事件，每个事件可以指定多个回调函数，而且可以"去耦合"，有利于实现模块化。**缺点**是整个程序都要变成事件驱动型，运行流程会变得很不清晰。阅读代码的时候，很难看出主流程。
+这种方法的**优点**是比较容易理解，可以绑定多个事件，每个事件可以指定多个回调函数，而且可以"去耦合"，有利于实现模块化。
 
-##### 3.发布订阅
+**缺点**是整个程序都要变成事件驱动型，运行流程会变得很不清晰。阅读代码的时候，很难看出主流程。
+
+
+
+### (3) 发布订阅
 
 我们假定，存在一个"信号中心"，某个任务执行完成，就向信号中心"发布"（publish）一个信号，其他任务可以向信号中心"订阅"（subscribe）这个信号，从而知道什么时候自己可以开始执行。这就叫做"发布/订阅模式"（publish-subscribe pattern），又称"**观察者模式**"（observer pattern）。
 
@@ -3640,7 +3649,9 @@ jQuery.unsubscribe('done', f2);
 
 这种方法的性质与“事件监听”类似，**但是明显优于后者**。因为可以通过查看“消息中心”，了解存在多少信号、每个信号有多少订阅者，从而监控程序的运行。
 
-##### 4.Promise/A+
+
+
+### (4) Promise/A+
 
 Promise本意是**承诺**，在程序中的意思就是**承诺我过一段时间后会给你一个结果**。 什么时候会用到过一段时间？答案是异步操作，异步是指可能比较长时间才有结果的才做，例如网络请求、读取本地文件等
 
@@ -3694,8 +3705,10 @@ console.log('end')
 
 - catch 会捕获到没有捕获的异常
 
-  接下来我们看几个例子：
+  
 
+  接下来我们看几个例子：
+  
   ```js
   // 例1
   Promise.resolve(1)
@@ -3745,7 +3758,7 @@ console.log('end')
   ```
 
   Promise不仅能够捕获错误，而且也很好地解决了回调地狱的问题，可以把之前的回调地狱例子改写为如下代码：
-
+  
   ```js
   ajax(url)
   .then(res => {
@@ -3757,10 +3770,12 @@ console.log('end')
   }).then(res => console.log(res))
   
   ```
-
+  
   它也是存在一些**缺点**的，比如无法取消 Promise，错误需要通过回调函数捕获。
+  
+  
 
-##### 5.生成器Generators/ yield
+### (5) 生成器Generators/ yield
 
 Generator 函数是 ES6 提供的一种异步编程解决方案，语法行为与传统函数完全不同，Generator 最大的特点就是可以控制函数的执行。
 
@@ -3793,7 +3808,7 @@ console.log(it.next(13)) // => {value: 42, done: true}
 
 - 当执行第一次 next 时，传参会被忽略，并且函数暂停在 yield (x + 1) 处，所以返回 5 + 1 = 6
 
-- 当执行第二次 next 时，传入的参数12就会被当作上一个yield表达式的返回值，如果你不传参，yield 永远返回 undefined。此时 let y = 2 * 12，所以第二个 yield 等于 2 * 12 / 3 = 8
+- 当执行第二次 next 时，传入的参数12就会被当作上一个yield表达式的返回值，**如果你不传参，yield 永远返回 undefined**。此时 let y = 2 * 12，所以第二个 yield 等于 2 * 12 / 3 = 8
 
 - 当执行第三次 next 时，传入的参数13就会被当作上一个yield表达式的返回值，所以 z = 13, x = 5, y = 24，相加等于 42
 
@@ -3809,7 +3824,7 @@ console.log(it.next(13)) // => {value: 42, done: true}
   //2.txt文件
   
   3.txt
-  //3.txt文
+  //3.txt文件
   ```
 
   
@@ -3832,6 +3847,7 @@ console.log(it.next(13)) // => {value: 42, done: true}
     console.log(r2)
     console.log(r3)
   }
+  
   let it = r()
   let { value, done } = it.next()
   value.then(function(data) { // value是个promise
@@ -3847,7 +3863,7 @@ console.log(it.next(13)) // => {value: 42, done: true}
   })
   
   ```
-
+  
   
 
 从上例中我们看出手动迭代Generator函数很麻烦，实现逻辑有点绕，而实际开发一般会配合co库去使用。**co是一个为Node.js和浏览器打造的基于生成器的流程控制工具，借助于Promise，你可以使用更加优雅的方式编写非阻塞代码**。
@@ -3869,6 +3885,7 @@ function* r() {
   console.log(r2)
   console.log(r3)
 }
+
 let co = require('co')
 co(r()).then(function(data) {
   console.log(data)
@@ -3894,7 +3911,7 @@ let result3 = it.next()
 
 
 
-##### 6.async/await
+### (6) async/await
 
 6.1 Async/Await简介
 
@@ -3986,30 +4003,26 @@ Generator函数依次调用三个文件那个例子用async/await写法，只需
 
 ------
 
-#### 3.5 怎么解决callback多层嵌套
-
-**参考答案：**
+## 5. 怎么解决callback多层嵌套
 
 回调地狱有两种解决方案：
 
 1. Promises
 2. Async/await
 
-------
-
-#### 3.6 promise的介绍与使用
-
 
 
 ------
 
-#### 3.7 Promise.all
+## 6. Promise.all
 
 Promise.all(iterable)方法返回一个Promise实例，此实例在iterable参数内所有的promise都“完成（resolved）”或参数中不包含promise时回调完成（resolve）；如果参数中promise有一个失败（rejected），此实例回调失败（reject），失败的原因是第一个失败promise的结果。
 
+
+
 ------
 
-#### 3.8 与promise.all相反的是哪一个
+## 7. 与promise.all相反的是哪一个
 
 Promse.race就是赛跑的意思，意思就是说，Promise.race([p1, p2, p3])里面哪个结果获得的快，就返回那个结果，不管结果本身是成功状态还是失败状态。
 
@@ -4017,7 +4030,7 @@ Promse.race就是赛跑的意思，意思就是说，Promise.race([p1, p2, p3])�
 
 ------
 
-#### 3.9 promise实现文件读取
+## 8.  promise实现文件读取
 
 **封装异步读取文件操作**
 
@@ -4113,95 +4126,14 @@ asyncGetFileByPath('./files/1.txt')
 
 ------
 
-#### 3.10 用js实现sleep，用promise
-
-**参考答案:**
-
-```js
-function sleep(time){
-    return new Promise(resolve=>setTimeout(resolve,time));
-}
-
-const t1=+new Date();
-sleep(3000).then(()=>{
-    const t2=+new Date();
-    console.log(t2-t1);
-});
-
-```
-
-优点：这种方式实际上是用了 setTimeout，**没有形成进程阻塞，不会造成性能和负载问题**。
-
-缺点：虽然不像 callback 套那么多层，但仍不怎么美观，**而且当我们需要在某过程中需要停止执行（或者在中途返回了错误的值），还必须得层层判断后跳出，非常麻烦**，而且这种异步并不是那么彻底，还是看起来别扭
-
-------
-
-#### 3.11 实现一个 Scheduler 类，完成对Promise的并发处理，最多同时执行2个任务
-
-**参考答案：**
-
-```js
-class Scheduler{
-    constructor(){
-        this.tasks=[];  // 待运行的任务
-        this.usingTask=[];  // 正在运行的任务
-    }
-
-    //promiseCreator 是一个异步函数，return Promise
-    add(promiseCreator){
-        return new Promise((resolve,reject)=>{
-            promiseCreator.resolve=resolve;
-            if (this.usingTask.length<2) {
-                this.usingRun(promiseCreator);
-            }else{
-                this.tasks.push(promiseCreator);
-            }
-        });
-    }
-
-    usingRun(promiseCreator){
-        this.usingTask.push(promiseCreator);
-        promiseCreator().then(()=>{
-            promiseCreator.resolve();
-            this.usingMove(promiseCreator);
-            if (this.tasks.length>0) {
-                this.usingRun(this.tasks.shift());
-            }
-        });
-    }
-
-    usingMove(promiseCreator){
-        let index=this.usingTask.findIndex(promiseCreator);
-        this.usingTask.splice(index,1);
-    }
-}
-
-const timeout=(time)=>new Promise(resolve=>{
-    setTimeout(resolve,time);
-});
-
-const scheduler=new Scheduler();
-const addTask=(time,order)=>{
-    scheduler.add(()=>timeout(time)).then(()=>console.log(order));
-}
-
-addTask(400,4);
-addTask(200,2);
-addTask(300,3);
-```
-
-------
-
-#### 3.12 循环i，setTimeout 中输出什么，如何解决（块级作用域，函数作用域）
-
-**参考答案：**
+## 9 循环i，setTimeout 中输出什么，如何解决
 
 **for循环setTimeout输出1-10解决方式问题来源**
 
 ```js
 for (var i = 0; i< 10; i++){
    setTimeout((i) => {
-   console.log(i);
+   		console.log(i);
    }, 0)
 }
 ```
@@ -4210,24 +4142,25 @@ for (var i = 0; i< 10; i++){
 
 为什么无法输出1到十
 
-在上面的代码中，**for循环是同步代码**，**setTimeout是异步代码**。遇到这种既包含同步又包含异步的情况，JavaScript依旧按照从上到下的顺序执行同步代码，并将异步代码插入任务队列。setTimeout的第二个参数则是把执行代码（console.log(i)）添加到任务队列需等待的毫秒数，但等待的时间是相对主程序完毕的时间计算的，也就是说，在执行到setTimeout函数时会等待一段时间，再将当前任务插入任务队列。
-最后，当执行完同步代码，js引擎就会去执行任务队列中的异步代码。这时候任务队列中就会有十个console.log(i)。我们知道，在每次循环中将setTimeout里面的代码“console.log(i)”放入任务队列时，i的值都是不一样的。但JavaScript引擎开始执行任务队列中的代码时，会开始在当前的作用域中开始找变量i，**但是当前作用域中并没有对变量i进行定义**。这个时候就会在创造该函数的作用域中寻找i。创建该函数的作用域就是全局作用域，这个时候就找到了for循环中的变量i，**这时的i是全局变量，并且值已经确定：10。**十个console.log“共享”i的值。**这就是作用域链的问题**。
+在上面的代码中，**for循环是同步代码**，**setTimeout是异步代码**。遇到这种既包含同步又包含异步的情况，JavaScript依旧按照从上到下的顺序执行同步代码，并将异步代码插入任务队列。setTimeout的第二个参数则是把执行代码（console.log(i)）添加到任务队列需等待的毫秒数，但等待的时间是相对主程序完毕的时间计算的，**也就是说，在执行到setTimeout函数时会等待一段时间，再将当前任务插入任务队列。**
+
+最后，当执行完同步代码，js引擎就会去执行任务队列中的异步代码。这时候任务队列中就会有十个console.log(i)。我们知道，在每次循环中将setTimeout里面的代码“console.log(i)”放入任务队列时，i的值都是不一样的。但JavaScript引擎开始执行任务队列中的代码时，会开始在当前的作用域中开始找变量i，**但是当前作用域中并没有对变量i进行定义**。这个时候就**会在创造该函数的作用域中寻找i**。创建该函数的作用域就是全局作用域，这个时候就找到了for循环中的变量i，**这时的i是全局变量，并且值已经确定：10。**十个console.log“共享”i的值。**这就是作用域链的问题**。
 
 **解决方法**
 
-- 方法一
+(1) 方法一,  **附加参数**，一旦定时器到期，它们会作为参数传递给`function`
 
 ```js
 for (var i = 0; i< 10; i++){
    setTimeout((i) => {
       console.log(i)
-   }, 1000,i);
+   }, 1000, i);
 }
 ```
 
 > **最精简解决方案**
 
-- 方法二
+(2) 方法二  **利用let形成块级作用域**
 
 ```js
 for (let i = 0; i< 10; i++){
@@ -4238,9 +4171,9 @@ for (let i = 0; i< 10; i++){
 
 ```
 
-> **最优解决方案**，利用let形成块级作用域
+> **最优解决方案**
 
-- 方法三
+(3) 方法三  **立即执行函数**
 
 ```js
     for (var i = 0; i< 10; i++){
@@ -4255,35 +4188,15 @@ for (let i = 0; i< 10; i++){
 
 > IIFE(**立即执行函数)**，类似于let生成了块级作用域。
 
-- 方法四
+
+
+(4) 方法四
 
 ```js
 for (var i = 0; i< 10; i++){
-   setTimeout(console.log(i),1000);
-}
-//有问题
-```
-
-> 直接输出，没有延迟
-
-- 方法五
-
-```js
-for (var i = 0; i< 10; i++){
-   setTimeout((()=>console.log(i))(),1000);
-}
-//有问题
-```
-
-> 同上
-
-- 方法六
-
-```js
-for (var i = 0; i< 10; i++){
-      try{
+      try {
         throw i
-      }catch(i){
+      } catch(i) {
         setTimeout(() => {
           console.log(i)
         }, 1000)
@@ -4292,127 +4205,17 @@ for (var i = 0; i< 10; i++){
 
 ```
 
-------
 
-3.13 js执行顺序的题目，涉及到settimeout、console、process.nextTick、promise.then
-
-```js
-console.time('start');
-
-setTimeout(function() {
-  console.log(2);
-}, 10);
-
-setImmediate(function() {
-  console.log(1);
-});
-
-new Promise(function(resolve) {
-  console.log(3);
-  resolve();
-  console.log(4);
-}).then(function() {
-  console.log(5);
-  console.timeEnd('start')
-});
-
-console.log(6);
-
-process.nextTick(function() {
-  console.log(7);
-});
-
-console.log(8);
-/*
-3
-4
-6
-8
-5
-start: 4.899ms
-7
-1
-2
-*/
-```
-
-**参考答案：**
-
-综合的执行顺序就是：3——>4——>6——>8——>7——>5——>start: 4.899ms——>1——>2
-
-**解析：**
-
-本题目，考察的就是 node 事件循环 Event Loop 我们可以简单理解Event Loop如下：
-
-1. 所有任务都在主线程上执行，形成一个执行栈(Execution Context Stack)
-2. 在主线程之外还存在一个任务队列(Task Queen),系统把异步任务放到任务队列中，然后主线程继续执行后续的任务
-3. 一旦执行栈中所有的任务执行完毕，系统就会读取任务队列。如果这时异步任务已结束等待状态，就会从任务队列进入执行栈，恢复执行
-4. 主线程不断重复上面的第三步
-
-在上述的例子中，我们明白首先执行主线程中的同步任务，因此依次输出3、4、6、8。当主线程任务执行完毕后，再从Event Loop中读取任务。
-
-Event Loop读取任务的先后顺序，取决于**任务队列（Job queue）中对于不同任务读取规则的限定**。
-
-在Job queue中的队列分为两种类型：
-
-- **宏任务** Macrotask宏任务是指Event Loop在**每个阶段**执行的任务
-- **微任务** Microtask微任务是指Event Loop在**每个阶段之间**执行的任务
-
-我们举例来看执行顺序的规定，我们假设
-
-宏任务队列包含任务: A1, A2 , A3
-
-微任务队列包含任务: B1, B2 , B3
-
-执行顺序为，首先执行宏任务队列开头的任务，也就是 A1 任务，执行完毕后，在执行微任务队列里的所有任务，也就是依次执行B1, B2 , B3，执行完后清空微任务队中的任务，接着执行宏任务中的第二个任务A2，依次循环。
-
-了解完了宏任务 Macrotask和微任务 Microtask两种队列的执行顺序之后，我们接着来看，真实场景下这两种类型的队列里真正包含的任务（我们以node V8引擎为例），在node V8中，这两种类型的真实任务顺序如下所示：
-
-宏任务 Macrotask队列真实包含任务：
-
-```js
-script(主程序代码),setTimeout, setInterval, setImmediate, I/O, UI rendering
-```
-
-微任务 Microtask队列真实包含任务：
-
-```
-process.nextTick, Promises, Object.observe, MutationObserver
-```
-
-由此我们得到的执行顺序应该为：
-
-```
-script(主程序代码)—>process.nextTick—>Promises...——>setTimeout——>setInterval——>setImmediate——> I/O——>UI rendering
-```
-
-> 在ES6中宏任务 Macrotask队列又称为ScriptJobs，而微任务 Microtask又称PromiseJobs
-
-我们的题目相对复杂，但是要注意，我们在定义promise的时候，promise构造部分是同步执行的
-
-接下来我们分析我们的题目，首先分析Job queue的执行顺序：
-
-```
-script(主程序代码)——>process.nextTick——>promise——>setTimeout——>setImmediate
-```
-
-- 主体部分： 定义promise的构造部分是同步的，因此先输出3、4 ，主体部分再输出6、8（同步情况下，就是严格按照定义的先后顺序）
-- process.nextTick: 输出7
-- promise： 这里的promise部分，严格的说其实是promise.then部分，输出的是5、以及 timeEnd('start')
-- setImmediate：输出1，依据上面优先级，应该先setTimeout，但是注意，setTimeout 设置 10ms 延时
-- setTimeout ： 输出2
 
 ------
 
 
 
-## this
+# this相关
 
 ------
 
-#### 4.1 call appy bind的作用和区别
-
-**参考答案：**
+## 1. call appy bind的作用和区别
 
 作用：
 
@@ -4432,7 +4235,7 @@ call方法
 
 call()方法调用一个对象。简单理解为调用函数的方式，但是它可以改变函数的this指向。
 
-写法：fun.call(thisArg, arg1, arg3, ...) // thisArg为想要指向的对象，arg1,arg3为参数
+写法：fun.call(thisArg, arg1, arg2, ...) // thisArg为想要指向的对象，arg1,arg2为参数
 
 **call 的主要作用也可以实现继承**
 
@@ -4448,6 +4251,8 @@ function Person(uname, age) {
   console.log(son);
 ```
 
+
+
 apply方法
 
 apply()方法调用一个函数。简单理解为调用函数的方式，但是它可以改变函数的this指向。
@@ -4456,7 +4261,7 @@ apply()方法调用一个函数。简单理解为调用函数的方式，但是�
 
 - thisArg:在fun函数运行时指定的this值
 - argsArray:传递的值，必须包含在数组里面
-- 返回值就是函数的返回值，因为他就是调用函数
+- **返回值就是函数的返回值**，因为他就是调用函数
 
 apply的主要应用，比如可以利用apply可以求得数组中最大值
 
@@ -4466,6 +4271,8 @@ const max = Math.max.apply(Math, arr);
 console.log(max);
 ```
 
+
+
 bind方法
 
 bind()方法不会调用函数，但是能改变函数内部this指向
@@ -4474,7 +4281,7 @@ bind()方法不会调用函数，但是能改变函数内部this指向
 
 - thisArg:在fun函数运行时指定的this值
 - arg1,arg2:传递的其他参数
-- 返回由指定的this值和初始化参数改造的原函数拷贝
+- 返回由指定的this值和初始化参数改造的**原函数拷贝**
 
 ```js
 var o = {
@@ -4512,64 +4319,69 @@ for (let i = 0; i < btns.length; i++) {
 
 1. call 经常做继承。
 2. apply 经常跟数组有关系，比如借助于数学对象实现数组最大值最小值。
-3. bind 不调用函数，但是还想改变this指向，比如改变定时器内部的this指向。
+3. bind 不调用函数，但是还想改变this指向，比如**改变定时器内部的this指向**。
+
+
 
 ------
 
-#### 4.2 this指向（普通函数、箭头函数）
-
-参考答案：
+## 2. this指向（普通函数、匿名函数、箭头函数）
 
 **普通函数中的**this
 
 谁调用了函数或者方法，那么这个函数或者对象中的this就指向谁
 
 ```js
-        let getThis = function () {
-            console.log(this);
-        }
+let getThis = function () {
+    console.log(this);
+}
 
-        let obj={
-            name:"kop",
-            getThis:function(){
-                console.log(this);
-            }
-        }
-        //getThis()方法是由window在全局作用域中调用的，所以this指向调用该方法的对象，即window
-        getThis();//window
-        //此处的getThis()方法是obj这个对象调用的，所以this指向obj
-        obj.getThis();//{ name: 'kop', getThis: [Function: getThis] }
+let obj={
+    name:"kop",
+    getThis:function(){
+        console.log(this);
+    }
+}
+//getThis()方法是由window在全局作用域中调用的，所以this指向调用该方法的对象，即window
+getThis();//window
+
+//此处的getThis()方法是obj这个对象调用的，所以this指向obj
+obj.getThis();//{ name: 'kop', getThis: [Function: getThis] }
 ```
 
 **匿名函数中的this**：
 
-匿名函数的执行具有全局性，则匿名函数中的this指向是window，而不是调用该匿名函数的对象；
+匿名函数的执行具有**全局性**，**则匿名函数中的this指向是window**，而不是调用该匿名函数的对象；
 
 ```js
-        let obj = {
-            getThis: function () {
-                return function () {
-                    console.log(this);
-                }
-            }
+let obj = {
+    getThis: function () {
+        return function () {
+            console.log(this);
         }
-        obj.getThis()(); //window
+    }
+}
+obj.getThis()(); //window
 ```
 
-上面代码中，getThis()方法是由obj调用，但是obj.getThis()返回的是一个匿名函数，而匿名函数中的this指向window，所以打印出window。 如果想在上述代码中使this指向调用该方法的对象，可以提前把this传值给另外一个变量(_this或者that)：
+上面代码中，getThis()方法是由obj调用，但是obj.getThis()返回的是一个匿名函数，而匿名函数中的this指向window，所以打印出window。 
+
+如果想在上述代码中使this指向调用该方法的对象，**可以提前把this传值给另外一个变量(_this或者that)**：
 
 ```js
-       let obj = {
-            getThis: function () {
-            //提前保存this指向
-                let _this=this
-                return function () {
-                    console.log(_this);
-                }
-            }
+let obj = {
+    getThis: function () {
+    //提前保存this指向
+        let _this=this
+        return function () {
+            console.log(_this);
         }
-        obj.getThis()(); //obj
+    }
+}
+obj.getThis()(); // { getThis: [Function: getThis] }
 ```
+
+
 
 **箭头函数中的this**
 
@@ -4580,29 +4392,29 @@ for (let i = 0; i < btns.length; i++) {
 例1：首先，距离箭头函数最近的是getThis(){}，与该函数平级的执行上下文是obj中的执行上下文，箭头函数中的this就是下注释代码处的this，即obj。
 
 ```js
-        let obj = {
-            //此处的this即是箭头函数中的this
-            getThis: function () {
-                return  ()=> {
-                    console.log(this);
-                }
-            }
+let obj = {
+    //此处的this即是箭头函数中的this
+    getThis: function () {
+        return  ()=> {
+            console.log(this);
         }
-        obj.getThis()(); //obj
+    }
+}
+obj.getThis()(); // { getThis: [Function: getThis] }
 ```
 
 例2：该段代码中存在两个箭头函数，**this找不到对应的function(){}**，所以一直往上找直到指向window。
 
 ```js
-        //代码中有两个箭头函数，由于找不到对应的function，所以this会指向window对象。
-       let obj = {
-            getThis: ()=> {
-                return  ()=> {
-                    console.log(this);
-                }
-            }
+//代码中有两个箭头函数，由于找不到对应的function，所以this会指向window对象。
+let obj = {
+    getThis: ()=> {
+        return  ()=> {
+            console.log(this);
         }
-        obj.getThis()(); //window
+    }
+}
+obj.getThis()(); //window
 
 ```
 
@@ -4610,11 +4422,9 @@ for (let i = 0; i < btns.length; i++) {
 
 ------
 
-#### 4.3 手写bind
+## 3. 手写bind
 
-**参考答案：**
-
-1. Function.prototype.bind,这样就可以让所有函数的隐式原型上都会有一个bind了。
+1. Function.prototype.bind,这样就可以**让所有函数的隐式原型上都会有一个bind**了。
 
 ```js
 Function.prototype.bind = function() {
@@ -4623,7 +4433,7 @@ Function.prototype.bind = function() {
 
 ```
 
-2. bind的第一个形参是要绑定给函数的上下文，所以再完善一下上面的代码
+2. bind的**第一个形参是要绑定给函数的上下文**，所以再完善一下上面的代码
 
 ```js
 Function.prototype.bind = function(context) {
@@ -4644,7 +4454,7 @@ foo.bind(null,"a","b")("c","d","e"); // {"1":"a","2":"b","3":"c","4":"d","5":"e"
 
 ```
 
-4. 为了实现上面的效果，我们发现只要在返回的值上将函数合并上去就行了
+4. 为了实现上面的效果，我们发现**只要在返回的值上将函数合并上去就行了**
 
 ```js
 Function.prototype.bind=function(context,...args){
@@ -4664,17 +4474,17 @@ foo.bind(null,"a","b")("c","d","e");  //[Arguments] { '0': 'a', '1': 'b', '2': '
 5. 为了兼容性，替换成ES5的写法
 
 ```js
-Function.prototype.bind=function(context,...args){
-    var args=Array.prototype.slice.call(arguments);
-    var context=args.splice(0,1)[0];
-    var fn=this;
+Function.prototype.bind = function(){
+    var args = Array.prototype.slice.call(arguments);
+    var context = args.splice(0, 1)[0];
+    var fn = this;
     return function(){
-        let rest=Array.prototype.slice.call(arguments);
-        return fn.apply(context,args.concat(rest));
+        var rest = Array.prototype.slice.call(arguments);
+        return fn.apply(context, args.concat(rest));
     }
 }
 
-let foo=function(){
+let foo = function(){
     console.log(arguments);
 }
 
@@ -4684,21 +4494,21 @@ foo.bind(null,"a","b")("c","d","e");  //[Arguments] { '0': 'a', '1': 'b', '2': '
 6. 把函数的原型保留下来。
 
 ```js
-Function.prototype.bind=function(context,...args){
-    var args=Array.prototype.slice.call(arguments);
-    var context=args.splice(0,1)[0];
-    var fn=this;
-    var res=function(){
-        let rest=Array.prototype.slice.call(arguments);
-        return fn.apply(context,args.concat(rest));
+Function.prototype.bind = function(){
+    var args = Array.prototype.slice.call(arguments);
+    var context = args.splice(0, 1)[0];
+    var fn = this;
+    var res = function(){
+        var rest = Array.prototype.slice.call(arguments);
+        return fn.apply(context, args.concat(rest));
     }
     if (this.prototype) {
-        res.prototype=this.prototype;
+        res.prototype = this.prototype;
     }
     return res;
 }
 
-let foo=function(){
+let foo = function(){
     console.log(arguments);
 }
 
@@ -4708,43 +4518,48 @@ foo.bind(null,"a","b")("c","d","e");  //[Arguments] { '0': 'a', '1': 'b', '2': '
 7. 最后还需要再找到一种方法来判断是否对bind之后的结果使用了new操作符。
 
 ```js
-Function.prototype.bind=function(context,...args){
-    var args=Array.prototype.slice.call(arguments);
-    var context=args.splice(0,1)[0];
-    var fn=this;
-    var noop=function(){}
-    var res=function(){
-        let rest=Array.prototype.slice.call(arguments);
+Function.prototype.bind = function(){
+    var args = Array.prototype.slice.call(arguments);
+    var context = args.splice(0, 1)[0];
+    var fn = this;
+
+    var noop = function() {}
+
+    var res = function(){
+        var rest = Array.prototype.slice.call(arguments);
         // this只和运行的时候有关系，所以这里的this和上面的fn不是一码事，new res()和res()在调用的时候，res中的this是不同的东西
-        return fn.apply(this instanceof noop ? this : context,args.concat(rest));
+        return fn.apply(this instanceof noop ? this : context, args.concat(rest));
     }
     if (this.prototype) {
-        noop.prototype=this.prototype;
+        noop.prototype = this.prototype;
     }
-    res.prototype=new noop();
+
+    res.prototype = new noop();
     return res;
 }
 
-let foo=function(){
+let foo = function(){
     console.log(arguments);
 }
 
 foo.bind(null,"a","b")("c","d","e");  //[Arguments] { '0': 'a', '1': 'b', '2': 'c', '3': 'd', '4': 'e' }
 ```
 
+
+
+
+
 ------
 
-#### 4.4 箭头函数能否当构造函数
-
-**参考答案：**
+## 4. 箭头函数能否当构造函数
 
 **箭头函数表达式**的语法比函数表达式更简洁，并且没有自己的this，arguments，super或new.target。箭头函数表达式更适用于那些本来需要匿名函数的地方，并且它不能用作构造函数。
 
+
+
 ------
 
-#### 4.5 继承，优缺点
-
-**参考答案：**
+## 5.  继承，优缺点
 
 - 继承的好处
   - a：提高了代码的复用性
@@ -4752,211 +4567,249 @@ foo.bind(null,"a","b")("c","d","e");  //[Arguments] { '0': 'a', '1': 'b', '2': '
   - c：让类与类之间产生了关系，是多态的前提
 - 继承的弊端
   - 类的耦合性增强了,但是开发的原则：高内聚，低耦合。
+  
+  
 
 ------
 
-#### 4.6 js继承的方法和优缺点
+## 6.  js继承的方法和优缺点
 
-**参考答案：**
+(1) 原型链继承
 
-1. 原型链继承
+**实现方式**：将子类的原型链指向父类的对象实例
 
-   **实现方式**：将子类的原型链指向父类的对象实例
+```js
+function Parent(){
+    this.name="parent";
+    this.list=["a"];
+}
+Parent.prototype.sayHi=function(){
+    console.log("Hello!");
+}
 
-   ```js
-   function Parent(){
-       this.name="parent";
-       this.list=["a"];
-   }
-   Parent.prototype.sayHi=function(){
-       console.log("Hello!");
-   }
-   
-   function Child(){}
-   Child.prototype=new Parent();
-   
-   var child=new Child();
-   console.log(child.name);  //parent
-   child.sayHi();  //Hello!
-   
-   var a=new Child();
-   var b=new Child();
-   a.list.push("b");
-   console.log(b.list);  //[ 'a', 'b' ]
-   ```
+function Child(){}
+Child.prototype=new Parent();
 
-   **原理**：子类实例child的`__proto__`指向Child的原型链prototype，而Child.prototype指向Parent类的对象实例，该父类对象实例的`__proto__`指向Parent.prototype,所以Child可继承Parent的构造函数属性、方法和原型链属性、方法
+var child=new Child();
+console.log(child.name);  //parent
+child.sayHi();  //Hello!
 
-   **优点**：可继承构造函数的属性，父类构造函数的属性，父类原型的属性
+var a=new Child();
+var b=new Child();
+a.list.push("b");
+console.log(b.list);  //[ 'a', 'b' ]
+```
 
-   **缺点**：无法向父类构造函数传参；且所有实例共享父类实例的属性，若父类共有属性为引用类型，一个子类实例更改父类构造函数共有属性时会导致继承的共有属性发生变化.
+**原理**：子类实例child的`__proto__`指向Child的原型链prototype，而Child.prototype指向Parent类的对象实例，该父类对象实例的`__proto__`指向Parent.prototype,所以Child可继承Parent的构造函数属性、方法和原型链属性、方法
 
-   
+**优点**：可继承构造函数的属性，父类构造函数的属性，父类原型的属性
 
-   
+**缺点**：无法向父类构造函数传参；且所有实例共享父类实例的属性，若父类共有属性为引用类型，一个子类实例更改父类构造函数共有属性时会导致继承的共有属性发生变化.
 
-2. 构造函数继承
 
-   **实现方式**：在子类构造函数中使用call或者apply劫持父类构造函数方法，并传入参数
 
-   ```js
-   function Parent(name,id){
-       this.id=id;
-       this.name=name;
-       this.list=["a"];
-       this.printName=function(){
-           console.log(this.name);
-       }
-   }
-   Parent.prototype.sayName=function(){
-       console.log(this.name);
-   }
-   
-   function Child(name,id){
-       Parent.call(this,name,id);
-       // Parent.apply(this, arguments);
-   }
-   
-   var child=new Child("kop",26);
-   child.printName();  //kop
-   child.sayName();  //TypeError: child.sayName is not a function
-   
-   ```
+(2) 构造函数继承
 
-   **原理**：使用call或者apply**更改子类函数的作用域**，使this执行父类构造函数，子类因此可以继承父类共有属性
+**实现方式**：在子类构造函数中使用call或者apply劫持父类构造函数方法，并传入参数
 
-   **优点**：可解决原型链继承的缺点
+```js
+function Parent(name,id){
+    this.id=id;
+    this.name=name;
+    this.list=["a"];
+    this.printName=function(){
+        console.log(this.name);
+    }
+}
+Parent.prototype.sayName=function(){
+    console.log(this.name);
+}
 
-   **缺点**：不可继承父类的原型链方法，构造函数不可复用
+function Child(name,id){
+    Parent.call(this, name, id);
+    // Parent.apply(this, arguments);
+}
 
-   
+var child=new Child("kop",26);
+child.printName();  //kop
+child.sayName();  //TypeError: child.sayName is not a function
 
-3. 组合继承
+```
 
-   **原理**：综合使用构造函数继承和原型链继承
+**原理**：使用call或者apply**更改子类函数的作用域**，使this执行父类构造函数，子类因此可以继承父类共有属性
 
-   ```js
-   function Parent(name,id){
-       this.id=id;
-       this.name=name;
-       this.list=["a"];
-       this.printName=function(){
-           console.log(this.name);
-       }
-   }
-   Parent.prototype.sayName=function(){
-       console.log(this.name);
-   }
-   
-   function Child(name,id){
-       Parent.call(this,name,id);
-       // Parent.apply(this, arguments);
-   }
-   Child.prototype=new Parent();
-   
-   var child=new Child("kop",26);
-   child.printName();  //kop
-   child.sayName();  //kop
-   
-   var a=new Child();
-   var b=new Child();
-   a.list.push("b");
-   console.log(a.list);  //[ 'a', 'b' ]
-   console.log(b.list);  //[ 'a' ]
-   ```
+**优点**：可解决原型链继承的缺点
 
-   **优点**：可继承父类原型上的属性，且可传参；每个新实例引入的构造函数是私有的
+**缺点**：不可继承父类的原型链方法，构造函数不可复用
 
-   **缺点**：会执行两次父类的构造函数，消耗较大内存，子类的构造函数会代替原型上的那个父类构造函数
 
-   
 
-4. 原型式继承
+(3) 组合继承
 
-   **原理**：类似Object.create，用一个函数包装一个对象，然后返回这个函数的调用，这个函数就变成了个可以随意增添属性的实例或对象，结果是将子对象的__proto__指向父对象
+**原理**：综合使用构造函数继承和原型链继承
 
-   ```js
-   var parent = {
-     names: ['a']
-   }
-   function copy(object) {
-     function F() {}
-     F.prototype = object;    
-     return new F();
-   }
-   var child = copy(parent);
-   
-   ```
+```js
+function Parent(name,id){
+    this.id=id;
+    this.name=name;
+    this.list=["a"];
+    this.printName=function(){
+        console.log(this.name);
+    }
+}
+Parent.prototype.sayName=function(){
+    console.log(this.name);
+}
 
-   缺点：共享引用类型
+function Child(name,id){
+    Parent.call(this,name,id);
+    // Parent.apply(this, arguments);
+}
+Child.prototype=new Parent();
 
-   
+var child=new Child("kop",26);
+child.printName();  //kop
+child.sayName();  //kop
 
-5. 寄生式继承
+var a=new Child();
+var b=new Child();
+a.list.push("b");
+console.log(a.list);  //[ 'a', 'b' ]
+console.log(b.list);  //[ 'a' ]
+```
 
-   原理：二次封装原型式继承，并拓展
+**优点**：可继承父类原型上的属性，且可传参；每个新实例引入的构造函数是私有的
 
-   ```js
-   function createObject(obj) {
-     var o = copy(obj);
-     o.getNames = function() {
-       console.log(this.names);
-       return this.names;
-     }
-     return o;
-   }
-   ```
+**缺点**：会执行两次父类的构造函数，消耗较大内存，子类的构造函数会代替原型上的那个父类构造函数
 
-   优点：可添加新的属性和方法
 
-   
 
-6. 寄生组合式继承
+(4) 原型式继承
 
-   原理：改进组合继承，利用寄生式继承的思想继承原型
+**原理**：类似Object.create，用一个函数包装一个对象，然后返回这个函数的调用，这个函数就变成了个可以随意增添属性的实例或对象，结果是将子对象的`__proto__`指向父对象
 
-   ```js
-   function inheritPrototype(subClass, superClass) {
-     // 复制一份父类的原型
-     var p = copy(superClass.prototype);
-     // 修正构造函数
-     p.constructor = subClass;
-     // 设置子类原型
-     subClass.prototype = p;
-   }
-   
-   function Parent(name, id){
-     this.id = id;
-     this.name = name;
-     this.list = ['a'];
-     this.printName = function(){
-       console.log(this.name);
-     }
-   }
-   Parent.prototype.sayName = function(){
-     console.log(this.name);
-   };
-   function Child(name, id){
-     Parent.call(this, name, id);
-     // Parent.apply(this, arguments);
-   }
-   inheritPrototype(Child, Parent);
-   
-   ```
+```js
+var parent = {
+  names: ['a']
+}
+function copy(object) {
+  function F() {}
+  F.prototype = object;    
+  return new F();
+}
 
-   ------
+var child1 = copy(parent);
+var child2 = copy(parent);
 
-   
+child1.names.push("b");
 
-#### 4.7 new会发生什么
+console.log(child2.names);  // [ 'a', 'b' ]
+```
 
-**参考答案：**
+缺点：共享引用类型
+
+
+
+(5) 寄生式继承
+
+原理：二次封装原型式继承，并拓展
+
+```js
+var parent = {
+  names: ['a']
+}
+function copy(object) {
+  function F() {}
+  F.prototype = object;    
+  return new F();
+}
+
+function createObject(obj) {
+  var o = copy(obj);
+
+  o.getNames = function() {
+    return this.names;
+  }
+  return o;
+}
+
+var child1 = createObject(parent);
+var child2 = createObject(parent);
+
+child1.names.push("b");
+
+console.log(child2.names);  // [ 'a', 'b' ]
+console.log(child1.getNames());  // [ 'a', 'b' ]
+```
+
+优点：可添加新的属性和方法
+
+缺点：共享引用类型
+
+
+
+(6) 寄生组合式继承
+
+原理：改进组合继承，利用寄生式继承的思想继承原型
+
+```js
+
+function copy(object) {
+  function F() {}
+  F.prototype = object;    
+  return new F();
+}
+
+function inheritPrototype(subClass, superClass) {
+  // 复制一份父类的原型
+  var p = copy(superClass.prototype);
+  // 修正构造函数
+  p.constructor = subClass;
+  // 设置子类原型
+  subClass.prototype = p;
+}
+
+function Parent(id, name){
+  this.id = id;
+  this.name = name;
+  this.list = ['a'];
+  this.printName = function(){
+    console.log(this.name);
+  }
+}
+Parent.prototype.sayName = function(){
+  console.log(this.name);
+};
+function Child(id, name){
+  Parent.call(this, id, name);
+  // Parent.apply(this, arguments);
+}
+inheritPrototype(Child, Parent);
+
+var child1 = new Child(1, "kop");
+var child2 = new Child(2, "bob");
+
+child1.list.push("b");
+
+console.log(child1.list);  // [ 'a', 'b' ]
+console.log(child2.list);  // [ 'a' ]
+child1.sayName();  // kop
+child2.sayName();  // bob
+```
+
+
+
+
+
+------
+
+## 7. new会发生什么
 
 1. 创建空对象；
    var obj = {};
 
 2. 设置新对象的constructor属性为构造函数的名称，设置新对象的**proto**属性指向构造函数的prototype对象；
-   obj.**proto** = ClassA.prototype;
+   obj.`__proto__ `= ClassA.prototype;
    扩展了新对象的原型链。
 
 3. 使用新对象调用函数，函数中的this被指向新实例对象：
@@ -4978,12 +4831,12 @@ foo.bind(null,"a","b")("c","d","e");  //[Arguments] { '0': 'a', '1': 'b', '2': '
 
 **`new`** 关键字会进行如下的操作：
 
-1. 创建一个空的简单JavaScript对象（即`**{}**`）；
-2. 为步骤1新创建的对象添加属性`**__proto__**`，将该属性链接至构造函数的原型对象 ；
-3. 将步骤1新创建的对象作为`**this**`的上下文 ；
-4. 如果该函数没有返回对象，则返回`**this**`。
+1. 创建一个空的简单JavaScript对象（即`{}`）；
+2. 为步骤1新创建的对象添加属性`__proto__`，将该属性链接至构造函数的原型对象 ；
+3. 将步骤1新创建的对象作为`this`的上下文 ；
+4. 如果该函数没有返回对象，则返回`this`。
 
-（译注：关于对象的 `**constructor**`，参见 `**Object.prototype.constructor**`）
+（译注：关于对象的 `constructor`，参见 `Object.prototype.constructor`）
 
 创建一个用户自定义的对象需要两步：
 
@@ -4992,66 +4845,21 @@ foo.bind(null,"a","b")("c","d","e");  //[Arguments] { '0': 'a', '1': 'b', '2': '
 
 创建一个对象类型，需要创建一个指定其名称和属性的函数；对象的属性可以指向其他对象
 
+
+
 ------
 
 ------
 
-##  js工作原理
+#  js工作原理
 
 ------
 
-##  如何检查Javascript中的内存泄漏？
+## 1. 为什么js是单线程
 
-### 浏览器
+这主要和js的用途有关，js是作为浏览器的脚本语言，主要是实现用户与浏览器的交互，以及操作dom；**这决定了它只能是单线程**，否则会带来很复杂的同步问题。 
 
-```
-1、打开开发者工具，选择 Timeline 面板
-2、在顶部的Capture字段里面勾选 Memory
-3、点击左上角的录制按钮。
-4、在页面上进行各种操作，模拟用户的使用情况。
-5、一段时间后，点击对话框的 stop 按钮，面板上就会显示这段时间的内存占用情况。
-```
-
-如果内存占用基本平稳，接近水平，就说明不存在内存泄漏。
-
-反之，就是内存泄漏了。
-
-### 命令行
-
-命令行可以使用 Node 提供的process.memoryUsage方法。
-
-```js
-console.log(process.memoryUsage());
-
-{
-  rss: 20168704,
-  heapTotal: 4915200,
-  heapUsed: 4129056,
-  external: 284355,
-  arrayBuffers: 11983
-}
-```
-
-process.memoryUsage返回一个对象，包含了 Node 进程的内存占用信息。该对象包含四个字段，单位是字节
-
-```
-rss（resident set size）：所有内存占用，包括指令区和堆栈。
-heapTotal："堆"占用的内存，包括用到的和没用到的。
-heapUsed：用到的堆的部分。
-external： V8 引擎内部的 C++ 对象占用的内存。
-```
-
-判断内存泄漏，以 `heapUsed` 字段为准。
-
-
-
-----
-
-#### 7.1 为什么js是单线程
-
-**参考答案：**
-
-这主要和js的用途有关，js是作为浏览器的脚本语言，主要是实现用户与浏览器的交互，以及操作dom；这决定了它只能是单线程，否则会带来很复杂的同步问题。 举个例子：如果js被设计了多线程，如果有一个线程要修改一个dom元素，另一个线程要删除这个dom元素，此时浏览器就会一脸茫然，不知所措。所以，为了避免复杂性，从一诞生，JavaScript就是单线程，这已经成了这门语言的核心特征，将来也不会改变
+举个例子：如果js被设计了多线程，如果有一个线程要修改一个dom元素，另一个线程要删除这个dom元素，此时浏览器就会一脸茫然，不知所措。所以，为了避免复杂性，从一诞生，JavaScript就是单线程，这已经成了这门语言的核心特征，将来也不会改变。
 
 **扩展：**
 
@@ -5065,72 +4873,72 @@ external： V8 引擎内部的 C++ 对象占用的内存。
 
 浏览器是多进程的？
 
-放在浏览器中，每打开一个tab页面，其实就是新开了一个进程，在这个进程中，还有ui渲染线程，js引擎线程，http请求线程等。 所以，浏览器是一个多进程的。
+放在浏览器中，每打开一个tab页面，其实就是新开了一个进程，在这个进程中，还有ui渲染线程，js引擎线程，http请求线程等。 所以，**浏览器是一个多进程的。**
 
-为了利用多核CPU的计算能力，HTML5提出Web Worker标准，允许JavaScript脚本创建多个线程，但是子线程完全受主线程控制，且不得操作DOM。所以，这个新标准并没有改变JavaScript单线程的本质。
+为了利用多核CPU的计算能力，HTML5提出Web Worker标准，允许JavaScript脚本创建多个线程，**但是子线程完全受主线程控制，且不得操作DOM**。所以，这个新标准并没有改变JavaScript单线程的本质。
 
 
 
 -------
 
-#### 7.2 宏微队列及执行顺序
-
-**参考答案：**
+## 2. 宏、微任务队列及执行顺序
 
 JS 中用来存储待执行回调函数的队列包含 2 个不同特定的列队
 
-- **宏列队**：用来保存待执行的宏任务（回调），比如：定时器回调、DOM 事件回调、ajax 回调
-- **微列队**：用来保存待执行的微任务（回调），比如：promise的回调、MutationObserver 的回调
+- **宏任务列队**：用来保存待执行的宏任务（回调），比如：定时器回调、DOM 事件回调、ajax 回调
+- **微任务列队**：用来保存待执行的微任务（回调），比如：promise的回调、MutationObserver 的回调
 
 JS 执行时会区别这 2 个队列
 
 - JS 引擎首先必须先执行所有的初始化同步任务代码
-- 每次准备取出第一个宏任务执行前, 都要将所有的微任务一个一个取出来执行，也就是优先级比宏任务高，且与微任务所处的代码位置无关
+- 每次准备取出第一个宏任务执行前, 都要将所有的微任务一个一个取出来执行，**也就是优先级比宏任务高**，且与微任务所处的代码位置无关
 
 下面这个例子可以看出**Promise要先于setTimeout执行**：
 
 ```js
-　　setTimeout(() => { //立即放入宏队列
-      console.log('timeout callback1（）')
-      Promise.resolve(3).then(
-        value => { //立即放入微队列
-          console.log('Promise onResolved3()', value)
-        }
-      )
+setTimeout(() => { //立即放入宏队列
+  console.log('timeout callback1（）')
+  Promise.resolve(3).then(
+    value => { //立即放入微队列
+      console.log('Promise onResolved3()', value)
+    }
+  )
+}, 0)
+
+setTimeout(() => { //立即放入宏队列
+  console.log('timeout callback2（）')
+}, 0)
+
+Promise.resolve(1).then(
+  value => { //立即放入微队列
+    console.log('Promise onResolved1()', value)
+    setTimeout(() => {
+      console.log('timeout callback3（）', value)
     }, 0)
+  }
+)
 
-    setTimeout(() => { //立即放入宏队列
-      console.log('timeout callback2（）')
-    }, 0)
+Promise.resolve(2).then(
+  value => { //立即放入微队列
+    console.log('Promise onResolved2()', value)
+  }
+)
 
-    Promise.resolve(1).then(
-      value => { //立即放入微队列
-        console.log('Promise onResolved1()', value)
-        setTimeout(() => {
-          console.log('timeout callback3（）', value)
-        }, 0)
-      }
-    )
-
-    Promise.resolve(2).then(
-      value => { //立即放入微队列
-        console.log('Promise onResolved2()', value)
-      }
-    )
-
-    // Promise onResolved1() 1
-    // Promise onResolved2() 2
-    // timeout callback1（）
-    // Promise onResolved3() 3
-    // timeout callback2（）
-    // timeout callback3（） 1
+// Promise onResolved1() 1
+// Promise onResolved2() 2
+// timeout callback1（）
+// Promise onResolved3() 3
+// timeout callback2（）
+// timeout callback3（） 1
 ```
+
+
+
+
 
 ------
 
-#### 7.3 死锁
-
-**参考答案：**
+## 3. 死锁
 
 死锁是指两个或两个以上的进程在执行过程中，由于竞争资源而造成阻塞的现象，若无外力作用，它们都将无法继续执行
 
@@ -5144,97 +4952,27 @@ JS 执行时会区别这 2 个队列
 
 产生条件
 
-1. 互斥条件：涉及的资源是非共享的
+1. 互斥条件：涉及的资源是**非共享**的
    - 涉及的资源是非共享的,一段时间内某资源只由一个进程占用,如果此时还有其它进程请求资源，则请求者只能等待，直至占有资源的进程用毕释放
-2. 不剥夺条件：不能强行剥夺进程拥有的资源
+2. 不剥夺条件：**不能强行剥夺进程拥有的资源**
    - 进程已获得的资源，在未使用完之前，不能被剥夺，只能在使用完时由自己释放
-3. 请求和保持条件：进程在等待一新资源时继续占有已分配的资源
-   - 指进程已经保持至少一个资源，但又提出了新的资源请求，而该资源已被其它进程占有，此时请求进程阻塞，但又对自己已获得的其它资源保持不放 环路等待条件：存在一种进程的循环链，链中的每一个进程已获得的资源同时被链中的下一个进程所请求 在发生死锁时，必然存在一个进程——资源的环形链
+3. 请求和保持条件：**进程在等待一新资源时继续占有已分配的资源**
+   - 指进程已经保持至少一个资源，但又提出了新的资源请求，而该资源已被其它进程占有，此时请求进程阻塞，但又对自己已获得的其它资源保持不放 
+4. 环路等待条件：**存在一种进程的循环链**，链中的每一个进程已获得的资源同时被链中的下一个进程所请求 在发生死锁时，必然存在一个进程——资源的环形链
 
 解决办法
 
 只要打破四个必要条件之一就能有效预防死锁的发生
 
-------
 
-#### 7.4 暂时性死区
-
-**参考答案：**
-
-暂时性死区的本质就是，只要一进入当前作用域，所要使用的变量就已经存在了，但是不可获取，只有等到声明变量的那一行代码出现，才可以获取和使用该变量。
-
-**扩展：**
-
-let 、const与暂时性死区
-
-let或const声明的变量拥有暂时性死区（TDZ）：当进入它的作用域，它不能被访问（获取或设置）直到执行到达声明。
-
-首先看看**不具有暂时性死区的var**：
-
-- 当进入var变量的作用域（包围它的函数），立即为它创建（绑定）存储空间。变量会立即被初始化并赋值为undefined。
-- 当执行到变量声明的时候，如果变量定义了值则会被赋值。
-
-通过**let声明的变量拥有暂时性死区**，生命周期如下：
-
-- 当进入let变量的作用域（包围它的语法块），立即为它创建（绑定）存储空间。此时变量仍是未初始化的。
-- 获取或设置未初始化的变量将抛出异常ReferenceError。
-- 当执行到变量声明的时候，如果变量定义了值则会被赋值。如果没有定义值，则赋值为undefined。
-
-**const工作方式与let类似，但是定义的时候必须赋值并且不能改变**。
-
-在 TDZ 内部，如果获取或设置变量将抛出异常：
-
-```js
-if (true) { // enter new scope, TDZ starts
-    // Uninitialized binding for `tmp` is created
-
-    tmp = 'abc'; // ReferenceError
-    console.log(tmp); // ReferenceError
-
-    let tmp; // TDZ ends, `tmp` is initialized with `undefined`
-    console.log(tmp); // undefined
-
-    tmp = 123;
-    console.log(tmp); // 123
-}
-```
-
-下面的示例将演示死区（dead zone）是真正短暂的（基于时间）和不受空间条件限制（基于位置）
-
-```js
-if (true) { // enter new scope, TDZ starts
-    const func = function () {
-        console.log(myVar); // OK!
-    };
-
-    // Here we are within the TDZ and
-    // accessing `myVar` would cause a `ReferenceError`
-
-    let myVar = 3; // TDZ ends
-    func(); // called outside TDZ
-}
-```
-
-typeof与暂时性死区
-
-变量在暂时性死区无法被访问，所以无法对它使用typeof：
-
-```js
-if (true) {
-    console.log(typeof tmp); // ReferenceError
-    let tmp;
-}
-```
 
 ------
 
-#### 7.5 面向对象的三个特征，分别说一下什么意思
-
-**参考答案：**
+## 4. 面向对象的三个特征，分别说一下什么意思
 
 概念：
 
-**封装：**将对象运行所需的资源封装在程序对象中——基本上，是方法和数据。对象是“公布其接口”。其他附加到这些接口上的对象不需要关心对象实现的方法即可使用这个对象。这个概念就是“不要告诉我你是怎么做的，只要做就可以了。”对象可以看作是一个自我包含的原子。对象接口包括了公共的方法和初始化数据。
+**封装：**将对象运行所需的资源封装在程序对象中——基本上，是方法和数据。对象是“公布其接口”。其他附加到这些接口上的对象不需要关心对象实现的方法即可使用这个对象。这个概念就是“不要告诉我你是怎么做的，只要做就可以了。” 对象可以看作是一个自我包含的原子。对象接口包括了公共的方法和初始化数据。
 
 **继承：** 继承可以解决代码复用，让编程更加靠近人类思维。当多个类存在相同的属性(变量)和方法时，可以从这些类中抽象出父类，在父类中定义这些相同的属性和方法，所有的子类不需要重新定义这些属性和方法，只需要通过继承父类中的属性和方法。
 
@@ -5248,15 +4986,19 @@ if (true) {
 
 **多态**就是相同的事物，调用其相同的方法，参数也相同时，但表现的行为却不同。多态分为两种，一种是行为多态与对象的多态
 
+
+
+
+
 ---
 
-#### 7.6 js事件循环
+## 5.  js事件循环
 
 浏览器中 JavaScript 的执行流程和 Node.js 中的流程都是基于 **事件循环** 的。
 
 理解事件循环的工作方式对于代码优化很重要，有时对于正确的架构也很重要。
 
-##### 事件循环
+**事件循环**
 
 **事件循环** 的概念非常简单。它是一个在 JavaScript 引擎等待任务，执行任务和进入休眠状态等待更多任务这几个状态之间转换的无限循环。
 
@@ -5294,7 +5036,7 @@ if (true) {
 1. **引擎执行任务时永远不会进行渲染（**render）。如果任务执行需要很长一段时间也没关系。仅在任务完成后才会绘制对 DOM 的更改。
 2. **如果一项任务执行花费的时间过长，浏览器将无法执行其他任务，例如处理用户事件**。因此，在一定时间后，浏览器会抛出一个如“页面未响应”之类的警报，建议你终止这个任务。**这种情况常发生在有大量复杂的计算或导致死循环的程序错误时**。
 
-##### 拆分 CPU 过载任务
+**拆分 CPU 过载任务**
 
 假设我们有一个 CPU 过载任务。
 
@@ -5399,7 +5141,7 @@ count();
 
 最后，我们将一个繁重的任务拆分成了几部分，现在它不会阻塞用户界面了。而且其总耗时并不会长很多。
 
-##### 进度指示
+**进度指示**
 
 对浏览器脚本中的过载型任务进行拆分的另一个好处是，我们可以显示进度指示。
 
@@ -5456,7 +5198,7 @@ count();
 
 现在 `div` 显示了 `i` 的值的增长，这就是进度条的一种。
 
-##### 在事件之后做一些事情
+**在事件之后做一些事情**
 
 在事件处理程序中，我们可能会决定推迟某些行为，直到事件冒泡并在所有级别上得到处理后。我们可以通过将该代码包装到零延迟的 `setTimeout` 中来做到这一点。
 
@@ -5476,7 +5218,7 @@ menu.onclick = function() {
 };
 ```
 
-##### 宏任务和微任务
+### 宏任务和微任务
 
 **宏任务（macrotask）** 外，还有在 [微任务（Microtask）](https://zh.javascript.info/microtask-queue) 一章中提到的 **微任务（microtask）**。
 
@@ -5539,7 +5281,7 @@ alert("code");
 </script>
 ```
 
-##### 总结
+**总结**
 
 更详细的事件循环算法（尽管与 [规范](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model) 相比仍然是简化过的）：
 
@@ -5613,7 +5355,7 @@ console.log(7);
    - 现在宏任务队列中有：`console.log(2); console.log(6); console.log(4)`。
 3. 当微任务队列为空后，开始执行宏任务队列。并输出 `2`、`6` 和 `4`。
 
-##### 为什么要引入微任务，只有一种类型的任务不行么？
+**为什么要引入微任务，只有一种类型的任务不行么？**
 
 页面渲染事件，各种IO的完成事件等随时被添加到任务队列中，一直会保持先进先出的原则执行，我们不能准确地控制这些事件被添加到任务队列中的位置。但是这个时候突然有高优先级的任务需要尽快执行，那么一种类型的任务就不合适了，所以引入了微任务队列。
 
@@ -5632,7 +5374,7 @@ console.log(7);
 - new Promise().then(回调)
 - MutationObserver(html5 新特性)
 
-#### 运行机制
+### 运行机制
 
 异步任务的返回结果会被放到一个任务队列中，根据异步事件的类型，这个事件实际上会被放到对应的宏任务和微任务队列中去。
 
@@ -5756,7 +5498,7 @@ setImmediate()方法**从意义上将是立刻执行的意思，但是实际上�
 
 ---
 
-##### **Web Workers**
+### **Web Workers**
 
 对于不应该阻塞事件循环的耗时长的繁重计算任务，我们可以使用 Web Workers.
 
@@ -5766,284 +5508,58 @@ Web Workers 可以与主线程交换消息，但是它们具有自己的变量�
 
 Web Workers 没有访问 DOM 的权限，因此，它们对于同时使用多个 CPU 内核的计算非常有用。
 
-------
+
 
 ----
 
+##  如何检查Javascript中的内存泄漏？
 
+### 浏览器
 
-## 模块化
-
-------
-
-#### 9.1 CommonJS规范
-
-**参考答案：**
-
-CommonJS规范加载模块是同步的，只有加载完成，才能执行后面的操作。
-
-CommonJS规范中的module、exports和require
-
-- 每个文件就是一个模块，有自己的作用域。每个模块内部，module变量代表当前模块，是一个对象，它的exports属性（即module.exports）是对外的接口。
-- module.exports属性表示当前模块对外输出的接口，其他文件加载该模块，实际上就是读取module.exports变量。
-- 为了方便，Node为每个模块提供一个exports变量，指向module.exports。
-
-```js
-let exports = module.exports;
+```
+1、打开开发者工具，选择 Timeline 面板
+2、在顶部的Capture字段里面勾选 Memory
+3、点击左上角的录制按钮。
+4、在页面上进行各种操作，模拟用户的使用情况。
+5、一段时间后，点击对话框的 stop 按钮，面板上就会显示这段时间的内存占用情况。
 ```
 
-- require命令用于加载模块文件。
+如果内存占用基本平稳，接近水平，就说明不存在内存泄漏。
 
-使用示例：
+反之，就是内存泄漏了。
 
-```js
-  //name.js
-  exports.name = function(){return '李婷婷'}; //导出
-  //getName.js
-  let getName = require('name'); //引入
-```
+### 命令行
 
-注：不能直接将exports变量指向一个值，因为这样等于切断了exports与module.exports的联系：如下
+命令行可以使用 Node 提供的process.memoryUsage方法。
 
 ```js
-exports = function(x){console.log(x)}
-```
+console.log(process.memoryUsage());
 
-如果一个模块的对外接口，就是一个单一的值，不能使用exports输出，只能使用module.exports输出。
-
-CommonJS模块导入用require，导出用module.exports。导出的对象需注意，如果是静态值，而且非常量，后期可能会有所改动的，请使用函数动态获取，否则无法获取修改值。导入的参数，是可以随意改动的，所以使用时要注意
-
-------
-
-#### 9.2 ES6 module 和 CommonJS module 的区别
-
-**参考答案**：
-
-- 为**CommonJS**的require语法是同步的，所以就导致了**CommonJS**模块规范只适合用在服务端，而ES6模块无论是在浏览器端还是服务端都是可以使用的，但是在服务端中，还需要遵循一些特殊的规则才能使用 ；
-- **CommonJS** 模块输出的是一个**值的拷贝**，而ES6 模块输出的是**值的引用**；
-- **CommonJS** 模块是运行时加载，而ES6 模块是编译时输出接口，使得对JS的模块进行静态分析成为了可能
-- 因为两个模块加载机制的不同，所以在对待循环加载的时候，它们会有不同的表现。**CommonJS**遇到循环依赖的时候，只会输出已经执行的部分，后续的输出或者变化，是不会影响已经输出的变量。而ES6模块相反，使用import加载一个变量，变量不会被缓存，真正取值的时候就能取到最终的值；
-- 关于模块顶层的this指向问题，在**CommonJS**顶层，this指向当前模块；而在ES6模块中，this指向undefined；
-- 关于两个模块互相引用的问题，在ES6模块当中，是支持加载**CommonJS**模块的。但是反过来，**CommonJS**并不能requireES6模块，在NodeJS中，两种模块方案是分开处理的。
-
-------
-
-#### 9.3 ES6 module、CommonJS module 循环引用的问题
-
-**参考答案：**
-
-循环加载指的是a脚本的执行依赖b脚本，b脚本的执行依赖a脚本
-
-1. CommonJS模块是加载时执行。一旦出现某个模块被“循环加载”，就只输出已经执行的部分，没有执行的部分不会输出。
-
-2. ES6模块对导出模块，变量，对象是动态引用，遇到模块加载命令import时不会去执行模块，只是生成一个指向被加载模块的引用。
-
-   CommonJS模块规范主要适用于后端Node.js，后端Node.js是同步模块加载，所以在模块循环引入时模块已经执行完毕。推荐前端工程中使用ES6的模块规范，通过安装Babel转码插件支持ES6模块引入的语法。
-
-**解析：**
-
-1. CommonJS模块的加载原理
-
-CommonJS模块就是一个脚本文件，require命令第一次加载该脚本时就会执行整个脚本，然后在内存中生成该模块的一个说明对象。
-
-```js
 {
-    id: '',  //模块名，唯一
-    exports: {  //模块输出的各个接口
-        ...
-    },
-    loaded: true,  //模块的脚本是否执行完毕
-    ...
+  rss: 20168704,
+  heapTotal: 4915200,
+  heapUsed: 4129056,
+  external: 284355,
+  arrayBuffers: 11983
 }
 ```
 
-以后用到这个模块时，就会到对象的exports属性中取值。即使再次执行require命令，也不会再次执行该模块，而是到缓存中取值。
-
-**CommonJS模块是加载时执行，即脚本代码在require时就全部执行**。一旦出现某个模块被“循环加载”，就只输出已经执行的部分，没有执行的部分不会输出。
-
-案例说明：
-
-案例来源于Node官方说明：[nodejs.org/api/modules…](https://nodejs.org/api/modules.html#modules_cycles)
-
-```js
-//a.js
-exports.done = false;
-
-var b = require('./b.js');
-console.log('在a.js中，b.done = %j', b.done);
-
-exports.done = true;
-console.log('a.js执行完毕！')
-
-//b.js
-exports.done = false;
-
-var a = require('./a.js');
-console.log('在b.js中，a.done = %j', a.done);
-
-exports.done = true;
-console.log('b.js执行完毕！')
-
-//main.js
-var a = require('./a.js');
-var b = require('./b.js');
-
-console.log('在main.js中，a.done = %j, b.done = %j', a.done, b.done);
+process.memoryUsage返回一个对象，包含了 Node 进程的内存占用信息。该对象包含四个字段，单位是字节
 
 ```
-
-输出结果如下：
-
-```js
-//node环境下运行main.js
-node main.js
-
-在b.js中，a.done = false
-b.js执行完毕！
-在a.js中，b.done = true
-a.js执行完毕！
-在main.js中，a.done = true, b.done = true
+rss（resident set size）：所有内存占用，包括指令区和堆栈。
+heapTotal："堆"占用的内存，包括用到的和没用到的。
+heapUsed：用到的堆的部分。
+external： V8 引擎内部的 C++ 对象占用的内存。
 ```
 
-JS代码执行顺序如下：
+判断内存泄漏，以 `heapUsed` 字段为准。
 
-1）main.js中先加载a.js，a脚本先输出done变量，值为false，然后加载b脚本，a的代码停止执行，等待b脚本执行完成后，才会继续往下执行。
 
-2）b.js执行到第二行会去加载a.js，这时发生循环加载，系统会去a.js模块对应对象的exports属性取值，因为a.js没执行完，从exports属性只能取回已经执行的部分，未执行的部分不返回，所以取回的值并不是最后的值。
-
-3）a.js已执行的代码只有一行，exports.done = false;所以对于b.js来说，require a.js只输出了一个变量done，值为false。往下执行console.log('在b.js中，a.done = %j', a.done);控制台打印出：
-
-```js
-在b.js中，a.done = false
-```
-
-4）b.js继续往下执行，done变量设置为true，console.log('b.js执行完毕！')，等到全部执行完毕，将执行权交还给a.js。此时控制台输出：
-
-```js
-b.js执行完毕！
-```
-
-5）执行权交给a.js后，a.js接着往下执行，执行console.log('在a.js中，b.done = %j', b.done);控制台打印出：
-
-```js
-在a.js中，b.done = true
-```
-
-6）a.js继续执行，变量done设置为true，直到a.js执行完毕。
-
-```
-a.js执行完毕！
-```
-
-7）main.js中第二行不会再次执行b.js，直接输出缓存结果。最后控制台输出：
-
-```
-在main.js中，a.done = true, b.done = true
-```
-
-总结：
-
-1）在b.js中，a.js没有执行完毕，只执行了第一行，所以循环加载中，只输出已执行的部分。
-
-2）main.js第二行不会再次执行，而是输出缓存b.js的执行结果。exports.done = true;
-
-1. ES6模块的循环加载
-
-ES6模块与CommonJS有本质区别，ES6模块对导出变量，方法，对象是动态引用，**遇到模块加载命令import时不会去执行模块，只是生成一个指向被加载模块的引用**，需要开发者保证真正取值时能够取到值，只要引用是存在的，代码就能执行。
-
-案例说明：
-
-```js
-//even.js
-import {odd} from './odd';
-
-var counter = 0;
-export function even(n){
-    counter ++;
-    console.log(counter);
-
-    return n == 0 || odd(n-1);
-}
-
-//odd.js
-import {even} from './even.js';
-
-export function odd(n){
-    return n != 0 && even(n-1);
-}
-
-//index.js
-import * as m from './even.js';
-
-var x = m.even(5);
-console.log(x);
-
-var y = m.even(4);
-console.log(y);
-
-```
-
-**执行index.js，输出结果如下：**
-
-```bash
-babel-node index.js
-
-1
-2
-3
-false
-4
-5
-6
-true
-
-```
-
-可以看出counter的值是累加的，ES6是动态引用。如果上面的引用改为CommonJS代码，会报错，因为在odd.js里，even.js代码并没有执行。改成CommonJS规范加载的代码为：
-
-```js
-//even.js
-var odd = require('./odd.js');
-
-var counter = 0;
-module.exports = function even(n){
-    counter ++;
-    console.log(counter);
-
-    return n == 0 || odd(n-1);
-}
-//odd.js
-var even = require('./even.js');
-
-module.exports = function odd(n){
-    return n != 0 && even(n-1);
-}
-//index.js
-var even = require('./even.js');
-
-var x = even(5);
-console.log(x);
-
-var y = even(5);
-console.log(y);
-
-```
-
-**执行index.js，输出结果如下：**
-
-```bash
-$ babel-node index.js
-1
-/Users/name/Projects/node/ES6/odd.1.js:6
-    return n != 0 && even(n - 1);
-                     ^
-
-TypeError: even is not a function
-    at odd (/Users/name/Projects/node/ES6/odd.1.js:4:22)
-
-```
 
 ------
+
+----
 
 
 
@@ -6508,7 +6024,86 @@ console.log(removeRepeatElementOfArray(nums));  // [ '1', '2', '3', '4', '5' ]
 
 ---
 
-## 
+#### 3.10 用js实现sleep，用promise
+
+**参考答案:**
+
+```js
+function sleep(time){
+    return new Promise(resolve=>setTimeout(resolve,time));
+}
+
+const t1=+new Date();
+sleep(3000).then(()=>{
+    const t2=+new Date();
+    console.log(t2-t1);
+});
+
+```
+
+优点：这种方式实际上是用了 setTimeout，**没有形成进程阻塞，不会造成性能和负载问题**。
+
+缺点：虽然不像 callback 套那么多层，但仍不怎么美观，**而且当我们需要在某过程中需要停止执行（或者在中途返回了错误的值），还必须得层层判断后跳出，非常麻烦**，而且这种异步并不是那么彻底，还是看起来别扭
+
+------
+
+#### 3.11 实现一个 Scheduler 类，完成对Promise的并发处理，最多同时执行2个任务
+
+**参考答案：**
+
+```js
+class Scheduler{
+    constructor(){
+        this.tasks=[];  // 待运行的任务
+        this.usingTask=[];  // 正在运行的任务
+    }
+
+    //promiseCreator 是一个异步函数，return Promise
+    add(promiseCreator){
+        return new Promise((resolve,reject)=>{
+            promiseCreator.resolve=resolve;
+            if (this.usingTask.length<2) {
+                this.usingRun(promiseCreator);
+            }else{
+                this.tasks.push(promiseCreator);
+            }
+        });
+    }
+
+    usingRun(promiseCreator){
+        this.usingTask.push(promiseCreator);
+        promiseCreator().then(()=>{
+            promiseCreator.resolve();
+            this.usingMove(promiseCreator);
+            if (this.tasks.length>0) {
+                this.usingRun(this.tasks.shift());
+            }
+        });
+    }
+
+    usingMove(promiseCreator){
+        let index=this.usingTask.findIndex(promiseCreator);
+        this.usingTask.splice(index,1);
+    }
+}
+
+const timeout=(time)=>new Promise(resolve=>{
+    setTimeout(resolve,time);
+});
+
+const scheduler=new Scheduler();
+const addTask=(time,order)=>{
+    scheduler.add(()=>timeout(time)).then(()=>console.log(order));
+}
+
+addTask(400,4);
+addTask(200,2);
+addTask(300,3);
+```
+
+------
+
+#### 
 
 ----
 
@@ -9154,3 +8749,114 @@ new new Foo().getName();  // 3
 
 ```
 
+
+
+----
+
+## 3.13 js执行顺序的题目，涉及到settimeout、console、process.nextTick、promise.then
+
+```js
+console.time('start');
+
+setTimeout(function() {
+  console.log(2);
+}, 10);
+
+setImmediate(function() {
+  console.log(1);
+});
+
+new Promise(function(resolve) {
+  console.log(3);
+  resolve();
+  console.log(4);
+}).then(function() {
+  console.log(5);
+  console.timeEnd('start')
+});
+
+console.log(6);
+
+process.nextTick(function() {
+  console.log(7);
+});
+
+console.log(8);
+/*
+3
+4
+6
+8
+5
+start: 4.899ms
+7
+1
+2
+*/
+```
+
+**参考答案：**
+
+综合的执行顺序就是：3——>4——>6——>8——>7——>5——>start: 4.899ms——>1——>2
+
+**解析：**
+
+本题目，考察的就是 node 事件循环 Event Loop 我们可以简单理解Event Loop如下：
+
+1. 所有任务都在主线程上执行，形成一个执行栈(Execution Context Stack)
+2. 在主线程之外还存在一个任务队列(Task Queen),系统把异步任务放到任务队列中，然后主线程继续执行后续的任务
+3. 一旦执行栈中所有的任务执行完毕，系统就会读取任务队列。如果这时异步任务已结束等待状态，就会从任务队列进入执行栈，恢复执行
+4. 主线程不断重复上面的第三步
+
+在上述的例子中，我们明白首先执行主线程中的同步任务，因此依次输出3、4、6、8。当主线程任务执行完毕后，再从Event Loop中读取任务。
+
+Event Loop读取任务的先后顺序，取决于**任务队列（Job queue）中对于不同任务读取规则的限定**。
+
+在Job queue中的队列分为两种类型：
+
+- **宏任务** Macrotask宏任务是指Event Loop在**每个阶段**执行的任务
+- **微任务** Microtask微任务是指Event Loop在**每个阶段之间**执行的任务
+
+我们举例来看执行顺序的规定，我们假设
+
+宏任务队列包含任务: A1, A2 , A3
+
+微任务队列包含任务: B1, B2 , B3
+
+执行顺序为，首先执行宏任务队列开头的任务，也就是 A1 任务，执行完毕后，在执行微任务队列里的所有任务，也就是依次执行B1, B2 , B3，执行完后清空微任务队中的任务，接着执行宏任务中的第二个任务A2，依次循环。
+
+了解完了宏任务 Macrotask和微任务 Microtask两种队列的执行顺序之后，我们接着来看，真实场景下这两种类型的队列里真正包含的任务（我们以node V8引擎为例），在node V8中，这两种类型的真实任务顺序如下所示：
+
+宏任务 Macrotask队列真实包含任务：
+
+```js
+script(主程序代码),setTimeout, setInterval, setImmediate, I/O, UI rendering
+```
+
+微任务 Microtask队列真实包含任务：
+
+```
+process.nextTick, Promises, Object.observe, MutationObserver
+```
+
+由此我们得到的执行顺序应该为：
+
+```
+script(主程序代码)—>process.nextTick—>Promises...——>setTimeout——>setInterval——>setImmediate——> I/O——>UI rendering
+```
+
+> 在ES6中宏任务 Macrotask队列又称为ScriptJobs，而微任务 Microtask又称PromiseJobs
+
+我们的题目相对复杂，但是要注意，我们在定义promise的时候，promise构造部分是同步执行的
+
+接下来我们分析我们的题目，首先分析Job queue的执行顺序：
+
+```
+script(主程序代码)——>process.nextTick——>promise——>setTimeout——>setImmediate
+```
+
+- 主体部分： 定义promise的构造部分是同步的，因此先输出3、4 ，主体部分再输出6、8（同步情况下，就是严格按照定义的先后顺序）
+- process.nextTick: 输出7
+- promise： 这里的promise部分，严格的说其实是promise.then部分，输出的是5、以及 timeEnd('start')
+- setImmediate：输出1，依据上面优先级，应该先setTimeout，但是注意，setTimeout 设置 10ms 延时
+- setTimeout ： 输出2
