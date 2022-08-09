@@ -1,42 +1,48 @@
+class Scheduler{
+    constructor(){
+        this.tasks = [];  // 待运行的任务
+        this.usingTask = [];  // 正在运行的任务
+    }
 
-function copy(object) {
-  function F() {}
-  F.prototype = object;    
-  return new F();
+    //promiseCreator 是一个异步函数，return Promise
+    add(promiseCreator){
+        return new Promise((resolve, reject) => {
+            promiseCreator.resolve = resolve;
+            if (this.usingTask.length < 2) {
+                this.usingRun(promiseCreator);
+            }else{
+                this.tasks.push(promiseCreator);
+            }
+        });
+    }
+
+    usingRun(promiseCreator){
+        this.usingTask.push(promiseCreator);
+        promiseCreator().then(() => {
+            promiseCreator.resolve();
+            this.usingMove(promiseCreator);
+            if (this.tasks.length > 0) {
+                this.usingRun(this.tasks.shift());
+            }
+        });
+    }
+
+    usingMove(promiseCreator){
+        let index = this.usingTask.findIndex(promiseCreator);
+        this.usingTask.splice(index, 1);
+    }
 }
 
-function inheritPrototype(subClass, superClass) {
-  // 复制一份父类的原型
-  var p = copy(superClass.prototype);
-  // 修正构造函数
-  p.constructor = subClass;
-  // 设置子类原型
-  subClass.prototype = p;
+const timeout = (time) => new Promise(resolve => {
+    setTimeout(resolve,time);
+});
+
+const scheduler = new Scheduler();
+
+const addTask = (time, order)=>{
+    scheduler.add(() => timeout(time)).then(() => console.log(order));
 }
 
-function Parent(id, name){
-  this.id = id;
-  this.name = name;
-  this.list = ['a'];
-  this.printName = function(){
-    console.log(this.name);
-  }
-}
-Parent.prototype.sayName = function(){
-  console.log(this.name);
-};
-function Child(id, name){
-  Parent.call(this, id, name);
-  // Parent.apply(this, arguments);
-}
-inheritPrototype(Child, Parent);
-
-var child1 = new Child(1, "kop");
-var child2 = new Child(2, "bob");
-
-child1.list.push("b");
-
-console.log(child1.list);  // [ 'a', 'b' ]
-console.log(child2.list);  // [ 'a' ]
-child1.sayName();  // kop
-child2.sayName();  // bob
+addTask(400, 4);
+addTask(200, 2);
+addTask(300, 3);

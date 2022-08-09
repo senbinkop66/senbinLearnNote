@@ -5565,249 +5565,11 @@ external： V8 引擎内部的 C++ 对象占用的内存。
 
 # 手写题
 
-----
+## 
 
-#### 2.18 数组去重
+## 1.  请问js有哪些数组去重方法？
 
-**参考答案：**
-
-**1. 利用ES6 Set去重（ES6中最常用）**
-
-```js
-function unique (arr) {
-  return Array.from(new Set(arr))
-}
-var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-console.log(unique(arr))
- //[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {}, {}]
-```
-
-不考虑兼容性，这种去重的方法代码最少。这种方法还无法去掉“{}”空对象，后面的高阶方法会添加去掉重复“{}”的方法。
-
-**2. 利用for嵌套for，然后splice去重（ES5中最常用）**
-
-```js
-function unique(arr){            
-        for(var i=0; i<arr.length; i++){
-            for(var j=i+1; j<arr.length; j++){
-                if(arr[i]==arr[j]){         //第一个等同于第二个，splice方法删除第二个
-                    arr.splice(j,1);
-                    j--;
-                }
-            }
-        }
-return arr;
-}
-var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-    console.log(unique(arr))
-    //[1, "true", 15, false, undefined, NaN, NaN, "NaN", "a", {…}, {…}]     //NaN和{}没有去重，两个null直接消失了
-```
-
-双层循环，外层循环元素，内层循环时比较值。值相同时，则删去这个值。
-
-**3. 利用indexOf去重**
-
-```js
-function unique(arr) {
-    if (!Array.isArray(arr)) {
-        console.log('type error!')
-        return
-    }
-    var array = [];
-    for (var i = 0; i < arr.length; i++) {
-        if (array .indexOf(arr[i]) === -1) {
-            array .push(arr[i])
-        }
-    }
-    return array;
-}
-var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-console.log(unique(arr))
-   // [1, "true", true, 15, false, undefined, null, NaN, NaN, "NaN", 0, "a", {…}, {…}]  //NaN、{}没有去重
-```
-
-新建一个空的结果数组，for 循环原数组，判断结果数组是否存在当前元素，如果有相同的值则跳过，不相同则push进数组。
-
-**4. 利用sort()**
-
-```js
-function unique(arr) {
-    if (!Array.isArray(arr)) {
-        console.log('type error!')
-        return;
-    }
-    arr = arr.sort()
-    var arrry= [arr[0]];
-    for (var i = 1; i < arr.length; i++) {
-        if (arr[i] !== arr[i-1]) {
-            arrry.push(arr[i]);
-        }
-    }
-    return arrry;
-}
-     var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-        console.log(unique(arr))
-// [0, 1, 15, "NaN", NaN, NaN, {…}, {…}, "a", false, null, true, "true", undefined]      //NaN、{}没有去重
-```
-
-利用sort()排序方法，然后根据排序后的结果进行遍历及相邻元素比对。
-
-**5. 利用对象的属性不能相同的特点进行去重（这种数组去重的方法有问题，不建议用，有待改进）**
-
-```js
-function unique(arr) {
-    if (!Array.isArray(arr)) {
-        console.log('type error!')
-        return
-    }
-    var arrry= [];
-     var  obj = {};
-    for (var i = 0; i < arr.length; i++) {
-        if (!obj[arr[i]]) {
-            arrry.push(arr[i])
-            obj[arr[i]] = 1
-        } else {
-            obj[arr[i]]++
-        }
-    }
-    return arrry;
-}
-    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-        console.log(unique(arr))
-//[1, "true", 15, false, undefined, null, NaN, 0, "a", {…}]    //两个true直接去掉了，NaN和{}去重
-```
-
-**6. 利用includes**
-
-```js
-function unique(arr) {
-    if (!Array.isArray(arr)) {
-        console.log('type error!')
-        return
-    }
-    var array =[];
-    for(var i = 0; i < arr.length; i++) {
-            if( !array.includes( arr[i]) ) {//includes 检测数组是否有某个值
-                    array.push(arr[i]);
-              }
-    }
-    return array
-}
-var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-    console.log(unique(arr))
-    //[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}, {…}]     //{}没有去重
-
-```
-
-**7. 利用hasOwnProperty**
-
-```js
-function unique(arr) {
-    var obj = {};
-    return arr.filter(function(item, index, arr){
-        return obj.hasOwnProperty(typeof item + item) ? false : (obj[typeof item + item] = true)
-    })
-}
-    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-        console.log(unique(arr))
-//[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}]   //所有的都去重了
-
-```
-
-利用hasOwnProperty 判断是否存在对象属性
-
-**8. 利用filter**
-
-```js
-function unique(arr) {
-  return arr.filter(function(item, index, arr) {
-    //当前元素，在原始数组中的第一个索引==当前索引值，否则返回当前元素
-    return arr.indexOf(item, 0) === index;
-  });
-}
-    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-        console.log(unique(arr))
-//[1, "true", true, 15, false, undefined, null, "NaN", 0, "a", {…}, {…}]
-//{}没有去重
-```
-
-**9. 利用递归去重**
-
-```js
-function unique(arr) {
-        var array= arr;
-        var len = array.length;
-
-    array.sort(function(a,b){   //排序后更加方便去重
-        return a - b;
-    })
-
-    function loop(index){
-        if(index >= 1){
-            if(array[index] === array[index-1]){
-                array.splice(index,1);
-            }
-            loop(index - 1);    //递归loop，然后数组去重
-        }
-    }
-    loop(len-1);
-    return array;
-}
- var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-console.log(unique(arr))
-//[1, "a", "true", true, 15, false, 1, {…}, null, NaN, NaN, "NaN", 0, "a", {…}, undefined]
-//{},NaN没有去重
-```
-
-**10. 利用Map数据结构去重**
-
-```js
-function arrayNonRepeatfy(arr) {
-  let map = new Map();
-  let array = new Array();  // 数组用于返回结果
-  for (let i = 0; i < arr.length; i++) {
-    if(map .has(arr[i])) {  // 如果有该key值
-      map .set(arr[i], true); 
-    } else { 
-      map .set(arr[i], false);   // 如果没有该key值
-      array .push(arr[i]);
-    }
-  } 
-  return array ;
-}
- var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-    console.log(arrayNonRepeatfy(arr))
-//[1, 'true', true,  15, false, undefined, null,  NaN, 'NaN', 0, 'a',   {}, {} ]
-//{}没有去重
-
-```
-
-创建一个空Map数据结构，遍历需要去重的数组，把数组的每一个元素作为key存到Map中。由于Map中不会出现相同的key值，所以最终得到的就是去重后的结果。
-
-**11. 利用reduce+includes**
-
-```js
-function unique(arr){
-    return arr.reduce((prev,cur) => prev.includes(cur) ? prev : [...prev,cur],[]);
-}
-var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
-console.log(unique(arr));
-// [1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}, {…}]
-//{}没有去重
-```
-
-**12. [...new Set(arr)]**
-
-```js
-[...new Set(arr)] 
-//代码就是这么少----（其实，严格来说并不算是一种，相对于第一种方法来说只是简化了代码）
-//[1, 'true', true,  15, false, undefined, null,  NaN, 'NaN', 0, 'a',   {}, {} ] 
-// {}没有去重
-```
-
-## 4.2 请问js有哪些数组去重方法？
-
-### **1.for循环（两次嵌套）+ 新数组**
+### (1) for循环（两次嵌套）+ 新数组
 
 ```js
 let nums=[1,2,3,2,4,5,3,2];
@@ -5866,7 +5628,9 @@ function removeRepeatElementOfArray(arr){
 console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
 ```
 
-### **2.for循环（两次嵌套）+ splice （ES5中最常用）**
+
+
+### (2) for循环（两次嵌套）+ splice （ES5中最常用）
 
 双层循环，外层循环元素，内层循环时比较值，值相同时，删除这个值
 
@@ -5874,25 +5638,31 @@ console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
 let nums=[1,2,3,2,4,5,3,2];
 
 function removeRepeatElementOfArray(arr){
-	if (arr.length===0){
-		return arr;
-	}
-	for(let i=0;i<arr.length;i++){
-		for(let j=i+1;j<arr.length;j++){
-			if (arr[i]===arr[j]) {
-				//遇到重复的删除后一个
-				arr.splice(j,1);
-				j--;  //这个减一很关键
-			}
-		}
-	}
-	return arr;
+    if (arr.length===0){
+        return arr;
+    }
+    for(let i=0; i < arr.length;i++){
+        for(let j=i+1;j < arr.length;j++){
+            if (arr[i]===arr[j]) {
+                //遇到重复的删除后一个
+                arr.splice(j,1);
+                j--;  //这个减一很关键
+            }
+        }
+    }
+    return arr;
 }
 
 console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(removeRepeatElementOfArray(arr))
+//[1, "true", 15, false, undefined, NaN, NaN, "NaN", "a", {…}, {…}]     //NaN和{}没有去重，两个null直接消失了
 ```
 
-### **3.for 循环（一次） + indexOf() + 新数组**
+
+
+### (3) for 循环（一次） + indexOf() + 新数组
 
 对方法1进行改进，对新数组判定是否有该字符，可以调用 Array.prototype.indexOf 函数，执行时间缩减了很多
 
@@ -5900,22 +5670,30 @@ console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
 let nums=[1,2,3,2,4,5,3,2];
 
 function removeRepeatElementOfArray(arr){
-	if (arr.length===0){
-		return arr;
-	}
-	const result=new Array();
-	for(let i=0;i<arr.length;i++){
-		if (result.indexOf(arr[i])===-1) {
-			result.push(arr[i]);
-		}
-	}
-	return result;
+    if (arr.length===0){
+        return arr;
+    }
+    const result=new Array();
+    for(let i=0;i < arr.length;i++){
+        if (result.indexOf(arr[i])===-1) {
+            result.push(arr[i]);
+        }
+    }
+    return result;
 }
 
 console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(removeRepeatElementOfArray(arr))
+   // [1, "true", true, 15, false, undefined, null, NaN, NaN, "NaN", 0, "a", {…}, {…}]  //NaN、{}没有去重
 ```
 
-### **4.sort 排序后去重**
+新建一个空的结果数组，for 循环原数组，判断结果数组是否存在当前元素，如果有相同的值则跳过，不相同则push进数组。
+
+
+
+### (4) sort 排序后去重
 
 利用sort()排序方法，然后根据排序后的结果进行遍历及相邻元素对比
 
@@ -5923,56 +5701,70 @@ console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
 let nums=[1,2,3,2,4,5,3,2];
 
 function removeRepeatElementOfArray(arr){
-	if (arr.length===0){
-		return arr;
-	}
-	arr=arr.sort();
-	const result=new Array();
-	result.push(arr[0])
-	
-	for(let i=1;i<arr.length;i++){
-		if (arr[i]!==arr[i-1]) {
-			result.push(arr[i]);
-		}
-	}
-	return result;
+    if (arr.length===0){
+        return arr;
+    }
+    arr=arr.sort();
+    const result=new Array();
+    result.push(arr[0])
+    
+    for(let i=1;i < arr.length;i++){
+        if (arr[i]!==arr[i-1]) {
+            result.push(arr[i]);
+        }
+    }
+    return result;
 }
 
 console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(removeRepeatElementOfArray(arr))
+// [0, 1, 15, "NaN", NaN, NaN, {…}, {…}, "a", false, null, true, "true", undefined]      //NaN、{}没有去重
 ```
 
-### **5.Map哈希映射**
+
+
+### (5) Map哈希映射
 
 利用 ES6 中的 Map 集合替代前面方法中的新数组，调用Map.has替代indexOf()，Map.set 替代push()，执行速度比前面的方法都要快
+
+创建一个空Map数据结构，遍历需要去重的数组，把数组的每一个元素作为key存到Map中。由于Map中不会出现相同的key值，所以最终得到的就是去重后的结果。
 
 ```js
 let nums=[1,2,3,2,4,5,3,2];
 
 function removeRepeatElementOfArray(arr){
-	if (arr.length===0){
-		return arr;
-	}
-	let m=new Map();
-	const result=new Array();
+    if (arr.length===0){
+        return arr;
+    }
+    let m=new Map();
+    const result=new Array();
 
-	for(let i=0;i<arr.length;i++){
-		if (m.has(arr[i])) {
-			//map.set(arr[i], true);
-			m.set(arr[i],m.get(arr[i])+1);  //可以查看重复元素及其次数
-		}else{
-			//map.set(arr[i], false);   // 如果没有该key值
-			m.set(arr[i],1);
-			result.push(arr[i]);
-		}
-	}
-	console.log(m);  //Map(5) { 1 => 1, 2 => 3, 3 => 2, 4 => 1, 5 => 1 }
-	return result;
+    for(let i=0;i< arr.length;i++){
+        if (m.has(arr[i])) {
+            //map.set(arr[i], true);
+            m.set(arr[i],m.get(arr[i])+1);  //可以查看重复元素及其次数
+        }else{
+            //map.set(arr[i], false);   // 如果没有该key值
+            m.set(arr[i],1);
+            result.push(arr[i]);
+        }
+    }
+    // console.log(m);  //Map(5) { 1 => 1, 2 => 3, 3 => 2, 4 => 1, 5 => 1 }
+    return result;
 }
 
 console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
+
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(removeRepeatElementOfArray(arr))
+// [1, 'true', true,  15, false, undefined, null,  NaN, 'NaN', 0, 'a', {}, {} ]]      //{}没有去重
 ```
 
-### **6.new Set() + Array.from()**
+
+
+### (6)  Set+ Array.from()
 
 利用 ES6 中的 Set 集合，Set 集合是一种无重复元素的列表，new Set(arr)会自动剔除重复元素，Array.from(...)将 Set 集合转换为数组
 
@@ -5986,7 +5778,18 @@ function removeRepeatElementOfArray(arr){
 console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
 ```
 
-### **7.new Set() + …(展开运算符)**
+```js
+function unique (arr) {
+  return Array.from(new Set(arr))
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr))
+ //[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {}, {}]
+```
+
+不考虑兼容性，**这种去重的方法代码最少**。这种方法还无法去掉“{}”空对象，后面的高阶方法会添加去掉重复“{}”的方法。
+
+### (7) Set + …(展开运算符)
 
 思路与方法6一致，只是将 Set 集合转换为数组的实现方法从 Array.from(...) 改成了 ...(展开运算符)
 
@@ -6000,7 +5803,9 @@ function removeRepeatElementOfArray(arr){
 console.log(removeRepeatElementOfArray(nums));  // [ 1, 2, 3, 4, 5 ]
 ```
 
-### **8.for循环(一次) + 新对象**
+
+
+### (8) for循环(一次) + 新对象
 
 将创建一个新数组，**改成创建一个新对象**，判定对象的 key 值，存在跳过，不存在则将字符以对象的 key 值存储
 
@@ -6022,47 +5827,152 @@ function removeRepeatElementOfArray(arr){
 console.log(removeRepeatElementOfArray(nums));  // [ '1', '2', '3', '4', '5' ]
 ```
 
----
 
-#### 3.10 用js实现sleep，用promise
 
-**参考答案:**
+### (9)  includes + 新数组
 
 ```js
-function sleep(time){
-    return new Promise(resolve=>setTimeout(resolve,time));
+function unique(arr) {
+    if (!Array.isArray(arr)) {
+        console.log('type error!')
+        return
+    }
+    var array =[];
+    for(var i = 0; i < arr.length; i++) {
+            if( !array.includes( arr[i]) ) {//includes 检测数组是否有某个值
+                    array.push(arr[i]);
+              }
+    }
+    return array
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr))
+    //[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}, {…}]     //{}没有去重
+
+```
+
+### (10) 利用hasOwnProperty + 空对象
+
+```js
+function unique(arr) {
+    var obj = {};
+    return arr.filter(function(item, index, arr){
+        return obj.hasOwnProperty(typeof item + item) ? false : (obj[typeof item + item] = true)
+    })
 }
 
-const t1=+new Date();
-sleep(3000).then(()=>{
-    const t2=+new Date();
-    console.log(t2-t1);
-});
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr))
+//[1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}]   // 所有的都去重了
 
+```
+
+利用hasOwnProperty 判断是否存在对象属性
+
+
+
+### (11)  利用filter + indexOf
+
+```js
+function unique(arr) {
+  return arr.filter(function(item, index, arr) {
+    //当前元素，在原始数组中的第一个索引==当前索引值，否则返回当前元素
+    return arr.indexOf(item, 0) === index;
+  });
+}
+    var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+        console.log(unique(arr))
+//[1, "true", true, 15, false, undefined, null, "NaN", 0, "a", {}, {}]
+//{}没有去重
+```
+
+
+
+### (12)  利用递归去重
+
+```js
+function unique(arr) {
+        var array= arr;
+        var len = array.length;
+
+    array.sort(function(a,b){   //排序后更加方便去重
+        return a - b;
+    })
+
+    function loop(index){
+        if(index >= 1){
+            if(array[index] === array[index-1]){
+                array.splice(index,1);
+            }
+            loop(index - 1);    //递归loop，然后数组去重
+        }
+    }
+    loop(len-1);
+    return array;
+}
+ var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr))
+//[1, "a", "true", true, 15, false, 1, {…}, null, NaN, NaN, "NaN", 0, "a", {…}, undefined]
+//{},NaN没有去重
+```
+
+### (13)  利用reduce+includes
+
+```js
+function unique(arr){
+    return arr.reduce((prev,cur) => prev.includes(cur) ? prev : [...prev, cur], []);
+}
+
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+
+console.log(unique(arr));
+// [1, "true", true, 15, false, undefined, null, NaN, "NaN", 0, "a", {…}, {…}]
+//{}没有去重
+```
+
+
+
+---
+
+## 2. 用js实现sleep，用promise
+
+```js
+function sleep(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
+
+const t1 = new Date();
+
+sleep(3000).then(() => {
+    const t2 = +new Date();
+    console.log(t2 - t1);  // 3033
+});
 ```
 
 优点：这种方式实际上是用了 setTimeout，**没有形成进程阻塞，不会造成性能和负载问题**。
 
 缺点：虽然不像 callback 套那么多层，但仍不怎么美观，**而且当我们需要在某过程中需要停止执行（或者在中途返回了错误的值），还必须得层层判断后跳出，非常麻烦**，而且这种异步并不是那么彻底，还是看起来别扭
 
+
+
 ------
 
-#### 3.11 实现一个 Scheduler 类，完成对Promise的并发处理，最多同时执行2个任务
+## 3. 实现一个 Scheduler 类，完成对Promise的并发处理，最多同时执行2个任务
 
-**参考答案：**
+
 
 ```js
 class Scheduler{
     constructor(){
-        this.tasks=[];  // 待运行的任务
-        this.usingTask=[];  // 正在运行的任务
+        this.tasks = [];  // 待运行的任务
+        this.usingTask = [];  // 正在运行的任务
     }
 
     //promiseCreator 是一个异步函数，return Promise
     add(promiseCreator){
-        return new Promise((resolve,reject)=>{
-            promiseCreator.resolve=resolve;
-            if (this.usingTask.length<2) {
+        return new Promise((resolve, reject) => {
+            promiseCreator.resolve = resolve;
+            if (this.usingTask.length < 2) {
                 this.usingRun(promiseCreator);
             }else{
                 this.tasks.push(promiseCreator);
@@ -6072,42 +5982,43 @@ class Scheduler{
 
     usingRun(promiseCreator){
         this.usingTask.push(promiseCreator);
-        promiseCreator().then(()=>{
+        promiseCreator().then(() => {
             promiseCreator.resolve();
             this.usingMove(promiseCreator);
-            if (this.tasks.length>0) {
+            if (this.tasks.length > 0) {
                 this.usingRun(this.tasks.shift());
             }
         });
     }
 
     usingMove(promiseCreator){
-        let index=this.usingTask.findIndex(promiseCreator);
-        this.usingTask.splice(index,1);
+        let index = this.usingTask.findIndex(promiseCreator);
+        this.usingTask.splice(index, 1);
     }
 }
 
-const timeout=(time)=>new Promise(resolve=>{
+const timeout = (time) => new Promise(resolve => {
     setTimeout(resolve,time);
 });
 
-const scheduler=new Scheduler();
-const addTask=(time,order)=>{
-    scheduler.add(()=>timeout(time)).then(()=>console.log(order));
+const scheduler = new Scheduler();
+
+const addTask = (time, order)=>{
+    scheduler.add(() => timeout(time)).then(() => console.log(order));
 }
 
-addTask(400,4);
-addTask(200,2);
-addTask(300,3);
+addTask(400, 4);
+addTask(200, 2);
+addTask(300, 3);
 ```
+
+
+
+
 
 ------
 
-#### 
-
-----
-
-## 26  instanceOf 原理，手动实现 function isInstanceOf (child, Parent)
+## 4.  instanceOf 原理，手动实现 function isInstanceOf (child, Parent)
 
 instanceof主要作用就是判断一个实例是否属于某种类型
 
@@ -6149,9 +6060,9 @@ function instance_of(L, R) {//L 表示左表达式，R 表示右表达式
     L = L.__proto__;
     while (true) { 
         if (L === null) 
-        return false; 
+        	return false; 
         if (O === L) // 这里重点：当 O 严格等于 L 时，返回true 
-        return true; 
+        	return true; 
         L = L.__proto__; 
     } 
 }
@@ -6179,11 +6090,9 @@ console.log(instance_of(d, father)) // true
 
 **`instanceof`** **运算符**用于检测构造函数的 `prototype` 属性是否出现在某个实例对象的原型链上。
 
-需要注意的是，如果表达式 `obj instanceof Foo` 返回 `true`，**则并不意味着该表达式会永远返回 `true`**，因为 `Foo.prototype` 属性的值有可能会改变，改变之后的值很有可能不存在于 `obj` 的原型链上，这时原表达式的值就会成为 `false`。
+需要注意的是，如果表达式 `obj instanceof Foo` 返回 `true`，**则并不意味着该表达式会永远返回 `true`**，因为 `Foo.prototype` 属性的值有可能会改变，**改变之后的值很有可能不存在于 `obj` 的原型链上，这时原表达式的值就会成为 `false`**。
 
 另外一种情况下，**原表达式的值也会改变，就是改变对象 `obj` 的原型链的情况**，虽然在目前的ES规范中，我们只能读取对象的原型而不能改变它，但借助于非标准的 `__proto__` 伪属性，是可以实现的。比如执行 `obj.__proto__ = {}` 之后，`obj instanceof Foo` 就会返回 `false` 了。
-
-
 
 
 
