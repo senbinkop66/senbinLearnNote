@@ -1,25 +1,33 @@
 /**
- * @param {number[]} pushed
- * @param {number[]} popped
- * @return {boolean}
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
  */
-var validateStackSequences = function(pushed, popped) {
-    if (pushed.length === 0) {
-        return true;
-    }
-    const stack = [];
-    let n = pushed.length;
-    let j = 0;
-    for (let i = 0; i < n; i++) {
-        stack.push(pushed[i]);
-        while (stack.length && stack[stack.length - 1] === popped[j]) {
-            stack.pop();
-            j++;
+/**
+ * @param {TreeNode} root
+ * @param {number} target
+ * @return {number[][]}
+ */
+var pathSum = function(root, target) {
+    const ans = [];
+    const path = [];
+
+    const dfs = (root, res) => {
+        if (root === null) {
+            return;
         }
+        path.push(root.val);
+        res -= root.val;
+        if (root.left === null && root.right === null && res === 0) {
+            ans.push([...path]); // 这里记得解构，不然传入的是地址
+        }
+        dfs(root.left, res);
+        dfs(root.right, res);
+        path.pop();
     }
-    return stack.length === 0;
+    dfs(root, target);
+    return ans;
 };
-
-let pushed = [1,2,3,4,5], popped = [4,5,3,2,1];
-
-console.log(validateStackSequences(pushed, popped));

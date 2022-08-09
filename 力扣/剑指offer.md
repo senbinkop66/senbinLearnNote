@@ -2087,9 +2087,247 @@ console.log(validateStackSequences(pushed, popped));
 
 ## 32 - I. 从上到下打印二叉树
 
+从上到下打印出二叉树的每个节点，同一层的节点按照从左到右的顺序打印。
+
+等价于层次遍历
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[]}
+ */
+var levelOrder = function(root) {
+    if (root === null) {
+        return [];
+    }
+    const ans = [];
+    const arr = [root];
+    while (arr.length > 0) {
+        let node = arr.shift();
+        ans.push(node.val);
+        if (node.left !== null) {
+            arr.push(node.left);
+        }
+        if (node.right !== null) {
+            arr.push(node.right);
+        }
+    }
+    return ans;
+};
+```
 
 
 
+----
+
+## 32 - II. 从上到下打印二叉树 II
+
+从上到下按层打印二叉树，同一层的节点按从左到右的顺序打印，每一层打印到一行。
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[]}
+ */
+var levelOrder = function(root) {
+    if (root === null) {
+        return [];
+    }
+    const ans = [];
+    const arr = [root];
+    while (arr.length > 0) {
+        let n = arr.length;
+        let temp = [];
+        while (n > 0) {
+            let node = arr.shift();
+            temp.push(node.val);
+            if (node.left !== null) {
+                arr.push(node.left);
+            }
+            if (node.right !== null) {
+                arr.push(node.right);
+            }
+            n--;
+        }
+        ans.push(temp);
+    }
+    return ans;
+};
+```
+
+
+
+----
+
+##  32 - III. 从上到下打印二叉树 III
+
+请实现一个函数按照之字形顺序打印二叉树，即第一行按照从左到右的顺序打印，第二层按照从右到左的顺序打印，第三行再按照从左到右的顺序打印，其他行以此类推。
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[]}
+ */
+var levelOrder = function(root) {
+    if (root === null) {
+        return [];
+    }
+    const ans = [];
+    const arr = [root];
+    let isOrderLeft = true;
+    while (arr.length > 0) {
+        let n = arr.length;
+        let temp = [];
+        while (n > 0) {
+            let node = arr.shift();
+            // 偶数行从右向左放就行
+            if (isOrderLeft) {
+                temp.push(node.val);
+            } else {
+                temp.unshift(node.val);
+            }
+
+            if (node.left !== null) {
+                arr.push(node.left);
+            }
+            if (node.right !== null) {
+                arr.push(node.right);
+            }
+            n--;
+        }
+        ans.push(temp);
+        isOrderLeft = !isOrderLeft;
+    }
+    return ans;
+};
+```
+
+
+
+----
+
+## 33. 二叉搜索树的后序遍历序列
+
+输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历结果。如果是则返回 `true`，否则返回 `false`。假设输入的数组的任意两个数字都互不相同。
+
+```js
+/**
+ * @param {number[]} postorder
+ * @return {boolean}
+ */
+var verifyPostorder = function(postorder) {
+    if (postorder.length < 1) {
+        return true;
+    }
+    let n = postorder.length;
+    return dfs(postorder, 0, n - 1);
+};
+
+const dfs = (postorder, i, j) => {
+    if (j - i < 2) {
+        return true;
+    }
+    let root = postorder[j];
+    let left = i;  // 左子树
+    while (left < j) {
+        // 左子树元素一定小于根节点
+        if (postorder[left] > root) {
+            break;
+        }
+        left++;
+    }
+    let right = left;  // 右子树
+    while (right < j) {
+        if (postorder[right] < root) {
+            // 右子树元素一定大于根节点
+            return false;
+        }
+        right++;
+    }
+    // console.log(left, right);
+    return dfs(postorder, i, left - 1) && dfs(postorder, left, j - 1);
+
+}
+
+let postorder = [4, 8, 6, 12, 16, 14, 10];
+console.log(verifyPostorder(postorder));
+```
+
+
+
+----
+
+## 34. 二叉树中和为某一值的路径
+
+给你二叉树的根节点 root 和一个整数目标和 targetSum ，找出所有 从根节点到叶子节点 路径总和等于给定目标和的路径。
+
+叶子节点 是指没有子节点的节点。
+
+递归
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @param {number} target
+ * @return {number[][]}
+ */
+var pathSum = function(root, target) {
+    const ans = [];
+    const path = [];
+
+    const dfs = (root, res) => {
+        if (root === null) {
+            return;
+        }
+        path.push(root.val);
+        res -= root.val;
+        if (root.left === null && root.right === null && res === 0) {
+            ans.push([...path]); // 这里记得解构，不然传入的是地址
+        }
+        dfs(root.left, res);
+        dfs(root.right, res);
+        path.pop();
+    }
+    dfs(root, target);
+    return ans;
+};
+
+```
+
+广度优先搜索
+
+```
+
+```
 
 
 
