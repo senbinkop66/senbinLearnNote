@@ -891,6 +891,73 @@ for(var i = 0;i < 5; i++){
 
 
 
+闭包：
+
+一个函数和对其周围状态（**lexical environment，词法环境**）的引用捆绑在一起（或者说函数被引用包围）， 这样的组合就是**闭包**（**closure**）。也就是说，**闭包让你可以在一个内层函数中访问到其外层函数的作用域**。在 JavaScript 中，**每当创建一个函数，闭包就会在函数创建的同时被创建出来。**
+
+闭包的特点：
+
+- 让外部访问函数内部变量成为可能；
+- 可以避免使用全局变量，防止全局变量污染；
+- 可以让局部变量常驻在内存中；
+- 会造成内存泄漏（有一块内存空间被长期占用，而不被释放）
+
+应用场景
+
+1. 埋点（是网站分析的一种常用的数据采集方法）计数器
+
+```js
+function count() {
+    var num = 0;
+    return function () {
+        return ++num
+    }
+}
+
+var getNum = count();
+var getNewNum = count();
+document.querySelectorAll('button')[0].onclick = function(){
+    console.log('点击加入购物车次数： '+getNum());
+}
+document.querySelectorAll('button')[1].onclick = function(){
+    console.log('点击付款次数： '+getNewNum());
+}    
+
+```
+
+2. 事件+循环
+
+按照以下方式添加事件，打印出来的i不是按照序号的
+
+形成原因就是操作的是同一个词法环境,因为onclick后面的函数都是一个闭包，但是操作的是同一个词法环境
+
+```js
+   var lis = document.querySelectorAll('li');
+   for (var i = 0; i < lis.length; i++) {
+        lis[i].onclick = function () {
+            alert(i)
+        }       
+    }
+```
+
+解决办法：
+
+使用匿名函数之后，就形成一个闭包， 操作的就是不同的词法环境
+
+```js
+var lis = document.querySelectorAll('li');  
+for (var i = 0; i < lis.length; i++) {
+     (function (j) {
+        lis[j].onclick = function () {
+            alert(j)
+        }
+    })(i)
+ }
+
+```
+
+
+
 ----
 
 ## 10. 请问js垃圾回收机制是什么工作原理？
@@ -5936,22 +6003,87 @@ console.log(unique(arr));
 
 ## 2. 用js实现sleep，用promise
 
+(1) 普通版
+
 ```js
-function sleep(time) {
-    return new Promise(resolve => setTimeout(resolve, time));
+function sleep(sleepTime) {
+    for(var start = new Date; new Date - start <= sleepTime;) {}
 }
+var t1 = +new Date()
+sleep(3000)
+var t2 = +new Date()
+console.log(t2 - t1)
 
-const t1 = new Date();
-
-sleep(3000).then(() => {
-    const t2 = +new Date();
-    console.log(t2 - t1);  // 3033
-});
 ```
 
-优点：这种方式实际上是用了 setTimeout，**没有形成进程阻塞，不会造成性能和负载问题**。
+优点：简单粗暴，通俗易懂。
 
-缺点：虽然不像 callback 套那么多层，但仍不怎么美观，**而且当我们需要在某过程中需要停止执行（或者在中途返回了错误的值），还必须得层层判断后跳出，非常麻烦**，而且这种异步并不是那么彻底，还是看起来别扭
+缺点：这是最简单粗暴的实现，确实 sleep 了，也确实卡死了，CPU 会飙升，无论你的服务器 CPU 有多么 Niubility。
+
+(2) Promise 版本
+
+```js
+function sleep(time) {
+  return new Promise(resolve => setTimeout(resolve, time))
+}
+
+const t1 = +new Date()
+sleep(3000).then(() => {
+  const t2 = +new Date()
+  console.log(t2 - t1)
+})
+```
+
+优点：这种方式实际上是用了 setTimeout，没有形成进程阻塞，不会造成性能和负载问题。
+
+缺点：虽然不像 callback 套那么多层，但仍不怎么美观，而且当我们需要在某过程中需要停止执行（或者在中途返回了错误的值），还必须得层层判断后跳出，非常麻烦，而且这种异步并不是那么彻底，还是看起来别扭
+
+(3) Async/Await 版本
+
+```js
+function sleep(time){
+    return new Promise(resolve=>setTimeout(resolve,time));
+}
+
+async function test(){
+    const t1=+new Date();
+    await sleep(3000);
+    const t2=+new Date();
+    console.log(t2-t1);
+}();
+```
+
+缺点： ES7 语法存在兼容性问题，**有 babel 一切兼容性都不是问题**
+
+更优雅的写法
+
+```js
+function sleep (time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+// 用法
+sleep(500).then(() => {
+    // 这里写sleep之后需要去做的事情
+})
+```
+
+
+
+(4) 使用sleep包
+
+```js
+const sleep = require("sleep")
+const t1 = +new Date()
+sleep.msleep(3000)
+const t2 = +new Date()
+console.log(t2 - t1)
+
+```
+
+优点：能够实现更加精细的时间精确度，而且看起来就是真的 sleep 函数，清晰直白。
+
+
 
 
 
@@ -6100,9 +6232,7 @@ console.log(instance_of(d, father)) // true
 
 ## 5. 文件异步上传怎么实现
 
-**参考答案：**
-
-1. 普通表单上传
+(1) 普通表单上传
 
 使用PHP来展示常规的表单上传是一个不错的选择。首先构建文件上传的表单，并指定表单的提交内容类型为enctype="multipart/form-data"，表明表单需要上传二进制数据。
 
@@ -6128,7 +6258,9 @@ if (move_uploaded_file($_FILES['myfile']['tmp_name'], $fileName)){
 
 form表单上传大文件时，很容易遇见服务器超时的问题。通过xhr，前端也可以进行异步上传文件的操作，一般由两个思路。
 
-2. 文件编码上传
+
+
+(2) 文件编码上传
 
 第一个思路是将文件进行编码，然后在服务端进行解码，在前端实现图片压缩上传的方法，其主要实现原理就是将图片转换成base64进行传递
 
@@ -6178,7 +6310,7 @@ reader.onload = function(){
 reader.readAsBinaryString(file);
 ```
 
-3. formData异步上传
+(3) formData异步上传
 
 FormData对象主要用来组装一组用 XMLHttpRequest发送请求的键/值对，可以更加灵活地发送Ajax请求。可以使用FormData来模拟表单提交。
 
@@ -6191,7 +6323,7 @@ axios.post(url, formData);
 
 服务端处理方式与直接form表单请求基本相同。
 
-4. iframe无刷新页面
+(4) iframe无刷新页面
 
 在低版本的浏览器（如IE）上，xhr是不支持直接上传formdata的，因此只能用form来上传文件，而form提交本身会进行页面跳转，这是因为form表单的[target](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/form)属性导致的，其取值有
 
@@ -6348,23 +6480,23 @@ let chunks = slice(file, LENGTH);
 let context = createContext(file);
 let tasks = [];
 chunks.forEach((chunk, index) => {
- let fd = new FormData();
- fd.append("file", chunk);
- // 传递context
- fd.append("context", context);
- // 传递切片索引值
- fd.append("chunk", index + 1);
+     let fd = new FormData();
+     fd.append("file", chunk);
+     // 传递context
+     fd.append("context", context);
+     // 传递切片索引值
+     fd.append("chunk", index + 1);
 
- tasks.push(post("/mkblk.php", fd));
+     tasks.push(post("/mkblk.php", fd));
 });
 // 所有切片上传完毕后，调用mkfile接口
 Promise.all(tasks).then(res => {
- let fd = new FormData();
- fd.append("context", context);
- fd.append("chunks", chunks.length);
- post("/mkfile.php", fd).then(res => {
- console.log(res);
- });
+     let fd = new FormData();
+     fd.append("context", context);
+     fd.append("chunks", chunks.length);
+     post("/mkfile.php", fd).then(res => {
+     	console.log(res);
+ 	});
 });
 
 ```
@@ -6396,9 +6528,9 @@ for($i = 1; $i <= $chunks; ++$i){
  $file = './upload/'.$context. '/' .$i; // 读取单个切块
  $content = file_get_contents($file);
  if(!file_exists($filename)){
- $fd = fopen($filename, "w+");
+ 	$fd = fopen($filename, "w+");
  }else{
- $fd = fopen($filename, "a");
+ 	$fd = fopen($filename, "a");
  }
  fwrite($fd, $content); // 将切块合并到一个文件上
 }
@@ -6435,12 +6567,14 @@ echo $filename;
 function getUploadSliceRecord(context){
  let record = localStorage.getItem(context)
  if(!record){
- return []
+ 	return []
  }else {
- try{
- return JSON.parse(record)
- }catch(e){}
- }
+     try{
+     	return JSON.parse(record)
+     }catch(e){
+         
+     }
+     }
 }
 // 保存已上传切片
 function saveUploadSliceRecord(context, sliceIndex){
@@ -6490,13 +6624,13 @@ chunks.forEach((chunk, index) => {
 
 上传暂停的实现也比较简单，通过xhr.abort可以取消当前未完成上传切片的上传，实现上传暂停的效果，恢复上传就跟断点续传类似，先获取已上传的切片列表，然后重新发送未上传的切片。
 
-由于篇幅关系，上传进度和暂停的功能这里就先不实现了。
+
+
+
 
 ------
 
-#### 8.2 使用setInterval请求实时数据，返回顺序不一致怎么解决
-
-**参考答案：**
+## 6. 使用setInterval请求实时数据，返回顺序不一致怎么解决
 
 场景：
 
@@ -6508,13 +6642,13 @@ setInterval(function() {
 }, 10000);
 ```
 
-上面的程序会每隔10秒向服务器请求一次数据，并在数据到达后存储。这个实现方法通常可以满足简单的需求，然而同时也存在着很大的缺陷：在网络情况不稳定的情况下，服务器从接收请求、发送请求到客户端接收请求的总时间有可能超过10秒，而请求是以10秒间隔发送的，这样会导致接收的数据到达先后顺序与发送顺序不一致。
+上面的程序会每隔10秒向服务器请求一次数据，并在数据到达后存储。这个实现方法通常可以满足简单的需求，然而同时也存在着很大的**缺陷**：在网络情况不稳定的情况下，服务器从接收请求、发送请求到客户端接收请求的总时间有可能超过10秒，而请求是以10秒间隔发送的，这样会导致接收的数据到达先后顺序与发送顺序不一致。
 
 解决方案：
 
 1. 使用setTimeout代替setInterval
 
-   程序首先设置10秒后发起请求，当数据返回后再隔10秒发起第二次请求，以此类推。这样的话虽然无法保证两次请求之间的时间间隔为固定值，但是可以保证到达数据的顺序。
+   程序首先设置10秒后发起请求，**当数据返回后再隔10秒发起第二次请求**，以此类推。这样的话虽然无法保证两次请求之间的时间间隔为固定值，但是可以保证到达数据的顺序。
 
    ```js
    function poll() {
@@ -6561,11 +6695,11 @@ setInterval(function() {
    }
    ```
 
+
+
 ------
 
-#### 8.3 防抖和节流的原理和使用场景
-
-**参考答案：**
+## 7. 防抖和节流的原理和使用场景
 
 函数防抖和函数节流：优化高频率执行js代码的一种手段，js中的一些事件如浏览器的resize、scroll，鼠标的mousemove、mouseover，input输入框的keypress等事件在触发时，会不断地调用绑定在事件上的回调函数，极大地浪费资源，降低前端性能。为了优化体验，需要对这类事件进行调用次数的限制。
 
@@ -6688,11 +6822,11 @@ function debounce(fn, delay) {
 - 谷歌搜索框，搜索联想功能
 - 高频点击提交，表单重复提交
 
+
+
 ------
 
-####  2.22 手写一个发布订阅
-
-**参考答案**：
+##  8. 手写一个发布订阅
 
 ```js
 // 发布订阅中心, on-订阅, off取消订阅, emit发布, 内部需要一个单独事件中心caches进行存储;
@@ -6833,9 +6967,7 @@ events.emit("hello");
 
 ------
 
-#### 2.23 手写数组转树
-
-**参考答案**：
+## 9. 手写数组转树
 
 **问题：**
 
@@ -6888,7 +7020,7 @@ let output = {
 
 ```
 
-**答案**：
+
 
 ```js
 // 代码实现
@@ -6923,13 +7055,13 @@ console.log(arrayToTree(input))
 
 ```
 
+
+
+
+
 ------
 
-
-
-#### 8.4 浅拷贝，深拷贝(实现方式)
-
-**参考答案：**
+## 10. 浅拷贝，深拷贝(实现方式)
 
 浅拷贝和深拷贝都只针对于引用数据类型，**浅拷贝**只复制指向某个对象的指针，而不复制对象本身，新旧对象还是共享同一块内存；但**深拷贝**会另外创造一个一模一样的对象，新对象跟原对象不共享内存，修改新对象不会改到原对象；
 
@@ -7040,9 +7172,7 @@ console.log(obj1.b.f === obj2.b.f);
 
 ------
 
-#### 8.5 获取当前页面url
-
-**参考答案：**
+## 11. 获取当前页面url
 
 1. window.location.href (设置或获取整个 URL 为字符串)
 
@@ -7094,19 +7224,19 @@ let pathname=window.location.pathname;
   console.log(hash);
 ```
 
-8. js获取url中的参数值*
+## 12.  js获取url中的参数值
 
 正则法
 
 ```js
  function getQueryString(name) {
-          var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
-          var r = window.location.search.substr(1).match(reg);
+      var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+      var r = window.location.search.substr(1).match(reg);
 
-          if (r != null) {
-             return unescape(r[2]);
-          }
-          return null;
+      if (r != null) {
+         return unescape(r[2]);
+      }
+      return null;
   }
 // 这样调用：
 alert(GetQueryString("参数名1"));
@@ -7119,17 +7249,17 @@ split拆分法
 
 ```js
 function GetRequest() {
-         var url = location.search; //获取url中"?"符后的字串
-         var theRequest = new Object();
+     var url = location.search; //获取url中"?"符后的字串
+     var theRequest = new Object();
 
-         if (url.indexOf("?") != -1) {
-                 var str = url.substr(1);
-                 strs = str.split("&");
-              for(var i = 0; i < strs.length; i ++) {
-                      theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
-               }
-         }
-     return theRequest;
+     if (url.indexOf("?") != -1) {
+         var str = url.substr(1);
+         strs = str.split("&");
+          for(var i = 0; i < strs.length; i ++) {
+                 theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+           }
+     }
+ 	return theRequest;
  }
 var Request = new Object();
 Request = GetRequest();
@@ -7143,13 +7273,13 @@ Request = GetRequest();
 ```
 
 指定取
-比如说一个url：[http://i.cnblogs.com/?j=js](https://link.jianshu.com/?t=http://i.cnblogs.com/?j=js), 我们想得到参数j的值，可以通过以下函数调用。
+比如说一个`http://i.cnblogs.com/?j=js`, 我们想得到参数j的值，可以通过以下函数调用。
 
 ```js
 function GetQueryString(name) { 
-         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"); 
-         var r = window.location.search.substr(1).match(reg); //获取url中"?"符后的字符串并正则匹配
-         var context = ""; 
+     var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"); 
+     var r = window.location.search.substr(1).match(reg); //获取url中"?"符后的字符串并正则匹配
+     var context = ""; 
 
      if (r != null) {
          context = r[2]; 
@@ -7167,22 +7297,24 @@ alert(GetQueryString("j"));
 
 ```js
 function GetRequest() {
-         var url = location.search; //获取url中"?"符后的字串
-         if (url.indexOf("?") != -1) {? //判断是否有参数
-                  var str = url.substr(1); //从第一个字符开始 因为第0个是?号 获取所有除问号的所有符串
-                  strs = str.split("=");? //用等号进行分隔 （因为知道只有一个参数 
-                                          //所以直接用等号进分隔 如果有多个参数 要用&号分隔 再用等号进行分隔）
-                  alert(strs[1]);???? //直接弹出第一个参数 （如果有多个参数 还要进行循环的）
-         }
+     var url = location.search; //获取url中"?"符后的字串
+     if (url.indexOf("?") != -1) {? //判断是否有参数
+          var str = url.substr(1); //从第一个字符开始 因为第0个是?号 获取所有除问号的所有符串
+          strs = str.split("=");? //用等号进行分隔 （因为知道只有一个参数 
+                                  //所以直接用等号进分隔 如果有多个参数 要用&号分隔 再用等号进行分隔）
+          alert(strs[1]);???? //直接弹出第一个参数 （如果有多个参数 还要进行循环的）
+     }
   }
 
 ```
 
+
+
+
+
 ------
 
-#### 8.6 js中两个数组怎么取交集+(差集、并集、补集)
-
-**参考答案：**
+## 13. js中两个数组怎么取交集+(差集、并集、补集)
 
 1. 最普遍的做法
 
@@ -7196,7 +7328,7 @@ function GetRequest() {
    //交集
    var c = a.filter(function(v){ return b.indexOf(v) > -1 })
    //差集
-   var d = a.filter(function(v){ return b.indexOf(v) == -1 })
+   var d = a.filter(function(v){ return b.indexOf(v) === -1 })
    //补集
    var e = a.filter(function(v){ return !(b.indexOf(v) > -1) })
            .concat(b.filter(function(v){ return !(a.indexOf(v) > -1)}))
@@ -7314,19 +7446,15 @@ function GetRequest() {
 
 ------
 
-#### 8.7 用正则和非正则实现1234567890.12=》1，234，567，890.12
-
-**参考答案：**
+## 14. 用正则和非正则实现数字格式化
 
 非正则：
 
 如果数字带有小数点的话，可以使用toLocaleString()方法实现这个需求。
 
 ```js
-b.toLocaleString();
-
-  let b=1234567890.12;
-  console.log(b.toLocaleString());  //1,234,567,890.12
+let b=1234567890.12;
+console.log(b.toLocaleString());  //1,234,567,890.12
 ```
 
 正则：
@@ -7358,17 +7486,17 @@ console.log(numFormat(num2));  //1,234,567,890
 
 ```
 
+
+
+
+
 ------
 
-#### 8.8 写一个判断是否是空对象的函数
-
-**参考答案：**
+## 15. 写一个判断是否是空对象的函数
 
 ```js
 function isEmpty(value){
-	return (
-		value===null || value===undefined || (typeof value==="object" && Object.keys(value).length===0)
-		);
+	return (value === null || value===undefined || (typeof value==="object" && Object.keys(value).length===0)		);
 }
 
 let str=[];
@@ -7377,15 +7505,13 @@ console.log(isEmpty(str));  //true
 
 ------
 
-#### 8.9 代码题：颜色值16进制转10进制rgb
-
-**参考答案：**
+## 16. 颜色值16进制转10进制rgb
 
 ```js
 function toRGB(color){
-	var regex=/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/;  //匹配十六进制的正则
-	match=color.match(regex);  //// 判断是否是十六进制颜色值
-	return match ? 'rgb('+parseInt(match[1],16)+","+parseInt(match[2],16)+","+parseInt(match[3],16)+")" : color;
+	var regex = /^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/;  //匹配十六进制的正则
+	match = color.match(regex);  //// 判断是否是十六进制颜色值
+	return match ? 'rgb('+parseInt(match[1], 16)+","+parseInt(match[2], 16)+","+parseInt(match[3], 16)+")" : color;
 }
 
 let str="#fd329b"
@@ -7396,11 +7522,9 @@ console.log(toRGB(str));  //rgb(253,50,155)
 
 ------
 
-#### 8.10 传入 [1,[[2],3,4],5] ，返回 [1,2,3,4,5],即拉平数组
+## 17. 拉平数组方法flat
 
-**参考答案：**
-
-**递归**
+### (1) 递归
 
 我们最一开始能想到的莫过于循环数组元素，如果还是一个数组，就递归调用该方法：
 
@@ -7424,7 +7548,7 @@ console.log(flatten(arr))
 
 ```
 
-**toString**
+### (2) toString
 
 如果数组的元素都是数字，那么我们可以考虑使用 toString 方法，因为：
 
@@ -7452,7 +7576,7 @@ console.log(flatten(arr))  //[ 1, 1, 2, 2 ]
 
 然而这种方法使用的场景却非常有限，如果数组是 [1, '1', 2, '2'] 的话，这种方法就会产生错误的结果。
 
-**reduce**
+### (3) reduce
 
 既然是对数组进行处理，最终返回一个值，我们就可以考虑使用 reduce 来简化代码：
 
@@ -7469,7 +7593,7 @@ console.log(flatten(arr))  //[ 1, 2, 3, 4 ]
 
 ```
 
-**...**
+### (4) ...扩展运算符
 
 ES6 增加了扩展运算符，用于取出参数对象的所有可遍历属性，拷贝到当前对象之中：
 
@@ -7498,7 +7622,7 @@ console.log(flatten(arr))  //[ 1, 2, 3, 4 ]
 
 ```
 
-**undercore**
+### (5) undercore
 
 那么如何写一个抽象的扁平函数，来方便我们的开发呢，所有又到了我们抄袭 underscore 的时候了~
 
@@ -7551,7 +7675,7 @@ console.log(flatten(arr,true,false))  //[ 1, 2, [ 3, 4 ] ]
 console.log(flatten(arr,false,false))  //[ 1, 2, 3, 4 ]
 ```
 
-解释下 strict，在代码里我们可以看出，当遍历数组元素时，如果元素不是数组，就会对 strict 取反的结果进行判断，如果设置 strict 为 true，就会跳过不进行任何处理，这意味着可以过滤非数组的元素，举个例子：
+解释下 strict，在代码里我们可以看出，**当遍历数组元素时，如果元素不是数组，就会对 strict 取反的结果进行判断**，如果设置 strict 为 true，就会跳过不进行任何处理，这意味着可以过滤非数组的元素，举个例子：
 
 ```js
 var arr = [1, 2, [3, 4]];
@@ -7647,55 +7771,69 @@ function difference(array, ...rest) {
 }
 ```
 
+
+
+
+
 ------
 
-#### 8.11 倒计时，一开始就进行
-
-**参考答案：**
+## 18.  倒计时，一开始就进行
 
 题意：一旦进入页面倒计时就开始，因此在window.onload方法中调用倒计时方法
 
 ```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+</head>
+<body>
+    <div id="count"></div>
+
 <script type="text/javascript">
-  window.onload=function(){
+
+window.onload=function(){
     countDown();
-    function addZero(i){
-      return i<10 ? "0"+i : i+"";
-    }
-    function countDown(){
-      let nowtime=new Date();
-      let endtime=new Date("2022/04/23,16:00:00");
-      let lefttime=parseInt((endtime.getTime()-nowtime.getTime())/1000);
+}
+function addZero(i){
+  return i < 10 ? "0"+i : i+"";
+}
+  
+function countDown(){
+  let nowtime=new Date();
+  let endtime=new Date("2022/08/10,16:00:00");
+  let lefttime=parseInt((endtime.getTime()-nowtime.getTime())/1000);
 
-      if (lefttime<=0) {
-        document.querySelector("#count").innerHTML="活动已结束";
-        return;
-      }
-
-      let d=addZero(parseInt(lefttime/(24*60*60)));
-      let h=addZero(parseInt(lefttime/(60*60)%24));
-      let m=addZero(parseInt(lefttime/60%60));
-      let s=addZero(parseInt(lefttime%60));
-
-      document.querySelector("#count").innerHTML=`活动倒计时  ${d}天 ${h} 时 ${m} 分 ${s} 秒`;
-      setTimeout(countDown,1000);
-    }
+  if (lefttime <= 0) {
+    document.querySelector("#count").innerHTML="活动已结束";
+    return;
   }
 
+  let d=addZero(parseInt(lefttime/(24*60*60)));
+  let h=addZero(parseInt(lefttime/(60*60)%24));
+  let m=addZero(parseInt(lefttime/60%60));
+  let s=addZero(parseInt(lefttime%60));
+
+  document.querySelector("#count").innerHTML=`活动倒计时  ${d}天 ${h} 时 ${m} 分 ${s} 秒`;
+  setTimeout(countDown,1000);
+}
+
 </script>
+</body>
+</html>
 ```
 
 ------
 
-#### 8.12 沙箱隔离怎么做的什么原理
-
-**参考答案：**
+## 19. 沙箱隔离怎么做的什么原理
 
 沙箱，即sandbox，顾名思义，**就是让你的程序跑在一个隔离的环境下，不对外界的其他程序造成影响**，通过创建类似沙盒的独立作业环境，在其内部运行的程序并不能对硬盘产生永久性的影响。
 
 实现沙箱的三种方法
 
-1. 借助with + new Function
+### (1) 借助with + new Function
 
 首先从最简陋的方法说起，假如你想要通过eval和function直接执行一段代码，这是不现实的，因为代码内部可以沿着作用域链往上找，篡改全局变量，这是我们不希望的，所以你需要让沙箱内的变量访问都在你的监控范围内；不过，你可以使用with API，在with的块级作用域下，变量访问会优先查找你传入的参数对象，之后再往上找，所以相当于你变相监控到了代码中的“变量访问”：
 
@@ -7770,7 +7908,7 @@ console.log(testObj.a.b.__proto__.toString())
 
 可见，new Function + with的这种沙箱方式，防君子不防小人，当然，你也可以通过对传入的code代码做代码分析或过滤？假如传入的代码不是按照的规定的数据格式（例如json），就直接抛出错误，阻止恶意代码注入，但这始终不是一种安全的做法。
 
-2. 借助iframe实现沙箱
+### (2) 借助iframe实现沙箱
 
 前面介绍一种劣质的、不怎么安全的方法构造了一个简单的沙箱，但是在前端最常见的方法，还是利用iframe来构造一个沙箱
 
@@ -7806,7 +7944,7 @@ console.log(testObj.a.b.__proto__.toString())
 
 简单的说，通过postMessageAPI传递的对象，已经由浏览器处理过了，原型链已经被切断，同时，传过去的对象也是复制好了的，占用的是不同的内存空间，两者互不影响，所以你不需要担心出现第一种沙箱做法中出现的问题。
 
-3. nodejs中的沙箱
+### (3) nodejs中的沙箱
 
 nodejs中使用沙箱很简单，只需要利用原生的vm模块，便可以快速创建沙箱，同时指定上下文。
 
@@ -7854,211 +7992,13 @@ if (opt.jsonpCallback) {
 
 通过runInNewContext返回沙箱中的构造函数Function，同时传入切断原型链的空对象防止逃逸，之后再外部使用的时候，只需要调用返回的这个函数，和普通的new Function一样调用即可。
 
-------
 
-#### 8.13 实现一个 JS 的sleep
-
-**参考答案**：
-
-1. 普通版
-
-```js
-function sleep(sleepTime) {
-    for(var start = new Date; new Date - start <= sleepTime;) {}
-}
-var t1 = +new Date()
-sleep(3000)
-var t2 = +new Date()
-console.log(t2 - t1)
-
-```
-
-优点：简单粗暴，通俗易懂。
-
-缺点：这是最简单粗暴的实现，确实 sleep 了，也确实卡死了，CPU 会飙升，无论你的服务器 CPU 有多么 Niubility。
-
-2. Promise 版本
-
-```js
-function sleep(time) {
-  return new Promise(resolve => setTimeout(resolve, time))
-}
-
-const t1 = +new Date()
-sleep(3000).then(() => {
-  const t2 = +new Date()
-  console.log(t2 - t1)
-})
-```
-
-优点：这种方式实际上是用了 setTimeout，没有形成进程阻塞，不会造成性能和负载问题。
-
-缺点：虽然不像 callback 套那么多层，但仍不怎么美观，而且当我们需要在某过程中需要停止执行（或者在中途返回了错误的值），还必须得层层判断后跳出，非常麻烦，而且这种异步并不是那么彻底，还是看起来别扭
-
-3. Async/Await 版本
-
-```js
-function sleep(time){
-    return new Promise(resolve=>setTimeout(resolve,time));
-}
-
-!async function test(){
-    const t1=+new Date();
-    await sleep(3000);
-    const t2=+new Date();
-    console.log(t2-t1);
-}();
-```
-
-缺点： ES7 语法存在兼容性问题，**有 babel 一切兼容性都不是问题**
-
-更优雅的写法
-
-```js
-function sleep (time) {
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
-
-// 用法
-sleep(500).then(() => {
-    // 这里写sleep之后需要去做的事情
-})
-```
-
-不要忘了开源的力量
-
-```js
-const sleep = require("sleep")
-const t1 = +new Date()
-sleep.msleep(3000)
-const t2 = +new Date()
-console.log(t2 - t1)
-
-```
-
-优点：能够实现更加精细的时间精确度，而且看起来就是真的 sleep 函数，清晰直白。
 
 ------
 
-#### 8.14 实现一个数组对象的去重，相同value的只保留最后一个，最好有多个思路
+## 20. 生成长度是N，且在min、max内不重复的整数随机数组
 
-**参考答案**：
 
-**1.遍历数组法**
-
-它是最简单的数组去重方法（indexOf方法）
-
-实现思路：新建一个数组，遍历去要重的数组，当值不在新数组的时候（indexOf为-1）就加入该新数组中；
-
-```js
-var arr=[2,8,5,0,5,2,6,7,2];
-function unique1(arr){
-  var hash=[];
-  for (var i = 0; i < arr.length; i++) {
-     if(hash.indexOf(arr[i])==-1){
-      hash.push(arr[i]);
-     }
-  }
-  return hash;
-}
-
-```
-
-**2.数组下标判断法**
-
-调用indexOf方法，性能和方法1差不多
-
-实现思路：如果当前数组的第 i 项在当前数组中第一次出现的位置不是 i，那么表示第 i 项是重复的，忽略掉。否则存入结果数组。
-
-```js
-function unique2(arr){
-  var hash=[];
-  for (var i = 0; i < arr.length; i++) {
-     if(arr.indexOf(arr[i])==i){
-      hash.push(arr[i]);
-     }
-  }
-  return hash;
-}
-```
-
-**3.排序后相邻去除法**
-
-实现思路：给传入的数组排序，排序后相同的值会相邻，然后遍历排序后数组时，新数组只加入不与前一值重复的值。
-
-```js
-function unique3(arr){
-  arr.sort();
-  var hash=[arr[0]];
-  for (var i = 1; i < arr.length; i++) {
-     if(arr[i]!=hash[hash.length-1]){
-      hash.push(arr[i]);
-     }
-  }
-  return hash;
-}
-
-```
-
-**4.优化遍历数组法（推荐）**
-
-实现思路：双层循环，外循环表示从0到arr.length，内循环表示从i+1到arr.length
-
-将没重复的右边值放入新数组。（检测到有重复值时终止当前循环同时进入外层循环的下一轮判断）
-
-```js
-function unique4(arr){
-    var hash=[];
-    for (var i = 0; i < arr.length; i++) {
-      for (var j = i+1; j < arr.length; j++) {
-        if(arr[i]===arr[j]){
-          ++i;
-          j = i;
-        }
-
-      }
-        hash.push(arr[i]); 
-    }
-    return hash;
-}
-
-```
-
-**5.ES6实现**
-
-基本思路：ES6提供了新的数据结构Set。它类似于数组，但是成员的值都是唯一的，没有重复的值。
-
-Set函数可以接受一个数组（或类似数组的对象）作为参数，用来初始化。
-
-```js
-function unique5(arr){
-  var x = new Set(arr);
- return [...x];
-}
-
-```
-
-扩展：如果重复，则去掉该元素
-
-**6.数组下标去重**
-
-```js
-function unique22(arr){
-  var hash=[];
-  for (var i = 0; i < arr.length; i++) {
-     if(arr.indexOf(arr[i])==arr.lastIndexOf(arr[i])){
-      hash.push(arr[i]);
-     }
-  }
-  return hash;
-}
-```
-
-------
-
-#### 8.15 function rand(min, max, N)：生成长度是N，且在min、max内不重复的整数随机数组
-
-**参考答案：**
 
 把考点拆成了4个小项；需要用递归算法实现：
 a) 生成一个长度为n的空数组arr。
@@ -8067,93 +8007,23 @@ c) 把随机数rand插入到数组arr内，如果数组arr内已存在与rand相
 d) 最终输出一个长度为n，且内容不重复的数组arr。
 
 ```js
-function buildArray(arr,n,min,max){
-    let num=Math.floor(Math.random()*(max-min+1))+min;
+function buildArray(arr, n, min, max){
+    let num = Math.floor(Math.random() * (max - min + 1)) + min;
     if (!arr.includes(num)) {
         arr.push(num);
     }
-    return arr.length===n ? arr : buildArray(arr,n,min,max);
+    return arr.length === n ? arr : buildArray(arr, n, min, max);
 }
 
-const result=buildArray([],20,2,100);
+const result=buildArray([], 20, 2, 100);
 console.log(result);
 ```
 
-------
 
-#### 8.16 闭包的理解
-
-**参考答案：**
-
-闭包：
-
-一个函数和对其周围状态（**lexical environment，词法环境**）的引用捆绑在一起（或者说函数被引用包围）， 这样的组合就是**闭包**（**closure**）。也就是说，**闭包让你可以在一个内层函数中访问到其外层函数的作用域**。在 JavaScript 中，**每当创建一个函数，闭包就会在函数创建的同时被创建出来。**
-
-闭包的特点：
-
-- 让外部访问函数内部变量成为可能；
-- 可以避免使用全局变量，防止全局变量污染；
-- 可以让局部变量常驻在内存中；
-- 会造成内存泄漏（有一块内存空间被长期占用，而不被释放）
-
-应用场景
-
-1. 埋点（是网站分析的一种常用的数据采集方法）计数器
-
-```js
-function count() {
-    var num = 0;
-    return function () {
-        return ++num
-    }
-}
-var getNum = count();
-var getNewNum = count();
-document.querySelectorAll('button')[0].onclick = function(){
-    console.log('点击加入购物车次数： '+getNum());
-}
-document.querySelectorAll('button')[1].onclick = function(){
-    console.log('点击付款次数： '+getNewNum());
-}    
-
-```
-
-2. 事件+循环
-
-按照以下方式添加事件，打印出来的i不是按照序号的
-
-形成原因就是操作的是同一个词法环境,因为onclick后面的函数都是一个闭包，但是操作的是同一个词法环境
-
-```js
-   var lis = document.querySelectorAll('li');
-   for (var i = 0; i < lis.length; i++) {
-            lis[i].onclick = function () {
-                alert(i)
-            }       
-    }
-```
-
-解决办法：
-
-使用匿名函数之后，就形成一个闭包， 操作的就是不同的词法环境
-
-```js
-var lis = document.querySelectorAll('li');  
-for (var i = 0; i < lis.length; i++) {
-     (function (j) {
-                lis[j].onclick = function () {
-                    alert(j)
-                }
-            })(i)
- }
-
-```
 
 ------
 
-#### 8.17 字符串中的单词逆序输出（手写）
-
-**参考答案：**
+## 21. 字符串中的单词逆序输出（手写）
 
 方法一：
 
@@ -8228,9 +8098,7 @@ function strReverse(str) {
 
 ------
 
-#### 8.18 **给定一个字符串，请你找出其中不含有重复字符的 最长子串 的长度**
-
-**参考答案：**
+## 22.  给定一个字符串，请你找出其中不含有重复字符的 最长子串 的长度
 
 思路分析：
 
@@ -8262,11 +8130,13 @@ var lengthOfLongestSubstring = function(s) {
 
 ```
 
+
+
+
+
 ------
 
-#### 8.19 去掉字符串前后的空格
-
-**参考答案：**
+## 23. 去掉字符串前后的空格
 
 第五种方法在处理长字符串时效率最高
 
@@ -8298,7 +8168,7 @@ function trimRight(s){
     if(s == null) return "";  
     var whitespace = new String(" \t\n\r");  
     var str = new String(s);  
-    if (whitespace.indexOf(str.charAt(str.length-1)) != -1){  
+    if (whitespace.indexOf(str.charAt(str.length-1)) !== -1){  
         var i = str.length - 1;  
         while (i >= 0 && whitespace.indexOf(str.charAt(i)) != -1){  
             i--;  
@@ -8363,32 +8233,7 @@ function trim(str){
 
 ------
 
-#### 8.20 "判断输出console.log(0 == [])console.log([1] == [1])"
-
-**参考答案：**
-
-```js
-console.log([]==[]);  // false
-console.log([1]==[1]) //false
-
-console.log([]== 0);  // true
-```
-
-解析：
-
-原始值的比较是值的比较：
-它们的值相等时它们就相等（==）
-对象和原始值不同，对象的比较并非值的比较,而是引用的比较：
-即使两个对象包含同样的属性及相同的值，它们也是不相等的
-即使两个数组各个索引元素完全相等，它们也是不相等的,所以[]!=[]
-
-[]==0,是数组进行了隐士转换，空数组会转换成数字0，所以相等
-
-------
-
-#### 8.21 三数之和
-
-**参考答案：**
+## 24. 三数之和
 
 题目描述
 
@@ -8765,3 +8610,32 @@ script(主程序代码)——>process.nextTick——>promise——>setTimeout—
 - promise： 这里的promise部分，严格的说其实是promise.then部分，输出的是5、以及 timeEnd('start')
 - setImmediate：输出1，依据上面优先级，应该先setTimeout，但是注意，setTimeout 设置 10ms 延时
 - setTimeout ： 输出2
+
+
+
+----
+
+## 24. 判断输出
+
+
+
+```js
+console.log([]==[]);  // false
+console.log([1]==[1]) //false
+
+console.log([] == 0);  // true
+```
+
+解析：
+
+原始值的比较是值的比较：
+它们的值相等时它们就相等（==）
+对象和原始值不同，对象的比较并非值的比较,而是引用的比较：
+即使两个对象包含同样的属性及相同的值，它们也是不相等的
+即使两个数组各个索引元素完全相等，它们也是不相等的,所以[]!=[]
+
+[]==0,是数组进行了隐士转换，空数组会转换成数字0，所以相等
+
+------
+
+#### 

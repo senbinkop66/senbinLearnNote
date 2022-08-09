@@ -1,33 +1,20 @@
 /**
- * Definition for a binary tree node.
- * function TreeNode(val, left, right) {
- *     this.val = (val===undefined ? 0 : val)
- *     this.left = (left===undefined ? null : left)
- *     this.right = (right===undefined ? null : right)
- * }
+ * @param {number[]} nums
+ * @return {number}
  */
-/**
- * @param {TreeNode} root
- * @param {number} target
- * @return {number[][]}
- */
-var pathSum = function(root, target) {
-    const ans = [];
-    const path = [];
-
-    const dfs = (root, res) => {
-        if (root === null) {
-            return;
+var minStartValue = function(nums) {
+    let ans = 1;
+    let sum = 1;
+    for (let item of nums) {
+        sum += item;
+        if (sum < 1) {
+            ans += 1 - sum;
+            sum = 1;
         }
-        path.push(root.val);
-        res -= root.val;
-        if (root.left === null && root.right === null && res === 0) {
-            ans.push([...path]); // 这里记得解构，不然传入的是地址
-        }
-        dfs(root.left, res);
-        dfs(root.right, res);
-        path.pop();
     }
-    dfs(root, target);
     return ans;
+
 };
+
+let nums = [-3,2,-3,4,2];
+console.log(minStartValue(nums));

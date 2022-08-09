@@ -175,6 +175,8 @@ console.log(nums)
 
 ### 举例让抽象问题具体化
 
+### 分解让复杂问题简单化
+
 
 
 
@@ -2326,6 +2328,335 @@ var pathSum = function(root, target) {
 广度优先搜索
 
 ```
+
+```
+
+
+
+----
+
+## 35. 复杂链表的复制
+
+请实现 copyRandomList 函数，复制一个复杂链表。在复杂链表中，每个节点除了有一个 next 指针指向下一个节点，还有一个 random 指针指向链表中的任意节点或者 null。
+
+**提示：**
+
+- `-10000 <= Node.val <= 10000`
+- `Node.random` 为空（null）或指向链表中的节点。
+- 节点数目不超过 1000 。
+
+**回溯 + 哈希表**
+
+本题要求我们对一个特殊的链表进行深拷贝。如果是普通链表，我们可以直接按照遍历的顺序创建链表节点。而本题中因为随机指针的存在，当我们拷贝节点时，「当前节点的随机指针指向的节点」可能还没创建，因此我们需要变换思路。一个可行方案是，我们利用回溯的方式，让每个节点的拷贝操作相互独立。对于当前节点，我们首先要进行拷贝，然后我们进行「当前节点的后继节点」和「当前节点的随机指针指向的节点」拷贝，拷贝完成后将创建的新节点的指针返回，即可完成当前节点的两指针的赋值。
+
+具体地，我们用哈希表记录每一个节点对应新节点的创建情况。遍历该链表的过程中，我们检查「当前节点的后继节点」和「当前节点的随机指针指向的节点」的创建情况。如果这两个节点中的任何一个节点的新节点没有被创建，我们都立刻递归地进行创建。当我们拷贝完成，回溯到当前层时，我们即可完成当前节点的指针赋值。注意一个节点可能被多个其他节点指向，因此我们可能递归地多次尝试拷贝某个节点，为了防止重复拷贝，我们需要首先检查当前节点是否被拷贝过，如果已经拷贝过，我们可以直接从哈希表中取出拷贝后的节点的指针并返回即可。
+
+在实际代码中，我们需要特别判断给定节点为空节点的情况。
+
+```javascript
+/**
+ * // Definition for a Node.
+ * function Node(val, next, random) {
+ *    this.val = val;
+ *    this.next = next;
+ *    this.random = random;
+ * };
+ */
+
+/**
+ * @param {Node} head
+ * @return {Node}
+ */
+var copyRandomList = function(head) {
+    
+    let cachedNode = new Map();
+    const dfs = (head) => {
+        if (head === null) {
+            return null;
+        }
+        if (!cachedNode.has(head)) {
+            cachedNode.set(head, {val: head.val});
+            Object.assign(cachedNode.get(head), {next: dfs(head.next), random: dfs(head.random)})
+        }
+        return cachedNode.get(head);
+    }
+    return dfs(head);
+};
+```
+
+
+
+**迭代 + 节点拆分**
+
+![复制复杂链表](E:\pogject\学习笔记\image\leetcode\复制复杂链表.png)
+
+```js
+/**
+ * // Definition for a Node.
+ * function Node(val, next, random) {
+ *    this.val = val;
+ *    this.next = next;
+ *    this.random = random;
+ * };
+ */
+
+/**
+ * @param {Node} head
+ * @return {Node}
+ */
+var copyRandomList = function(head) {
+    if (head === null) {
+        return null;
+    }
+    for (let node = head; node !== null; node = node.next.next) {
+        const newNode = new Node(node.val, node.next, null);
+        node.next = newNode;
+    }
+    for (let node = head; node !== null; node = node.next.next) {
+        const newNode = node.next;
+        //可以直接找到每一个拷贝节点 S' 的随机指针应当指向的节点，即为其原节点 S 的随机指针指向的节点 T 的后继节点 T'
+        newNode.random = (node.random !== null) ? node.random.next : null;
+    }
+
+    const newHead = head.next;
+    for (let node = head; node !== null; node = node.next) {
+        const newNode = node.next;
+        node.next = node.next.next;
+        newNode.next = (newNode.next !== null) ? newNode.next.next : null;
+    }
+    return newHead;
+};
+```
+
+
+
+----
+
+## 36. 二叉搜索树与双向链表
+
+输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的循环双向链表。要求不能创建任何新的节点，只能调整树中节点指针的指向。
+
+**递归**
+
+```js
+/**
+ * // Definition for a Node.
+ * function Node(val,left,right) {
+ *    this.val = val;
+ *    this.left = left;
+ *    this.right = right;
+ * };
+ */
+/**
+ * @param {Node} root
+ * @return {Node}
+ */
+var treeToDoublyList = function(root) {
+    if (root === null) {
+        return null;
+    }
+
+    let tail = null, head = null;
+    dfs(root);
+    // 头尾指针
+    head.left = tail;
+    tail.right = head;
+
+    return head;
+
+    function dfs(curr){
+        if (curr === null) {
+            return;
+        }
+        dfs(curr.left);
+        
+        if (tail === null) {
+            head = curr;
+        } else {
+            tail.right = curr;
+            curr.left = tail;
+        }
+        tail = curr;
+        dfs(curr.right);
+    }
+};
+```
+
+
+
+----
+
+## 37. 序列化二叉树
+
+请实现两个函数，分别用来序列化和反序列化二叉树。
+
+你需要设计一个算法来实现二叉树的序列化与反序列化。这里不限定你的序列 / 反序列化算法执行逻辑，你只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。
+
+提示：输入输出格式与 LeetCode 目前使用的方式一致，详情请参阅 LeetCode 序列化二叉树的格式。你并非必须采取这种方式，你也可以采用其他的方法解决这个问题。
+
+先序遍历+深度优先搜索
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+
+/**
+ * Encodes a tree to a single string.
+ *
+ * @param {TreeNode} root
+ * @return {string}
+ */
+var serialize = function(root) {
+    return rserialize(root, "");
+};
+
+const rserialize = (root, str) => {
+    if (root === null) {
+        str += "$,";
+    } else {
+        str += root.val + ",";
+        str = rserialize(root.left, str);
+        str = rserialize(root.right, str);
+    }
+    return str;
+}
+
+/**
+ * Decodes your encoded data to tree.
+ *
+ * @param {string} data
+ * @return {TreeNode}
+ */
+var deserialize = function(data) {
+    const dataArray = data.split(",");
+    return rdeserialize(dataArray);
+};
+
+/**
+ * Your functions will be called as such:
+ * deserialize(serialize(root));
+ */
+
+const rdeserialize = (dataList) => {
+    if (dataList[0] === "$") {
+        dataList.shift();
+        return null;
+    }
+    const root = new TreeNode(parseInt(dataList[0]));
+    dataList.shift();
+    root.left = rdeserialize(dataList);
+    root.right = rdeserialize(dataList);
+
+    return root;
+}
+```
+
+
+
+----
+
+##  38. 字符串的排列
+
+输入一个字符串，打印出该字符串中字符的所有排列。
+
+ 你可以以任意顺序返回这个字符串数组，但里面不能有重复元素。
+
+**回溯**
+
+```js
+var permutation = function(s) {
+    const rec = [], vis = [];
+    const n = s.length;
+    const arr = Array.from(s).sort();
+    const perm = [];
+    const backtrack = (arr, i, n, perm) => {
+        if (i === n) {
+            rec.push(perm.toString());
+            return;
+        }
+        for (let j = 0; j < n; j++) {
+            if (vis[j] || (j > 0 && !vis[j - 1] && arr[j - 1] === arr[j])) {
+                continue;
+            }
+            vis[j] = true;
+            perm.push(arr[j]);
+            backtrack(arr, i + 1, n, perm);
+            perm.pop();
+            vis[j] = false;
+        }
+    }
+
+    backtrack(arr, 0, n, perm);
+    const size = rec.length;
+    const recArr = new Array(size).fill(0);
+    for (let i = 0; i < size; i++) {
+        recArr[i] = rec[i].split(',').join('');
+    }
+    return recArr;
+};
+
+```
+
+
+
+**下一个排列**
+
+具体地，我们首先对给定的字符串中的字符进行排序，即可得到当前字符串的第一个排列，然后我们不断地计算当前字符串的字典序中下一个更大的排列，直到不存在更大的排列为止即可。
+
+这个方案的优秀之处在于，我们得到的所有排列都不可能重复，这样我们就无需进行去重的操作。同时因为无需使用回溯法，没有栈的开销，算法时间复杂度的常数较小。
+
+```js
+var permutation = function(s) {
+    const ret = [];
+    const arr = Array.from(s).sort();
+
+    const nextPermutation = (arr) => {
+        let i = arr.length - 2;
+        while (i >= 0 && arr[i] >= arr[i + 1]) {
+            i--;
+        }
+        if (i < 0) {
+            return false;
+        }
+        let j = arr.length - 1;
+        while (j >= 0 && arr[i] >= arr[j]) {
+            j--;
+        }
+        swap(arr, i, j);
+        reverse(arr, i + 1);
+        return true;
+    }
+
+    const swap = (arr, i, j) => {
+        const temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+
+    const reverse = (arr, start) => {
+        let left = start, right = arr.length - 1;
+        while (left < right) {
+            swap(arr, left, right);
+            left++;
+            right--;
+        }
+    }
+
+    do {
+        ret.push(arr.join(''));
+    } while (nextPermutation(arr));
+    const size = ret.length;
+    const retArr = new Array(size).fill(0);
+    for (let i = 0; i < size; i++) {
+        retArr[i] = ret[i];
+    }
+    return retArr;
+};
 
 ```
 

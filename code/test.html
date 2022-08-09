@@ -6,38 +6,35 @@
     <title></title>
 </head>
 <body>
+    <div id="count"></div>
+
 <script type="text/javascript">
 
-function Foo() {
-    getName = function() {
-        console.log("1")
-    }
-    return this;
+window.onload=function(){
+    countDown();
 }
-Foo.getName = function() {
-    console.log("2");
+function addZero(i){
+  return i < 10 ? "0"+i : i+"";
 }
-Foo.prototype.getName = function() {
-    console.log("3");
+  
+function countDown(){
+  let nowtime=new Date();
+  let endtime=new Date("2022/08/10,16:00:00");
+  let lefttime=parseInt((endtime.getTime()-nowtime.getTime())/1000);
+
+  if (lefttime <= 0) {
+    document.querySelector("#count").innerHTML="活动已结束";
+    return;
+  }
+
+  let d=addZero(parseInt(lefttime/(24*60*60)));
+  let h=addZero(parseInt(lefttime/(60*60)%24));
+  let m=addZero(parseInt(lefttime/60%60));
+  let s=addZero(parseInt(lefttime%60));
+
+  document.querySelector("#count").innerHTML=`活动倒计时  ${d}天 ${h} 时 ${m} 分 ${s} 秒`;
+  setTimeout(countDown,1000);
 }
-
-var getName = function() {
-    console.log("4")
-}
-
-function getName() {
-    console.log("5");
-}
-
-Foo.getName();  // 2
-
-getName();  // 4
-
-new Foo.getName();  // 2
-
-new Foo().getName();  // 3
-
-new new Foo().getName();  // 3
 
 </script>
 </body>
