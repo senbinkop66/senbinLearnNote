@@ -118,15 +118,13 @@ Vue2.0的数据响应是采用**数据劫持**结合**发布者-订阅者模式*
 
 ## 1.4 Vue3.0 实现数据双向绑定的方法
 
-**参考答案:**
-
 vue3.0 实现数据双向绑定是通过**Proxy**
 
 **Proxy**是 ES6 中新增的一个特性，翻译过来意思是"代理"，用在这里表示由它来“代理”某些操作。 Proxy 让我们能够以简洁易懂的方式控制外部对对象的访问。其功能非常类似于设计模式中的代理模式。
 
 Proxy 可以理解成，**在目标对象之前架设一层“拦截**”，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。
 
-使用 Proxy 的**核心优点**是可以交由它来处理一些非核心逻辑（如：读取或设置对象的某些属性前记录日志；设置对象的某些属性值前，需要验证；某些属性的访问控制等）。 从而可以让对象只需关注于核心逻辑，达到关注点分离，降低对象复杂度等目的。
+使用 Proxy 的**核心优点**是可以交由它来**处理一些非核心逻辑**（如：读取或设置对象的某些属性前记录日志；设置对象的某些属性值前，需要验证；某些属性的访问控制等）。 从而可以让对象只需关注于核心逻辑，达到关注点分离，降低对象复杂度等目的。
 
 **扩展：**
 
@@ -134,6 +132,8 @@ Proxy 可以理解成，**在目标对象之前架设一层“拦截**”，外�
 
 1. 可以劫持整个对象，并返回一个新对象
 2. 有13种劫持操作
+
+
 
 ---
 
@@ -171,6 +171,8 @@ Proxy 可以理解成，**在目标对象之前架设一层“拦截**”，外�
 - 祖先与后代组件数据传递可选择`attrs`与`listeners`或者 `Provide`与 `Inject`
 - 复杂关系的组件数据传递可以通过`vuex`存放共享的变量
 
+
+
 -----
 
 ## 1.6 props传递数据
@@ -204,6 +206,10 @@ Father.vue组件
 <Children name="jack" age=18 />  
 ```
 
+
+
+
+
 ----
 
 ## 1.7 $emit 触发自定义事件传递数据
@@ -223,18 +229,26 @@ Father.vue
 <Children @add="cartAdd($event)" />  
 ```
 
+
+
+
+
 ----
 
 ##  1.8 使用 ref 传递数据
 
 - 父组件在使用子组件的时候设置`ref`
-- 父组件通过设置子组件`ref`来获取数据
+- 父组件通过设置子组件`refs来获取数据
 
 ```vue
 <Children ref="foo" />  
   
 this.$refs.foo  // 获取子组件实例，通过子组件实例我们就能拿到对应的数据  
 ```
+
+
+
+
 
 ----
 
@@ -251,7 +265,8 @@ this.$refs.foo  // 获取子组件实例，通过子组件实例我们就能拿�
 - 兄弟组件通过`$emit`触发自定义事件，`$emit`第二个参数为传递的数值
 - 另一个兄弟组件通过`$on`监听自定义事件
 
-```js
+```vue
+<script>
 Vue.component('brother1',{ 
  data(){ 
      return { 
@@ -267,15 +282,16 @@ Vue.component('brother1',{
  methods:{ 
      passData(val){ 
          //触发全局事件globalEvent 
-         bus.$emit('globalEvent',val) 
+         bus.$emit('globalEvent', val) 
      } 
  } 
 }) 
+    
 Vue.component('brother2',{ 
  template:` 
  <div> 
- <p>this is brother2 compoent!</p> 
- <p>brother1传递过来的数据：{{brothermessage}}</p> 
+ 	<p>this is brother2 compoent!</p> 
+ 	<p>brother1传递过来的数据：{{brothermessage}}</p> 
  </div> 
  `, 
  data(){ 
@@ -286,11 +302,12 @@ Vue.component('brother2',{
  }, 
  mounted(){ 
       //绑定全局事件globalEvent 
-     bus.$on('globalEvent',(val)=>{ 
+     bus.$on('globalEvent', (val)=>{ 
         this.brothermessage=val; 
      }) 
  } 
 }) 
+    
 //中央事件总线 
 var bus=new Vue(); 
 var app=new Vue({ 
@@ -302,7 +319,7 @@ var app=new Vue({
      </div> 
  ` 
 }) 
-
+</script>
 ```
 
 
@@ -311,12 +328,12 @@ var app=new Vue({
 
 ## 1.10 $parent 或$root
 
-- 通过共同祖辈`$parent`或者`$root`搭建通信侨联
+- 通过共同祖辈`$parent`或者`$root`搭建通信桥梁
 
 兄弟组件
 
 ```js
-this.$parent.on('add',this.add)
+this.$parent.on('add', this.add)
 ```
 
 另一个兄弟组件
@@ -348,7 +365,7 @@ C组件
 Vue.component('C',{ 
      template:` 
      <div> 
-     <input type="text" v-model="$attrs.messageC" @input="passCData($attrs.messageC)"> 
+     	<input type="text" v-model="$attrs.messageC" @input="passCData($attrs.messageC)"> 
      </div> 
      `, 
      methods:{ 
@@ -437,6 +454,8 @@ var app=new Vue({
 
 ![img](https://uploadfiles.nowcoder.com/images/20220301/4107856_1646128655053/F98E288D764804F2354ED35EC26D637C)
 
+
+
 -----
 
 ## 1.12 provide和inject
@@ -471,7 +490,7 @@ inject:['foo'] // 获取到祖先组件传递过来的值
 如果业务逻辑复杂，很多组件之间需要同时处理一些公共的数据，这个时候才有上面这一些方法可能不利于项目的维护，vuex的做法就是将这一些公共的数据抽离出来，然后其他组件就可以对这个公共数据进行读写操作，这样达到了解耦的目的
 
 - 适用场景: 复杂关系的组件数据传递
-- `Vuex`作用相当于一个用来存储共享变量的容器
+- `Vuex`作用**相当于一个用来存储共享变量的容器**
 
 ![img](E:\pogject\学习笔记\image\vue\fa207cd0-3aca-11eb-ab90-d9ae814b240d.png)
 
@@ -492,12 +511,12 @@ new Vue({
 })
 ```
 
-这个大家都熟悉，调用 render 就会得到传入的模板(`.vue`文件)对应的虚拟 DOM，那么这个 render 是哪来的呢？它是怎么把 `.vue` 文件转成浏览器可识别的代码的呢？
+调用 render 就会得到传入的模板(`.vue`文件)对应的虚拟 DOM，那么这个 render 是哪来的呢？它是怎么把 `.vue` 文件转成浏览器可识别的代码的呢？
 
 render 函数是怎么来的有两种方式
 
-- 第一种就是经过模板编译生成 render 函数
-- 第二种是我们自己在组件里定义了 render 函数，这种会跳过模板编译的过程
+- 第一种就是**经过模板编译生成 render 函数**
+- 第二种是我们**自己在组件里定义了 render 函数**，这种会跳过模板编译的过程
 
 我们知道 `<template></template>` 这个是模板，不是真实的 HTML，浏览器是不认识模板的，所以我们需要把它编译成浏览器认识的原生的 HTML
 
@@ -511,11 +530,13 @@ render 函数是怎么来的有两种方式
 
 上面的 1、2、3 条就是模板编译的过程了
 
+
+
 ---
 
 ## 1.15 vue3中怎么设置全局变量？
 
-### 方法一 config.globalProperties
+### (1) config.globalProperties
 
 `vue2.x`挂载全局是使用 `Vue.prototype.$xxxx=xxx` 的形式来挂载，然后通过 `this.$xxx`来获取挂载到全局的变量或者方法。
 
@@ -530,7 +551,7 @@ const app = createApp({})
 app.config.globalProperties.$http = () => {}
 ```
 
-### 方法二 Provide / Inject
+### (2)  Provide / Inject
 
 vue3新的 `provide/inject` 功能可以穿透多层组件，实现数据从父组件传递到子组件。
 
@@ -556,11 +577,11 @@ vue3新的 `provide/inject` 功能可以穿透多层组件，实现数据从父�
 
 最常用的是在 created 钩子函数中调用异步请求
 
-**解析：**
-
 一般来说，可以在，created，mounted中都可以发送数据请求，但是，**大部分时候，会在created发送请求**。
+
 Created的使用场景：如果页面首次渲染的就来自后端数据。因为，此时data已经挂载到vue实例了。
 在 created（如果希望首次选的数据来自于后端，就在此处发请求）（只发了异步请求，渲染是在后端响应之后才进行的）、beforeMount、mounted（**在mounted中发请求会进行二次渲染**） 这三个钩子函数中进行调用。
+
 因为在这三个钩子函数中，data 已经创建，可以将服务端端返回的数据进行赋值。但是**最常用的是在 created 钩子函数中调用异步请求**，
 
 因为在 created 钩子函数中调用异步请求有**两个优点**：
@@ -569,9 +590,13 @@ Created的使用场景：如果页面首次渲染的就来自后端数据。因�
 
 - 第二点：放在 created 中有助于一致性，因为ssr 不支持 beforeMount 、mounted 钩子函数。
 
+
+
 ----
 
 ## 1.20 vue钩子函数
+
+![Vue 实例生命周期](https://vuejs.bootcss.com/images/lifecycle.png)
 
 Vue生命周期经历哪些阶段：
 
@@ -606,7 +631,7 @@ Vue生命周期经历哪些阶段：
 
    即：data，computed都执行了。属性已经赋值，但没有动态创建template属性对应的HTML元素，所以，此时如果更改数据不会触发updated函数
 
-   如果：数据的初始值就来自于后端，可以发送ajax，或者fetch请求获取数据，但是，此时不会触发updated函数
+   如果：数据的初始值就来自于后端，可以发送ajax，或者fetch请求获取数据，但是，**此时不会触发updated函数**
 
 6. 检查
 
@@ -619,53 +644,53 @@ Vue生命周期经历哪些阶段：
 
 
 
-1. beforeMount函数：
+7. beforeMount函数：
 
-   模板编译(template)、数据挂载(把数据显示在模板里)之前执行的钩子函数
+模板编译(template)、数据挂载(把数据显示在模板里)之前执行的钩子函数
 
-   此时 this.$el有值，但是数据还没有挂载到页面上。即此时页面中的{{}}里的变量还没有被数据替换
+此时 this.$el有值，但是数据还没有挂载到页面上。即此时页面中的{{}}里的变量还没有被数据替换
 
-2. 模板编译：用vue对象的数据（属性）替换模板中的内容
+8. 模板编译：用vue对象的数据（属性）替换模板中的内容
 
-3. Mounted函数：
+9. Mounted函数：
 
-   模板编译完成，数据挂载完毕
+模板编译完成，数据挂载完毕
 
-   即：此时已经把数据挂载到了页面上，所以，页面上能够看到正确的数据了。
+即：此时已经把数据挂载到了页面上，所以，页面上能够看到正确的数据了。
 
-   一般来说，我们在此处发送异步请求（ajax，fetch，axios等），获取服务器上的数据，显示在DOM里。
+一般来说，我们在此处发送异步请求（ajax，fetch，axios等），获取服务器上的数据，显示在DOM里。
 
-4. beforeUpdate函数：
+10. beforeUpdate函数：
 
-   组件更新之前执行的函数，只有数据更新后，才能调用（触发）beforeUpdate，注意：**此数据一定是在模板上出现的数据**，否则，不会，也没有必要触发组件更新（因为数据不出现在模板里，就没有必要再次渲染）
+组件更新之前执行的函数，只有数据更新后，才能调用（触发）beforeUpdate，注意：**此数据一定是在模板上出现的数据**，否则，不会，也没有必要触发组件更新（因为数据不出现在模板里，就没有必要再次渲染）
 
-   数据更新了，但是，vue（组件）对象对应的dom中的内部（innerHTML）没有变，所以叫作**组件更新前**
+数据更新了，但是，vue（组件）对象对应的dom中的内部（innerHTML）没有变，所以叫作**组件更新前**
 
-5. updated函数：
+11. updated函数：
 
-   组件更新之后执行的函数
+组件更新之后执行的函数
 
-   vue（组件）对象对应的dom中的内部（innerHTML）改变了，所以，叫作**组件更新之后**
+vue（组件）对象对应的dom中的内部（innerHTML）改变了，所以，叫作**组件更新之后**
 
-6. activated函数：keep-alive组件激活时调用
+12. activated函数：keep-alive组件激活时调用
 
-7. deactivated函数：keep-alive组件停用时调用
+13. deactivated函数：keep-alive组件停用时调用
 
-8. beforeDestroy：vue（组件）对象销毁之前
+14. beforeDestroy：vue（组件）对象销毁之前
 
-9. destroyed：vue组件销毁后
+15. destroyed：vue组件销毁后
 
 keep-alive
 
 `<keep-alive></keep-alive>`包裹动态组件时，会缓存不活动的组件实例,主要用于保留组件状态或避免重新渲染。
 
-**解析：** 比如有一个列表和一个详情，那么用户就会经常执行打开详情=>返回列表=>打开详情…这样的话列表和详情都是一个频率很高的页面，那么就可以对列表组件使用<keep-alive></keep-alive>进行缓存，这样用户每次返回列表的时候，都能从缓存中快速渲染，而不是重新渲染
+**解析：** 比如有一个列表和一个详情，那么用户就会经常执行打开详情=>返回列表=>打开详情…这样的话列表和详情都是一个频率很高的页面，那么就可以对列表组件使用`<keep-alive></keep-alive>`进行缓存，这样用户每次返回列表的时候，都能从缓存中快速渲染，而不是重新渲染
+
+
 
 -----
 
 ## 1.21 vue keep-alive
-
-**参考答案：**
 
 **keep-alive**：keep-alive可以实现组件缓存，是Vue.js的一个内置组件。
 
@@ -680,15 +705,31 @@ keep-alive
 2. 两个生命周期activated/deactivated，用来得知当前组件是否处于活跃状态。
 3. keep-alive的中还运用了LRU(Least Recently Used)算法。
 
-原理：Vue 的缓存机制并不是直接存储 DOM 结构，而是将 DOM 节点抽象成了一个个 VNode节点，所以，keep- alive的缓存也是基于VNode节点的而不是直接存储DOM结构。
+```vue
+<KeepAlive>
+  <component :is="view"></component>
+</KeepAlive>
+```
+
+原理：Vue 的缓存机制并不是直接存储 DOM 结构，**而是将 DOM 节点抽象成了一个个 VNode节点**，所以，keep- alive的缓存也是基于VNode节点的而不是直接存储DOM结构。
 
 其实就是将需要缓存的VNode节点保存在this.cache中, 在render时,如果VNode的name符合在缓存条件（可以用include以及exclude控制），则会从this.cache中取出之前缓存的VNode实例进行渲染。
+
+```
+
+```
+
+
 
 ---
 
 ## 1.22 既然函数是引用类型，为什么 vue 的 data 还是可以用函数
 
-JavaScript只有函数构成作用域(注意理解作用域，**只有函数{}构成作用域**,对象的{}以及if(){}都不构成作用域),**data是一个函数时，每个组件实例都有自己的作用域，每个实例相互独立，不会相互影响**。
+为了使组件实例有自己的作用域
+
+JavaScript只有函数构成作用域(注意理解作用域，**只有函数{}构成作用域**，对象的{}以及if(){}都不构成作用域)
+
+**data是一个函数时，每个组件实例都有自己的作用域，每个实例相互独立，不会相互影响**。
 
 
 
@@ -698,9 +739,9 @@ JavaScript只有函数构成作用域(注意理解作用域，**只有函数{}�
 
 作用：是**为了可以获取更新后的DOM** 。
 
-由于Vue DOM更新是**异步执行**的，即修改数据时，视图不会立即更新，而是会监听数据变化，并缓存在同一事件循环中，等同一数据循环中的所有数据变化完成之后，再统一进行视图更新。
+由于Vue DOM更新是**异步执行**的，即修改数据时，视图不会立即更新，**而是会监听数据变化，并缓存在同一事件循环中，等同一数据循环中的所有数据变化完成之后，再统一进行视图更新。**
 
-为了确保得到更新后的DOM，所以设置了 Vue.nextTick()，就是在下次DOM更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的DOM。
+为了确保得到更新后的DOM，所以设置了 Vue.nextTick()，**就是在下次DOM更新循环结束之后执行延迟回调**。在修改数据之后立即使用这个方法，获取更新后的DOM。
 
 原理：
 
@@ -713,6 +754,8 @@ JavaScript只有函数构成作用域(注意理解作用域，**只有函数{}�
 
 定义了一个异步方法，多次调用nextTick会将方法存入队列中，**通过这个异步方法清空当前队列。**
 
+
+
 ---
 
 ## 1.24 vue的特性
@@ -723,6 +766,8 @@ JavaScript只有函数构成作用域(注意理解作用域，**只有函数{}�
 - 过滤器
 - 侦听器
 - 生命周期
+
+
 
 ---
 
@@ -757,21 +802,19 @@ JavaScript只有函数构成作用域(注意理解作用域，**只有函数{}�
 - `v-show` 由`false`变为`true`的时候不会触发组件的生命周期
 - `v-if`由`false`变为`true`的时候，触发组件的`beforeCreate`、`create`、`beforeMount`、`mounted`钩子，由`true`变为`false`的时候触发组件的`beforeDestory`、`destoryed`方法
 
-性能消耗：`v-if`有更高的切换消耗；`v-show`有更高的初始渲染消耗；
+**性能消耗**：`v-if`有更高的切换消耗；`v-show`有更高的初始渲染消耗；
 
 
 
 v-show和v-if都是用来显示隐藏元素，v-if还有一个v-else配合使用，两者达到的效果都一样，**但是v-if更消耗性能的，因为v-if在显示隐藏过程中有DOM的添加和删除**，v-show就简单多了，只是操作css。
 
-**解析：**
-
 v-show
 
-v-show不管条件是真还是假，第一次渲染的时候都会编译出来，也就是标签都会添加到DOM中。之后切换的时候，通过display: none;样式来显示隐藏元素。可以说只是改变css的样式，几乎不会影响什么性能。
+v-show不管条件是真还是假，第一次渲染的时候都会编译出来，也就是标签都会添加到DOM中。之后切换的时候，通过display: none;样式来显示隐藏元素。**可以说只是改变css的样式，几乎不会影响什么性能**。
 
 v-if
 
-在首次渲染的时候，如果条件为假，什么也不操作，页面当作没有这些元素。当条件为真的时候，开始局部编译，动态的向DOM元素里面添加元素。当条件从真变为假的时候，开始局部编译，卸载这些元素，也就是删除。
+在首次渲染的时候，如果条件为假，什么也不操作，页面当作没有这些元素。当条件为真的时候，开始**局部编译**，动态的向DOM元素里面添加元素。当条件从真变为假的时候，开始局部编译，卸载这些元素，也就是删除。
 
 ### 使用场景
 
@@ -791,7 +834,7 @@ v-if
 
 需要使用key来给每个节点做一个唯一标识，Diff算法就可以正确的识别此节点。主要是为了高效的更新虚拟DOM。
 
-vue中列表循环需加:key="唯一标识" 唯一标识且最好是静态的，因为vue组件高度复用增加Key可以标识组件的唯一性，为了更好地区别各个组件 key的作用主要是为了高效的更新虚拟DOM
+vue中列表循环需加:key="唯一标识" 唯一标识且最好是静态的，因为vue组件高度复用增加Key可以标识组件的唯一性，为了更好地区别各个组件 key的作用**主要是为了高效的更新虚拟DOM**
 
 **解析：**
 
@@ -830,7 +873,7 @@ vue和react的虚拟DOM的Diff算法大致相同，其核心是基于两个简�
 
 ## 1.30 双向数据绑定原理
 
-目前几种主流的mvc(vm)框架都实现了单向数据绑定，而我所理解的双向数据绑定**无非就是在单向绑定的基础上给可输入元素（input、textare等）添加了change(input)事件，来动态修改model和 view**，并没有多高深。所以无需太过介怀是实现的单向或双向绑定。
+目前几种主流的mvc(vm)框架都实现了单向数据绑定，而双向数据绑定**无非就是在单向绑定的基础上给可输入元素（input、textare等）添加了change(input)事件，来动态修改model和 view**，并没有多高深。所以无需太过介怀是实现的单向或双向绑定。
 
 实现数据绑定的做法有大致如下几种：
 
@@ -864,7 +907,7 @@ vue和react的虚拟DOM的Diff算法大致相同，其核心是基于两个简�
 
 **一但我们的绑定细粒度过高就会产生大量的Watcher，这会带来内存以及依赖追踪的开销**，而细粒度过低会无法精准侦测变化,
 
-因此Vue的设计是选择中等细粒度的方案,**在组件级别进行push侦测的方式**,也就是那套响应式系统,通常我们会第一时间侦测到发生变化的组件,然后在组件内部进行Virtual Dom Diff获取更加具体的差异，而Virtual Dom Diff则是pull操作，**Vue是push+pull结合的方式进行变化侦测的。**
+因此Vue的设计是选择中等细粒度的方案,**在组件级别进行push侦测的方式**,也就是那套响应式系统,通常我们会第一时间侦测到发生变化的组件,然后在**组件内部**进行Virtual Dom Diff获取更加具体的差异，而Virtual Dom Diff则是pull操作，**Vue是push+pull结合的方式进行变化侦测的。**
 
 
 
@@ -884,24 +927,20 @@ vue和react的虚拟DOM的Diff算法大致相同，其核心是基于两个简�
 10. 进入挂载阶段，将 vue 模板语法通过vue-loader解析成虚拟 DOM 树，虚拟 DOM 树与数据完成双向绑定，触发生命周期钩子beforeMount；
 11. 将解析好的虚拟 DOM 树通过 vue 渲染成真实 DOM，触发生命周期钩子mounted；
 
-----
-
-
-
 
 
 ---
 
 ## 1.33 root、refs、$parent、$children的使用？
 
-$root    访问根元素。
+$root    **访问根元素**。
 
 ```js
 this.$root.属性名。
 ```
 
 如果在vue-cli工程内使用$root:
-有人可能认为根元素是App.vue。但是其实是main.js中new Vue这个实例，在new Vue这个实例中定义data即可
+有人可能认为根元素是App.vue。**但是其实是main.js中new Vue这个实例**，在new Vue这个实例中定义data即可
 
 $root可以将根组件作为一个全局store来访问或使用。
 
@@ -930,13 +969,13 @@ $refs用来实现父组件对于特定子组件进行访问
 this.$refs.usernameInput
 ```
 
-> $refs 只会在组件渲染完成之后生效，并且它们不是响应式的。这仅作为一个用于直接操作子组件的“逃生舱”——你应该避免在模板或计算属性中访问 $refs。
+> $refs 只会在组件渲染完成之后生效，**并且它们不是响应式的**。这仅作为一个用于直接操作子组件的“逃生舱”——你应该避免在模板或计算属性中访问 $refs。
 
 $children
 
 $children返回的是一个组件集合，如果你能清楚的知道子组件的顺序，你也可以使用下标来操作；
 
-```
+```js
 this.$children[0]
 ```
 
@@ -961,6 +1000,8 @@ css的预编译。
 
 - 可以用混合器，例如（）
 - 可以嵌套
+
+
 
 ----
 
@@ -987,9 +1028,11 @@ console.log(arr2)    //[1,2]
 
 computed 和 watch看似都能实现对数据的监听
 
-### computed 计算属性
+### computed
 
-#### 其他属性计算而来
+ 计算属性
+
+**其他属性计算而来**
 
 计算属性基于 data 中声明过或者父组件传递的 props 中的数据通过计算得到的一个**新值**，这个新值只会根据已知值的变化而变化，简言之：这个属性依赖其他属性，由**其他属性计算而来**的。
 
@@ -1013,7 +1056,7 @@ computed: {
 
 因为如果 computed 属性值是一个函数，那么默认会走 get 方法，**必须要有一个返回值，函数的返回值就是属性的属性值**。计算属性定义了 fullName 并返回对应的结果给这个变量，**变量不可被重复定义和赋值**。
 
-#### computed 带有缓存功能
+**computed 带有缓存功能**
 
 在官方文档中，还强调了 computed 一个重要的特点，就是 **computed 带有缓存功能**。比如我在页面中多次显示 fullName：
 
@@ -1037,7 +1080,7 @@ computed: {
 而 **computed 属性值默认会缓存计算结果**，计算属性是基于它们的响应式依赖进行缓存的；
 只有当 computed 属性被使用后，才会执行 computed 的代码，**在重复的调用中，只要依赖数据不变，直接取缓存中的计算结果**。只有**依赖型数据**发生**改变**，computed 才会重新计算。
 
-#### 计算属性的高级：
+**计算属性的高级：**
 
 在computed 中的属性都有一个 **get** 和一个 **set** 方法，当数据变化时，调用 set 方法。下面我们通过计算属性的 getter/setter 方法来**实现对属性数据的显示和监视，即双向绑定。**
 
@@ -1058,7 +1101,9 @@ computed: {
 
 
 
-### watch 监听属性
+### watch 
+
+监听属性
 
 通过 vm 对象的 $watch() 或 watch 配置来监听 Vue 实例上的属性变化，或某些特定数据的变化，然后执行某些具体的业务逻辑操作**。当属性变化时，回调函数自动调用，在函数内部进行计算。**其可以监听的数据来源：data，props，computed 内的数据。
 
@@ -1083,7 +1128,7 @@ watch: {
 
 上面仅限监听简单数据类型，监听复杂数据类型就需要用到深度监听 deep。
 
-**deep：**为了发现对象内部值的变化，可以在选项参数中指定 deep: true。**注意监听数组的变更不需要这么做。**
+**deep：**为了发现**对象内部值**的变化，可以在选项参数中指定 deep: true。**注意监听数组的变更不需要这么做。**
 
 ```js
 data: {
@@ -1141,9 +1186,13 @@ watch: {
 
 ### 应用场景
 
-computed：用于处理复杂的逻辑运算；**一个数据受一个或多个数据影响**；用来处理watch和methods无法处理的，或处理起来不方便的情况。例如处理模板中的复杂表达式、购物车里面的商品数量和总金额之间的变化关系等。
+computed：用于处理复杂的逻辑运算；**一个数据受一个或多个数据影响**；用来处理watch和methods无法处理的，或处理起来不方便的情况。
 
-watch：用来处理当一个属性发生变化时，需要执行某些具体的业务逻辑操作，**或要在数据变化时执行异步或开销较大的操作**；**一个数据改变影响多个数据**。例如用来监控路由、inpurt 输入框值的特殊处理等。
+例如处理模板中的复杂表达式、购物车里面的商品数量和总金额之间的变化关系等。
+
+watch：用来处理当一个属性发生变化时，需要执行某些具体的业务逻辑操作，**或要在数据变化时执行异步或开销较大的操作**；**一个数据改变影响多个数据**。
+
+例如用来监控路由、inpurt 输入框值的特殊处理等。
 
 ### 区别
 
@@ -1170,15 +1219,331 @@ watch：用来处理当一个属性发生变化时，需要执行某些具体的
 
 ## 1.37 computed怎么实现的缓存
 
+```vue
+<div id="app">
+  <span @click="change">{{sum}}</span>
+</div>
+<script src="./vue2.6.js"></script>
+<script>
+  new Vue({
+    el: "#app",
+    data() {
+      return {
+        count: 1,
+      }
+    },
+    methods: {
+      change() {
+        this.count = 2
+      },
+    },
+    computed: {
+      sum() {
+        return this.count + 1
+      },
+    },
+  })
+</script>
+```
+
+1. 初始化data和computed,分别代理其set以及get方法, 对data中的所有属性生成唯一的dep实例。
+2. 对computed中的sum生成唯一watcher,并保存在vm._computedWatchers中
+3. 执行render函数时会访问sum属性，从而执行initComputed时定义的getter方法，会将Dep.target指向sum的watcher,并调用该属性具体方法sum。
+4. sum方法中访问this.count，即会调用this.count代理的get方法，将this.count的dep加入sum的watcher,同时该dep中的subs添加这个watcher。
+5. 设置vm.count = 2，调用count代理的set方法触发dep的notify方法，因为是computed属性，只是将watcher中的dirty设置为true。
+6. 最后一步vm.sum，访问其get方法时，得知sum的watcher.dirty为true,调用其watcher.evaluate()方法获取新的值。
+
 
 
 ----
 
 ## 1.38 自定义指令是什么？有哪些应用场景？
 
+在`vue`中提供了一套为数据驱动视图更为方便的操作，这些操作被称为指令系统
+
+我们看到的`v- `开头的行内属性，都是指令，不同的指令可以完成或实现不同的功能
+
+除了核心功能默认内置的指令 (`v-model` 和 `v-show`)，`Vue` 也允许注册自定义指令
+
+指令使用的几种方式：
+
+```js
+//会实例化一个指令，但这个指令没有参数 
+`v-xxx`
+
+// -- 将值传到指令中
+`v-xxx="value"`  
+
+// -- 将字符串传入到指令中，如`v-html="'<p>内容</p>'"`
+`v-xxx="'string'"` 
+
+// -- 传参数（`arg`），如`v-bind:class="className"`
+`v-xxx:arg="value"` 
+
+// -- 使用修饰符（`modifier`）
+`v-xxx:arg.modifier="value"` 
+```
+
+注册一个自定义指令有全局注册与局部注册
+
+全局注册注册主要是用过`Vue.directive`方法进行注册
+
+`Vue.directive`第一个参数是指令的名字（不需要写上`v-`前缀），第二个参数可以是对象数据，也可以是一个指令函数
+
+```js
+// 注册一个全局自定义指令 `v-focus`
+Vue.directive('focus', {
+  // 当被绑定的元素插入到 DOM 中时……
+  inserted: function (el) {
+    // 聚焦元素
+    el.focus()  // 页面加载完成之后自动让输入框获取到焦点的小功能
+  }
+})
+```
+
+局部注册通过在组件`options`选项中设置`directive`属性
+
+```js
+directives: {
+  focus: {
+    // 指令的定义
+    inserted: function (el) {
+      el.focus() // 页面加载完成之后自动让输入框获取到焦点的小功能
+    }
+  }
+}
+```
+
+然后你可以在模板中任何元素上使用新的 `v-focus` property，如下：
+
+```vue
+<input v-focus />
+```
+
+自定义指令也像组件那样存在钩子函数：
+
+- `bind`：只调用一次，指令第一次绑定到元素时调用。在这里可以进行一次性的初始化设置
+- `inserted`：被绑定元素插入父节点时调用 (仅保证父节点存在，但不一定已被插入文档中)
+- `update`：所在组件的 `VNode` 更新时调用，但是可能发生在其子 `VNode` 更新之前。指令的值可能发生了改变，也可能没有。但是你可以通过比较更新前后的值来忽略不必要的模板更新
+- `componentUpdated`：指令所在组件的 `VNode` 及其子 `VNode` 全部更新后调用
+- `unbind`：只调用一次，指令与元素解绑时调用
+
+所有的钩子函数的参数都有以下：
+
+- `el`：指令所绑定的元素，可以用来直接操作 `DOM`
+- binding：一个对象，包含以下property：
+  - `name`：指令名，不包括 `v-` 前缀。
+  - `value`：指令的绑定值，例如：`v-my-directive="1 + 1"` 中，绑定值为 `2`。
+  - `oldValue`：指令绑定的前一个值，仅在 `update` 和 `componentUpdated` 钩子中可用。无论值是否改变都可用。
+  - `expression`：字符串形式的指令表达式。例如 `v-my-directive="1 + 1"` 中，表达式为 `"1 + 1"`。
+  - `arg`：传给指令的参数，可选。例如 `v-my-directive:foo` 中，参数为 `"foo"`。
+  - `modifiers`：一个包含修饰符的对象。例如：`v-my-directive.foo.bar` 中，修饰符对象为 `{ foo: true, bar: true }`
+- `vnode`：`Vue` 编译生成的虚拟节点
+- `oldVnode`：上一个虚拟节点，仅在 `update` 和 `componentUpdated` 钩子中可用
+
+> 除了 `el` 之外，其它参数都应该是只读的，切勿进行修改。如果需要在钩子之间共享数据，建议通过元素的 `dataset` 来进行
+
+举个例子：
+
+```vue
+<div v-demo="{ color: 'white', text: 'hello!' }"></div>
+<script>
+    Vue.directive('demo', function (el, binding) {
+    console.log(binding.value.color) // "white"
+    console.log(binding.value.text)  // "hello!"
+    })
+</script>
+```
 
 
 
+使用自定义组件组件可以满足我们日常一些场景，这里给出几个自定义组件的案例：
+
+- 防抖
+- 图片懒加载
+- 一键 Copy的功能
+
+### 输入框防抖
+
+防抖这种情况设置一个`v-debounce`自定义指令来实现
+
+举个例子：
+
+```js
+// 1.设置v-debounce自定义指令
+Vue.directive('debounce', {
+  bind: (el, binding) => {
+    let debounceTime = binding.value; // 防抖时间
+    if (!debounceTime) { // 用户若不设置防抖时间，则默认2s
+      debounceTime = 2000;
+    }
+    let cbFun;
+    el.addEventListener('click', event => {
+      if (!cbFun) { // 第一次执行
+        cbFun = setTimeout(() => {
+          cbFun = null;
+        }, debounceTime);
+      } else {
+        event && event.stopImmediatePropagation();
+      }
+    }, true);
+  },
+});
+
+// 2.为button标签设置v-debounce自定义指令
+<button @click="sayHello" v-debounce>提交</button>
+```
+
+### 图片懒加载
+
+设置一个`v-lazy`自定义组件完成图片懒加载
+
+```js
+const LazyLoad = {
+    // install方法
+    install(Vue,options){
+    	  // 代替图片的loading图
+        let defaultSrc = options.default;
+        Vue.directive('lazy',{
+            bind(el,binding){
+                LazyLoad.init(el,binding.value,defaultSrc);
+            },
+            inserted(el){
+                // 兼容处理
+                if('IntersectionObserver' in window){
+                    LazyLoad.observe(el);
+                }else{
+                    LazyLoad.listenerScroll(el);
+                }
+                
+            },
+        })
+    },
+    // 初始化
+    init(el,val,def){
+        // data-src 储存真实src
+        el.setAttribute('data-src',val);
+        // 设置src为loading图
+        el.setAttribute('src',def);
+    },
+    // 利用IntersectionObserver监听el
+    observe(el){
+        let io = new IntersectionObserver(entries => {
+            let realSrc = el.dataset.src;
+            if(entries[0].isIntersecting){
+                if(realSrc){
+                    el.src = realSrc;
+                    el.removeAttribute('data-src');
+                }
+            }
+        });
+        io.observe(el);
+    },
+    // 监听scroll事件
+    listenerScroll(el){
+        let handler = LazyLoad.throttle(LazyLoad.load,300);
+        LazyLoad.load(el);
+        window.addEventListener('scroll',() => {
+            handler(el);
+        });
+    },
+    // 加载真实图片
+    load(el){
+        let windowHeight = document.documentElement.clientHeight
+        let elTop = el.getBoundingClientRect().top;
+        let elBtm = el.getBoundingClientRect().bottom;
+        let realSrc = el.dataset.src;
+        if(elTop - windowHeight<0&&elBtm > 0){
+            if(realSrc){
+                el.src = realSrc;
+                el.removeAttribute('data-src');
+            }
+        }
+    },
+    // 节流
+    throttle(fn,delay){
+        let timer; 
+        let prevTime;
+        return function(...args){
+            let currTime = Date.now();
+            let context = this;
+            if(!prevTime) prevTime = currTime;
+            clearTimeout(timer);
+            
+            if(currTime - prevTime > delay){
+                prevTime = currTime;
+                fn.apply(context,args);
+                clearTimeout(timer);
+                return;
+            }
+
+            timer = setTimeout(function(){
+                prevTime = Date.now();
+                timer = null;
+                fn.apply(context,args);
+            },delay);
+        }
+    }
+
+}
+export default LazyLoad;
+```
+
+### 一键 Copy的功能
+
+```js
+import { Message } from 'ant-design-vue';
+
+const vCopy = { //
+  /*
+    bind 钩子函数，第一次绑定时调用，可以在这里做初始化设置
+    el: 作用的 dom 对象
+    value: 传给指令的值，也就是我们要 copy 的值
+  */
+  bind(el, { value }) {
+    el.$value = value; // 用一个全局属性来存传进来的值，因为这个值在别的钩子函数里还会用到
+    el.handler = () => {
+      if (!el.$value) {
+      // 值为空的时候，给出提示，我这里的提示是用的 ant-design-vue 的提示，你们随意
+        Message.warning('无复制内容');
+        return;
+      }
+      // 动态创建 textarea 标签
+      const textarea = document.createElement('textarea');
+      // 将该 textarea 设为 readonly 防止 iOS 下自动唤起键盘，同时将 textarea 移出可视区域
+      textarea.readOnly = 'readonly';
+      textarea.style.position = 'absolute';
+      textarea.style.left = '-9999px';
+      // 将要 copy 的值赋给 textarea 标签的 value 属性
+      textarea.value = el.$value;
+      // 将 textarea 插入到 body 中
+      document.body.appendChild(textarea);
+      // 选中值并复制
+      textarea.select();
+      // textarea.setSelectionRange(0, textarea.value.length);
+      const result = document.execCommand('Copy');
+      if (result) {
+        Message.success('复制成功');
+      }
+      document.body.removeChild(textarea);
+    };
+    // 绑定点击事件，就是所谓的一键 copy 啦
+    el.addEventListener('click', el.handler);
+  },
+  // 当传进来的值更新的时候触发
+  componentUpdated(el, { value }) {
+    el.$value = value;
+  },
+  // 指令与元素解绑的时候，移除事件绑定
+  unbind(el) {
+    el.removeEventListener('click', el.handler);
+  },
+};
+
+export default vCopy;
+```
+
+关于自定义组件还有很多应用场景，如：拖拽指令、页面水印、权限校验等等应用场景
 
 
 
@@ -1272,7 +1637,7 @@ MVVM 表示的是 Model-View-ViewModel
 
 ### 组件化
 
-1.什么是组件化一句话来说就是把图形、非图形的各种逻辑均抽象为一个统一的概念（组件）来实现开发的模式，在`Vue`中每一个`.vue`文件都可以视为一个组件
+1.什么是组件化，一句话来说就是把图形、非图形的各种逻辑均抽象为一个统一的概念（组件）来实现开发的模式，在`Vue`中每一个`.vue`文件都可以视为一个组件
 
 2.组件化的优势
 
@@ -1293,6 +1658,8 @@ MVVM 表示的是 Model-View-ViewModel
 
 没有指令之前我们是怎么做的？是不是先要获取到DOM然后在....
 
+
+
 ----
 
 ##  1.43 Vue2.0为什么不能检查数组的变化，该怎么解决？
@@ -1306,7 +1673,7 @@ MVVM 表示的是 Model-View-ViewModel
 
 - 无法检测数组/对象的新增？
 
-Vue检测数据的变动是通过Object.defineProperty实现的，所以无法监听数组的添加操作是可以理解的，因为是在构造函数中就已经为所有属性做了这个检测绑定操作。
+**Vue检测数据的变动是通过Object.defineProperty实现的**，所以无法监听数组的添加操作是可以理解的，因为是在构造函数中就已经为所有属性做了这个检测绑定操作。
 
 - 无法检测通过索引改变数组的操作。即vm.items[indexOfItem] = newValue？
 
@@ -1316,7 +1683,7 @@ Vue检测数据的变动是通过Object.defineProperty实现的，所以无法�
 
 > Vue对数组的7个变异方法（push、pop、shift、unshift、splice、sort、reverse）实现了响应式
 
-们测试一下通过索引改变数组的操作，能不能被监听到。遍历数组，用Object.defineProperty对每一项进行监测
+测试一下通过索引改变数组的操作，能不能被监听到。遍历数组，用Object.defineProperty对每一项进行监测
 
 ```js
 function defineReactive(data, key, value) {
@@ -1349,7 +1716,7 @@ arr[1] = 100;
 
 通过索引改变arr[1]，我们发现触发了set，也就是Object.defineProperty是可以检测到通过索引改变数组的操作的，那Vue2.0为什么没有实现呢？
 
-**小结**：是出于对性能原因的考虑，没有去实现它。而不是不能实现。
+**小结**：**是出于对性能原因的考虑，没有去实现它**。而不是不能实现。
 
 对于对象而言，每一次的数据变更都会对对象的属性进行一次枚举，一般对象本身的属性数量有限，所以对于遍历枚举等方式产生的性能损耗可以忽略不计，但是对于数组而言呢？数组包含的元素量是可能达到成千上万，假设对于每一次数组元素的更新都触发了枚举/遍历，其带来的性能损耗将与获得的用户体验不成正比，故vue无法检测数组的变动。
 
@@ -1388,12 +1755,8 @@ console.log(this.originArr)  //同样的 源数组也会被修改 在某些情�
 
 1. this.$set(obj, key ,value) - 可实现增、改
 
-   ```
    
-   ```
-
    
-
 2. watch时添加`deep：true`深度监听，**只能监听到属性值的变化**，新增、删除属性无法监听
 
    ```js
@@ -1664,13 +2027,9 @@ console.log(sum)  //应该为120
 
 在日常的Vue项目开发过程中，为了让项目更好的维护一般都会使用模块化开发的方式进行。也就是每个组件维护独立的`template`，`script`，`style`。今天主要介绍一下使用`<style scoped>`为什么在页面渲染完后样式之间并不会造成污染。
 
-1. 每个组件都会拥有一个`[data-v-hash:8]`插入HTML标签，子组件标签上也具体父组件`[data-v-hash:8]`;
-2. 如果style标签加了`scoped属性`，里面的选择器都会变成`(Attribute Selector) [data-v-hash:8]`;
+1. **每个组件都会拥有一个`[data-v-hash:8]`插入HTML标签**，子组件标签上也具体父组件`[data-v-hash:8]`;
+2. 如果style标签加了`scoped属性`，**里面的选择器都会变成`(Attribute Selector) [data-v-hash:8]`**;
 3. 如果子组件选择器跟父组件选择器完全一样，那么就会出现子组件样式被父组件覆盖，因为`子组件会优先于父组件mounted`
-
-----
-
-## 
 
 
 
