@@ -179,6 +179,16 @@ console.log(nums)
 
 
 
+---
+
+## 优化时间和空间效率
+
+### 时间效率
+
+
+
+
+
 
 
 ----
@@ -2664,6 +2674,267 @@ var permutation = function(s) {
 
 ----
 
+## 39. 数组中出现次数超过一半的数字
+
+数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字。
+
+ 你可以假设数组是非空的，并且给定的数组总是存在多数元素。
+
+**计数**
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var majorityElement = function(nums) {
+    if (nums.length === 0) {
+        return false;
+    }
+    let count = 0;
+    let ans;
+    let n = nums.length;
+    for (let i = 0; i < n; i++) {
+        if (count === 0) {
+            ans = nums[i];
+        }
+        count += (nums[i] === ans) ? 1 : -1;
+    }
+    return ans;
+};
+
+let nums = [1, 2, 3, 2, 2, 2, 5, 4, 2];
+console.log(majorityElement(nums));
+```
+
+**排序**
+
+```js
+var majorityElement = function(nums) {
+    nums.sort((a, b) => a - b);
+    return nums[nums.length >> 1];
+};
+```
+
+**分治**
+
+```java
+class Solution {
+    private int countInRange(int[] nums, int num, int lo, int hi) {
+        int count = 0;
+        for (int i = lo; i <= hi; i++) {
+            if (nums[i] == num) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int majorityElementRec(int[] nums, int lo, int hi) {
+        // base case; the only element in an array of size 1 is the majority
+        // element.
+        if (lo == hi) {
+            return nums[lo];
+        }
+
+        // recurse on left and right halves of this slice.
+        int mid = (hi - lo) / 2 + lo;
+        int left = majorityElementRec(nums, lo, mid);
+        int right = majorityElementRec(nums, mid + 1, hi);
+
+        // if the two halves agree on the majority element, return it.
+        if (left == right) {
+            return left;
+        }
+
+        // otherwise, count each element and return the "winner".
+        int leftCount = countInRange(nums, left, lo, hi);
+        int rightCount = countInRange(nums, right, lo, hi);
+
+        return leftCount > rightCount ? left : right;
+    }
+
+    public int majorityElement(int[] nums) {
+        return majorityElementRec(nums, 0, nums.length - 1);
+    }
+}
+
+```
+
+
+
+----
+
+## 40. 最小的k个数
+
+输入整数数组 `arr` ，找出其中最小的 `k` 个数。例如，输入4、5、1、6、2、7、3、8这8个数字，则最小的4个数字是1、2、3、4。
+
+**限制：**
+
+- `0 <= k <= arr.length <= 10000`
+- `0 <= arr[i] <= 10000`
+
+**排序**
+
+对原数组从小到大排序后取出前 *k* 个数即可。
+
+```js
+/**
+ * @param {number[]} arr
+ * @param {number} k
+ * @return {number[]}
+ */
+var getLeastNumbers = function(arr, k) {
+    if (k === 0 || arr.length === 0) {
+        return [];
+    }
+    arr.sort((a, b) => a - b);
+    return arr.slice(0, k);
+};
+
+let nums = [1, 2, 3, 2, 2, 2, 5, 4, 2];
+console.log(getLeastNumbers(nums, 2));
+```
+
+**堆**
+
+```js
+/**
+ * @param {number[]} arr
+ * @param {number} k
+ * @return {number[]}
+ */
+var getLeastNumbers = function(arr, k) {
+    if (k === 0 || arr.length === 0) {
+        return [];
+    }
+
+    let maxHeap = [Infinity];  // 最大堆
+    let n = arr.length;
+    for (let i = 0; i < n; i++) {
+        let item = arr[i];
+        if (maxHeap.length - 1 < k) {
+            // 构造最大堆
+            insert(item, maxHeap);
+        } else {
+            // 如果当前元素比最大堆的最大值小，则将堆的最大值替换成此元素，然后再重新构造成最大堆
+            if (item < maxHeap[1]) {
+                addToTop(item, maxHeap);
+            }
+        }
+    }
+
+    function insert(item, heap) {
+        heap.push(item);
+        let index = heap.length - 1;
+        while (heap[index] > heap[parseInt(index / 2)]) {
+            let temp = heap[index];
+            heap[index] = heap[parseInt(index / 2)];
+            heap[parseInt(index / 2)] = temp;
+            index = parseInt(index / 2);
+        }
+    }
+
+    function addToTop(item, heap) {
+        heap[1] = item;
+        let index = 1;
+        while (true) {
+            if (heap[2 * index] === undefined) {
+                break;
+            }
+            if (heap[2 * index + 1] === undefined) {
+                if (heap[2 * index] < heap[index]) {
+                    break;
+                }
+                let temp = heap[2 * index];
+                heap[2 * index] = heap[index];
+                heap[index] = temp;
+                index = 2 * index;
+            } else {
+                if (heap[2 * index] < heap[index] && heap[2 * index + 1] < heap[index]) {
+                    break;
+                }
+                if (heap[2 * index] > heap[2 * index + 1]) {
+                    let temp = heap[2 * index];
+                    heap[2 * index] = heap[index];
+                    heap[index] = temp;
+                    index = 2 * index;
+                } else {
+                    let temp = heap[2 * index + 1];
+                    heap[2 * index + 1] = heap[index];
+                    heap[index] = temp;
+                    index = 2 * index + 1;
+                }
+            }
+        }
+    }
+    maxHeap.shift();
+    return maxHeap;
+};
+
+let nums = [1, 2, 3, 2, 2, 2, 5, 4, 2];
+console.log(getLeastNumbers(nums, 2));
+```
+
+**快排思想**
+
+```java
+class Solution {
+    int partition(vector<int>& nums, int l, int r) {
+        int pivot = nums[r];
+        int i = l - 1;
+        for (int j = l; j <= r - 1; ++j) {
+            if (nums[j] <= pivot) {
+                i = i + 1;
+                swap(nums[i], nums[j]);
+            }
+        }
+        swap(nums[i + 1], nums[r]);
+        return i + 1;
+    }
+
+    // 基于随机的划分
+    int randomized_partition(vector<int>& nums, int l, int r) {
+        int i = rand() % (r - l + 1) + l;
+        swap(nums[r], nums[i]);
+        return partition(nums, l, r);
+    }
+
+    void randomized_selected(vector<int>& arr, int l, int r, int k) {
+        if (l >= r) {
+            return;
+        }
+        int pos = randomized_partition(arr, l, r);
+        int num = pos - l + 1;
+        if (k == num) {
+            return;
+        } else if (k < num) {
+            randomized_selected(arr, l, pos - 1, k);
+        } else {
+            randomized_selected(arr, pos + 1, r, k - num);
+        }
+    }
+
+public:
+    vector<int> getLeastNumbers(vector<int>& arr, int k) {
+        srand((unsigned)time(NULL));
+        randomized_selected(arr, 0, (int)arr.size() - 1, k);
+        vector<int> vec;
+        for (int i = 0; i < k; ++i) {
+            vec.push_back(arr[i]);
+        }
+        return vec;
+    }
+};
+
+```
+
+
+
+
+
+----
+
 ## 41. 滑动窗口的平均值
 
 给定一个整数数据流和一个窗口大小，根据该滑动窗口的大小，计算滑动窗口里所有数字的平均值。
@@ -2672,6 +2943,8 @@ var permutation = function(s) {
 
 MovingAverage(int size) 用窗口大小 size 初始化对象。
 double next(int val) 成员函数 next 每次调用的时候都会往滑动窗口增加一个整数，请计算并返回数据流中最后 size 个值的移动平均值，即滑动窗口里所有数字的平均值。
+
+**哈希表**
 
 
 
@@ -2704,6 +2977,18 @@ MovingAverage.prototype.next = function(val) {
  * var obj = new MovingAverage(size)
  * var param_1 = obj.next(val)
  */
+```
+
+
+
+----
+
+
+
+
+
+```
+
 ```
 
 
@@ -2777,7 +3062,7 @@ words[i] 仅由小写英文字母组成
 
 拓扑排序 + 深度优先搜索
 
-```
+```js
 /**
  * @param {string[]} words
  * @return {string}
