@@ -1,9 +1,9 @@
 function f(){
-    return a; 
+	return a; 
 }
 
 console.log(f());  //undefined
 
-let a=100;
+let a = 100;
 
 console.log(f());  //100

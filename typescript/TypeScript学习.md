@@ -210,7 +210,9 @@ tsconfig.json
 }
 ```
 
-参考于[https://www.tslang.cn/docs/home.html]
+
+
+----
 
 ## 基础类型
 
@@ -218,11 +220,11 @@ tsconfig.json
 
 ### 布尔值
 
-最基本的数据类型就是简单的true/false值，在JavaScript和TypeScript里叫做`boolean`（其它语言中也一样）。
+最基本的数据类型就是**简单的true/false值**，在JavaScript和TypeScript里叫做`boolean`（其它语言中也一样）。
 
 ### 数字
 
-和JavaScript一样，TypeScript里的所有数字都是浮点数。 这些浮点数的类型是 `number`。 除了支持十进制和十六进制字面量，TypeScript还支持ECMAScript 2015中引入的二进制和八进制字面量。
+和JavaScript一样，**TypeScript里的所有数字都是浮点数**。 这些浮点数的类型是 `number`。 除了支持十进制和十六进制字面量，TypeScript还支持ECMAScript 2015中引入的二进制和八进制字面量。
 
 ```typescript
 
@@ -238,6 +240,13 @@ console.log(decLiteral);
 console.log(hexLiteral);
 console.log(octalLiteral);
 console.log(binaryLiteral);
+/*
+false
+16
+16
+16
+16
+*/
 ```
 
 ### 字符串
@@ -247,12 +256,13 @@ JavaScript程序的另一项基本操作是处理网页或服务器端的文本�
 还可以使用*模版字符串*，它可以定义多行文本和内嵌表达式。 这种字符串是被反引号包围（ ```），并且以`${ expr }`这种形式嵌入表达式
 
 ```typescript
-let mane: string = "mane";
-mane = "Arnold";
+let name: string = "mane";
+name = "Arnold";
 
 let club: string = `liverpool`;
 let startYear: number = 1892;
 let thisYear: number=2021;
+
 //使用模版字符串
 let his : string = `${club} is found since from ${startYear},which has ${thisYear-startYear} years history.`;
 //等价于
@@ -266,14 +276,15 @@ console.log(his2);
 TypeScript像JavaScript一样可以操作数组元素。 有两种方式可以定义数组。
 
 - 第一种，可以在元素类型后面接上 `[]`，表示由此类型元素组成的一个数组：
-- 第二种方式是使用数组泛型，`Array<元素类型>`
+- 第二种方式是使用**数组泛型**，`Array<元素类型>`
 
 ```typescript
 //在元素类型后面接上 []，表示由此类型元素组成的一个数组
-let list1:number[]=[10,26,66];
-let list2:string[]=["mane","Robson","Arnold"];
+let list1 : number[] = [10,26,66];
+let list2 : string[] = ["mane","Robson","Arnold"];
+
 //使用数组泛型
-let list3:Array<number>=[10,26,66];
+let list3 : Array<number> = [10,26,66];
 ```
 
 ### 元组 Tuple
@@ -282,7 +293,7 @@ let list3:Array<number>=[10,26,66];
 
 当访问一个已知索引的元素，会得到正确的类型
 
-当访问一个越界的元素，会使用联合类型替代。联合类型是高级主题
+**当访问一个越界的元素，会使用联合类型替代**。联合类型是高级主题
 
 ```typescript
 //元组 Tuple
@@ -292,7 +303,7 @@ member=["mane",10];
 //member=[10,"mane"];  //错误
 
 //当访问一个已知索引的元素，会得到正确的类型
-console.log(member[0].substr(0,1));
+console.log(member[0].substr(0,1));  // m
 //console.log(member[1].substr(0,1));  //Property 'substr' does not exist on type 'number'.
 
 //当访问一个越界的元素，会使用联合类型替代
@@ -312,49 +323,54 @@ console.log(member[0].substr(0,1));
 ```typescript
 //枚举
 //默认情况下，从0开始为元素编号。
-enum Color {Red,Green,Blue}
-let c:Color=Color.Green;
+enum Color {Red, Green, Blue}
+let c : Color = Color.Green;
 console.log(c);  //1
+
 //可以手动的指定成员的数值
-enum Color1 {Red=1,Green,Blue}
-let c1:Color1=Color1.Green;
+enum Color1 {Red = 1, Green, Blue}
+let c1 : Color1 = Color1.Green;
 console.log(c1);  //2
+
 //全部都采用手动赋值
-enum Color2 {Red=2,Green=5,Blue=8}
-let c2:Color2=Color2.Green;
+enum Color2 {Red = 2, Green = 5, Blue = 8}
+let c2 : Color2 = Color2.Green;
 console.log(c2);  //5
+
 //枚举类型提供的一个便利是你可以由枚举的值得到它的名字
-let colorName:string=Color2[2];
+let colorName : string= Color2[2];
 console.log(colorName);  //Red
 ```
 
-枚举类型提供的一个便利是你可以由枚举的值得到它的名字。 例如，我们知道数值为2，但是不确定它映射到Color里的哪个名字，我们可以查找相应的名字：
+枚举类型提供的一个便利是你可以由枚举的值得到它的名字。 例如，我们知道数值为2，但是不确定它映射到Color里的哪个名字，我们可以查找相应的名字。
 
 ### Any
 
-有时候，我们会想要为那些在编程阶段还不清楚类型的变量指定一个类型。 这些值可能来自于动态的内容，比如来自用户输入或第三方代码库。 这种情况下，我们不希望类型检查器对这些值进行检查而是直接让它们通过编译阶段的检查。 那么我们可以使用 `any`类型来标记这些变量：
+有时候，我们会想要为那些在编程阶段还不清楚类型的变量指定一个类型。 这些值可能来自于动态的内容，比如来自用户输入或第三方代码库。 这种情况下，**我们不希望类型检查器对这些值进行检查而是直接让它们通过编译阶段的检查**。 那么我们可以使用 `any`类型来标记这些变量：
 
-在对现有代码进行改写的时候，`any`类型是十分有用的，它允许你在编译时可选择地包含或移除类型检查。 你可能认为 `Object`有相似的作用，就像它在其它语言中那样。 但是 `Object`类型的变量只是允许你给它赋任意值 - 但是却不能够在它上面调用任意的方法，即便它真的有这些方法：
+在对现有代码进行改写的时候，`any`类型是十分有用的，它允许你在编译时可选择地包含或移除类型检查。 你可能认为 `Object`有相似的作用，就像它在其它语言中那样。 但是 `Object`类型的变量**只是允许你给它赋任意值** - 但是**却不能够在它上面调用任意的方法**，即便它真的有这些方法：
 
 ```typescript
 //any
 
-let notSure:any=4;
+let notSure : any = 4;
 notSure="maybe a string";
 notSure=true;
 
 notSure.ifItExists();
 notSure.toFixed();
 
-let prettySure:Object=4;
+let prettySure : Object = 4;
 prettySure.toFixed();  //roperty 'toFixed' does not exist on type 'Object'.
 ```
 
 当你只知道一部分数据的类型时，`any`类型也是有用的。 比如，你有一个数组，它包含了不同的类型的数据：
 
 ```typescript
-let list4:any[]=[26,"mane",false];
-list4[1]=true;
+let list : any[] = [26, "roberson", true];
+list[2] = false;
+
+console.log(list)  // [ 26, 'roberson', false ]
 ```
 
 ### Void
@@ -364,12 +380,14 @@ list4[1]=true;
 声明一个`void`类型的变量没有什么大用，因为你只能为它赋予`undefined`和`null`：
 
 ```typescript
-function showMessage():void{
-    console.log("Hello World!");
+function showMessage() : void {
+	console.log("Hello World!");
 }
 
-let unUsable:void=undefined;
-unUsable=null;
+let unUsable : void = undefined;
+unUsable = null;
+
+showMessage();
 ```
 
 ### Null 和 Undefined
@@ -378,28 +396,28 @@ TypeScript里，`undefined`和`null`两者各自有自己的类型分别叫做`u
 
 ```typescript
 //Null 和 Undefined
-let u:undefined=undefined;
-let n:null=null;
+let u : undefined = undefined;
+let n : null = null;
 console.log(u);  //undefined
 console.log(n);  //null
 ```
 
-默认情况下`null`和`undefined`是所有类型的子类型。 就是说你可以把 `null`和`undefined`赋值给`number`类型的变量。
+**默认情况下`null`和`undefined`是所有类型的子类型**。 就是说你可以把 `null`和`undefined`赋值给`number`类型的变量。
 
-然而，当你指定了`--strictNullChecks`标记，`null`和`undefined`只能赋值给`void`和它们各自。 这能避免 *很多*常见的问题。 也许在某处你想传入一个 `string`或`null`或`undefined`，你可以使用联合类型`string | null | undefined`。 鼓励尽可能地使用`--strictNullChecks`
+然而，**当你指定了`--strictNullChecks`标记，`null`和`undefined`只能赋值给`void`和它们各自。 这能避免 *很多*常见的问题**。 也许在某处你想传入一个 `string`或`null`或`undefined`，你可以使用联合类型`string | null | undefined`。 鼓励尽可能地使用`--strictNullChecks`
 
 ### Never
 
-`never`类型表示的是那些永不存在的值的类型。 例如， `never`类型是那些总是会抛出异常或根本就不会有返回值的函数表达式或箭头函数表达式的返回值类型； 变量也可能是 `never`类型，当它们被永不为真的类型保护所约束时。
+`never`类型**表示的是那些永不存在的值的类型**。 例如， `never`类型是那些总是会抛出异常或根本就不会有返回值的函数表达式或箭头函数表达式的返回值类型； 变量也可能是 `never`类型，当它们被永不为真的类型保护所约束时。
 
-`never`类型是任何类型的子类型，也可以赋值给任何类型；然而，*没有*类型是`never`的子类型或可以赋值给`never`类型（除了`never`本身之外）。 即使 `any`也不可以赋值给`never`。
+**`never`类型是任何类型的子类型，也可以赋值给任何类型**；然而，***没有*类型是`never`的子类型或可以赋值给`never`类型**（除了`never`本身之外）。 即使 `any`也不可以赋值给`never`。
 
 下面是一些返回`never`类型的函数：
 
 ```typescript
 // 返回never的函数必须存在无法达到的终点
-function error(message:string) :never {
-    throw new Error(message);
+function error(message : string) : never {
+	throw new Error(message);
 }
 
 //推断的返回值类型为never
@@ -408,7 +426,7 @@ function fail(){
 }
 
 //返回never的函数必须存在无法达到的终点
-function infiniteLoop() : never{
+function infiniteLoop() : never {
     while(true){ }
 }
 ```
@@ -421,8 +439,8 @@ function infiniteLoop() : never{
 
 ```typescript
 //Object
-declare function create(o:object|null):void;
-create({prop:0});  //可以
+declare function create(o : object | null) : void;
+create({prop: 0});  //可以
 create(null);  //可以
 //create(66);  //Argument of type 'number' is not assignable to parameter of type 'object'.
 //create("string");  //不可以
@@ -434,7 +452,7 @@ create(undefined);  //可以
 
 有时候你会遇到这样的情况，你会比TypeScript更了解某个值的详细信息。 通常这会发生在你清楚地知道一个实体具有比它现有类型更确切的类型。
 
-通过*类型断言*这种方式可以告诉编译器，“相信我，我知道自己在干什么”。 类型断言好比其它语言里的类型转换，但是不进行特殊的数据检查和解构。 它没有运行时的影响，只是在编译阶段起作用。 TypeScript会假设你，程序员，已经进行了必须的检查。
+通过*类型断言*这种方式可以告诉编译器，“相信我，我知道自己在干什么”。 **类型断言好比其它语言里的类型转换**，但是不进行特殊的数据检查和解构。 **它没有运行时的影响，只是在编译阶段起作用**。 TypeScript会假设你，程序员，已经进行了必须的检查。
 
 类型断言有两种形式。
 
@@ -446,16 +464,18 @@ create(undefined);  //可以
 ```typescript
 //类型断言
 //“尖括号”语法
-let someValue:any="this is a string";
-let strLen:number=(<string>someValue).length;
+let someValue : any = "this is a string";
+let strLen : number = (<string> someValue).length;
 
 //as语法
-let strLen2:number=(someValue as string).length;
+let strLen2 : number = (someValue as string).length;
 
 console.log(strLen,strLen2);  //16,16
 ```
 
 
+
+-----
 
 ## 变量声明
 
@@ -488,20 +508,22 @@ function f1(){
 ```typescript
 //也可以在其它函数内部访问相同的变量。
 function f2(){
-	var a=26;
-	return function g(){
-		var b=a+1;
-		return b;
-	}
+    var a = 26;
+    return function g(){
+        var b = a + 1;
+        return b;
+    }
 }
 
-var g=f2();
+var g = f2();
+
 console.log(g());  //27
+
 ```
 
 上面的例子里，`g`可以获取到`f`函数里定义的`a`变量。 每当 `g`被调用时，它都可以访问到`f`里的`a`变量。
 
- 即使当 `g`在`f`已经执行完后才被调用，它仍然可以访问及修改`a`。
+ **即使当 `g`在`f`已经执行完后才被调用，它仍然可以访问及修改`a`。**
 
 ```typescript
 function f3(){
@@ -534,9 +556,9 @@ console.log(f(true));  //100
 console.log(f(false));  //undefined
 ```
 
-变量 `x`是定义在*`if`语句里面*，但是我们却可以在语句的外面访问它。 这是因为 `var`声明可以在包含它的函数，模块，命名空间或全局作用域内部任何位置被访问，包含它的代码块对此没有什么影响。 有些人称此为 **`var`作用域*或*函数作用域**。 函数参数也使用函数作用域。
+变量 `x`是定义在*`if`语句里面*，但是我们却可以在语句的外面访问它。 这是因为 `var`声明可以在包含它的函数，模块，命名空间或全局作用域内部任何位置被访问，包含它的代码块对此没有什么影响。 有些人称此为 **`var`作用域*或*函数作用域**。 **函数参数也使用函数作用域。**
 
-这些作用域规则可能会引发一些错误。 其中之一就是，多次声明同一个变量并不会报错：
+**这些作用域规则可能会引发一些错误**。 其中之一就是，多次声明同一个变量并不会报错：
 
 ```typescript
 function sumMatrix(matrix: number[][]) {
@@ -582,7 +604,7 @@ for (var i=0;i<10;i++){
 	(function(i){
 		setTimeout(function(){
 			console.log(i);
-		},100*i);
+		}, 100*i);
 	})(i);
 }
 /*
@@ -597,10 +619,10 @@ for (var i=0;i<10;i++){
 
 ### let 声明
 
-已经知道了`var`存在一些问题，这恰好说明了为什么用`let`语句来声明变量。 除了名字不同外， `let`与`var`的写法一致。主要的区别不在语法上，而是语义。
+已经知道了`var`存在一些问题，这恰好说明了为什么用`let`语句来声明变量。 除了名字不同外， `let`与`var`的写法一致。**主要的区别不在语法上，而是语义。**
 
 ```typescript
-let a=66;  //这里定义了一个名为a值为66的变量。
+let a = 66;  //这里定义了一个名为a值为66的变量。
 ```
 
 ### 块作用域
@@ -608,11 +630,10 @@ let a=66;  //这里定义了一个名为a值为66的变量。
 当用`let`声明一个变量，它使用的是***词法作用域***或***块作用域***。 不同于使用 `var`声明的变量那样可以在包含它们的函数外访问，**块作用域变量**在包含它们的块或`for`循环之外是不能访问的。
 
 ```typescript
-function f(isDone:boolean){
+function f(isDone : boolean){
 	let a=100;
-
+    
 	if(isDone){
-
 		let x=a-10;
 		return x;
 	}
@@ -641,7 +662,7 @@ a++;  //Block-scoped variable 'a' used before its declaration.
 let a=10;
 ```
 
-注意一点，我们仍然可以在一个拥有块作用域变量被声明前*获取*它。 只是我们不能在变量声明前去调用那个函数。 如果生成代码目标为ES2015，现代的运行时会抛出一个错误；然而，现今TypeScript是不会报错的。
+注意一点，我们仍然可以在一个拥有块作用域变量被声明前*获取*它。 **只是我们不能在变量声明前去调用那个函数**。 如果生成代码目标为ES2015，现代的运行时会抛出一个错误；然而，**现今TypeScript是不会报错的**。
 
 ```typescript
 function f(){
@@ -672,7 +693,7 @@ function f(x){
 f(2);  // 2
 ```
 
-所有`x`的声明实际上都引用一个*相同*的`x`，并且这是完全有效的代码。 这经常会成为bug的来源。 好的是， `let`声明就不会这么宽松了。并不是要求两个均是块级作用域的声明TypeScript才会给出一个错误的警告。
+**所有`x`的声明实际上都引用一个*相同*的`x`，并且这是完全有效的代码**。 这经常会成为bug的来源。 好的是， `let`声明就不会这么宽松了。并不是要求两个均是块级作用域的声明TypeScript才会给出一个错误的警告。
 
 ```js
 function f(x){
@@ -685,7 +706,7 @@ function f(x){
 }
 ```
 
-不是说块级作用域变量不能用函数作用域变量来声明。 而是块级作用域变量需要在明显不同的块里声明。
+不是说块级作用域变量不能用函数作用域变量来声明。 **而是块级作用域变量需要在明显不同的块里声明**。
 
 ```typescript
 function f(isDone,x){
@@ -700,7 +721,7 @@ function f(isDone,x){
 f(true,10);
 ```
 
-在一个嵌套作用域里引入一个新名字的行为称做***屏蔽***。 它是一把双刃剑，它可能会不小心地引入新问题，同时也可能会解决一些错误。 例如，假设我们现在用 `let`重写之前的`sumMatrix`函数。
+在一个嵌套作用域里引入一个新名字的行为称做***屏蔽***。 它是一把双刃剑，它**可能会不小心地引入新问题**，同时**也可能会解决一些错误**。 例如，假设我们现在用 `let`重写之前的`sumMatrix`函数。
 
 ```typescript
 function sumMatrix(matrix: number[][]) {
@@ -715,13 +736,15 @@ function sumMatrix(matrix: number[][]) {
 }
 ```
 
-循环能得到正确的结果，因为内层循环的`i`可以屏蔽掉外层循环的`i`。
+循环能得到正确的结果，**因为内层循环的`i`可以屏蔽掉外层循环的`i`**。
 
 ***通常*来讲应该避免使用屏蔽**，因为我们需要写出清晰的代码。 同时也有些场景适合利用它，你需要好好打算一下。
 
+
+
 ### 块级作用域变量的获取
 
-在我们最初谈及获取用`var`声明的变量时，简略地探究了一下在获取到了变量之后它的行为是怎样的。 直观地讲，每次进入一个作用域时，它创建了一个变量的 *环境*。 就算作用域内代码已经执行完毕，这个环境与其捕获的变量依然存在。
+在我们最初谈及获取用`var`声明的变量时，简略地探究了一下在获取到了变量之后它的行为是怎样的。 直观地讲，每次进入一个作用域时，它创建了一个变量的 *环境*。 **就算作用域内代码已经执行完毕，这个环境与其捕获的变量依然存在**。
 
 ```typescript
 function f2(isDone){
@@ -739,16 +762,16 @@ console.log(f2(true));  //100
 console.log(f2(false));  //g is not a function
 ```
 
-回想一下前面`setTimeout`的例子，我们最后需要使用立即执行的函数表达式来获取每次`for`循环迭代里的状态。 实际上，我们做的是为获取到的变量创建了一个新的变量环境。 这样做挺痛苦的，但是幸运的是，你不必在TypeScript里这样做了。
+回想一下前面`setTimeout`的例子，我们最后需要使用立即执行的函数表达式来获取每次`for`循环迭代里的状态。 **实际上，我们做的是为获取到的变量创建了一个新的变量环境**。 这样做挺痛苦的，但是幸运的是，你不必在TypeScript里这样做了。
 
-当`let`声明出现在循环体里时拥有完全不同的行为。 不仅是在循环里引入了一个新的变量环境，而是针对 *每次迭代*都会创建这样一个新作用域。 这就是我们在使用立即执行的函数表达式时做的事，所以在 `setTimeout`例子里我们仅使用`let`声明就可以了。
+当`let`声明出现在循环体里时拥有完全不同的行为。 **不仅是在循环里引入了一个新的变量环境，而是针对 *每次迭代*都会创建这样一个新作用域。** 这就是我们在使用立即执行的函数表达式时做的事，所以在 `setTimeout`例子里我们仅使用`let`声明就可以了。
 
 ```typescript
 for (let i=0;i<10;i++){
 	//setTimeout会在若干毫秒的延时后执行一个函数（等待其它代码执行完毕）
 	setTimeout(function(){
 		console.log(i);
-	},100*i);
+	}, 100*i);
 }
 /*
 1
@@ -790,13 +813,15 @@ person.name="cat";
 console.log(person);  //{ name: 'cat', age: 19 }
 ```
 
-除非你使用特殊的方法去避免，实际上`const`变量的内部状态是可修改的。 幸运的是，TypeScript允许你将对象的成员设置成只读的。接口一章有详细说明。
+除非你使用特殊的方法去避免，**实际上`const`变量的内部状态是可修改的**。 幸运的是，TypeScript允许你将对象的成员设置成只读的。接口一章有详细说明。
 
 ### let  与 const
 
 现在我们有两种作用域相似的声明方式，我们自然会问到底应该使用哪个。 与大多数泛泛的问题一样，答案是：依情况而定。
 
-使用[最小特权原则](https://en.wikipedia.org/wiki/Principle_of_least_privilege)，所有变量除了你计划去修改的都应该使用`const`。 基本原则就是如果一个变量不需要对它写入，那么其它使用这些代码的人也不能够写入它们，并且要思考为什么会需要对这些变量重新赋值。 使用 `const`也可以让我们更容易的推测数据的流动。
+使用[最小特权原则](https://en.wikipedia.org/wiki/Principle_of_least_privilege)，所有变量**除了你计划去修改的都应该使用`const`**。 
+
+**基本原则**就是如果一个变量不需要对它写入，那么其它使用这些代码的人也不能够写入它们，并且要思考为什么会需要对这些变量重新赋值。 使用 `const`也可以让我们更容易的推测数据的流动。
 
 跟据你的自己判断，如果合适的话，与团队成员商议一下。
 
