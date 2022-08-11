@@ -1218,7 +1218,7 @@ console.log(isMatch(s, p));
 
 ----
 
-## 20.  表示数值的字符串*
+## 20.  表示数值的字符串(*)
 
 请实现一个函数用来判断字符串是否表示数值（包括整数和小数）。
 
@@ -2935,61 +2935,103 @@ public:
 
 ----
 
-## 41. 滑动窗口的平均值
+## 41. 数据流中的中位数(no)
 
-给定一个整数数据流和一个窗口大小，根据该滑动窗口的大小，计算滑动窗口里所有数字的平均值。
+如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。
 
-实现 MovingAverage 类：
+例如，
 
-MovingAverage(int size) 用窗口大小 size 初始化对象。
-double next(int val) 成员函数 next 每次调用的时候都会往滑动窗口增加一个整数，请计算并返回数据流中最后 size 个值的移动平均值，即滑动窗口里所有数字的平均值。
+[2,3,4] 的中位数是 3
 
-**哈希表**
+[2,3] 的中位数是 (2 + 3) / 2 = 2.5
 
+设计一个支持以下两种操作的数据结构：
 
+void addNum(int num) - 从数据流中添加一个整数到数据结构中。
+double findMedian() - 返回目前所有元素的中位数。
+
+**有序集合 + 双指针**
 
 ```js
-/**
- * Initialize your data structure here.
- * @param {number} size
- */
-var MovingAverage = function(size) {
-	this.queue = [];
-    this.size = size;
-    this.sum = 0;
-};
 
-/** 
- * @param {number} val
- * @return {number}
- */
-MovingAverage.prototype.next = function(val) {
-	if (this.queue.length === this.size) {
-        this.sum -= this.queue.shift();
-    }
-    this.queue.push(val);
-    this.sum += val;
-    return this.sum / this.queue.length;
-};
+```
 
-/**
- * Your MovingAverage object will be instantiated and called as such:
- * var obj = new MovingAverage(size)
- * var param_1 = obj.next(val)
- */
+**大顶堆+小顶堆**
+
+```
+
 ```
 
 
 
 ----
 
+## 42. 连续子数组的最大和
 
+输入一个整型数组，数组中的一个或连续多个整数组成一个子数组。求所有子数组的和的最大值。
 
+要求时间复杂度为O(n)。
 
+**提示：**
 
+- `1 <= arr.length <= 10^5`
+- `-100 <= arr[i] <= 100`
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var maxSubArray = function(nums) {
+    let ans = nums[0];
+    let sum = nums[0];
+    let n = nums.length;
+    for (let i = 1; i < n; i++) {
+        sum = Math.max(sum + nums[i], nums[i]);
+        ans = Math.max(ans, sum);
+    }
+    return ans;
+};
+
+let nums = [-2,1,-3,4,-1,2,1,-5,4];
+console.log(maxSubArray(nums));
 ```
 
+
+
+----
+
+##  43. 1～n 整数中 1 出现的次数
+
+输入一个整数 n ，求1～n这n个整数的十进制表示中1出现的次数。
+
+例如，输入12，1～12这些整数中包含1 的数字有1、10、11和12，1一共出现了5次。
+
+
+
+```js
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var countDigitOne = function(n) {
+    // mulk 表示 10^k
+    // 在下面的代码中，可以发现 k 并没有被直接使用到（都是使用 10^k）
+    // 但为了让代码看起来更加直观，这里保留了 k
+    let mulk = 1;
+    let ans = 0;
+    for (let k = 0; n >= mulk; k++) {
+        ans += (Math.floor(n / (mulk * 10))) * mulk + Math.min(Math.max(n % (mulk * 10) - mulk + 1, 0), mulk);
+        mulk *= 10;
+    }
+    return ans;
+};
+
+let n = 1000;
+console.log(countDigitOne(n));
 ```
+
+
 
 
 

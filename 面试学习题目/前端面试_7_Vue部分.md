@@ -1982,8 +1982,8 @@ console.log(sum) //sum依旧是3，非响应式
 
 那么vue3如何使用响应式呢？
 
-- vue3既可以通过data函数返回一个响应式对象，也可以通过ref、reactive来创建响应式变量。使用reactive等时，即在内部对数据用Proxy进行了包装。
-- 使用computed、watch、视图渲染函数等时，可以看作声明了一个依赖响应式数据的回调，这个回调会被传入**effect**（副作用函数），当依赖的数据改变时，回调被重新调用，从而computed等得到更新。
+- vue3既可以通过data函数返回一个响应式对象，也可以通过ref、reactive来创建响应式变量。使用reactive时，即在内部对数据用Proxy进行了包装。
+- 使用computed、watch、视图渲染函数时，可以看作声明了一个依赖响应式数据的回调，这个回调会被传入**effect**（副作用函数），当依赖的数据改变时，回调被重新调用，从而computed得到更新。
 
 要实现简单版的响应式，其大致结构为：
 
@@ -3187,6 +3187,189 @@ Vue为了给用于减轻一定的负担，但又不至于太封闭，就创建�
 
 ----
 
+## 2.21 vue3有什么优点
+
+不以解决实际业务痛点的更新都是耍流氓，下面我们来列举一下`Vue3`之前我们或许会面临的问题
+
+- 随着功能的增长，复杂组件的代码变得越来越难以维护
+- 缺少一种比较「干净」的在多个组件之间提取和复用逻辑的机制
+- 类型推断不够友好
+- `bundle`的时间太久了
+
+而 `Vue3` 经过长达两三年时间的筹备，做了哪些事情？
+
+我们从结果反推
+
+- 更小
+- 更快
+- TypeScript支持
+- API设计一致性
+- 提高自身可维护性
+- 开放更多底层功能
+
+一句话概述，就是更小更快更友好了
+
+**更小**
+
+```
+Vue3`移除一些不常用的 `API
+```
+
+引入`tree-shaking`，可以将无用模块“剪辑”，仅打包需要的，使打包的整体体积变小了
+
+**更快**
+
+主要体现在编译方面：
+
+- diff算法优化
+- 静态提升
+- 事件监听缓存
+- SSR优化
+
+**更友好**
+
+`vue3`在兼顾`vue2`的`options API`的同时还推出了`composition API`，大大增加了代码的逻辑组织和代码复用能力
+
+这里代码简单演示下：
+
+存在一个获取鼠标位置的函数
+
+```js
+import { toRefs, reactive } from 'vue';
+function useMouse(){
+    const state = reactive({x:0,y:0});
+    const update = e=>{
+        state.x = e.pageX;
+        state.y = e.pageY;
+    }
+    onMounted(()=>{
+        window.addEventListener('mousemove',update);
+    })
+    onUnmounted(()=>{
+        window.removeEventListener('mousemove',update);
+    })
+
+    return toRefs(state);
+}
+```
+
+
+
+我们只需要调用这个函数，即可获取`x`、`y`的坐标，完全不用关注实现过程
+
+试想一下，如果很多类似的第三方库，我们只需要调用即可，不必关注实现过程，开发效率大大提高
+
+同时，`VUE3`是基于`typescipt`编写的，可以享受到自动的类型定义提示
+
+
+
+---
+
+## 2.22 vue3 相比 vue2 的十项优点
+
+### 优点1：diff算法的优化
+
+vue2中的虚拟dom是全量的对比（每个节点不论写死的还是动态的都会一层一层比较，这就浪费了大部分事件在对比静态节点上）
+
+vue3新增了静态标记（patchflag）与上次虚拟节点对比时，**只对比带有patch flag的节点**（动态数据所在的节点）；可通过flag信息得知当前节点要对比的具体内容。
+
+### 优点2：hoistStatic 静态提升
+
+vue2无论元素是否参与更新，每次都会重新创建然后再渲染。
+
+vue3对于不参与更新的元素，会做静态提升，只会被创建一次，在渲染时直接复用即可。
+
+### 优点3：cacheHandlers 事件侦听器缓存
+
+vue2.x中，绑定事件每次触发都要重新生成全新的function去更新，cacheHandlers 是Vue3中提供的事件缓存对象，当 cacheHandlers 开启，会自动生成一个内联函数，同时生成一个静态节点。当事件再次触发时，只需从缓存中调用即可，无需再次更新。
+
+默认情况下onClick会被视为动态绑定，所以每次都会追踪它的变化，但是同一个函数没必要追踪变化，直接缓存起来复用即可。
+
+### 优点4：ssr渲染
+
+Vue2 中也是有 SSR 渲染的，但是 Vue3 中的 SSR 渲染相对于 Vue2 来说，性能方面也有对应的提升。
+
+当存在大量静态内容时，这些内容会被当作纯字符串推进一个 buffer 里面，即使存在动态的绑定，会通过模版插值潜入进去。这样会比通过虚拟 dom 来渲染的快上很多。
+
+当静态内容大到一个量级的时候，会用_createStaticVNode 方法在客户端去生成一个 static node，这些静态 node，会被直接 innerHtml，就不需要再创建对象，然后根据对象渲染。
+
+### 优点5：更好的Ts支持
+
+vue2不适合使用ts，原因在于vue2的Option API风格。options是个简单对象，而ts是一种类型系统、面向对象的语法。两者有点不匹配。
+
+在vue2结合ts的具体实践中，要用 vue-class-component 强化 vue 组件，让 Script 支持 TypeScript 装饰器，用 vue-property-decorator 来增加更多结合 Vue 特性的装饰器，最终搞得ts的组件写法和js的组件写法差别挺大。
+
+在vue3中，量身打造了defineComponent函数，使组件在ts下，更好的利用参数类型推断 。Composition API 代码风格中，比较有代表性的api就是 ref 和 reactive，也很好的支持了类型声明。
+
+### 优点6：Compostion API: 组合API/注入API
+
+传统的网页是html/css/javascript（结构/样式/逻辑）分离。vue通过组件化的方式，将联系紧密的结构/样式/逻辑放在一起，有利于代码的维护。compostion api更进一步，着力于JS（逻辑）部分，将逻辑相关的代码放在一起，这样更有利于代码的维护。
+
+在vue2的组件内使用的是Option API风格(data/methods/mounted)来组织的代码，这样会让逻辑分散，举个例子就是我们完成一个计数器功能，要在data里声明变量，在methods定义响应函数，在mounted里初始化变量，如果在一个功能比较多、代码量比较大的组件里，你要维护这样一个功能，就需要在data/methods/mounted反复的切换到对应位置，然后进行代码的更改。
+
+### 优点7：更先进的组件
+
+vue2是不允许这样写的，组件必须有一个跟节点，现在可以这样写，**vue将为我们创建一个虚拟的Fragment节点**。
+
+```html
+<template>
+    <div>华为云享专家</div>
+    <div>全栈领域博主</div>
+</template>
+```
+
+在Suspended-component完全渲染之前，备用内容会被显示出来。如果是异步组件，Suspense可以等待组件被下载，或者在设置函数中执行一些异步操作。
+
+### 优点8：自定义渲染API
+
+vue2.x项目架构对于weex（移动端跨平台方案）和myvue（小程序上使用）等渲染到不同平台不太友好，vue3.0推出了自定义渲染API解决了该问题。下面我们先看vue2和vue3的入口写法有哪些不同。
+
+vue2
+
+```javascript
+import Vue from 'vue'
+import App from './App.vue'
+new Vue({ => h(App)}).$mount('#app')
+```
+
+vue3
+
+```javascript
+const { createApp } from 'vue'
+import App from "./src/App"
+createApp(App).mount(('#app')
+```
+
+vue官方实现的 createApp 会给我们的 template 映射生成 html 代码，但是要是你不想渲染生成到 html ，而是要渲染生成到 canvas 之类的不是html的代码的时候，那就需要用到 Custom Renderer API 来定义自己的 render 渲染生成函数了。
+
+```javascript
+import { createApp } from "./runtime-render";
+import App from "./src/App"; // 根组件
+createApp(App).mount('#app');
+```
+
+使用自定义渲染API，如weex和myvue这类方案的问题就得到了完美解决。只需重写createApp即可。
+
+### 优点9：按需编译，体积比vue2.x更小
+
+框架的大小也会影响其性能。这是 Web 应用程序的唯一关注点，因为需要即时下载资源，在浏览器解析必要的 JavaScript 之前该应用程序是不可交互的。对于单页应用程序尤其如此。尽管 Vue 一直是相对轻量级的（Vue 2 的运行时大小压缩为 23 KB）。
+在 Vue 3 中，通过将大多数全局 API 和内部帮助程序移至 ES 模块导出来，实现了这一目标。这使现代的打包工具可以静态分析模块依赖性并删除未使用的导出相关的代码。模板编译器还会生成友好的 Tree-shaking 代码，在模板中实际使用了该功能时才导入该功能的帮助程序。
+框架的某些部分永远不会 Tree-shaking，因为它们对于任何类型的应用都是必不可少的。我们将这些必不可少的部分的度量标准称为基准尺寸。尽管增加了许多新功能，但 Vue 3 的基准大小压缩后约为 10 KB，还不到 Vue 2 的一半。
+
+### 优点10：支持多根节点组件
+
+Vue3 一个模板不再限制有多个根节点，(多个根节点上的 Attribute 继承) 需要显式定义 attribute 应该分布在哪里。否则控制台会给出警告提示。
+在 Vue 3 中，组件现在正式支持多根节点组件，即片段！
+
+在 2.x 中，不支持多根组件，当用户意外创建多根组件时会发出警告，因此，为了修复此错误，许多组件被包装在一个
+
+Vue是国内最火的前端框架之一。性能提升，运行速度是vue2的1.2-2倍。
+
+- 体积更小，按需编译体积vue2要更小。
+- 类型推断，更好的支持ts这个也是趋势。
+- 高级给予，暴露了更底层的API和提供更先进的内置组件。
+- 组合API，能够更好的组织逻辑，封装逻辑，复用逻辑
+
 
 
 
@@ -3267,6 +3450,7 @@ Vuex的使用方法？
 ```js
 import Vuex from 'vuex';
 Vue.use(Vuex); // 1. vue的插件机制，安装vuex
+
 let store = new Vuex.Store({ // 2.实例化store，调用install方法
     state,
     getters,
@@ -3280,6 +3464,10 @@ new Vue({ // 3.注入store, 挂载vue实例
     render: h=>h(app)
 }).$mount('#app');
 ```
+
+
+
+
 
 ---
 
@@ -3454,7 +3642,7 @@ new Vue({ // 3.注入store, 挂载vue实例
 
 ## 3.3 mutation和action有什么区别？
 
-**mutation**：更改 Vuex 的 store 中的状态的唯一方法是提交 mutation。Vuex 中的 mutation 非常类似于件： 每个 mutation 都有一个字符串的 事件类型 (type) 和 一个 回调函数 (handler)。这个回调函数就是我们实际进 行状态更改的地方，并且它会接受 state 作为第一个参数
+**mutation**：更改 Vuex 的 store 中的状态的唯一方法是提交 mutation。Vuex 中的 mutation 非常类似于事件： 每个 mutation 都有一个字符串的 事件类型 (type) 和 一个 回调函数 (handler)。这个回调函数就是我们实际进 行状态更改的地方，并且它会接受 state 作为第一个参数
 
 ```js
 const store = new Vuex.Store({
@@ -3506,7 +3694,9 @@ const store = new Vuex.Store({
 
 **扩展：**事实上在 vuex 里面 actions 只是一个架构性的概念，并不是必须的，说到底只是一个函数，你在里面想干嘛都可以，只要最后触发 mutation 就行。异步竞态怎么处理那是用户自己的事情。
 
-vuex 真正限制你的只有 mutation 必须是同步的这一点（在 redux 里面就好像 reducer 必须同步返回下一个状态一样）。同步的意义在于这样每一个 mutation 执行完成后都可以对应到一个新的状态（和 reducer 一样），这样 devtools 就可以打个 snapshot 存下来，然后就可以随便 time-travel 了。如果你开着 devtool 调用一个异步的 action，你可以清楚地看到它所调用的 mutation 是何时被记录下来的，并且可以立刻查看它们对应的状态。
+**vuex 真正限制你的只有 mutation 必须是同步的这一点**（在 redux 里面就好像 reducer 必须同步返回下一个状态一样）。
+
+同步的意义在于这样每一个 mutation 执行完成后都可以对应到一个新的状态（和 reducer 一样），这样 devtools 就可以打个 snapshot 存下来，然后就可以随便 time-travel 了。如果你开着 devtool 调用一个异步的 action，你可以清楚地看到它所调用的 mutation 是何时被记录下来的，并且可以立刻查看它们对应的状态。
 
 
 
@@ -3593,13 +3783,16 @@ Vue router 的两种方法，hash模式不会请求服务器
 **解析：**
 
 1. url的hash，就是通常所说的锚点#，javascript通过hashChange事件来监听url的变化，IE7以下需要轮询。比如这个 URL：http://www.abc.com/#/hello，hash 的值为#/hello。它的特点在于：hash 虽然出现在 URL 中，但不会被包括在 HTTP 请求中，对后端完全没有影响，因此**改变 hash 不会重新加载页面**。
-2. HTML5的History模式，它使url看起来像普通网站那样，以“/”分割，没有#，单页面并没有跳转。不过使用这种模式需要服务端支持，服务端在接收到所有请求后，都只想同一个html文件，不然会出现404。因此单页面应用只有一个html，整个网站的内容都在这一个html里，通过js来处理。
+2. HTML5的History模式，它使url看起来像普通网站那样，以“/”分割，没有#，单页面并没有跳转。**不过使用这种模式需要服务端支持，服务端在接收到所有请求后，都只想同一个html文件，不然会出现404**。因此单页面应用只有一个html，整个网站的内容都在这一个html里，通过js来处理。
+
+
 
 ---
 
 ## 4.2  路由跳转和location.href的区别？
 
 使用location.href='/url'来跳转，简单方便，但是刷新了页面；
+
 使用路由方式跳转，无刷新页面，静态跳转；
 
 
@@ -3610,122 +3803,123 @@ Vue router 的两种方法，hash模式不会请求服务器
 
 路由守卫主要用来**通过跳转或取消的方式守卫导航**。
 
-简单的说，路由守卫就是路由跳转过程中的一些钩子函数。路由跳转是一个大的过程，这个大的过程分为跳转前中后等等细小的过程，在每一个过程中都有一函数，这个函数能让你操作一些其他的事儿的时机，这就是路由守卫。
+简单的说，**路由守卫就是路由跳转过程中的一些钩子函数**。路由跳转是一个大的过程，这个大的过程分为跳转**前中后**等等细小的过程，在每一个过程中都有一函数，这个函数能让你操作一些其他的事儿的时机，这就是路由守卫。
 
 **解析：**
 
 路由守卫的具体方法：
 
-1. 全局前置守卫
+（1）全局前置守卫
 
-   你可以使用 router.beforeEach 注册一个全局前置守卫：
+你可以使用 router.beforeEach 注册一个全局前置守卫：
 
-   ```js
-   const router = new VueRouter({ ... })
-   	router.beforeEach((to, from, next) => {
-     // ...
-   })
-   
-   ```
+```js
+const router = new VueRouter({ ... })
+	router.beforeEach((to, from, next) => {
+  // ...
+})
 
-   当一个导航开始时，全局前置守卫按照注册顺序调用。守卫是异步链式调用的，导航在最后的一层当中。
+```
 
-   ```js
-   new Promise((resolve, reject) => {
-       resolve('第一个全局前置守卫')
-   }.then(() => {
-       return '第二个全局前置守卫'
-   }.then(() => {
-       ...
-   }.then(() => {
-       console.log('导航终于开始了') // 导航在最后一层中
-   })
-   
-   ```
+当一个导航开始时，全局前置守卫按照注册顺序调用。守卫是异步链式调用的，导航在最后的一层当中。
+
+```js
+new Promise((resolve, reject) => {
+    resolve('第一个全局前置守卫')
+}.then(() => {
+    return '第二个全局前置守卫'
+}.then(() => {
+    ...
+}.then(() => {
+    console.log('导航终于开始了') // 导航在最后一层中
+})
+
+```
 
 每个守卫方法接收三个参数（往后的守卫都大同小异）：
 
 1.  to: Route: 即将要进入的目标 路由对象
 2.  from: Route: 当前导航正要离开的路由
-3.  next: Function: 一定要调用该方法将控制权交给下一个守卫，执行效果依赖 next 方法的参数。
+3.  next: Function: 一定要调用该方法将控制权交给下一个守卫，**执行效果依赖 next 方法的参数。**
 
-next(): 进入下一个守卫。如果全部守卫执行完了。则导航的状态就是 confirmed (确认的)。
+- next(): **进入下一个守卫**。如果全部守卫执行完了。则导航的状态就是 confirmed (确认的)。
 
-next(false): 中断当前的导航（把小明腿打断了）。如果浏览器的 URL 改变了 (可能是用户手动或者浏览器 后退按钮)，那么 URL 地址会重置到 from 路由对应的地址。
+- next(false): **中断当前的导航**。如果浏览器的 URL 改变了 (可能是用户手动或者浏览器 后退按钮)，那么 URL 地址会重置到 from 路由对应的地址。
 
-next('/') 或者 next({ path: '/' }): 跳转到一个不同的地址。当前的导航被中断，然后进行一个新的导航（小 明被打断腿并且送回家了）。你可以向 next 传递任意位置对象，且允许设置诸如 replace: true、name: 'home' 之类的选项以及任何用在 router-link 的 to prop 或 router.push 中的选项。
+- next('/') 或者 next({ path: '/' }): **跳转到一个不同的地址**。当前的导航被中断，然后进行一个新的导航。你可以向 next 传递任意位置对象，且允许设置诸如 replace: true、name: 'home' 之类的选项以及任何用在 router-link 的 to prop 或 router.push 中的选项。
 
-next(error): (2.4.0+) 如果传入 next 的参数是一个 Error 实例，则导航会被终止且该错误会被传递router.
+- next(error): (2.4.0+) 如果传入 next 的参数是一个 Error 实例，**则导航会被终止且该错误会被传递router**.
+
 
 onError() 注册过的回调。
 
-注意：永远不要使用两次next，这会产生一些误会。
+注意：**永远不要使用两次next**，这会产生一些误会。
 
-1. 全局解析守卫
+（2）全局解析守卫
 
-   这和 router.beforeEach 类似，但他总是被放在最后一个执行。
+这和 router.beforeEach 类似，但他总是被放在最后一个执行。
 
-2. 全局后置钩子
+（3）全局后置钩子
 
-   导航已经确认了的，小明已经到了外婆家了，你打断他的腿他也是在外婆家了。
+导航已经确认了
 
-   ```js
-   router.afterEach((to, from) => {
-       // 你并不能调用next
-     // ...
-   })
-   
-   ```
+```js
+router.afterEach((to, from) => {
+    // 你并不能调用next
+  // ...
+})
 
-   
+```
 
-3. 路由独享的守卫
 
-   在路由内写的守卫
 
-   ```js
-   const router = new VueRouter({
-     routes: [
-       {
-         path: '/foo',
-         component: Foo,
-         beforeEnter: (to, from, next) => {
-           // ...
-         }
-       }
-     ]
-   })
-   
-   ```
+（4）路由独享的守卫
 
-4. 组件内的守卫
+在路由内写的守卫
 
-   beforeRouteEnter
+```js
+const router = new VueRouter({
+  routes: [
+    {
+      path: '/foo',
+      component: Foo,
+      beforeEnter: (to, from, next) => {
+        // ...
+      }
+    }
+  ]
+})
 
-   beforeRouteUpdate (2.2 新增)
+```
 
-   beforeRouteLeave
+（5） 组件内的守卫
 
-   ```js
-   const Foo = {
-     template: `...`,
-     beforeRouteEnter (to, from, next) {
-       // 路由被 confirm 前调用
-       // 组件还未渲染出来，不能获取组件实例 `this`
-     },
-     beforeRouteUpdate (to, from, next) {
-       // 在当前路由改变，但是该组件被复用时调用
-       // 举例来说，对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
-       // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
-       // 可以访问组件实例 `this`，一般用来数据获取。
-     },
-     beforeRouteLeave (to, from, next) {
-       // 导航离开该组件的对应路由时调用
-       // 可以访问组件实例 `this`
-     }
-   }
-   
-   ```
+beforeRouteEnter
+
+beforeRouteUpdate (2.2 新增)
+
+beforeRouteLeave
+
+```js
+const Foo = {
+  template: `...`,
+  beforeRouteEnter (to, from, next) {
+    // 路由被 confirm 前调用
+    // 组件还未渲染出来，不能获取组件实例 `this`
+  },
+  beforeRouteUpdate (to, from, next) {
+    // 在当前路由改变，但是该组件被复用时调用
+    // 举例来说，对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
+    // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
+    // 可以访问组件实例 `this`，一般用来数据获取。
+  },
+  beforeRouteLeave (to, from, next) {
+    // 导航离开该组件的对应路由时调用
+    // 可以访问组件实例 `this`
+  }
+}
+
+```
 
 **扩展：**
 
@@ -3744,11 +3938,13 @@ onError() 注册过的回调。
 - 触发 DOM 更新。
 - 用创建好的实例调用 beforeRouteEnter 守卫中传给 next 的回调函数。
 
+
+
 ---
 
 ## 4.4  路由守卫进行判断登录
 
-在vue项目中，切换路由时肯定会碰到需要登录的路由，其原理就是在切换路径之前进行判断，你不可能进入页面再去判断有无登录重新定向到login，那样的话会导致页面已经渲染以及它的各种请求已经发出。
+在vue项目中，切换路由时肯定会碰到需要登录的路由，其**原理就是在切换路径之前进行判断**，你不可能进入页面再去判断有无登录重新定向到login，那样的话会导致页面已经渲染以及它的各种请求已经发出。
 
 1. 如需要登录的路由可在main.js中统一处理（全局前置守卫）
 
@@ -3770,6 +3966,7 @@ onError() 注册过的回调。
        next();
      }
    });
+   
    new Vue({
      el: '#app',
      router,
@@ -3860,13 +4057,11 @@ onError() 注册过的回调。
 
 ## 4.5 vue-router 实现懒加载
 
-**参考答案：**
-
 懒加载：当打包构建应用时，JavaScript 包会变得非常大，影响页面加载。如果我们能把不同路由对应的组件分割成不同的代码块，然后当路由被访问的时候才加载对应组件，这样就更加高效了。
 
 实现：结合 Vue 的[异步组件](https://cn.vuejs.org/v2/guide/components-dynamic-async.html#异步组件)和 Webpack 的[代码分割功能](https://doc.webpack-china.org/guides/code-splitting-async/#require-ensure-/)，可以实现路由组件的懒加载
 
-1. 首先，可以将异步组件定义为返回一个 Promise 的工厂函数 (该函数返回的 Promise 应该 resolve 组件本身)：
+1. 首先，**可以将异步组件定义为返回一个 Promise 的工厂函数** (该函数返回的 Promise 应该 resolve 组件本身)：
 
    ```js
    const Foo = () => Promise.resolve({ /* 组件定义对象 */ })
@@ -3899,8 +4094,6 @@ onError() 注册过的回调。
    ---
 
 ## 4.6  js是如何监听HistoryRouter的变化的
-
-   **参考答案：**
 
    通过浏览器的地址栏来改变切换页面，前端实现主要有两种方式：
 
@@ -3987,7 +4180,7 @@ history.replaceState =  addHistoryMethod('replaceState');
 
 前端路由有两种模式：hash 模式和 history 模式。
 
-**vue-router**是Vue官方的路由管理器。它和 Vue.js 的核心深度集成，让构建单页面应用变得易如反掌。vue-router默认 hash 模式，还有一种是history模式。
+**vue-router**是Vue官方的路由管理器。它和 Vue.js 的核心深度集成，让构建单页面应用变得易如反掌。**vue-router默认 hash 模式**，还有一种是history模式。
 
 ### hash 模式
 
@@ -4012,7 +4205,9 @@ hash 模式是一种把前端路由的路径用井号 `#` 拼接在真实 URL �
 
 原理：
 
-hash路由：hash模式的工作原理是hashchange事件，可以在window监听hash的变化。我们在url后面随便添加一个#xx触发这个事件。**vue-router默认的是hash模式**—使用URL的hash来模拟一个完整的URL,于是当URL改变的时候,页面不会重新加载,也就是单页应用了,当#后面的hash发生变化,不会导致浏览器向服务器发出请求,浏览器不发出请求就不会刷新页面,并且会触发hasChange这个事件,**通过监听hash值的变化来实现更新页面部分内容的操作**
+hash路由：hash模式的工作原理是hashchange事件，可以在window监听hash的变化。
+
+我们在url后面随便添加一个#xx触发这个事件。**vue-router默认的是hash模式**—使用URL的hash来模拟一个完整的URL,于是当URL改变的时候,页面不会重新加载,也就是单页面应用了，当#后面的hash发生变化,不会导致浏览器向服务器发出请求,浏览器不发出请求就不会刷新页面,并且会触发hasChange这个事件,**通过监听hash值的变化来实现更新页面部分内容的操作**
 
 对于hash模式会创建hashHistory对象,在访问不同的路由的时候,会发生两件事:
 
@@ -4028,7 +4223,7 @@ hash路由：hash模式的工作原理是hashchange事件，可以在window监�
 
 ### history 模式
 
-history API 是 H5 提供的新特性，允许开发者直接更改前端路由，即更新浏览器 URL 地址而不重新发起请求。
+history API 是 H5 提供的新特性，允许开发者直接更改前端路由，**即更新浏览器 URL 地址而不重新发起请求。**
 
 我们新建一个 `history.html`，内容为：
 
@@ -4054,7 +4249,7 @@ history API 是 H5 提供的新特性，允许开发者直接更改前端路由�
 
 原理：
 
-history路由：**主要使用HTML5的pushState()和replaceState()这两个api**结合**window.popstate事件**（监听浏览器前进后退）来实现的, pushState()可以改变url地址且不会发送请求, replaceState()可以读取历史记录栈,还可以对浏览器记录进行修改
+history路由：**主要使用HTML5的pushState()和replaceState()这两个api**结合**window.popstate事件**（监听浏览器前进后退）来实现的, pushState()可以**改变url地址且不会发送请求**, replaceState()可以**读取历史记录栈**,还可以**对浏览器记录进行修改**。
 
 history API 提供了丰富的函数供开发者调用，我们不妨把控制台打开，然后输入下面的语句来观察浏览器地址栏的变化：
 
@@ -4071,7 +4266,7 @@ history.go(-2) // 后退2次
 - 用户点击浏览器的前进和后退操作
 - 手动调用 history 的 `back`、`forward` 和 `go` 方法
 
-监听不到：
+**监听不到**：
 
 - history 的 `pushState` 和 `replaceState`方法
 
@@ -4095,12 +4290,12 @@ try_files $uri /index.html;
 ### 区别
 
 1. hash模式较丑，**history模式较优雅**
-2. pushState设置的新URL可以是与当前URL同源的任意URL；**而hash只可修改#后面的部分，故只可设置与当前同文档的URL**
+2. pushState设置的新URL可以是与当前URL**同源**的任意URL；**而hash只可修改#后面的部分，故只可设置与当前同文档的URL**
 3. pushState设置的新URL可以与当前URL一模一样，这样也会把记录添加到栈中；**而hash设置的新值必须与原来不一样才会触发记录添加到栈中**
 4. pushState通过stateObject可以添加任意类型的数据到记录中；**而hash只可添加短字符串**
 5. pushState可额外设置title属性供后续使用
 6. hash兼容IE8以上，history兼容IE10以上
-7. history模式需要后端配合将所有访问都指向index.html，否则用户刷新页面，会导致404错误
+7. **history模式需要后端配合将所有访问都指向index.html**，否则用户刷新页面，会导致404错误
 
 使用方法:
 
@@ -4131,7 +4326,7 @@ try_files $uri /index.html;
 
 **this.$router**
 
-是 router 实例
+是 routerr实例
 
 通过 `this.$router` 访问路由器,**相当于获取了整个路由文件**，在`$router.option.routes`中，或查看到当前项目的整个路由结构 具有实例方法
 

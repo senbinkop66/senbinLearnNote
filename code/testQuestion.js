@@ -1,75 +1,38 @@
 /**
- * @param {number[]} arr
- * @param {number} k
- * @return {number[]}
+ * @param {string} s
+ * @return {string}
  */
-var getLeastNumbers = function(arr, k) {
-    if (k === 0 || arr.length === 0) {
-        return [];
-    }
-
-    let maxHeap = [Infinity];  // 最大堆
-    let n = arr.length;
+var reformat = function(s) {
+    let sumDigit = 0;
+    let n = s.length;
     for (let i = 0; i < n; i++) {
-        let item = arr[i];
-        if (maxHeap.length - 1 < k) {
-            // 构造最大堆
-            insert(item, maxHeap);
-        } else {
-            // 如果当前元素比最大堆的最大值小，则将堆的最大值替换成此元素，然后再重新构造成最大堆
-            if (item < maxHeap[1]) {
-                addToTop(item, maxHeap);
-            }
+        if (isDigit(s[i])) {
+            sumDigit++;
         }
+    }
+    let sumAlpha = n - sumDigit;
+
+    if (Math.abs(sumDigit - sumAlpha) > 1) {
+        return "";
     }
 
-    function insert(item, heap) {
-        heap.push(item);
-        let index = heap.length - 1;
-        while (heap[index] > heap[parseInt(index / 2)]) {
-            let temp = heap[index];
-            heap[index] = heap[parseInt(index / 2)];
-            heap[parseInt(index / 2)] = temp;
-            index = parseInt(index / 2);
-        }
-    }
+    let flag = sumDigit > sumAlpha;
 
-    function addToTop(item, heap) {
-        heap[1] = item;
-        let index = 1;
-        while (true) {
-            if (heap[2 * index] === undefined) {
-                break;
+    const arr = [...s];
+    for (let i = 0, j = 1; i < n; i += 2) {
+        if (isDigit(arr[i]) !== flag) {
+            while (isDigit(arr[j]) !== flag) {
+                j += 2;
             }
-            if (heap[2 * index + 1] === undefined) {
-                if (heap[2 * index] < heap[index]) {
-                    break;
-                }
-                let temp = heap[2 * index];
-                heap[2 * index] = heap[index];
-                heap[index] = temp;
-                index = 2 * index;
-            } else {
-                if (heap[2 * index] < heap[index] && heap[2 * index + 1] < heap[index]) {
-                    break;
-                }
-                if (heap[2 * index] > heap[2 * index + 1]) {
-                    let temp = heap[2 * index];
-                    heap[2 * index] = heap[index];
-                    heap[index] = temp;
-                    index = 2 * index;
-                } else {
-                    let temp = heap[2 * index + 1];
-                    heap[2 * index + 1] = heap[index];
-                    heap[index] = temp;
-                    index = 2 * index + 1;
-                }
-            }
+            [arr[i], arr[j]] = [arr[j], arr[i]];
         }
     }
-    maxHeap.shift();
-    return maxHeap;
+    return arr.join("");
 };
 
-let nums = [1, 2, 3, 2, 2, 2, 5, 4, 2];
-console.log(getLeastNumbers(nums, 2));
+const isDigit = (ch) =>{
+    return parseFloat(ch).toString() === "NaN" ? false : true;
+}
+
+let s = "covid2019";
+console.log(reformat(s));
