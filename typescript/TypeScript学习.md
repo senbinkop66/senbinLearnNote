@@ -825,6 +825,10 @@ console.log(person);  //{ name: 'cat', age: 19 }
 
 跟据你的自己判断，如果合适的话，与团队成员商议一下。
 
+
+
+----
+
 ## 解构
 
 ### 解构数组
@@ -925,11 +929,11 @@ console.log(rest);  //{ b: 10, c: 'bar' }
 可以给属性以不同的名字：
 
 ```typescript
-let {a:newName1,b:newName2}=o;
-console.log(newName1,newName2);  //foo 10
+let {a:newName1, b:newName2}=o;
+console.log(newName1, newName2);  //foo 10
 ```
 
-这里的语法开始变得混乱。 你可以将 `a: newName1` 读做 "`a` 作为 `newName1`"。 方向是从左到右，好像你写成了以下样子：
+这里的语法开始变得混乱。 **你可以将 `a: newName1` 读做 "`a` 作为 `newName1`"**。 方向是从左到右，好像你写成了以下样子：
 
 ```typescript
 let newName1 = o.a;
@@ -947,8 +951,8 @@ let {a, b} : {a: string, b: number} = o;
 默认值可以让你在属性为 undefined 时使用缺省值：
 
 ```typescript
-function f(o:{a:string,b?:number}){
-	let {a,b=100}=o;
+function f(o:{a:string, b?:number}){
+	let {a, b = 100} = o;
 }
 ```
 
@@ -959,14 +963,14 @@ function f(o:{a:string,b?:number}){
 解构也能用于函数声明。 看以下简单的情况：
 
 ```typescript
-type C={a:string,b?:number}
+type C = {a:string,b?:number}
 
 function f({a,b}: C): void{
 	//..
 }
 ```
 
-但是，通常情况下更多的是指定默认值，解构默认值有些棘手。 首先，你需要在默认值之前设置其格式。
+但是，通常情况下更多的是指定默认值，解构默认值有些棘手。 首先，**你需要在默认值之前设置其格式**。
 
 ```typescript
 function f({a="",b=0}={}): void{
@@ -976,7 +980,7 @@ f();
 //代码是一个类型推断的例子
 ```
 
-其次，你需要知道在解构属性上给予一个默认或可选的属性用来替换主初始化列表。 要知道 `C` 的定义有一个 `b` 可选属性：
+其次，你需要知道**在解构属性上给予一个默认或可选的属性用来替换主初始化列表**。 要知道 `C` 的定义有一个 `b` 可选属性：
 
 ```typescript
 function f({a,b=0}={a:""}): void{
@@ -988,6 +992,10 @@ f({});  //Argument of type '{}' is not assignable to parameter of type '{ a: str
 ```
 
 要小心使用解构。 从前面的例子可以看出，就算是最简单的解构表达式也是难以理解的。 尤其当存在深层嵌套解构的时候，就算这时没有堆叠在一起的重命名，默认值和类型注解，也是令人难以理解的。 解构表达式要尽量保持小而简单。 你自己也可以直接使用解构将会生成的赋值表达式。
+
+
+
+----
 
 ## 展开
 
@@ -1014,7 +1022,7 @@ let search={...defaults,food:"bad",days:10};
 console.log(search);  //{ food: 'bad', price: '$15', ambiance: 'noisy', days: 10 }
 ```
 
- 对象的展开比数组的展开要复杂的多。 像数组展开一样，它是从左至右进行处理，但结果仍为对象。 这就意味着出现在展开对象后面的属性会覆盖前面的属性。 因此，如果我们修改上面的例子，在结尾处进行展开的话：
+ **对象的展开比数组的展开要复杂的多**。 像数组展开一样，它是从左至右进行处理，但结果仍为对象。 这就意味着出现在展开对象后面的属性会覆盖前面的属性。 因此，如果我们修改上面的例子，在结尾处进行展开的话：
 
 ```typescript
 let search2={food:"bad",...defaults,days:10};
@@ -1041,6 +1049,10 @@ clone.f();  //Property 'f' does not exist on type '{ a: number; }'.
 ```
 
 其次，TypeScript编译器不允许展开泛型函数上的类型参数。 这个特性会在TypeScript的未来版本中考虑实现。
+
+
+
+----
 
 ## 函数
 
