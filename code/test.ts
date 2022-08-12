@@ -1,19 +1,11 @@
-const fullNameMaxLength = 10;
-class Employee {
-  private _fullName: string = "";
-  get fullName(): string {
-    return this._fullName;
-  }
-  set fullName(newName: string) {
-    if (newName && newName.length > fullNameMaxLength) {
-      throw new Error("fullName has a max length of " + fullNameMaxLength);
-    }
-    this._fullName = newName;
+class Octopus{
+  readonly numberOfLegs:number=8;
+  constructor(readonly name:string){
   }
 }
 
-let employee = new Employee();
-employee.fullName = "Bob Smith";
-if (employee.fullName) {
-  console.log(employee.fullName);
-}
+let p=new Octopus("dog");
+console.log(p.name);  //dog
+
+p.name = "cat";
+// test.ts(10,3): error TS2540: Cannot assign to 'name' because it is a read-only property.
