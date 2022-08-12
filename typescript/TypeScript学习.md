@@ -1067,7 +1067,7 @@ function add(x,y){
 }
 
 //匿名函数
-let myAdd=function(x,y){ return x+y};
+let myAdd = function(x,y){ return x+y};
 ```
 
 JavaScript里，函数可以使用函数体外部的变量。 当函数这么做时，我们说它‘捕获’了这些变量。 至于为什么可以这样做以及其中的利弊超出了本文的范围，但是深刻理解这个机制对学习JavaScript和TypeScript会很有帮助。
@@ -1088,15 +1088,15 @@ function add2(x,y){
 
 ```typescript
 //有名字的函数
-function add(x:number,y:number):number{
-	return x+y;
+function add(x : number, y : number) : number {
+	return x + y;
 }
 
 //匿名函数
-let myAdd=function(x:number,y:number):number{ return x+y};
+let myAdd = function(x : number, y : number) : number { return x + y};
 ```
 
-我们可以给每个参数添加类型之后再为函数本身添加返回值类型。 TypeScript能够根据返回语句自动推断出返回值类型，因此我们通常省略它。
+我们可以给每个参数添加类型之后再为函数本身添加返回值类型。 **TypeScript能够根据返回语句自动推断出返回值类型**，因此我们通常省略它。
 
 #### 书写完整函数类型
 
@@ -1107,18 +1107,25 @@ let myAdd:(x:number,y:number) => number=
 	function(x:number,y:number):number{ return x+y;};
 ```
 
-函数类型包含两部分：参数类型和返回值类型。 当写出完整函数类型的时候，这两部分都是需要的。 我们以参数列表的形式写出参数类型，为每个参数指定一个名字和类型。 这个名字只是为了增加可读性。 我们也可以这么写：
+函数类型包含两部分：参数类型和返回值类型。 
+
+**当写出完整函数类型的时候，这两部分都是需要的**。 我们以参数列表的形式写出**参数类型**，为每个参数指定一个名字和类型。 这个名字只是为了增加可读性。 我们也可以这么写：
 
 ```typescript
-let myAdd:(baseValue:number,increment:number) => number=
-	function(x:number,y:number):number { return x+y;};
+let myAdd : (baseValue : number, increment: number) => number = function(x: number, y : number) : number {
+	return x + y;
+}
+
+console.log(myAdd(2, 3));
 ```
 
-只要参数类型是匹配的，那么就认为它是有效的函数类型，而不在乎参数名是否正确。
+**只要参数类型是匹配的，那么就认为它是有效的函数类型**，而不在乎参数名是否正确。
 
-第二部分是返回值类型。 对于返回值，我们在函数和返回值类型之前使用( `=>`)符号，使之清晰明了。 如之前提到的，返回值类型是函数类型的必要部分，如果函数没有返回任何值，你也必须指定返回值类型为 `void`而不能留空。
+第二部分是**返回值类型**。 对于返回值，我们在函数和返回值类型之前使用( `=>`)符号，使之清晰明了。 如之前提到的，返回值类型是函数类型的必要部分，**如果函数没有返回任何值，你也必须指定返回值类型为 `void`而不能留空**。
 
-**函数的类型只是由参数类型和返回值组成的**。 函数中使用的捕获变量不会体现在类型里。 实际上，这些变量是函数的隐藏状态并不是组成API的一部分。
+**函数的类型只是由参数类型和返回值组成的**。 函数中使用的捕获变量不会体现在类型里。 实际上，**这些变量是函数的隐藏状态并不是组成API的一部分。**
+
+
 
 #### 推断类型
 
@@ -1133,14 +1140,16 @@ let myAdd2:(baseValue:number,increment:number) => number=
 	function(x,y) { return x+y;};
 ```
 
-这叫做“按上下文归类”，是类型推论的一种。 它帮助我们更好地为程序指定类型。
+**这叫做“按上下文归类”，是类型推论的一种**。 它帮助我们更好地为程序指定类型。
+
+
 
 ### 可选参数和默认参数
 
-TypeScript里的每个函数参数都是必须的。 这不是指不能传递 `null`或`undefined`作为参数，而是说编译器检查用户是否为每个参数都传入了值。 编译器还会假设只有这些参数会被传递进函数。 简短地说，传递给一个函数的参数个数必须与函数期望的参数个数一致。
+TypeScript里的每个函数参数都是必须的。 这不是指不能传递 `null`或`undefined`作为参数，**而是说编译器检查用户是否为每个参数都传入了值**。 编译器还会假设只有这些参数会被传递进函数。 简短地说，传递给一个函数的参数个数必须与函数期望的参数个数一致。
 
 ```typescript
-function buildName(firstName:string,lastName:string){
+function buildName(firstName:string, lastName:string){
 	return firstName+" "+lastName;
 }
 console.log(buildName("mane","sadio"));
@@ -1153,24 +1162,23 @@ mane sadio
 */
 ```
 
-JavaScript里，每个参数都是可选的，可传可不传。 没传参的时候，它的值就是undefined。 在TypeScript里我们可以在参数名旁使用 `?`实现可选参数的功能。 比如，我们想让last name是可选的：
+**JavaScript里，每个参数都是可选的，可传可不传**。 没传参的时候，它的值就是undefined。 在TypeScript里我们**可以在参数名旁使用 `?`实现可选参数的功能**。 比如，我们想让last name是可选的：
 
 ```typescript
-function buildName(firstName:string,lastName?:string){
-	if(lastName){
-		return firstName+" "+lastName;
-	}else{
-		return firstName;
+function buildName(firstName : string, lastName ?: string) {
+	if (lastName) {
+		return firstName + " " + lastName;
 	}
+	return firstName;
 }
 console.log(buildName("mane","sadio"));  //mane sadio
 console.log(buildName("mane"));  //mane
 console.log(buildName("mane","sadio",10));  //Expected 1-2 arguments, but got 3.
 ```
 
-可选参数必须跟在必须参数后面。 如果上例我们想让first name是可选的，那么就必须调整它们的位置，把first name放在后面。
+**可选参数必须跟在必须参数后面**。 如果上例我们想让first name是可选的，那么就必须调整它们的位置，把first name放在后面。
 
-在TypeScript里，我们也可以为参数提供一个默认值当用户没有传递这个参数或传递的值是`undefined`时。 它们叫做有默认初始化值的参数。 让我们修改上例，把last name的默认值设置为`"big"`。
+在TypeScript里，我们也可以为参数提供一个默认值当用户**没有传递这个参数或传递的值是`undefined`时**。 它们叫做**有默认初始化值的参数**。 让我们修改上例，把last name的默认值设置为`"big"`。
 
 ```typescript
 function buildName(firstName:string,lastName="big"){
@@ -1182,7 +1190,7 @@ console.log(buildName("mane",undefined));  //mane big
 console.log(buildName("mane","sadio",10));  //mane sadio  Expected 1-2 arguments, but got 3.
 ```
 
-在所有必须参数后面的带默认初始化的参数都是可选的，与可选参数一样，在调用函数的时候可以省略。 也就是说可选参数与末尾的默认参数共享参数类型。
+在所有必须参数后面的带默认初始化的参数都是可选的，与可选参数一样，在调用函数的时候可以省略。 也就是说**可选参数与末尾的默认参数共享参数类型。**
 
 ```typescript
 function buildName(firstName: string, lastName?: string) {
@@ -1196,7 +1204,7 @@ function buildName(firstName: string, lastName = "big") {
 
 共享同样的类型`(firstName: string, lastName?: string) => string`。 默认参数的默认值消失了，只保留了它是一个可选参数的信息。
 
-与普通可选参数不同的是，带默认值的参数不需要放在必须参数的后面。 如果带默认值的参数出现在必须参数前面，用户必须明确的传入 `undefined`值来获得默认值。 例如，我们重写最后一个例子，让 `firstName`是带默认值的参数：
+与普通可选参数不同的是**，带默认值的参数不需要放在必须参数的后面**。 如果**带默认值的参数出现在必须参数前面，用户必须明确的传入 `undefined`值来获得默认值**。 例如，我们重写最后一个例子，让 `firstName`是带默认值的参数：
 
 ```typescript
 function buildName(firstName="big",lastName:string){
@@ -1208,6 +1216,8 @@ console.log(buildName("mane"));  //mane undefined,Expected 2 arguments, but got 
 console.log(buildName("sadio","mane",10));  //sadio mane,  Expected 1-2 arguments, but got 3.
 ```
 
+
+
 ### 剩余参数
 
 必要参数，默认参数和可选参数有个共同点：它们表示某一个参数。 有时，你想同时操作多个参数，或者你并不知道会有多少参数传递进来。 在JavaScript里，你可以使用 `arguments`来访问所有传入的参数。
@@ -1215,67 +1225,71 @@ console.log(buildName("sadio","mane",10));  //sadio mane,  Expected 1-2 argument
 在TypeScript里，你可以把所有参数收集到一个变量里：
 
 ```typescript
-function buildName(firstName:string,...restOfName:string[]){
-	return firstName+" "+restOfName.join(" ");
+function buildName(firstName: string, ...restOfName: string[]){
+	return firstName + " " + restOfName.join(" ");
 }
 
 console.log(buildName("mane"));  //.mane 
-console.log(buildName("sadio","mane"));  //sadio mane
-console.log(buildName("big","sadio","mane"));  //big sadio mane
+console.log(buildName("sadio", "mane"));  //sadio mane
+console.log(buildName("big", "sadio", "mane"));  //big sadio mane
 ```
 
-剩余参数会被当做个数不限的可选参数。 可以一个都没有，同样也可以有任意个。 编译器创建参数数组，名字是你在省略号（ `...`）后面给定的名字，你可以在函数体内使用这个数组。
+**剩余参数会被当做个数不限的可选参数**。 可以一个都没有，同样也可以有任意个。 编译器创建参数数组，名字是你在省略号（ `...`）后面给定的名字，你可以在函数体内使用这个数组。
 
-这个省略号也会在带有剩余参数的函数类型定义上使用到：
+**这个省略号也会在带有剩余参数的函数类型定义上使用到**：
 
 ```typescript
-function buildName(firstName:string,...restOfName:string[]){
+function buildName(firstName: string, ...restOfName: string[]){
 	return firstName+" "+restOfName.join(" ");
 }
 
 let buildNameFun: (fname: string, ...rest: string[]) => string = buildName;
 
-console.log(buildNameFun("mane"));  //.mane 
+console.log(buildNameFun("mane"));  // mane 
 console.log(buildNameFun("sadio","mane"));  //sadio mane
 console.log(buildNameFun("big","sadio","mane"));  //big sadio mane
 ```
 
+
+
 ### this
 
 由于TypeScript是JavaScript的超集，TypeScript程序员也需要弄清 `this`工作机制并且当有bug的时候能够找出错误所在。 幸运的是，TypeScript能通知你错误地使用了 `this`的地方。 如果你想了解JavaScript里的 `this`是如何工作的，那么首先阅读Yehuda Katz写的[Understanding JavaScript Function Invocation and "this"](http://yehudakatz.com/2011/08/11/understanding-javascript-function-invocation-and-this/)。
+
+
 
 #### `this`和箭头函数
 
 JavaScript里，`this`的值在函数被调用的时候才会指定。 这是个既强大又灵活的特点，但是你需要花点时间弄清楚函数调用的上下文是什么。 但众所周知，这不是一件很简单的事，尤其是在返回一个函数或将函数当做参数传递的时候。
 
 ```typescript
-let deck={
-	suits:["hearts", "spades", "clubs", "diamonds"],
-	cards:Array(52),
-	createCardPicker:function(){
-		return function(){
-			let pickedCard=Math.floor(Math.random()*52);
-			let pickedSuit=Math.floor(pickedCard/13);
-			return {suit:this.suits[pickedSuit],card:pickedCard%13};
-		}
-	}
+let deck = {
+    suits: ["hearts", "spades", "clubs", "diamonds"],
+    cards: Array(52),
+    createCardPicker: function(){
+        return function(){
+            let pickedCard = Math.floor(Math.random() * 52);
+            let pickedSuit = Math.floor(pickedCard / 13);
+            return {suit: this.suits[pickedSuit], card:pickedCard % 13};
+        }
+    }
 }
 
-let cardPicker=deck.createCardPicker();
-let pickedCard=cardPicker();
+let cardPicker = deck.createCardPicker();
+let pickedCard = cardPicker();
 console.log("card: " + pickedCard.card + " of " + pickedCard.suit);
 ```
 
-可以看到`createCardPicker`是个函数，并且它又返回了一个函数。 如果我们尝试运行这个程序，会发现它并没有弹出对话框而是报错了。 因为 `createCardPicker`返回的函数里的`this`被设置成了`window`而不是`deck`对象。 因为我们只是独立的调用了 `cardPicker()`。 顶级的非方法式调用会将 `this`视为`window`。 （注意：在严格模式下， `this`为`undefined`而不是`window`）。
+可以看到`createCardPicker`是个函数，并且它又返回了一个函数。 如果我们尝试运行这个程序，会发现它并没有弹出对话框而是报错了。 **因为 `createCardPicker`返回的函数里的`this`被设置成了`window`而不是`deck`对象**。 因为我们只是独立的调用了 `cardPicker()`。 顶级的非方法式调用会将 `this`视为`window`。 （注意：**在严格模式下， `this`为`undefined`而不是`window`**）。
 
-为了解决这个问题，我们可以在函数被返回时就绑好正确的`this`。 这样的话，无论之后怎么使用它，都会引用绑定的‘deck’对象。 我们需要改变函数表达式来使用ECMAScript 6箭头语法。 箭头函数能保存函数创建时的 `this`值，而不是调用时的值：
+为了解决这个问题，我们可以在函数被返回时就绑好正确的`this`。 这样的话，无论之后怎么使用它，都会引用绑定的‘deck’对象。 我们需要改变函数表达式来使用ECMAScript 6箭头语法。 **箭头函数能保存函数创建时的 `this`值，而不是调用时的值**：
 
 ```typescript
 let deck={
 	suits:["红桃", "黑桃", "梅花", "方块"],
 	cards:Array(52),
 	createCardPicker:function(){
-		return ()=>{
+		return () => {
 			let pickedCard=Math.floor(Math.random()*52);
 			let pickedSuit=Math.floor(pickedCard/13);
 			return {suit:this.suits[pickedSuit],card:pickedCard%13};
@@ -1288,11 +1302,11 @@ let pickedCard=cardPicker();
 console.log("card: " + pickedCard.card + " of " + pickedCard.suit);
 ```
 
-更好事情是，TypeScript会警告你犯了一个错误，如果你给编译器设置了`--noImplicitThis`标记。 它会指出 `this.suits[pickedSuit]`里的`this`的类型为`any`。
+更好事情是，**TypeScript会警告你犯了一个错误**，如果你给编译器设置了`--noImplicitThis`标记。 它会指出 `this.suits[pickedSuit]`里的`this`的类型为`any`。
 
 #### `this`参数
 
-不幸的是，`this.suits[pickedSuit]`的类型依旧为`any`。 这是因为 `this`来自对象字面量里的函数表达式。 修改的方法是，提供一个显式的 `this`参数。 `this`参数是个假的参数，它出现在参数列表的最前面：
+不幸的是，`this.suits[pickedSuit]`的类型依旧为`any`。 这是因为 `this`来自对象字面量里的函数表达式。 修改的方法是，提供一个显式的 `this`参数。 **`this`参数是个假的参数，它出现在参数列表的最前面**：
 
 ```typescript
 function f(this:void){
@@ -1304,37 +1318,39 @@ function f(this:void){
 
 ```typescript
 interface Card{
-	suit:string;
-	card:number;
+	suit: string;
+	card: number;
 }
 interface Deck{
-	suits:string[];
-	cards:number[];
-	createCardPicker(this:Deck):()=>Card;
+	suits: string[];
+	cards: number[];
+	createCardPicker(this: Deck): () => Card;
 }
 
-let deck:Deck={
-	suits:["红桃", "黑桃", "梅花", "方块"],
-	cards:Array(52),
-	createCardPicker:function(this:Deck){
-		return ()=>{
-			let pickedCard=Math.floor(Math.random()*52);
-			let pickedSuit=Math.floor(pickedCard/13);
-			return {suit:this.suits[pickedSuit],card:pickedCard%13};
+let deck: Deck = {
+	suits: ["红桃", "黑桃", "梅花", "方块"],
+	cards: Array(52),
+	createCardPicker: function(this: Deck){
+		return () => {
+			let pickedCard = Math.floor(Math.random() * 52);
+			let pickedSuit = Math.floor(pickedCard / 13);
+			return {suit: this.suits[pickedSuit], card: pickedCard % 13};
 		}
 	}
 }
 
-let cardPicker=deck.createCardPicker();
-let pickedCard=cardPicker();
+let cardPicker = deck.createCardPicker();
+let pickedCard = cardPicker();
 console.log("card: " + pickedCard.card + " of " + pickedCard.suit);
 ```
 
-现在TypeScript知道`createCardPicker`期望在某个`Deck`对象上调用。 也就是说 `this`是`Deck`类型的，而非`any`，因此`--noImplicitThis`不会报错了。
+现在TypeScript知道`createCardPicker`期望在某个`Deck`对象上调用。 **也就是说 `this`是`Deck`类型的，而非`any`**，因此`--noImplicitThis`不会报错了。
+
+
 
 #### `this`参数在回调函数里
 
-你可以也看到过在回调函数里的`this`报错，当你将一个函数传递到某个库函数里稍后会被调用时。 因为当回调被调用的时候，它们会被当成一个普通函数调用， `this`将为`undefined`。 稍做改动，你就可以通过 `this`参数来避免错误。 首先，库函数的作者要指定 `this`的类型：
+你可以也看到过在回调函数里的`this`报错，当你将一个函数传递到某个库函数里稍后会被调用时。 因为当回调被调用的时候，它们会被当成一个普通函数调用， `this`将为`undefined`。 稍做改动，**你就可以通过 `this`参数来避免错误**。 首先，库函数的作者要指定 `this`的类型：
 
 ```typescript
 interface UIElement {
@@ -1351,7 +1367,7 @@ let h=new Handler();
 uiElement.addClickListener(h.onClickBad); // error!
 ```
 
-指定了`this`类型后，你显式声明`onClickBad`必须在`Handler`的实例上调用。 然后TypeScript会检测到 `addClickListener`要求函数带有`this: void`。 改变 `this`类型来修复这个错误：
+指定了`this`类型后，你显式声明`onClickBad`必须在`Handler`的实例上调用。 然后TypeScript会检测到 `addClickListener`要求函数带有`this: void`。 **改变 `this`类型来修复这个错误**：
 
 ```typescript
 interface UIElement {
@@ -1370,12 +1386,12 @@ let h=new Handler();
 uiElement.addClickListener(h.onClickGood); // 
 ```
 
-因为`onClickGood`指定了`this`类型为`void`，因此传递`addClickListener`是合法的。 当然了，这也意味着不能使用 `this.info`. 如果你两者都想要，你不得不使用箭头函数了：
+**因为`onClickGood`指定了`this`类型为`void`，因此传递`addClickListener`是合法的**。 当然了，这也意味着不能使用 `this.info`. 如果你两者都想要，你不得不使用箭头函数了：
 
 ```typescript
 class Handler{
 	info:string;
-	onClickGood=(e:Event)=>{
+	onClickGood=(e:Event) => {
 		this.info=e.message;
 	}
 }
@@ -1409,7 +1425,7 @@ console.log("card: " + pickedCard2.card + " of " + pickedCard2.suit);
 
 `pickCard`方法根据传入参数的不同会返回两种不同的类型。 如果传入的是代表纸牌的对象，函数作用是从中抓一张牌。 如果用户想抓牌，我们告诉他抓到了什么牌。 但是这怎么在类型系统里表示呢。
 
-方法是为同一个函数提供多个函数类型定义来进行函数重载。 编译器会根据这个列表去处理函数的调用。 下面我们来重载 `pickCard`函数。
+**方法是为同一个函数提供多个函数类型定义来进行函数重载**。 编译器会根据这个列表去处理函数的调用。 下面我们来重载 `pickCard`函数。
 
 ```typescript
 let suits = ["hearts", "spades", "clubs", "diamonds"];
@@ -1436,9 +1452,13 @@ console.log("card: " + pickedCard2.card + " of " + pickedCard2.suit);
 
 这样改变后，重载的`pickCard`函数在调用的时候会进行正确的类型检查。
 
-为了让编译器能够选择正确的检查类型，它与JavaScript里的处理流程相似。 它查找重载列表，尝试使用第一个重载定义。 如果匹配的话就使用这个。 因此，在定义重载的时候，一定要把最精确的定义放在最前面。
+**为了让编译器能够选择正确的检查类型，它与JavaScript里的处理流程相似**。 它查找重载列表，尝试使用第一个重载定义。 如果匹配的话就使用这个。 **因此，在定义重载的时候，一定要把最精确的定义放在最前面**。
 
 注意，`function pickCard(x): any`并不是重载列表的一部分，因此这里只有两个重载：一个是接收对象另一个接收数字。 以其它参数调用 `pickCard`会产生错误。
+
+
+
+----
 
 ## 接口
 
@@ -1451,34 +1471,37 @@ TypeScript的核心原则之一是对值所具有的*结构*进行类型检查�
 通过一个简单示例来观察接口是如何工作的：
 
 ```typescript
-function printLabel(labelledObj:{label:string}){
+function printLabel(labelledObj: {label: string}){
 	console.log(labelledObj.label);
 }
 
-let myObj={size:10,label:"Size 10 Object"};
+let myObj={size: 10, label: "Size 10 Object"};
 printLabel(myObj);  //Size 10 Object
 ```
 
-类型检查器会查看`printLabel`的调用。 `printLabel`有一个参数，并要求这个对象参数有一个名为`label`类型为`string`的属性。 需要注意的是，我们传入的对象参数实际上会包含很多属性，但是编译器只会检查那些必需的属性是否存在，并且其类型是否匹配。 然而，有些时候TypeScript却并不会这么宽松，
+类型检查器会查看`printLabel`的调用。 `printLabel`有一个参数，**并要求这个对象参数有一个名为`label`类型为`string`的属性**。 需要注意的是，我们传入的对象参数实际上会包含很多属性，**但是编译器只会检查那些必需的属性是否存在**，并且其类型是否匹配。 然而，有些时候TypeScript却并不会这么宽松。
 
-下面我们重写上面的例子，这次使用接口来描述：必须包含一个`label`属性且类型为`string`：
+下面我们重写上面的例子，这次使用接口来描述：**必须包含一个`label`属性且类型为`string`**：
 
 ```typescript
-interface labelledValue{
-	label:string;
+interface labelledValue {
+	label: string;
 }
 
-function printLabel(labelledObj:labelledValue){
+function printLabel(labelledObj: labelledValue) {
 	console.log(labelledObj.label);
 }
 
-let myObj={size:10,label:"Size 10 Object"};
-printLabel(myObj);  //Size 10 Object
+let myObj = {size : 10, label: "made in china"}
+printLabel(myObj);  // made in china
+
 ```
 
-`LabelledValue`接口就好比一个名字，用来描述上面例子里的要求。 它代表了有一个 `label`属性且类型为`string`的对象。 需要注意的是，我们在这里并不能像在其它语言里一样，说传给 `printLabel`的对象实现了这个接口。我们只会去关注值的外形。 只要传入的对象满足上面提到的必要条件，那么它就是被允许的。
+**`LabelledValue`接口就好比一个名字**，用来描述上面例子里的要求。 它代表了有一个 `label`属性且类型为`string`的对象。 需要注意的是，我们在这里并不能像在其它语言里一样，说传给 `printLabel`的对象实现了这个接口。我们只会去关注值的外形。 **只要传入的对象满足上面提到的必要条件，那么它就是被允许的。**
 
-还有一点值得提的是，类型检查器不会去检查属性的顺序，只要相应的属性存在并且类型也是对的就可以。
+还有一点值得提的是**，类型检查器不会去检查属性的顺序，只要相应的属性存在并且类型也是对的就可以**。
+
+
 
 ### 可选属性
 
@@ -1488,27 +1511,29 @@ printLabel(myObj);  //Size 10 Object
 
 ```typescript
 interface SquareConfig{
-	color?:string;
-	width?:number;
+	color?: string;
+	width?: number;
 }
 
-function createSquare(config:SquareConfig):{color:string;area:number}{
-	let newSquare={color:"#ffffff",area:100};
+function createSquare(config: SquareConfig): {color: string; area: number}{
+	let newSquare = {color:"#ffffff", area:100};
 	if (config.color){
-		newSquare.color=config.color;
+		newSquare.color = config.color;
 	}
 	if (config.width){
-		newSquare.area=config.width*config.width;
+		newSquare.area = config.width*config.width;
 	}
 	return newSquare;
 }
 
-let mySquare=createSquare({color:"red"});
+let mySquare = createSquare({color:"red"});
 ```
 
-带有可选属性的接口与普通的接口定义差不多，只是在可选属性名字定义的后面加一个`?`符号。
+带有可选属性的接口与普通的接口定义差不多，**只是在可选属性名字定义的后面加一个`?`符号**。
 
-可选属性的好处之一是可以对可能存在的属性进行预定义，好处之二是可以捕获引用了不存在的属性时的错误。 比如，我们故意将 `createSquare`里的`color`属性名拼错，就会得到一个错误提示
+可选属性的好处之一是**可以对可能存在的属性进行预定义**，好处之二是**可以捕获引用了不存在的属性时的错误**。 比如，我们故意将 `createSquare`里的`color`属性名拼错，就会得到一个错误提示
+
+
 
 ### 只读属性
 
@@ -1526,11 +1551,11 @@ p1.x=10;  //Cannot assign to 'x' because it is a read-only property.
 
 你可以通过赋值一个对象字面量来构造一个`Point`。 赋值后， `x`和`y`再也不能被改变了。
 
-TypeScript具有`ReadonlyArray<T>`类型，它与`Array<T>`相似，只是把所有可变方法去掉了，因此可以确保数组创建后再也不能被修改：
+TypeScript具有`ReadonlyArray<T>`类型，它与`Array<T>`相似，**只是把所有可变方法去掉了，因此可以确保数组创建后再也不能被修改**：
 
 ```typescript
-let a:number[]=[1,2,3,4,5];
-let ro:ReadonlyArray<number>=a;
+let a: number[]=[1,2,3,4,5];
+let ro: ReadonlyArray<number>=a;
 ro[1]=10;  //Index signature in type 'readonly number[]' only permits reading.
 ro.push(20);  // Property 'push' does not exist on type 'readonly number[]'.
 ro.length=10;  //Cannot assign to 'length' because it is a read-only property.
@@ -1541,18 +1566,20 @@ a=ro;  //The type 'readonly number[]' is 'readonly' and cannot be assigned to th
 上面代码的最后一行，可以看到就算把整个`ReadonlyArray`赋值到一个普通数组也是不可以的。 但是你可以用**类型断言**重写：
 
 ```typescript
-a=ro as number[];
+a = ro as number[];
 ```
 
-### readonly  vs  const
+#### readonly  vs  const
 
-最简单判断该用`readonly`还是`const`的方法是看要把它做为变量使用还是做为一个属性。 做为变量使用的话用 `const`，若做为属性则使用`readonly`。
+最简单判断该用`readonly`还是`const`的方法**是看要把它做为变量使用还是做为一个属性**。 做为变量使用的话用 `const`，若做为属性则使用`readonly`。
+
+
 
 ### 额外的属性检查
 
 我们在第一个例子里使用了接口，TypeScript让我们传入`{ size: number; label: string; }`到仅期望得到`{ label: string; }`的函数里。 我们已经学过了可选属性，并且知道他们在“option bags”模式里很有用。
 
-然而，天真地将这两者结合的话就会像在JavaScript里那样搬起石头砸自己的脚。 比如，拿 `createSquare`例子来说：
+然而，天**真地将这两者结合的话就会像在JavaScript里那样搬起石头砸自己的脚**。 比如，拿 `createSquare`例子来说：
 
 ```typescript
 interface SquareConfig{
@@ -1578,11 +1605,11 @@ let mySquare=createSquare({color2:"red",width:66});
 
 ```
 
-注意传入`createSquare`的参数拼写为*`colour`*而不是`color`。 在JavaScript里，这会默默地失败。
+注意传入`createSquare`的参数拼写为*`color2`*而不是`color`。 在JavaScript里，这会默默地失败。
 
-你可能会争辩这个程序已经正确地类型化了，因为`width`属性是兼容的，不存在`color`属性，而且额外的`colour`属性是无意义的。
+你可能会争辩这个程序已经正确地类型化了，因为`width`属性是兼容的，不存在`color2`属性，而且额外的`color2`属性是无意义的。
 
-然而，TypeScript会认为这段代码可能存在bug。 对象字面量会被特殊对待而且会经过 *额外属性检查*，当将它们赋值给变量或作为参数传递的时候。 如果一个对象字面量存在任何“目标类型”不包含的属性时，你会得到一个错误。
+然而，TypeScript会认为这段代码可能存在bug。 对象字面量会被特殊对待而且会经过 *额外属性检查*，当将它们赋值给变量或作为参数传递的时候。 **如果一个对象字面量存在任何“目标类型”不包含的属性时，你会得到一个错误。**
 
 绕开这些检查非常简单。 最简便的方法是使用类型断言：
 
@@ -1594,16 +1621,16 @@ let mySquare2=createSquare({width:66,opacity:0.6} as SquareConfig);
 然而，最佳的方式是能够添加一个字符串索引签名，前提是你能够确定这个对象可能具有某些做为特殊用途使用的额外属性。 如果 `SquareConfig`带有上面定义的类型的`color`和`width`属性，并且*还会*带有任意数量的其它属性，那么我们可以这样定义它：
 
 ```typescript
-interface SquareConfig{
-	color?:string;
-	width?:number;
-	[propName:string]:any;
+interface SquareConfig {
+	color?: string;
+	width?: string;
+	[propName: string]: any;
 }
 ```
 
-在这我们要表示的是`SquareConfig`可以有任意数量的属性，并且只要它们不是`color`和`width`，那么就无所谓它们的类型是什么。
+在这我们要表示的是`SquareConfig`可以有任意数量的属性，**并且只要它们不是`color`和`width`，那么就无所谓它们的类型是什么**。
 
-还有最后一种跳过这些检查的方式，这可能会让你感到惊讶，它就是将这个对象赋值给一个另一个变量： 因为 `squareOptions`不会经过额外属性检查，所以编译器不会报错。
+还有最后一种跳过这些检查的方式，这可能会让你感到惊讶，**它就是将这个对象赋值给一个另一个变量**： 因为 `squareOptions`不会经过额外属性检查，所以编译器不会报错。
 
 ```typescript
 let squareOptions={color2:"red",width:66};
@@ -1612,11 +1639,13 @@ let mySquare=createSquare(squareOptions);
 
 要留意，在像上面一样的简单代码里，你可能不应该去绕开这些检查。 对于包含方法和内部状态的复杂对象字面量来讲，你可能需要使用这些技巧，但是大部额外属性检查错误是真正的bug。 就是说你遇到了额外类型检查出的错误，比如“option bags”，你应该去审查一下你的类型声明。 在这里，如果支持传入 `color`或`colour`属性到`createSquare`，你应该修改`SquareConfig`定义来体现出这一点。
 
+
+
 ### 函数类型
 
 接口能够描述JavaScript中对象拥有的各种各样的外形。 除了描述带有属性的普通对象外，接口也可以描述函数类型。
 
-为了使用接口表示函数类型，我们需要给接口定义一个调用签名。 它就像是一个只有参数列表和返回值类型的函数定义。参数列表里的每个参数都需要名字和类型。
+**为了使用接口表示函数类型，我们需要给接口定义一个调用签名**。 它就像是一个只有参数列表和返回值类型的函数定义。参数列表里的每个参数都需要名字和类型。
 
 ```typescript
 interface SearchFunc{
@@ -1624,7 +1653,7 @@ interface SearchFunc{
 }
 ```
 
-这样定义后，我们可以像使用其它接口一样使用这个函数类型的接口。 下例展示了如何创建一个函数类型的变量，并将一个同类型的函数赋值给这个变量。
+**这样定义后，我们可以像使用其它接口一样使用这个函数类型的接口**。 下例展示了如何创建一个函数类型的变量，并将一个同类型的函数赋值给这个变量。
 
 ```typescript
 let mySearch:SearchFunc;
@@ -1634,17 +1663,21 @@ mySearch=function(source:string,subString:string){
 }
 ```
 
-对于函数类型的类型检查来说，函数的参数名不需要与接口里定义的名字相匹配。 比如，我们使用下面的代码重写上面的例子：
+对于函数类型的类型检查来说，**函数的参数名不需要与接口里定义的名字相匹配**。 比如，我们使用下面的代码重写上面的例子：
 
 ```typescript
-let mySearch:SearchFunc;
-mySearch=function(src:string,sub:string):boolean{
-	let result=src.search(sub);
-	return result>-1;
+interface SearchFunc {
+	(source: string, subString: string): boolean;
+}
+
+let mySearch: SearchFunc;
+mySearch = function(src: string, sub: string): boolean {
+	let result = src.search(sub);
+	return result > -1;
 }
 ```
 
-函数的参数会逐个进行检查，要求对应位置上的参数类型是兼容的。 如果你不想指定类型，TypeScript的类型系统会推断出参数类型，因为函数直接赋值给了 `SearchFunc`类型变量。 函数的返回值类型是通过其返回值推断出来的（此例是 `false`和`true`）。 如果让这个函数返回数字或字符串，类型检查器会警告我们函数的返回值类型与 `SearchFunc`接口中的定义不匹配。
+函数的参数会逐个进行检查，要求对应位置上的参数类型是兼容的。 如果你不想指定类型，TypeScript的类型系统会推断出参数类型，因为函数直接赋值给了 `SearchFunc`类型变量。 **函数的返回值类型是通过其返回值推断出来的**（此例是 `false`和`true`）。 如果让这个函数返回数字或字符串，类型检查器会警告我们函数的返回值类型与 `SearchFunc`接口中的定义不匹配。
 
 ```typescript
 let mySearch:SearchFunc;
@@ -1654,9 +1687,11 @@ mySearch=function(src,sub){
 }
 ```
 
+
+
 ### 可索引的类型
 
-与使用接口描述函数类型差不多，我们也可以描述那些能够“通过索引得到”的类型，比如`a[10]`或`ageMap["daniel"]`。 可索引类型具有一个 *索引签名*，它描述了对象索引的类型，还有相应的索引返回值类型。 让我们看一个例子：
+与使用接口描述函数类型差不多，我们也可以描述那些能够“通过索引得到”的类型，比如`a[10]`或`ageMap["daniel"]`。 **可索引类型具有一个 *索引签名*，它描述了对象索引的类型，还有相应的索引返回值类型。** 让我们看一个例子：
 
 ```typescript
 interface StringArray{
@@ -1670,9 +1705,9 @@ let myStr:string=myArray[0];
 console.log(myStr);  //mane
 ```
 
-上面例子里，我们定义了`StringArray`接口，它具有索引签名。 这个索引签名表示了当用 `number`去索引`StringArray`时会得到`string`类型的返回值。
+上面例子里，我们定义了`StringArray`接口，它具有索引签名。 **这个索引签名表示了当用 `number`去索引`StringArray`时会得到`string`类型的返回值。**
 
-TypeScript支持两种索引签名：字符串和数字。 可以同时使用两种类型的索引，但是数字索引的返回值必须是字符串索引返回值类型的子类型。 这是因为当使用 `number`来索引时，JavaScript会将它转换成`string`然后再去索引对象。 也就是说用 `100`（一个`number`）去索引等同于使用`"100"`（一个`string`）去索引，因此两者需要保持一致。
+TypeScript支持两种索引签名：字符串和数字。 可以同时使用两种类型的索引，**但是数字索引的返回值必须是字符串索引返回值类型的子类型**。 这是因为当使用 `number`来索引时，JavaScript会将它转换成`string`然后再去索引对象。 也就是说用 `100`（一个`number`）去索引等同于使用`"100"`（一个`string`）去索引，因此两者需要保持一致。
 
 ```typescript
 class Animal{
@@ -1701,7 +1736,7 @@ interface NumberDictionary{
 }
 ```
 
-最后，你可以将索引签名设置为只读，这样就防止了给索引赋值：
+最后，**你可以将索引签名设置为只读，这样就防止了给索引赋值**：
 
 ```typescript
 interface ReadonlyStringArray{
@@ -1712,24 +1747,26 @@ let myArray:ReadonlyStringArray=["mane","Arnold"];
 myArray[1]="Alison";  //Index signature in type 'ReadonlyStringArray' only permits reading.
 ```
 
+
+
 ### 类类型
 
 #### 实现接口
 
-与C#或Java里接口的基本作用一样，TypeScript也能够用它来明确的强制一个类去符合某种契约。
+与C#或Java里接口的基本作用一样，**TypeScript也能够用它来明确的强制一个类去符合某种契约**。
 
 ```typescript
 interface ClockInterface{
-	currentTime:Date;
+	currentTime: Date;
 }
 
 class Clock implements ClockInterface{
 	currentTime:Date;
-	constructor(h:number,m:number){}
+	constructor(h:number, m:number){}
 }
 ```
 
-你也可以在接口中描述一个方法，在类里实现它，如同下面的`setTime`方法一样：
+**你也可以在接口中描述一个方法，在类里实现它**，如同下面的`setTime`方法一样：
 
 ```typescript
 interface ClockInterface{
@@ -1746,11 +1783,13 @@ class Clock implements ClockInterface{
 }
 ```
 
-接口描述了类的公共部分，而不是公共和私有两部分。 它不会帮你检查类是否具有某些私有成员。
+**接口描述了类的公共部分**，而不是公共和私有两部分。 **它不会帮你检查类是否具有某些私有成员**。
+
+
 
 #### 类静态部分与实例部分的区别
 
-当你操作类和接口的时候，你要知道类是具有两个类型的：静态部分的类型和实例的类型。 你会注意到，当你用构造器签名去定义一个接口并试图定义一个类去实现这个接口时会得到一个错误：
+当你操作类和接口的时候，你要知道类是具有两个类型的：**静态部分的类型**和**实例的类型**。 你会注意到，当你用构造器签名去定义一个接口并试图定义一个类去实现这个接口时会得到一个错误：
 
 ```typescript
 interface ClockConstructor{
@@ -1764,9 +1803,9 @@ class Clock implements ClockConstructor{
 }
 ```
 
-这里因为当一个类实现了一个接口时，只对其实例部分进行类型检查。 constructor存在于类的静态部分，所以不在检查的范围内。
+**这里因为当一个类实现了一个接口时，只对其实例部分进行类型检查**。 constructor存在于类的静态部分，所以不在检查的范围内。
 
-因此，我们应该直接操作类的静态部分。 看下面的例子，我们定义了两个接口， `ClockConstructor`为构造函数所用和`ClockInterface`为实例方法所用。 为了方便我们定义一个构造函数 `createClock`，它用传入的类型创建实例。
+因此，**我们应该直接操作类的静态部分**。 看下面的例子，我们定义了两个接口， `ClockConstructor`为构造函数所用和`ClockInterface`为实例方法所用。 为了方便我们定义一个构造函数 `createClock`，它用传入的类型创建实例。
 
 ```typescript
 interface ClockInterface{
@@ -1804,9 +1843,11 @@ analog.tick();  //tick tock
 
 因为`createClock`的第一个参数是`ClockConstructor`类型，在`createClock(AnalogClock, 12, 20)`里，会检查`AnalogClock`是否符合构造函数签名。
 
+
+
 ### 继承接口
 
-和类一样，接口也可以相互继承。 这让我们能够从一个接口里复制成员到另一个接口里，可以更灵活地将接口分割到可重用的模块里。
+**和类一样，接口也可以相互继承**。 这让我们能够从一个接口里复制成员到另一个接口里，可以更灵活地将接口分割到可重用的模块里。
 
 ```typescript
 interface Shape{
@@ -1823,7 +1864,7 @@ square.sideLength=20;
 console.log(square);  //{ color: 'red', sideLength: 20 }
 ```
 
-一个接口可以继承多个接口，创建出多个接口的合成接口。
+**一个接口可以继承多个接口，创建出多个接口的合成接口**。
 
 ```typescript
 interface Shape{
@@ -1834,7 +1875,7 @@ interface PenStroke{
 	penWidth:number;
 }
 
-interface Square extends Shape,PenStroke{
+interface Square extends Shape, PenStroke{
 	sideLength:number;
 }
 
@@ -1844,6 +1885,8 @@ square.sideLength=20;
 square.penWidth=12;
 console.log(square);  //{ color: 'red', sideLength: 20, penWidth: 12 }
 ```
+
+
 
 ### 混合类型
 
@@ -1873,6 +1916,8 @@ console.log(c);  //Function: counter] { interval: 66, reset: [Function (anonymou
 ```
 
 在使用JavaScript第三方库的时候，你可能需要像上面那样去完整地定义类型。
+
+
 
 ### 接口继承类
 
@@ -1912,6 +1957,10 @@ class Location{
 在上面的例子里，`SelectableControl`包含了`Control`的所有成员，包括私有成员`state`。 因为 `state`是私有成员，所以只能够是`Control`的子类们才能实现`SelectableControl`接口。 因为只有 `Control`的子类才能够拥有一个声明于`Control`的私有成员`state`，这对私有成员的兼容性是必需的。
 
 在`Control`类内部，是允许通过`SelectableControl`的实例来访问私有成员`state`的。 实际上， `SelectableControl`接口和拥有`select`方法的`Control`类是一样的。 `Button`和`TextBox`类是`SelectableControl`的子类（因为它们都继承自`Control`并有`select`方法），但`Image`和`Location`类并不是这样的。
+
+
+
+----
 
 ## 类
 

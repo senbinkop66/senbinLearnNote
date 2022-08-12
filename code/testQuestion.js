@@ -1,38 +1,31 @@
 /**
  * @param {string} s
- * @return {string}
+ * @return {number}
  */
-var reformat = function(s) {
-    let sumDigit = 0;
+var lengthOfLongestSubstring = function(s) {
+    if (s.length === 0) {
+        return 0;
+    }
+
+    let curLen = 0;  // 局部最长不重复
+    let ans = 0;  //  全局最长不重复
+    const position = new Map();
     let n = s.length;
     for (let i = 0; i < n; i++) {
-        if (isDigit(s[i])) {
-            sumDigit++;
+        let preIndex = position.has(s[i]) ? position.get(s[i]) : -1;
+
+        if (preIndex < 0 || i - preIndex > curLen) {
+            curLen++;
+        } else {
+            ans = Math.max(ans, curLen);
+            curLen = i - preIndex;  // 保持不重复
         }
+        position.set(s[i], i);
     }
-    let sumAlpha = n - sumDigit;
+    ans = Math.max(ans, curLen);
 
-    if (Math.abs(sumDigit - sumAlpha) > 1) {
-        return "";
-    }
-
-    let flag = sumDigit > sumAlpha;
-
-    const arr = [...s];
-    for (let i = 0, j = 1; i < n; i += 2) {
-        if (isDigit(arr[i]) !== flag) {
-            while (isDigit(arr[j]) !== flag) {
-                j += 2;
-            }
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-    }
-    return arr.join("");
+    return ans;
 };
 
-const isDigit = (ch) =>{
-    return parseFloat(ch).toString() === "NaN" ? false : true;
-}
-
-let s = "covid2019";
-console.log(reformat(s));
+let s = "abcabcbb";
+console.log(lengthOfLongestSubstring(s));

@@ -1,9 +1,19 @@
-function f(){
-	return a; 
+const fullNameMaxLength = 10;
+class Employee {
+  private _fullName: string = "";
+  get fullName(): string {
+    return this._fullName;
+  }
+  set fullName(newName: string) {
+    if (newName && newName.length > fullNameMaxLength) {
+      throw new Error("fullName has a max length of " + fullNameMaxLength);
+    }
+    this._fullName = newName;
+  }
 }
 
-console.log(f());  //undefined
-
-let a = 100;
-
-console.log(f());  //100
+let employee = new Employee();
+employee.fullName = "Bob Smith";
+if (employee.fullName) {
+  console.log(employee.fullName);
+}

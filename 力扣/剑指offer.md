@@ -3033,6 +3033,258 @@ console.log(countDigitOne(n));
 
 
 
+----
+
+## 44. 数字序列中某一位的数字
+
+数字以0123456789101112131415…的格式序列化到一个字符序列中。在这个序列中，第5位（从下标0开始计数）是5，第13位是1，第19位是4，等等。
+
+请写一个函数，求任意第n位对应的数字。
+
+**限制：**
+
+- `0 <= n < 2^31`
+
+迭代
+
+一位数、两位数、三位数...
+
+10, 90 x 2 = 180, 900 x 3 = 2700, ...
+
+```js
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var findNthDigit = function(n) {
+    if (n < 0) {
+        return -1;
+    }
+    let digits = 1;
+    while (true) {
+        let numbers = countOfIntegets(digits);
+        if (n < numbers * digits) {
+            // 找到属于几位数中
+            return digitAtIndex(n, digits);
+        }
+        n -= numbers * digits;  // 减去位数小的数
+        digits++;
+    }
+    return -1;
+};
+
+const countOfIntegets = (digits) => {
+    //计算 几位数共有多少个数
+    if (digits === 1) {
+        return 10;
+    }
+    let count = Math.pow(10, digits - 1);
+    return 9 * count;
+}
+
+const digitAtIndex = (n, digits) => {
+    let number = beginNumber(digits) + Math.floor(n / digits);  // 定位开始的数字
+    let indexFromRight = digits - n % digits;
+    for (let i = 1; i < indexFromRight; i++) {
+        // 找到数字位
+        number = Math.floor(number / 10);
+    }
+    return number % 10;
+}
+
+const beginNumber = (digits) => {
+    // 计算几位数开始的第一个数
+    if (digits === 1) {
+        return 0;
+    }
+    return Math.pow(10, digits - 1);
+}
+
+
+let n = 11;
+console.log(findNthDigit(n));
+```
+
+
+
+----
+
+## 45. 把数组排成最小的数
+
+输入一个非负整数数组，把数组里所有数字拼接起来排成一个数，打印能拼接出的所有数字中最小的一个。
+
+提示:
+
+0 < nums.length <= 100
+说明:
+
+输出结果可能非常大，所以你需要返回一个字符串而不是整数
+拼接起来的数字可能会有前导 0，最后结果不需要去掉前导 0
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {string}
+ */
+var minNumber = function(nums) {
+    //利用js特性
+    //字符串之间相减会像number一样正常减掉，会被转换成number
+    //字符串之间相加会转换成两个字符串之间拼接，会被转换成string
+    nums.sort((a, b) => `${a}${b}` - `${b}${a}`);
+    return nums.join("");
+};
+
+let nums = [3,30,34,5,9];
+console.log(minNumber(nums));
+```
+
+
+
+----
+
+##  46. 把数字翻译成字符串
+
+给定一个数字，我们按照如下规则把它翻译为字符串：0 翻译成 “a” ，1 翻译成 “b”，……，11 翻译成 “l”，……，25 翻译成 “z”。一个数字可能有多个翻译。请编程实现一个函数，用来计算一个数字有多少种不同的翻译方法。
+
+ **动态规划**
+
+```
+/**
+ * @param {number} num
+ * @return {number}
+ */
+var translateNum = function(num) {
+    num = num.toString();
+    let p = 0, q = 0, r = 1;
+    let n = num.length;
+    for (let i = 0; i < n; i++) {
+        p = q;
+        q = r;
+        r = q;
+        if (i === 0) {
+            continue;
+        }
+        let pre = num.substring(i - 1, i + 1);
+        if (num[i - 1] !== "0" && Number(pre) < 26 && Number(pre) >= 0) {
+            // 注意前一位0的情况
+            r += p;
+        }
+    }
+    return r;
+};
+
+let num = 12258;
+console.log(translateNum(num));
+```
+
+
+
+----
+
+## 47. 礼物的最大价值
+
+在一个 m*n 的棋盘的每一格都放有一个礼物，每个礼物都有一定的价值（价值大于 0）。你可以从棋盘的左上角开始拿格子里的礼物，并每次向右或者向下移动一格、直到到达棋盘的右下角。给定一个棋盘及其上面的礼物的价值，请计算你最多能拿到多少价值的礼物？
+
+```
+输入: 
+[
+  [1,3,1],
+  [1,5,1],
+  [4,2,1]
+]
+输出: 12
+解释: 路径 1→3→5→2→1 可以拿到最多价值的礼物
+```
+
+提示：
+
+- `0 < grid.length <= 200`
+- `0 < grid[0].length <= 200`
+
+```js
+/**
+ * @param {number[][]} grid
+ * @return {number}
+ */
+var maxValue = function(grid) {
+    if (grid.length < 1 || grid[0].length < 1) {
+        return 0;
+    }
+    const m = grid.length, n = grid[0].length;
+
+    const maxValues = new Array(n).fill(0);
+    for (let i = 0; i < m; i++) {
+        for (let j = 0; j < n; j++) {
+            let left = 0, top = 0;
+            if (i > 0) {
+                top = maxValues[j];
+            }
+            if (j > 0) {
+                left = maxValues[j - 1];
+            }
+            maxValues[j] = Math.max(left, top) + grid[i][j];
+        }
+    }
+    return maxValues[n - 1];
+};
+
+let grid = [
+  [1,3,1],
+  [1,5,1],
+  [4,2,1]
+];
+
+console.log(maxValue(grid));
+```
+
+
+
+----
+
+## 48. 最长不含重复字符的子字符串
+
+请从字符串中找出一个最长的不包含重复字符的子字符串，计算该最长子字符串的长度。
+
+提示：
+
+- `s.length <= 40000`
+
+哈希表
+
+```js
+/**
+ * @param {string} s
+ * @return {number}
+ */
+var lengthOfLongestSubstring = function(s) {
+    if (s.length === 0) {
+        return 0;
+    }
+
+    let curLen = 0;  // 局部最长不重复
+    let ans = 0;  //  全局最长不重复
+    const position = new Map();
+    let n = s.length;
+    for (let i = 0; i < n; i++) {
+        let preIndex = position.has(s[i]) ? position.get(s[i]) : -1;
+
+        if (preIndex < 0 || i - preIndex > curLen) {
+            curLen++;
+        } else {
+            ans = Math.max(ans, curLen);
+            curLen = i - preIndex;  // 保持不重复
+        }
+        position.set(s[i], i);
+    }
+    ans = Math.max(ans, curLen);
+
+    return ans;
+};
+
+let s = "abcabcbb";
+console.log(lengthOfLongestSubstring(s));
+```
+
 
 
 ----
