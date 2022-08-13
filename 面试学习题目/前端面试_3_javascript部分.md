@@ -833,7 +833,7 @@ var result=f1();
 result();  //10
 ```
 
-此时f2函数形成了一个闭包，因f2函数里需要访问f1作用域下的n变量，但他们不处于同一个作用域，故两者相互牵引，需要输出n，f1中的变量n就必须存在，作用域链在f1中找到n，输出n时，垃圾回收机制会认为f2还没有执行完成，但此时作用域链查找已经到了f1作用域下，所以n的内存空间不会被垃圾回收机制清除
+此时f2函数形成了一个闭包，因f2函数里需要访问f1作用域下的n变量，但他们不处于同一个作用域，故两者相互牵引，需要输出n，f1中的变量n就必须存在，作用域链在f1中找到n，**输出n时，垃圾回收机制会认为f2还没有执行完成**，但**此时作用域链查找已经到了f1作用域下，所以n的内存空间不会被垃圾回收机制清除**
 
 闭包**优点**：
 
@@ -878,7 +878,7 @@ for(var i = 0;i < 5; i++){
 
 **闭包缺点：**
 
-- 闭包会导致变量不会被垃圾回收机制所清除，会大量消耗内存
+- **闭包会导致变量不会被垃圾回收机制所清除**，会大量消耗内存
 - 使用不恰当可能会造成**内存泄漏**的问题
 
 **避免闭包引起的内存泄漏**：
@@ -898,9 +898,9 @@ for(var i = 0;i < 5; i++){
 闭包的特点：
 
 - 让外部访问函数内部变量成为可能；
-- 可以避免使用全局变量，防止全局变量污染；
+- 可以避免使用全局变量，**防止全局变量污染**；
 - 可以让局部变量常驻在内存中；
-- 会造成内存泄漏（有一块内存空间被长期占用，而不被释放）
+- **会造成内存泄漏**（有一块内存空间被长期占用，而不被释放）
 
 应用场景
 
@@ -1148,6 +1148,46 @@ function removeButton(){
 
 与其他面向对象语言不同，ES6之前js没有引入类（class）的概念，js并非通过类而是直接通过构造函数来创建实例
 
+**原型**
+
+`JavaScript` 常被描述为一种基于原型的语言——每个对象拥有一个原型对象
+
+当试图访问一个对象的属性时，它不仅仅在该对象上搜寻，还会搜寻该对象的原型，以及该对象的原型的原型，依次层层向上搜索，直到找到一个名字匹配的属性或到达原型链的末尾
+
+准确地说，这些属性和方法定义在Object的构造器函数（constructor functions）之上的`prototype`属性上，而非实例对象本身
+
+下面举个例子：
+
+函数可以有属性。 每个函数都有一个特殊的属性叫作原型`prototype`
+
+```js
+function doSomething(){}
+console.log( doSomething.prototype );
+```
+
+控制台输出
+
+```json
+{
+    constructor: ƒ doSomething(),
+    __proto__: {
+        constructor: ƒ Object(),
+        hasOwnProperty: ƒ hasOwnProperty(),
+        isPrototypeOf: ƒ isPrototypeOf(),
+        propertyIsEnumerable: ƒ propertyIsEnumerable(),
+        toLocaleString: ƒ toLocaleString(),
+        toString: ƒ toString(),
+        valueOf: ƒ valueOf()
+    }
+}
+```
+
+上面这个对象，就是大家常说的原型对象
+
+可以看到，原型对象有一个自有属性`constructor`，这个属性指向该函数，如下图关系展示
+
+
+
 **构造函数与实例原型**
 
 在js中，每当定义一个函数(普通函数、类)时候，**都会天生自带一个prototype属性**，这个属性**指向函数的原型对象**，并且这个属性是一个对象数据类型的值
@@ -1176,7 +1216,11 @@ function removeButton(){
 
 **原型链**
 
-在JavaScript中万物都是对象，对象和对象之间也有关系，并不是孤立存在的。对象之间的继承关系，在JavaScript中是通过prototype对象指向父类对象，直到指向Object对象为止，这样就形成了一个原型指向的链条，专业术语称之为**原型链**
+在JavaScript中万物都是对象，对象和对象之间也有关系，并不是孤立存在的。
+
+原型对象也可能拥有原型，并从中继承方法和属性，一层一层、以此类推。这种关系常被称为原型链 (prototype chain)，它解释了为何一个对象会拥有定义在其他对象中的属性和方法
+
+对象之间的继承关系，**在JavaScript中是通过prototype对象指向父类对象，直到指向Object对象为止**，这样就形成了一个原型指向的链条，专业术语称之为**原型链**
 
 注意：Object是js中所有**对象数据类型**的基类（最顶层的类），Object.prototype 没有原型，（`Object.prototype.__proto__ `的值为 null）
 
@@ -1273,6 +1317,43 @@ console.log(f.__proto__.__proto__);  //[Object: null prototype] { a: [Function (
 **f.b的查找路径：**
 
 f自身：没有 → `f.__proto`__(Object.prototype)：没有 → f.`__proto__.__proto__ `(Object.prototype.`__proto__`)：找不到，所以报错
+
+每个对象的`__proto__`都是指向它的构造函数的原型对象`prototype`的
+
+```js
+person1.__proto__ === Person.prototype
+```
+
+构造函数是一个函数对象，是通过 `Function `构造器产生的
+
+```js
+Person.__proto__ === Function.prototype
+```
+
+原型对象本身是一个普通对象，而普通对象的构造函数都是`Object`
+
+```js
+Person.prototype.__proto__ === Object.prototype
+```
+
+刚刚上面说了，所有的构造器都是函数对象，函数对象都是 `Function `构造产生的
+
+```js
+Object.__proto__ === Function.prototype
+```
+
+`Object `的原型对象也有`__proto__`属性指向`null`，`null`是原型链的顶端
+
+```js
+Object.prototype.__proto__ === null
+```
+
+总结：
+
+- 一切对象都是继承自`Object`对象，`Object` 对象直接继承根源对象` null`
+- 一切的函数对象（包括 `Object` 对象），都是继承自 `Function` 对象
+- `Object` 对象直接继承自 `Function` 对象
+- `Function`对象的`__proto__`会指向自己的原型对象，最终还是继承自`Object`对象
 
 
 
