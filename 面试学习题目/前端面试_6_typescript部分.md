@@ -519,16 +519,20 @@ class Employee {
 
 ## Typescript中泛型是什么？
 
-TypeScript Generics是提供创建可重用组件的方法的工具。 它能够创建可以使用多种数据类型而不是单一数据类型的组件。 而且，它在不影响性能或生产率的情况下提供了类型安全性。 泛型允许我们创建泛型类，泛型函数，泛型方法和泛型接口。
+TypeScript Generics是**提供创建可重用组件的方法的工具**。 它能够创建可以使用多种数据类型而不是单一数据类型的组件。 而且，它在不影响性能或生产率的情况下提供了类型安全性。
 
-在泛型中，类型参数写在左括号（<）和右括号（>）之间，这使它成为强类型集合。 它使用一种特殊的类型变量<T>来表示类型。
+ **泛型允许我们创建泛型类，泛型函数，泛型方法和泛型接口。**
 
-```js
+在泛型中，类型参数写在左括号（<）和右括号（>）之间，这使它成为强类型集合。 它使用一种特殊的类型变量`<T>`来表示类型。
+
+```typescript
 function identity<T>(arg: T): T {
     return arg;
 }
+
 let output1 = identity<string>("edureka");
 let output2 = identity<number>( 117 );
+
 console.log(output1);
 console.log(output2);
 ```
@@ -569,7 +573,7 @@ type SetUser = (name: string, age: number)=> void;
 
 - 都允许拓展（extends）
 
-interface 和 type 都可以拓展，并且两者并不是相互独立的，也就是说 interface 可以 extends type, type 也可以 extends interface 。 虽然效果差不多，但是两者语法不同。
+interface 和 type 都可以拓展，**并且两者并不是相互独立的**，也就是说 interface 可以 extends type, type 也可以 extends interface 。 虽然效果差不多，但是两者语法不同。
 
 **interface extends interface**
 
@@ -577,6 +581,7 @@ interface 和 type 都可以拓展，并且两者并不是相互独立的，也�
 interface Name { 
   name: string; 
 }
+
 interface User extends Name { 
   age: number; 
 }

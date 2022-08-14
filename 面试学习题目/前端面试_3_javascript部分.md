@@ -8,7 +8,7 @@
 
 JavaScript 语言中类型集合由原始值和对象组成。
 
-**原始值**（直接表示在语言底层的不可变数据）
+**原始值**（直接表示在**语言底层的不可变数据**）
 
 除对象类型（object）以外的其它任何类型定义的不可变的值（值本身无法被改变）。例如（与 C 语言不同），JavaScript 中字符串是不可变的（译注：如，JavaScript 中**对字符串的操作一定返回了一个新字符串**，原始字符串并没有被改变）。我们称这些类型的值为“*原始值*”。
 
@@ -28,7 +28,9 @@ JavaScript 语言中类型集合由原始值和对象组成。
 
 
 
-JS数据类型一共有7种，分为基本数据类型和引用数据类型
+JS数据类型一共有7 + 1种，分为基本数据类型和引用数据类型
+
+
 
 ### 基本数据类型
 
@@ -60,7 +62,7 @@ console.log(a === b);     // true
 
 ### 两者区别
 
-（1）声明变量时不同的内存分配：
+（1）**声明变量时不同的内存分配**：
 
 - 基本：存储在栈中的简单数据段，它们的值直接存储在变量访问的位置
 
@@ -71,21 +73,21 @@ console.log(a === b);     // true
   ​	 原因：**引用类型数据的大小会改变**，不能把它放在栈中，否则会降低变量查寻速度，**相反，地址的大小是固定的，可以存在栈中**
 
 
-（2）不同的内存分配机制也带来了不同的访问机制
+（2）**不同的内存分配机制也带来了不同的访问机制**
 
 - 引用：js中不允许直接访问保存在堆内存中的对象，在访问一个对象时，**首先得到对象在堆内存中的地址**，按照这个地址去获得对象中的值（引用访问）
 
 - 基本：可直接访问
 
 
-（3）复制变量时的不同
+（3）**复制变量时的不同**
 
 - 基本：变量复制时，会将原始值的副本赋值给新变量，此后两变量是完全独立的，他们只是拥有相同的值而已（深拷贝）
 
 - 引用：变量复制时，会把内存地址赋值给新变量，新旧变量都指向了堆内存中的同一个对象，任何一个作出的改变都会影响另一个（浅拷贝）
 
 
-（4）参数传递的不同（把实参复制给形参的过程）由于内存分配的差别，两者在传参时也有区别
+（4）**参数传递的不同**（把实参复制给形参的过程）由于内存分配的差别，两者在传参时也有区别
 
 - 基本：只是把变量里的值传递给参数，**之后参数和这个变量互不影响**
 
@@ -128,6 +130,7 @@ ECMAScript 规范： null 和  undefined 的行为很相似，并且**都表示 
 
 ```js
 Number(undefined); // NaN
+
 Number(null); // 0
 
 ```
@@ -1898,6 +1901,53 @@ null被当成复合对象，**由于null没有valueOf与toString方法**，因�
 
 - 存在 NaN 则返回 false
 
+
+
+----
+
+## 33. js对象如何转成数组的方法
+
+**(1) Array.prototype.slice.call(obj)**
+
+该方法可以将类数组对象转换为数组，所谓类数组对象，就是含 length 和索引属性的对象
+
+返回的数组长度取决于对象 length 属性的值，且非索引属性的值，或索引大于 length 的值都不会被返回到数组中
+
+```js
+let obj = { '0': 3, '1': 13, '2': 23, '3': 33, 'length': 3, 'name': 330}
+let arr = Array.prototype.slice.call(obj)  // [3, 13, 23]
+```
+
+**(2) Array.from(obj)**
+
+该方法可以将类数组对象和可迭代对象转换为数组
+
+类数组对象上文已提及，何为可迭代对象？
+
+Array、Set、Map 和字符串都是可迭代对象（WeakMap/WeakSet 并不是可迭代对象）
+
+字符串变成了可迭代对象，解决了编码的问题
+
+这些对象都有默认的迭代器，即具有 Symbol.iterator 属性
+
+可以用 for of 循环
+
+所有通过生成器创建的迭代器都是可迭代对象
+
+```js
+document.getElementsByTagName("div") //返回的是可迭代对象但不是一个数组
+
+Array.isArray(document.getElementsByTagName('div')） //返回 false
+```
+
+
+
+**(3) Object.values(obj), Object.keys(obj), Object.entries(obj)**  
+
+
+
+
+
 ---
 
 # 高级部分
@@ -2680,30 +2730,33 @@ fn1.call(obj2);  //6
 //使用递归的方式实现数组、对象的深拷贝
 
 function deepClone(obj){
-	//判断要进行深拷贝的是数组还是对象，是数组的话进行数组拷贝，对象的话进行对象拷贝
-	var objClone=Array.isArray(obj) ? [] : {};
-	//进行深拷贝的不能为空，并且是对象
-	if (obj && typeof obj === "object") {
-		for (key in obj){
-			if (obj.hasOwnProperty(key)) {
-				if (obj[key] && typeof obj[key] === "object") {
-					objClone[key]=deepClone(obj[key]);
-				} else {
-					objClone[key]=obj[key];
-				}
-			}
-		}
-	}
-	return objClone;
+    //判断要进行深拷贝的是数组还是对象，是数组的话进行数组拷贝，对象的话进行对象拷贝
+    var objClone = Array.isArray(obj) ? [] : {};
+    //进行深拷贝的不能为空，并且是对象
+    if (obj && typeof obj === "object") {
+        for (let key in obj){
+            if (obj.hasOwnProperty(key)) {
+                if (obj[key] && typeof obj[key] === "object") {
+                    objClone[key] = deepClone(obj[key]);
+                } else {
+                    objClone[key] = obj[key];
+                }
+            }
+        }
+    }
+    return objClone;
 }
 
 let obj1={
-	a:1,
-	b:{
-		c:2
-	},
-	d:[3,4,5],
-	e:true
+    a:1,
+    b:{
+        c:2
+    },
+    d:[3,4,5],
+    e:true,
+    f: function() {
+        console.log("abc");
+    }
 }
 
 let obj2=deepClone(obj1);
@@ -2712,7 +2765,10 @@ obj2.b.c=66;
 
 console.log(obj1.b.c);  //2
 console.log(obj2.b.c);  //66
+obj2.f();  // abc
 ```
+
+
 
 ### (2) 借助JSON对象的parse和stringify
 
@@ -2720,8 +2776,8 @@ console.log(obj2.b.c);  //66
 
 ```js
 function deepClone(obj){
-	var _obj=JSON.stringify(obj);
-	var objClone=JSON.parse(_obj);
+	var _obj = JSON.stringify(obj);
+	var objClone = JSON.parse(_obj);
 	return objClone;
 }
 
@@ -2748,12 +2804,16 @@ stringify() → JavaScript对象序列化为JSON字符串
 
 parse() → 把JSON字符串解析为原生JavaScript值
 
+
+
 ### (3) 通过jQuery的extend方法
 
 ```js
 var array = [1,2,3,4];
-var newArray = $.extend(true,[],array);
+var newArray = $.extend(true, [], array);
 ```
+
+
 
 ### (4) Object.assign()拷贝
 
@@ -2782,9 +2842,13 @@ console.log(obj1.b.c);  //66
 console.log(obj2.b.c);  //66
 ```
 
+
+
 ### (5) lodash函数库
 
-lodash是一个很热门的函数库，可利用lodash.cloneDeep()[实现深拷贝](https://www.lodashjs.com/docs/lodash.cloneDeep#_clonedeepvalue)
+lodash是一个很热门的函数库，可利用lodash.cloneDeep()实现深拷贝
+
+这个方法类似[`_.clone`](https://www.lodashjs.com/docs/lodash.cloneDeep#clone)，除了它会递归拷贝 `value`。（注：也叫深拷贝）。
 
 ```bash
 $ cnpm i lodash --save
@@ -4444,10 +4508,11 @@ f();  //{ name: 'lisa' }
 
 bind应用
 
-如果有的函数我们不需要立即调用，但是又需要改变这个函数的this指向，此时用bind再合适不过了
+**如果有的函数我们不需要立即调用，但是又需要改变这个函数的this指向**，此时用bind再合适不过了
 
 ```js
 const btns = document.querySelectorAll("button");
+
 for (let i = 0; i < btns.length; i++) {
     btns[i].onclick = function() {
       this.disabled = true;
@@ -4466,7 +4531,7 @@ for (let i = 0; i < btns.length; i++) {
 主要应用场景：
 
 1. call 经常做继承。
-2. apply 经常跟数组有关系，比如借助于数学对象实现数组最大值最小值。
+2. **apply 经常跟数组有关系**，比如借助于数学对象实现数组最大值最小值。
 3. bind 不调用函数，但是还想改变this指向，比如**改变定时器内部的this指向**。
 
 
@@ -4475,7 +4540,7 @@ for (let i = 0; i < btns.length; i++) {
 
 ## 2. this指向（普通函数、匿名函数、箭头函数）
 
-**普通函数中的**this
+### 普通函数中的this
 
 谁调用了函数或者方法，那么这个函数或者对象中的this就指向谁
 
@@ -4497,7 +4562,7 @@ getThis();//window
 obj.getThis();//{ name: 'kop', getThis: [Function: getThis] }
 ```
 
-**匿名函数中的this**：
+### **匿名函数中的this**：
 
 匿名函数的执行具有**全局性**，**则匿名函数中的this指向是window**，而不是调用该匿名函数的对象；
 
@@ -4531,13 +4596,13 @@ obj.getThis()(); // { getThis: [Function: getThis] }
 
 
 
-**箭头函数中的this**
+### **箭头函数中的this**
 
 1. 箭头函数中的this是**在函数定义的时候就确定下来的**，而不是在函数调用的时候确定的；
 2. **箭头函数中的this指向父级作用域的执行上下文**；（技巧：因为javascript中除了全局作用域，其他作用域都是由函数创建出来的，所以如果想确定this的指向，**则找到离箭头函数最近的function，与该function平级的执行上下文中的this即是箭头函数中的this**）
 3. **箭头函数无法使用apply、call和bind方法改变this指向**，因为其this值在函数定义的时候就被确定下来。
 
-例1：首先，距离箭头函数最近的是getThis(){}，与该函数平级的执行上下文是obj中的执行上下文，箭头函数中的this就是下注释代码处的this，即obj。
+例1：首先，距离箭头函数最近的是getThis(){}，与该函数平级的执行上下文是obj中的执行上下文，箭头函数中的this就是下面注释代码处的this，即obj。
 
 ```js
 let obj = {

@@ -2,30 +2,29 @@
  * @param {string} s
  * @return {number}
  */
-var lengthOfLongestSubstring = function(s) {
-    if (s.length === 0) {
-        return 0;
-    }
-
-    let curLen = 0;  // 局部最长不重复
-    let ans = 0;  //  全局最长不重复
-    const position = new Map();
+var maxScore = function(s) {
+    let left = 0;
     let n = s.length;
-    for (let i = 0; i < n; i++) {
-        let preIndex = position.has(s[i]) ? position.get(s[i]) : -1;
-
-        if (preIndex < 0 || i - preIndex > curLen) {
-            curLen++;
-        } else {
-            ans = Math.max(ans, curLen);
-            curLen = i - preIndex;  // 保持不重复
+    let scores = new Array(n).fill(0);
+    let zero = 0;
+    for (let i = 0; i < n - 1; i++) {
+        if (s[i] === "0") {
+            zero++;
         }
-        position.set(s[i], i);
+        scores[i] = zero;
     }
-    ans = Math.max(ans, curLen);
+
+    let one = 0;
+    let ans = 0;
+    for (let i = n - 1; i > 0; i--) {
+        if (s[i] === "1") {
+            one++;
+        }
+        ans = Math.max(ans, scores[i - 1] + one);
+    }
 
     return ans;
 };
 
-let s = "abcabcbb";
-console.log(lengthOfLongestSubstring(s));
+let s = "00111";
+console.log(maxScore(s));

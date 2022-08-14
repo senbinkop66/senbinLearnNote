@@ -655,6 +655,7 @@ box-sizing: border-box; /* IE* /
 html {
   box-sizing: border-box;
 }
+
 *, *::before, *::after {
   box-sizing: inherit;
 }
@@ -669,6 +670,8 @@ html {
 （3）window.getComputedStyle(dom).width/height同（2）但是多浏览器支持，IE9 以上支持。
 （4）dom.getBoundingClientRect().width/height也是得到渲染后的宽和高，大多浏览器支持。IE9 以上支持，除此外还可以取到相对于视窗的上下左右的距离。
 （6）dom.offsetWidth/offsetHeight包括高度（宽度）、内边距和边框，不包括外边距。最常用，兼容性最好。
+
+
 
 ----
 
@@ -721,7 +724,7 @@ BFC是CSS布局的一个概念，是一块独立的渲染区域，是一个环�
 ### BFC原理（渲染规则|布局规则）： 
 
 - （1）内部的Box会在垂直方向，从顶部开始一个接着一个地放置；
-- （2）Box垂直方向的距离由margin(外边距)决定，属于同一个BFC的两个相邻Box的margin会发生重叠；（完整的说法是：属于同一个BFC的两个相邻Box的margin会发生折叠，不同BFC不会发生折叠。）
+- （2）Box垂直方向的距离由margin(外边距)决定，属于同一个BFC的两个相邻Box的margin会发生重叠；（完整的说法是：**属于同一个BFC的两个相邻Box的margin会发生折叠**，不同BFC不会发生折叠。）
 - （3）生成BFC元素的子元素中，每一个子元素左外边距与包含块的左边界相接触（对于从右到左的格式化，右外边距接触右边界），**即使浮动元素也是如此**（尽管子元素的内容区域会由于浮动而压缩），除非这个子元素也创建了一个新的BFC（如它自身也是一个浮动元素）。
 - （4）BFC 在页面上是一个隔离的独立容器，外面的元素不会影响里面的元素，反之亦然。文字环绕效果，设置float；
 - （5）BFC 的区域不会与float Box重叠（清浮动）;
@@ -752,7 +755,7 @@ BFC是CSS布局的一个概念，是一块独立的渲染区域，是一个环�
 
 BFC是页面上的一个隔离的独立容器，容器里面的子元素不会影响到外面元素，反之亦然。我们可以利用BFC的这个特性来做很多事。
 
-1. **自适应两（三）栏布局**（避免多列布局由于宽度计算四舍五入而自动换行的情况），有时候因为多列布局采用小数点位的width导致因为浏览器因为四舍五入造成的换行的情况，可以在最后一 列触发BFC的形式来阻止换行的发生。
+1. **自适应两（三）栏布局**（避免多列布局由于宽度计算四舍五入而自动换行的情况），有时候因为多列布局采用小数点位的width导致因为浏览器因为四舍五入造成的换行的情况，**可以在最后一 列触发BFC的形式来阻止换行的发生**。
 2. **避免元素被浮动元素覆盖**, 一个正常文档流的block元素可能被一个float元素覆盖，挤占正常文档流，因此可以设置一个元素的float、 display、position值等方式触发BFC，以阻止被浮动盒子覆盖。
 3. **可以让父元素的高度包含子浮动元素，清除内部浮动**（原理：触发父div的BFC属性，使下面的子div都处在父div的同一个BFC区域之内，以此来包含子元素的浮动盒子。）
 4. **去除相邻元素的边距重叠现象，分属于不同的BFC时，可以阻止margin重**叠。属于同一个BFC的两个相邻块级子元素的上下margin会发生重叠，(设置writing-mode:tb-rl时，水平 margin会发生重叠)。所以当两个相邻块级子元素分属于不同的BFC时可以阻止margin重叠。这里给任一个相邻块级盒子的外面包一个div，通过改变此div的属性使两个原盒子分属于两个不同的BFC，以此来阻止margin重叠。
@@ -1956,9 +1959,44 @@ item-3 = 200px + 60px = 260px
 
 ## 33.请问有哪些常见margin问题，有什么解决办法？
 
+### margin重叠历史由来：
+
+1、连续段落或者列表之类，如果没有margin重叠，首尾相间距会和其它兄弟标签1：2关系，排版不自然
+
+2、web中任何地方嵌套或者直接放入任何裸div，都不会影响原来的布局。
+
+3、遗落的空标签多个<p>元素，都不会影响原来的阅读排版。
+
+
+
+### 重叠的结果：
+
+1、两个相邻的外边距都是正数时，重叠结果是它们两者之间较大的值。
+2、两个相邻的外边距都是负数时，重叠结果是两者绝对值的较大值。
+3、两个外边距一正一负时，重叠结果是两者的相加的和。
+margin 重叠本质上的问题还是 BFC，要理解这个问题，我们先来看看重叠的条件。
+
+### 重叠的条件
+
+- 必须是处于常规文档流（非 float 和绝对定位）的块级盒子，并且处于同一个 BFC 当中。
+- 没有线盒，没有空隙（clearance，下面会讲到），没有 padding 和 border 将他们分隔开
+- 都属于垂直方向上相邻的外边距，可以是下面任意一种情况
+  - 元素的 margin-top 与其第一个常规文档流的子元素的 margin-top
+  - 元素的 margin-bottom 与其下一个常规文档流的兄弟元素的 margin-top
+  - height 为 auto 的元素的 margin-bottom 与其最后一个常规文档流的子元素的 margin-bottom
+  - 高度为 0 或 auto 并且最小高度也为 0，不包含常规文档流的子元素，并且自身没有建立新的 BFC 的元素的 margin-top 和 margin-bottom
+
+总结一下就是
+
+- 浮动元素、绝对定位、inline-block元素不与任何元素的外边距产生重叠
+- 不同 BFC 的元素不会产生重叠
+- 特殊情况下存在间隙（clearance）的元素不会产生重叠
+
+
+
 ### (1)父元素margin塌陷,父子边距重合
 
-边界重叠是指两个或多个盒子(可能相邻也可能嵌套)的相邻边界(其间没有任何非空内容、补白、边框)重合在一起而形成一个单一边界。
+边界重叠是**指两个或多个盒子**(可能相邻也可能嵌套)**的相邻边界**(其间没有任何非空内容、补白、边框)重**合在一起而形成一个单一边界**。
 
 **只发生在垂直方向**，父元素和第一个/最后一个子元素设置了同方向的margin值，两个属性之间没有其他内容进行隔离，导致父元素margin-top/margin-bottom塌陷
 
@@ -2056,7 +2094,7 @@ item-3 = 200px + 60px = 260px
 
 ### (2)同级元素margin重叠
 
-只发生在垂直方向，在同一个BFC区域内，相邻的兄弟元素会出现margin重叠情况，通常是上一个盒子的margin-bottom和下一个盒子的margin-top，叠加后的间距通常是：**两者为正取大值**（如下图所示效果），**一正一负/两者为负取两者之和**
+只发生在垂直方向，在同一个BFC区域内，相邻的兄弟元素会出现margin重叠情况，通常是上一个盒子的margin-bottom和下一个盒子的margin-top.
 
 ![img](E:\pogject\学习笔记\image\css\974EDA43625E4786A64431DC1560371A)
 
@@ -2091,7 +2129,7 @@ item-3 = 200px + 60px = 260px
 </div>
 ```
 
-**分析原因：**在于**child1的margin-bottom的参照元素**是child2，而**child2的margin-top的参照元素**恰好是child1，这就导致了它俩之间的间距就会以**两值中最大的那个**为实际效果。这个现象其实和我们生活中很多场景很像，仔细想想应该不难理解。
+**分析原因：**在于**child1的margin-bottom的参照元素**是child2，而**child2的margin-top的参照元素**恰好是child1，这就导致了它俩之间的间距就会以**两值中最大的那个**为实际效果。
 
 常见解决办法：
 
@@ -2158,6 +2196,10 @@ item-3 = 200px + 60px = 260px
   </div>
  </div>
 ```
+
+
+
+
 
 
 
@@ -6877,5 +6919,69 @@ div{
 
 
 
+----
 
+## 103.css如何让页面div高度一致，小的适应大的
+
+(1) 利用dispaly:table,父级div设置dispaly:table子级div设置display: table-cell;
+
+```html
+    <style type="text/css">
+    
+    .div-box1{
+      display: table;
+      padding: 10px;
+      border: 1px solid #000;
+    }
+    .div1{
+      display: table-cell;
+      border: 1px solid #000;
+    }
+    .div2{
+      display: table-cell;
+      border: 1px solid #000;
+    }
+    </style>
+</head>
+<body>
+    <div class="div-box1">
+      <div class="div1"><p>第一个盒子</p><p>第一个盒子</p><p>第一个盒子</p><p>第一个盒子</p><p>第一个盒子</p></div>
+      <div class="div2">第二个盒子</div>
+    </div>
+</body>
+```
+
+
+
+(2) 利用dispaly:flex,父级div设置dispaly:flex子级div设置flex: 1;
+
+```html
+    <style type="text/css">
+      
+    .div-box1{
+      display: flex;
+      padding: 10px;
+      border: 1px solid #000;
+    }
+    .div1{
+      flex: 1;
+      border: 1px solid #00f;
+    }
+    .div2{
+      flex: 1;
+      border: 1px solid #f00;
+    }
+    </style>
+</head>
+<body>
+    <div class="div-box1">
+      <div class="div1"><p>第一个盒子</p><p>第一个盒子</p><p>第一个盒子</p><p>第一个盒子</p><p>第一个盒子</p></div>
+      <div class="div2">第二个盒子</div>
+    </div>
+</body>
+```
+
+
+
+----
 
