@@ -1,10 +1,17 @@
-var Octopus = /** @class */ (function () {
-    function Octopus(name) {
-        this.name = name;
-        this.numberOfLegs = 8;
+var a = 'window';
+var obj1 = {
+    a: 1,
+    fn1: function () {
+        var _this = this;
+        return function () { return console.log(_this.a); };
     }
-    return Octopus;
-}());
-var p = new Octopus("dog");
-console.log(p.name); //dog
-p.name = "cat";
+};
+var obj2 = {
+    a: 2
+};
+
+obj1.fn1()(); // 1
+
+obj1.fn1().call(obj2); // 1 
+
+obj1.fn1.call(obj2)(); // 2

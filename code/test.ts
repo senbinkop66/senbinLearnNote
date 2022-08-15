@@ -1,11 +1,15 @@
-class Octopus{
-  readonly numberOfLegs:number=8;
-  constructor(readonly name:string){
-  }
+var a = 'window'
+var obj1 = {
+    a: 1,
+    fn1: function () {
+            return () => console.log(this.a)
+    }
 }
+var obj2 = {
+    a: 2
+};
 
-let p=new Octopus("dog");
-console.log(p.name);  //dog
+obj1.fn1()(); // 1
+obj1.fn1().call(obj2); // 1 
 
-p.name = "cat";
-// test.ts(10,3): error TS2540: Cannot assign to 'name' because it is a read-only property.
+obj1.fn1.call(obj2)(); // 2

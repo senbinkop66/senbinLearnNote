@@ -735,17 +735,17 @@ BFC是CSS布局的一个概念，是一块独立的渲染区域，是一个环�
 ### CSS在什么情况下会创建出BFC（即脱离文档流）
 
 - 根元素（`<html>`）
-- 浮动元素（float 值不为 none）
-- 绝对定位元素（position 值为 absolute 或 fixed）
-- 行内块元素（display 值为 inline-block）
+- **浮动元素**（float 值不为 none）
+- **绝对定位元素**（position 值为 absolute 或 fixed）
+- **行内块元素**（display 值为 inline-block）
 - 表格单元格（display 值为 table-cell，HTML 表格单元格默认值）
 - 表格标题（display 值为 table-caption，HTML 表格标题默认值）
 - 匿名表格单元格元素（display 值为 table、table-row、 table-row-group、table-header-group、table-footer-group（分别是 HTML table、tr、tbody、thead、tfoot 的默认值）或 inline-table）
 - **overflow 值不为 visible、clip 的块元素**
 - display 值为 flow-root 的元素
-- **contain 值为 layout、content 或 paint 的元素**
-- 弹性元素（display 值为 flex 或 inline-flex 元素的直接子元素），如果它们本身既不是 flex、grid 也不是 table 容器
-- 网格元素（display 值为 grid 或 inline-grid 元素的直接子元素），如果它们本身既不是 flex、grid 也不是 table 容器
+- contain 值为 layout、content 或 paint 的元素
+- **弹性元素**（display 值为 flex 或 inline-flex 元素的直接子元素），如果它们本身既不是 flex、grid 也不是 table 容器
+- **网格元素**（display 值为 grid 或 inline-grid 元素的直接子元素），如果它们本身既不是 flex、grid 也不是 table 容器
 - **多列容器**（column-count 或 column-width (en-US) 值不为 auto，包括column-count 为 1）
 - column-span 值为 all 的元素始终会创建一个新的 BFC，即使该元素没有包裹在一个多列容器中 (规范变更, Chrome bug)
 
@@ -757,8 +757,8 @@ BFC是页面上的一个隔离的独立容器，容器里面的子元素不会�
 
 1. **自适应两（三）栏布局**（避免多列布局由于宽度计算四舍五入而自动换行的情况），有时候因为多列布局采用小数点位的width导致因为浏览器因为四舍五入造成的换行的情况，**可以在最后一 列触发BFC的形式来阻止换行的发生**。
 2. **避免元素被浮动元素覆盖**, 一个正常文档流的block元素可能被一个float元素覆盖，挤占正常文档流，因此可以设置一个元素的float、 display、position值等方式触发BFC，以阻止被浮动盒子覆盖。
-3. **可以让父元素的高度包含子浮动元素，清除内部浮动**（原理：触发父div的BFC属性，使下面的子div都处在父div的同一个BFC区域之内，以此来包含子元素的浮动盒子。）
-4. **去除相邻元素的边距重叠现象，分属于不同的BFC时，可以阻止margin重**叠。属于同一个BFC的两个相邻块级子元素的上下margin会发生重叠，(设置writing-mode:tb-rl时，水平 margin会发生重叠)。所以当两个相邻块级子元素分属于不同的BFC时可以阻止margin重叠。这里给任一个相邻块级盒子的外面包一个div，通过改变此div的属性使两个原盒子分属于两个不同的BFC，以此来阻止margin重叠。
+3. **可以让父元素的高度包含子浮动元素，清除内部浮动**（原理：触发父div的BFC属性，**使下面的子div都处在父div的同一个BFC区域之内，以此来包含子元素的浮动盒子。）**
+4. 去除相邻元素的边距重叠现象，**分属于不同的BFC时，可以阻止margin重叠**。属于同一个BFC的两个相邻块级子元素的上下margin会发生重叠，(设置writing-mode:tb-rl时，水平 margin会发生重叠)。**所以当两个相邻块级子元素分属于不同的BFC时可以阻止margin重叠。**这里给任一个相邻块级盒子的外面包一个div，通过改变此div的属性使两个原盒子分属于两个不同的BFC，以此来阻止margin重叠。
 
 
 
@@ -2133,7 +2133,7 @@ margin 重叠本质上的问题还是 BFC，要理解这个问题，我们先来
 
 常见解决办法：
 
-触发BFC布局，改变元素渲染规则，将其中一个元素独立出来
+触发BFC布局，改变元素渲染规则，**将其中一个元素独立出来**
 
 **解决方法**：只设置一个元素的margin-top或者margin-bottom，避免margin重叠。 
 
@@ -2146,9 +2146,11 @@ margin 重叠本质上的问题还是 BFC，要理解这个问题，我们先来
 
 <div class="parent">
   <div class="child1"></div>
+    
   <div class="child2_box">
     <div class="child2"></div>
   </div>
+    
  </div>
 ```
 
@@ -3947,6 +3949,36 @@ $(function(){
 </html>
 
 ```
+
+
+
+实现一个 CSS 三角形，底边 60px、腰是 50px
+
+```
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>测试</title>
+    <style type="text/css">
+        div {
+             width:0px;
+             height:0px;
+             margin:100px auto;
+             border-left:30px solid transparent; 
+             border-right:30px solid transparent; 
+             border-bottom:40px solid #A962CE; /*--三角形的高--*/
+        }
+    </style>
+</head>
+<body>
+    <div></div>
+</body>
+</html>
+
+```
+
+
 
 ---
 
