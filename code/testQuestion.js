@@ -1,30 +1,29 @@
 /**
- * @param {string} s
+ * @param {number} n
  * @return {number}
  */
-var maxScore = function(s) {
-    let left = 0;
-    let n = s.length;
-    let scores = new Array(n).fill(0);
-    let zero = 0;
-    for (let i = 0; i < n - 1; i++) {
-        if (s[i] === "0") {
-            zero++;
-        }
-        scores[i] = zero;
+var nthUglyNumber = function(n) {
+    if (n < 1) {
+        return 0;
     }
-
-    let one = 0;
-    let ans = 0;
-    for (let i = n - 1; i > 0; i--) {
-        if (s[i] === "1") {
-            one++;
+    const dp = new Array(n + 1).fill(0);
+    dp[1] = 1;
+    let p2 = 1, p3 = 1, p5 = 1;
+    for (let i = 2; i <= n; i++) {
+        const num2 = dp[p2] * 2, num3 = dp[p3] * 3, num5 = dp[p5] * 5;
+        dp[i] = Math.min(num2, num3, num5);
+        if (dp[i] === num2) {
+            p2++;
         }
-        ans = Math.max(ans, scores[i - 1] + one);
+        if (dp[i] === num3) {
+            p3++;
+        }
+        if (dp[i] === num5) {
+            p5++;
+        }
     }
-
-    return ans;
+    return dp[n];
 };
 
-let s = "00111";
-console.log(maxScore(s));
+
+console.log(nthUglyNumber(10));

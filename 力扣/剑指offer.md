@@ -185,6 +185,8 @@ console.log(nums)
 
 ### 时间效率
 
+### 时间与空间效率的平衡
+
 
 
 
@@ -3284,6 +3286,191 @@ var lengthOfLongestSubstring = function(s) {
 let s = "abcabcbb";
 console.log(lengthOfLongestSubstring(s));
 ```
+
+
+
+----
+
+## 49. 丑数
+
+我们把只包含质因子 2、3 和 5 的数称作丑数（Ugly Number）。求按从小到大的顺序的第 n 个丑数。
+
+**说明:** 
+
+1. `1` 是丑数。
+2. `n` **不超过**1690。
+
+
+
+**逐个判断**，超时
+
+```
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var nthUglyNumber = function(n) {
+    if (n < 1) {
+        return 0;
+    }
+    let num = 1;
+    let count = 1;
+    while (count < n) {
+        num++;
+        if (isUgly(num)) {
+            count++;
+        }
+    }
+    return num;
+};
+
+const isUgly = (num) => {
+    while (num % 2 === 0) {
+        num /= 2;
+    }
+    while (num % 3 === 0) {
+        num /= 3;
+    }
+    while (num % 5 === 0) {
+        num /= 5;
+    }
+    return num === 1;
+}
+
+console.log(nthUglyNumber(10));
+```
+
+
+
+**动态规划**
+
+```js
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var nthUglyNumber = function(n) {
+    if (n < 1) {
+        return 0;
+    }
+    const dp = new Array(n + 1).fill(0);
+    dp[1] = 1;
+    let p2 = 1, p3 = 1, p5 = 1;
+    for (let i = 2; i <= n; i++) {
+        const num2 = dp[p2] * 2, num3 = dp[p3] * 3, num5 = dp[p5] * 5;
+        dp[i] = Math.min(num2, num3, num5);
+        if (dp[i] === num2) {
+            p2++;
+        }
+        if (dp[i] === num3) {
+            p3++;
+        }
+        if (dp[i] === num5) {
+            p5++;
+        }
+    }
+    return dp[n];
+};
+
+
+console.log(nthUglyNumber(10));
+```
+
+
+
+**最小堆**
+
+```js
+var nthUglyNumber = function(n) {
+    const factors = [2, 3, 5];
+    const seen = new Set();
+    const heap = new MinHeap();
+    seen.add(1);
+    heap.insert(1);
+    let ugly = 0;
+    for (let i = 0; i < n; i++) {
+        ugly = heap.pop();
+        for (const factor of factors) {
+            const next = ugly * factor;
+            if (!seen.has(next)) {
+                seen.add(next);
+                heap.insert(next);
+            }
+        }
+        
+    }
+    return ugly;
+};
+
+// 最小堆
+class MinHeap {
+    constructor() {
+        this.heap = [];
+    }
+
+    getParentIndex(i) {
+        return (i - 1) >> 1;
+    }
+
+    getLeftIndex(i) {
+        return i * 2 + 1;
+    }
+
+    getRightIndex(i) {
+        return i * 2 + 2;
+    }
+
+    shiftUp(index) {
+        if(index === 0) { return; }
+        const parentIndex = this.getParentIndex(index);
+        if(this.heap[parentIndex] > this.heap[index]){
+            this.swap(parentIndex, index);
+            this.shiftUp(parentIndex);
+        }  
+    }
+
+    swap(i1, i2) {
+        const temp = this.heap[i1];
+        this.heap[i1]= this.heap[i2];
+        this.heap[i2] = temp;
+    }
+
+    insert(value) {
+        this.heap.push(value);
+        this.shiftUp(this.heap.length - 1);
+    }
+
+    pop() {
+        this.heap[0] = this.heap.pop();
+        this.shiftDown(0);
+        return this.heap[0];
+    }
+
+    shiftDown(index) {
+        const leftIndex = this.getLeftIndex(index);
+        const rightIndex = this.getRightIndex(index);
+        if (this.heap[leftIndex] < this.heap[index]) {
+            this.swap(leftIndex, index);
+            this.shiftDown(leftIndex);
+        }
+        if (this.heap[rightIndex] < this.heap[index]){
+            this.swap(rightIndex, index);
+            this.shiftDown(rightIndex);
+        }
+    }
+
+    peek() {
+        return this.heap[0];
+    }
+
+    size() {
+        return this.heap.length;
+    }
+}
+
+```
+
+
 
 
 
