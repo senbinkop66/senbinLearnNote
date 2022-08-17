@@ -187,6 +187,28 @@ console.log(nums)
 
 ### 时间与空间效率的平衡
 
+改用更加高效的算法
+
+用空间交换时间
+
+---
+
+## 面试中的各项能力
+
+### 沟通能力和学习能力
+
+#### 沟通能力
+
+介绍项目经验还是介绍解题思路时，都需要逻辑清晰明了，语言详略得当，表述的时候重点突出、观点明确。
+
+#### 学习能力
+
+#### 善于提问
+
+
+
+### 知识迁移能力
+
 
 
 
@@ -3469,6 +3491,366 @@ class MinHeap {
 }
 
 ```
+
+
+
+-----
+
+## 50. 第一个只出现一次的字符
+
+在字符串 s 中找出第一个只出现一次的字符。如果没有，返回一个单空格。 s 只包含小写字母。
+
+**使用哈希表存储频数**
+
+```js
+/**
+ * @param {string} s
+ * @return {character}
+ */
+var firstUniqChar = function(s) {
+    let n = s.length;
+    const alphaMap = new Map();
+    for (let i = 0; i < n; i++) {
+        if (alphaMap.has(s[i])) {
+            alphaMap.set(s[i], -1);
+        } else {
+            alphaMap.set(s[i], 1);
+        }
+    }
+    for (let i = 0; i < n; i++) {
+        if (alphaMap.get(s[i]) === 1) {
+            return s[i];
+        }
+    }
+    return " ";
+};
+
+console.log(firstUniqChar("dddccdbba"));
+```
+
+**使用哈希表存储索引**
+
+```js
+/**
+ * @param {string} s
+ * @return {character}
+ */
+var firstUniqChar = function(s) {
+    let n = s.length;
+    const alphaMap = new Map();
+    for (let i = 0; i < n; i++) {
+        if (alphaMap.has(s[i])) {
+            alphaMap.set(s[i], -1);
+        } else {
+            alphaMap.set(s[i], i);
+        }
+    }
+    let first = n;
+
+    for (let pos of alphaMap.values()) {
+        if (pos !== -1) {
+            first = Math.min(first, pos);
+        }
+    }
+    return first === n ? " " : s[first];
+};
+
+console.log(firstUniqChar("dddccdbba"));
+```
+
+
+
+
+
+----
+
+## 51. 数组中的逆序对
+
+在数组中的两个数字，如果前面一个数字大于后面的数字，则这两个数字组成一个逆序对。输入一个数组，求出这个数组中的逆序对的总数。
+
+**限制：**
+
+0 <= 数组长度 <= 50000
+
+**归并排序**
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var reversePairs = function(nums) {
+    const  n = nums.length;
+    if (n < 2) {
+        return 0;
+    }
+    const copy = [...nums];
+    const temp = new Array(n);
+    return dfs(copy, 0, n - 1, temp);
+};
+
+const dfs = (nums, left, right, temp) => {
+    if (left === right) {
+        return 0;
+    }
+    let mid = left + Math.floor((right - left) / 2);
+    let leftPairs = dfs(nums, left, mid, temp);
+    let rightPairs = dfs(nums, mid + 1, right, temp);
+
+    if (nums[mid] <= nums[mid + 1]) {
+        return leftPairs + rightPairs;
+    }
+
+    let crossPairs = mergeAndCount(nums, left, mid, right, temp);
+
+    return leftPairs + rightPairs + crossPairs;
+}
+
+const mergeAndCount = (nums, left, mid, right, temp) => {
+    for (let i = left; i <= right; i++) {
+        temp[i] = nums[i];
+    }
+    let i = left;
+    let j = mid + 1;
+    let count = 0;
+    for (let k = left; k <= right; k++) {
+        if (i === mid + 1) {
+            nums[k] === temp[j];
+            j++;
+        } else if (j === right + 1) {
+            nums[k] = temp[i];
+            i++;
+        } else if (temp[i] <= temp[j]) {
+            nums[k] = temp[i];
+            i++;
+        } else {
+            nums[k] = temp[j];
+            j++;
+            count += (mid - i + 1);
+        }
+    }
+    return count;
+}
+
+let nums = [7,5,6,4];
+
+console.log(reversePairs(nums));
+```
+
+
+
+
+
+----
+
+##  52. 两个链表的第一个公共节点
+
+输入两个链表，找出它们的第一个公共节点。
+
+注意：
+
+如果两个链表没有交点，返回 null.
+在返回结果后，两个链表仍须保持原有的结构。
+可假定整个链表结构中没有循环。
+程序尽量满足 O(n) 时间复杂度，且仅用 O(1) 内存。
+
+
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+
+/**
+ * @param {ListNode} headA
+ * @param {ListNode} headB
+ * @return {ListNode}
+ */
+var getIntersectionNode = function(headA, headB) {
+    let p = headA, q = headB;
+    let lenA = 0, lenB = 0;
+    while (p) {
+        p = p.next;
+        lenA++;
+    }
+    while (q) {
+        q = q.next;
+        lenB++;
+    }
+    if (lenA === 0 || lenB ===0) {
+        return null;
+    }
+    p = headA;
+    q = headB;
+    if (lenA < lenB) {
+        [p, q] = [q, p];
+    }
+    let diff = Math.abs(lenA - lenB);
+    while (diff > 0) {
+        p = p.next;
+        diff--;
+    }
+    while(p) {
+        if (p === q) {
+            return p;
+        }
+        p = p.next;
+        q = q.next;
+    }
+    return null;
+};
+```
+
+**双指针**
+
+![链表公共结点](E:\pogject\学习笔记\image\leetcode\链表公共结点.png)
+
+```js
+var getIntersectionNode = function(headA, headB) {
+    if (headA === null || headB === null) {
+        return null;
+    }
+    let pA = headA, pB = headB;
+    while (pA !== pB) {
+        pA = pA === null ? headB : pA.next;
+        pB = pB === null ? headA : pB.next;
+    }
+    return pA;
+};
+```
+
+
+
+----
+
+## 53 - I. 在排序数组中查找数字 I
+
+统计一个数字在排序数组中出现的次数。
+
+提示：
+
+0 <= nums.length <= 105
+-109 <= nums[i] <= 109
+nums 是一个非递减数组
+-109 <= target <= 109
+
+
+
+```js
+/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number}
+ */
+var search = function(nums, target) {
+    let ans = 0;
+    const leftIndex = binarySearch(nums, target, true);
+    const rightIndex = binarySearch(nums, target, false) - 1;
+    if (leftIndex <= rightIndex && rightIndex < nums.length && nums[leftIndex] === target && nums[rightIndex] === target) {
+        ans = rightIndex - leftIndex + 1;
+    }
+    return ans;
+};
+
+const binarySearch = (nums, target, lower) => {
+    // 如果 lower 为 true，则查找第一个大于等于 target 的下标，否则查找第一个小于 target 的下标。
+    let left = 0, right = nums.length - 1, ans = nums.length;
+    while (left <= right) {
+        const mid = left + Math.floor((right - left) / 2);
+        if (nums[mid] > target || (lower && nums[mid] >= target)) {
+            right = mid - 1;
+            ans = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    return ans;
+}
+
+let nums = [5,7,7,8,8,10], target = 8;
+console.log(search(nums, target));
+```
+
+
+
+----
+
+## 53 - II. 0～n-1中缺失的数字
+
+一个长度为n-1的递增排序数组中的所有数字都是唯一的，并且每个数字都在范围0～n-1之内。在范围0～n-1内的n个数字中有且只有一个数字不在该数组中，请找出这个数字。
+
+**限制：**
+
+1 <= 数组长度 <= 10000
+
+
+
+可根据数组中每个下标处的元素是否和下标相等，得到缺失的数字。
+
+```js
+
+var missingNumber = function(nums) {
+    const n = nums.length + 1;
+    for (let i = 0; i < n - 1; i++) {
+        if (nums[i] !== i) {
+            return i;
+        }
+    }
+    return n - 1;
+};
+```
+
+数学
+
+```js
+var missingNumber = function(nums) {
+    const n = nums.length + 1;
+    let total = Math.floor(n * (n - 1) / 2);
+    let arrSum = 0;
+    for (let i = 0; i < n - 1; i++) {
+        arrSum += nums[i];
+    }
+    return total - arrSum;
+};
+
+```
+
+二分法
+
+```js
+
+var missingNumber = function(nums) {
+    if (nums.length < 1) {
+        return -1;
+    }
+    const n = nums.length;
+    let left = 0;
+    let right = n;
+    while (left < right) {
+        const mid = left + Math.floor((right - left) / 2);
+        if (nums[mid] > mid) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    return left === n ? n : nums[left] - 1;
+};
+
+
+let nums = [0, 1, 2, 3];
+console.log(missingNumber(nums));
+```
+
+
+
+----
+
+
 
 
 
