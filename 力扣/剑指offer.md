@@ -211,7 +211,11 @@ console.log(nums)
 
 
 
+### 抽象建模能力
 
+建模的第一步是选择合理的数据结构来表述问题。
+
+建模的第二部是分析模型中内在的规律，并用编程语言表述这种规律。
 
 
 
@@ -3844,6 +3848,546 @@ var missingNumber = function(nums) {
 
 let nums = [0, 1, 2, 3];
 console.log(missingNumber(nums));
+```
+
+
+
+----
+
+##  54. 二叉搜索树的第k大节点
+
+给定一棵二叉搜索树，请找出其中第 `k` 大的节点的值。
+
+**限制：**
+
+- 1 ≤ k ≤ 二叉搜索树元素个数
+
+右中左的中序遍历
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @param {number} k
+ * @return {number}
+ */
+var kthLargest = function(root, k) {
+    let res = [];  //从大到小排序的数组
+    //中序遍历 右中左
+    const dfs = (root) => {
+        if (root === null) {
+            return;
+        }
+        dfs(root.right);
+        res.push(root.val);
+        dfs(root.left);
+    }
+
+    dfs(root);
+    return res[k - 1];
+};
+```
+
+
+
+----
+
+## 55 - I. 二叉树的深度
+
+输入一棵二叉树的根节点，求该树的深度。从根节点到叶节点依次经过的节点（含根、叶节点）形成树的一条路径，最长路径的长度为树的深度。
+
+例如：
+
+给定二叉树 [3,9,20,null,null,15,7]，
+
+```
+   3
+  / \
+  9  20
+    /  \
+   15   7
+```
+
+返回它的最大深度 3 。
+
+ 提示：
+
+节点总数 <= 10000
+
+
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number}
+ */
+var maxDepth = function(root) {
+    if (root === null) {
+        return 0;
+    }
+    let leftDepth = maxDepth(root.left);
+    let rightDepth = maxDepth(root.right);
+
+    return Math.max(leftDepth, rightDepth) + 1;
+};
+```
+
+
+
+----
+
+##  55 - II. 平衡二叉树
+
+输入一棵二叉树的根节点，判断该树是不是平衡二叉树。如果某二叉树中任意节点的左右子树的深度相差不超过1，那么它就是一棵平衡二叉树。
+
+ **自底向上的递归**
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {boolean}
+ */
+var isBalanced = function(root) {
+    return getHeight(root) >= 0;
+
+};
+
+const getHeight = (root) => {
+    if (root === null) {
+        return 0;
+    }
+    let leftHeight = getHeight(root.left);
+    let rightHeight = getHeight(root.right);
+    // 如果存在一棵子树不平衡，则整个二叉树一定不平衡。
+    if (leftHeight === -1 || rightHeight === -1 || Math.abs(leftHeight - rightHeight) > 1) {
+        return -1;
+    } else {
+        return Math.max(leftHeight, rightHeight) + 1;
+    }
+}
+```
+
+
+
+-----
+
+## 56 - I. 数组中数字出现的次数
+
+一个整型数组 `nums` 里除两个数字之外，其他数字都出现了两次。请写程序找出这两个只出现一次的数字。要求时间复杂度是O(n)，空间复杂度是O(1)。
+
+**限制：**
+
+- `2 <= nums.length <= 10000`
+
+**分组异或**
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number[]}
+ */
+var singleNumbers = function(nums) {
+    let ret = 0;
+    const n = nums.length;
+    for (let i = 0; i < n; i++) {
+        ret ^= nums[i];
+    }
+    let div = 1;
+    while ((div & ret) === 0) {
+        // 找到第一个 二进制位 1
+        div <<= 1;
+    }
+    let a = 0, b = 0;
+    for (let i = 0; i < n; i++) {
+        if ((div & nums[i]) !== 0) {
+            a ^= nums[i];
+        } else {
+            b ^= nums[i];
+        }
+    }
+    return [a, b];
+};
+
+let nums = [4,1,4,6];
+console.log(singleNumbers(nums));
+```
+
+
+
+----
+
+##  56 - II. 数组中数字出现的次数 II
+
+在一个数组 `nums` 中除一个数字只出现一次之外，其他数字都出现了三次。请找出那个只出现一次的数字。
+
+**限制：**
+
+- `1 <= nums.length <= 10000`
+- `1 <= nums[i] < 2^31`
+
+使用位运算原理
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number[]}
+ */
+var singleNumber = function(nums) {
+    const bits = new Array(32).fill(0);
+    const n = nums.length;
+    for (let i = 0; i < n; i++) {
+        let bitNum = nums[i].toString(2).split("").map(Number).reverse();
+        for (let j = 0; j < bitNum.length; j++) {
+            bits[j] += bitNum[j];
+        }
+    }
+    // console.log(bits);
+    // 如果某一位能被3整除，则目标值该二进制位为 0， 否则为 1
+    for (let i = 0; i < 32; i++) {
+        if (bits[i] % 3 === 0) {
+            bits[i] = 0;
+        } else {
+            bits[i] = 1;
+        }
+    }
+    // console.log(bits);
+    return  Number("0b" + bits.reverse().join(""));
+};
+
+let nums = [3,4,3,3];
+console.log(singleNumber(nums));
+```
+
+
+
+----
+
+## 57 - I. 和为s的两个数字
+
+输入一个递增排序的数组和一个数字s，在数组中查找两个数，使得它们的和正好是s。如果有多对数字的和等于s，则输出任意一对即可。
+
+**限制：**
+
+- `1 <= nums.length <= 10^5`
+- `1 <= nums[i] <= 10^6`
+
+
+
+```js
+/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number[]}
+ */
+var twoSum = function(nums, target) {
+    const n = nums.length;
+    if (n < 2) {
+        return [];
+    }
+    let left = 0, right = n - 1;
+    while (left < right) {
+        if (nums[left] + nums[right] > target) {
+            right--;
+        } else if (nums[left] + nums[right] < target) {
+            left++;
+        } else {
+            return [nums[left], nums[right]];
+        }
+    }
+    return [];
+};
+
+let nums = [2,7,11,15], target = 9;
+console.log(twoSum(nums, target));
+```
+
+
+
+----
+
+## 57 - II. 和为s的连续正数序列
+
+输入一个正整数 target ，输出所有和为 target 的连续正整数序列（至少含有两个数）。
+
+序列内的数字由小到大排列，不同序列按照首个数字从小到大排列。
+
+**限制：**
+
+- `1 <= target <= 10^5`
+
+**双指针**
+
+```js
+/**
+ * @param {number} target
+ * @return {number[][]}
+ */
+var findContinuousSequence = function(target) {
+    const ans = [];
+    const maxNumber = (target + 1) >> 1;
+    let left = 1, right = 2;
+    let temp = [left, right];
+    let sum = 3;
+    while (left < right) {
+        if (sum === target) {
+            ans.push([...temp]);
+            temp.shift();
+            sum -= left;
+            left++;
+
+        } else if (sum < target) {
+            right++;
+            sum += right;
+            temp.push(right)
+        } else {
+            sum -= left;
+            left++;
+            temp.shift();
+        }
+    }
+    return ans;
+};
+
+let target = 12;
+console.log(findContinuousSequence(target));
+```
+
+
+
+-----
+
+## 58 - I. 翻转单词顺序
+
+输入一个英文句子，翻转句子中单词的顺序，但单词内字符的顺序不变。为简单起见，标点符号和普通字母一样处理。例如输入字符串"I am a student. "，则输出"student. a am I"。
+
+**说明：**
+
+- 无空格字符构成一个单词。
+- 输入字符串可以在前面或者后面包含多余的空格，但是反转后的字符不能包括。
+
+
+
+```js
+/**
+ * @param {string} s
+ * @return {string}
+ */
+var reverseWords = function(s) {
+    return s.trim().replace(/\s{2,}/g, " ").split(" ").reverse().join(" ");
+};
+
+let s = " the   sky  is blue ";
+console.log(reverseWords(s));
+```
+
+
+
+----
+
+##  58 - II. 左旋转字符串
+
+字符串的左旋转操作是把字符串前面的若干个字符转移到字符串的尾部。请定义一个函数实现字符串左旋转操作的功能。比如，输入字符串"abcdefg"和数字2，该函数将返回左旋转两位得到的结果"cdefgab"。
+
+**限制：**
+
+- `1 <= k < s.length <= 10000`
+
+
+
+```js
+/**
+ * @param {string} s
+ * @param {number} n
+ * @return {string}
+ */
+var reverseLeftWords = function(s, n) {
+    return s.slice(n) + s.slice(0, n);
+};
+
+let s = "abcdefg", k = 2;
+console.log(reverseLeftWords(s, k));
+```
+
+
+
+----
+
+## 59 - I. 滑动窗口的最大值
+
+给定一个数组 `nums` 和滑动窗口的大小 `k`，请找出所有滑动窗口里的最大值。
+
+你可以假设 *k* 总是有效的，在输入数组 **不为空** 的情况下，`1 ≤ k ≤ nums.length`。
+
+**双端队列**
+
+```js
+/**
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number[]}
+ */
+var maxSlidingWindow = function(nums, k) {
+    const ans = [];
+    const queue = [];
+    const n = nums.length;
+    for (let i = 0; i < k; i++) {
+        while (queue.length && nums[i] >= nums[queue[queue.length - 1]]) {
+            queue.pop();
+        }
+        queue.push(i);
+    }
+    ans.push(nums[queue[0]]);
+    for (let i = k; i < n; i++) {
+        /*为了保持队列的性质，我们会不断地将新的元素与队尾的元素相比较，如果前者大于等于后者，
+        那么队尾的元素就可以被永久地移除，我们将其弹出队列。我们需要不断地进行此项操作，直到队列为空或者新的元素小于队尾的元素。*/
+        while (queue.length && nums[i] >= nums[queue[queue.length - 1]]) {
+            queue.pop();
+        }
+        // 当滑动窗口向右移动时，我们需要把一个新的元素放入队列中
+        queue.push(i);
+        /* 但与方法一中相同的是，此时的最大值可能在滑动窗口左边界的左侧，并且随着窗口向右移动，
+        它永远不可能出现在滑动窗口中了。因此我们还需要不断从队首弹出元素，直到队首元素在窗口中为止。*/
+        while (queue[0] <= i - k) {
+            queue.shift();
+        }
+        // 由于队列中下标对应的元素是严格单调递减的，因此此时队首下标对应的元素就是滑动窗口中的最大值。
+        ans.push(nums[queue[0]]);
+    }
+    return ans;
+};
+
+let nums = [1,3,-1,-3,5,3,6,7], k = 3;
+console.log(maxSlidingWindow(nums, k));
+```
+
+
+
+----
+
+## 59 - II. 队列的最大值
+
+请定义一个队列并实现函数 max_value 得到队列里的最大值，要求函数max_value、push_back 和 pop_front 的均摊时间复杂度都是O(1)。
+
+若队列为空，pop_front 和 max_value 需要返回 -1
+
+**限制：**
+
+- `1 <= push_back,pop_front,max_value的总操作数 <= 10000`
+- `1 <= value <= 10^5`
+
+
+
+```js
+var MaxQueue = function() {
+    this.queue = [];
+    this.maxValueindex = [];
+};
+
+/**
+ * @return {number}
+ */
+MaxQueue.prototype.max_value = function() {
+    if (this.maxValueindex.length) {
+        return this.maxValueindex[0];
+    } else {
+        return -1;
+    }
+};
+
+/** 
+ * @param {number} value
+ * @return {void}
+ */
+MaxQueue.prototype.push_back = function(value) {
+    while(this.maxValueindex.length && this.maxValueindex[this.maxValueindex.length - 1] < value) {
+        this.maxValueindex.pop();
+    }
+    this.maxValueindex.push(value);
+    this.queue.push(value);
+};
+
+/**
+ * @return {number}
+ */
+MaxQueue.prototype.pop_front = function() {
+    if (!this.queue.length) {
+        return -1;
+    }
+    if (this.queue[0] === this.maxValueindex[0]) {
+        this.maxValueindex.shift();
+    }
+    return this.queue.shift();
+};
+
+/**
+ * Your MaxQueue object will be instantiated and called as such:
+ * var obj = new MaxQueue()
+ * var param_1 = obj.max_value()
+ * obj.push_back(value)
+ * var param_3 = obj.pop_front()
+ */
+```
+
+
+
+
+
+----
+
+## 60. n个骰子的点数
+
+把n个骰子扔在地上，所有骰子朝上一面的点数之和为s。输入n，打印出s的所有可能的值出现的概率。
+
+ 你需要用一个浮点数数组返回答案，其中第 i 个元素代表这 n 个骰子所能掷出的点数集合中第 i 小的那个的概率。
+
+
+
+态规划 + 背包问题
+
+```
+var dicesProbability = function(n) {
+    const dp = Array.from({ length: n + 1 }, x => Array(6 * n + 1).fill(0));
+    let res = [];
+    for (let i = 1; i <= 6; i++) {
+        dp[1][i] = 1;
+    }
+
+    for (let i = 1; i <= n; i++) {
+        for (let j = i; j <= 6 * n; j++) {
+            for (let k = 1; k <= 6; k++) {
+                if (dp[i - 1][j - k]) {
+                    dp[i][j] += dp[i - 1][j - k];
+                }
+            }
+
+            if (i === n) {
+                res.push(dp[i][j] / 6 ** n);
+            }
+        }
+    }
+
+    return res;
+};
 ```
 
 

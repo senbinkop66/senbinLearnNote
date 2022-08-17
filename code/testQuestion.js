@@ -1,22 +1,23 @@
-
-var missingNumber = function(nums) {
-    if (nums.length < 1) {
-        return -1;
+var dicesProbability = function(n) {
+    const dp = Array.from({ length: n + 1 }, x => Array(6 * n + 1).fill(0));
+    let res = [];
+    for (let i = 1; i <= 6; i++) {
+        dp[1][i] = 1;
     }
-    const n = nums.length;
-    let left = 0;
-    let right = n;
-    while (left < right) {
-        const mid = left + Math.floor((right - left) / 2);
-        if (nums[mid] > mid) {
-            right = mid;
-        } else {
-            left = mid + 1;
+
+    for (let i = 1; i <= n; i++) {
+        for (let j = i; j <= 6 * n; j++) {
+            for (let k = 1; k <= 6; k++) {
+                if (dp[i - 1][j - k]) {
+                    dp[i][j] += dp[i - 1][j - k];
+                }
+            }
+
+            if (i === n) {
+                res.push(dp[i][j] / 6 ** n);
+            }
         }
     }
-    return left === n ? n : nums[left] - 1;
+
+    return res;
 };
-
-
-let nums = [0, 1, 2, 3];
-console.log(missingNumber(nums));
