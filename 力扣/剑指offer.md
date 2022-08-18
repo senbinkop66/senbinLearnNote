@@ -4439,6 +4439,424 @@ console.log(isStraight(nums));
 
 
 
+----
+
+## 62. 圆圈中最后剩下的数字
+
+0,1,···,n-1这n个数字排成一个圆圈，从数字0开始，每次从这个圆圈里删除第m个数字（删除后从下一个数字开始计数）。求出这个圆圈里剩下的最后一个数字。
+
+例如，0、1、2、3、4这5个数字组成一个圆圈，从数字0开始每次删除第3个数字，则删除的前4个数字依次是2、0、4、1，因此最后剩下的数字是3。
+
+数学 + 递归
+
+```js
+/**
+ * @param {number} n
+ * @param {number} m
+ * @return {number}
+ */
+var lastRemaining = function(n, m) {
+    return f(n, m);
+};
+
+const f = (n, m) => {
+    if (n === 1) {
+        return 0;
+    }
+    let x = f(n - 1, m);
+    return (m + x) % n;
+}
+
+let n = 10, m = 17;
+console.log(lastRemaining(n, m));
+```
+
+数学 + 迭代
+
+```js
+/**
+ * @param {number} n
+ * @param {number} m
+ * @return {number}
+ */
+var lastRemaining = function(n, m) {
+    let f = 0;
+    for (let i = 2; i !== n + 1; i++) {
+        f = (m + f) % i;
+    }
+    return f;
+};
+
+
+let n = 10, m = 17;
+console.log(lastRemaining(n, m));
+```
+
+
+
+----
+
+## 63. 股票的最大利润
+
+假设把某股票的价格按照时间先后顺序存储在数组中，请问买卖该股票一次可能获得的最大利润是多少？
+
+**限制：**
+
+0 <= 数组长度 <= 10^5
+
+```js
+/**
+ * @param {number[]} prices
+ * @return {number}
+ */
+var maxProfit = function(prices) {
+    if (prices.length < 2) {
+        return 0;
+    }
+    const n = prices.length;
+    let minP = prices[0];
+    let ans = 0;
+    for (let i = 1; i < n; i++) {
+        ans = Math.max(ans, prices[i] - minP);
+        minP = Math.min(minP, prices[i]);
+    }
+    return ans;
+};
+
+let prices = [7,1,5,3,6,4];
+console.log(maxProfit(prices));
+```
+
+
+
+----
+
+## 64. 求1+2+…+n
+
+求 `1+2+...+n` ，要求不能使用乘除法、for、while、if、else、switch、case等关键字及条件判断语句（A?B:C）。
+
+**限制：**
+
+- `1 <= n <= 10000`
+
+递归
+
+```js
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var sumNums = function(n) {
+    n && (n += sumNums(n - 1));
+    return n;
+};
+
+let n = 10;
+console.log(sumNums(n));
+```
+
+
+
+----
+
+## 65. 不用加减乘除做加法
+
+写一个函数，求两个整数之和，要求在函数体内不得使用 “+”、“-”、“*”、“/” 四则运算符号。
+
+**提示：**
+
+- `a`, `b` 均可能是负数或 0
+- 结果不会溢出 32 位整数
+
+```js
+/**
+ * @param {number} a
+ * @param {number} b
+ * @return {number}
+ */
+var add = function(a, b) {
+    let carry;
+    while (b) {
+        carry = (a & b) << 1;
+        a = a ^ b;
+        b = carry;
+    }
+    return a;
+};
+
+let a = 10, b = -10;
+console.log(add(a, b));
+```
+
+
+
+-----
+
+##  66. 构建乘积数组
+
+给定一个数组 A[0,1,…,n-1]，请构建一个数组 B[0,1,…,n-1]，其中 B[i] 的值是数组 A 中除了下标 i 以外的元素的积, 即 B[i]=A[0]×A[1]×…×A[i-1]×A[i+1]×…×A[n-1]。不能使用除法。
+
+**提示：**
+
+- 所有元素乘积之和不会溢出 32 位整数
+- `a.length <= 100000`
+
+
+
+```js
+/**
+ * @param {number[]} a
+ * @return {number[]}
+ */
+var constructArr = function(a) {
+    if (a.length < 2) {
+        return [];
+    }
+    const n = a.length;
+    const ans = new Array(n);
+    // answer[i] 表示索引 i 左侧所有元素的乘积
+    // 因为索引为 '0' 的元素左侧没有元素， 所以 answer[0] = 1
+    ans[0] = 1;
+    for (let i = 1; i < n; i++) {
+        ans[i] = a[i - 1] * ans[i - 1];
+    }
+    // R 为右侧所有元素的乘积
+    // 刚开始右边没有元素，所以 R = 1
+    let r = 1;
+    for (let i = n - 1; i >= 0; i--) {
+        // 对于索引 i，左边的乘积为 answer[i]，右边的乘积为 R
+        ans[i] = ans[i] * r;
+        // R 需要包含右边所有的乘积，所以计算下一个结果时需要将当前值乘到 R 上
+        r *= a[i];
+    }
+    return ans;
+};
+
+let a = [1,2,3,4,5];
+console.log(constructArr(a));
+```
+
+
+
+----
+
+## 67. 把字符串转换成整数
+
+写一个函数 StrToInt，实现把字符串转换成整数这个功能。不能使用 atoi 或者其他类似的库函数。
+
+ 
+
+首先，该函数会根据需要丢弃无用的开头空格字符，直到寻找到第一个非空格的字符为止。
+
+当我们寻找到的第一个非空字符为正或者负号时，则将该符号与之后面尽可能多的连续数字组合起来，作为该整数的正负号；假如第一个非空字符是数字，则直接将其与之后连续的数字字符组合起来，形成整数。
+
+该字符串除了有效的整数部分之后也可能会存在多余的字符，这些字符可以被忽略，它们对于函数不应该造成影响。
+
+注意：假如该字符串中的第一个非空格字符不是一个有效整数字符、字符串为空或字符串仅包含空白字符时，则你的函数不需要进行转换。
+
+在任何情况下，若函数不能进行有效的转换时，请返回 0。
+
+说明：
+
+假设我们的环境只能存储 32 位大小的有符号整数，那么其数值范围为 [−231,  231 − 1]。如果数值超过这个范围，请返回  INT_MAX (231 − 1) 或 INT_MIN (−231) 。
+
+
+
+```js
+/**
+ * @param {string} s
+ * @return {number}
+ */
+var strToInt = function(s) {
+    s=s.trim();
+    let patt=/[^0-9+-]/
+    if (patt.test(s[0])) {
+        return 0;
+    }
+    
+    let nums=new Array();
+    nums.push(s[0]);
+    
+    for (let i=1;i<s.length;i++){
+        if (/\D/.test(s[i])) {
+            //查找到非数字停止
+            break;
+        }else{
+            nums.push(s[i]);
+        }
+    }
+
+    let num=nums.join("");
+    if (num==="+" || num==="-") {return 0;}
+    num=parseInt(num);
+    const START=-Math.pow(2,31);
+    const END=Math.pow(2,31)-1;
+
+    if (num<START) {return START;}
+    if (num>END) {return END;}
+    return num;
+};
+
+
+let str1 = "+-12";
+let result=strToInt(str1);
+console.log(result);
+
+```
+
+
+
+----
+
+## 68 - I. 二叉搜索树的最近公共祖先
+
+给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先。
+
+百度百科中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（一个节点也可以是它自己的祖先）。”
+
+**说明:**
+
+- 所有节点的值都是唯一的。
+- p、q 为不同节点且均存在于给定的二叉搜索树中。
+
+
+
+我们从根节点开始遍历；
+
+如果当前节点的值大于 p 和 q 的值，说明 p 和 q 应该在当前节点的左子树，因此将当前节点移动到它的左子节点；
+
+如果当前节点的值小于 p 和 q 的值，说明 p 和 q 应该在当前节点的右子树，因此将当前节点移动到它的右子节点；
+
+如果当前节点的值不满足上述两条要求，那么说明当前节点就是「分岔点」。此时，p 和 q 要么在当前节点的不同的子树中，要么其中一个就是当前节点。
+
+
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @param {TreeNode} p
+ * @param {TreeNode} q
+ * @return {TreeNode}
+ */
+var lowestCommonAncestor = function(root, p, q) {
+    let ans = root;
+    while (true) {
+        if (p.val < ans.val && q.val < ans.val) {
+            ans = ans.left;
+        } else if (p.val > ans.val && q.val > ans.val) {
+            ans = ans.right;
+        } else {
+            break;
+        }
+    }
+    return ans;
+};
+```
+
+
+
+---
+
+##  68 - II. 二叉树的最近公共祖先
+
+给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。
+
+**说明:**
+
+- 所有节点的值都是唯一的。
+- p、q 为不同节点且均存在于给定的二叉树中。
+
+**递归**
+
+因为我们是自底向上从叶子节点开始更新的，所以在所有满足条件的公共祖先中一定是深度最大的祖先先被访问到
+
+```js
+var lowestCommonAncestor = function(root, p, q) {
+    let ans;
+    const dfs = (root, p, q) => {
+        if (root === null) return false;
+        const lson = dfs(root.left, p, q);
+        const rson = dfs(root.right, p, q);
+        if ((lson && rson) || ((root.val === p.val || root.val === q.val) && (lson || rson))) {
+            ans = root;
+        } 
+        return lson || rson || (root.val === p.val || root.val === q.val);
+    }
+    dfs(root, p, q);
+    return ans;
+};
+
+```
+
+**存储父节点**
+
+我们可以用哈希表存储所有节点的父节点，然后我们就可以利用节点的父节点信息从 p 结点开始不断往上跳，并记录已经访问过的节点，再从 q 节点开始不断往上跳，如果碰到已经访问过的节点，那么这个节点就是我们要找的最近公共祖先。
+
+算法
+
+从根节点开始遍历整棵二叉树，用哈希表记录每个节点的父节点指针。
+从 p 节点开始不断往它的祖先移动，并用数据结构记录已经访问过的祖先节点。
+同样，我们再从 q 节点开始不断往它的祖先移动，如果有祖先已经被访问过，即意味着这是 p 和 q 的深度最深的公共祖先，即 LCA 节点。
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @param {TreeNode} p
+ * @param {TreeNode} q
+ * @return {TreeNode}
+ */
+var lowestCommonAncestor = function(root, p, q) {
+    const parent = new Map();
+    const visited = new Set();
+
+    const dfs = (root) => {
+        if (root.left !== null) {
+            parent.set(root.left.val, root);
+            dfs(root.left);
+        }
+        if (root.right !== null) {
+            parent.set(root.right.val, root);
+            dfs(root.right);
+        }
+    }
+
+    dfs(root);
+
+    while (p !== null) {
+        // 把p的父节点加入加入集合
+        visited.add(p.val);
+        if (parent.has(p.val)) {
+            p = parent.get(p.val);
+        } else {
+            p = null;
+        }
+    }
+    while (q !== null) {
+        if (visited.has(q.val)) {
+            return q;
+        }
+        q = parent.get(q.val);
+    }
+    return null;
+};
+
+
+```
+
 
 
 ----
