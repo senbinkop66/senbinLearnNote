@@ -4364,13 +4364,16 @@ MaxQueue.prototype.pop_front = function() {
 
 态规划 + 背包问题
 
-```
+```js
 var dicesProbability = function(n) {
-    const dp = Array.from({ length: n + 1 }, x => Array(6 * n + 1).fill(0));
-    let res = [];
-    for (let i = 1; i <= 6; i++) {
+    const dp = new Array(n + 1);
+    for (let i = 0; i <= n; i++) {
+        dp[i] = new Array(6 * n + 1).fill(0);
+    }
+    for (let i = 1; i <=6; i++) {
         dp[1][i] = 1;
     }
+    let ans = [];
 
     for (let i = 1; i <= n; i++) {
         for (let j = i; j <= 6 * n; j++) {
@@ -4379,22 +4382,60 @@ var dicesProbability = function(n) {
                     dp[i][j] += dp[i - 1][j - k];
                 }
             }
-
             if (i === n) {
-                res.push(dp[i][j] / 6 ** n);
+                ans.push(dp[i][j] / 6 ** n);
             }
         }
     }
 
-    return res;
+    return ans;
 };
+
+console.log(dicesProbability(6));
 ```
 
 
 
 ----
 
+##  61. 扑克牌中的顺子
 
+从若干副扑克牌中随机抽 5 张牌，判断是不是一个顺子，即这5张牌是不是连续的。2～10为数字本身，A为1，J为11，Q为12，K为13，而大、小王为 0 ，可以看成任意数字。A 不能视为 14。
+
+**限制：**
+
+数组长度为 5 
+
+数组的数取值为 [0, 13] .
+
+
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {boolean}
+ */
+var isStraight = function(nums) {
+    nums.sort((a, b) => a - b);
+    let zeroSize = 0;
+    let diff = 0;
+    for (let i = 0; i < 5; i++) {
+        if (nums[i] === 0) {
+            zeroSize++;
+        }
+        if (i > 0 && nums[i - 1] !== 0) {
+            if (nums[i] === nums[i - 1]) {
+                return false;
+            }
+            diff += nums[i] - nums[i - 1] - 1;
+        }
+    }
+    return zeroSize >= diff;
+};
+
+let nums = [0,0,1,2,5];
+console.log(isStraight(nums));
+```
 
 
 

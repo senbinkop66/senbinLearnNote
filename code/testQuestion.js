@@ -1,23 +1,24 @@
-var dicesProbability = function(n) {
-    const dp = Array.from({ length: n + 1 }, x => Array(6 * n + 1).fill(0));
-    let res = [];
-    for (let i = 1; i <= 6; i++) {
-        dp[1][i] = 1;
-    }
-
-    for (let i = 1; i <= n; i++) {
-        for (let j = i; j <= 6 * n; j++) {
-            for (let k = 1; k <= 6; k++) {
-                if (dp[i - 1][j - k]) {
-                    dp[i][j] += dp[i - 1][j - k];
-                }
+/**
+ * @param {number[]} nums
+ * @return {boolean}
+ */
+var isStraight = function(nums) {
+    nums.sort((a, b) => a - b);
+    let zeroSize = 0;
+    let diff = 0;
+    for (let i = 0; i < 5; i++) {
+        if (nums[i] === 0) {
+            zeroSize++;
+        }
+        if (i > 0 && nums[i - 1] !== 0) {
+            if (nums[i] === nums[i - 1]) {
+                return false;
             }
-
-            if (i === n) {
-                res.push(dp[i][j] / 6 ** n);
-            }
+            diff += nums[i] - nums[i - 1] - 1;
         }
     }
-
-    return res;
+    return zeroSize >= diff;
 };
+
+let nums = [0,0,1,2,5];
+console.log(isStraight(nums));
