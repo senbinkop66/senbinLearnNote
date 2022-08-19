@@ -1,9 +1,5 @@
-let obj = {
-  0: "Hello",
-  1: "world!",
-  length: 2,
-};
+let chineseDictionary = Object.create(null);
+chineseDictionary.hello = "你好";
+chineseDictionary.bye = "再见";
 
-obj.join = Array.prototype.join;
-
-console.log( obj.join(',') ); // Hello,world!
+console.log(Object.keys(chineseDictionary)); // [ 'hello', 'bye' ]
