@@ -23,5 +23,8 @@ git add .;git commit -m 'update';git push origin master
 ```
 git remote -v
 git remote add origin https://github.com/senbinkop66/senbinLearnNote.git
+
+git remote add origin git@github.com:senbinkop66/senbinLearnNote.git
+git remote -v
 ```
 
