@@ -585,15 +585,15 @@ render() 方法是 class 组件中唯一必须实现的方法。
 
 当 render 被调用时，它会检查 this.props 和 this.state 的变化并返回以下类型之一：
 
-- React 元素。通常通过 JSX 创建。例如，`<div /> `会被 React 渲染为 DOM 节点，`<MyComponent />` 会被 React 渲染为自定义组件，无论是 `<div />` 还是 `<MyComponent />` 均为 React 元素。
-- 数组或 fragments。 使得 render 方法可以返回多个元素。
-- Portals。可以渲染子节点到不同的 DOM 子树中。
-- 字符串或数值类型。它们在 DOM 中会被渲染为文本节点
-- 布尔类型或 null。什么都不渲染。（主要用于支持返回 test && `<Child />` 的模式，其中 test 为布尔类型。）
+- **React 元素**。通常通过 JSX 创建。例如，`<div /> `会被 React 渲染为 DOM 节点，`<MyComponent />` 会被 React 渲染为自定义组件，无论是 `<div />` 还是 `<MyComponent />` 均为 React 元素。
+- **数组或 fragments**。 使得 render 方法可以返回多个元素。
+- **Portals**。可以渲染子节点到不同的 DOM 子树中。
+- **字符串或数值类型**。它们在 DOM 中会被渲染为文本节点
+- **布尔类型或 null**。什么都不渲染。（主要用于支持返回 test && `<Child />` 的模式，其中 test 为布尔类型。）
 
 **render() 函数应该为纯函数**，这意味着在不修改组件 state 的情况下，每次调用时都返回相同的结果，并且它不会直接与浏览器交互。
 
-如需与浏览器进行交互，请在 componentDidMount() 或其他生命周期方法中执行你的操作。保持 render() 为纯函数，可以使组件更容易思考。
+如需与浏览器进行交互，请在 componentDidMount() 或其他生命周期方法中执行你的操作。**保持 render() 为纯函数，可以使组件更容易思考。**
 
 
 
@@ -601,7 +601,7 @@ render() 方法是 class 组件中唯一必须实现的方法。
 
 **如果不初始化 state 或不进行方法绑定**，则不需要为 React 组件实现构造函数。
 
-在 React 组件挂载之前，会调用它的构造函数。在为 React.Component 子类实现构造函数时，**应在其他语句之前前调用 super(props)。**否则，this.props 在构造函数中可能会出现未定义的 bug。
+在 React 组件挂载之前，会调用它的构造函数。在为 React.Component 子类实现构造函数时，**应在其他语句之前前调用 super(props)。**否则，**this.props 在构造函数中可能会出现未定义的 bug。**
 
 通常，在 React 中，构造函数仅用于以下两种情况：
 
@@ -658,7 +658,7 @@ componentWillUnmount() 中**不应调用 setState()**，因为**该组件将永�
 
 ### shouldComponentUpdate()
 
-根据 shouldComponentUpdate() 的返回值，判断 React 组件的输出是否受当前 state 或 props 更改的影响。默认行为是 state 每次发生变化组件都会重新渲染。大部分情况下，你应该遵循默认行为。
+根据 shouldComponentUpdate() 的返回值，判断 React 组件的输出是否受当前 state 或 props 更改的影响。**默认行为是 state 每次发生变化组件都会重新渲染。**大部分情况下，你应该遵循默认行为。
 
 当 props 或 state 发生变化时，shouldComponentUpdate() 会在渲染执行之前被调用。返回值默认为 true。**首次渲染或使用 forceUpdate() 时不会调用该方法。**
 
@@ -686,7 +686,7 @@ getDerivedStateFromProps 会**在调用 render 方法之前调用**，并且在�
 
 **此方法无权访问组件实例。**如果你需要，可以通过提取组件 props 的纯函数及 class 之外的状态，在getDerivedStateFromProps()和其他 class 方法之间重用代码。
 
-请注意，不管原因是什么，都会在每次渲染前触发此方法。这与 UNSAFE_componentWillReceiveProps 形成对比，后者仅在父组件重新渲染时触发，而不是在内部调用 setState 时。
+**请注意，不管原因是什么，都会在每次渲染前触发此方法**。这与 UNSAFE_componentWillReceiveProps 形成对比，后者仅在父组件重新渲染时触发，而不是在内部调用 setState 时。
 
 
 
@@ -729,7 +729,7 @@ React 的开发和生产构建版本在 componentDidCatch() 的方式上有轻�
 
 **在开发模式下，错误会冒泡至 window**，这意味着任何 window.onerror 或 window.addEventListener('error', callback) 会中断这些已经被 componentDidCatch() 捕获的错误。
 
-相反，在生产模式下，错误不会冒泡，这意味着任何根错误处理器只会接受那些没有显式地被 componentDidCatch() 捕获的错误。
+**相反，在生产模式下，错误不会冒泡**，这意味着任何根错误处理器只会接受那些没有显式地被 componentDidCatch() 捕获的错误。
 
 
 
@@ -823,13 +823,13 @@ return (
 
 这些虚拟`DOM`树最终会渲染成真实`DOM`
 
-在`render`过程中，`React` 将新调用的 `render `函数返回的树与旧版本的树进行比较，这一步是决定如何更新 `DOM` 的必要步骤，然后进行 `diff` 比较，更新 `DOM `树
+在`render`过程中，**`React` 将新调用的 `render `函数返回的树与旧版本的树进行比较**，这一步是决定如何更新 `DOM` 的必要步骤，然后进行 `diff` 比较，更新 `DOM `树
 
 ### 触发时机
 
 `render`的执行时机主要分成了两部分：
 
-- 类组件调用 setState 修改状态
+- **类组件调用 setState 修改状态**
 
 ```jsx
 class Foo extends React.Component {
@@ -859,7 +859,7 @@ class Foo extends React.Component {
 
 点击按钮，则调用`setState`方法，**无论`count`如何发生变化，控制台都会输出`Foo render`**，证明`render`执行了
 
-- 函数组件通过`useState hook`修改状态
+- **函数组件通过`useState hook`修改状态**
 
 ```jsx
 function Foo() {
@@ -883,7 +883,7 @@ function Foo() {
 
 函数组件通过`useState`这种形式更新数据，**当数组的值不发生改变了，就不会触发`render`**
 
-- 类组件重新渲染
+- **类组件重新渲染**
 
 ```jsx
 class App extends React.Component {
@@ -913,7 +913,7 @@ function Foo() {
 
 只要点击了 `App` 组件内的 `Change name` 按钮，**不管 `Foo` 具体实现是什么，都会被重新`render`渲染**
 
-- 函数组件重新渲染
+- **函数组件重新渲染**
 
 ```jsx
 function App(){
@@ -940,17 +940,17 @@ function Foo() {
 }
 ```
 
-可以发现，使用`useState`来更新状态的时候，**只有首次会触发`Foo render`**，后面并不会导致`Foo render`
+可以发现，使用`useState`来更新状态的时候，**只有首次会触发`Foo render`**，后面并**不会导致`Foo render`**
 
 ### 总结
 
 render`函数里面可以编写`JSX`，转化成`createElement`这种形式，用于生成虚拟`DOM`，最终转化成真实`DOM
 
-在` React` 中，**类组件只要执行了 `setState` 方法，就一定会触发 `render` 函数执行**，函数组件使用`useState`更改状态不一定导致重新`render`
+在` React` 中，**类组件只要执行了 `setState` 方法，就一定会触发 `render` 函数执行**，函数组件使用`useState`更改状态**不一定**导致重新`render`
 
-**组件的` props` 改变了，不一定触发 `render` 函数的执行**，但是如果 `props` 的值来自于父组件或者祖先组件的 `state`。在这种情况下，父组件或者祖先组件的 `state` 发生了改变，就会导致子组件的重新渲染
+**组件的` props` 改变了，不一定触发 `render` 函数的执行**，但是如果 `props` 的值来自于父组件或者祖先组件的 `state`。在这种情况下，**父组件或者祖先组件的 `state` 发生了改变，就会导致子组件的重新渲染**
 
-所以，一旦执行了`setState`就会执行`render`方法，**`useState` 会判断当前值有无发生改变确定是否执行`render`方法**，一旦父组件发生渲染，子组件也会渲染
+所以，一旦执行了`setState`就会执行`render`方法，**`useState` 会判断当前值有无发生改变确定是否执行`render`方法**，一旦父组件发生渲染，子组件也会渲染。
 
 
 
@@ -993,6 +993,8 @@ class ReferenceDemo extends React.Component{
 - 需要管理焦点、选择文本或媒体播放时
 - 触发式动画
 - 与第三方 DOM 库集成
+
+
 
 ---
 
