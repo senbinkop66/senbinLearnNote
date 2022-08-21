@@ -1030,9 +1030,11 @@ function HelloComponent(props, /* context */) {
 }
 ```
 
+
+
 ### 通过 React.createElement 方法创建
 
-`React.createClass`是react刚开始推荐的创建组件的方式，目前这种创建方式已经不怎么用了
+`React.createElement`是react刚开始推荐的创建组件的方式，目前这种创建方式已经不怎么用了
 
 像上述通过函数式创建的组件的方式，最终会通过`babel`转化成`React.createClass`这种形式，转化成如下：
 
@@ -1047,7 +1049,9 @@ function HelloComponent(props) /* context */{
 }
 ```
 
-由于上述的编写方式过于冗杂，目前基本上不使用上
+由于上述的编写方式过于冗杂，目前基本上不使用
+
+
 
 ### 继承 React.Component 创建
 
@@ -1113,9 +1117,9 @@ class Timer extends React.Component {
 
 - 无论是使用函数或是类来声明一个组件，它决不能修改它自己的 props。
   - **所有 React 组件都必须是纯函数**，**并禁止修改其自身 props**。
-- React是单项数据流，父组件改变了属性，那么子组件视图会更新。
+- React是单项数据流，**父组件改变了属性，那么子组件视图会更新。**
   - 属性 props是外界传递过来的，**状态 state是组件本身的，状态可以在组件中任意修改**
-  - 组件的属性和状态改变都会更新视图。
+  - **组件的属性和状态改变都会更新视图**。
 
 ```jsx
 class Welcome extends React.Component {
@@ -1174,7 +1178,7 @@ function SayHi() {
 const result = SayHi(props) // » <p>Hello, React</p>
 ```
 
-如果SayHi是一个类，React需要先用new操作符将其实例化，然后调用刚才生成实例的render方法：
+如果SayHi是一个类，React需要先用new操作符**将其实例化**，然后调用刚才生成实例的render方法：
 
 ```jsx
 // 你的代码 
@@ -1188,7 +1192,7 @@ const instance = new SayHi(props) // » SayHi {}
 const result = instance.render() // » <p>Hello, React</p>
 ```
 
-可想而知，函数组件重新渲染将重新调用组件方法返回新的react元素，**类组件重新渲染将new一个新的组件实例，然后调用render类方法返回react元素**，这也说明为什么类组件中this是可变的。
+可想而知，函数组件重新渲染将重新调用组件方法返回新的react元素，**类组件重新渲染将new一个新的组件实例，然后调用render方法返回react元素**，这也说明为什么类组件中this是可变的。
 
 
 
@@ -1203,7 +1207,7 @@ const EnhancedComponent = higherOrderComponent(WrappedComponent);
 ```
 
 - 高阶组件（HOC）是 React 中用于复用组件逻辑的一种高级技巧
-- 高阶组件的参数为一个组件返回一个新的组件
+- 高阶组件的参数为一个组件，返回一个新的组件
 - 组件是将 props 转换为 UI，而**高阶组件是将组件转换为另一个组件**
 
 
@@ -1214,7 +1218,7 @@ const EnhancedComponent = higherOrderComponent(WrappedComponent);
 
 在调用方法之前，子类构造函数无法使用this引用super()。
 
-在ES6中，在子类的constructor中必须先调用super才能引用this。
+在ES6中，**在子类的constructor中必须先调用super才能引用this。**
 
 在constructor中可以使用this.props
 
@@ -1255,8 +1259,9 @@ class MyComponent extends React.Component {
 
 ## 12. React 事件绑定原理
 
-React并不是将click事件绑在该div的真实DOM上，而是在document处监听所有支持的事件，当事件发生并冒泡至document处时，React将事件内容封装并交由真正的处理函数运行。这样的方式不仅减少了内存消耗，还能在组件挂载销毁时统一订阅和移除事件。
-另外冒泡到 document 上的事件也不是原生浏览器事件，而是 React 自己实现的合成事件（SyntheticEvent）。因此我们如果不想要事件冒泡的话，调用 event.stopPropagation 是无效的，而应该调用event.preventDefault。
+React并**不是**将click事件绑在该div的真实DOM上，而是在document处监听所有支持的事件，当事件发生并冒泡至document处时，React将事件内容封装并交由真正的处理函数运行。
+
+这样的方式不仅减少了内存消耗，还能在组件挂载销毁时统一订阅和移除事件。另外冒泡到 document 上的事件也不是原生浏览器事件，**而是 React 自己实现的合成事件**（SyntheticEvent）。因此我们如果不想要事件冒泡的话，调用 event.stopPropagation 是无效的，而应该调用event.preventDefault。
 
 
 
@@ -1269,7 +1274,7 @@ React并不是将click事件绑在该div的真实DOM上，而是在document处�
 3. Component中有一个render函数，render函数要求返回一个Element对象（或null）；
 4. Element对象分为原生Element对象和组件式对象，原生Element+ 组件式对象会被一起解析成虚拟 DOM 树，并且内部使用的state和props也以 AST 的形式注入到这棵虚拟 DOM 树之中；
 5. 在渲染虚拟 DOM 树的前后，会触发 React Component 的一些生命周期钩子函数，比如componentWillMount和componentDidMount，在虚拟 DOM 树解析完成后将被渲染成真实 DOM 树；
-6. 调用setState时，会调用更新函数更新Component的state，并且触发内部的一个updater，调用render生成新的虚拟 DOM 树，利用 diff 算法与旧的虚拟 DOM 树进行比对，比对以后利用最优的方案进行 DOM 节点的更新，这也是 React 单向数据流的原理（与 Vue 的 MVVM 不同之处）。
+6. 调用setState时，会调用更新函数更新Component的state，并且触发内部的一个updater，**调用render生成新的虚拟 DOM 树，利用 diff 算法与旧的虚拟 DOM 树进行比对，比对以后利用最优的方案进行 DOM 节点的更新**，这也是 React 单向数据流的原理（与 Vue 的 MVVM 不同之处）。
 
 
 
@@ -1283,7 +1288,7 @@ React并不是将click事件绑在该div的真实DOM上，而是在document处�
 
 非受控组件，简单来讲，就是不受我们控制的组件
 
-一般情况是**在初始化的时候接受外部数据**，然后自己在内部存储其自身状态
+一般情况是**在初始化的时候接受外部数据**，然后自己在内 部存储其自身状态
 
 当需要时，可以使用`ref` 查询 `DOM `并查找其当前值，如下：
 
@@ -1323,7 +1328,7 @@ export class UnControll extends Component {
   render () {
     return (
       <form onSubmit={e => this.handleSubmit(e)}>
-        <input defaultValue="lindaidai" ref={this.inputRef} />
+        <input defaultValue="abc" ref={this.inputRef} />
         <input type="submit" value="提交" />
       </form>
     )
@@ -1338,6 +1343,24 @@ export class UnControll extends Component {
 受控组件，简单来讲，就是受我们控制的组件，组件的状态全程响应外部数据
 
 受控组件就是组件的状态受React控制。上面提到过，既然通过设置input的value属性, 无法改变输入框值,那么我们把它和state结合在一起,再绑定onChange事件,实时更新value值就行了。
+
+
+
+```jsx
+class TestComponent extends React.Component {
+  constructor (props) {
+    super(props);
+    this.state = { username: 'kop' };
+  }
+  render () {
+    return <input name="username" value={this.state.username} />
+  }
+}
+```
+
+这时候当我们在输入框输入内容的时候，会发现输入的内容并无法显示出来，也就是`input`标签是一个可读的状态
+
+这是因为`value`被`this.state.username`所控制住。当用户输入新的内容时，`this.state.username`并不会自动更新，这样的话`input`内的内容也就不会变了
 
 ```jsx
 class Demo1 extends Component {
@@ -1362,22 +1385,6 @@ class Demo1 extends Component {
 }
 ```
 
-```jsx
-class TestComponent extends React.Component {
-  constructor (props) {
-    super(props);
-    this.state = { username: 'lindaidai' };
-  }
-  render () {
-    return <input name="username" value={this.state.username} />
-  }
-}
-```
-
-这时候当我们在输入框输入内容的时候，会发现输入的内容并无法显示出来，也就是`input`标签是一个可读的状态
-
-这是因为`value`被`this.state.username`所控制住。当用户输入新的内容时，`this.state.username`并不会自动更新，这样的话`input`内的内容也就不会变了
-
 **如果想要解除被控制，可以为`input`标签设置`onChange`事件，输入的时候触发事件函数**，在函数内部实现`state`的更新，从而导致`input`框的内容页发现改变
 
 因此，受控组件我们一般**需要初始状态**和**一个状态更新事件函数**
@@ -1395,10 +1402,6 @@ class TestComponent extends React.Component {
 
 
 ![img](E:\pogject\学习笔记\image\react\受控组件)
-
-
-
-
 
 
 
@@ -1436,6 +1439,8 @@ class MyComponent extends React.Component {
 
 **浏览器只能处理 JavaScript 对象**，而不能读取常规 JavaScript 对象中的 JSX。所以为了使浏览器能够读取 JSX，首先，需要用像 Babel 这样的 JSX 转换器将 JSX 文件转换为 JavaScript 对象，然后再将其传给浏览器。
 
+
+
 ----
 
 ## 说说React Jsx转换成真实DOM过程？
@@ -1469,8 +1474,8 @@ React.createElement(
 
 在转化过程中，`babel`在编译时会判断 JSX 中组件的首字母：
 
-- **当首字母为小写时，其被认定为原生 `DOM` 标签**，`createElement` 的第一个变量被编译为字符串
-- **当首字母为大写时，其被认定为自定义组件**，createElement 的第一个变量被编译为对象
+- **当首字母为小写时，其被认定为原生 `DOM` 标签**，`createElement` 的第一个变量被编译为字**符串**
+- **当首字母为大写时，其被认定为自定义组件**，createElement 的第一个变量被编译为**对象**
 
 最终都会通过`RenderDOM.render(...)`方法进行挂载，如下：
 
@@ -1525,7 +1530,7 @@ const jsx = (
 
 这些类别最终都会被转化成`React.createElement`这种形式
 
-`React.createElement`其被调用时会传⼊标签类型`type`，标签属性`props`及若干子元素`children`，作用是生成一个虚拟`Dom`对象，如下所示：
+`React.createElement`其被调用时会传⼊**标签类型**`type`，**标签属性**`props`及**若干子元素`children`**，作用是生成一个虚拟`Dom`对象，如下所示：
 
 ```js
 function createElement(type, config, ...children) {
@@ -1537,8 +1542,8 @@ function createElement(type, config, ...children) {
     const props = {
         ...config,
         children: children.map(child =>
-   typeof child === "object" ? child : createTextNode(child)
-  )
+   			typeof child === "object" ? child : createTextNode(child)
+  		)
     };
     return {
         type,
@@ -1710,7 +1715,7 @@ export default {
 
 
 
-在React中，如果是由React引发的事件处理（比如通过onClick引发的事件处理），调用setState不会同步更新this.state，**除此之外的setState调用会同步执行this.state** 。
+在React中，如果是由React引发的事件处理（比如通过onClick引发的事件处理），调用setState**不会**同步更新this.state，**除此之外的setState调用会同步执行this.state** 。
 
 所谓“**除此之外**”，指的是绕过React通过addEventListener直接添加的事件处理函数，还有通过setTimeout/setInterval产生的异步调用。
 
@@ -1735,11 +1740,11 @@ react中不能直接修改state，因为并不会重新触发render。
 this.state.message =”Hello world”;
 ```
 
-而是需要使用setState()方法，状态改变时，组件通过重新渲染做出响应。
+而是需要使用setState()方法，**状态改变时，组件通过重新渲染做出响应。**
 
 ```js
 //Correct
-This.setState({message: ‘Hello World’});
+this.setState({message: ‘Hello World’});
 ```
 
 setState通过一个队列机制来实现 state 更新。当执行 setState 的时候，**会将需要更新的 state 合并后放入状态队列，而不会立刻更新 this.state**。
@@ -1761,7 +1766,7 @@ props和state是普通的 JS 对象。虽然它们都包含影响渲染输出的
 
 ### state
 
-一个组件的显示形态可以由数据状态和外部参数所决定，而数据状态就是`state`，一般在 `constructor` 中初始化
+**一个组件的显示形态可以由数据状态和外部参数所决定**，而数据状态就是`state`，一般在 `constructor` 中初始化
 
 当需要修改里面的值的状态需要通过调用`setState`来改变，从而达到更新组件内部数据的作用，并且重新调用组件`render`方法，如下面的例子：
 
@@ -1790,13 +1795,15 @@ class Button extends React.Component {
 }
 ```
 
-`setState`还可以接受第二个参数，它是一个函数，会在`setState`调用完成并且组件开始重新渲染时被调用，可以用来监听渲染是否完成
+`setState`还可以接受第二个参数，**它是一个函数，会在`setState`调用完成并且组件开始重新渲染时被调用**，可以用来监听渲染是否完成
 
 ```js
 this.setState({
-  name:'JS每日一题'
+  name:'kop'
 },()=>console.log('setState finished'))
 ```
+
+
 
 ### props
 
@@ -1820,7 +1827,7 @@ const element = <Welcome name="Sara" onNameChanged={this.handleName} />;
 
 上述`name`属性与`onNameChanged`方法都能在子组件的`props`变量中访问
 
-**在子组件中，`props`在内部不可变的**，如果想要改变它看，只能通过外部组件传入新的`props`来重新渲染子组件，否则子组件的`props`和展示形式不会改变
+**在子组件中，`props`在内部不可变的**，如果想要改变它看，**只能通过外部组件传入新的`props`来重新渲染子组件**，否则子组件的`props`和展示形式不会改变
 
 ### 区别
 
@@ -1878,7 +1885,7 @@ constructor(props) {
 
 虚拟 dom 相当于在 js 和真实 dom 中间加了一个缓存，利用 dom diff 算法避免了没有必要的 dom 操作，从而 提高性能。
 
-虚拟DOM（VDOM）它**是真实DOM的内存表示,一种编程概念，一种模式**。它会和真实的DOM同步，比如通过ReactDOM这种库，这个同步的过程叫做调和(reconcilation)。
+虚拟DOM（VDOM）它**是真实DOM的内存表示,一种编程概念，一种模式**。它会和真实的DOM同步，比如通过ReactDOM这种库，这个同步的过程叫做**调和**(reconcilation)。
 
 虚拟DOM更多是一种模式，不是一种特定的技术。
 
