@@ -1,48 +1,40 @@
 /**
- * Definition for a binary tree node.
- * function TreeNode(val) {
- *     this.val = val;
- *     this.left = this.right = null;
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
  * }
  */
 /**
- * @param {TreeNode} root
- * @param {TreeNode} p
- * @param {TreeNode} q
- * @return {TreeNode}
+ * @param {ListNode} head
+ * @param {number} left
+ * @param {number} right
+ * @return {ListNode}
  */
-var lowestCommonAncestor = function(root, p, q) {
-    const parent = new Map();
-    const visited = new Set();
+function reverseBetween(head, left, right) {
+    // 因为头节点有可能发生变化，使用虚拟头节点可以避免复杂的分类讨论
+    const dummyNode = new ListNode(-1);
+    dummyNode.next = head;
 
-    const dfs = (root) => {
-        if (root.left !== null) {
-            parent.set(root.left.val, root);
-            dfs(root.left);
-        }
-        if (root.right !== null) {
-            parent.set(root.right.val, root);
-            dfs(root.right);
-        }
+    let pre = dummyNode;
+    
+    for (let i = 0; i < left - 1; i++) {
+        pre = pre.next;
     }
 
-    dfs(root);
+    let cur = pre.next;
+    for (let i = 0; i < right - left; i++) {
+        const next = cur.next;
+        cur.next = next.next;
+        next.next = pre.next;
+        pre.next = next;
+    }
 
-    while (p !== null) {
-        // 把p的父节点加入加入集合
-        visited.add(p.val);
-        if (parent.has(p.val)) {
-            p = parent.get(p.val);
-        } else {
-            p = null;
-        }
-    }
-    while (q !== null) {
-        if (visited.has(q.val)) {
-            return q;
-        }
-        q = parent.get(q.val);
-    }
-    return null;
+    return dummyNode.next;
+}
+
+
+
+module.exports = {
+    reverseBetween : reverseBetween
 };
-
