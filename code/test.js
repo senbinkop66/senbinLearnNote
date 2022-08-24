@@ -1,65 +1,29 @@
-/*
- * function ListNode(x){
- *   this.val = x;
- *   this.next = null;
- * }
- */
-
 /**
- * 
- * @param head ListNode类 the head node
- * @return ListNode类
+ * @param {string} version1
+ * @param {string} version2
+ * @return {number}
  */
-function sortInList( head ) {
+var compareVersion = function(version1, version2) {
     // write code here
-    return toSortList(head, null);
-};
-
-const toSortList = (head, tail) => {
-    if (head === null) {
-        return head;
-    }
-    if (head.next === tail) {
-        head.next = null;
-        return head;
-    }
-    let slow = head, fast = head;
-    while (fast !== tail) {
-        slow = slow.next;
-        fast = fast.next;
-        if (fast !== tail) {
-            fast = fast.next;
+    const n = version1.length, m = version2.length;
+    let i = 0, j = 0;
+    while (i < n || j < m) {
+        let x = 0;
+        for (; i < n && version1[i] !== "."; i++) {
+            x = x * 10 + version1[i].charCodeAt() - '0'.charCodeAt();
+        }
+        ++i;  // 跳过点号
+        let y = 0;
+        for (; j < m && version2[j] !== "."; j++) {
+            y = y * 10 + version2[j].charCodeAt() - '0'.charCodeAt();
+        }
+        ++j;  // 跳过点号
+        if (x !== y) {
+            return x > y ? 1 : -1;
         }
     }
-    const mid = slow;
-    return merge(toSortList(head, mid), toSortList(mid, tail));
-}
-
-const merge = (head1, head2) => {
-    if (head1 === null) {
-        return head2;
-    }
-    if (head2 === null) {
-        return head1;
-    }
-
-    const dummyNode = new ListNode(-1);
-    let pre = dummyNode;
-    while (head1 !== null && head2 !== null) {
-        if (head1.val <= head2.val) {
-            pre.next = head1;
-            head1 = head1.next;
-        } else {
-            pre.next = head2;
-            head2 = head2.next;
-        }
-        pre = pre.next;
-    }
-    pre.next = head1 === null ? head2 : head1;
-
-    return dummyNode.next;
-}
-
-module.exports = {
-    sortInList : sortInList
+    return 0;
 };
+
+let version1 = "1.01", version2 = "1.001";
+console.log(compareVersion(version1, version2));
