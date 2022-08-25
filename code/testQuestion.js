@@ -1,33 +1,51 @@
 /**
- * 代码中的类名、方法名、参数名已经指定，请勿修改，直接返回方法规定的值即可
- *
- * 比较版本号
- * @param version1 string字符串 
- * @param version2 string字符串 
- * @return int整型
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number}
  */
-function compare( version1 ,  version2 ) {
+var findKthLargest = function(nums, k) {
     // write code here
-    const n = version1.length, m = version2.length;
-    let i = 0, j = 0;
-    while (i < n || j < m) {
-        let x = 0;
-        for (; i < n && version1[i] !== "."; i++) {
-            x = x * 10 + version1[i].charCodeAt() - '0'.charCodeAt();
-        }
-        ++i;  // 跳过点号
-        let y = 0;
-        for (; j < m && version2[j] !== "."; j++) {
-            y = y * 10 + version2[j].charCodeAt() - '0'.charCodeAt();
-        }
-        ++j;  // 跳过点号
-        if (x !== y) {
-            return x > y ? 1 : -1;
-        }
-    }
-    return 0;
+    const n = nums.length;
+    return quickSelect(nums, 0, n - 1, n - k);
 }
 
-module.exports = {
-    compare : compare
-};
+const quickSelect = (nums, left, right, index) => {
+    const q = randomPartition(nums, left, right);
+    // console.log(q, nums)
+    if (q === index) {
+        // 我们会对子数组进行划分，如果划分得到的 qq 正好就是我们需要的下标，就直接返回 a[q]a[q]
+        return nums[q];
+    } else if (q < index){
+        // 否则，如果 qq 比目标下标小，就递归右子区间
+        return quickSelect(nums, q + 1, right, index);
+    } else {
+        // 否则递归左子区间
+        return quickSelect(nums, left, q - 1, index);
+    }
+}
+
+const randomPartition = (nums, left, right) => {
+    const randomIndex = left + Math.floor(Math.random() * (right - left));
+    swap(nums, randomIndex, right);
+    return partition(nums, left, right);
+}
+
+const partition = (nums, left, right) => {
+    const x = nums[right];
+    let i = left - 1;
+    for (let j = left; j < right; j++) {
+        if (nums[j] <= x) {
+            // 把小于等基准值的移到左边
+            swap(nums, ++i, j);
+        }
+    }
+    swap(nums, i + 1, right);
+    return i + 1;
+}
+
+const swap = (nums, i, j) => {
+    [nums[i], nums[j]] = [nums[j], nums[i]];
+}
+
+let nums = [3,2,1,5,6,4], k = 2;
+console.log(findKthLargest(nums, k));
