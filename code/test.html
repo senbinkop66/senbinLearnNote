@@ -4,17 +4,41 @@
     <meta charset="utf-8" />
     <title>测试</title>
     <style type="text/css">
-        div {
-             width:0px;
-             height:0px;
-             margin:100px auto;
-             border-left:30px solid transparent; 
-             border-right:30px solid transparent; 
-             border-bottom:40px solid #A962CE; /*--三角形的高--*/
-        }
+   .box {
+      width: 500px;
+      height: 100px;
+      background-color: hotpink;
+      display: flex;
+    }
+ 
+    .box div {
+      width: 100px;
+    }
+ 
+    .box div:nth-child(1) {
+        flex-grow: 2;
+      flex-basis: 50px;
+      background-color: gray;
+    }
+ 
+    .box div:nth-child(2) {
+        flex-grow: 1;
+      flex-basis: 100px;
+      background-color: blue;
+    }
+ 
+    .box div:nth-child(3) {
+        flex-grow: 1;
+      flex-basis: 50px;
+      background-color: goldenrod;
+    }
     </style>
 </head>
 <body>
-    <div></div>
+    <div class="box">
+        <div>1</div>
+        <div>2</div>
+        <div>3</div>
+    </div>
 </body>
 </html>

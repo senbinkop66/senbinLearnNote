@@ -1,22 +1,11 @@
-async function foo() {
-  console.log(2);
-  console.log(await Promise.resolve(8));
-  console.log(9); 
-  console.log(await Promise.resolve(18));
-  console.log(19);
+function Insert(num)
+{
+    // write code here
 }
-async function bar() {
-  console.log(4);
-  console.log(await 6);
-  console.log(7);
+function GetMedian(){
+	// write code here
 }
-
-console.log(1);
-
-foo();
-
-console.log(3);
-
-bar();
-
-console.log(5);
+module.exports = {
+    Insert : Insert,
+    GetMedian : GetMedian
+};
