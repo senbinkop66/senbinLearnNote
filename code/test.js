@@ -1,26 +1,11 @@
-function (nums, n) {
-	let evenMax = 0;
-	let oddMax = 0；
-	for (let i = 0; i < n; ++i) {
-			let num = nums[i]
-      if (i % 2 === 0) {
-      	evenMax = evenMax > num ? evenMax : num;
-      } else {
-      	oddMax = oddMax > num ? oddMax : num;
-      }
-  }
-
-  let res = 0
-  for (let i = 0; i < n; ++i) {
-      if (i % 2 === 0) {
-          res += (evenMax - nums[i]);
-      }
-      else {
-          res += (oddMax - nums[i]);
-      }
-  }
-  if (evenMax == oddMax){
-  	res += (n / 2);
-  }
-  return ans;
+function formatNumber(num) {
+	let [int, fraction] = num.toString().split(".");
+	let reg = /\d{1,3}(?=(\d{3})+$)/g
+	return (int + '').replace(reg, "$&,") + (!!fraction ? "." + fraction : "");
 }
+
+let num1 = 123456.342;
+console.log(formatNumber(num1));  // 123,456.342
+
+let num2 = -1234567.342;
+console.log(formatNumber(num2));  // -1,234,567.342

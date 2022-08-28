@@ -655,9 +655,118 @@ vue3新的 `provide/inject` 功能可以穿透多层组件，实现数据从父�
 
 ----
 
+## 1.16 如何在自定义组件使用v-model
+
+vue2.2+版本新增了一个功能，可以在自定义组件上使用v-model实现双向绑定。在使用新功能之前，我们先来了解一下vue.js的v-model是如何实现双向绑定的。从官方文档以及各种技术文章中,我们可以知道，v-model是v-bind以及v-on配合使用的语法糖，
+
+1. `v-bind`绑定一个`value`属性
+2. `v-on`监听当前元素的`input`事件，当数据变化时，将值传递给`value`实时更新数据
+
+```vue
+<input v-model="value" />
+<input v-bind:value="value" v-on:input="value= $event.target.value" />
+```
+
+两种方法的实现效果是一样的，都是给`<input>`标签绑定一个值，并且在监听到input事件时，把输入的值替换绑定的值来实现双向绑定。其中第一种是第二种方法的语法糖。
+
+现在我们已经了解了v-model是什么东东，那么除了在表单控件上使用v-model外，能不能在自定义的组件上使用v-model，从而实现父子组件间的双向绑定呢？
+
+答案是可以的。 vue2.2+版本后，新增加了一个model选项，model选项允许自定义prop和event。官方原文是这样的：**允许一个自定义组件在使用 v-model 时定制 prop 和 event。默认情况下，一个组件上的 v-model 会把 value 用作 prop 且把 input 用作 event，但是一些输入类型比如单选框和复选框按钮可能想使用 value prop 来达到不同的目的。使用 model 选项可以回避这些情况产生的冲突。**
+
+我们首先编写一个子组件，并用到model选项,核心代码如下
+
+```vue
+<template>
+  <div class="radio">
+    <div class="radioGroup">
+      <div
+        class="radioItem"
+        v-for="item in options"
+        :key="item.value"
+        @click="clickRadio(item.value);"
+      >
+        <div
+          class="radioBox"
+          :class="{ checked: item.value === checked }"
+        ></div>
+        <div class="name">{{ item.name }}</div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  name: "radio",
+  props: {
+    options: Array,
+    value: Number
+  },
+  computed: {
+    checked() {
+      return this.value;
+    }
+  },
+  model: {
+    prop: "value", //绑定的值，通过父组件传递
+    event: "update" //自定义事件名
+  },
+  methods: {
+    clickRadio(val) {
+      this.checked = val;
+      this.$emit("update", val); //子组件与父组件通讯，告知父组件更新绑定的值
+    }
+  },
+  watch: {
+    checked: function(newVal, oldVal) {
+      console.log("我是子组件，现在的值为：" + newVal);
+    }
+  }
+};
+</script>
+```
+
+父组件部分:
+
+```vue
+<template>
+  <div id="app">
+    <div class="left">选中：{{checked}}</div>
+    <radio class="right" :options="options" v-model="checked"></radio>
+  </div>
+</template>
+
+<script>
+import radio from './components/radio.vue'
+
+export default {
+  name: 'App',
+  components: {
+    radio
+  },
+  data() {
+    return {
+      checked: 0,
+      options: [{
+        value: 0,
+        name: '选项1'
+      }, {
+        value: 1,
+        name: '选项2'
+      }]
+    }
+  }
+}
+</script>
+```
 
 
 
+### `v-model`和`v-bind:value`有什么区别？
+
+自定义组件中，必定会使用`v-bind`指令来实现组件之间值的传递，既然有的`v-bind`指令，为什么还需要在自定义的组件中实现`v-model`指令呢？在我实践了一番之后，我才明白，`v-model`既能够实现值的传递，也能够实现页面数据的实时变化，而`v-bind`只是实现值的传递，如果需要实现实时变化的效果，需要使用另外的方法修改变量的值，可以总结为下面两点
+
+1. `v-model`实现视图和数据的双向绑定，一者变化另一者也会同时变化
+2. `v-bind`只会在初始化的时候将数据绑定到视图上，后续视图变化不会影响数据
 
 
 
@@ -845,6 +954,37 @@ JavaScript只有函数构成作用域(注意理解作用域，**只有函数{}�
 - 如果以上都不行则采用setTimeout
 
 定义了一个异步方法，多次调用nextTick会将方法存入队列中，**通过这个异步方法清空当前队列。**
+
+
+
+**答题思路：**
+
+1. nextTick是啥？下一个定义
+2. 为什么需要它呢？用异步更新队列实现原理解释
+3. 我再什么地方用它呢？抓抓头，想想你在平时开发中使用它的地方
+4. 下面介绍一下如何使用nextTick
+5. 最后能说出源码实现就会显得你格外优秀
+
+Vue.nextTick( [callback, context] )
+
+在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
+
+```js
+// 修改数据
+vm.msg = 'Hello'
+// DOM 还没有更新
+Vue.nextTick(function () {
+// DOM 更新了
+})
+```
+
+**回答范例**：
+
+1. nextTick是Vue提供的一个全局API，由于vue的异步更新策略导致我们对数据的修改不会立刻体现在dom变化上，此时如果想要立即获取更新后的dom状态，就需要使用这个方法
+2. Vue 在更新 DOM 时是**异步**执行的。只要侦听到数据变化，Vue 将开启一个队列，并缓冲在同一事件循环中发生的所有数据变更。如果同一个 watcher 被多次触发，只会被推入到队列中一次。这种在缓冲时去除重复数据对于避免不必要的计算和 DOM 操作是非常重要的。nextTick方法会在队列中加入一个回调函数，确保该函数在前面的dom操作完成后才调用。
+3. 所以**当我们想在修改数据后立即看到dom执行结果就需要用到nextTick方法。**
+4. 比如，我在干什么的时候就会使用nextTick，传一个回调函数进去，在里面执行dom操作即可。
+5. 我也有简单了解nextTick实现，它会在callbacks里面加入我们传入的函数，然后用timerFunc异步方式调用它们，首选的异步方式会是Promise。这让我明白了为什么可以在nextTick中看到dom操作结果。
 
 
 

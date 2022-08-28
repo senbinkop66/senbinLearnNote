@@ -377,11 +377,7 @@ true
 
 ## 5. 请问你了解js作用域吗？
 
-**1，js作用域**
-
-**概念：**作用域就是一个独立的地盘，让变量不会外泄、暴露出去。也就是说**作用域最大的用处就是隔离变量**，不同作用域下同名变量不会有冲突。
-
-ES6 之前 JavaScript 没有块级作用域,只有**全局作用域**和**函数作用域**。ES6 的到来，为我们提供了‘**块级作用域**’,可通过新增命令 let 和 const 来体现。
+### 作用域
 
 作用域：在运行时代码中的某些特定部分中变量、函数和对象的**可访问性**。换句话说，作用域决定了代码区块中变量和其他资源的可见性，作用域就是一个独立的地盘，让变量不会外泄、暴露出去。
 
@@ -389,7 +385,11 @@ ES6 之前 JavaScript 没有块级作用域,只有**全局作用域**和**函数
 
 作用域是分层的，**内层作用域可以访问外层作用域的变量**，反之不行
 
-**2， JavaScript 没有块级作用域（ES6之前）**，只有全局作用域和函数作用域，ES6引入块级作用域
+ES6 之前 JavaScript 没有块级作用域,只有**全局作用域**和**函数作用域**。ES6 的到来，为我们提供了‘**块级作用域**’,可通过新增命令 let 和 const 来体现。
+
+
+
+### 全局作用域
 
 **全局作用域**（浏览器）：window
 
@@ -404,14 +404,17 @@ ES6 之前 JavaScript 没有块级作用域,只有**全局作用域**和**函数
 
 - 一个文件就是一个模块，通过 require 引入模块
 
-**函数作用域**：
+
+
+### 函数作用域
 
 - 声明在函数内部的变量
 
 
+
 **3，作用域链**
 
-当我们需要某个变量的值时，先去它最近的作用域去找，如果找不到，就找它的上级作用域，依次类推，直到找到全局，如全都未定义，那就抛出一个错误，如下代码所示
+当我们需要某个变量的值时，**先去它最近的作用域去找**，如果找不到，就找它的上级作用域，依次类推，直到找到全局，如全都未定义，那就抛出一个错误，如下代码所示
 
 ```js
 var a = 1
@@ -437,7 +440,7 @@ function B(){
     A();
 }
 
-B();//10
+B(); //10
 
 ```
 
@@ -490,6 +493,95 @@ function foo() {
 var fun = foo();
 fun(); // "bar in foo"
 ```
+
+
+
+### 块级作用域
+
+**块语句**（或其他语言的**复合语句**）用于组合零个或多个语句。该块由一对大括号界定，可以是`labelled`
+
+其他语言中通常将语句块称为**复合语句**。它允许你使用多个语句，其中 JavaScript 只需要一个语句。将语句组合成块是 JavaScript 中的常见做法。相反的做法是可以使用一个[空语句](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/Empty)，你不提供任何语句，虽然一个是必需的。
+
+**在非严格模式 (non-strict mode) 下的`var` 或者函数声明时**
+
+通过`var`声明的变量或者非严格模式下 (non-strict mode) 创建的函数声明**没有**块级作用域。在语句块里声明的变量的作用域不仅是其所在的函数或者 script 标签内，所设置变量的影响会在超出语句块本身之外持续存在。 换句话说，这种语句块不会引入一个作用域。尽管单独的语句块是合法的语句，但在 JavaScript 中你不会想使用单独的语句块，因为它们不像你想象的 C 或 Java 中的语句块那样处理事物。例如：
+
+```js
+var x = 1;
+{
+  var x = 2;
+}
+console.log(x); // 输出 2
+```
+
+输出结果是 2，因为块中的 `var x`语句与块前面的`var x`语句作用域相同。在 C 或 Java 中，这段代码会输出 1。
+
+
+
+**使用`let`和 `const`**
+
+相比之下，使用 [`let`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/let)和[`const`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/const)声明的变量是**有**块级作用域的。
+
+```js
+let x = 1;
+{
+  let x = 2;
+}
+console.log(x); // 输出 1
+```
+
+`x = 2`仅限在定义它的块中。
+
+`const`的结果也是一样的：
+
+```js
+const c = 1;
+{
+  const c = 2;
+}
+console.log(c); // 输出 1，而且不会报错
+```
+
+注意，位于块范围之内的 `const c = 2` 并不会抛出`SyntaxError: Identifier 'c' has already been declared`这样的语法错误，因为在它自己的块中它可能是唯一一个被声明的常量。
+
+**使用 let 声明的变量在块级作用域内能强制执行更新变量**，下面的两个例子对比：
+
+```js
+var a = [];
+for (var i = 0; i < 10; i++) {
+      a[i] = function () {console.log(i);};
+}
+a[0]();                // 10
+a[1]();                // 10
+a[6]();                // 10
+
+/********************/
+
+var a = [];
+for (let i = 0; i < 10; i++) {
+      a[i] = function () {console.log(i);};
+}
+a[0]();                // 0
+a[1]();                // 1
+a[6]();                // 6
+
+```
+
+**使用`function`**
+
+[函数声明](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function)同样被限制在声明他的语句块内：
+
+```js
+foo('outside');  // TypeError: foo is not a function
+{
+  function foo(location) {
+   console.log('foo is called ' + location);
+  }
+  foo('inside'); // 正常工作并且打印 'foo is called inside'
+}
+```
+
+
 
 
 
@@ -1369,16 +1461,65 @@ var ——ES5 变量声明方式
 1. 在变量未赋值时，变量undefined（为使用声明变量时也为undefined）
 2. 作用域——var的作用域为**方法作用域**；只要在方法内定义了，整个方法内的定义变量后的代码都可以使用
 
+```js
+var a = 2;
+
+if(true){
+     var a = 3;
+ }
+console.log(a);  // 3
+```
+
+```js
+// var a = 2;
+
+if(true){
+     var a = 3;
+ }
+console.log(a);  // 3
+```
+
+**var定义的是全局变量**
+
+
+
 let——ES6变量声明方式
 
 1. 在变量未声明前直接使用会报错
 2. 作用域——let为**块作用域**——通常let比var 范围要小
 3. let禁止重复声明变量，否则会报错；**var可以重复声明**
+4. **不存在变量提升**。既要先定义，后面才能有这个值，否则会报错，如果改成var会提示undefined未定义，但是let就直接报错了
+
+```js
+{
+       console.log(b);//报错
+        let b = 1;
+    }
+```
+
+
+
+6. 暂时性死区。只要在块级作用域里面存在let,则它所声明的变量就绑定在这个块级作用域上了，不受外界影响
+
+```js
+  var a = 2;
+   if(true){
+       console.log(a); //报错
+       let a = 3;
+   }
+```
+
+注意：a先是全局变量，但是let声明之后，导致let声明的变量已经绑定在这个块级作用域上了，在块级作用域里面a就变成局部变量，所以在let声明变量前，输出a会报错
+
+**简述：** let不能重复声明，不存在变量提升，暂时性死区，作用于块级作用域，let声明的变量只有在它所在的区域里面有效
+
+
 
 const——ES6变量声明方式
 
 1. const为常量声明方式；**声明变量时必须初始化**，在后面出现的代码中不能再修改该常量的值
 2. const实际上保真的，并不是变量的值不得改动，**而是变量指向的那个内存地址不得改动**
+3.  const必须初始化，声明一定要有值，无法重复声明，是块级作用域。不存在变量提升。暂时性死区
 
 
 
@@ -5683,6 +5824,12 @@ Promise.resolve(2).then(
 
 ## 5.  js事件循环
 
+
+
+
+
+
+
 浏览器中 JavaScript 的执行流程和 Node.js 中的流程都是基于 **事件循环** 的。
 
 理解事件循环的工作方式对于代码优化很重要，有时对于正确的架构也很重要。
@@ -5909,6 +6056,64 @@ menu.onclick = function() {
 
 ### 宏任务和微任务
 
+(宏)任务，其实就是标准JavaScript机制下的常规任务，或者简单的说，就是指消息队列中的等待被主线程执行的事件。在宏任务执行过程中，v8引擎都会建立新栈存储任务，宏任务中执行不同的函数调用，栈随执行变化，当该宏任务执行结束时，会清空当前的栈，接着主线程继续执行下一个宏任务。
+
+微任务，看定义中与(宏)任务的区别其实比较复杂，但是根据定义就可以知道，其中很重要的一点是，微任务必须是一个异步的执行的任务，这个执行的时间需要在主函数执行之后，也就是微任务建立的函数执行后，而又需要在当前宏任务结束之前。
+
+由此可以看出，微任务的出现其实就是语言设计中的一种实时性和效率的权衡体现。当宏任务执行时间太久，就会影响到后续任务的执行，而此时因为某些需求，编程人员需要让某些任务在宿主环境(比如浏览器)提供的事件循环下一轮执行前执行完毕，提高实时性，这就是微任务存在的意义。
+
+常见的创建宏任务的方法有setTimeout定时器，而常见的属于微任务延伸出的技术有Promise、Generator、async/await等。而无论是宏任务还是微任务依赖的都是基础的执行栈和消息队列的机制而运行。根据定义，宏任务和微任务存在于不同的任务队列，而微任务的任务队列应该在宏任务执行栈完成前清空。
+
+```js
+function taskOne() {
+    console.log('1 task one ...')
+    setTimeout(() => {
+        Promise.resolve().then(() => {
+            console.log('2 task one micro in macro ...')
+        })
+        setTimeout(() => {
+            console.log('3 task one macro ...')
+        }, 0)
+    }, 0)
+    taskTwo()
+}
+ 
+ 
+function taskTwo() {
+    console.log('4 task two ...')
+    Promise.resolve().then(() => {
+        setTimeout(() => {
+            console.log('5 task two macro in micro...')
+        }, 0)
+    })
+ 
+    setTimeout(() => {
+        console.log('6 task two macro ...')
+    }, 0)
+}
+ 
+setTimeout(() => {
+    console.log('7 running macro ...')
+}, 0)
+ 
+taskOne()
+ 
+Promise.resolve().then(() => {
+    console.log('8 running micro ...')
+})
+
+/*
+1 task one ...
+4 task two ...
+8 running micro ...
+7 running macro ...
+2 task one micro in macro ...
+6 task two macro ...
+5 task two macro in micro...
+3 task one macro ...
+*/
+```
+
 **宏任务（macrotask）** 外，还有在 [微任务（Microtask）](https://zh.javascript.info/microtask-queue) 一章中提到的 **微任务（microtask）**。
 
 微任务仅来自于我们的代码。它们通常是由 promise 创建的：对 `.then/catch/finally` 处理程序的执行会成为微任务。微任务也被用于 `await` 的“幕后”，因为它是 promise 处理的另一种形式。
@@ -6048,7 +6253,7 @@ console.log(7);
 
 页面渲染事件，各种IO的完成事件等随时被添加到任务队列中，一直会保持先进先出的原则执行，我们不能准确地控制这些事件被添加到任务队列中的位置。但是这个时候突然有高优先级的任务需要尽快执行，那么一种类型的任务就不合适了，所以引入了微任务队列。
 
-不同的异步任务被分为：宏任务和微任务
+不同的**异步任务**被分为：宏任务和微任务
 宏任务：
 
 - script(整体代码)
@@ -6083,7 +6288,7 @@ console.log(7);
 - 渲染完毕后，JS线程继续接管，开始下一个宏任务（从事件队列中获取）
 
 简单总结一下执行的顺序：
-执行宏任务，然后执行该宏任务产生的微任务，若微任务在执行过程中产生了新的微任务，则继续执行微任务，微任务执行完毕后，再回到宏任务中进行下一轮循环。
+执行宏任务，**然后执行该宏任务产生的微任务**，若微任务在执行过程中产生了新的微任务，则继续执行微任务，微任务执行完毕后，再回到宏任务中进行下一轮循环。
 
 ![宏任务和微任务](https://segmentfault.com/img/remote/1460000022805533)
 
@@ -6184,6 +6389,8 @@ setTimeout()方法是定义一个回调，并且希望这个回调在我们所�
 
 setImmediate：
 setImmediate()方法**从意义上将是立刻执行的意思，但是实际上它却是在一个固定的阶段才会执行回调**，即poll阶段之后。
+
+
 
 ---
 

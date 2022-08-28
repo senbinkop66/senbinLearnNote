@@ -1681,6 +1681,122 @@ function add(a ,b){
 
 ## 数字转千分位
 
+### 数值转字符串遍历
+
+```js
+function format_with_array(number) {
+    var arr = (number + '').split('.');
+    var int = arr[0].split('');
+    var fraction = arr[1] || '';
+    var r = "";
+    var len = int.length;
+    int.reverse().forEach(function (v, i) {
+        if (i !== 0 && i % 3 === 0) {
+            r = v + "," + r;
+        } else {
+            r = v + r;
+        }
+    })
+    return r + (!!fraction ? "." + fraction : '');
+}
+```
+
+### substring
+
+```js
+function format_with_substring(number) {
+    var arr = (number + '').split('.');
+    var int = arr[0] + '';
+    var fraction = arr[1] || '';
+    var f = int.length % 3;
+    var r = int.substring(0, f);
+
+    for (var i = 0; i < Math.floor(int.length / 3); i++) {
+        r += ',' + int.substring(f + i * 3, f + (i + 1) * 3)
+    }
+
+    if (f === 0) {
+        r = r.substring(1);
+    }
+    return r + (!!fraction ? "." + fraction : '');
+}
+```
+
+### 除法+求模
+
+```js
+function format_with_mod(number) {
+    var n = number;
+    var r = ""; 
+    var temp;
+    do {
+        mod = n % 1000;
+        n = n / 1000;
+        temp = ~~mod;
+        r =  (n >= 1 ?`${temp}`.padStart(3, "0"): temp) + (!!r ? "," + r : "")
+    } while (n >= 1)
+
+    var strNumber = number + "";
+    var index = strNumber.indexOf(".");
+    if (index > 0) {
+        r += strNumber.substring(index);
+    }
+    return r;
+}
+```
+
+### 正则
+
+```js
+function formatNumber(num) {
+	let [int, fraction] = num.toString().split(".");
+	let reg = /\d{1,3}(?=(\d{3})+$)/g
+	return (int + '').replace(reg, "$&,") + (!!fraction ? "." + fraction : "");
+}
+function format_with_regex(number) {
+    var reg = /(\d)(?=(?:\d{3})+$)/g   
+    return (number + '').replace(reg, '$1,');
+}
+
+let num1 = 123456.342;
+console.log(formatNumber(num1));  // 123,456.342
+
+let num2 = -1234567.342;
+console.log(formatNumber(num2));  // -1,234,567.342
+```
+
+### toLocaleString
+
+```js
+function format_with_toLocaleString(number, minimumFractionDigits, maximumFractionDigits) {
+    minimumFractionDigits = minimumFractionDigits || 2;
+    maximumFractionDigits = (maximumFractionDigits || 2);
+    maximumFractionDigits = Math.max(minimumFractionDigits, maximumFractionDigits);
+
+    return number.toLocaleString("en-us", {
+        maximumFractionDigits: maximumFractionDigits || 2,
+        minimumFractionDigits: minimumFractionDigits || 2
+    })
+}
+```
+
+### Intl.NumberFormat
+
+```js
+function format_with_Intl(number, minimumFractionDigits, maximumFractionDigits) {
+    minimumFractionDigits = minimumFractionDigits || 2;
+    maximumFractionDigits = (maximumFractionDigits || 2);
+    maximumFractionDigits = Math.max(minimumFractionDigits, maximumFractionDigits);
+
+    return new Intl.NumberFormat('en-us', {
+        maximumFractionDigits: maximumFractionDigits || 2,
+        minimumFractionDigits: minimumFractionDigits || 2
+    }).format(number)
+}
+```
+
+
+
 
 
 
@@ -1689,7 +1805,9 @@ function add(a ,b){
 
 ## 获取url参数
 
+```
 
+```
 
 
 
