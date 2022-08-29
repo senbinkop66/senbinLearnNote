@@ -5036,6 +5036,148 @@ for (var i = 0; i< 10; i++){
 
 
 
+
+
+----
+
+## 10. JS 通过 Promise 实现延时执行，支持链式调用
+
+### 延时执行
+
+定义`sleep`函数
+
+```js
+/**
+ * 定义延时函数
+ * delaytime 延时时长，单位毫秒
+ */
+var sleep = (delaytime = 1000) => {
+  return new Promise(resolve => setTimeout(resolve, delaytime))
+}
+
+```
+
+### 同步执行
+
+```javascript
+(async () => {
+    await sleep(3000);
+    console.log(Date.now());
+})();
+```
+
+```js
+/**
+ * 定义延时函数
+ * delaytime 延时时长，单位毫秒。默认1000
+ */
+var sleep = (delaytime = 1000) => {
+  return new Promise(resolve => setTimeout(resolve, delaytime))
+}
+/**
+ * 遍历数据，调用 foo 逐个处理。
+ * arr         待遍历的数组
+ * callback    处理数组元素的业务逻辑。默认输出日志
+ * delaytime   延时时长
+ */
+async function delayDo(arr, callback = data=>console.log(`数据：${data}`), delaytime) {
+    var len = arr.length;
+    for (let i = 0; i <len  ; i++) {        
+        await sleep(delaytime);
+        callback(arr[i]);
+    }
+};
+// 遍历数组，间隔 1 秒处理一个元素。
+function main(){
+    var arr = [1,2,3,'呵呵哒！',5,6,7,8,9];
+    delayDo(arr);
+}
+main();
+
+```
+
+### 异步方式
+
+```javascript
+sleep(3000).then(() => {  
+    console.log(Date.now());
+});
+
+```
+
+```js
+var sleep = (delaytime) => {
+  return new Promise(resolve => setTimeout(resolve, delaytime))
+}
+sleep(1000).then(() => {  
+    console.log(Date.now());
+
+    sleep(1000).then(() => {  
+        console.log(Date.now());
+
+        sleep(1000).then(() => {  
+            console.log(Date.now());
+        });
+    });
+});
+
+```
+
+### 支持链式调用
+
+今天需要按顺序执行一组方法，并支持结果向后传递。
+
+```js
+class Jdelay {
+  constructor() {
+	this.params = []; // 用来缓存链式调用的结果进行传递
+    this.queue = Promise.resolve();
+  }
+  /**
+   * 睡眠指定时间。默认1秒
+   */
+  sleep(time=1) {
+    this.queue = this.queue.then(() => {
+      return new Promise(res => {
+        setTimeout(res, time * 1000)
+      })
+    })
+    return this;
+  }
+  /**
+   * 执行传入的方法
+   */
+  do(callback) {
+    this.queue = this.queue.then(() => {
+    	if(typeof foo == 'function'){
+    		// 将上一次执行结果作为参数传入。将本次执行结果保存备用。 
+      		this.params.push(callback(this.params.pop()));
+    	}else{
+    		console.info('请传入回调函数，当前是个：', typeof callback);
+    	}
+    })
+    return this;
+  }
+}
+
+/**
+ * 被调用的方法
+ */
+function foo(data){
+	var now = (new Date()).toLocaleString().match(/(\d+)/g).map((d,i)=>d+['-','-',' ',':',':',''][i]).join('');
+	console.info(now, '前一个方法结果：', data); 
+	return now + '某些事情发生了！';
+}
+
+// 链式调用3次
+new Jdelay().sleep(3).do(foo).sleep(3).do(foo).sleep(3).do(foo);
+
+```
+
+
+
+
+
 ------
 
 
