@@ -1,56 +1,36 @@
 /**
- * 
- * @param n int整型 the n
- * @return int整型
+ * @param {number[]} coins
+ * @param {number} amount
+ * @return {number}
  */
-function Nqueen( n ) {
-    const queens = new Array(n).fill(-1);
-    const ans = 0;
-    // 分别记录每一列以及两个方向的每条斜线上是否有皇后
-    const columns = new Set();
-    const diagons1 = new Set();
-    const diagons2 = new Set();
-    
-    const backtrack = (queens, n, row, columns, diagons1, diagons2) => {
-        if (row === n) {
-            ans++;
-        } else {
-            for (let i = 0; i < n; i++) {
-                if (columns.has(i)) {
-                    continue;
-                }
-                let diagon1 = row - i;
-                if (diagons1.has(diagon1)) {
-                    continue;
-                }
-                let diagon2 = row + i;
-                if (diagons2.has(diagon2)) {
-                    continue;
-                }
+var coinChange = function(coins, amount) {
+    if (amount < 1) {
+        return 0;
+    }
+    const count = new Array(amount).fill(0);
 
-                queens[row] = i;
-                columns.add(i);
-                diagons1.add(diagon1);
-                diagons2.add(diagon2);
-                //回溯
-                backtrack(queens, n, row + 1, columns, diagons1, diagons2);
-                //撤销
-                queens[row] = -1;
-                columns.delete(i);
-                diagons1.delete(diagon1);
-                diagons2.delete(diagon2);
+    const dfs = (coins, rem, count) => {
+        if (rem < 0) {
+            return -1;
+        }
+        if (rem === 0) {
+            return 0;
+        }
+        if (count[rem - 1] !== 0) {
+            return count[rem - 1];
+        }
+        let min = Number.MAX_SAFE_INTEGER;
+        for (let i = 0; i < coins.length; i++) {
+            let res = coinChange(coins, rem - coins[i], count);
+            if (res >= 0 && res < min) {
+                min = 1 + res;
             }
         }
+        count[rem - 1] = (min === Number.MAX_SAFE_INTEGER) ? -1 : min;
+        return count[rem - 1];
     }
-
-    backtrack(queens, n, 0, columns, diagons1, diagons2);
-
-    return ans;
+    return dfs(coins, amount, count);
 };
 
-
-
-
-module.exports = {
-    Nqueen : Nqueen
-};
+let coins = [2], amount = 3;
+console.log(coinChange(coins, amount));
