@@ -672,6 +672,52 @@ html {
 
 
 
+### 盒模型width:100%会出现什么问题 
+
+```html
+    <style type="text/css">
+        #box1 {
+            width: 200px;
+            height: 200px;
+            border: 1px solid gray;
+        }
+        #box2 {
+            width: 100%;
+            margin: 10px;
+            padding: 10px;
+            height: 100px;
+            border: 1px solid red;
+        }
+    </style>
+</head>
+<body>
+    <div id="box1">
+        <div id="box2"></div>
+    </div>
+</body>
+```
+
+如果设置了外边距或内边距或边框，会超出父元素范围
+
+
+
+### width:100%、width:auto、width:80%、width:100rpx的区别
+
+width:100% 子元素的width值(仅仅指content area范围)为父元素的width值
+width:auto 子元素的width值则为content+padding+border+margin
+width:100px 子元素的width值为100px
+
+### CSS函数: calc()
+
+因为我们有时候会需要子元素width减去margin值这种场景，同时子元素width是不能写固定值的，这时候就可以用calc()函数来进行计算了。该calc()函数将单个表达式作为其参数，并将表达式的结果用作值。表达式可以是使用标准运算符优先级规则组合以下运算符的任何简单表达式：
+
+```css
+/* property: calc(expression) */
+width: calc(100% - 80px);
+```
+
+
+
 ----
 
 ## 14.文档流有哪些
@@ -1473,7 +1519,7 @@ CSS3增加了很多选择器，以供样式绑定使用，常用的主要有：
 
 CSS3新增创建动画方法，通过@keyframes 规则创建动画，在规则中指定 CSS 样式，就能创建由当前样式逐渐改为新样式的动画效果，用百分比来规定变化发生的时间，或用"from" 和 "to"（等同于 0% 和 100%）
 
-利用animation属性将动画绑定到指定选择器上，至少绑定动画名称与时长
+利用animation属性将动画绑定到指定选择器上，**至少绑定动画名称与时长**
 
 ###   3. 形状变换
 
@@ -1825,17 +1871,93 @@ CSS像素*DPR = 物理像素
 
 ## 32.flex:1表达什么含义？
 
-flex 是 flex-grow, flex-shrink 和 flex-basis的简写。
+flex：flex属性是flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 auto
 
-flex-grow：定义在分配多余空间时，盒子的放大比例，默认为0，**即存在剩余空间，也不放大**
+该属性有两个快捷值：auto (1 1 auto) 和 none (0 0 auto)。
 
-flex-shrink：定义在分配多余空间时，盒子的缩小比例（多余空间可能是负值），默认为1，**即空间不足将缩小**
+
+
+flex-grow：定义在分配多余空间时，**盒子的放大比例**，默认为0，**即存在剩余空间，也不放大**
+
+```
+flex-grow：属性定义的是项目的方法比例，默认为 0，即如果存在剩余空间，也不会去放大
+如果所有的项目的flex-grow都为1，则他们将等分剩余空间。
+如果一个项目的flex-grow属性为2，其他的都为1，那么前者占据的剩余空间会比其他项多一倍。
+```
+
+flex-shrink：定义在分配多余空间时，**盒子的缩小比例**（多余空间可能是负值），默认为1，**即空间不足将缩小**
+
+```
+flex-shrink：属性定义了项目的缩小比例，默认为1，即：如果空间不足，就将改项目缩小。
+如果所有项目的flex-shrink属性为1，当空间不足时，就都等比例缩小。
+如果一个项目的flex-shrink属性为0，其他的项目都为1，当空间不足的时候，为0的不缩小。
+```
 
 flex-basis：定义在分配多余空间之前，**盒子占据的主轴空间**（可理解为基准值），通常根据该属性计算多余空间，默认为auto，即盒子自身大小
 
+```
+flex-basis：属性定义了在分配多余空间之前，项目占据的主轴空间。
+浏览器根据这个属性，计算主轴是否有多余空间，它的默认值为auto，也就是项目本来的大小
+它可以设为跟width或height属性一样的值（比如350px），则项目将占据固定空间。
+
+并且basis和width同时存在basis会把width干掉
+```
+
+
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>测试</title>
+    <style type="text/css">
+   .box {
+      width: 500px;
+      height: 100px;
+      background-color: hotpink;
+      display: flex;
+    }
+ 
+    .box div {
+      width: 100px;
+    }
+ 
+    .box div:nth-child(1) {
+        flex-grow: 2;
+      flex-basis: 50px;
+      background-color: gray;
+    }
+ 
+    .box div:nth-child(2) {
+        flex-grow: 1;
+      flex-basis: 100px;
+      background-color: blue;
+    }
+ 
+    .box div:nth-child(3) {
+        flex-grow: 1;
+      flex-basis: 50px;
+      background-color: goldenrod;
+    }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div>1</div>
+        <div>2</div>
+        <div>3</div>
+    </div>
+</body>
+</html>
+
+```
+
+
+
 除了auto (1 1 auto) 和 none (0 0 auto)这两个快捷值外，还有以下设置方式：
 
-- 当 flex 取值为一个非负数字，则该数字为 flex-grow 值，flex-shrink 取 1，flex-basis 取 0%，如下是等同的：
+- 当 flex 取值为一个非负数字，**则该数字为 flex-grow 值**，flex-shrink 取 1，flex-basis 取 0%，如下是等同的：
 
   ```css
   .item {flex: 1;}
@@ -1942,6 +2064,10 @@ item-2 = auto + 120px = 100px + 120px = 220px
 
 item-3 = 200px + 60px = 260px
 ```
+
+
+
+
 
 ---
 
@@ -2687,17 +2813,40 @@ relative (相对于自身偏移)
 
 定位布局：页面元素CSS样式采用position属性，可在top/bottom/right/left四个方向进行位置移动，从而达到定位效果，position属性可取以下7个值：
 
-###   (1) 相对定位 relative
+### (1) 静态定位 static
 
-- **不会使元素脱离文档流**（原本位置会被保留，即改变位置也不会占用新位置）
+- **默认定位，遵循正常的文档流**。元素不会受到影响
+
+- 该关键字指定元素使用正常的布局行为，即元素在文档常规流中当前的布局位置。此时 `top`, `right`, `bottom`, `left` 和 `z-index` 属性无效。
+
+
+
+###   (2) 相对定位 relative
+
+- **不会使元素脱离文档流**（原本位置会被保留，即改变位置也不会占用新位置）。
 
 - 相对于自身原本位置移动（**没有定位偏移量则对元素无影响**）
 
 - 不影响元素本身特性（无论块级元素或行内元素，保留其原本特性）
 
-- 常用于提升层级，从而改变元素覆盖关系，若两个都为定位元素，后面的会覆盖前面
+- **常用于提升层级**，从而改变元素覆盖关系，若两个都为定位元素，后面的会覆盖前面
 
-### (2) 绝对定位 absolute
+- 该关键字下，元素先放置在未添加定位时的位置，再在不改变页面布局的前提下调整元素位置（因此会在此元素未添加定位时所在位置留下空白）。
+
+```css
+
+    #div2 {
+        background-color: black;
+        position: relative;
+        top: 100px;
+        left: 100px;
+    }
+
+```
+
+
+
+### (3) 绝对定位 absolute
 
 - **使元素完全脱离文档流**（在文档流中不再占原来位置）
 
@@ -2711,15 +2860,45 @@ relative (相对于自身偏移)
 
 - 可提升层级
 
-### (3) 固定定位 fixed
+- 元素会被移出正常文档流，并不为元素预留空间，通过指定元素相对于最近的非 static 定位祖先元素的偏移，来确定元素位置。绝对定位的元素可以设置外边距（margins），且不会与其他边距合并。
 
-- 直接相对于浏览器窗口进行“绝对定位”
+  ```css
+  {
+      position:absolute;
+      left:100px;
+      top:150px;
+  }
+  ```
 
-- 浮动在页面中，**元素位置不会随浏览器窗口滚动条滚动而变化**
+  
+
+### (4) 固定定位 fixed
+
+- 直接**相对于浏览器窗口**进行“绝对定位”
+
+- 浮动在页面中，**元素位置不会随浏览器窗口滚动条滚动而变化**。即使窗口是滚动的它也不会移动
 
 - **不会受文档流动影响**
 
-### (4) 粘性定位 sticky
+- 元素会被移出正常文档流，并不为元素预留空间，而是通过指定元素相对于屏幕视口（viewport）的位置来指定元素位置。
+
+- 元素的位置在屏幕滚动时不会改变。打印时，元素会出现在的每页的固定位置。
+
+- `fixed` 属性会创建新的层叠上下文。
+
+- 当元素祖先的 `transform`, `perspective` 或 `filter` 属性非 `none` 时，**容器由视口改为该祖先**。fixed效果失效。
+
+- ```css
+  {
+      position:fixed;
+      top:30px;
+      right:5px;
+  }
+  ```
+
+  
+
+### (5) 粘性定位 sticky
 
 - 基于用户的滚动来定位，**在相对定位与固定定位两者间切换**。滚动前相当于position:relative，当页面滚动超出目标区域时，相当于position:fixed，会将元素固定在目标位置
 
@@ -2729,11 +2908,16 @@ relative (相对于自身偏移)
 
 - 兼容性不好，如Internet Explorer, Edge 15 及更早 IE 版本不支持 sticky 定位，通常需要结合CSS3兼容方案
 
-### (5) 静态定位 static
+- 注意，**一个 sticky 元素会“固定”在离它最近的一个拥有“滚动机制”的祖先上**（当该祖先的`overflow` 是 `hidden`, `scroll`, `auto`, 或 `overlay`时），即便这个祖先不是最近的真实可滚动祖先。这有效地抑制了任何“sticky”行为
 
-- **默认定位，遵循正常的文档流**
+- 须指定 [`top`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/top), [`right`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/right), [`bottom`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/bottom) 或 [`left`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/left) 四个阈值其中之一，才可使粘性定位生效。否则其行为与相对定位相同。
 
-- 元素不会受到影响
+- ```css
+  #one { position: sticky; top: 10px; }
+  /*在 viewport 视口滚动到元素 top 距离小于 10px 之前，元素为相对定位。之后，元素将固定在与顶部距离 10px 的位置，直到 viewport 视口回滚到阈值以下。*/
+  ```
+
+  
 
 ### (6) 继承值 inherit
 
@@ -2745,15 +2929,51 @@ relative (相对于自身偏移)
 
 - 可将所有CSS属性恢复到初始状态
 
+**重叠的元素**
+
+元素的定位与文档流无关，所以它们可以覆盖页面上的其它元素
+
+z-index属性指定了一个元素的堆叠顺序（哪个元素应该放在前面，或后面）
+
+一个元素可以有正数或负数的堆叠顺序：
+
+```css
+img {
+    position:absolute;
+    left:0px;
+    top:0px;
+    z-index:-1;
+}
+```
+
+具有更高堆叠顺序的元素总是在较低的堆叠顺序元素的前面。
+
+**注意：** 如果两个定位元素重叠，没有指定z - index，最后定位在HTML代码中的元素将被显示在最前面。
+
+
+
+
+
 ---
 
 ##  40.fixed定位会出现失效情况吗？有什么解决办法吗？
+
+
 
 存在常见3种fixed定位失效情况：
 
 (1) **父元素的transform属性值不为none时，子元素的fixed失效**（比较常见，仅在部分浏览器中失效）
 
+```html
+<p style="transform:scale(1);"><img src="mm1.jpg"style="position:fixed;" /></p>
+```
+
 失效原因：当元素祖先的 transform 属性非 none 时，**定位容器由视口改为该祖先**（摘自MDN）
+
+这就涉及到了 Stacking Context ，也就是堆叠上下文的概念了。解释上面的问题分为两步：
+
+1. 任何非 `none` 的 `transform` 值都会导致一个堆叠上下文（Stacking Context）和包含块（Containing Block）的创建。
+2. 由于堆叠上下文的创建，该元素会影响其子元素的固定定位。设置了 `position:fixed` 的子元素将不会基于 `viewport` 定位，而是基于这个父元素。
 
 解决办法：
 
@@ -2769,9 +2989,25 @@ relative (相对于自身偏移)
 
 浏览器都不支持 perspective 属性，Chrome 和 Safari 支持替代的 -webkit-perspective 属性，目前可行办法就是删掉perspective属性
 
+```css
+-webkit-perspective: 1000;
+ 
+-moz-perspective: 1000;
+ 
+-ms-perspective: 1000;
+ 
+perspective: 1000;
+```
+
 (3)  元素的will-change中指定了任意 CSS 属性
 
 目前可行办法就是尽量避免给fixed定位元素设置will-change
+
+
+
+`position: fixed` 还有一些其他问题，比如在在移动端实现头部、底部模块定位。或者是在 `position: fixed` 中使用了 input 也会存在一些问题
+
+
 
 
 
@@ -2809,7 +3045,20 @@ relative (相对于自身偏移)
 
 而脱离文档流的设置有两种：float，position：absolute
 
-### (1)float
+### 什么是脱离文档流？
+
+浏览器默认的排版方式就是文档流(或者叫标准流)排版方式。脱离文档流就是不按照文档流的排版方式。
+
+文档流的排版方式是：块级元素垂直排布，行内元素和行内块级水平排布。不脱离就是按照这种方式排版,从左到右，从上到下。
+
+脱离文档流是指，该元素脱离了文档中。不再占据默认分配的空间，它下面的元素会上去补位。
+
+| 脱离状态 | 区别                                                         |
+| -------- | ------------------------------------------------------------ |
+| 全脱离   | 补位元素中无论是有图片还是文字，都会全部上去补位             |
+| 半脱离   | 补位元素中有图片、文字的，这些图片或者文字会卡在元素周围，形成环绕效果 |
+
+### (1)float(半脱离文档)
 
 （理解是通过设置float来脱离文档流，脱离后的元素会遵循文档流之外的另一套规则，暂且称为**浮动规则**）。
 规则如下：
@@ -2822,14 +3071,58 @@ relative (相对于自身偏移)
 ⑦、文档流中子元素的宽度默认为父元素的100%，**脱离文档流之后，块元素的高宽度都只能由内容撑开**，而且**浮动的子元素无法撑开父元素（除非父元素也是浮动元素）。**
 ⑧、内联元素浮动后会变成块级元素。
 
-### (2) position:absolute
+```html
+<div class="box1"></div>
+<!-- 我们多写点文字 -->
+<div class="box2">
+麒麟二哥麒麟二哥麒麟二哥麒麟二哥麒麟二哥麒麟二哥麒麟二哥麒麟二哥麒麟二哥麒麟二哥麒麟二哥麒麟二哥麒麟二哥麒麟二哥麒麟二哥
+</div>
+
+```
+
+
+
+```css
+.box1{
+	width: 200px;
+	height: 200px;
+	float: left;
+	background-color: #00B5EE;
+}
+.box2{
+    /*宽度设置大一点，比200多50 实现全环绕效果*/
+	width: 250px;
+	height: 250px;
+	background-color: #00FF00;
+}
+
+```
+
+
+
+### (2) position:absolute（全脱离文档流）
 
 （理解是通过设置绝对定位来脱离文档流，脱离后的元素会遵循文档流之外的另一套规则，暂且称为**绝对定位规则**）。
 规则如下：
 ①、 绝对定位是相对于**离他最近的开启了定位的祖先元素**进行定位的，没有这种祖先元素，则相对于浏览器窗口（以左上角为坐标（0，0））
-②、定位元素会提高一个层级。
+②、定位元素会**提高一个层级**。
 ③、**内联元素变块级元素，高宽都只能由内容撑开。**
 ④、当一个文档流中的元素前的一个元素开启了绝对定位，**则这个文档流中的元素会向上移动，被前元素覆盖**。（其实跟浮动规则差不多），如果没有这样的情况，则开启了绝对定位的元素如果不设置偏移量，位置不会发生变化。
+
+```css
+.box1{
+	width: 200px;
+	height: 200px;
+	position: absolute;
+	background-color: #00B5EE;
+}
+.box2{
+	width: 200px;
+	height: 200px;
+	background-color: #00FF00;
+}
+
+```
 
 浮动规则≠绝对定位规则，两者不相通
 这句话的意思是一个浮动元素和一个定位元素会重叠，且**绝对定位元素的层级高于浮动元素的层级**（按照浮动规则，浮动的兄弟元素是不会相互覆盖的）。
@@ -2867,6 +3160,8 @@ relative (相对于自身偏移)
 ```
 
 （当两个元素都开启绝对定位且不设置偏移量时，**两个元素也会像上面这个图一样相互覆盖**）
+
+
 
 
 
@@ -7009,3 +7304,9 @@ div{
 
 ----
 
+## 104. 什么是堆叠上下文？
+
+堆叠上下文（Stacking Context）：堆叠上下文是 HTML 元素的三维概念，这些 HTML 元素在一条假想的相对于面向（电脑屏幕的）视窗或者网页的用户的 z 轴上延伸，HTML 元素依据其自身属性按照优先级顺序占用层叠上下文的空间。
+
+概念比较抽象，简单理解，就是 生成了 Stacking Context 的元素会影响 该元素的层叠关系与定位关系。
+总之，按照上面的说法，堆叠上下文的创建，该元素会影响其子元素的固定定位。设置了 position:fixed 的子元素将不会基于 viewport 定位，而是基于这个祖先元素。

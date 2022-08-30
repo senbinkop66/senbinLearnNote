@@ -146,7 +146,7 @@ Proxy 可以理解成，**在目标对象之前架设一层“拦截**”，外�
 - 组件
 - 通信
 
-都知道组件是`vue`最强大的功能之一，`vue`中每一个`.vue`我们都可以视之为一个组件通信指的是发送者通过某种媒体以某种格式来传递信息到收信者以达到某个目的。广义上，任何信息的交通都是通信**组件间通信**即指组件(`.vue`)通过某种方式来传递信息以达到某个目的举个栗子我们在使用`UI`框架中的`table`组件，可能会往`table`组件中传入某些数据，这个本质就形成了组件之间的通信
+都知道组件是`vue`最强大的功能之一，`vue`中每一个`.vue`我们都可以视之为一个组件通信指的是发送者通过某种媒体以某种格式来传递信息到收信者以达到某个目的。广义上，任何信息的交通都是通信**组件间通信**即指组件(`.vue`)通过某种方式来传递信息以达到某个目的。举个栗子我们在使用`UI`框架中的`table`组件，可能会往`table`组件中传入某些数据，这个本质就形成了组件之间的通信
 
 组件间通信的分类可以分成以下
 
@@ -236,7 +236,7 @@ Father.vue组件
 ## 1.7 $emit 触发自定义事件传递数据
 
 - 适用场景：子组件传递数据给父组件
-- 子组件通过`$emit触发`自定义事件，`$emit`第二个参数为传递的数值
+- 子组件通过`$emit触发`自定义事件，**`$emit`第二个参数为传递的数值**
 - 父组件绑定监听器获取到子组件传递过来的参数
 
 ```js
@@ -470,7 +470,7 @@ var app=new Vue({
 
 **解析：**
 
-- C组件中能直接触发getCData的原因在于 B组件调用C组件时 使用 v-on 绑定了$listeners 属性
+- C组件中能直接触发getCData的**原因在于 B组件调用C组件时 使用 v-on 绑定了$listeners 属性**
 - 通过v-bind 绑定$attrs属性，C组件可以直接获取到A组件中传递下来的props(除了B组件中props声明的)
 
 ![img](https://uploadfiles.nowcoder.com/images/20220301/4107856_1646128655053/F98E288D764804F2354ED35EC26D637C)
@@ -481,26 +481,97 @@ var app=new Vue({
 
 ## 1.12 provide和inject
 
-父组件中通过provider来提供变量，然后在子组件中通过inject来注入变量。不论子组件有多深，只要调用了inject那么就可以注入provider中的数据。而不是局限于只能从当前父组件的prop属性来获取数据，只要在父组件的生命周期内，子组件都可以调用。
+这对选项需要一起使用，以允许一个祖先组件向其所有子孙后代注入一个依赖，不论组件层次有多深，并在其上下游关系成立的时间里始终生效。如果你熟悉 React，这与 React 的上下文特性很相似。
+
+```
+provide：Object | () => Object
+inject：Array<string> | { [key: string]: string | Symbol | Object }
+```
+
+`provide` 选项应该是一个对象或返回一个对象的函数。该对象包含可注入其子孙的 property。在该对象中你可以使用 ES2015 Symbols 作为 key，但是只在原生支持 `Symbol` 和 `Reflect.ownKeys` 的环境下可工作。
+
+`inject` 选项应该是：
+
+- 一个字符串数组，或
+- 一个对象，对象的 key 是本地的绑定名，value 是：
+  - 在可用的注入内容中搜索用的 key (字符串或 Symbol)，或
+  - 一个对象，该对象的：
+    - `from` property 是在可用的注入内容中搜索用的 key (字符串或 Symbol)
+    - `default` property 是降级情况下使用的 value
 
 - 在祖先组件定义`provide`属性，返回传递的值
 - 在后代组件通过`inject`接收组件传递过来的值
 
-祖先组件
+> 提示：`provide` 和 `inject` 绑定并不是可响应的。这是刻意为之的。然而，**如果你传入了一个可监听的对象，那么其对象的 property 还是可响应的。**
 
 ```js
-provide(){  
-    return {  
-        foo:'foo'  
-    }  
-}  
+// 父级组件提供 'foo'
+var Provider = {
+  provide: {
+    foo: 'bar'
+  },
+  // ...
+}
+
+// 子组件注入 'foo'
+var Child = {
+  inject: ['foo'],
+  created () {
+    console.log(this.foo) // => "bar"
+  }
+  // ...
+}
 ```
 
-后代组件
+
+
+我们就可以通过传递一个对象的方式，实现数据的响应式。
+
+数据格式为对象Object的类型，父组件修改数据影响子组件，子组件修改数据影响父组件，感觉和对象的存储有关，对象格式数据存储的是指针而不是数据，所以父子组件其实是用的同一个对象，修改的也是同一个对象，因此会实现双向响应改变
 
 ```js
-inject:['foo'] // 获取到祖先组件传递过来的值  
+//父组件Father.vue
+
+ data(){
+     return {
+        obj: {            //一定是个对象,才能实现响应式
+             name: 'eavan'
+         }
+     }
+ },
+ provide() {            //要访问组件实例 property，我们需要将 provide 转换为返回对象的函数
+     return{
+         user: this.obj
+    }
+ }
+//子组件Child.vue
+
+export default {
+    name: 'Child',
+    inject: ['user']    //正常使用inject
+}
 ```
+
+
+
+```html
+<script setup>
+import { ref, provide } from 'vue'
+import { fooSymbol } from './injectionSymbols'
+
+// 提供静态值
+provide('foo', 'bar')
+
+// 提供响应式的值
+const count = ref(0)
+provide('count', count)
+
+// 提供时将 Symbol 作为 key
+provide(fooSymbol, count)
+</script>
+```
+
+
 
 
 
@@ -584,9 +655,118 @@ vue3新的 `provide/inject` 功能可以穿透多层组件，实现数据从父�
 
 ----
 
+## 1.16 如何在自定义组件使用v-model
+
+vue2.2+版本新增了一个功能，可以在自定义组件上使用v-model实现双向绑定。在使用新功能之前，我们先来了解一下vue.js的v-model是如何实现双向绑定的。从官方文档以及各种技术文章中,我们可以知道，v-model是v-bind以及v-on配合使用的语法糖，
+
+1. `v-bind`绑定一个`value`属性
+2. `v-on`监听当前元素的`input`事件，当数据变化时，将值传递给`value`实时更新数据
+
+```vue
+<input v-model="value" />
+<input v-bind:value="value" v-on:input="value= $event.target.value" />
+```
+
+两种方法的实现效果是一样的，都是给`<input>`标签绑定一个值，并且在监听到input事件时，把输入的值替换绑定的值来实现双向绑定。其中第一种是第二种方法的语法糖。
+
+现在我们已经了解了v-model是什么东东，那么除了在表单控件上使用v-model外，能不能在自定义的组件上使用v-model，从而实现父子组件间的双向绑定呢？
+
+答案是可以的。 vue2.2+版本后，新增加了一个model选项，model选项允许自定义prop和event。官方原文是这样的：**允许一个自定义组件在使用 v-model 时定制 prop 和 event。默认情况下，一个组件上的 v-model 会把 value 用作 prop 且把 input 用作 event，但是一些输入类型比如单选框和复选框按钮可能想使用 value prop 来达到不同的目的。使用 model 选项可以回避这些情况产生的冲突。**
+
+我们首先编写一个子组件，并用到model选项,核心代码如下
+
+```vue
+<template>
+  <div class="radio">
+    <div class="radioGroup">
+      <div
+        class="radioItem"
+        v-for="item in options"
+        :key="item.value"
+        @click="clickRadio(item.value);"
+      >
+        <div
+          class="radioBox"
+          :class="{ checked: item.value === checked }"
+        ></div>
+        <div class="name">{{ item.name }}</div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  name: "radio",
+  props: {
+    options: Array,
+    value: Number
+  },
+  computed: {
+    checked() {
+      return this.value;
+    }
+  },
+  model: {
+    prop: "value", //绑定的值，通过父组件传递
+    event: "update" //自定义事件名
+  },
+  methods: {
+    clickRadio(val) {
+      this.checked = val;
+      this.$emit("update", val); //子组件与父组件通讯，告知父组件更新绑定的值
+    }
+  },
+  watch: {
+    checked: function(newVal, oldVal) {
+      console.log("我是子组件，现在的值为：" + newVal);
+    }
+  }
+};
+</script>
+```
+
+父组件部分:
+
+```vue
+<template>
+  <div id="app">
+    <div class="left">选中：{{checked}}</div>
+    <radio class="right" :options="options" v-model="checked"></radio>
+  </div>
+</template>
+
+<script>
+import radio from './components/radio.vue'
+
+export default {
+  name: 'App',
+  components: {
+    radio
+  },
+  data() {
+    return {
+      checked: 0,
+      options: [{
+        value: 0,
+        name: '选项1'
+      }, {
+        value: 1,
+        name: '选项2'
+      }]
+    }
+  }
+}
+</script>
+```
 
 
 
+### `v-model`和`v-bind:value`有什么区别？
+
+自定义组件中，必定会使用`v-bind`指令来实现组件之间值的传递，既然有的`v-bind`指令，为什么还需要在自定义的组件中实现`v-model`指令呢？在我实践了一番之后，我才明白，`v-model`既能够实现值的传递，也能够实现页面数据的实时变化，而`v-bind`只是实现值的传递，如果需要实现实时变化的效果，需要使用另外的方法修改变量的值，可以总结为下面两点
+
+1. `v-model`实现视图和数据的双向绑定，一者变化另一者也会同时变化
+2. `v-bind`只会在初始化的时候将数据绑定到视图上，后续视图变化不会影响数据
 
 
 
@@ -774,6 +954,37 @@ JavaScript只有函数构成作用域(注意理解作用域，**只有函数{}�
 - 如果以上都不行则采用setTimeout
 
 定义了一个异步方法，多次调用nextTick会将方法存入队列中，**通过这个异步方法清空当前队列。**
+
+
+
+**答题思路：**
+
+1. nextTick是啥？下一个定义
+2. 为什么需要它呢？用异步更新队列实现原理解释
+3. 我再什么地方用它呢？抓抓头，想想你在平时开发中使用它的地方
+4. 下面介绍一下如何使用nextTick
+5. 最后能说出源码实现就会显得你格外优秀
+
+Vue.nextTick( [callback, context] )
+
+在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
+
+```js
+// 修改数据
+vm.msg = 'Hello'
+// DOM 还没有更新
+Vue.nextTick(function () {
+// DOM 更新了
+})
+```
+
+**回答范例**：
+
+1. nextTick是Vue提供的一个全局API，由于vue的异步更新策略导致我们对数据的修改不会立刻体现在dom变化上，此时如果想要立即获取更新后的dom状态，就需要使用这个方法
+2. Vue 在更新 DOM 时是**异步**执行的。只要侦听到数据变化，Vue 将开启一个队列，并缓冲在同一事件循环中发生的所有数据变更。如果同一个 watcher 被多次触发，只会被推入到队列中一次。这种在缓冲时去除重复数据对于避免不必要的计算和 DOM 操作是非常重要的。nextTick方法会在队列中加入一个回调函数，确保该函数在前面的dom操作完成后才调用。
+3. 所以**当我们想在修改数据后立即看到dom执行结果就需要用到nextTick方法。**
+4. 比如，我在干什么的时候就会使用nextTick，传一个回调函数进去，在里面执行dom操作即可。
+5. 我也有简单了解nextTick实现，它会在callbacks里面加入我们传入的函数，然后用timerFunc异步方式调用它们，首选的异步方式会是Promise。这让我明白了为什么可以在nextTick中看到dom操作结果。
 
 
 
@@ -2000,7 +2211,7 @@ vm.message = 'Hello!'
 
 这样的限制在背后是有其技术原因的，**它消除了在依赖项跟踪系统中的一类边界情况**，也使 Vue 实例能更好地配合类型检查系统工作。但与此同时在代码可维护性方面也有一点重要的考虑：`data` 对象就像组件状态的结构 (schema)。**提前声明所有的响应式 property，可以让组件代码在未来修改或给其他开发人员阅读时更易于理解。**
 
-### [异步更新队列](https://cn.vuejs.org/v2/guide/reactivity.html#异步更新队列)
+### 异步更新队列
 
 可能你还没有注意到，Vue 在更新 DOM 时是**异步**执行的。只要侦听到数据变化，Vue 将开启一个队列，并缓冲在同一事件循环中发生的所有数据变更。**如果同一个 watcher 被多次触发，只会被推入到队列中一次**。这种在缓冲时去除重复数据对于避免不必要的计算和 DOM 操作是非常重要的。然后，在下一个的事件循环“tick”中，Vue 刷新队列并执行实际 (已去重的) 工作。Vue 在内部对异步队列尝试使用原生的 `Promise.then`、`MutationObserver` 和 `setImmediate`，如果执行环境不支持，则会采用 `setTimeout(fn, 0)` 代替。
 

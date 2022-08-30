@@ -377,11 +377,7 @@ true
 
 ## 5. 请问你了解js作用域吗？
 
-**1，js作用域**
-
-**概念：**作用域就是一个独立的地盘，让变量不会外泄、暴露出去。也就是说**作用域最大的用处就是隔离变量**，不同作用域下同名变量不会有冲突。
-
-ES6 之前 JavaScript 没有块级作用域,只有**全局作用域**和**函数作用域**。ES6 的到来，为我们提供了‘**块级作用域**’,可通过新增命令 let 和 const 来体现。
+### 作用域
 
 作用域：在运行时代码中的某些特定部分中变量、函数和对象的**可访问性**。换句话说，作用域决定了代码区块中变量和其他资源的可见性，作用域就是一个独立的地盘，让变量不会外泄、暴露出去。
 
@@ -389,7 +385,11 @@ ES6 之前 JavaScript 没有块级作用域,只有**全局作用域**和**函数
 
 作用域是分层的，**内层作用域可以访问外层作用域的变量**，反之不行
 
-**2， JavaScript 没有块级作用域（ES6之前）**，只有全局作用域和函数作用域，ES6引入块级作用域
+ES6 之前 JavaScript 没有块级作用域,只有**全局作用域**和**函数作用域**。ES6 的到来，为我们提供了‘**块级作用域**’,可通过新增命令 let 和 const 来体现。
+
+
+
+### 全局作用域
 
 **全局作用域**（浏览器）：window
 
@@ -404,14 +404,17 @@ ES6 之前 JavaScript 没有块级作用域,只有**全局作用域**和**函数
 
 - 一个文件就是一个模块，通过 require 引入模块
 
-**函数作用域**：
+
+
+### 函数作用域
 
 - 声明在函数内部的变量
 
 
+
 **3，作用域链**
 
-当我们需要某个变量的值时，先去它最近的作用域去找，如果找不到，就找它的上级作用域，依次类推，直到找到全局，如全都未定义，那就抛出一个错误，如下代码所示
+当我们需要某个变量的值时，**先去它最近的作用域去找**，如果找不到，就找它的上级作用域，依次类推，直到找到全局，如全都未定义，那就抛出一个错误，如下代码所示
 
 ```js
 var a = 1
@@ -437,7 +440,7 @@ function B(){
     A();
 }
 
-B();//10
+B(); //10
 
 ```
 
@@ -490,6 +493,95 @@ function foo() {
 var fun = foo();
 fun(); // "bar in foo"
 ```
+
+
+
+### 块级作用域
+
+**块语句**（或其他语言的**复合语句**）用于组合零个或多个语句。该块由一对大括号界定，可以是`labelled`
+
+其他语言中通常将语句块称为**复合语句**。它允许你使用多个语句，其中 JavaScript 只需要一个语句。将语句组合成块是 JavaScript 中的常见做法。相反的做法是可以使用一个[空语句](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/Empty)，你不提供任何语句，虽然一个是必需的。
+
+**在非严格模式 (non-strict mode) 下的`var` 或者函数声明时**
+
+通过`var`声明的变量或者非严格模式下 (non-strict mode) 创建的函数声明**没有**块级作用域。在语句块里声明的变量的作用域不仅是其所在的函数或者 script 标签内，所设置变量的影响会在超出语句块本身之外持续存在。 换句话说，这种语句块不会引入一个作用域。尽管单独的语句块是合法的语句，但在 JavaScript 中你不会想使用单独的语句块，因为它们不像你想象的 C 或 Java 中的语句块那样处理事物。例如：
+
+```js
+var x = 1;
+{
+  var x = 2;
+}
+console.log(x); // 输出 2
+```
+
+输出结果是 2，因为块中的 `var x`语句与块前面的`var x`语句作用域相同。在 C 或 Java 中，这段代码会输出 1。
+
+
+
+**使用`let`和 `const`**
+
+相比之下，使用 [`let`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/let)和[`const`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/const)声明的变量是**有**块级作用域的。
+
+```js
+let x = 1;
+{
+  let x = 2;
+}
+console.log(x); // 输出 1
+```
+
+`x = 2`仅限在定义它的块中。
+
+`const`的结果也是一样的：
+
+```js
+const c = 1;
+{
+  const c = 2;
+}
+console.log(c); // 输出 1，而且不会报错
+```
+
+注意，位于块范围之内的 `const c = 2` 并不会抛出`SyntaxError: Identifier 'c' has already been declared`这样的语法错误，因为在它自己的块中它可能是唯一一个被声明的常量。
+
+**使用 let 声明的变量在块级作用域内能强制执行更新变量**，下面的两个例子对比：
+
+```js
+var a = [];
+for (var i = 0; i < 10; i++) {
+      a[i] = function () {console.log(i);};
+}
+a[0]();                // 10
+a[1]();                // 10
+a[6]();                // 10
+
+/********************/
+
+var a = [];
+for (let i = 0; i < 10; i++) {
+      a[i] = function () {console.log(i);};
+}
+a[0]();                // 0
+a[1]();                // 1
+a[6]();                // 6
+
+```
+
+**使用`function`**
+
+[函数声明](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function)同样被限制在声明他的语句块内：
+
+```js
+foo('outside');  // TypeError: foo is not a function
+{
+  function foo(location) {
+   console.log('foo is called ' + location);
+  }
+  foo('inside'); // 正常工作并且打印 'foo is called inside'
+}
+```
+
+
 
 
 
@@ -596,7 +688,7 @@ JavaScript是单线程语言，所以执行肯定是按顺序执行。但是并�
 
 变量提升（Hoisting）被认为是， Javascript中执行上下文 （特别是创建和执行阶段）工作方式的一种认识。在 [ECMAScript® 2015 Language Specification](https://www.ecma-international.org/ecma-262/6.0/index.html) 之前的JavaScript文档中找不到变量提升（Hoisting）这个词。不过，需要注意的是，开始时，这个概念可能比较难理解，甚至恼人。
 
-例如，从概念的字面意义上说，“变量提升”意味着变量和函数的声明会在物理层面移动到代码的最前面，但这么说并不准确。**实际上变量和函数声明在代码里的位置是不会动的，而是在编译阶段被放入内存中。**
+例如，从概念的字面意义上说，“变量提升”意味着变量和函数的声明**会在物理层面移动到代码的最前面**，但这么说并不准确。**实际上变量和函数声明在代码里的位置是不会动的，而是在编译阶段被放入内存中。**
 
 JavaScript 在执行任何代码段之前，将函数声明放入内存中的优点之一是，你可以在声明一个函数之前使用该函数。
 
@@ -618,7 +710,7 @@ function catName(name) {
 
 即使我们在定义这个函数之前调用它，函数仍然可以工作。这是因为在 JavaScript 中**执行上下文**的工作方式造成的。
 
-变量提升也适用于其他数据类型和变量。变量可以在声明之前进行初始化和使用。但是如果没有初始化，就不能使用它们。
+变量提升也适用于其他数据类型和变量。**变量可以在声明之前进行初始化和使用**。但是如果没有初始化，就不能使用它们。
 
 译者注： 函数和变量相比，会被优先提升。**这意味着函数会被提升到更靠前的位置**。
 
@@ -1369,16 +1461,65 @@ var ——ES5 变量声明方式
 1. 在变量未赋值时，变量undefined（为使用声明变量时也为undefined）
 2. 作用域——var的作用域为**方法作用域**；只要在方法内定义了，整个方法内的定义变量后的代码都可以使用
 
+```js
+var a = 2;
+
+if(true){
+     var a = 3;
+ }
+console.log(a);  // 3
+```
+
+```js
+// var a = 2;
+
+if(true){
+     var a = 3;
+ }
+console.log(a);  // 3
+```
+
+**var定义的是全局变量**
+
+
+
 let——ES6变量声明方式
 
 1. 在变量未声明前直接使用会报错
 2. 作用域——let为**块作用域**——通常let比var 范围要小
 3. let禁止重复声明变量，否则会报错；**var可以重复声明**
+4. **不存在变量提升**。既要先定义，后面才能有这个值，否则会报错，如果改成var会提示undefined未定义，但是let就直接报错了
+
+```js
+{
+       console.log(b);//报错
+        let b = 1;
+    }
+```
+
+
+
+6. 暂时性死区。只要在块级作用域里面存在let,则它所声明的变量就绑定在这个块级作用域上了，不受外界影响
+
+```js
+  var a = 2;
+   if(true){
+       console.log(a); //报错
+       let a = 3;
+   }
+```
+
+注意：a先是全局变量，但是let声明之后，导致let声明的变量已经绑定在这个块级作用域上了，在块级作用域里面a就变成局部变量，所以在let声明变量前，输出a会报错
+
+**简述：** let不能重复声明，不存在变量提升，暂时性死区，作用于块级作用域，let声明的变量只有在它所在的区域里面有效
+
+
 
 const——ES6变量声明方式
 
 1. const为常量声明方式；**声明变量时必须初始化**，在后面出现的代码中不能再修改该常量的值
 2. const实际上保真的，并不是变量的值不得改动，**而是变量指向的那个内存地址不得改动**
+3.  const必须初始化，声明一定要有值，无法重复声明，是块级作用域。不存在变量提升。暂时性死区
 
 
 
@@ -1434,6 +1575,8 @@ for..of..: 它是es6新增的一个遍历方法，但**只限于迭代器(iterat
 是会报错的。
 
 可迭代的对象：包括Array, Map, Set, String, TypedArray, arguments对象等等
+
+
 
 ------
 
@@ -2993,13 +3136,13 @@ console.log(Reflect.ownKeys(c).length===0);  // TypeError: Reflect.ownKeys calle
 
 ---
 
-## 10. 什么可枚举属性？什么是不可枚举属性？
+## 10. js遍历对象各个方法？
 
 可枚举属性是指内部**可枚举标志**（enumerable）设置为true的属性，不可枚举属性即是enumerable为false（摘自MDN）
 
 ---
 
-### **js遍历对象各个方法区别总结**
+**区别总结**
 
 | 方法                           | 基本属性 | 原型链属性 | 不可枚举属性 | symbol属性 |
 | ------------------------------ | -------- | ---------- | ------------ | ---------- |
@@ -3009,6 +3152,8 @@ console.log(Reflect.ownKeys(c).length===0);  // TypeError: Reflect.ownKeys calle
 | Object.getOwnPropertySymbols() | ✖        | ✖          | ✔            | ✔          |
 | Reflect.ownKeys()              | ✔        | ✖          | ✔            | ✔          |
 
+
+
 **for in （遍历key）**：可遍历到原型对象上的属性 ，用hasOwnProperty()方法过滤, 可遍历得到字符串类型的键值，**通常不适用于数组遍历**
 
 **Object.values() 、Object.keys() ：**可自动过滤原型链上的属性
@@ -3016,6 +3161,141 @@ console.log(Reflect.ownKeys(c).length===0);  // TypeError: Reflect.ownKeys calle
 **Object.getOwnPropertyNames()：**可遍历不可枚举的属性
 
 **Reflect.ownkeys()：** 可遍历不可枚举的属性 和 Symbol属性
+
+
+
+### (1) for in
+
+for in 循环是最基础的遍历对象的方式，它还会得到对象**原型链**上的属性
+
+```js
+// 创建一个对象并指定其原型，bar 为原型上的属性
+
+let originObj = {
+	bar: 'bar'
+}
+originObj.baz = "baz"
+
+const obj = Object.create(originObj)
+
+// foo 为对象自身的属性
+obj.foo = 'foo'
+
+originObj.aaa = "aaa";
+originObj[Symbol("bbb")] = "bbb"
+
+for (let key in obj) {
+  console.log(obj[key]) // foo, bar, baz, aaa
+}
+
+console.log(obj);  // { foo: 'foo' }
+```
+
+
+可以看到对象原型上的属性也被循环出来了
+
+在这种情况下可以使用对象的 hasOwnProperty() 方法过滤掉原型链上的属性
+
+```js
+for (let key in obj) {
+  if (obj.hasOwnProperty(key)) {
+    console.log(obj[key]) // foo
+  }
+}
+```
+
+这时候原型上的 bar 属性就被过滤掉了
+
+### (2) Object.keys
+
+Object.keys() 是 ES5 新增的一个对象方法，该方法**返回对象自身属性名**组成的数组，它会自动过滤掉原型链上的属性，然后可以通过数组的 forEach() 方法来遍历
+
+```js
+Object.keys(obj).forEach((key) => {
+  console.log(obj[key]) // foo
+})
+```
+
+
+另外还有 Object.values() 方法和 Object.entries() 方法，这两方法的作用范围和 Object.keys() 方法类似，因此不再说明
+
+for in 循环和 Object.keys() 方法**都不会返回对象的不可枚举属性**
+
+如果需要遍历不可枚举的属性，就要用到前面提到的 Object.getOwnPropertyNames() 方法了
+
+### (3) Object.getOwnPropertyNames
+
+Object.getOwnPropertyNames() 也是 ES5 新增的一个对象方法，该方法返回对象自身属性名组成的数组，包括不可枚举的属性，也可以通过数组的 forEach 方法来遍历
+
+```js
+// 创建一个对象并指定其原型，bar 为原型上的属性
+// baz 为对象自身的属性并且不可枚举
+const obj = Object.create({
+  bar: 'bar'
+}, {
+  baz: {
+    value: 'baz',
+    enumerable: false
+  }
+})
+
+obj.foo = 'foo'
+
+// 不包括不可枚举的 baz 属性
+Object.keys(obj).forEach((key) => {
+  console.log(obj[key]) // foo
+})
+
+// 包括不可枚举的 baz 属性
+Object.getOwnPropertyNames(obj).forEach((key) => {
+  console.log(obj[key]) // baz, foo
+})
+```
+
+
+ES2015 新增了 Symbol 数据类型，该类型可以作为对象的键，针对该类型 ES2015 同样新增了 Object.getOwnPropertySymbols() 方法
+
+### (4) Object.getOwnPropertySymbols
+
+Object.getOwnPropertySymbols() 方法返回对象自身的 Symbol 属性组成的数组，不包括字符串属性
+
+```js
+Object.getOwnPropertySymbols(obj).forEach((key) => {
+  console.log(obj[key])
+})
+```
+
+
+什么都没有，因为该对象还没有 Symbol 属性
+
+```js
+let obj = {}
+// 给对象添加一个不可枚举的 Symbol 属性
+Object.defineProperties(obj, {
+[Symbol('baz')]: {
+    value: 'Symbol baz',
+    enumerable: false
+  }
+})
+
+// 给对象添加一个可枚举的 Symbol 属性
+obj[Symbol('foo')] = 'Symbol foo'
+
+Object.getOwnPropertySymbols(obj).forEach((key) => {
+  console.log(obj[key]) // Symbol baz, Symbol foo
+})
+// 不可枚举属性也可以遍历到
+```
+
+### (5) Reflect.ownKeys
+
+Reflect.ownKeys() 方法是 ES2015 新增的静态方法，该方法返回对象**自身所有属性名组成的数组**，包括不可枚举的属性和 Symbol 属性
+
+```js
+Reflect.ownKeys(obj).forEach((key) => {
+  console.log(obj[key]) // baz, foo, Symbol baz, Symbol foo
+})
+```
 
 
 
@@ -3173,134 +3453,340 @@ console.log(ans);  //[1, 2, 3, 4, 5, 2, 3, 5 ]
 
 ```
 
+----
+
+## 12.  js中如何判断一个值是否是数组类型？
+
+### (1) instanceof
+
+判断一个实例是否属于某种类型.
+
+instanceof运算符可以用来判断某个构造函数的prototype属性所指向的對象是否存在于另外一个要检测对象的原型链上。
+
+理解来说，就是要判断一个Object是不是数组（这里不是口误，在JavaScript当中，数组实际上也是一种对象），如果这个Object的原型链上能够找到Array构造函数的话，那么这个Object应该及就是一个数组，如果这个Object的原型链上只能找到Object构造函数的话，那么它就不是一个数组。
+
+```js
+const a = [];
+const b = {};
+console.log(a instanceof Array);//true
+console.log(a instanceof Object);//true,在数组的原型链上也能找到Object构造函数
+console.log(b instanceof Array);//false
+```
+
+由上面的几行代码可以看出，使用instanceof运算符可以分辨数组和对象，可以判断数组是数组。
+
+**instanceof 判断逻辑？**
+
+```js
+_instanceof(f, Foo);  
+
+function _instanceof(L, R) {
+    var R = R.prototype;
+    var L = L.__proto__;
+    while( true) {
+        if(L == null) {
+            return false;
+        }
+        if(L == R) {
+            return true;
+        }
+        L = L.__proto__;
+    }
+}
+
+```
+
+**instanceof 不准确的原因?**
+
+```js
+  var iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+
+    var arr = [1,2,3];
+    xArray = window.frames[0].Array;  //iframe中的构造函数
+    var arrx = new xArray(4,5,6);
+
+    console.log(arrx instanceof Array);  //false
+    console.log(arrx.constructor == Array);// false
+
+    console.log(Array.prototype == xArray.prototype); //false
+    console.log(arr instanceof xArray); //false
+
+    console.log(arrx.constructor === Array);// false
+    console.log(arr.constructor === Array);// true
+    console.log(arrx.constructor === xArray);// true
+    console.log(Array.isArray(arrx));  //true
+
+```
+
+instanceof操作符的问题在于，它假定只有一个全局环境。如果网页中包含多个框架，那实际上就存在两个以上不同的全局执行环境，从而存在两个以上不同版本的Array构造函数。
+ 如果你从一个框架向另一个框架传入一个数组，那么传入的数组与在第二个框架中原生创建的数组分别具有各自不同的构造函数。
+
+
+
+### (2) 用constructor判断
+
+实例化的数组拥有一个constructor属性，这个属性指向生成这个数组的方法。
+
+```js
+const a = [];
+console.log(a.constructor);//function Array(){ [native code] }
+```
+
+以上的代码说明，数组是有一个叫Array的函数实例化的。
+如果被判断的对象是其他的数据类型的话，结果如下：
+
+```js
+const o = {};
+console.log(o.constructor);//function Object(){ [native code] }
+const r = /^[0-9]$/;
+console.log(r.constructor);//function RegExp() { [native code] }
+const n = null;
+console.log(n.constructor);//报错
+```
+
+看到这里，你可能会觉得这也是一种靠谱的判断数组的方法，我们可以用以下的方式来判断:
+
+```js
+const a = [];
+console.log(a.constructor == Array);//true
+```
+
+但是，**因为constructor可以被重写，所以不能确保一定是数组**，如果你一不小心作死改了constructor属性的话，那么使用这种方法就无法判断出数组的真是身份了
+
+```javascript
+//定义一个数组
+const a = [];
+//作死将constructor属性改成了别的
+a.contrtuctor = Object;
+console.log(a.constructor == Array);//false (哭脸)
+console.log(a.constructor == Object);//true (哭脸)
+console.log(a instanceof Array);//true (instanceof火眼金睛)
+```
+
+可以看出，constructor属性被修改之后，就无法用这个方法判断数组是数组了，除非你能保证不会发生constructor属性被改写的情况，否则用这种方法来判断数组也是不靠谱的。
+
+而且constructor和instanceof存在同样问题，不同执行环境下，constructor判断不正确问题。
+
+
+
+### (3) Object.prototype.isPrototypeOf
+
+使用Object的原型方法isPrototypeOf，判断两个对象的原型是否一样, isPrototypeOf() 方法用于测试一个对象是否存在于另一个对象的原型链上。
+
+```js
+const arr = [];
+Object.prototype.isPrototypeOf(arr, Array.prototype); // true
+```
+
+
+
+### (4) Object.getPrototypeOf
+
+Object.getPrototypeOf() 方法返回指定对象的原型（内部[[Prototype]]属性的值）。
+
+```js
+const arr = []
+Object.getPrototypeOf(arr) === Array.prototype // true
+```
+
+
+
+### (5) Object.prototype.toString
+
+借用Object原型的call或者apply方法，调用toString()是否为[object Array]
+
+另一个行之有效的方法就是使用Object.prototype.toString方法来判断，每一个继承自Object的对象都拥有toString的方法。
+
+```js
+const arr = []
+Object.prototype.toString.call(arr) === '[object Array]' // true
+
+const obj = {}
+Object.prototype.toString.call(obj) // "[object Object]"
+```
+
+如果一个对象的toString方法没有被重写过的话，那么toString方法将会返回"[object *type*]"，其中的*type*代表的是对象的类型，根据type的值，我们就可以判断这个疑似数组的对象到底是不是数组了。
+
+你可能会纠结，为什么不是直接调用数组，或则字符串自己的的toString方法呢？我们试一试就知道了。
+
+```js
+const a = ['Hello','Howard'];
+const b = {0:'Hello',1:'Howard'};
+const c = 'Hello Howard';
+a.toString();//"Hello,Howard"
+b.toString();//"[object Object]"
+c.toString();//"Hello,Howard"
+```
+
+从上面的代码可以看出，除了对象之外，其他的数据类型的toString返回的都是内容的字符创，只有对象的toString方法会返回对象的类型。所以要判断除了对象之外的数据的数据类型，我们需要“借用”对象的toString方法，所以我们需要使用call或者apply方法来改变toString方法的执行上下文。
+
+```javascript
+const a = ['Hello','Howard'];
+const b = {0:'Hello',1:'Howard'};
+const c = 'Hello Howard';
+Object.prototype.toString.call(a);//"[object Array]"
+Object.prototype.toString.call(b);//"[object Object]"
+Object.prototype.toString.call(c);//"[object String]"
+```
+
+使用apply方法也能达到同样的效果：
+
+```javascript
+const a = ['Hello','Howard'];
+const b = {0:'Hello',1:'Howard'};
+const c = 'Hello Howard';
+Object.prototype.toString.apply(a);//"[object Array]"
+Object.prototype.toString.apply(b);//"[object Object]"
+Object.prototype.toString.apply(c);//"[object String]"
+```
+
+总结一下，我们就可以用写一个方法来判断数组是否为数组：
+
+```js
+const isArray = (something)=>{
+    return Object.prototype.toString.call(something) === '[object Array]';
+}
+
+cosnt a = [];
+const b = {};
+isArray(a);//true
+isArray(b);//false
+```
+
+
+
+但重写了Object原型链上的toString方法就会出问题
+
+```js
+//重写了toString方法
+Object.prototype.toString = () => {
+    return "123"
+}
+//调用String方法
+const a = [];
+Object.prototype.toString.call(a);  
+```
+
+
+
+### (6) Array.isArray
+
+是目前遇到过的最靠谱的判断数组的方法了，当参数为数组的时候，isArray方法返回true，当参数不为数组的时候，isArray方法返回false。
+
+```js
+const a = [];
+const b = {};
+Array.isArray(a);//true
+Array.isArray(b);//false
+
+//试着在调用这个方法之前重写了Object.prototype.toString方法：
+
+Object.prototype.toString = ()=>{
+    console.log('Hello Howard');
+}
+const a = [];
+Array.isArray(a);//true
+
+// 并不影响判断的结果。我又试着修改了constructor对象：
+const a = [];
+const b = {};
+a.constructor = b.constructor;
+Array.isArray(a);//true
+```
+
+还是不影响判断的结果。
+
+可见，它与instance运算符判断的方法以及Object.prototype.toString法并不相同，**一些列的修改并没有影响到判断的结果**。
+
+你可以放心大胆的使用Array.isArray去判断一个对象是不是数组。
+除非你不小心重写了Array.isArray方法本身。。
+
+Array.isArray是ES5标准中增加的方法，部分比较老的浏览器可能会有兼容问题，所以为了增强健壮性，建议还是给Array.isArray方法进行判断，增强兼容性，重新封装的方法如下：
+
+```javascript
+if (!Array.isArray) {
+  Array.isArray = function(arg) {
+    return Object.prototype.toString.call(arg) === '[object Array]';
+  };
+}
+```
+
+#### `instanceof` VS `isArray`
+
+当检测 `Array` 实例时，`Array.isArray` 优于 `instanceof`，因为 `Array.isArray` 能检测 `iframes`。
+
+```js
+const iframe = document.createElement('iframe');
+document.body.appendChild(iframe);
+xArray = window.frames[window.frames.length-1].Array;
+const arr = new xArray(1,2,3); // [1,2,3]
+
+// Correctly checking for Array
+Array.isArray(arr);  // true
+// Considered harmful, because doesn't work through iframes
+arr instanceof Array; // false
+```
+
+
+
+```js
+// 下面的函数调用都返回 true
+Array.isArray([]);
+Array.isArray([1]);
+Array.isArray(new Array());
+Array.isArray(new Array('a', 'b', 'c', 'd'))
+// 鲜为人知的事实：其实 Array.prototype 也是一个数组。
+Array.isArray(Array.prototype);
+
+// 下面的函数调用都返回 false
+Array.isArray();
+Array.isArray({});
+Array.isArray(null);
+Array.isArray(undefined);
+Array.isArray(17);
+Array.isArray('Array');
+Array.isArray(true);
+Array.isArray(false);
+Array.isArray(new Uint8Array(32))
+Array.isArray({ __proto__: Array.prototype });
+```
+
 
 
 ----
 
-## 12. 请问什么是函数防抖？什么是函数节流？
+###  如何区分数组和对象？
 
-**函数防抖**(debounce)：触发高频事件后n秒内，函数只会执行一次，如果n秒内高频事件再次被触发，则重新计算时间
-
-**函数节流**(throttle)：高频事件触发，但在n秒内只会执行一次，所以节流会稀释函数的执行频率
-
-两者**都是为了限制函数的执行频次**，以优化函数触发频率过高导致的响应速度跟不上触发频率，出现延迟，假死或卡顿的现象
-
-可结合下图对两者进行区分：
-
-![img](https://uploadfiles.nowcoder.com/images/20211008/897353_1633667352451/6AF15ACD40C68A84BAD11D4A2F5981F6)
-
-**防抖：**
-
-实现思路：在事件被触发n秒后再执行回调函数，如果在这n秒内又被触发，则重新计时
-
-特点：如果事件在规定的时间间隔内被不断的触发，则调用方法被不断的延迟，**当遇到不断触发但是仍然需要触发的情况，应该选用节流**
-
-只有当高频事件停止，**最后一次事件触发的超时调用才能在wait时间后执行**
+#### 通过 ES6 中的 Array.isArray 来识别
 
 ```js
-function debounce(fn,wait){
-	var timeout;  //用来存放定时器的返回值，一触发就重新计时
-	return function(){
-		var context=this;
-		//把前一个 setTimeout clear 掉
-		clearTimeout(timeout);
-		//又创建一个新的 setTimeout,保障间隔时间内持续触发，不会执行fn函数
-		timeout=setTimeout(function(){
-			fn.apply(context);
-		},wait);
-	}
-}
+console.log(Array.isArray([]))//true
+console.log(Array.isArray({}))//false
 ```
 
-防抖 (debounce)
-
-防抖，顾名思义，防止抖动，以免把一次事件误认为多次，敲键盘就是一个每天都会接触到的防抖操作。
-
-特点：等待某种操作停止后，加以间隔进行操作
-
-- 持续触发不执行
-- 不触发的一段时间之后再执行
-
-想要了解一个概念，必先了解概念所应用的场景。在 JS 这个世界中，有哪些防抖的场景呢
-
-1. 登录、发短信等按钮避免用户点击太快，以致于发送了多次请求，需要防抖
-2. 调整浏览器窗口大小时，resize 次数过于频繁，造成计算过多，此时需要一次到位，就用到了防抖
-3. 文本编辑器实时保存，当无任何更改操作一秒后进行保存
-4. `mousemove` 鼠标滑动事件
-5. Select 去服务端动态搜索功能
-
-代码如下，可以看出来**防抖重在清零 `clearTimeout(timer)`**
-
-```javascript
-function debounce (f, wait) {
-  let timer
-  return (...args) => {
-    clearTimeout(timer)
-    timer = setTimeout(() => {
-      f(...args)
-    }, wait)
-  }
-}
-```
-
----
-
-**节流：**（每隔一段时间发一次 Ajax 请求，用节流）
-
-规定一个单位时间，**在这个单位时间内，只能有一次触发事件的回调函数执行**，如果在同一个单位时间内某事件被触发多次，只有一次能生效
-
-实现思路：通过判断是否到达一定时间来触发函数，**若没到规定时间则使用计时器延后**，而下一次事件则会重新设定计时器
+#### 通过 instanceof 来识别
 
 ```js
-function throttle(fn,delay){
-	let canRun=true;  //通过闭包保存一个标记
-	return function(){
-		//在函数开头判断标记是否为true,不为true 则return
-		if (!canRun) {
-			return;
-		}
-		//立即设置为false
-		canRun=false;
-		//将外部传入的函数的执行放在setTimeout中
-		setTimeout(()=>{
-			//最后在setTimeout执行完毕后再把标记设置为true(关键)表示可以执行下一次循环了
-			//当定时器没有执行的时候标记永远是false,在开头被return掉
-			fn.apply(this,arguments);
-			canRun=true;
-		},delay);
-	};
-}
+console.log([] instanceof Array)//true
+console.log({} instanceof Array)//false
 ```
 
-节流 (throttle)
+#### 通过调用 constructor 来识别
 
-节流，顾名思义，控制水的流量。控制事件发生的频率，如控制为1s发生一次，甚至1分钟发生一次。与服务端(server)及网关(gateway)控制的限流 (Rate Limit) 类似。
-
-特点：每等待某种间隔后，进行操作
-
-- 持续触发并不会执行多次
-- 到一定时间 / 其它间隔 ( 如滑动的高度 )再去执行
-
-1. `scroll` 事件，每隔一秒计算一次位置信息等
-2. 浏览器播放事件，每个一秒计算一次进度信息等
-3. input 框实时搜索并发送请求展示下拉列表，没隔一秒发送一次请求 (也可做防抖)
-4. 埋点场景。商品搜索列表、商品橱窗等，用户滑动时 定时 / 定滑动的高度 发送埋点请求
-5. 运维系统查看应用运行日志时，每 n 秒刷新一次
-
-代码如下，可以看出来**节流重在开关锁 `timer=null`**
-
-```javascript
-function throttle (f, wait) {
-  let timer
-  return (...args) => {
-    if (timer) { return }
-    timer = setTimeout(() => {
-      f(...args)
-      timer = null
-    }, wait)
-  }
-}
+```js
+console.log([].constructor)//[Function: Array]
+console.log({}.constructor)//[Function: Object]
 ```
+
+#### 通过 Object.prototype.toString.call 方法来识别
+
+```js
+console.log(Object.prototype.toString.call([]))//[object Array]  
+console.log(Object.prototype.toString.call({}))//[object Object]   
+```
+
+
 
 
 
@@ -3605,6 +4091,137 @@ strictMode() // 将报错
 ```
 
 ---
+
+## 17. 请问什么是函数防抖？什么是函数节流？
+
+**函数防抖**(debounce)：触发高频事件后n秒内，函数只会执行一次，如果n秒内高频事件再次被触发，则重新计算时间
+
+**函数节流**(throttle)：高频事件触发，但在n秒内只会执行一次，所以节流会稀释函数的执行频率
+
+两者**都是为了限制函数的执行频次**，以优化函数触发频率过高导致的响应速度跟不上触发频率，出现延迟，假死或卡顿的现象
+
+可结合下图对两者进行区分：
+
+![img](https://uploadfiles.nowcoder.com/images/20211008/897353_1633667352451/6AF15ACD40C68A84BAD11D4A2F5981F6)
+
+**防抖：**
+
+实现思路：在事件被触发n秒后再执行回调函数，如果在这n秒内又被触发，则重新计时
+
+特点：如果事件在规定的时间间隔内被不断的触发，则调用方法被不断的延迟，**当遇到不断触发但是仍然需要触发的情况，应该选用节流**
+
+只有当高频事件停止，**最后一次事件触发的超时调用才能在wait时间后执行**
+
+```js
+function debounce(fn,wait){
+	var timeout;  //用来存放定时器的返回值，一触发就重新计时
+	return function(){
+		var context=this;
+		//把前一个 setTimeout clear 掉
+		clearTimeout(timeout);
+		//又创建一个新的 setTimeout,保障间隔时间内持续触发，不会执行fn函数
+		timeout=setTimeout(function(){
+			fn.apply(context);
+		},wait);
+	}
+}
+```
+
+防抖 (debounce)
+
+防抖，顾名思义，防止抖动，以免把一次事件误认为多次，敲键盘就是一个每天都会接触到的防抖操作。
+
+特点：等待某种操作停止后，加以间隔进行操作
+
+- 持续触发不执行
+- 不触发的一段时间之后再执行
+
+想要了解一个概念，必先了解概念所应用的场景。在 JS 这个世界中，有哪些防抖的场景呢
+
+1. 登录、发短信等按钮避免用户点击太快，以致于发送了多次请求，需要防抖
+2. 调整浏览器窗口大小时，resize 次数过于频繁，造成计算过多，此时需要一次到位，就用到了防抖
+3. 文本编辑器实时保存，当无任何更改操作一秒后进行保存
+4. `mousemove` 鼠标滑动事件
+5. Select 去服务端动态搜索功能
+
+代码如下，可以看出来**防抖重在清零 `clearTimeout(timer)`**
+
+```javascript
+function debounce (f, wait) {
+  let timer
+  return (...args) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      f(...args)
+    }, wait)
+  }
+}
+```
+
+---
+
+**节流：**（每隔一段时间发一次 Ajax 请求，用节流）
+
+规定一个单位时间，**在这个单位时间内，只能有一次触发事件的回调函数执行**，如果在同一个单位时间内某事件被触发多次，只有一次能生效
+
+实现思路：通过判断是否到达一定时间来触发函数，**若没到规定时间则使用计时器延后**，而下一次事件则会重新设定计时器
+
+```js
+function throttle(fn,delay){
+	let canRun=true;  //通过闭包保存一个标记
+	return function(){
+		//在函数开头判断标记是否为true,不为true 则return
+		if (!canRun) {
+			return;
+		}
+		//立即设置为false
+		canRun=false;
+		//将外部传入的函数的执行放在setTimeout中
+		setTimeout(()=>{
+			//最后在setTimeout执行完毕后再把标记设置为true(关键)表示可以执行下一次循环了
+			//当定时器没有执行的时候标记永远是false,在开头被return掉
+			fn.apply(this,arguments);
+			canRun=true;
+		},delay);
+	};
+}
+```
+
+节流 (throttle)
+
+节流，顾名思义，控制水的流量。控制事件发生的频率，如控制为1s发生一次，甚至1分钟发生一次。与服务端(server)及网关(gateway)控制的限流 (Rate Limit) 类似。
+
+特点：每等待某种间隔后，进行操作
+
+- 持续触发并不会执行多次
+- 到一定时间 / 其它间隔 ( 如滑动的高度 )再去执行
+
+1. `scroll` 事件，每隔一秒计算一次位置信息等
+2. 浏览器播放事件，每个一秒计算一次进度信息等
+3. input 框实时搜索并发送请求展示下拉列表，没隔一秒发送一次请求 (也可做防抖)
+4. 埋点场景。商品搜索列表、商品橱窗等，用户滑动时 定时 / 定滑动的高度 发送埋点请求
+5. 运维系统查看应用运行日志时，每 n 秒刷新一次
+
+代码如下，可以看出来**节流重在开关锁 `timer=null`**
+
+```javascript
+function throttle (f, wait) {
+  let timer
+  return (...args) => {
+    if (timer) { return }
+    timer = setTimeout(() => {
+      f(...args)
+      timer = null
+    }, wait)
+  }
+}
+```
+
+
+
+-----
+
+
 
 # 异步相关
 
@@ -5207,6 +5824,12 @@ Promise.resolve(2).then(
 
 ## 5.  js事件循环
 
+
+
+
+
+
+
 浏览器中 JavaScript 的执行流程和 Node.js 中的流程都是基于 **事件循环** 的。
 
 理解事件循环的工作方式对于代码优化很重要，有时对于正确的架构也很重要。
@@ -5433,6 +6056,64 @@ menu.onclick = function() {
 
 ### 宏任务和微任务
 
+(宏)任务，其实就是标准JavaScript机制下的常规任务，或者简单的说，就是指消息队列中的等待被主线程执行的事件。在宏任务执行过程中，v8引擎都会建立新栈存储任务，宏任务中执行不同的函数调用，栈随执行变化，当该宏任务执行结束时，会清空当前的栈，接着主线程继续执行下一个宏任务。
+
+微任务，看定义中与(宏)任务的区别其实比较复杂，但是根据定义就可以知道，其中很重要的一点是，微任务必须是一个异步的执行的任务，这个执行的时间需要在主函数执行之后，也就是微任务建立的函数执行后，而又需要在当前宏任务结束之前。
+
+由此可以看出，微任务的出现其实就是语言设计中的一种实时性和效率的权衡体现。当宏任务执行时间太久，就会影响到后续任务的执行，而此时因为某些需求，编程人员需要让某些任务在宿主环境(比如浏览器)提供的事件循环下一轮执行前执行完毕，提高实时性，这就是微任务存在的意义。
+
+常见的创建宏任务的方法有setTimeout定时器，而常见的属于微任务延伸出的技术有Promise、Generator、async/await等。而无论是宏任务还是微任务依赖的都是基础的执行栈和消息队列的机制而运行。根据定义，宏任务和微任务存在于不同的任务队列，而微任务的任务队列应该在宏任务执行栈完成前清空。
+
+```js
+function taskOne() {
+    console.log('1 task one ...')
+    setTimeout(() => {
+        Promise.resolve().then(() => {
+            console.log('2 task one micro in macro ...')
+        })
+        setTimeout(() => {
+            console.log('3 task one macro ...')
+        }, 0)
+    }, 0)
+    taskTwo()
+}
+ 
+ 
+function taskTwo() {
+    console.log('4 task two ...')
+    Promise.resolve().then(() => {
+        setTimeout(() => {
+            console.log('5 task two macro in micro...')
+        }, 0)
+    })
+ 
+    setTimeout(() => {
+        console.log('6 task two macro ...')
+    }, 0)
+}
+ 
+setTimeout(() => {
+    console.log('7 running macro ...')
+}, 0)
+ 
+taskOne()
+ 
+Promise.resolve().then(() => {
+    console.log('8 running micro ...')
+})
+
+/*
+1 task one ...
+4 task two ...
+8 running micro ...
+7 running macro ...
+2 task one micro in macro ...
+6 task two macro ...
+5 task two macro in micro...
+3 task one macro ...
+*/
+```
+
 **宏任务（macrotask）** 外，还有在 [微任务（Microtask）](https://zh.javascript.info/microtask-queue) 一章中提到的 **微任务（microtask）**。
 
 微任务仅来自于我们的代码。它们通常是由 promise 创建的：对 `.then/catch/finally` 处理程序的执行会成为微任务。微任务也被用于 `await` 的“幕后”，因为它是 promise 处理的另一种形式。
@@ -5572,7 +6253,7 @@ console.log(7);
 
 页面渲染事件，各种IO的完成事件等随时被添加到任务队列中，一直会保持先进先出的原则执行，我们不能准确地控制这些事件被添加到任务队列中的位置。但是这个时候突然有高优先级的任务需要尽快执行，那么一种类型的任务就不合适了，所以引入了微任务队列。
 
-不同的异步任务被分为：宏任务和微任务
+不同的**异步任务**被分为：宏任务和微任务
 宏任务：
 
 - script(整体代码)
@@ -5607,7 +6288,7 @@ console.log(7);
 - 渲染完毕后，JS线程继续接管，开始下一个宏任务（从事件队列中获取）
 
 简单总结一下执行的顺序：
-执行宏任务，然后执行该宏任务产生的微任务，若微任务在执行过程中产生了新的微任务，则继续执行微任务，微任务执行完毕后，再回到宏任务中进行下一轮循环。
+执行宏任务，**然后执行该宏任务产生的微任务**，若微任务在执行过程中产生了新的微任务，则继续执行微任务，微任务执行完毕后，再回到宏任务中进行下一轮循环。
 
 ![宏任务和微任务](https://segmentfault.com/img/remote/1460000022805533)
 
@@ -5708,6 +6389,8 @@ setTimeout()方法是定义一个回调，并且希望这个回调在我们所�
 
 setImmediate：
 setImmediate()方法**从意义上将是立刻执行的意思，但是实际上它却是在一个固定的阶段才会执行回调**，即poll阶段之后。
+
+
 
 ---
 
