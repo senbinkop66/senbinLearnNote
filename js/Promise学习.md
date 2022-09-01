@@ -907,9 +907,9 @@ const nextTick = (() => {
 
 # Promise.catch()
 
-**catch()** 方法返回一个[Promise (en-US)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)，并且处理拒绝的情况。它的行为与调用[`Promise.prototype.then(undefined, onRejected)`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then) 相同。 (事实上, calling `obj.catch(onRejected)` 内部calls `obj.then(undefined, onRejected)`).
+**catch()** 方法返回一个[Promise (en-US)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)，并且处理拒绝的情况。它的行为与调用`Promise.prototype.then(undefined, onRejected)` 相同。 (事实上, **calling `obj.catch(onRejected)` 内部calls `obj.then(undefined, onRejected)`)**.
 
-## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch#syntax)
+## 语法
 
 ```js
 p.catch(onRejected);
@@ -919,25 +919,25 @@ p.catch(function(reason) {
 });
 ```
 
-### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch#参数)
+### 参数
 
 - **onRejected**
 
   当Promise 被rejected时,被调用的一个[`Function`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function)。 该函数拥有一个参数：`reason`  rejection 的原因。如果 `onRejected` 抛出一个错误或返回一个本身失败的 Promise ，  通过 `catch()` 返回的Promise 被rejected；否则，它将显示为成功（resolved）。
 
-### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch#返回值)
+### 返回值
 
 一个[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
-## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch#description)
+## 描述
 
 `catch `方法可以用于您的promise组合中的错误处理。
 
-Internally calls `Promise.prototype.then` on the object upon which is called, passing the parameters `undefined` and the `onRejected` handler received; then returns the value of that call (which is a [`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)).
 
-## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch#示例)
 
-### [使用链式语句的 `catch`方法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch#使用链式语句的_catch方法)
+## 示例
+
+### 使用链式语句的 `catch`方法
 
 ```js
 let p1 = new Promise((resolve, reject) => {
@@ -970,9 +970,12 @@ p1.then(function(value) {
 }, function () {
   console.log('Not fired due to the catch');
 });
+// Success
+// oh, no!
+// after a catch the chain is restored
 ```
 
-### [捕获抛出的错误](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch#捕获抛出的错误)
+### 捕获抛出的错误
 
 ```js
 // 抛出一个错误，大多数时候将调用catch方法
@@ -1006,7 +1009,7 @@ p3.catch((e) => {
 });
 ```
 
-### [如果已决议](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch#如果已决议)
+### 如果已决议
 
 ```js
 //创建一个新的 Promise ，且已决议
@@ -1025,19 +1028,22 @@ p2.then(function (value) {
     console.log("next promise's onRejected");
     console.log(reason);
 });
+
+// next promise's onFulfilled
+// calling next
 ```
 
 ---
 
 # Promise.finally()
 
-`**finally()**` 方法返回一个[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)。在promise结束时，无论结果是fulfilled或者是rejected，都会执行指定的回调函数。这为在`Promise`是否成功完成后都需要执行的代码提供了一种方式。
+`finally()` 方法返回一个[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)。在promise结束时，无论结果是fulfilled或者是rejected，都会执行指定的回调函数。这为在`Promise`是否成功完成后都需要执行的代码提供了一种方式。
 
 这避免了同样的语句需要在[`then()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then)和[`catch()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch)中各写一次的情况。
 
-## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally#语法)
+## 语法
 
-```
+```js
 p.finally(onFinally);
 
 p.finally(function() {
@@ -1045,30 +1051,30 @@ p.finally(function() {
 });
 ```
 
-### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally#参数)
+### 参数
 
 - `onFinally`
 
   `Promise` 结束后调用的[`Function`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function)。
 
-### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally#返回值)
+### 返回值
 
 返回一个设置了 `finally` 回调函数的[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)对象。 
 
-## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally#描述)
+## 描述
 
 如果你想在 promise 执行完毕后**无论其结果怎样都做一些处理或清理时，`finally()` 方法可能是有用的。**
 
-`finally()` 虽然与 `.then(onFinally, onFinally)` 类似，它们不同的是：
+`finally()` 虽然与 `.then(onFinally, onFinally)` 类似，它们**不同**的是：
 
 - 调用内联函数时，不需要多次声明该函数或为该函数创建一个变量保存它。
-- 由于无法知道`promise`的最终状态，所以`finally`的回调函数中不接收任何参数，它仅用于无论最终结果如何都要执行的情况。
-- 与`Promise.resolve(2).then(() => {}, () => {})` （resolved的结果为`undefined`）不同，`Promise.resolve(2).finally(() => {})` resolved的结果为 `2`。
-- 同样，`Promise.reject(3).then(() => {}, () => {})` (fulfilled的结果为`undefined`), `Promise.reject(3).finally(() => {})` rejected 的结果为 `3`。
+- **由于无法知道`promise`的最终状态，所以`finally`的回调函数中不接收任何参数**，它仅用于无论最终结果如何都要执行的情况。
+- 与`Promise.resolve(2).then(() => {}, () => {})` （resolved的结果为`undefined`）不同，**`Promise.resolve(2).finally(() => {})` resolved的结果为 `2`。**
+- 同样，`Promise.reject(3).then(() => {}, () => {})` (fulfilled的结果为`undefined`), **`Promise.reject(3).finally(() => {})` rejected 的结果为 `3`。**
 
-> **备注：** 在`finally`回调中 `throw`（或返回被拒绝的promise）将以 `throw()` 指定的原因拒绝新的promise.
+> **备注：** 在`finally`回调中 `throw`（或返回被拒绝的promise）**将以 `throw()` 指定的原因拒绝新的promise**.
 
-## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally#示例)
+## 示例
 
 ```js
 let isLoading = true;
@@ -1092,41 +1098,41 @@ fetch(myRequest).then(function(response) {
 
 # Promise.all()
 
-Promise.all() 方法接收一个promise的iterable类型（注：Array，Map，Set都属于ES6的iterable类型）的输入，并且只返回一个[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)实例， 那个输入的所有promise的resolve回调的结果是一个数组。这个[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)的resolve回调执行是在所有输入的promise的resolve回调都结束，或者输入的iterable里没有promise了的时候。它的reject回调执行是，只要任何一个输入的promise的reject回调执行或者输入不合法的promise就会立即抛出错误，并且reject的是第一个抛出的错误信息。
+Promise.all() 方法**接收一个promise的iterable类型**（注：Array，Map，Set都属于ES6的iterable类型）的输入，并且只返回一个[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)实例， 那个输入的所有promise的resolve回调的结果是一个数组。这个[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)的resolve回调执行是在所有输入的promise的resolve回调都结束，或者输入的iterable里没有promise了的时候。它的reject回调执行是，只要任何一个输入的promise的reject回调执行或者输入不合法的promise就会立即抛出错误，**并且reject的是第一个抛出的错误信息**。
 
-## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all#语法)
+## 语法
 
 ```
 Promise.all(iterable);
 ```
 
-### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all#参数)
+### 参数
 
 - iterable
 
   一个[可迭代](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#The_iterable_protocol)对象，如 [`Array`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array) 或 [`String`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String)。
 
-### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all#返回值)
+### 返回值
 
 - 如果传入的参数是一个空的可迭代对象，则返回一个**已完成（already resolved）**状态的 [`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)。
 - 如果传入的参数不包含任何 `promise`，则返回一个**异步完成（asynchronously resolved）** [`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)。注意：Google Chrome 58 在这种情况下返回一个**已完成（already resolved）**状态的 [`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)。
-- 其它情况下返回一个**处理中（pending）**的[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)。这个返回的 `promise` 之后会在所有的 `promise` 都完成或有一个 `promise` 失败时**异步**地变为完成或失败。 见下方关于“Promise.all 的异步或同步”示例。返回值将会按照参数内的 `promise` 顺序排列，而不是由调用 `promise` 的完成顺序决定。
+- 其它情况下返回一个**处理中（pending）**的[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)。这个返回的 `promise` 之后会在所有的 `promise` 都完成或有一个 `promise` 失败时**异步**地变为完成或失败。 见下方关于“Promise.all 的异步或同步”示例。**返回值将会按照参数内的 `promise` 顺序排列，而不是由调用 `promise` 的完成顺序决定。**
 
-## [说明](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all#说明)
+## 说明
 
 此方法在集合多个 `promise` 的返回结果时很有用。
 
-完成（Fulfillment）：
+**完成（Fulfillment）**：
 如果传入的可迭代对象为空，`Promise.all` 会**同步**地返回一个已完成（resolved）状态的`promise`。
 如果所有传入的 `promise` 都变为完成状态，或者传入的可迭代对象内没有 `promise`，`Promise.all` 返回的 `promise` **异步**地变为完成。
 在任何情况下，`Promise.all` 返回的 `promise` 的**完成状态的结果都是一个数组**，它包含所有的传入迭代参数对象的值（也包括非 `promise` 值）。
 
-失败/拒绝（Rejection）：
-如果传入的 `promise` 中有一个失败（rejected），`Promise.all` 异步地将失败的那个结果给失败状态的回调函数，而不管其它 `promise` 是否完成。
+**失败/拒绝（Rejection）**：
+如果传入的 `promise` 中有一个失败（rejected），`Promise.all` **异步地将失败的那个结果给失败状态的回调函数**，而不管其它 `promise` 是否完成。
 
-## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all#示例)
+## 示例
 
-### [`Promise.all` 的使用](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all#promise.all_的使用)
+### `Promise.all` 的使用
 
 `Promise.all` 等待所有都完成（或第一个失败）。
 
@@ -1158,9 +1164,11 @@ setTimeout(function(){
 },0);
 ```
 
-### [`Promise.all` 的异步和同步](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all#promise.all_的异步和同步)
 
-下面的例子中演示了 `Promise.all` 的异步性（如果传入的可迭代对象是空的，就是同步）：
+
+### `Promise.all` 的异步和同步
+
+下面的例子中演示了 `Promise.all` 的**异步性**（如果传入的可迭代对象是空的，就是同步）：
 
 ```js
 // we are passing as argument an array of promises that are already resolved,
@@ -1169,12 +1177,12 @@ var resolvedPromisesArray = [Promise.resolve(33), Promise.resolve(44)];
 
 var p = Promise.all(resolvedPromisesArray);
 // immediately logging the value of p
-console.log(p);
+console.log(p);  // Promise { <pending> }
 
 // using setTimeout we can execute code after the stack is empty
 setTimeout(function(){
     console.log('the stack is now empty');
-    console.log(p);
+    console.log(p);  // Promise { [ 33, 44 ] }
 });
 
 // logs, in order:
@@ -1188,7 +1196,8 @@ setTimeout(function(){
 ```js
 var mixedPromisesArray = [Promise.resolve(33), Promise.reject(44)];
 var p = Promise.all(mixedPromisesArray);
-console.log(p);
+// 异步性
+console.log(p);  // Promise { <state>: "pending" }
 setTimeout(function(){
     console.log('the stack is now empty');
     console.log(p);
@@ -1200,12 +1209,12 @@ setTimeout(function(){
 // Promise { <state>: "rejected", <reason>: 44 }
 ```
 
-但是，`Promise.all` **当且仅当**传入的可迭代对象为空时为同步：
+但是，`Promise.all` **当且仅当**传入的**可迭代对象为空时为同步**：
 
 ```js
-var p = Promise.all([]); // will be immediately resolved
-var p2 = Promise.all([1337, "hi"]); // non-promise values will be ignored, but the evaluation will be done asynchronously
-console.log(p);
+var p = Promise.all([]); // will be immediately resolved  同步
+var p2 = Promise.all([1337, "hi"]); // 异步 non-promise values will be ignored, but the evaluation will be done asynchronously
+console.log(p);  
 console.log(p2)
 setTimeout(function(){
     console.log('the stack is now empty');
@@ -1220,7 +1229,9 @@ setTimeout(function(){
 // Promise { [ 1337, 'hi' ] }
 ```
 
-### [`Promise.all` 的快速返回失败行为](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all#promise.all_的快速返回失败行为)
+
+
+### `Promise.all` 的快速返回失败行为
 
 `Promise.all` 在任意一个传入的 `promise` 失败时返回失败。例如，如果你传入的 `promise`中，有四个 `promise` 在一定的时间之后调用成功函数，**有一个立即调用失败函数，那么 `Promise.all` 将立即变为失败。**
 
@@ -1271,13 +1282,13 @@ Promise.all([p1, p2, p3, p4, p5]).then(values => {
 
 相比之下，`Promise.all()` 更适合彼此相互依赖或者在其中任何一个`reject`时立即结束。
 
-## [句法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled#句法)
+## 语法
 
-```
+```js
 Promise.allSettled(iterable);
 ```
 
-### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled#参数)
+### 参数
 
 - `iterable`
 
@@ -1285,7 +1296,7 @@ Promise.allSettled(iterable);
 
 ### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled#返回值)
 
-一旦所指定的 promises 集合中每一个 promise 已经完成，无论是成功的达成或被拒绝，**未决议的** [`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)将被**异步**完成。那时，所返回的 promise 的处理器将传入一个数组作为输入，该数组包含原始 promises 集中每个 promise 的结果。
+一旦所指定的 promises 集合中每一个 promise 已经完成，无论是成功的达成或被拒绝，**未决议的** [`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)将被**异步**完成。那时，所返回的 promise 的处理器将传入一个数组作为输入，**该数组包含原始 promises 集中每个 promise 的结果**。
 
 对于每个结果对象，都有一个 `status` 字符串。如果它的值为 `fulfilled`，则结果对象上存在一个 `value` 。如果值为 `rejected`，则存在一个 `reason` 。value（或 reason ）反映了每个 promise 决议（或拒绝）的值。
 
@@ -1312,7 +1323,7 @@ Promise.allSettled(promises).then((results) => {
 
 > **警告：**`Promise.any()` 方法依然是实验性的，尚未被所有的浏览器完全支持。它当前处于 [TC39 第四阶段草案（Stage 4）](https://github.com/tc39/proposal-promise-any)
 
-## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/any#语法)
+## 语法
 
 ```
 Promise.any(iterable);
@@ -1324,34 +1335,34 @@ Promise.any(iterable);
 
   一个[可迭代](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Iteration_protocols#The_iterable_protocol)的对象, 例如 [Array](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array)。
 
-### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/any#返回值)
+### 返回值
 
 - 如果传入的参数是一个空的可迭代对象，则返回一个 **已失败（already rejected）** 状态的 [Promise](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)。
 - 如果传入的参数不包含任何 `promise`，则返回一个 **异步完成** （**asynchronously resolved**）的 [Promise](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)。
 - 其他情况下都会返回一个**处理中（pending）** 的 [Promise](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)。 只要传入的迭代对象中的任何一个 `promise` 变成成功（resolve）状态，或者其中的所有的 `promises` 都失败，那么返回的 `promise` 就会 **异步地**（当调用栈为空时） 变成成功/失败（resolved/reject）状态。
 
-## [说明](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/any#说明)
+## 说明
 
-这个方法用于返回第一个成功的 `promise` 。只要有一个 `promise` 成功此方法就会终止，它不会等待其他的 `promise` 全部完成。
+**这个方法用于返回第一个成功的 `promise`** 。只要有一个 `promise` 成功此方法就会终止，**它不会等待其他的 `promise` 全部完成**。
 
 不像 [Promise.all()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all) 会返回一组完成值那样（resolved values），**我们只能得到一个成功值**（假设至少有一个 `promise` 完成）。当**我们只需要一个 `promise` 成功，而不关心是哪一个成功时此方法很有用的。**
 
 同时, 也不像 [Promise.race()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race) 总是返回第一个结果值（resolved/reject）那样，**这个方法返回的是第一个 *成功的* 值**。这个方法将会忽略掉所有被拒绝的 `promise`，直到第一个 `promise` 成功。
 
-### [成功（Fulfillment）：](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/any#成功（fulfillment）：)
+### 成功（Fulfillment）：
 
 当任何一个被传入的 `promise` 成功的时候, 无论其他的 `promises` 成功还是失败，此函数会将那个成功的 `promise` 作为返回值 。
 
-- 如果传入的参数是一个空的可迭代对象, 这个方法将会同步返回一个已经完成的 `promise`。
+- 如果传入的参数是一个空的可迭代对象, 这个方法将会**同步**返回一个已经完成的 `promise`。
 - 如果传入的任何一个 `promise` 已成功, 或者传入的参数不包括任何 `promise`, **那么 `Promise.any` 返回一个异步成功的 `promise`**。
 
-### [失败/拒绝（Rejection）：](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/any#失败拒绝（rejection）：)
+### 失败/拒绝（Rejection）：
 
 如果所有传入的 `promises` 都失败, `Promise.any` **将返回异步失败**，和一个 [AggregateError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AggregateError) 对象，它继承自 [Error](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Error)，有一个 `error` 属性，**属性值是由所有失败值填充的数组。**
 
-## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/any#示例)
+## 示例
 
-### [First to fulfil](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/any#first_to_fulfil)
+### First to fulfil
 
 即使第一个返回的 promise 是失败的，`Promise.any()` 依然使用第一个成功状态的 promise 来返回。这与使用首个（无论 rejected 还是 fullfiled）promise 来返回的 [`Promise.race()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race) 相反。
 
@@ -1373,7 +1384,7 @@ Promise.any([pErr, pSlow, pFast]).then((value) => {
 });
 ```
 
-### [Rejections with AggregateError](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/any#rejections_with_aggregateerror)
+### Rejections with AggregateError
 
 如果没有 fulfilled (成功的) promise，`Promise.any()` 返回 [`AggregateError`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/AggregateError) 错误。
 
@@ -1398,7 +1409,7 @@ Promise.any([pErr, pSlow, pFast])
 });
 ```
 
-### [显示第一张已加载的图片](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/any#显示第一张已加载的图片)
+### 显示第一张已加载的图片
 
 在这个例子，我们有一个获取图片并返回 blob 的函数，我们使用 `Promise.any()` 来获取一些图片并显示第一张有效的图片（即最先 resolved 的那个 promise）。
 
@@ -1449,33 +1460,33 @@ Promise.race([promise1, promise2]).then((value) => {
 
 ```
 
-## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race#syntax)
+## 语法
 
-```
+```js
 Promise.race(iterable);
 ```
 
-### [**参数**](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race#参数)
+### **参数**
 
 - iterable
 
   可迭代对象，类似[`Array`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array)。详见 [iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols)。
 
-### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race#返回值)
+### 返回值
 
 一个**待定的** [`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise) 只要给定的迭代中的一个promise解决或拒绝，就采用第一个promise的值作为它的值，从而**异步**地解析或拒绝（一旦堆栈为空）。
 
-## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race#description)
+## 描述
 
 `race` 函数返回一个 `Promise`，它将与第一个传递的 promise 相同的完成方式被完成。它可以是完成（ resolves），也可以是失败（rejects）**，这要取决于第一个完成的方式是两个中的哪个。**
 
 **如果传的迭代是空的，则返回的 promise 将永远等待。**
 
-如果迭代包含一个或多个非承诺值和/或已解决/拒绝的承诺，则` Promise.race` 将解析为迭代中找到的第一个值。
+如果迭代**包含一个或多个非承诺值**和/**或已解决/拒绝的承诺**，则` Promise.race` 将解析为**迭代中找到的第一个值**。
 
-## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race#示例)
+## 示例
 
-### [Promise.race的异步性](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race#promise.race的异步性)
+### Promise.race的异步性
 
 ```js
 let resolvedPromisesArray = [Promise.resolve(33), Promise.resolve(44)];
@@ -1494,7 +1505,7 @@ setTimeout(function(){
 // Promise { 33 }
 ```
 
-### [使用 Promise.race –  setTimeout 的示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/race#使用_promise.race_–_settimeout_的示例)
+### 使用 Promise.race –  setTimeout 的示例
 
 ```js
 let p1 = new Promise((resolve, reject) => {
@@ -1547,7 +1558,7 @@ Promise.race([p5, p6]).then((value) => {
 
 ## async 函数
 
-1. 函数的返回值为 promise 对象
+1. **函数的返回值为 promise 对象**
 2. promise 对象的结果由 async 函数执行的返回值决定
 
 
@@ -1555,13 +1566,13 @@ Promise.race([p5, p6]).then((value) => {
 ## await 表达式
 
 1. await 右侧的表达式一般为 promise 对象, 但也可以是其它的值
-2. 如果表达式是 promise 对象, await 返回的是 promise 成功的值
-3. 如果表达式是其它值, 直接将此值作为 await 的返回值
+2. 如果表达式是 promise 对象, **await 返回的是 promise 成功的值**
+3. 如果表达式是其它值, **直接将此值作为 await 的返回值**
 
 ## 注意
 
 1. await 必须写在 async 函数中, 但 async 函数中可以没有 await
-2. 如果 await 的 promise 失败了, 就会抛出异常, 需要通过 try...catch 捕获处理
+2. 如果 await 的 promise 失败了, 就会抛出异常, **需要通过 try...catch 捕获处理**
 
 ```js
 function fn1() {
