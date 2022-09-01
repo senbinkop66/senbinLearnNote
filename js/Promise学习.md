@@ -15,7 +15,7 @@
 1) 从语法上来说: Promise 是一个构造函数
 2) 从功能上来说: promise 对象用来封装一个异步操作并可以获取其成功/失败的结果值
 
-一个 `Promise` 对象代表一个在这个 promise 被创建出来时不一定已知的值。它让您能够把异步操作最终的成功返回值或者失败原因和相应的处理程序关联起来。 这样使得异步方法可以像同步方法那样返回值：异步方法并不会立即返回最终的值，而是会返回一个 *promise*，以便在未来某个时候把值交给使用者。
+一个 `Promise` 对象代表一个在这个 promise 被创建出来时不一定已知的值**。它让您能够把异步操作最终的成功返回值或者失败原因和相应的处理程序关联起来。 这样使得异步方法可以像同步方法那样返回值**：异步方法并不会立即返回最终的值，而是会返回一个 *promise*，以便在未来某个时候把值交给使用者。
 
 一个 `Promise` 必然处于以下几种状态之一：
 
@@ -41,9 +41,9 @@
 
 ![promise](E:\pogject\学习笔记\image\js\promise基本流程.jpg)
 
-待定状态的 Promise 对象要么会通过一个值*被兑现（fulfilled）*，要么会通过一个原因（错误）*被拒绝（rejected）*。当这些情况之一发生时，我们用 promise 的 then 方法排列起来的相关处理程序就会被调用。如果 promise 在一个相应的处理程序被绑定时就已经被兑现或被拒绝了，那么这个处理程序就会被调用，因此在完成异步操作和绑定处理方法之间不会存在竞争状态。
+待定状态的 Promise 对象要么会通过一个值*被兑现（fulfilled）*，要么会通过一个原因（错误）*被拒绝（rejected）*。当这些情况之一发生时，我们用 promise 的 then 方法排列起来的相关处理程序就会被调用。**如果 promise 在一个相应的处理程序被绑定时就已经被兑现或被拒绝了，那么这个处理程序就会被调用**，因此在完成异步操作和绑定处理方法之间不会存在竞争状态。
 
-因为 Promise.prototype.then 和  Promise.prototype.catch 方法返回的是 promise， 所以它们可以被链式调用。
+因为 Promise.prototype.then 和  Promise.prototype.catch 方法返回的是 promise， 所以它们**可以被链式调用**。
 
 ### promise 的基本使用
 
@@ -244,9 +244,9 @@ async function request(){
 
 ​	(1) executor 函数: 执行器 (resolve, reject) => {}
 
-​	(2) resolve 函数: 内部定义成功时我们调用的函数 value => {}
+​	(2) resolve 函数: **内部定义成功时我们调用的函数** value => {}
 
-​	(3) reject 函数: 内部定义失败时我们调用的函数 reason => {}
+​	(3) reject 函数: **内部定义失败时我们调用的函数** reason => {}
 
 说明: **executor 会在 Promise 内部立即同步调用**,异步操作在执行器中执行
 
@@ -258,7 +258,7 @@ async function request(){
 
 ​	(2) onRejected 函数: 失败的回调函数 (reason) => {}
 
-说明: 指定用于得到成功 value 的成功回调和用于得到失败 reason 的失败回调，返回一个新的 promise 对象
+说明: 指定用于得到成功 value 的成功回调和用于得到失败 reason 的失败回调，**返回一个新的 promise 对象**
 
 
 
@@ -266,7 +266,7 @@ async function request(){
 
 ​	(1) onRejected 函数: 失败的回调函数 (reason) => {}
 
-说明: then()的语法糖, 相当于: then(undefined, onRejected)
+说明: t**hen()的语法糖, 相当于: then(undefined, onRejected)**
 
 
 
@@ -274,7 +274,7 @@ async function request(){
 
 ​	(1) value: 成功的数据或 promise 对象
 
-说明: 返回一个成功/失败的 promise 对象
+说明: **返回一个成功/失败的 promise 对象**
 
 
 
@@ -282,7 +282,7 @@ async function request(){
 
 ​	(1) reason: 失败的原因
 
-说明: 返回一个失败的 promise 对象
+说明: **返回一个失败的 promise 对象**
 
 
 
@@ -290,7 +290,7 @@ async function request(){
 
 ​	(1) promises: 包含 n 个 promise 的数组
 
-说明: 返回一个新的 promise, 只有所有的 promise 都成功才成功, 只要有一个失败了就直接失败
+说明: **返回一个新的 promise**, 只有所有的 promise 都成功才成功, **只要有一个失败了就直接失败**
 
 
 
@@ -299,7 +299,7 @@ async function request(){
 
 ​	(1) promises: 包含 n 个 promise 的数组
 
-说明: 返回一个新的 promise, 第一个完成的 promise 的结果状态就是最终的结果状态
+说明: **返回一个新的 promise**, 第一个完成的 promise 的结果状态就是最终的结果状态
 
 ```js
 new Promise((resolve, reject) => {
@@ -361,7 +361,7 @@ pRace.then(
 
 (2) reject(reason): 如果当前是 pending 就会变为 rejected
 
-(3) 抛出异常: 如果当前是 pending 就会变为 rejected
+(3) 抛出异常: **如果当前是 pending 就会变为 rejected**
 
 ### 一个 promise 指定多个成功/失败回调函数, 都会调用吗?
 
@@ -383,19 +383,19 @@ pRace.then(
 
 ### promise.then()返回的新 promise 的结果状态由什么决定?
 
-(1) 简单表达: 由 then()指定的回调函数执行的结果决定
+(1) 简单表达: **由 then()指定的回调函数执行的结果决定**
 
 (2) 详细表达:
 
 ① 如果抛出异常, 新 promise 变为 rejected, reason 为抛出的异常
-② 如果返回的是**非 promise** 的任意值, 新 promise 变为 resolved, value 为返回的值
-③ 如果返回的是另一个新 promise, 此 promise 的结果就会成为新 promise 的结果
+② 如果返回的是**非 promise** 的任意值, **新 promise 变为 resolved, value 为返回的值**
+③ 如果返回的是另一个新 promise, **此 promise 的结果就会成为新 promise 的结果**
 
 ### promise 如何串连多个操作任务?
 
 (1) promise 的 then()返回一个新的 promise, 可以看成 then()的链式调用
 
-(2) 通过 then 的链式调用串连多个同步/异步任务
+(2) **通过 then 的链式调用串连多个同步/异步任务**
 
 ### promise 异常传透?
 
@@ -405,18 +405,36 @@ pRace.then(
 
 ### 中断 promise 链?
 
-(1) 当使用 promise 的 then 链式调用时, 在中间中断, 不再调用后面的回调函数
+(1) 当使用 promise 的 then 链式调用时, **在中间中断, 不再调用后面的回调函数**
 
 (2) 办法: 在回调函数中**返回一个 pendding 状态的 promise 对象**
 
 
 
-
-
-
-
-```
-
+```js
+new Promise((resolve, reject) => {
+  console.log(1);
+  resolve(2);
+}).then(value => {
+  console.log(value);
+  return Promise.resolve(3)
+}).then(value => {
+  console.log(value);
+  return new Promise(() => {});  // 中断后面then的执行
+  // return Promise.resolve(4)
+}).then(value => {
+  console.log(value);
+  return Promise.resolve(5)
+}).then(value => {
+  console.log(value);
+}).catch((err) => {
+  console.log(err);
+});
+/*
+1
+2
+3
+*/
 ```
 
 
@@ -425,7 +443,13 @@ pRace.then(
 
 # Promise.resolve()
 
-**Promise.resolve(value)**方法返回一个以给定值解析后的[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise) 对象。如果这个值是一个 promise ，那么将返回这个 promise ；如果这个值是thenable（即带有[`"then" `](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then)方法），返回的promise会“跟随”这个thenable的对象，采用它的最终状态；否则返回的promise将以此值完成。此函数将类promise对象的多层嵌套展平。
+**Promise.resolve(value)**方法返回一个**以给定值解析后的`Promise` 对象**。
+
+如果这个值是一个 promise ，那么将返回这个 promise ；
+
+如果这个值是thenable（即带有[`"then" `](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then)方法），**返回的promise会“跟随”这个thenable的对象**，采用它的最终状态；
+
+否则返回的promise将以此值完成。此函数将类promise对象的多层嵌套展平。
 
 > **警告：**不要在解析为自身的thenable 上调用`Promise.resolve`。**这将导致无限递归**，因为它试图展平无限嵌套的promise。一个例子是将它与Angular中的异步管道一起使用。在[此处](https://angular.io/guide/template-syntax#avoid-side-effects)了解更多信息。
 
@@ -441,29 +465,29 @@ let thenable = {
 Promise.resolve(thenable)  //这会造成一个死循环
 ```
 
-## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve#syntax)
+## 语法
 
 ```
 Promise.resolve(value);
 ```
 
-### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve#参数)
+### 参数
 
 value
 
 将被`Promise`对象解析的参数，也可以是一个`Promise`对象，或者是一个thenable。
 
-### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve#返回值)
+### 返回值
 
 返回一个带着给定值解析过的`Promise`对象，如果参数本身就是一个`Promise`对象，则直接返回这个`Promise`对象。
 
-## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve#description)
+## 描述
 
 静态方法 `Promise.resolve`返回一个解析过的`Promise`对象。
 
-## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve#示例)
+## 示例
 
-### [使用静态`Promise.resolve`方法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve#使用静态promise.resolve方法)
+### 使用静态`Promise.resolve`方法
 
 ```js
 Promise.resolve("Success").then((value) => {
@@ -473,7 +497,7 @@ Promise.resolve("Success").then((value) => {
 });
 ```
 
-### [resolve一个数组](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve#resolve一个数组)
+### resolve一个数组
 
 ```javascript
 let p = Promise.resolve([1, 2, 3]);
@@ -485,7 +509,7 @@ p.then((value) => {
 });
 ```
 
-### [resolve另一个promise](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve#resolve另一个promise)
+### resolve另一个promise
 
 ```js
 let p1 = Promise.resolve(11);
@@ -505,7 +529,7 @@ console.log("p1 === p1 : " + (p1 === p2));
 
 日志顺序颠倒其实是由于异步地调用`then` 方法。在[这里](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then#Return_value)查看`then` 是如何工作的。
 
-### [resolve thenable 并抛出错误](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve#resolve_thenable_并抛出错误)
+### resolve thenable 并抛出错误
 
 ```js
 // Resolve一个thenable对象
@@ -552,6 +576,7 @@ p3.then(function(v) {
   console.log(v);  // Resolving
 }, function(e) {
   // 不会被调用
+    console.log(e);
 });
 ```
 
@@ -559,31 +584,31 @@ p3.then(function(v) {
 
 # Promise.reject()
 
-**Promise.reject()**方法返回一个带有拒绝原因的`Promise`对象。
+**Promise.reject()**方法返回**一个带有拒绝原因的`Promise`对象**。
 
-## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject#syntax)
+## 语法
 
 ```
 Promise.reject(reason);
 ```
 
-### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject#参数)
+### 参数
 
 - reason
 
   表示`Promise`被拒绝的原因。
 
-### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject#返回值)
+### 返回值
 
 一个给定原因了的被拒绝的 [`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)。
 
-## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject#description)
+## 描述
 
 静态函数`Promise.reject`返回一个被拒绝的`Promise对象`。通过使用[`Error`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Error)的实例获取错误原因`reason`对调试和选择性错误捕捉很有帮助。
 
-## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject#示例)
+## 示例
 
-### [使用静态`Promise.reject()`方法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject#使用静态promise.reject方法)
+### 使用静态`Promise.reject()`方法
 
 ```js
 
@@ -598,11 +623,11 @@ Promise.reject(new Error("fail")).then(value => {
 
 # Promise.then()
 
-**then()** 方法返回一个 [`Promise` (en-US)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)。它最多需要有两个参数：Promise 的成功和失败情况的回调函数。
+**then()** 方法返回一个 `Promise` 。它最多需要有两个参数：Promise 的成功和失败情况的回调函数。
 
-> **备注：**如果忽略针对某个状态的回调函数参数，或者提供非函数 (nonfunction) 参数，那么 `then` 方法将会丢失关于该状态的回调函数信息，但是并不会产生错误。如果调用 `then` 的 `Promise` 的状态（fulfillment 或 rejection）发生改变，但是 `then` 中并没有关于这种状态的回调函数，那么 `then` 将创建一个没有经过回调函数处理的新 `Promise` 对象，**这个新 `Promise` 只是简单地接受调用这个 `then` 的原 `Promise` 的终态作为它的终态。**
+> **备注：**如果忽略针对某个状态的回调函数参数，或者提供非函数 (nonfunction) 参数，**那么 `then` 方法将会丢失关于该状态的回调函数信息，但是并不会产生错误**。如果调用 `then` 的 `Promise` 的状态（fulfillment 或 rejection）发生改变，但是 `then` 中并没有关于这种状态的回调函数，**那么 `then` 将创建一个没有经过回调函数处理的新 `Promise` 对象**，**这个新 `Promise` 只是简单地接受调用这个 `then` 的原 `Promise` 的终态作为它的终态。**
 
-## [语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then#语法)
+## 语法
 
 ```js
 p.then(onFulfilled[, onRejected]);
@@ -614,26 +639,26 @@ p.then(value => {
 });
 ```
 
-### [参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then#参数)
+### 参数
 
 - `onFulfilled` 可选
 
-  当 Promise 变成接受状态（fulfilled）时调用的[`函数`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function)。该函数有一个参数，即接受的最终结果（the fulfillment  value）。**如果该参数不是函数，则会在内部被替换为 `(x) => x`，即原样返回 promise 最终结果的函数**
+  当 Promise 变成接受状态（fulfilled）时调用的[`函数`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function)。该函数有一个参数，**即接受的最终结果**（the fulfillment  value）。**如果该参数不是函数，则会在内部被替换为 `(x) => x`，即原样返回 promise 最终结果的函数**
 
 - `onRejected` 可选
 
   当 Promise 变成拒绝状态（rejected）时调用的[`函数`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function)。该函数有一个参数，即拒绝的原因（`rejection reason`）。 **如果该参数不是函数，则会在内部被替换为一个 "Thrower" 函数** (it throws an error it received as argument)。
 
-### [返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then#返回值)
+### 返回值
 
 当一个 [`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise) 完成（fulfilled）或者失败（rejected）时，**返回函数将被异步调用**（由当前的线程循环来调度完成）。具体的返回值依据以下规则返回。如果 `then` 中的回调函数：
 
-- 返回了一个值，那么 `then` 返回的 Promise 将会成为接受状态，并且将返回的值作为接受状态的回调函数的参数值。
-- 没有返回任何值，那么 `then` 返回的 Promise 将会成为接受状态，并且该接受状态的回调函数的参数值为 `undefined`。
-- 抛出一个错误，那么 `then` 返回的 Promise 将会成为拒绝状态，并且将抛出的错误作为拒绝状态的回调函数的参数值。
-- 返回一个已经是接受状态的 Promise，那么 `then` 返回的 Promise 也会成为接受状态，并且将那个 Promise 的接受状态的回调函数的参数值作为该被返回的Promise的接受状态回调函数的参数值。
-- 返回一个已经是拒绝状态的 Promise，那么 `then` 返回的 Promise 也会成为拒绝状态，并且将那个 Promise 的拒绝状态的回调函数的参数值作为该被返回的Promise的拒绝状态回调函数的参数值。
-- 返回一个**未定状态**（`pending`）的 Promise，那么 `then` 返回 Promise 的状态也是未定的，并且它的终态与那个 Promise 的终态相同；同时，它变为终态时调用的回调函数参数与那个 Promise 变为终态时的回调函数的参数是相同的。
+- **返回了一个值**，那么 `then` 返回的 Promise 将会成为**接受状态**，并且将**返回的值**作为接受状态的回调函数的参数值。
+- **没有返回任何值**，那么 `then` 返回的 Promise 将会成为**接受状态**，并且该接受状态的回调函数的**参数值为 `undefined`**。
+- **抛出一个错误**，那么 `then` 返回的 Promise 将会成为**拒绝状态**，并且将**抛出的错误**作为拒绝状态的回调函数的参数值。
+- 返回一个**已经是接受状态的 Promise**，那么 `then` 返回的 Promise 也会成为**接受状态**，并且将那个 Promise 的接受状态的回调函数的参数值作为该被返回的Promise的接受状态回调函数的参数值。
+- 返回一个**已经是拒绝状态的 Promise**，那么 `then` 返回的 Promise 也会成为**拒绝状态**，并且将那个 Promise 的拒绝状态的回调函数的参数值作为该被返回的Promise的拒绝状态回调函数的参数值。
+- 返回一个**未定状态**（`pending`）的 Promise，那么 `then` 返回 Promise 的状态也是**未定的**，并且**它的终态与那个 Promise 的终态相同**；同时，它变为终态时调用的回调函数参数与那个 Promise 变为终态时的回调函数的**参数是相同的**。
 
 下面是一个演示` then` 方法的异步性的例子。
 
@@ -656,13 +681,13 @@ setTimeout(() => {
 // Promise { 33 }
 ```
 
-## [描述](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then#描述)
+## 描述
 
 由于 `then` 和 [`Promise.prototype.catch()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch) 方法都会返回 promise，它们可以被[链式调用](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Using_promises#chaining)——这同时也是一种被称为**复合**（ *composition）* 的操作。
 
-## [示例](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then#示例)
+## 示例
 
-### [使用 `then` 方法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then#使用_then_方法)
+### 使用 `then` 方法
 
 ```js
 const p1 = new Promise((resolve, reject) => {
@@ -678,7 +703,7 @@ p1.then(value => {
 });
 ```
 
-### [链式调用](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then#链式调用)
+### 链式调用
 
 `then` 方法返回一个 `Promise` 对象，其允许方法链。
 
@@ -731,7 +756,7 @@ Promise.resolve("foo")
 // foobarbaz
 ```
 
-当一个值只是从一个 `then` 内部返回时，它将等价地返回 `Promise.resolve(<由被调用的处理程序返回的值>)`。
+当一个值只是从一个 `then` 内部返回时，**它将等价地返回** `Promise.resolve(<由被调用的处理程序返回的值>)`。
 
 ```js
 const p1 = new Promise((resolve, reject) => {
@@ -780,7 +805,7 @@ Promise.reject()
 	});
 ```
 
-实际上，捕获 rejected promise 的需求经常大于使用 `then` 的两种情况语法，比如下面这样的：
+实际上，**捕获 rejected promise 的需求经常大于使用 `then` 的两种情况语法**，比如下面这样的：
 
 ```js
 Promise.resolve()
@@ -858,7 +883,7 @@ p3.then((value) => {
 });
 ```
 
-### [基于 promise 的 ](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/then#基于_promise_的_domxrefwindow.setimmediate_polyfill)[`window.setImmediate`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/setImmediate) polyfill
+### 基于 promise 的 `window.setImmediate` polyfill
 
 Using a [`Function.prototype.bind()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/bind) `Reflect.apply` ([`Reflect.apply()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Reflect/apply)) method to create a (non-cancellable) setImmediate-style function.
 
