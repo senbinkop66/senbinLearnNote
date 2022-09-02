@@ -2089,6 +2089,109 @@ Array.isArray(document.getElementsByTagName('div')） //返回 false
 
 
 
+-----
+
+## 34. let x=1&&2;let y=1||2,x，y返回结果是什么
+
+```js
+ let x = 1 && 2;
+ let y = 1 || 2;
+
+ console.log(x);  // 2 
+ console.log(y);  // 1
+```
+
+### **逻辑与 (&&)**
+
+`&&`当且仅当其所有操作数都为真时，一组操作数的逻辑 AND ( ) 运算符（逻辑合取）为真。它通常与[`Boolean`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Boolean)（逻辑）值一起使用。如果是，则返回一个布尔值。但是，该`&&`运算符实际上返回指定操作数之一的值，因此如果此运算符与非布尔值一起使用，它将返回一个非布尔值。
+
+```
+expr1 && expr2
+```
+
+**如果`expr1`可以转换为`true`，则返回`expr2`**；否则，返回`expr1`。
+
+如果一个值可以转换为`true`，那么这个值就是所谓的[真](https://developer.mozilla.org/zh-CN/docs/Glossary/Truthy)值。如果一个值可以转换为`false`，那么这个值就是所谓的[falsy](https://developer.mozilla.org/zh-CN/docs/Glossary/Falsy)。
+
+可以转换为 false 的表达式示例如下：
+
+- `null`;
+- `NaN`;
+- `0`;
+- 空字符串（`""`或`''`或``）；
+- `undefined`.
+
+即使该`&&`运算符可以与不是布尔值的操作数一起使用，它仍然可以被视为布尔运算符，因为它的返回值始终可以转换为[布尔原语](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#boolean_type)。要将其返回值（或一般的任何表达式）显式转换为相应的布尔值，请使用双[非运算符](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators#logical_not)或[`Boolean` (en-US)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean/Boolean)构造函数。
+
+逻辑 AND 表达式从左到右求值，使用以下规则测试可能的“短路”求值：
+
+`(some falsy expression) && expr`短路评估为假表达式；
+
+短路意味着`expr`上面的部分**没有被评估**，因此这样做的任何副作用都不会生效（例如，如果`expr`是函数调用，则调用永远不会发生）。发生这种情况是因为运算符的值在第一个操作数的评估之后已经确定。参见示例：
+
+```js
+function A(){ console.log('called A'); return false; }
+function B(){ console.log('called B'); return true; }
+
+console.log( A() && B() );
+// logs "called A" due to the function call,
+// then logs false (which is the resulting value of the operator)
+```
+
+运算符优先级
+
+以下表达式可能看起来等价，但实际上并非如此，**因为`&&`运算符在运算符之前执行`||`**（请参阅[运算符优先级](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence)）。
+
+```js
+true || false && false      // returns true, because && is executed first
+(true || false) && false    // returns false, because operator precedence cannot apply
+```
+
+以下代码显示了`&&`（逻辑与）运算符的示例。
+
+```js
+a1 = true  && true       // t && t returns true
+a2 = true  && false      // t && f returns false
+a3 = false && true       // f && t returns false
+a4 = false && (3 == 4)   // f && f returns false
+a5 = 'Cat' && 'Dog'      // t && t returns "Dog"
+a6 = false && 'Cat'      // f && t returns false
+a7 = 'Cat' && false      // t && f returns false
+a8 = ''    && false      // f && f returns ""
+a9 = false && ''         // f && f returns false
+
+```
+
+
+
+### 逻辑或 (||)
+
+当且仅当其一个或多个操作数为真时，一组操作数的逻辑 OR ( `||`) 运算符（逻辑析取）为真。它通常与[`Boolean`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Boolean)（逻辑）值一起使用。如果是，则返回一个布尔值。但是，该`||`运算符实际上返回指定操作数之一的值，因此如果此运算符与非布尔值一起使用，它将返回一个非布尔值。
+
+```
+expr1 || expr2
+```
+
+如果`expr1`可以转换为`true`，则返回`expr1`；否则，返回`expr2`。
+
+以下代码显示了`||`（逻辑 OR）运算符的示例。
+
+```js
+o1 = true  || true       // t || t returns true
+o2 = false || true       // f || t returns true
+o3 = true  || false      // t || f returns true
+o4 = false || (3 == 4)   // f || f returns false
+o5 = 'Cat' || 'Dog'      // t || t returns "Cat"
+o6 = false || 'Cat'      // f || t returns "Cat"
+o7 = 'Cat' || false      // t || f returns "Cat"
+o8 = ''    || false      // f || f returns false
+o9 = false || ''         // f || f returns ""
+o10 = false || varObject // f || object returns varObject
+
+```
+
+
+
 
 
 ---
@@ -4221,7 +4324,58 @@ function throttle (f, wait) {
 
 -----
 
+## 18. Js生成随机数和字符串
 
+### (1) 使用randomString，e表示长度，默认32位
+
+```js
+function randomString(e) {
+    e = e || 32;
+    const t = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
+    const m = t.length - 1;
+    const str = [];
+    for (let i = 0; i < e; i++) {
+      str.push(t.charAt(Math.floor(Math.random() * m)));
+    } 
+    return str.join("")
+}
+console.log(randomString(10));
+```
+
+
+
+### (2) 生成随机数
+
+```js
+
+function GetRandomNum(Min, Max) {
+  const Range = Max - Min;
+  return(Min + Math.round(Math.random() * Range));
+}
+var num = GetRandomNum(10000,999999);
+console.log(num);
+```
+
+
+
+### (3) 对定义的数组字符集进行随机选取
+
+```js
+var str = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+function generateMixed(n) {
+     var res = "";
+     for(var i = 0; i < n ; i ++) {
+         var id = Math.ceil(Math.random()*35);
+         res += str[id];
+     }
+     return res;
+}
+console.log(generateMixed(6));
+```
+
+
+
+----
 
 # 异步相关
 

@@ -1,18 +1,10 @@
-const pErr = new Promise((resolve, reject) => {
-  reject("总是失败");
-});
-
-const pSlow = new Promise((resolve, reject) => {
-  setTimeout(reject, 500, "最终失败");
-});
-
-const pFast = new Promise((resolve, reject) => {
-  setTimeout(reject, 100, "很快失败");
-});
-
-Promise.any([pErr, pSlow, pFast])
-  .then((value) => {
-    console.log(value);  //
-  }).catch((err) => {
-    console.log(err);  //[AggregateError: All promises were rejected]
-});
+var str = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+function generateMixed(n) {
+     var res = "";
+     for(var i = 0; i < n ; i ++) {
+         var id = Math.ceil(Math.random()*35);
+         res += str[id];
+     }
+     return res;
+}
+console.log(generateMixed(6));
