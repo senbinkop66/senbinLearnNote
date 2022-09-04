@@ -1,45 +1,38 @@
-/**
- * 代码中的类名、方法名、参数名已经指定，请勿修改，直接返回方法规定的值即可
- * 计算两个数之和
- * @param s string字符串 表示第一个整数
- * @param t string字符串 表示第二个整数
- * @return string字符串
- */
-function solve( s ,  t ) {
-    // write code here
-    let ans = [];
-
-    s = s.split("").reverse();
-    t = t.split("").reverse();
-    if (s.length > t.length) {
-    //确保s是短的一个数字
-    [s, t] = [t, s];
+// 每个数加任意次k后最多有多少数相等
+function solution(nums, n, k){
+    if (k === 1) {
+        return n;
     }
-    const n = s.length;
-    const m = t.length;
-
-    let ret = 0;
-    let sum = 0;
-    for (let i = 0; i < m; i++) {
-        let a = 0;
-        if (i < n) {
-            a = Number(s[i]);
+    let ans = 1;
+    // nums.sort((a, b) =>a - b);
+    let flag = false;
+    for (let i = 0; i < n; i++) {
+        if (nums[i] === -1) {
+            continue;
         }
-        let b = Number(t[i]);
-        sum = a + b + ret;
-        ret = sum > 9 ? 1 : 0;
-        sum %= 10;
-        ans .unshift(sum);
+        if (flag) {
+            break;
+        }
+        let count = 1;
+        flag = true;
+        for (let j = i + 1; j < n; j++) {
+            if (nums[j] === -1) {
+                continue;
+            }
+            flag = false;
+            if (Math.abs(nums[j] - nums[i]) % k === 0) {
+                count++;
+                nums[j] = -1;
+            }
+        }
+        nums[i] = -1;
+        ans = Math.max(ans, count);
     }
-    if (ret > 0) {
-        ans.unshift(1);
-    }
-
-    return ans.join("");
+    return ans;
 }
-// let s = "9", t = "99999999999999999999999999999999999999999999999999999999999994";
-// console.log(solve(s, t));
 
-module.exports = {
-    solve : solve
-};
+// console.log(solution([1, 4, 2,3,5], 5, 2));
+
+const [n, k] = readline().trim().split(" ").map(Number);
+const nums = readline().trim().split(" ").map(Number);
+console.log(solution(nums, n, k));
