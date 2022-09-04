@@ -1,38 +1,28 @@
-// 每个数加任意次k后最多有多少数相等
-function solution(nums, n, k){
-    if (k === 1) {
-        return n;
+/**
+ * 代码中的类名、方法名、参数名已经指定，请勿修改，直接返回方法规定的值即可
+ *
+ * 
+ * @param height int整型一维数组 
+ * @return int整型
+ */
+function maxArea( height ) {
+    // write code here
+    if (height < 2) {
+        return 0;
     }
-    let ans = 1;
-    // nums.sort((a, b) =>a - b);
-    let flag = false;
-    for (let i = 0; i < n; i++) {
-        if (nums[i] === -1) {
-            continue;
+    let left = 0, right = height.length - 1;
+    let ans = 0;
+    while (left < right) {
+        let area = Math.min(height[left], height[right]) * (right - left);
+        ans = Math.max(ans, area);
+        if (height[left] <= height[right]) {
+            left++;
+        } else {
+            right--;
         }
-        if (flag) {
-            break;
-        }
-        let count = 1;
-        flag = true;
-        for (let j = i + 1; j < n; j++) {
-            if (nums[j] === -1) {
-                continue;
-            }
-            flag = false;
-            if (Math.abs(nums[j] - nums[i]) % k === 0) {
-                count++;
-                nums[j] = -1;
-            }
-        }
-        nums[i] = -1;
-        ans = Math.max(ans, count);
     }
     return ans;
 }
-
-// console.log(solution([1, 4, 2,3,5], 5, 2));
-
-const [n, k] = readline().trim().split(" ").map(Number);
-const nums = readline().trim().split(" ").map(Number);
-console.log(solution(nums, n, k));
+module.exports = {
+    maxArea : maxArea
+};
