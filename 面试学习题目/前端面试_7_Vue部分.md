@@ -376,7 +376,12 @@ attrs和isteners的作用：解决多层嵌套情况下，父组件A下面有子
 - 包含了父级作用域中不作为 `prop` 被识别 (且获取) 的特性绑定 ( class 和 style 除外)。
 - 可以通过 `v-bind="$attrs"` 传⼊内部组件
 
+**范例**
 
+1. 我们可能会有一些属性和事件没有在props中定义，这类称为非属性特性，结合v-bind指令可以直接透传给内部的子组件。
+2. 这类“属性透传”常常用于包装高阶组件时往内部传递属性，常用于爷孙组件之间传参。比如我在扩展A组件时创建了组件B组件，然后在C组件中使用B，此时传递给C的属性中只有props里面声明的属性是给B使用的，其他的都是A需要的，此时就可以利用v-bind="$attrs"透传下去。
+3. 最常见用法是结合v-bind做展开；$attrs本身不是响应式的，除非访问的属性本身是响应式对象。
+4. vue2中使用$listeners获取事件，vue3中已移除，均合并到$attrs中，使用起来更简单了。
 
 attrs和listeners解决问题的过程：
 
@@ -770,6 +775,113 @@ export default {
 
 
 
+----
+
+## 1.17 Vue要做权限管理该怎么做？控制到按钮级别的权限怎么做？
+
+综合实践题目，实际开发中经常需要面临权限管理的需求，考查实际应用能力。
+
+权限管理一般需求是两个：页面权限和按钮权限，从这两个方面论述即可。
+
+**思路**
+
+1. 权限管理需求分析：页面和按钮权限
+2. 权限管理的实现方案：分后端方案和前端方案阐述
+3. 说说各自的优缺点
+
+回答范例
+
+1. 权限管理一般需求是**页面权限**和**按钮权限**的管理
+
+2. 具体实现的时候分后端和前端两种方案：
+
+   前端方案会**把所有路由信息在前端配置**，通过路由守卫要求用户登录，用户**登录后根据角色过滤出路由表**。比如我会配置一个`asyncRoutes`数组，需要认证的页面在其路由的`meta`中添加一个`roles`字段，等获取用户角色之后取两者的交集，若结果不为空则说明可以访问。此过滤过程结束，剩下的路由就是该用户能访问的页面，**最后通过`router.addRoutes(accessRoutes)`方式动态添加路由**即可。
+
+   后端方案会**把所有页面路由信息存在数据库**中，用户登录的时候根据其角色**查询得到其能访问的所有页面路由信息**返回给前端，前端**再通过`addRoutes`动态添加路由**信息
+
+   按钮权限的控制通常会**实现一个指令**，例如`v-permission`，**将按钮要求角色通过值传给v-permission指令**，在指令的`moutned`钩子中可以**判断当前用户角色和按钮是否存在交集**，有则保留按钮，无则移除按钮。
+
+3. 纯前端方案的优点是实现简单，不需要额外权限管理页面，但是维护起来问题比较大，有新的页面和角色需求就要修改前端代码重新打包部署；服务端方案就不存在这个问题，通过专门的角色和权限管理页面，配置页面和按钮权限信息到数据库，应用每次登陆时获取的都是最新的路由信息，可谓一劳永逸！
+
+可能的追问
+
+类似`Tabs`这类组件能不能使用`v-permission`指令实现按钮权限控制？
+
+```vue
+<el-tabs> 
+  <el-tab-pane label="⽤户管理" name="first">⽤户管理</el-tab-pane> 
+	<el-tab-pane label="⻆⾊管理" name="third">⻆⾊管理</el-tab-pane>
+</el-tabs>
+```
+
+服务端返回的路由信息如何添加到路由器中？
+
+```js
+// 前端组件名和组件映射表
+const map = {
+  //xx: require('@/views/xx.vue').default // 同步的⽅式
+  xx: () => import('@/views/xx.vue') // 异步的⽅式
+}
+// 服务端返回的asyncRoutes
+const asyncRoutes = [
+  { path: '/xx', component: 'xx',... }
+]
+// 遍历asyncRoutes，将component替换为map[component]
+function mapComponent(asyncRoutes) {
+  asyncRoutes.forEach(route => {
+    route.component = map[route.component];
+    if(route.children) {
+      route.children.map(child => mapComponent(child))
+    }
+	})
+}
+mapComponent(asyncRoutes)
+```
+
+
+
+----
+
+## 1.18 子组件可以直接改变父组件的数据么，说明原因
+
+组件化开发过程中有个单项数据流原则，不在子组件中修改父组件是个常识问题。
+
+1. 讲讲单项数据流原则，表明为何不能这么做
+2. 举几个常见场景的例子说说解决方案
+3. 结合实践讲讲如果需要修改父组件状态应该如何做
+
+### 回答范例
+
+1. 所有的 prop 都使得其父子之间形成了一个单向下行绑定：父级 prop 的更新会向下流动到子组件中，但是反过来则不行。**这样会防止从子组件意外变更父级组件的状态，从而导致你的应用的数据流向难以理解**。另外，每次父级组件发生变更时，子组件中所有的 prop 都将会刷新为最新的值。这意味着你不应该在一个子组件内部改变 prop。如果你这样做了，Vue 会在浏览器控制台中发出警告。 
+
+   ```
+   const props = defineProps(['foo']) // ❌ 
+   ```
+
+   下面行为会被警告, props是只读的! props.foo = 'bar'
+
+2. 实际开发过程中有两个场景会想要修改一个属性：
+
+- 这个 prop 用来传递一个初始值；这个子组件接下来希望将其作为一个本地的 prop 数据来使用。在这种情况下，最好定义一个本地的 data，并将这个 prop 用作其初始值： 
+
+  ```js
+  const props = defineProps(['initialCounter']) 
+  const counter = ref(props.initialCounter)
+  ```
+
+  
+
+- 这个 prop 以一种原始的值传入且需要进行转换。在这种情况下，最好使用这个 prop 的值来定义一个计算属性：
+
+  ```js
+   const props = defineProps(['size']) // prop变化，计算属性自动更新 
+   const normalizedSize = computed(() => props.size.trim().toLowerCase())
+  ```
+
+  
+
+3. 实践中如果确实想要改变父组件属性**应该emit一个事件让父组件去做这个变更**。注意虽然我们不能直接修改一个传入的对象或者数组类型的prop，但是我们还是能够直接改内嵌的对象或属性。
+
 
 
 ----
@@ -1161,6 +1273,94 @@ F C
 6. 看过源码里面关于代码生成的部分
 
 
+
+----
+
+## 1.28 异步组件是什么？使用场景有哪些？
+
+因为异步路由的存在，我们使用异步组件的次数比较少，因此还是有必要两者的不同。
+
+大型应用中，我们需要分割应用为更小的块，并且在需要组件时再加载它们。
+
+```js
+import { defineAsyncComponent } from 'vue'
+// defineAsyncComponent定义异步组件
+const AsyncComp = defineAsyncComponent(() => {
+  // 加载函数返回Promise
+  return new Promise((resolve, reject) => {
+    // ...可以从服务器加载组件
+    resolve(/* loaded component */)
+  })
+})
+// 借助打包工具实现ES模块动态导入
+const AsyncComp = defineAsyncComponent(() =>
+  import('./components/MyComponent.vue')
+)
+```
+
+思路
+
+1. 异步组件作用
+2. 何时使用异步组件
+3. 使用细节
+4. 和路由懒加载的不同
+
+范例
+
+1. 在大型应用中，我们需要分割应用为更小的块，并且在需要组件时再加载它们。
+2. 我们不仅可以在路由切换时懒加载组件，还可以在页面组件中继续使用异步组件，从而实现更细的分割粒度。
+3. 使用异步组件最简单的方式是直接给defineAsyncComponent指定一个loader函数，结合ES模块动态导入函数import可以快速实现。我们甚至可以指定loadingComponent和errorComponent选项从而给用户一个很好的加载反馈。另外Vue3中还可以结合Suspense组件使用异步组件。
+4. 异步组件容易和路由懒加载混淆，实际上不是一个东西。**异步组件不能被用于定义懒加载路由上，处理它的是vue框架**，处理路由组件加载的是vue-router。**但是可以在懒加载的路由组件中使用异步组件**。
+
+defineAsyncComponent定义了一个高阶组件，返回一个包装组件。包装组件根据加载器的状态决定渲染什么内容。
+
+
+
+----
+
+## 1.29 什么是递归组件？
+
+递归组件我们用的比较少，但是在Tree、Menu这类组件中会被用到。
+
+```vue
+<template>
+  <li>
+    <div> {{ model.name }}</div>
+    <ul v-show="isOpen" v-if="isFolder">
+      <!-- 注意这里：组件递归渲染了它自己 -->
+      <TreeItem
+        class="item"
+        v-for="model in model.children"
+        :model="model">
+      </TreeItem>
+    </ul>
+  </li>
+<script>
+export default {
+  name: 'TreeItem',
+  // ...
+}
+</script>
+```
+
+思路
+
+- 下定义
+
+- 使用场景
+
+- 使用细节
+
+- 原理阐述
+
+
+
+回答范例
+
+1. 如果某个组件通过组件名称引用它自己，这种情况就是递归组件。
+2. 实际开发中类似Tree、Menu这类组件，它们的节点往往包含子节点，子节点结构和父节点往往是相同的。这类组件的数据往往也是树形结构，这种都是使用递归组件的典型场景。
+3. 使用递归组件时，由于我们并未也不能在组件内部导入它自己，所以设置组件`name`属性，用来查找组件定义，如果使用SFC，则可以通过SFC文件名推断。**组件内部通常也要有递归结束条件，比如model.children这样的判断。**
+4. 查看生成渲染函数可知，递归组件查找时会传递一个布尔值给`resolveComponent`，这样实际获取的组件就是当前组件本身。
 
 
 
@@ -1577,6 +1777,26 @@ watch：用来处理当一个属性发生变化时，需要执行某些具体的
 
 ## 1.38 自定义指令是什么？有哪些应用场景？
 
+回答范例
+
+1. Vue有一组默认指令，比如`v-mode`l或`v-for`，同时Vue也允许用户注册自定义指令来扩展Vue能力
+2. 自定义指令主要完成一些可复用低层级DOM操作
+3. 使用自定义指令分为定义、注册和使用三步：
+   - 定义自定义指令有两种方式：对象和函数形式，前者类似组件定义，有各种生命周期；后者只会在mounted和updated时执行
+   - 注册自定义指令类似组件，可以使用app.directive()全局注册，使用{directives:{xxx}}局部注册
+   - 使用时在注册名称前加上v-即可，比如v-focus
+4. 我在项目中常用到一些自定义指令，例如：
+   - 复制粘贴 v-copy
+   - 长按 v-longpress
+   - 防抖 v-debounce
+   - 图片懒加载 v-lazy
+   - 按钮权限 v-premission
+   - 页面水印 v-waterMarker
+   - 拖拽指令 v-draggable
+5. vue3中指令定义发生了比较大的变化，主要是钩子的名称保持和组件一致，这样开发人员容易记忆，不易犯错。另外在v3.2之后，可以在setup中以一个小写v开头方便的定义自定义指令，更简单了！
+
+
+
 在`vue`中提供了一套为数据驱动视图更为方便的操作，这些操作被称为指令系统
 
 我们看到的`v- `开头的行内属性，都是指令，不同的指令可以完成或实现不同的功能
@@ -1866,6 +2086,42 @@ export default vCopy;
 
 
 ---
+
+## 1.39 v-once的使用场景有哪些？
+
+仅渲染元素和组件一次，并且跳过未来更新
+
+```vue
+<!-- single element -->
+<span v-once>This will never change: {{msg}}</span>
+<!-- the element have children -->
+<div v-once>
+  <h1>comment</h1>
+  <p>{{msg}}</p>
+</div>
+<!-- component -->
+<my-component v-once :comment="msg"></my-component>
+<!-- `v-for` directive -->
+<ul>
+  <li v-for="i in list" v-once>{{i}}</li>
+</ul>
+```
+
+1. `v-once`是什么
+2. 什么时候使用
+3. 如何使用
+4. 扩展`v-memo`
+5. 探索原理
+
+### 回答范例
+
+1. `v-once`是vue的内置指令，**作用是仅渲染指定组件或元素一次，并跳过未来对其更新。**
+2. 如果我们有一些元素或者组件在初始化渲染之后不再需要变化，这种情况下适合使用`v-once`，这样哪怕这些数据变化，vue也会跳过更新，是一种代码优化手段。
+3. 我们只需要作用的组件或元素上加上v-once即可。
+4. **vue3.2之后，又增加了`v-memo`指令，可以有条件缓存部分模板并控制它们的更新**，可以说控制力更强了。
+5. 编译器发现元素上面有v-once时，会将首次计算结果存入缓存对象，组件再次渲染时就会从缓存获取，从而避免再次计算。
+
+
 
 
 
@@ -3731,6 +3987,271 @@ Vue是国内最火的前端框架之一。性能提升，运行速度是vue2的1
 
 
 
+----
+
+## 使用vue渲染大量数据时应该怎么优化？
+
+思路
+
+1. 描述大数据量带来的问题
+2. 分不同情况做不同处理
+3. 总结一下
+
+回答
+
+1. 在大型企业级项目中经常需要渲染大量数据，此时很容易出现卡顿的情况。比如大数据量的表格、树。
+2. 处理时要根据情况做不通处理：
+   - 可以采取分页的方式获取，避免渲染大量数据
+   - [vue-virtual-scroller](https://github.com/Akryum/vue-virtual-scroller)等虚拟滚动方案，只渲染视口范围内的数据
+   - 如果不需要更新，可以使用`v-once`方式只渲染一次
+   - 通过[v-memo](https://vuejs.org/api/built-in-directives.html#v-memo)可以缓存结果，结合`v-for`使用，避免数据变化时不必要的VNode创建
+   - 可以采用懒加载方式，在用户需要的时候再加载数据，比如tree组件子树的懒加载
+3. 总之，还是要看具体需求，首先从设计上避免大数据获取和渲染；实在需要这样做可以采用虚表的方式优化渲染；最后优化更新，如果不需要更新可以v-once处理，需要更新可以v-memo进一步优化大数据更新性能。其他可以采用的是交互方式优化，无线滚动、懒加载等方案。
+
+
+
+----
+
+## Vue实例挂载的过程中发生了什么?
+
+1. 初始化
+2. 建立更新机制
+
+回答范例
+
+1. 挂载过程指的是app.mount()过程，这个是个初始化过程，整体上做了两件事：**初始化**和**建立更新机制**
+2. 初始化会**创建组件实例**、**初始化组件状态**、**创建各种响应式数据**
+3. 建立更新机制这一步会立即执行一次组件更新函数，这会首次执行组件渲染函数并执行patch将前面获得vnode转换为dom；同时首次执行渲染函数会创建它内部响应式数据和组件更新函数之间的依赖关系，这使得以后数据变化时会执行对应的更新函数。
+
+
+
+-----
+
+## 你总结的vue最佳实践有哪些？
+
+从编码风格、性能、安全等方面说几条：
+
+1. 编码风格方面：
+   - 命名组件时使用“多词”风格避免和HTML元素冲突
+   - 使用“细节化”方式定义属性而不是只有一个属性名
+   - 属性名声明时使用“驼峰命名”，模板或jsx中使用“肉串命名”
+   - 使用v-for时务必加上key，且不要跟v-if写在一起
+2. 性能方面：
+   - 路由懒加载减少应用尺寸
+   - 利用SSR减少首屏加载时间
+   - 利用v-once渲染那些不需要更新的内容
+   - 一些长列表可以利用虚拟滚动技术避免内存过度占用
+   - 对于深层嵌套对象的大数组可以使用shallowRef或shallowReactive降低开销
+   - 避免不必要的组件抽象
+
+3. 安全：
+
+- 不使用不可信模板，例如使用用户输入拼接模板：`template: <div> + userProvidedString + </div>`
+- 小心使用v-html，:url，:style等，避免html、url、样式等注入
+
+
+
+----
+
+## 从0到1自己构架一个vue项目，说说有哪些步骤
+
+思路
+
+1. 构建项目，创建项目基本结构
+2. 引入必要的插件：
+3. 代码规范：prettier，eslint
+4. 提交规范：husky，lint-staged
+5. 其他常用：svg-loader，vueuse，nprogress
+6. 常见目录结构
+
+回答范例
+
+1. 从0创建一个项目我大致会做以下事情：项目构建、引入必要插件、代码规范、提交规范、常用库和组件
+2. 目前vue3项目我会用vite或者create-vue创建项目
+3. 接下来引入必要插件：路由插件vue-router、状态管理vuex/pinia、ui库我比较喜欢element-plus和antd-vue、http工具我会选axios
+4. 其他比较常用的库有vueuse，nprogress，图标可以使用vite-svg-loader
+5. 下面是代码规范：结合prettier和eslint即可
+6. 最后是提交规范，可以使用husky，lint-staged，commitlint
+
+7. 目录结构我有如下习惯： `.vscode`：用来放项目中的 vscode 配置
+
+```
+plugins`：用来放 vite 插件的 plugin 配置
+
+`public`：用来放一些诸如 页头icon 之类的公共文件，会被打包到dist根目录下
+
+`src`：用来放项目代码文件
+
+`api`：用来放http的一些接口配置
+
+`assets`：用来放一些 CSS 之类的静态资源
+
+`components`：用来放项目通用组件
+
+`layout`：用来放项目的布局
+
+`router`：用来放项目的路由配置
+
+`store`：用来放状态管理Pinia的配置
+
+`utils`：用来放项目中的工具方法类
+
+`views`：用来放项目的页面文件
+
+```
+
+
+
+----
+
+## 你是怎么处理vue项目中的错误的？
+
+这是一个综合应用题目，在项目中我们常常需要将App的异常上报，此时错误处理就很重要了。
+
+这里要区分错误的类型，针对性做收集。
+
+然后是将收集的的错误信息上报服务器。
+
+思路
+
+1. 首先区分错误类型
+2. 根据错误不同类型做相应收集
+3. 收集的错误是如何上报服务器的
+
+回答范例
+
+1. 应用中的错误类型分为"`接口异常`"和“`代码逻辑异常`”
+
+2. 我们需要根据不同错误类型做相应处理：
+
+   `接口异常`是我们请求后端接口过程中发生的异常，可能是请求失败，也可能是请求获得了服务器响应，但是返回的是错误状态。以Axios为例，这类异常我们可以通过封装Axios，在拦截器中统一处理整个应用中请求的错误。
+
+   `代码逻辑异常`是我们编写的前端代码中存在逻辑上的错误造成的异常，vue应用中最常见的方式是使用全局错误处理函数`app.config.errorHandler`收集错误。
+
+3. 收集到错误之后，需要统一处理这些异常：分析错误，获取需要错误信息和数据。这里应该有效区分错误类型，如果是请求错误，需要上报接口信息，参数，状态码等；对于前端逻辑异常，获取错误名称和详情即可。另外还可以收集应用名称、环境、版本、用户信息，所在页面等。这些信息可以通过vuex存储的全局状态和路由信息获取。
+
+axios拦截器中处理捕获异常：
+
+```js
+// 响应拦截器
+instance.interceptors.response.use(
+  (response) => {
+    return response.data;
+  },
+  (error) => {
+    // 存在response说明服务器有响应
+    if (error.response) {
+      let response = error.response;
+      if (response.status >= 400) {
+        handleError(response);
+      }
+    } else {
+      handleError(null);
+    }
+    return Promise.reject(error);
+  },
+);
+```
+
+vue中全局捕获异常：
+
+```js
+import { createApp } from 'vue'
+
+const app = createApp(...)
+
+app.config.errorHandler = (err, instance, info) => {
+  // report error to tracking services
+}
+```
+
+处理接口请求错误：
+
+```js
+function handleError(error, type) {
+  if(type == 1) {
+    // 接口错误，从config字段中获取请求信息
+    let { url, method, params, data } = error.config
+    let err_data = {
+       url, method,
+       params: { query: params, body: data },
+       error: error.data?.message || JSON.stringify(error.data),
+    })
+  }
+}
+```
+
+处理前端逻辑错误：
+
+```js
+function handleError(error, type) {
+  if(type == 2) {
+    let errData = null
+    // 逻辑错误
+    if(error instanceof Error) {
+      let { name, message } = error
+      errData = {
+        type: name,
+        error: message
+      }
+    } else {
+      errData = {
+        type: 'other',
+        error: JSON.strigify(error)
+      }
+    }
+  }
+}
+```
+
+
+
+----
+
+## SPA、SSR的区别是什么
+
+我们现在编写的Vue、React和Angular应用大多数情况下都会在一个页面中，点击链接跳转页面通常是内容切换而非页面跳转，由于良好的用户体验逐渐成为主流的开发模式。但同时也会有首屏加载时间长，SEO不友好的问题，因此有了SSR，这也是为什么面试中会问到两者的区别。
+
+思路分析
+
+1. 两者概念
+2. 两者优缺点分析
+3. 使用场景差异
+4. 其他选择
+
+回答范例
+
+1. SPA（Single Page Application）即**单页面应用**。一般也称为 **客户端渲染**（Client Side Render）， 简称 CSR。SSR（Server Side Render）即 **服务端渲染**。一般也称为 **多页面应用**（Mulpile Page Application），简称 MPA。
+2. SPA应用只会首次请求html文件，后续只需要请求JSON数据即可，因此用户体验更好，节约流量，服务端压力也较小。但是首屏加载的时间会变长，而且SEO不友好。为了解决以上缺点，就有了SSR方案，由于HTML内容在服务器一次性生成出来，首屏加载快，搜索引擎也可以很方便的抓取页面信息。但同时SSR方案也会有性能，开发受限等问题。
+3. 在选择上，如果我们的应用存在首屏加载优化需求，SEO需求时，就可以考虑SSR。
+4. 但并不是只有这一种替代方案，比如对一些不常变化的静态网站，SSR反而浪费资源，我们可以考虑[预渲染](https://github.com/chrisvfritz/prerender-spa-plugin)（prerender）方案。另外nuxt.js/next.js中给我们提供了SSG（Static Site Generate）静态网站生成方案也是很好的静态站点解决方案，结合一些CI手段，可以起到很好的优化效果，且能节约服务器资源。
+
+内容生成上的区别：
+
+SSR
+
+[![ss](E:\pogject\学习笔记\image\SSR)](https://camo.githubusercontent.com/79c4e902659ea138cdf3b81729751b30f813026420a0c80c1a7b89467a499d02/68747470733a2f2f747661312e73696e61696d672e636e2f6c617267652f65366339643234656c793168327a75686d797075636a32306f6930686f6a73322e6a7067)
+
+------
+
+SPA
+
+[![sp](E:\pogject\学习笔记\image\SPA)](https://camo.githubusercontent.com/e0f8f4b1fb7a37a602e6db238c6b7b38b313af0b62fb4695e47b5027f8506cb6/68747470733a2f2f747661312e73696e61696d672e636e2f6c617267652f65366339643234656c793168327a75687a346c77306a323070383069613735332e6a7067)
+
+------
+
+部署上的区别
+
+[![部署上区别](E:\pogject\学习笔记\image\SSR部署)
+
+
+
+
+
+----
+
+
+
 
 
 -----
@@ -4077,6 +4598,39 @@ const store = new Vuex.Store({
 
 同步的意义在于这样每一个 mutation 执行完成后都可以对应到一个新的状态（和 reducer 一样），这样 devtools 就可以打个 snapshot 存下来，然后就可以随便 time-travel 了。如果你开着 devtool 调用一个异步的 action，你可以清楚地看到它所调用的 mutation 是何时被记录下来的，并且可以立刻查看它们对应的状态。
 
+答题思路
+
+1. 给出两者概念说明区别
+2. 举例说明应用场景
+3. 使用细节不同
+4. 简单阐述实现上差异
+
+回答范例
+
+1. 官方文档说：更改 Vuex 的 store 中的状态的唯一方法是提交 `mutation`，`mutation` 非常类似于事件：每个 `mutation` 都有一个字符串的**类型 (type)\**和一个\**回调函数 (handler)**。`Action` 类似于 `mutation`，不同在于：`Action`可以包含任意异步操作，但它不能修改状态， 需要提交`mutation`才能变更状态。
+2. 因此，开发时，包含异步操作或者复杂业务组合时使用action；需要直接修改状态则提交mutation。但由于dispatch和commit是两个API，容易引起混淆，实践中也会采用统一使用dispatch action的方式。
+3. 调用dispatch和commit两个API时几乎完全一样，但是定义两者时却不甚相同，mutation的回调函数接收参数是state对象。action则是与Store实例具有相同方法和属性的上下文context对象，因此一般会解构它为`{commit, dispatch, state}`，从而方便编码。另外dispatch会返回Promise实例便于处理内部异步结果。
+4. 实现上commit(type)方法相当于调用`options.mutations[type](state)`；`dispatch(type)`方法相当于调用`options.actions[type](store)`，这样就很容易理解两者使用上的不同了。
+
+```js
+class Store {
+    constructor(options) {
+        this.state = reactive(options.state)
+        this.options = options
+    }
+    commit(type, payload) {
+        // 传入上下文和参数1都是state对象
+        this.options.mutations[type].call(this.state, this.state, payload)
+    }
+    dispatch(type, payload) {
+        // 传入上下文和参数1都是store本身
+        this.options.actions[type].call(this, this, payload)
+    }
+}
+```
+
+
+
 
 
 ---
@@ -4143,9 +4697,66 @@ created() {
 
 ----
 
+## 怎么监听vuex数据的变化？
+
+vuex数据状态是响应式的，所以状态变视图跟着变，但是有时还是需要知道数据状态变了从而做一些事情。
+
+既然状态都是响应式的，那自然可以`watch`，另外vuex也提供了订阅的API：`store.subscribe()`。
+
+- 我知道几种方法：
+  - 可以通过watch选项或者watch方法监听状态
+  - 可以使用vuex提供的API：store.subscribe()
+- watch选项方式，可以以字符串形式监听`$store.state.xx`；subscribe方式，可以调用store.subscribe(cb),回调函数接收mutation对象和state对象，这样可以进一步判断mutation.type是否是期待的那个，从而进一步做后续处理。
+- watch方式简单好用，且能获取变化前后值，首选；subscribe方法会被所有commit行为触发，因此还需要判断mutation.type，用起来略繁琐，一般用于vuex插件中。
+
+watch方式
+
+```js
+const app = createApp({
+    watch: {
+      '$store.state.counter'() {
+        console.log('counter change!');
+      }
+    }
+  })
+```
+
+subscribe方式：
+
+```js
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'add') {
+      console.log('counter change in subscribe()!');
+    }
+  })
+```
 
 
 
+----
+
+## 如果让你从零开始写一个vuex，说说你的思路
+
+- `vuex`需求分析
+- 如何实现这些需求
+
+1. 官方说`vuex`是一个状态管理模式和库，并确保这些状态以可预期的方式变更。可见要实现一个`vuex`：
+   - 要实现一个`Store`存储全局状态
+   - 要提供修改状态所需API：`commit(type, payload)`, `dispatch(type, payload)`
+2. 实现`Store`时，可以定义Store类，构造函数接收选项options，设置属性state对外暴露状态，提供commit和dispatch修改属性state。这里需要设置state为响应式对象，同时将Store定义为一个Vue插件。
+3. `commit(type, payload)`方法中可以获取用户传入`mutations`并执行它，这样可以按用户提供的方法修改状态。 `dispatch(type, payload)`类似，但需要注意它可能是异步的，需要返回一个Promise给用户以处理异步结果。
+
+```js
+class Store {
+    constructor(options) {
+        this.state = reactive(options.state)
+        this.options = options
+    }
+    commit(type, payload) {
+        this.options.mutations[type].call(this, this.state, payload)
+    }
+}
+```
 
 
 
@@ -4748,3 +5359,38 @@ query: {}  // 一个 key/value 对象，表示 URL 查询参数。跟随在路�
 
 
 
+----
+
+## router-link和router-view是如何起作用的？
+
+vue-router中两个重要组件`router-link`和`router-view`，分别起到导航作用和内容渲染作用，但是回答如何生效还真有一定难度哪！
+
+思路
+
+- 两者作用
+- 阐述使用方式
+- 原理说明
+
+回答范例
+
+- vue-router中两个重要组件`router-link`和`router-view`，分别起到路由导航作用和组件内容渲染作用
+- 使用中router-link默认生成一个a标签，设置to属性定义跳转path。实际上也可以通过custom和插槽自定义最终的展现形式。router-view是要显示组件的占位组件，可以嵌套，对应路由配置的嵌套关系，配合name可以显示具名组件，起到更强的布局作用。
+- router-link组件内部根据custom属性判断如何渲染最终生成节点，内部提供导航方法navigate，用户点击之后实际调用的是该方法，此方法最终会修改响应式的路由变量，然后重新去routes匹配出数组结果，router-view则根据其所处深度deep在匹配数组结果中找到对应的路由并获取组件，最终将其渲染出来。
+
+
+
+----
+
+## 怎么定义动态路由？怎么获取传过来的动态参数？
+
+1. 什么是动态路由
+2. 什么时候使用动态路由，怎么定义动态路由
+3. 参数如何获取
+4. 细节、注意事项
+
+回答范例
+
+1. 很多时候，我们需要**将给定匹配模式的路由映射到同一个组件**，这种情况就需要定义动态路由。
+2. 例如，我们可能有一个 `User` 组件，它应该对所有用户进行渲染，但用户 ID 不同。在 Vue Router 中，我们可以在路径中使用一个动态字段来实现，例如：`{ path: '/users/:id', component: User }`，其中`:id`就是路径参数
+3. *路径参数* 用冒号 `:` 表示。当一个路由被匹配时，它的 *params* 的值将在每个组件中以 `this.$route.params` 的形式暴露出来。
+4. 参数还可以有多个，例如`/users/:username/posts/:postId`；除了 `$route.params` 之外，`$route` 对象还公开了其他有用的信息，如 `$route.query`、`$route.hash` 等。
