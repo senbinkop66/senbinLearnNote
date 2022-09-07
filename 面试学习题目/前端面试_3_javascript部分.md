@@ -1235,6 +1235,10 @@ function removeButton(){
 
 **5、未被销毁的事件监听**
 
+6、console.lo打印到控制台的对象
+
+7、循环引用
+
 
 
 ---
@@ -2189,6 +2193,65 @@ o9 = false || ''         // f || f returns ""
 o10 = false || varObject // f || object returns varObject
 
 ```
+
+
+
+----
+
+## 35. Object.create(null) 和 {} 区别是什么
+
+```js
+Object.create(proto,[propertiesObject])
+```
+
+- proto:新创建对象的原型对象
+- propertiesObject:可选。要添加到新对象的**可枚举**（新添加的属性是其自身的属性，而不是其原型链上的属性）的属性。
+
+1. Object.create() 必须接收一个对象参数，创建的新对象的原型指向接收的参数对象
+2.  而通过Object.create(null)创建的对象是一个干净的对象，也就是没有原型，不继承Object[原型链](https://so.csdn.net/so/search?q=原型链&spm=1001.2101.3001.7020)上的属性
+3. new Object()创建的对象是 Object的实例，原型永远指向Object.prototype，
+4. {}创建的对象与其一样都会继承Object对象的所有属性
+
+```js
+let obj1 = {};
+let obj2 = Object.create(null);
+let obj3 = Object.create({});
+
+console.log("obj1", obj1); //VM848:4 obj1 {}[[Prototype]]: Object
+console.log("obj2", obj2);  //VM848:5 obj2 {}No properties
+console.log("obj3", obj3);  // obj3 {}[[Prototype]]: Object[[Prototype]]: Object
+console.log("obj4", obj4);  // {}[[Prototype]]: Object
+
+console.log(obj1.toString);  // [Function: toString]
+console.log(obj2.toString);  // undefined
+console.log(obj3.toString);  // [Function: toString]
+console.log(obj4.toString);  // [Function: toString]
+```
+
+`Object.create(null)`没有继承任何原型方法，也就是说它的原型链没有上一层。
+
+使用`create`创建的对象，没有任何属性，显示`No properties`，我们可以把它当作一个非常**纯净**的map来使用，我们可以自己定义`hasOwnProperty`、`toString`方法，不管是有意还是不小心，我们完全不必担心会将原型链上的同名方法覆盖掉。
+
+从运行结果可以看到这两种方式创建的对象，虽然形式上都是{}，但是它们各自的原型对象却是不一样的。
+
+使用字面量形式赋值，相当于var obj1 = new Object()，原型指向Object.prototype，会继承Object的属性和方法。例如：toString方法等。
+
+使用Object.create(null)创建的对象，其原型指向null。null作为原型链的顶端，没有也不会继承任何属性和方法。
+
+总结：
+
+1. 你需要一个非常干净且高度可定制的对象当作数据字典的时候；
+2. 想节省`hasOwnProperty`带来的一丢丢性能损失并且可以偷懒少些一点代码的时候
+
+用`Object.create(null)`吧！其他时候，请用`{}`。
+
+### Object.create(null)的应用场景
+
+可以创建一个干净且高度可定制的对象当做数据字典，进行循环取用，可以提高循环效率。
+
+这个时候如果对象有原型链，那便会在循环的时候去循环它的各个属性和方法，效率则会降低
+
+
 
 
 
@@ -3564,15 +3627,16 @@ console.log(ans);  //[1, 2, 3, 4, 5, 2, 3, 5 ]
 
 判断一个实例是否属于某种类型.
 
-instanceof运算符可以用来判断某个构造函数的prototype属性所指向的對象是否存在于另外一个要检测对象的原型链上。
+instanceof运算符可以用来**判断某个构造函数的prototype属性所指向的对象**是否存在于**另外一个要检测对象的原型链上**。
 
-理解来说，就是要判断一个Object是不是数组（这里不是口误，在JavaScript当中，数组实际上也是一种对象），如果这个Object的原型链上能够找到Array构造函数的话，那么这个Object应该及就是一个数组，如果这个Object的原型链上只能找到Object构造函数的话，那么它就不是一个数组。
+理解来说，就是要判断一个Object是不是数组（这里不是口误，在JavaScript当中，数组实际上也是一种对象），**如果这个Object的原型链上能够找到Array构造函数的话，那么这个Object应该及就是一个数组**，如果这个Object的原型链上只能找到Object构造函数的话，那么它就不是一个数组。
 
 ```js
 const a = [];
 const b = {};
 console.log(a instanceof Array);//true
 console.log(a instanceof Object);//true,在数组的原型链上也能找到Object构造函数
+
 console.log(b instanceof Array);//false
 ```
 
@@ -3587,10 +3651,10 @@ function _instanceof(L, R) {
     var R = R.prototype;
     var L = L.__proto__;
     while( true) {
-        if(L == null) {
+        if(L === null) {
             return false;
         }
-        if(L == R) {
+        if(L === R) {
             return true;
         }
         L = L.__proto__;
@@ -3616,20 +3680,21 @@ function _instanceof(L, R) {
     console.log(arr instanceof xArray); //false
 
     console.log(arrx.constructor === Array);// false
+
     console.log(arr.constructor === Array);// true
     console.log(arrx.constructor === xArray);// true
     console.log(Array.isArray(arrx));  //true
 
 ```
 
-instanceof操作符的问题在于，它假定只有一个全局环境。如果网页中包含多个框架，那实际上就存在两个以上不同的全局执行环境，从而存在两个以上不同版本的Array构造函数。
+instanceof操作符的问题在于，**它假定只有一个全局环境**。如果网页中包含多个框架，那实际上就存在两个以上不同的全局执行环境，从而存在两个以上不同版本的Array构造函数。
  如果你从一个框架向另一个框架传入一个数组，那么传入的数组与在第二个框架中原生创建的数组分别具有各自不同的构造函数。
 
 
 
 ### (2) 用constructor判断
 
-实例化的数组拥有一个constructor属性，这个属性指向生成这个数组的方法。
+实例化的数组拥有一个constructor属性，**这个属性指向生成这个数组的方法**。
 
 ```js
 const a = [];
@@ -3637,13 +3702,16 @@ console.log(a.constructor);//function Array(){ [native code] }
 ```
 
 以上的代码说明，数组是有一个叫Array的函数实例化的。
+
 如果被判断的对象是其他的数据类型的话，结果如下：
 
 ```js
 const o = {};
 console.log(o.constructor);//function Object(){ [native code] }
+
 const r = /^[0-9]$/;
 console.log(r.constructor);//function RegExp() { [native code] }
+
 const n = null;
 console.log(n.constructor);//报错
 ```
@@ -3662,12 +3730,13 @@ console.log(a.constructor == Array);//true
 const a = [];
 //作死将constructor属性改成了别的
 a.contrtuctor = Object;
-console.log(a.constructor == Array);//false (哭脸)
-console.log(a.constructor == Object);//true (哭脸)
+console.log(a.constructor == Array);//false 
+console.log(a.constructor == Object);//true 
+
 console.log(a instanceof Array);//true (instanceof火眼金睛)
 ```
 
-可以看出，constructor属性被修改之后，就无法用这个方法判断数组是数组了，除非你能保证不会发生constructor属性被改写的情况，否则用这种方法来判断数组也是不靠谱的。
+可以看出，**constructor属性被修改之后，就无法用这个方法判断数组是数组了**，除非你能保证不会发生constructor属性被改写的情况，否则用这种方法来判断数组也是不靠谱的。
 
 而且constructor和instanceof存在同样问题，不同执行环境下，constructor判断不正确问题。
 
@@ -3699,7 +3768,7 @@ Object.getPrototypeOf(arr) === Array.prototype // true
 
 借用Object原型的call或者apply方法，调用toString()是否为[object Array]
 
-另一个行之有效的方法就是使用Object.prototype.toString方法来判断，每一个继承自Object的对象都拥有toString的方法。
+另一个行之有效的方法就是使用Object.prototype.toString方法来判断，**每一个继承自Object的对象都拥有toString的方法。**
 
 ```js
 const arr = []
@@ -3722,7 +3791,7 @@ b.toString();//"[object Object]"
 c.toString();//"Hello,Howard"
 ```
 
-从上面的代码可以看出，除了对象之外，其他的数据类型的toString返回的都是内容的字符创，只有对象的toString方法会返回对象的类型。所以要判断除了对象之外的数据的数据类型，我们需要“借用”对象的toString方法，所以我们需要使用call或者apply方法来改变toString方法的执行上下文。
+从上面的代码可以看出，**除了对象之外，其他的数据类型的toString返回的都是内容的字符创**，只有对象的toString方法会返回对象的类型。所以要判断除了对象之外的数据的数据类型，我们需要“借用”对象的toString方法，**所以我们需要使用call或者apply方法来改变toString方法的执行上下文。**
 
 ```javascript
 const a = ['Hello','Howard'];
@@ -3805,7 +3874,7 @@ Array.isArray(a);//true
 你可以放心大胆的使用Array.isArray去判断一个对象是不是数组。
 除非你不小心重写了Array.isArray方法本身。。
 
-Array.isArray是ES5标准中增加的方法，部分比较老的浏览器可能会有兼容问题，所以为了增强健壮性，建议还是给Array.isArray方法进行判断，增强兼容性，重新封装的方法如下：
+Array.isArray是ES5标准中增加的方法**，部分比较老的浏览器可能会有兼容问题**，所以为了增强健壮性，建议还是给Array.isArray方法进行判断，增强兼容性，重新封装的方法如下：
 
 ```javascript
 if (!Array.isArray) {
@@ -8798,23 +8867,21 @@ console.log(toRGB(str));  //rgb(253,50,155)
 我们最一开始能想到的莫过于循环数组元素，如果还是一个数组，就递归调用该方法：
 
 ```js
-// 方法 1
-var arr = [1, [2, [3, 4]]];
-
-function flatten(arr) {
-    var result = [];
-    for (var i = 0, len = arr.length; i < len; i++) {
+function flattenArr(arr) {
+    if (!Array.isArray(arr)) return;
+    let result = [];
+    for (let i = 0; i < arr.length; i++) {
         if (Array.isArray(arr[i])) {
-            result = result.concat(flatten(arr[i]))
-        }
-        else {
-            result.push(arr[i])
+            result = result.concat(flattenArr(arr[i]));
+        } else {
+            result.push(arr[i]);
         }
     }
     return result;
 }
-console.log(flatten(arr))
 
+let arr = [1, [2, [3, 4, [5, 6]]]];
+console.log(flattenArr(arr));  // [ 1, 2, 3, 4, 5, 6
 ```
 
 ### (2) toString
@@ -8850,16 +8917,16 @@ console.log(flatten(arr))  //[ 1, 1, 2, 2 ]
 既然是对数组进行处理，最终返回一个值，我们就可以考虑使用 reduce 来简化代码：
 
 ```js
-// 方法3
-var arr = [1, [2, [3, 4]]];
-
-function flatten(arr) {
-    return arr.reduce(function(prev, next){
-        return prev.concat(Array.isArray(next) ? flatten(next) : next)
-    }, [])
+function flattenArr(arr) {
+    if (!Array.isArray(arr)) return;
+    return arr.reduce((prev, next) => {
+        return prev.concat(Array.isArray(next) ? flattenArr(next) : next);
+    }, []);
 }
-console.log(flatten(arr))  //[ 1, 2, 3, 4 ]
 
+
+let arr = [1, [2, [3, 4, [5, 6]]]];
+console.log(flattenArr(arr));  // [ 1, 2, 3, 4, 5, 6
 ```
 
 ### (4) ...扩展运算符
@@ -8875,20 +8942,16 @@ console.log([].concat(...arr)); // [1, 2, [3, 4]]
 我们用这种方法只可以扁平一层，但是顺着这个方法一直思考，我们可以写出这样的方法：
 
 ```js
-// 方法4
-var arr = [1, [2, [3, 4]]];
-
-function flatten(arr) {
-
+function flattenArr(arr) {
+    if (!Array.isArray(arr)) return;
     while (arr.some(item => Array.isArray(item))) {
         arr = [].concat(...arr);
     }
-
     return arr;
 }
 
-console.log(flatten(arr))  //[ 1, 2, 3, 4 ]
-
+let arr = [1, [2, [3, 4, [5, 6]]]];
+console.log(flattenArr(arr));  // [ 1, 2, 3, 4, 5, 6
 ```
 
 ### (5) undercore

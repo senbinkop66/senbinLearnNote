@@ -4,41 +4,272 @@
     <meta charset="utf-8" />
     <title>测试</title>
     <style type="text/css">
-   .box {
-      width: 500px;
-      height: 100px;
-      background-color: hotpink;
-      display: flex;
-    }
- 
-    .box div {
-      width: 100px;
-    }
- 
-    .box div:nth-child(1) {
-        flex-grow: 2;
-      flex-basis: 50px;
-      background-color: gray;
-    }
- 
-    .box div:nth-child(2) {
-        flex-grow: 1;
-      flex-basis: 100px;
-      background-color: blue;
-    }
- 
-    .box div:nth-child(3) {
-        flex-grow: 1;
-      flex-basis: 50px;
-      background-color: goldenrod;
-    }
+   * {
+    margin: 0;
+    padding: 0;
+   }
+   fieldset {
+    width: 500px;
+    padding: 20px;
+    margin: 30px auto;
+    border: 1px solid #ccc;
+   }
+   legend {
+    font-size: 18px;
+    font-weight: bold;
+   }
+   #addr-show {
+    width: 200px;
+    height: 25px;
+    margin-bottom: 10px;
+   }
+   .btn {
+    width: 80px;
+    height: 30px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    outline: none;
+    background-color: #aaa;
+    margin: 0 20px;
+   }
+   .btn:disabled {
+    background-color: #ccc;
+   }
+   select {
+    width: 120px;
+    height: 30px;
+   }
+   select #city {
+    display: none;
+   }
+   select #country {
+    display: none;
+   }
     </style>
 </head>
 <body>
-    <div class="box">
-        <div>1</div>
-        <div>2</div>
-        <div>3</div>
+    <div>
+      <fieldset>
+        <legend>下拉选择框实现省市区（县）三级联动</legend>
+        <form action="#">
+          <label for="addr-show">您选择的是：
+            <input type="text" value="" id="addr-show">
+          </label>
+          <br>
+
+          <!-- 省份选择 -->
+          <select id="prov" onchange="showCity(this)">
+            <option>=请选择省份=</option>
+          </select>
+
+          <!--城市选择-->
+          <select id="city" onchange="showCountry(this)">
+            <option>=请选择城市=</option>
+          </select>
+
+          <!--县区选择-->
+          <select id="country" onchange="selectCountry(this)">
+            <option>=请选择县区=</option>
+          </select>
+
+          <button type="button" id="btn" class="btn met1" onclick="showAddr()">确定</button>
+        </form>
+      </fieldset>
     </div>
+    <script type="text/javascript">
+      const provice = [
+        {
+          name: "北京市",
+          city: [
+            {
+              name: "北京市",
+              districtAndCounty: ["东城区", "西城区", "崇文区", "宣武区", "朝阳区", "丰台区", "石景山区", "海淀区", "门头沟区", "房山区", "通州区", "顺义区", "昌平区", "大兴区", "怀柔区", "平谷区", "密云县", "延庆县", "延庆镇"]
+            }
+          ]
+        },
+        {
+          name: "天津市",
+          city: [
+            {
+              name: "天津市",
+              districtAndCounty: ["和平区", "河东区", "河西区", "南开区", "河北区", "红桥区", "塘沽区", "汉沽区", "大港区", "东丽区", "西青区", "津南区", "北辰区", "武清区", "宝坻区", "蓟县", "宁河县", "芦台镇", "静海县", "静海镇"]
+            }
+          ]
+        },
+        {
+          name: "上海市",
+          city: [
+            {
+              name: "上海市",
+              districtAndCounty: ["黄浦区", "卢湾区", "徐汇区", "长宁区", "静安区", "普陀区", "闸北区", "虹口区", "杨浦区", "闵行区", "宝山区?", "嘉定区", "浦东新区", "金山区", "松江区", "青浦区", "南汇区", "奉贤区", "崇明县", "城桥镇"]
+            }
+          ]
+        },
+        {
+          name: "重庆市",
+          city: [
+            {
+              name: "重庆市",
+              districtAndCounty: ["渝中区", "大渡口区", "江北区", "沙坪坝区", "九龙坡区", "南岸区", "北碚区", "万盛区", "双桥区", "渝北区", "巴南区", "万州区", "涪陵区", "黔江区", "长寿区", "合川市", "永川区市", "江津市", "南川市", "綦江县", "潼南县", "铜梁县", "大足县", "荣昌县", "璧山县", "垫江县", "武隆县", "丰都县", "城口县", "梁平县", "开县", "巫溪县", "巫山县", "奉节县", "云阳县", "忠县", "石柱土家族自治县", "彭水苗族土家族自治县", "酉阳土家族苗族自治县", "秀山土家族苗族自治县"]
+            }
+          ]
+        },
+        {
+          name: "辽宁省",
+          city: [
+            {
+              name: "沈阳市",
+              districtAndCounty: ["沈河区", "和平区", "大东区", "皇姑区", "铁西区", "苏家屯区", "东陵区", "新城子区", "于洪区", "新民市", "辽中县", "辽中镇", "康平县", "康平镇", "法库县", "法库镇"]
+            },
+            {
+              name: "朝阳市",
+              districtAndCounty: ["双塔区", "龙城区", "北票市", "凌源市", "朝阳县", "朝阳市双塔区", "建平县", "喀喇沁左翼蒙古族自治县", "大城子镇"]
+            },
+            {
+              name: "阜新市",
+              districtAndCounty: ["海州区", "新邱区", "太平区", "清河门区", "细河区", "彰武县", "彰武镇", "阜新蒙古族自治县", "阜新镇"]
+            },
+            {
+              name: "铁岭市",
+              districtAndCounty: ["银州区", "清河区", "调兵山市", "开原市", "铁岭县", "铁岭市银州区", "西丰县", "西丰镇", "昌图县", "昌图镇"]
+            },
+            {
+              name: "抚顺市",
+              districtAndCounty: ["顺城区", "新抚区", "东洲区", "望花区", "抚顺县", "抚顺市顺城区", "新宾满族自治县", "新宾镇", "清原满族自治县", "清原镇"]
+            },
+            {
+              name: "本溪市",
+              districtAndCounty: ["平山区", "溪湖区", "明山区", "南芬区", "本溪满族自治县", "小市镇", "桓仁满族自治县", "桓仁镇"]
+            },
+            {
+              name: "辽阳市",
+              districtAndCounty: ["白塔区", "文圣区", "宏伟区", "弓长岭区", "太子河区", "灯塔市", "辽阳县", "首山镇"]
+            },
+            {
+              name: "鞍山市",
+              districtAndCounty: ["铁东区", "铁西区", "立山区", "千山区", "海城市", "台安县", "台安镇", "岫岩满族自治县", "岫岩镇"]
+            },
+            {
+              name: "丹东市",
+              districtAndCounty: ["振兴区", "元宝区", "振安区", "凤城市", "东港市", "宽甸满族自治县", "宽甸镇"]
+            },
+            {
+              name: "大连市",
+              districtAndCounty: ["西岗区", "中山区", "沙河口区", "甘井子区", "旅顺口区", "金州区", "瓦房店市", "普兰店市", "庄河市", "长海县", "大长山岛镇"]
+            },
+            {
+              name: "营口市",
+              districtAndCounty: ["站前区", "西市区", "鲅鱼圈区", "老边区", "大石桥市", "盖州市"]
+            },
+            {
+              name: "盘锦市",
+              districtAndCounty: ["兴隆台区", "双台子区", "大洼县", "大洼镇", "盘山县", "盘锦市双台子区"]
+            },
+            {
+              name: "锦州市",
+              districtAndCounty: ["太和区", "古塔区", "凌河区", "凌海市", "北宁市", "黑山县", "黑山镇", "义县", "义州镇"]
+            },
+            {
+              name: "葫芦岛市",
+              districtAndCounty: ["龙港区", "连山区", "南票区", "兴城市", "绥中县", "绥中镇", "建昌县", "建昌镇"]
+            }
+          ]
+        },
+      ];
+      // 页面加载时，动态获取省份列表并放到下拉菜单的下拉项中
+      let btn = document.getElementById("btn");
+      let prov = document.getElementById("prov");
+
+      (function showProv() {
+        btn.disabled = true;
+        const len = provice.length;
+        for (let i = 0; i < len; i++) {
+          let provOpt = document.createElement("option");
+          provOpt.innerText = provice[i]["name"];
+          provOpt.value = i;
+          prov.appendChild(provOpt);
+        }
+      })();
+      //这是一个立即执行函数。
+      /* 当点击省份的下拉列表时会触发select的onchange事件，我们用options的selectedIndex属性找到用户选择的省份，动态的生成相应省得城市列表*/
+
+      /*根据所选的省份来显示城市列表*/
+      let addrShow = document.getElementById("addr-show");
+      let city = document.getElementById("city");
+      let country = document.getElementById("country");
+      const current = {prov: 0, city: 0, country: 0};
+
+      function showCity(obj) {
+        let val = Number(obj.options[obj.selectedIndex].value);
+        // console.log(val);
+        if (val >= 0) {
+          city.style.display = "inline-block";
+          country.style.display = "none";
+        } else {
+          city.style.display = "none";
+          country.style.display = "none";
+        }
+        if (val !== current.prov) {
+          current.prov = val;
+          addrShow.value = "";
+          btn.disabled = true;
+        }
+        if (val !== null) {
+          city.length = 1;   //清空之前的内容只留第一个默认选项
+          let cityLen = 0;
+          if (provice[val]) {
+            cityLen = provice[val]["city"].length;
+          }
+          for (let j = 0; j < cityLen; j++) {
+            let cityOpt = document.createElement("option");
+            cityOpt.innerText = provice[val]["city"][j].name;
+            cityOpt.value = j;
+            city.appendChild(cityOpt);
+          }
+        }
+      }
+
+      /*根据所选的城市来显示县区列表*/
+      function showCountry(obj) {
+        let val = Number(obj.options[obj.selectedIndex].value);
+        if (val >= 0) {
+          country.style.display = 'inline-block';
+        } else {
+          country.style.display = 'none';
+        }
+        current.city = val;
+        if (val !== null) {
+          country.length = 1; //清空之前的内容只留第一个默认选项
+          let countryLen = 0;
+          if (provice[current.prov]["city"][val]) {
+            countryLen = provice[current.prov]["city"][val].districtAndCounty.length;
+          }
+          // var countryLen = provice[current.prov]["city"][val].districtAndCounty.length;
+          if(countryLen === 0){
+            addrShow.value = provice[current.prov].name + '-' + provice[current.prov]["city"][current.city].name;
+            return;
+          }
+          for (let j = 0; j < countryLen; j++) {
+            let countryOpt = document.createElement('option');
+            countryOpt.innerText = provice[current.prov]["city"][val].districtAndCounty[j];
+            countryOpt.value = j;
+            country.appendChild(countryOpt);
+          }
+        }
+      }
+
+      function selectCountry(obj) {
+        let val = Number(obj.options[obj.selectedIndex].value);
+        current.country = val;
+        btn.disabled = false;
+        addrShow.value = provice[current.prov].name + '-' + provice[current.prov]["city"][current.city].name + '-' + provice[current.prov]["city"][current.city].districtAndCounty[current.country];
+      }
+
+      function showAddr() {
+        addrShow.value = provice[current.prov].name + '-' + provice[current.prov]["city"][current.city].name + '-' + provice[current.prov]["city"][current.city].districtAndCounty[current.country];
+        //处理其他
+      }
+
+    </script>
 </body>
 </html>

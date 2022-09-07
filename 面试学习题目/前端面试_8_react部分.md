@@ -702,11 +702,11 @@ getSnapshotBeforeUpdate() **在最近一次渲染输出（提交到 DOM 节点�
 
 ### Error boundaries
 
-Error boundaries 是 React 组件，它会在其子组件树中的任何位置捕获 JavaScript 错误，并记录这些错误，展示降级 UI 而不是崩溃的组件树。Error boundaries 组件会捕获在渲染期间，在生命周期方法以及其整个树的构造函数中发生的错误。
+Error boundaries 是 React 组件，**它会在其子组件树中的任何位置捕获 JavaScript 错误**，并记录这些错误，展示降级 UI 而不是崩溃的组件树。**Error boundaries 组件会捕获在渲染期间，在生命周期方法以及其整个树的构造函数中发生的错误。**
 
 如果 class 组件定义了生命周期方法 static getDerivedStateFromError() 或 componentDidCatch() 中的任何一个（或两者），它就成为了 Error boundaries。通过生命周期更新 state 可让组件捕获树中未处理的 JavaScript 错误并展示降级 UI。
 
-仅使用 Error boundaries 组件来从意外异常中恢复的情况；不要将它们用于流程控制。
+**仅使用 Error boundaries 组件来从意外异常中恢复的情况**；不要将它们用于流程控制。
 
 
 
