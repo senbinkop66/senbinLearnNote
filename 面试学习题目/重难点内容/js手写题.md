@@ -2376,3 +2376,275 @@ function getUrlParam(name) {
 
 ```
 
+
+
+----
+
+## 原生js实现轮播图
+
+**轮播图原理就是图片的移动**。所有轮播图片横向排列，在一个窗口中显示一张图片，窗口外的图片隐藏，每一次一排图片就是移动一张图片的距离，切换到下一张图片，即可实现图片轮播。
+
+图片的移动有两种方式：
+
+1. `translate` 实现的图片移动
+2. `position`定位实现图片的偏移
+
+图片的自动播放，那必然用到定时器吧，而且是间隔定时器 `setInterval`
+
+该案例实现效果：
+
+- 图片自动播放
+- 点击中间圆点按钮，实现图片任意切换
+- 点击左右箭头按钮，实现图片左右切换
+- 图片的切换对应小圆点的样式变化，即每一个小圆点对应一张图片
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>测试</title>
+    <style type="text/css">
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      .banner_container {
+        position: relative;
+        margin: 100px auto;
+        width: 400px;
+        height: 250px;
+        overflow: hidden;
+      }
+      ul.img_box {
+        position: absolute;
+        top: 0;
+        left: 0;
+        /* html中的第一张图片不是我们想要显示，第二张才是我们轮播图的第一张图片因此要让这排图片往左移动一张图片的距离 */
+        transform: translateX(-400px);
+      }
+      .img_box li {
+        float: left;
+        list-style: none;
+      }
+      /* 图片大小 */
+      .img_box li img {
+        width: 400px;
+      }
+      /* 小圆点 */
+      .sel_box {
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .sel_box li {
+        list-style: none;
+        /* 转换为行内块元素 -- 一行显示 */
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background-color: pink;
+        margin-right: 3px;
+        border-radius: 5px;
+        transition: all 0.4s;
+      }
+      /* 左箭头 */
+      .left_btn {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        width: 25px;
+        height: 30px;
+        background-color: #fff;
+        line-height: 30px;
+        padding-left: 3px;
+        /* 将鼠标样式改为小手 */
+        cursor: pointer;
+      }
+      /* 右箭头 */
+      .right_btn {
+        position: absolute;
+        top: 50%;
+        /*left: 375px;*/
+        right: 0;
+        transform: translateY(-50%);
+        width: 25px;
+        height: 30px;
+        background-color: #fff;
+        line-height: 30px;
+        padding-left: 5px;
+        /* 将鼠标样式改为小手 */
+        cursor: pointer;
+      }
+      .sel_box .cur {
+        background-color: red!important;
+        transform: scale(1.3);
+      }
+    </style>
+</head>
+<body>
+    <div class="banner_container">
+      <!-- 6张图片 -->
+      <!-- 第一张图片放置的其实四张轮播图中的最后一张，第6张图片其实是四张轮播图中的第一张，目的很简单，就是为了实现图片无缝轮播 -->
+      <ul class="img_box">
+        <li><img src="../image/img4.jpg" alt=""></li>
+        <li><img src="../image/img1.jpg" alt=""></li>
+        <li><img src="../image/img2.jpg" alt=""></li>
+        <li><img src="../image/img3.jpg" alt=""></li>
+        <li><img src="../image/img4.jpg" alt=""></li>
+        <li><img src="../image/img1.jpg" alt=""></li>
+      </ul>
+      <!-- 中间圆点 -->
+      <ul class="sel_box">
+        <!-- 自定义属性 -->
+        <li data-index="0"></li>
+        <li data-index="1"></li>
+        <li data-index="2"></li>
+        <li data-index="3"></li>
+      </ul>
+      <!-- 左右箭头 -->
+      <div class="left_btn">&lt;</div>
+      <div class="right_btn">&gt;</div>
+    </div>
+
+
+
+    <script type="text/javascript">
+      // 获取相关标签变量
+      let img_box = document.querySelector(".img_box");
+      let imgs = document.querySelectorAll("img");
+      let sel_box = document.querySelector(".sel_box");
+      let lis = sel_box.querySelectorAll("li");
+      let left_btn = document.querySelector(".left_btn");
+      let right_btn = document.querySelector(".right_btn");
+
+      let index = 0;  // 记录第几张图片
+      let timer = null;  // 定时器
+
+      // 设置图片容器大小
+      // imgContainerW：img_box本身宽度，为400
+      let imgContainW = img_box.offsetWidth;
+      img_box.style.width = imgContainW * imgs.length + 'px';
+      // 设置容器位置
+      img_box.style.left = 0 + 'px';
+
+      // 设置第一个小圆点作为当前按钮
+      lis[0].className = 'cur';
+
+      // 轮播图切换
+      function swapImg() {
+        // 修改img_box的定位，往左偏移 index * imgContainerW
+        img_box.style.left = -index * imgContainW + 'px';
+        // 排他算法
+        for (let i = 0; i < lis.length; i++) {
+          lis[i].className = "";
+        }
+        // 修改小图标的样式
+        lis[index].className = "cur";
+      }
+
+      // 轮播切换规律
+      /*当我们的图片切换到四张轮播图的最后一张，下一张应该是第一张，但是这样直接切回第一
+      张没有了过渡效果，我们想要的是四张轮播图片像是一个圆，一直无缝循环
+
+      所以我们就在四张轮播图的再后面放上第一张图片，当四张轮播图切换完后，下一张就切换到
+      新增的这第一张图片，切换完毕，我们再趁机切换到四张图片的第一张，注意这次切换时无过
+      渡效果的，这样图片播放又从第一张图片开始。
+          */
+      function swapFormat() {
+        index++;  // 进入下一张图片
+        // 如果是在最后一张图片
+        if (index >= 4) {
+          // 此处是为了防止频繁点击按钮，index++，导致index超过4，变成5、6、7...
+          // 当index>=4，我们强行让其等于4,类似防抖
+          index = 4;
+          img_box.style.transition = 'all, linear, 1s';
+          img_box.style.left = -index * imgContainW + 'px';
+          for (let i = 0; i < lis.length; i++) {
+            lis[i].className = "";
+          }
+          // 修改小图标的样式
+          lis[0].className = 'cur';
+
+          // 此处就是我们为实现无缝轮播，做的手脚 
+          // 通过延时定时器，当图片过渡完，立刻马上切换到第一张图片
+          setTimeout(() => {
+            index = 0;  // 第一张图片
+            img_box.style.transition = "";  // 无过渡
+            swapImg();
+          }, 1500);
+        } else {
+          // 如果是其它图片，正常过渡切换
+          img_box.style.transition = 'all, linear, 1.5s';
+          swapImg();
+        }
+      }
+
+      // 添加定时器，调用函数
+      timer = setInterval(swapFormat, 3000);
+
+      // 点击右箭头，图片移动方式与自动播放一样
+      right_btn.addEventListener("click", function() {
+        swapFormat();
+      });
+
+      /*点击左箭头与右箭头相反，图片往左移动，索引需要减一；同理，我们首张放置的就是四张
+      轮播图片的最后一张，其用处也是在这里，拿它来做个“跳板”，先过渡这张图片再切换到真正
+      的最后一张，无缝轮播
+      */
+      left_btn.addEventListener("click", function() {
+        index--;
+        // 如果要切换到第四章
+        if (index < 0) {
+          index = -1;
+          img_box.style.transition = 'all, linear, 1.5s';
+          img_box.style.left = -index * imgContainW + 'px';
+          for (let i = 0; i < lis.length; i++) {
+            lis[i].className = '';
+          }
+          // 修改小图标的样式
+          lis[3].className = 'cur';
+          // 迅速切换
+          setTimeout(() => {
+            index = 3;
+            img_box.style.transition = "";
+            swapImg();
+          }, 1000);
+        } else {
+          img_box.style.transition = 'all, linear, 1.5s';
+          swapImg();
+        }
+      });
+
+      // 清除和开启定时器
+      // 当鼠标在图片上、左箭头、右箭头时清除定时器，即图片不轮播
+      img_box.addEventListener("mouseover", () => {
+        clearInterval(timer);
+      });
+      left_btn.addEventListener("mouseover", () => {
+        clearInterval(timer);
+      });
+      right_btn.addEventListener("mouseover", () => {
+        clearInterval(timer);
+      });
+
+      // 当鼠标离开图片、左箭头、右箭头时开启定时器，即图片继续轮播
+      img_box.addEventListener("mouseout", () => {
+        timer = setInterval(swapFormat, 3000);
+      });
+      left_btn.addEventListener("mouseout", () => {
+        timer = setInterval(swapFormat, 3000);
+      });
+      right_btn.addEventListener("mouseout", () => {
+        timer = setInterval(swapFormat, 3000);
+      });
+
+    </script>
+</body>
+</html>
+
+```
+

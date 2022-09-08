@@ -1812,7 +1812,98 @@ const args = [...arguments];
 
 ## 27. setTimeout的替代方法
 
+### JavaScript中setTimeout的实现原理
 
+- 首先明确，setTimeout函数是异步代码，但其实setTimeout并不是真正的异步操作
+- 由于JS线程的工作机制：当线程中没有执行任何同步代码的前提下才会执行异步代码，setTimeout是异步代码，所以setTimeout只能等js空闲才会执行
+- 前面提到过，如果代码中设定了一个 setTimeout，那么浏览器便会在合适的时间，将代码插入任务队列，如果这个时间设为 0，就代表立即插入队列，但不是立即执行，仍然要等待前面代码执行完毕。所以 setTimeout 并不能保证执行的时间，是否及时执行取决于 JavaScript 线程是拥挤还是空闲。
+- 也就是说setTimeout只能保证在指定的时间过后将任务(需要执行的函数)插入队列等候，并不保证这个任务在什么时候执行。执行javascript的线程会在空闲的时候，自行从队列中取出任务然后执行它。javascript 通过这种队列机制，给我们制造一个异步执行的假象。
+- 有时setTimeout中的代码会很快得到执行，我们会感觉这段代码是在异步执行，这是因为 javascript 线程并没有因为什么耗时操作而阻塞，所以可以很快地取出排队队列中的任务然后执行它。
+
+```js
+var t = true;
+    
+window.setTimeout(function (){
+    t = false;
+},1000);
+    
+while (t){}
+    
+alert('end');
+```
+
+运行结果：程序陷入死循环，`t = false` 得不到执行，因此 `alert('end')` 不会执行。
+解析：
+
+- JS是单线程的，所以会先执行 while(t){} 再 alert，但这个循环体是死循环，所以永远不会执行alert。
+- 为什么不执行 setTimeout？是因为JS的工作机制是：当线程中没有执行任何同步代码的前提下才会执行异步代码，setTimeout是异步代码，所以 setTimeout 只能等JS空闲才会执行，但死循环是永远不会空闲的，所以 setTimeout 也永远得不到执行。
+
+```js
+var start = new Date();
+    
+setTimeout(function(){  
+    var end = new Date();  
+    console.log("Time elapsed: ", end - start, "ms");  
+}, 500);  
+      
+while (new Date - start <= 1000){}
+```
+
+运行结果："Time elapsed: 1035 ms" (这里的1035不准确 但是一定是大于1000的)
+解析：
+
+- JS是单线程 setTimeout 异步代码 其回调函数执行必须需等待主线程运行完毕
+- 当while循环因为时间差超过 1000ms 跳出循环后，setTimeout 函数中的回调才得以执行
+
+
+
+### setTimeout(0)函数的作用
+
+setTimeout函数增加了Javascript函数调用的灵活性，为函数执行顺序的调度提供极大便利。
+**简言之，改变顺序，这正是setTimeout(0)的作用。**
+
+```html
+<input type="text" onkeydown="show(this.value)">  
+<div></div>  
+<script type="text/javascript">  
+  function show(val) {  
+    document.getElementsByTagName('div')[0].innerHTML = val;  
+  }  
+</script> 
+```
+
+这里绑定了 keydown 事件，意图是当用户在文本框里输入字符时，将输入的内容实时地在 <div> 中显示出来。但是实际效果并非如此，可以发现，每按下一个字符时，<div> 中只能显示出之前的内容，无法得到当前的字符。
+
+修改代码：
+
+```xml
+  <input type="text" onkeydown="var self=this; setTimeout(function(){show(self.value)}, 0)">  
+  <div></div>  
+  <script type="text/javascript">  
+    function show(val) {  
+      document.getElementsByTagName('div')[0].innerHTML = val;  
+    }  
+  </script>
+```
+
+这段代码使用setTimeout(0)就可以实现需要的效果了。
+
+这里其实涉及2个任务，1个是将键盘输入的字符回写到输入框中，一个是获取文本框的值将其写入div中。第一个是浏览器自身的默认行为，一个是我们自己编写的代码。很显然，必须要先让浏览器将字符回写到文本框，然后我们才能获取其内容写到div中。改变顺序，这正是setTimeout(0)的作用。
+
+其他应用场景：有时候，加载一些广告的时候，我们用setTimeout实现异步，好让广告不会阻塞我们页面的渲染。
+
+
+
+### setTimeout 和 setInterval 在执行异步代码的时候有着根本的不同
+
+- 如果一个计时器被阻塞而不能立即执行，它将延迟执行直到下一次可能执行的时间点才被执行（比期望的时间间隔要长些）
+- 如果setInterval回调函数的执行时间将足够长（比指定的时间间隔长），它们将连续执行并且彼此之间没有时间间隔。
+
+
+
+### 替代方法
+
+要计时的话，就加个计数器。
 
 ```js
 function createOnFrame(duration, callback) {
