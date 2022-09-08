@@ -9730,7 +9730,7 @@ var threeSum = function(nums) {
 
 ----
 
-#### 2.26 异步笔试题
+## 1. 异步笔试题
 
 请写出下面代码的运行结果：
 
@@ -9796,7 +9796,7 @@ settimeout
 */
 ```
 
-#### 2.29 代码解释题
+## 2. 代码解释题
 
 **参考答案**：
 
@@ -9839,7 +9839,7 @@ false
 
 ------
 
-#### 2.30 代码解析题
+## 3. 代码解析题
 
 **题目**
 
@@ -9926,7 +9926,7 @@ new new Foo().getName();  // 3
 
 ----
 
-## 3.13 js执行顺序的题目，涉及到settimeout、console、process.nextTick、promise.then
+## 4. js执行顺序的题目
 
 ```js
 console.time('start');
@@ -10038,7 +10038,7 @@ script(主程序代码)——>process.nextTick——>promise——>setTimeout—
 
 ----
 
-## 24. 判断输出
+## 5. 判断输出
 
 
 
@@ -10051,14 +10051,53 @@ console.log([] == 0);  // true
 
 解析：
 
-原始值的比较是值的比较：
-它们的值相等时它们就相等（==）
-对象和原始值不同，对象的比较并非值的比较,而是引用的比较：
-即使两个对象包含同样的属性及相同的值，它们也是不相等的
-即使两个数组各个索引元素完全相等，它们也是不相等的,所以[]!=[]
+原始值的比较是值的比较：它们的值相等时它们就相等（==）
+
+对象和原始值不同，**对象的比较并非值的比较,而是引用的比较**：即使两个对象包含同样的属性及相同的值，它们也是不相等的。即使两个数组各个索引元素完全相等，它们也是不相等的,所以[]!=[]
 
 []==0,是数组进行了隐士转换，空数组会转换成数字0，所以相等
 
 ------
 
-#### 
+## 6. 提取日期
+
+```js
+const input=['2022-8-1','2022-8-1','2022-8-2','2022-9-1']
+const output= {
+    2022-8:['1','2'],
+    2022-9:['1']
+}
+```
+
+```js
+function solution(arr) {
+    let result = {};
+    const n = arr.length;
+    for (let i = 0; i < n; i++) {
+        let date = arr[i].split("-");
+        if (date.length === 3) {
+            let ym = date[0]+"-" + date[1];
+            if (result[ym]) {
+                if (result[ym].indexOf(date[2]) == -1) {
+                    result[ym].push(date[2]);
+                }
+            } else {
+                result[ym] = [date[2]];
+            }
+        }
+    }
+    return result;
+}
+
+const input=['2022-8-1','2022-8-1','2022-8-2','2022-9-1']
+let ouput = solution(input);
+
+console.log(ouput);
+```
+
+
+
+
+
+----
+
