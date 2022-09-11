@@ -8,20 +8,18 @@
       margin: 0;
       padding: 0;
      }
-     #test {
-      display: inline-block;
-      width: 200px;
-      height: 100px;
-      background-color: #345ffd;
-     }
      span {
-      float: left;
+      background-color: #34ffdd;
+      margin: 10px 20px 10px 20px;
+      padding: 10px 20px 10px 20px;
      }
     </style>
 </head>
 <body>
-    <div id="test"></div>
-    <span>123</span>
+    <p>水平方向：水平方向上，都有效；</p>
+    <span>垂直方向上，都无效</span>
+    <span>padding-top和padding-bottom**会显示出效果**，**但是高度不会撑开，不会对周围元素有影响**</span>
+    <p>水平方向：水平方向上，都有效；</p>
     <script type="text/javascript">
       
     </script>
