@@ -75,7 +75,7 @@ console.log(a === b);     // true
 
 （2）**不同的内存分配机制也带来了不同的访问机制**
 
-- 引用：js中不允许直接访问保存在堆内存中的对象，在访问一个对象时，**首先得到对象在堆内存中的地址**，按照这个地址去获得对象中的值（引用访问）
+- 引用：js中**不允许直接**访问保存在堆内存中的对象，在访问一个对象时，**首先得到对象在堆内存中的地址**，按照这个地址去获得对象中的值（引用访问）
 
 - 基本：可直接访问
 
@@ -103,7 +103,7 @@ console.log(a === b);     // true
 
 不同点：
 
-Undefined表示"缺少值"，**就是此处应该有一个值，但是还没有定义**，转为数值时为NaN。典型用法：
+Undefined表示"**缺少值**"，**就是此处应该有一个值，但是还没有定义**，转为数值时为NaN。典型用法：
 
 - 变量被声明了，但没有赋值时，就等于undefined
 - 调用函数时，应该提供的参数没有提供，该参数等于undefined
@@ -112,7 +112,7 @@ Undefined表示"缺少值"，**就是此处应该有一个值，但是还没有�
 
 Null：
 
-表示"没有对象"，**即该处不应该有值**，转为数值时为0。典型用法是：
+表示"**没有对象**"，**即该处不应该有值**，转为数值时为0。典型用法是：
 
 - 作为函数的参数，**表示该函数的参数不是对象**
 - **作为对象原型链的终点**
@@ -126,16 +126,15 @@ undefined === null; //false
 
 ECMAScript 规范： null 和  undefined 的行为很相似，并且**都表示 一个无效的值**，那么它们所表示的内容也具有相似性，故他们相等。
 
-全等操作 === 在比较相等性的时候，两者不是同一类型值，会发生类型转换，故两者不全等。
+全等操作 === 在比较相等性的时候，**两者不是同一类型值**，会发生类型转换，故两者不全等。
 
 ```js
 Number(undefined); // NaN
 
 Number(null); // 0
-
 ```
 
-当检测 `null` 或 `undefined` 时，注意[相等（==）与全等（===）两个操作符的区别](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators) ，前者会执行类型转换：
+当检测 `null` 或 `undefined` 时，注意相等（==）与全等（===）两个操作符的区别 ，前者会执行类型转换：
 
 ```js
 typeof null        // "object" (因为一些以前的原因而不是'null')
@@ -143,10 +142,20 @@ typeof undefined   // "undefined"
 null === undefined // false
 null  == undefined // true
 null === null // true
+
+undefined == undefined  // true
 null == null // true
+
 !null //true
+!undefined // true
+
 isNaN(1 + null) // false
 isNaN(1 + undefined) // true
+
+undefined == false  // false
+undefined == true  // false
+null == false  // false
+null == true  // false
 ```
 
 
@@ -208,6 +217,8 @@ console.log(typeof(now));  //object
 console.log(typeof(reg));  //object
 ```
 
+
+
 ### (2) xx instanceof xx
 
 返回true/false，**只能判断引用类型** ，无法检测基本类型
@@ -218,7 +229,7 @@ console.log(typeof(reg));  //object
 
 ```js
 console.log('abc' instanceof String);// false 
-console.log( String('abc') instanceof String);// true 
+console.log(String('abc') instanceof String);// true 
 
 console.log(12 instanceof Number);// false 
 console.log(new Number(12) instanceof Number);// true 
@@ -260,21 +271,26 @@ console.log(BigInt(2) instanceof Object);  //false
 
 具体来说：当 var f = new F() 时，F被当成了构造函数，f是F的实例对象，**此时F原型上的constructor传递到了f上，因此f.constructor === F**
 
-缺点：不可判断Null、Undefined是无效的对象，**没有constructor存在**
+**缺点**：不可判断Null、Undefined是无效的对象，**没有constructor存在**
 
 constructor 是不稳定的，如创建的对象更改了原型，无法检测到最初的类型
 
 ```js
 console.log("abc".constructor===String);  //true
 console.log(new Number(2).constructor===Number);  //true
-console.log([1,2,3].constructor===Array);  //true
+console.log((2).constructor===Number);  //true
 console.log(false.constructor===Boolean);  //true
+
+console.log([1,2,3].constructor===Array);  //true
+
 console.log(new Function().constructor===Function);  //true
 console.log(new Date().constructor===Date);  //true
 console.log(/abc/.constructor===RegExp);  //true
 
 console.log(document.constructor===HTMLDocument);  //true
 ```
+
+
 
 ### (4) Object.prototype.toString.call(xx)
 
@@ -299,19 +315,22 @@ console.log(Object.prototype.toString.call(new Date()));  //[object Date]
 console.log(Object.prototype.toString.call(new RegExp("abc","g")));  //[object RegExp]
 
 console.log(Object.prototype.toString.call(function(){}));  //[object Function]
+
+class Person {}
+console.log(Object.prototype.toString.call(Person));  // [object Function]
 ```
 
 
 
 -----
 
-## 4. 请问===与==有何区别？相等与全等的区别
+## 4. 请问===与==有何区别？
 
 ==：相等(值)
 
 **先转换再比较**（强制转换）
 
-- 有布尔值，把false->0， true->1， 调用Number()方法
+- 有布尔值，把`false->0， true->1`， 调用Number()方法
 - 字符串 和 数值，**字符串转数值** ；调用Number()方法
 - 对象 和 非对象，**调用对象的valueOf()和toString()方法**把对象转换成基础类型的值再比较，**除Date对象外，会优先尝试使用valueOf()方法**
 - **有一个是NaN， 则返回false**。 即使两个都是NaN，也返回false，**因为按照规则，NaN不等于NaN**
@@ -319,9 +338,9 @@ console.log(Object.prototype.toString.call(function(){}));  //[object Function]
 - 比较相等性之前， **不能将 null和 undefined转换成其他任何值**
 
 ```bash
-> 1==true
+> 1==true  
 true
-> 2==false
+> 2==false  
 false
 > 2===true
 false
@@ -343,6 +362,8 @@ false
 > null==undefined
 true
 > 1==NaN
+false
+> NaN==NaN
 false
 
 > 0==undefined
@@ -373,6 +394,10 @@ false
 true
 ```
 
+
+
+
+
 ---
 
 ## 5. 请问你了解js作用域吗？
@@ -393,9 +418,9 @@ ES6 之前 JavaScript 没有块级作用域,只有**全局作用域**和**函数
 
 **全局作用域**（浏览器）：window
 
-- 最外层函数 和在最外层函数外面定义的变量拥有全局作用域
+- **最外层函数** 和**在最外层函数外面定义的变量**拥有全局作用域
 
-- **所有末定义直接赋值的变量自动声明为拥有全局作用域**
+- 所有**末定义直接赋值的变量**自动声明为拥有全局作用域
 - 所有window对象的属性拥有全局作用域，如window.name、window.location、window.top等
 
 - nodejs 的全局对象：global，**声明全局变量的方式为: global.变量名**
@@ -414,7 +439,7 @@ ES6 之前 JavaScript 没有块级作用域,只有**全局作用域**和**函数
 
 **3，作用域链**
 
-当我们需要某个变量的值时，**先去它最近的作用域去找**，如果找不到，就找它的上级作用域，依次类推，直到找到全局，如全都未定义，那就抛出一个错误，如下代码所示
+当我们需要某个变量的值时，**先去它最近的作用域去找**，如果找不到，就找它的上级作用域，依次类推，**直到找到全局，如全都未定义，那就抛出一个错误**，如下代码所示
 
 ```js
 var a = 1
@@ -450,9 +475,9 @@ B(); //10
 
 Scope（作用域）
 
-当前的执行上下文。[值 (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/Value)和**表达式**在其中 "可见" 或可被访问到的上下文。如果一个**[变量 (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/Variable)**或者其他表达式不 "在当前的作用域中"，那么它就是不可用的。 作用域也可以根据代码层次分层，以便子作用域可以访问父作用域，通常是指沿着链式的作用域链查找，而不能从父作用域引用子作用域中的变量和引用。
+当前的执行上下文。[值 (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/Value)和**表达式**在其中 "可见" 或可被访问到的上下文。如果一个**[变量 (en-US)](https://developer.mozilla.org/en-US/docs/Glossary/Variable)**或者其他表达式不 "在当前的作用域中"，那么它就是不可用的。 作用域也可以根据代码层次分层，以便子作用域可以访问父作用域，**通常是指沿着链式的作用域链查找**，而不能从父作用域引用子作用域中的变量和引用。
 
-当然，一个 [Function](https://developer.mozilla.org/zh-CN/docs/Glossary/Function) 将生成一个闭包（通常是返回一个函数引用），这个函数引用从外部作用域（在当前环境下）可以访问闭包内部的作用域。例如，下面的代码是无效的，并不是闭包的形式）：
+当然，一个 [Function](https://developer.mozilla.org/zh-CN/docs/Glossary/Function) 将生成一个闭包（通常是返回一个函数引用），**这个函数引用从外部作用域（在当前环境下）可以访问闭包内部的作用域。**例如，下面的代码是无效的，并不是闭包的形式）：
 
 ```js
 function exampleFunction() {
@@ -498,13 +523,13 @@ fun(); // "bar in foo"
 
 ### 块级作用域
 
-**块语句**（或其他语言的**复合语句**）用于组合零个或多个语句。该块由一对大括号界定，可以是`labelled`
+**块语句**（或其他语言的**复合语句**）用于组合零个或多个语句。**该块由一对大括号界定**，可以是`labelled`
 
 其他语言中通常将语句块称为**复合语句**。它允许你使用多个语句，其中 JavaScript 只需要一个语句。将语句组合成块是 JavaScript 中的常见做法。相反的做法是可以使用一个[空语句](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/Empty)，你不提供任何语句，虽然一个是必需的。
 
 **在非严格模式 (non-strict mode) 下的`var` 或者函数声明时**
 
-通过`var`声明的变量或者非严格模式下 (non-strict mode) 创建的函数声明**没有**块级作用域。在语句块里声明的变量的作用域不仅是其所在的函数或者 script 标签内，所设置变量的影响会在超出语句块本身之外持续存在。 换句话说，这种语句块不会引入一个作用域。尽管单独的语句块是合法的语句，但在 JavaScript 中你不会想使用单独的语句块，因为它们不像你想象的 C 或 Java 中的语句块那样处理事物。例如：
+**通过`var`声明的变量**或者非严格模式下 (non-strict mode) 创建的函数声明**没有**块级作用域。在语句块里声明的变量的作用域不仅是其所在的函数或者 script 标签内，所设置变量的影响会在超出语句块本身之外持续存在。 **换句话说，这种语句块不会引入一个作用域。尽管单独的语句块是合法的语句**，但在 JavaScript 中你不会想使用单独的语句块，因为它们不像你想象的 C 或 Java 中的语句块那样处理事物。例如：
 
 ```js
 var x = 1;
@@ -514,7 +539,7 @@ var x = 1;
 console.log(x); // 输出 2
 ```
 
-输出结果是 2，因为块中的 `var x`语句与块前面的`var x`语句作用域相同。在 C 或 Java 中，这段代码会输出 1。
+输出结果是 2，**因为块中的 `var x`语句与块前面的`var x`语句作用域相同**。在 C 或 Java 中，这段代码会输出 1。
 
 
 
