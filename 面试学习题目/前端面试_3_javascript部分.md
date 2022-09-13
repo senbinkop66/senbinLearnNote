@@ -934,7 +934,7 @@ RHS：
 
 概念一：闭包是指有权访问另一个函数作用域中的变量的函数（概念出自《JavaScript高级程序设计》）
 
-概念二：一个函数和对其周围状态（词法环境）的引用捆绑在一起（或者说函数被引用包围），这样的组合就是闭包，也就是说，闭包让你可以在一个内层函数中访问到其外层函数的作用域。（概念出自MDN）
+概念二：**一个函数和对其周围状态**（词法环境）**的引用捆绑在一起**（或者说函数被引用包围），这样的组合就是闭包，也就是说，闭包让你可以在一个内层函数中访问到其外层函数的作用域。（概念出自MDN）
 
 可以简单理解为：闭包就是一个函数，一个外部函数通过调用函数并return返回出内部函数，此**内部函数就是一个闭包**
 
@@ -973,26 +973,25 @@ for(var i = 0; i < 5; i++){
 
 预期应该是输出0、1、2、3、4，但实际是输出5个5，因为setTimeout事件是被异步触发的，当事件被触发的时候，for循环早已经结束
 
-可利用闭包解决该问题：将每次循环的i值封闭起来， 当沿着作用域链从内到外查找变量i时，会先找到被封闭在闭包环境中的i
+可利用闭包解决该问题：**将每次循环的i值封闭起来， 当沿着作用域链从内到外查找变量i时**，会先找到被封闭在闭包环境中的i
 
 ```js
 //1、在setTimeout外部创建一个自执行函数，并将i当作参数传递进闭包
-for(var i = 0; i < 5; i++){
-    (function(num){
-        setTimeout(function(){
-            console.log(num);   // 输出0，1，2，3，4         
-        }, num*1000);
-      }
-    )(i);
+for (var i = 0; i < 5; i++) {
+    (function(num) {
+        setTimeout(function() {
+            console.log(num);
+        }, num * 1000);  // 0 1 2 3 4 
+    })(i);
 }
 
 //2、在setTimeout内部函数创建一个闭包，并将i当作参数传递进去
-for(var i = 0;i < 5; i++){
+for(var i = 0; i < 5; i++){
     setTimeout(function(num){
         return function(){ //用匿名函数打造一个num变量副本
             console.log(num);   // 输出0，1，2，3，4 
         }
-    }(i), i*1000);
+    }(i), i * 1000);
 }
 ```
 
@@ -1003,7 +1002,7 @@ for(var i = 0;i < 5; i++){
 
 **避免闭包引起的内存泄漏**：
 
-1、在退出函数之前，将不使用的局部变量全部删除或者赋值为null
+1、在退出函数之前，将不使用的局部变量**全部删除或者赋值为null**
 
 **将变量设置为null：切断变量与它此前引用的值之间的连接**，当垃圾回收器下次运行时，会删除这些值并回收它们占用的内存
 
@@ -1017,9 +1016,9 @@ for(var i = 0;i < 5; i++){
 
 闭包的特点：
 
-- 让外部访问函数内部变量成为可能；
+- 让外部访问**函数内部变量**成为可能；
 - 可以避免使用全局变量，**防止全局变量污染**；
-- 可以让局部变量常驻在内存中；
+- 可以让**局部变量常驻在内存**中；
 - **会造成内存泄漏**（有一块内存空间被长期占用，而不被释放）
 
 应用场景
@@ -1049,7 +1048,7 @@ document.querySelectorAll('button')[1].onclick = function(){
 
 按照以下方式添加事件，打印出来的i不是按照序号的
 
-形成原因就是操作的是同一个词法环境,因为onclick后面的函数都是一个闭包，但是操作的是同一个词法环境
+形成原因就是操作的是同一个词法环境**,因为onclick后面的函数都是一个闭包，但是操作的是同一个词法环境**
 
 ```js
    var lis = document.querySelectorAll('li');
@@ -1082,7 +1081,7 @@ for (var i = 0; i < lis.length; i++) {
 
 ## 10. 请问js垃圾回收机制是什么工作原理？
 
-js语言有 自动垃圾回收机制，执行环境会管理 代码执行过程中使用的内存，垃圾收集器会定期（周期性）找出不再继续使用的变量，然后释放其内存
+js语言有 **自动垃圾回收机制**，执行环境会管理 代码执行过程中使用的内存，垃圾收集器会定期（周期性）找出不再继续使用的变量，然后释放其内存
 
 不再使用的变量：**生命周期结束的变量**（局部变量），**全局变量的生命周期直至浏览器卸载页面才会结束**
 
@@ -1173,6 +1172,8 @@ function test(){
 test();//执行完毕 之后 a、b又被标离开环境，被回收
 ```
 
+
+
 **引用计数：**跟踪记录每个值被引用的次数。当声明了一个变量并将一个引用类型值赋给该变量时，这个值的引用次数是1；若同一个值又被赋给另一个变量，则该值的引用次数再加1。相反，如果包含对这个值引用的变量又取得了另外一个值，则这个值的引用次数减1
 
 当这个值的**引用次数变成0时**，则表示没有办法再访问这个值了，其占用的内存空间可回收
@@ -1186,7 +1187,7 @@ function test(){
 }
 ```
 
-注意：引用计数算法是js早期的垃圾标记算法，现在几乎不怎么用，该算法存在一个问题：**无法应对互相引用的情况**，当两个对象互相引用时，就会永远无法被回收，从而造成内存泄漏。 基于这个问题，后来提出了标记-清除算法
+注意：引用计数算法是js早期的垃圾标记算法，现在几乎不怎么用，该算法存在一个问题：**无法应对互相引用的情况**，当两个对象互相引用时，**就会永远无法被回收，从而造成内存泄漏**。 基于这个问题，后来提出了标记-清除算法
 
 
 
@@ -1276,13 +1277,13 @@ function removeButton(){
 
 `JavaScript` 常被描述为一种基于原型的语言——每个对象拥有一个原型对象
 
-当试图访问一个对象的属性时，它不仅仅在该对象上搜寻，还会搜寻该对象的原型，以及该对象的原型的原型，依次层层向上搜索，直到找到一个名字匹配的属性或到达原型链的末尾
+当试图访问一个对象的属性时，它不仅仅在该对象上搜寻，还会搜寻该对象的原型，以及该对象的原型的原型，**依次层层向上搜索，直到找到一个名字匹配的属性或到达原型链的末尾**
 
 准确地说，这些属性和方法定义在Object的构造器函数（constructor functions）之上的`prototype`属性上，而非实例对象本身
 
 下面举个例子：
 
-函数可以有属性。 每个函数都有一个特殊的属性叫作原型`prototype`
+函数可以有属性。 **每个函数都有一个特殊的属性叫作原型`prototype`**
 
 ```js
 function doSomething(){}
@@ -1314,7 +1315,7 @@ console.log( doSomething.prototype );
 
 **构造函数与实例原型**
 
-在js中，每当定义一个函数(普通函数、类)时候，**都会天生自带一个prototype属性**，这个属性**指向函数的原型对象**，并且这个属性是一个对象数据类型的值
+在js中，每当定义一个函数(普通函数、类)时候，**都会天生自带一个prototype属性**，这个属性**指向函数的原型对象**，并且这个属性是一个**对象数据类型的值**
 
 ![img](E:\pogject\学习笔记\image\js\6792CAEEBFCDBCFC9E66B7976460013F)
 
@@ -1323,6 +1324,12 @@ console.log( doSomething.prototype );
 原型对象可看作一个公共的区域，**所有同一个类的实例都可以访问到原型对象**，可将对象都有的内容，统一设置到原型对象中
 
 `__proto__`
+
+```js
+let obj = {a:1, b:2};
+console.log(obj.__proto__);  // [Object: null prototype] {}
+console.log(Object.getPrototypeOf(obj));  // [Object: null prototype] {}
+```
 
 **每个对象**(除null外)都会有`__proto__`属性，这个属性会指向该对象的原型
 
@@ -1384,6 +1391,11 @@ F.b();  //b()
 
 f.a();  //a()
 f.b();  //TypeError: f.b is not a function
+
+console.log(f instanceof F)  // true
+console.log(Object.__proto__)  // { b: [Function (anonymous)] }
+Object.b()  // b()
+Object.a()  // a()
 ```
 
 这道题有几个考点：1、原型与原型链 2、实例对象、构造函数、Object、Function的关系
@@ -1403,7 +1415,7 @@ F是Object 和 Function两个的实例，即F既能访问到a，也能访问到b
 
 
 
-对于f，并不是Function的实例，**因为它本来就不是构造函数**，只能访问Object原型链
+对于f，**并不是Function的实例**，**因为它本来就不是构造函数**，只能访问Object原型链
 
 有：
 
@@ -1442,6 +1454,8 @@ console.log(f.__proto__.__proto__);  //[Object: null prototype] { a: [Function (
 
 f自身：没有 → `f.__proto`__(Object.prototype)：没有 → f.`__proto__.__proto__ `(Object.prototype.`__proto__`)：找不到，所以报错
 
+
+
 每个对象的`__proto__`都是指向它的构造函数的原型对象`prototype`的
 
 ```js
@@ -1460,7 +1474,7 @@ Person.__proto__ === Function.prototype
 Person.prototype.__proto__ === Object.prototype
 ```
 
-刚刚上面说了，所有的构造器都是函数对象，函数对象都是 `Function `构造产生的
+刚刚上面说了，**所有的构造器都是函数对象，函数对象都是 `Function `构造产生的**
 
 ```js
 Object.__proto__ === Function.prototype
@@ -1475,7 +1489,7 @@ Object.prototype.__proto__ === null
 总结：
 
 - 一切对象都是继承自`Object`对象，`Object` 对象直接继承根源对象` null`
-- 一切的函数对象（包括 `Object` 对象），都是继承自 `Function` 对象
+- **一切的函数对象（包括 `Object` 对象）**，都是继承自 `Function` 对象
 - `Object` 对象直接继承自 `Function` 对象
 - `Function`对象的`__proto__`会指向自己的原型对象，最终还是继承自`Object`对象
 
@@ -1528,7 +1542,7 @@ let——ES6变量声明方式
 
 
 
-6. 暂时性死区。只要在块级作用域里面存在let,则它所声明的变量就绑定在这个块级作用域上了，不受外界影响
+6. 暂时性死区。**只要在块级作用域里面存在let,则它所声明的变量就绑定在这个块级作用域上了，不受外界影响**
 
 ```js
   var a = 2;
@@ -1538,9 +1552,9 @@ let——ES6变量声明方式
    }
 ```
 
-注意：a先是全局变量，但是let声明之后，导致let声明的变量已经绑定在这个块级作用域上了，在块级作用域里面a就变成局部变量，所以在let声明变量前，输出a会报错
+注意：a先是全局变量，**但是let声明之后，导致let声明的变量已经绑定在这个块级作用域上了**，在块级作用域里面a就变成局部变量，所以在let声明变量前，输出a会报错
 
-**简述：** let不能重复声明，不存在变量提升，暂时性死区，作用于块级作用域，let声明的变量只有在它所在的区域里面有效
+**简述：** let不能重复声明，**不存在变量提升**，暂时性死区，作用于块级作用域，let声明的变量只有在它所在的区域里面有效
 
 
 
@@ -1548,7 +1562,7 @@ const——ES6变量声明方式
 
 1. const为常量声明方式；**声明变量时必须初始化**，在后面出现的代码中不能再修改该常量的值
 2. const实际上保真的，并不是变量的值不得改动，**而是变量指向的那个内存地址不得改动**
-3.  const必须初始化，声明一定要有值，无法重复声明，是块级作用域。不存在变量提升。暂时性死区
+3.  const必须初始化，声明一定要有值，无法重复声明，是块级作用域。**不存在变量提升**。暂时性死区
 
 
 
@@ -1572,9 +1586,11 @@ const——ES6变量声明方式
 
 ## 16. constructor的理解
 
-创建的每个函数都有一个prototype（原型）对象，这个属性是一个指针，指向一个对象。
+创建的每个函数都有一个prototype（原型）对象，**这个属性是一个指针，指向一个对象**。
 
-在默认情况下，**所有原型对象都会自动获得一个constructor**（构造函数）属性，这**个属性是一个指向prototype属性所在函数的指针**。当调用构造函数创建一个新实例后，该实例的内部将包含一个指针（继承自构造函数的prototype），指向构造函数的原型对象。**注意当将构造函数的prototype设置为等于一个以对象字面量形式创建的新对象时，constructor属性不再指向该构造函数。**
+在默认情况下，**所有原型对象都会自动获得一个constructor**（构造函数）属性，这**个属性是一个指向prototype属性所在函数的指针**。
+
+当调用构造函数创建一个新实例后，该实例的内部将包含一个指针（继承自构造函数的prototype），指向构造函数的原型对象。**注意当将构造函数的prototype设置为等于一个以对象字面量形式创建的新对象时，constructor属性不再指向该构造函数。**
 
 **构造函数**属于被实例化的特定类[对象](https://developer.mozilla.org/zh-CN/docs/Glossary/Object) 。构造函数初始化这个对象，并提供可以访问其私有信息的方法。构造函数的概念可以应用于大多数[面向对象](https://developer.mozilla.org/zh-CN/docs/Glossary/OOP)的编程语言。本质上，[JavaScript](https://developer.mozilla.org/zh-CN/docs/Glossary/JavaScript) 中的构造函数通常在[类](https://developer.mozilla.org/zh-CN/docs/Glossary/Class)的实例中声明。
 
@@ -1588,7 +1604,7 @@ const——ES6变量声明方式
 
 1. 都是循环遍历数组中的每一项
 2. 每次执行匿名函数都支持三个参数，参数分别为item（当前每一项），index（索引值），arr（原数组）
-3. 匿名函数中的this都是指向window
+3. **匿名函数中的this都是指向window**
 4. 只能遍历数组
 
 不同点：
@@ -1596,12 +1612,13 @@ const——ES6变量声明方式
 1. map()**会分配内存空间存储新数组并返回**，forEach()不会返回数据。
 2. forEach()**允许callback更改原始数组的元素**。map()返回新的数组。
 
+
+
 ------
 
 ## 18. for of 可以遍历哪些对象
 
-for..of..: 它是es6新增的一个遍历方法，但**只限于迭代器(iterator)**, 所以普通的对象用for..of遍历
-是会报错的。
+for..of..: 它是es6新增的一个遍历方法，但**只限于迭代器(iterator)**, 所以普通的对象用for..of遍历是会报错的。
 
 可迭代的对象：包括Array, Map, Set, String, TypedArray, arguments对象等等
 
@@ -1615,8 +1632,8 @@ for..of..: 它是es6新增的一个遍历方法，但**只限于迭代器(iterat
 
 静态类型语言 & 动态类型语言
 
-- 静态类型语言：类型检查发生在编译阶段，因此除非修复错误，否则会一直编译失败
-- 动态类型语言：只有在程序运行了一次的时候错误才会被发现，也就是在运行时，因此即使代码中包含了会 在运行时阻止脚本正常运行的错误类型，这段代码也可以通过编译
+- **静态类型语言**：类型检查发生在编译阶段，因此除非修复错误，否则会一直编译失败
+- **动态类型语言**：只有在程序运行了一次的时候错误才会被发现，也就是在运行时，因此即使代码中包含了会 在运行时阻止脚本正常运行的错误类型，这段代码也可以通过编译
 
 **js静态类型检查的方法**
 
@@ -1786,7 +1803,7 @@ arguments[2]
 arguments[1] = 'new value';
 ```
 
-`arguments`对象不是一个 [`Array`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array) 。它类似于`Array`，**但除了length属性和索引元素之外没有任何`Array`属性**。例如，它没有 [pop](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/pop) 方法。但是它可以被转换为一个真正的`Array`：
+`arguments`对象**不是一个 `Array`** 。它类似于`Array`，**但除了length属性和索引元素之外没有任何`Array`属性**。例如，它没有 [pop](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/pop) 方法。但是它**可以被转换为一个真正的**`Array`：
 
 ```js
 var args = Array.prototype.slice.call(arguments);
@@ -1797,7 +1814,7 @@ const args = Array.from(arguments);
 const args = [...arguments];
 ```
 
-如果调用的参数多于正式声明接受的参数，则可以使用`arguments`对象。这种技术对于可以传递可变数量的参数的函数很有用。使用 `arguments.length`来确定传递给函数参数的个数，然后使用`arguments`对象来处理每个参数。要确定函数[签名](https://developer.mozilla.org/zh-CN/docs/Glossary/Signature/Function)中（输入）参数的数量，请使用`Function.length`属性。
+如果调用的参数多于正式声明接受的参数，则可以使用`arguments`对象。**这种技术对于可以传递可变数量的参数的函数很有用**。使用 `arguments.length`来确定传递给函数参数的个数，然后使用`arguments`对象来处理每个参数。要确定函数[签名](https://developer.mozilla.org/zh-CN/docs/Glossary/Signature/Function)中（输入）参数的数量，请使用`Function.length`属性。
 
 属性
 
@@ -1812,6 +1829,8 @@ const args = [...arguments];
 - `arguments[@@iterator]`
 
   返回一个新的`Array 迭代器` 对象，该对象包含参数中每个索引的值。
+
+
 
 ----
 
@@ -1839,10 +1858,10 @@ const args = [...arguments];
 
 ### JavaScript中setTimeout的实现原理
 
-- 首先明确，setTimeout函数是异步代码，但其实setTimeout并不是真正的异步操作
+- 首先明确，setTimeout函数是异步代码，但其实setTimeout**并不是真正的异步操作**
 - 由于JS线程的工作机制：当线程中没有执行任何同步代码的前提下才会执行异步代码，setTimeout是异步代码，所以setTimeout只能等js空闲才会执行
-- 前面提到过，如果代码中设定了一个 setTimeout，那么浏览器便会在合适的时间，将代码插入任务队列，如果这个时间设为 0，就代表立即插入队列，但不是立即执行，仍然要等待前面代码执行完毕。所以 setTimeout 并不能保证执行的时间，是否及时执行取决于 JavaScript 线程是拥挤还是空闲。
-- 也就是说setTimeout只能保证在指定的时间过后将任务(需要执行的函数)插入队列等候，并不保证这个任务在什么时候执行。执行javascript的线程会在空闲的时候，自行从队列中取出任务然后执行它。javascript 通过这种队列机制，给我们制造一个异步执行的假象。
+- 前面提到过，如果代码中设定了一个 setTimeout，**那么浏览器便会在合适的时间，将代码插入任务队列**，如果这个时间设为 0，就代表立即插入队列，**但不是立即执行，仍然要等待前面代码执行完毕**。所以 setTimeout 并不能保证执行的时间，是否及时执行取决于 JavaScript 线程是拥挤还是空闲。
+- 也就是说setTimeout只能保证在指定的时间过后将任务(需要执行的函数)插入队列等候，并不保证这个任务在什么时候执行。执行javascript的线程会在空闲的时候，自行从队列中取出任务然后执行它。**javascript 通过这种队列机制，给我们制造一个异步执行的假象。**
 - 有时setTimeout中的代码会很快得到执行，我们会感觉这段代码是在异步执行，这是因为 javascript 线程并没有因为什么耗时操作而阻塞，所以可以很快地取出排队队列中的任务然后执行它。
 
 ```js
@@ -1861,7 +1880,7 @@ alert('end');
 解析：
 
 - JS是单线程的，所以会先执行 while(t){} 再 alert，但这个循环体是死循环，所以永远不会执行alert。
-- 为什么不执行 setTimeout？是因为JS的工作机制是：当线程中没有执行任何同步代码的前提下才会执行异步代码，setTimeout是异步代码，所以 setTimeout 只能等JS空闲才会执行，但死循环是永远不会空闲的，所以 setTimeout 也永远得不到执行。
+- 为什么不执行 setTimeout？是因为JS的工作机制是：**当线程中没有执行任何同步代码的前提下才会执行异步代码**，setTimeout是异步代码，所以 setTimeout 只能等JS空闲才会执行，但死循环是永远不会空闲的，所以 setTimeout 也永远得不到执行。
 
 ```js
 var start = new Date();
@@ -1885,6 +1904,7 @@ while (new Date - start <= 1000){}
 ### setTimeout(0)函数的作用
 
 setTimeout函数增加了Javascript函数调用的灵活性，为函数执行顺序的调度提供极大便利。
+
 **简言之，改变顺序，这正是setTimeout(0)的作用。**
 
 ```html
@@ -1901,7 +1921,7 @@ setTimeout函数增加了Javascript函数调用的灵活性，为函数执行顺
 
 修改代码：
 
-```xml
+```html
   <input type="text" onkeydown="var self=this; setTimeout(function(){show(self.value)}, 0)">  
   <div></div>  
   <script type="text/javascript">  
@@ -1922,7 +1942,7 @@ setTimeout函数增加了Javascript函数调用的灵活性，为函数执行顺
 ### setTimeout 和 setInterval 在执行异步代码的时候有着根本的不同
 
 - 如果一个计时器被阻塞而不能立即执行，它将延迟执行直到下一次可能执行的时间点才被执行（比期望的时间间隔要长些）
-- 如果setInterval回调函数的执行时间将足够长（比指定的时间间隔长），它们将连续执行并且彼此之间没有时间间隔。
+- 如果setInterval回调函数的执行时间将足够长（比指定的时间间隔长），**它们将连续执行并且彼此之间没有时间间隔**。
 
 
 
@@ -2097,14 +2117,14 @@ console.log(Array.prototype.slice.call(al2)); // [ 0, 1, <2 empty items> ]
 **Set**
 
 1. 成员不能重复；
-2. 只有键值，没有键名，有点类似数组；
+2. **只有键值，没有键名**，有点类似数组；
 3. 可以遍历，方法有add、delete、has
 
 **WeakSet**
 
 1. **成员都是对象（引用）**；
-2. 成员都是弱引用，随时可以消失（不计入垃圾回收机制）。可以用来保存 DOM 节点，不容易造成内存泄露；
-3. 不能遍历，方法有add、delete、has；
+2. 成员都是弱引用，随时可以消失（不计入垃圾回收机制）。**可以用来保存 DOM 节点，不容易造成内存泄露**；
+3. **不能遍历**，方法有add、delete、has；
 
 **Map**
 
@@ -2115,7 +2135,7 @@ console.log(Array.prototype.slice.call(al2)); // [ 0, 1, <2 empty items> ]
 
 1. **只接收对象为键名**（null 除外），不接受其他类型的值作为键名；
 2. 键名指向的对象，不计入垃圾回收机制；
-3. 不能遍历，方法同get、set、has、delete；
+3. **不能遍历**，方法同get、set、has、delete；
 
 
 
@@ -2160,7 +2180,7 @@ Number,Boolean,String,Undefined这几种基本类型混合比较时，**会将�
 
 undefined被当成基本类型，**undefined转换成数字是NaN**，因此undefined与除null之外的其它类型值进行比较时始终返回false(注意NaN==NaN返回false) 
 
-null被当成复合对象，**由于null没有valueOf与toString方法**，因此和除了undefined之外的其它类型值进行比较时始终返回false 
+null被当成**复合对象**，**由于null没有valueOf与toString方法**，因此和除了undefined之外的其它类型值进行比较时始终返回false 
 
 - 存在 NaN 则返回 false
 
@@ -2172,9 +2192,9 @@ null被当成复合对象，**由于null没有valueOf与toString方法**，因�
 
 **(1) Array.prototype.slice.call(obj)**
 
-该方法可以将类数组对象转换为数组，所谓类数组对象，就是含 length 和索引属性的对象
+该方法可以将类数组对象转换为数组，所谓**类数组对象，就是含 length 和索引属性的对象**
 
-返回的数组长度取决于对象 length 属性的值，且非索引属性的值，或索引大于 length 的值都不会被返回到数组中
+返回的数组长度取决于对象 length 属性的值，且非索引属性的值，**或索引大于 length 的值都不会被返回到数组中**
 
 ```js
 let obj = { '0': 3, '1': 13, '2': 23, '3': 33, 'length': 3, 'name': 330}
@@ -2323,15 +2343,16 @@ Object.create(proto,[propertiesObject])
 - proto:新创建对象的原型对象
 - propertiesObject:可选。要添加到新对象的**可枚举**（新添加的属性是其自身的属性，而不是其原型链上的属性）的属性。
 
-1. Object.create() 必须接收一个对象参数，创建的新对象的原型指向接收的参数对象
-2.  而通过Object.create(null)创建的对象是一个干净的对象，也就是没有原型，不继承Object[原型链](https://so.csdn.net/so/search?q=原型链&spm=1001.2101.3001.7020)上的属性
-3. new Object()创建的对象是 Object的实例，原型永远指向Object.prototype，
+1. Object.create() 必须接收一个对象参数，**创建的新对象的原型指向接收的参数对象**
+2.  而通过Object.create(null)创建的对象是一个干净的对象，**也就是没有原型**，不继承Object[原型链](https://so.csdn.net/so/search?q=原型链&spm=1001.2101.3001.7020)上的属性
+3. new Object()创建的对象是 Object的实例，**原型永远指向Object.prototype**，
 4. {}创建的对象与其一样都会继承Object对象的所有属性
 
 ```js
 let obj1 = {};
 let obj2 = Object.create(null);
 let obj3 = Object.create({});
+let obj4 = new Object();
 
 console.log("obj1", obj1); //VM848:4 obj1 {}[[Prototype]]: Object
 console.log("obj2", obj2);  //VM848:5 obj2 {}No properties
@@ -2346,7 +2367,7 @@ console.log(obj4.toString);  // [Function: toString]
 
 `Object.create(null)`没有继承任何原型方法，也就是说它的原型链没有上一层。
 
-使用`create`创建的对象，没有任何属性，显示`No properties`，我们可以把它当作一个非常**纯净**的map来使用，我们可以自己定义`hasOwnProperty`、`toString`方法，不管是有意还是不小心，我们完全不必担心会将原型链上的同名方法覆盖掉。
+使用`create`创建的对象，没有任何属性，显示`No properties`，我们可以把它当作一个非常**纯净**的map来使用，我们可以自己定义`hasOwnProperty`、`toString`方法，不管是有意还是不小心，**我们完全不必担心会将原型链上的同名方法覆盖掉**。
 
 从运行结果可以看到这两种方式创建的对象，虽然形式上都是{}，但是它们各自的原型对象却是不一样的。
 
@@ -2365,7 +2386,7 @@ console.log(obj4.toString);  // [Function: toString]
 
 可以创建一个干净且高度可定制的对象当做数据字典，进行循环取用，可以提高循环效率。
 
-这个时候如果对象有原型链，那便会在循环的时候去循环它的各个属性和方法，效率则会降低
+这个时候如果对象有原型链，**那便会在循环的时候去循环它的各个属性和方法，效率则会降低**
 
 
 
@@ -2422,14 +2443,14 @@ function Sub(){
 
 }
 
-Sub.prototype=new Super();  //将Sub的原型对象Sub.prototype指向Super的实例
+Sub.prototype = new Super();  //将Sub的原型对象Sub.prototype指向Super的实例
 
-var sub1=new Sub();  //创建Sub的实例sub1
+var sub1 = new Sub();  //创建Sub的实例sub1
 sub1.name.push("sub1");
 
 console.log(sub1.getSuper());  // [ 'super', 'sub1' ]
 
-var sub2=new Sub();  //创建Sub的实例sub2
+var sub2 = new Sub();  //创建Sub的实例sub2
 sub2.name.push("sub2");
 
 console.log(sub2.getSuper());  //[ 'super', 'sub1', 'sub2' ]
@@ -2462,17 +2483,17 @@ function Sub(name){
 }
 
 
-var sub1=new Sub("sub1");  //创建Sub的实例sub1,
+var sub1 = new Sub("sub1");  //创建Sub的实例sub1,
 
 //console.log(sub1.getSuper());  //(不能继承原型链方法）TypeError: sub1.getSuper is not a function
 console.log(sub1.name);  //  sub1
 
-var sub2=new Sub();  //创建Sub的实例sub2
+var sub2 = new Sub();  //创建Sub的实例sub2
 
 //console.log(sub2.getSuper());  //(不能继承原型链方法）TypeError: sub2.getSuper is not a function
 console.log(sub2.name);  //undefined
 
-var sup1=new Super();
+var sup1 = new Super();
 console.log(sup1.getSuper());  //undefined
 ```
 
@@ -2480,7 +2501,7 @@ console.log(sup1.getSuper());  //undefined
 
 这种继承方式的**缺点**是：
 
-（1）、不能继承原型链方法
+（1）、**不能继承原型链方法**
 
 ---
 
@@ -2490,9 +2511,9 @@ console.log(sup1.getSuper());  //undefined
 
 ```js
 function Super(name){
-	this.name=name;
+	this.name = name;
 }
-Super.prototype.getSuper=function(){
+Super.prototype.getSuper = function(){
 	return this.name;
 }
 
@@ -2501,23 +2522,23 @@ function Sub(name){
 }
 
 Sub.prototype = new Super();  //第一次调用，原型链继承
-Sub.prototype.constructor=Sub;
+Sub.prototype.constructor = Sub;
 
-var sub1=new Sub("sub1");  //创建Sub的实例sub1,
+var sub1 = new Sub("sub1");  //创建Sub的实例sub1,
 
 console.log(sub1.getSuper());  //sub1
 console.log(sub1.name);  //  sub1
 console.log(sub1 instanceof Sub);  // true
 console.log(sub1 instanceof Super);  // true
 
-var sub2=new Sub("sub2");  //创建Sub的实例sub2
+var sub2 = new Sub("sub2");  //创建Sub的实例sub2
 
 console.log(sub2.getSuper());  // sub2
 console.log(sub2.name);  //sub2
 
 ```
 
-在子类Sub中，使用 call继承超类型的属性 + 原型链继承原型链的方法和属性，弥补了上面两种继承方式的三个缺点
+在子类Sub中，使用 **call继承超类型的属性** + **原型链继承原型链的方法和属性**，弥补了上面两种继承方式的三个缺点
 
 这种继承方式的**缺点**是：
 
@@ -2536,25 +2557,25 @@ console.log(sub2.name);  //sub2
 ```js
 function object(o){
 	function F(){}
-	F.prototype=o;
+	F.prototype = o;
 	return new F();
 }
 
-var person={
+var person = {
 	name:"js",
 	friends:["css","ts"]
 }
 
 var people1 = object(person);
 // var people1 = Object.create(person);在传入一个参数的情况下，Object.create()和object()相同
-people1.name="python";
+people1.name = "python";
 people1.friends.push("pip");
 
 console.log(people1.name);  //python
 console.log(people1.friends);  //[ 'css', 'ts', 'pip' ]
 
-var people2=object(person);
-people2.name="java";
+var people2 = object(person);
+people2.name = "java";
 people2.friends.push("jar");
 
 console.log(people2.friends);  //[ 'css', 'ts', 'pip', 'jar' ]
@@ -2581,19 +2602,19 @@ function object(o){
 }
 
 function createAnother(o){
-	var clone=object(o);
-	clone.sayHi=function(){
+	var clone = object(o);
+	clone.sayHi = function(){
 		console.log("hi");
 	}
 	return clone;
 }
 
-var person={
+var person = {
 	name:"js",
 	friends:["css","ts"]
 }
 
-var people1=createAnother(person);
+var people1 = createAnother(person);
 // var people1 = Object.create(person);在传入一个参数的情况下，Object.create()和object()相同
 people1.name="python";
 people1.friends.push("pip");
@@ -2601,8 +2622,8 @@ people1.friends.push("pip");
 console.log(people1.name);  //python
 console.log(people1.friends);  //[ 'css', 'ts', 'pip' ]
 
-var people2=createAnother(person);
-people2.name="java";
+var people2 = createAnother(person);
+people2.name = "java";
 people2.friends.push("jar");
 
 console.log(people2.friends);  //[ 'css', 'ts', 'pip', 'jar' ]
@@ -2624,22 +2645,22 @@ Sub.prototype = new Super()，实质上就是一次对超类型原型对象的�
 ```js
 function object(o){
 	function F(){}
-	F.prototype=o;
+	F.prototype = o;
 	return new F();
 }
 
 function inheritPrototype(subType, superType){
 	//复制超类型的原型对象
-	var clone=object(superType.prototype);
+	var clone = object(superType.prototype);
 	//将构造函数指向子类型
 	clone.constructor=subType;
-	subType.prototype=clone;
+	subType.prototype = clone;
 }
 
 function Super(name){
-	this.name=name;
+	this.name = name;
 }
-Super.prototype.getSuper=function(){
+Super.prototype.getSuper = function(){
 	return this.name;
 }
 
@@ -2654,14 +2675,14 @@ function Sub(name){
 // 优化后：
 inheritPrototype(Sub,Super);
 
-var sub1=new Sub("sub1");  //创建Sub的实例sub1,
+var sub1 = new Sub("sub1");  //创建Sub的实例sub1,
 
 console.log(sub1.getSuper());  //sub1
 console.log(sub1.name);  //  sub1
 console.log(sub1 instanceof Sub);  // true
 console.log(sub1 instanceof Super);  // true
 
-var sub2=new Sub("sub2");  //创建Sub的实例sub2
+var sub2 = new Sub("sub2");  //创建Sub的实例sub2
 
 console.log(sub2.getSuper());  // sub2
 console.log(sub2.name);  //sub2
@@ -2719,20 +2740,20 @@ child.sayName() //echo
 
 （2）、新对象的`_proto_`属性指向构造函数的原型对象，
 
-（3）、将构造函数的作用域赋给新对象（因此 this 就指向了这个新对象）
+（3）、**将构造函数的作用域赋给新对象**（因此 this 就指向了这个新对象）
 
 （4）、执行构造函数中的代码，将属性添加给child中的this对象
 
-（5）、若构造器没有手动返回对象，则返回第一步创建的对象（新对象child）
+（5）、**若构造器没有手动返回对象**，则返回第一步创建的对象（新对象child）
 
 通俗理解：在new一个对象时，新对象（新实例）没有prototype属性，所以把prototype属性赋值给新对象的`_proto_`属性
 
 **`new`** 关键字会进行如下的操作：
 
 1. 创建一个空的简单JavaScript对象（即`{}`）；
-2. 为步骤1新创建的对象添加属性`__proto__`，将该属性链接至构造函数的原型对象 ；
-3. 将步骤1新创建的对象作为`this`的上下文 ；
-4. 如果该函数没有返回对象，则返回`this`。
+2. 为步骤1新创建的对象添加属性`__proto__`，将该属性链接至构造函数的原型对象 ；将这个空对象的原型对象指向构造函数的原型属性，从而继承原型上的方法;
+3. 将this指向这个空对象，执行构造函数中的代码，以获取私有属性;
+4. .如果构造函数返回了一个对象res，就将该返回值res返回，如果返回值不是对象，就将创建的对象返回
 
 
 
@@ -2765,6 +2786,43 @@ let person=newMethod(Person,"kop",66);
 console.log(person.name);  // kop
 console.log(person.age);  //66
 ```
+
+
+
+```js
+/**
+ * 模拟实现 new 操作符
+ * @param  {Function} ctor [构造函数]
+ * @return {Object|Function|Regex|Date|Error}      [返回结果]
+ */
+function newOperator(ctor){
+    if(typeof ctor !== 'function'){
+      throw 'newOperator function the first param must be a function';
+    }
+    // ES6 new.target 是指向构造函数
+    newOperator.target = ctor;
+    // 1.创建一个全新的对象，
+    // 2.并且执行[[Prototype]]链接
+    // 4.通过`new`创建的每个对象将最终被`[[Prototype]]`链接到这个函数的`prototype`对象上。
+    var newObj = Object.create(ctor.prototype);
+    // ES5 arguments转成数组 当然也可以用ES6 [...arguments], Aarry.from(arguments);
+    // 除去ctor构造函数的其余参数
+    var argsArr = [].slice.call(arguments, 1);
+    // 3.生成的新对象会绑定到函数调用的`this`。
+    // 获取到ctor函数返回结果
+    var ctorReturnResult = ctor.apply(newObj, argsArr);
+    // 小结4 中这些类型中合并起来只有Object和Function两种类型 typeof null 也是'object'所以要不等于null，排除null
+    var isObject = typeof ctorReturnResult === 'object' && ctorReturnResult !== null;
+    var isFunction = typeof ctorReturnResult === 'function';
+    if(isObject || isFunction){
+        return ctorReturnResult;
+    }
+    // 5.如果函数没有返回对象类型`Object`(包含`Functoin`, `Array`, `Date`, `RegExg`, `Error`)，那么`new`表达式中的函数调用会自动返回这个新的对象。
+    return newObj;
+}
+```
+
+
 
 ---
 
@@ -2834,7 +2892,7 @@ fn1();
 
 代码中无论函数声明在哪，在哪调用，**由于函数调用时前面并未指定任何对象，这种情况下this指向全局对象window**
 
-注意：在严格模式下（use strict），全局对象将无法使用默认绑定，会报undefined错误
+注意：在**严格模式下**（use strict），全局对象将无法使用默认绑定，会报undefined错误
 
 ```js
 function fn1(){
@@ -2917,6 +2975,8 @@ obj2.obj3.foo();  // undefined
 
 代码中调用链不只一层，存在obj1、obj2两个对象，先获取obj2.obj1→通过引用获取到obj1对象，再访问 obj1.foo →最后执行foo函数调用，获取最后一层调用的上下文对象，即obj1，所以结果是4（obj1.a）
 
+
+
 #### 隐式丢失
 
 在一些特殊情况下，**会存在隐式绑定丢失问题**，最常见：参数传递、变量赋值
@@ -2944,6 +3004,8 @@ fn1(obj1.foo);  // 2
 
 代码中将 obj.foo 作为参数传递进 fn1 中执行，**只是单纯地传递了一个函数而已**，this并没有跟函数绑在一起，**发生了隐式丢失**，this依旧指向window
 
+
+
 ##### **变量赋值（本质上与传参相同）**
 
 ```js
@@ -2962,6 +3024,8 @@ let fn1 = obj1.foo;
 fn1();  // 2
 
 ```
+
+
 
 ### (3) 显式绑定（call、apply、bind）
 
@@ -3004,6 +3068,8 @@ foo.bind(undefined)();  // 4
 
 注意：若使用函数应用的方法改变this指向时，**指向参数是null或者undefined，那么 this 将指向全局对象**
 
+
+
 ### (4) new 绑定
 
 ```js
@@ -3029,6 +3095,8 @@ console.log(obj.a);  // 1
 new绑定 > 隐式绑定 > 默认绑定
 
 注意：**不存在显式绑定和new绑定同时生效的场景**，若同时写会直接报错
+
+
 
 ---
 
