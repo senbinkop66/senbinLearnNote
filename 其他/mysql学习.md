@@ -1,75 +1,286 @@
-## 创建数据库
+# 基本概念
 
-```mysql
-create database abc;      # 创建数据库
-use abc;                  # 使用已创建的数据库
-set names utf8;           # 设置编码
+## 什么是数据库？
+
+数据库（Database）是按照数据结构来组织、存储和管理数据的仓库。
+
+每个数据库都有一个或多个不同的 API 用于创建，访问，管理，搜索和复制所保存的数据。
+
+我们也可以将数据存储在文件中，但是在文件中读写数据速度相对较慢。
+
+所以，现在我们使用关系型数据库管理系统（RDBMS）来存储和管理大数据量。所谓的关系型数据库，是建立在关系模型基础上的数据库，借助于集合代数等数学概念和方法来处理数据库中的数据。
+
+RDBMS 即关系数据库管理系统(Relational Database Management System)的特点：
+
+- 1.数据以表格的形式出现
+- 2.每行为各种记录名称
+- 3.每列为记录名称所对应的数据域
+- 4.许多的行和列组成一张表单
+- 5.若干的表单组成database
 
 
+
+## RDBMS 术语
+
+了解下RDBMS的一些术语：
+
+- **数据库:** 数据库是一些关联表的集合。
+- **数据表:** 表是数据的矩阵。在一个数据库中的表看起来像一个简单的电子表格。
+- **列:** 一列(数据元素) 包含了相同类型的数据, 例如邮政编码的数据。
+- **行：**一行（=元组，或记录）是一组相关的数据，例如一条用户订阅的数据。
+- **冗余**：存储两倍数据，冗余降低了性能，但提高了数据的安全性。
+- **主键**：主键是唯一的。一个数据表中只能包含一个主键。你可以使用主键来查询数据。
+- **外键：**外键用于关联两个表。
+- **复合键**：复合键（组合键）将多个列作为一个索引键，一般用于复合索引。
+- **索引：**使用索引可快速访问数据库表中的特定信息。索引是对数据库表中一列或多列的值进行排序的一种结构。类似于书籍的目录。
+- **参照完整性:** 参照的完整性要求关系中不允许引用不存在的实体。与实体完整性是关系模型必须满足的完整性约束条件，目的是保证数据的一致性。
+
+MySQL 为关系型数据库(Relational Database Management System), 这种所谓的"关系型"可以理解为"表格"的概念, 一个关系型数据库由一个或数个表格组成
+
+- 表头(header): 每一列的名称;
+- 列(col): 具有相同数据类型的数据的集合;
+- 行(row): 每一行用来描述某条记录的具体信息;
+- 值(value): 行的具体信息, 每个值必须与该列的数据类型相同;
+- **键(key)**: 键的值在当前列中具有唯一性。
+
+
+
+## MySQL数据库
+
+MySQL 是一个关系型数据库管理系统，由瑞典 MySQL AB 公司开发，目前属于 Oracle 公司。MySQL 是一种关联数据库管理系统，关联数据库将数据保存在不同的表中，而不是将所有数据放在一个大仓库内，这样就增加了速度并提高了灵活性。
+
+- MySQL 是开源的，目前隶属于 Oracle 旗下产品。
+- MySQL 支持大型的数据库。可以处理拥有上千万条记录的大型数据库。
+- MySQL 使用标准的 SQL 数据语言形式。
+- MySQL 可以运行于多个系统上，并且支持多种语言。这些编程语言包括 C、C++、Python、Java、Perl、PHP、Eiffel、Ruby 和 Tcl 等。
+- MySQL 对 PHP 有很好的支持，PHP 是很适合用于 Web 程序开发。
+- MySQL 支持大型数据库，支持 5000 万条记录的数据仓库，32 位系统表文件最大可支持 4GB，64 位系统支持最大的表文件为8TB。
+- MySQL 是可以定制的，采用了 GPL 协议，你可以修改源码来开发自己的 MySQL 系统。
+
+
+
+----
+
+# MySQL 安装
+
+Linux平台上推荐使用RPM包来安装Mysql,MySQL AB提供了以下RPM包的下载地址：
+
+- **MySQL** - MySQL服务器。你需要该选项，除非你只想连接运行在另一台机器上的MySQL服务器。
+- **MySQL-client** - MySQL 客户端程序，用于连接并操作Mysql服务器。
+- **MySQL-devel** - 库和包含文件，如果你想要编译其它MySQL客户端，例如Perl模块，则需要安装该RPM包。
+- **MySQL-shared** - 该软件包包含某些语言和应用程序需要动态装载的共享库(libmysqlclient.so*)，使用MySQL。
+- **MySQL-bench** - MySQL数据库服务器的基准和性能测试工具。
+
+安装前，我们可以检测系统是否自带安装 MySQL:
+
+```bash
+rpm -qa | grep mysql
+```
+
+如果你系统有安装，那可以选择进行卸载:
+
+```bash
+rpm -e mysql　　// 普通删除模式
+rpm -e --nodeps mysql　　// 强力删除模式，如果使用上面命令删除时，提示有依赖的其它文件，则用该命令可以对其进行强力删除
+```
+
+**安装 MySQL**
+
+```bash
+wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+rpm -ivh mysql-community-release-el7-5.noarch.rpm
+yum update
+yum install mysql-server
+```
+
+权限设置：
+
+```
+chown -R mysql:mysql /var/lib/mysql/
+```
+
+初始化 MySQL：
+
+```
+mysqld --initialize
+```
+
+启动 MySQL：
+
+```
+systemctl start mysqld
+```
+
+查看 MySQL 运行状态：
+
+```
+systemctl status mysqld
+```
+
+**注意：**如果我们是第一次启动 mysql 服务，mysql 服务器首先会进行初始化的配置。
+
+> 此外,你也可以使用 MariaDB 代替，MariaDB 数据库管理系统是 MySQL 的一个分支，主要由开源社区在维护，采用 GPL 授权许可。开发这个分支的原因之一是：甲骨文公司收购了 MySQL 后，有将 MySQL 闭源的潜在风险，因此社区采用分支的方式来避开这个风险。
+>
+> MariaDB的目的是完全兼容MySQL，包括API和命令行，使之能轻松成为MySQL的代替品。
+>
+> ```
+> yum install mariadb-server mariadb 
+> ```
+>
+> mariadb数据库的相关命令是：
+>
+> ```bash
+> systemctl start mariadb  #启动MariaDB
+> systemctl stop mariadb  #停止MariaDB
+> systemctl restart mariadb  #重启MariaDB
+> systemctl enable mariadb  #设置开机启动
+> ```
+
+在成功安装 MySQL 后，一些基础表会表初始化，在服务器启动后，你可以通过简单的测试来验证 MySQL 是否工作正常。
+
+使用 mysqladmin 工具来获取服务器状态：
+
+使用 mysqladmin 命令来检查服务器的版本, 在 linux 上该二进制文件位于 /usr/bin 目录，在 Windows 上该二进制文件位于C:\mysql\bin 。
+
+```bash
+mysqladmin --version
+```
+
+你可以在 MySQL Client(Mysql客户端) 使用 mysql 命令连接到 MySQL 服务器上，默认情况下 MySQL 服务器的登录密码为空，所以本实例不需要输入密码。
+
+```bash
+mysql
+```
+
+Mysql安装成功后，默认的root用户密码为空，你可以使用以下命令来创建root用户的密码：
+
+```bash
+mysqladmin -u root password "new_password";
+```
+
+现在你可以通过以下命令来连接到Mysql服务器：
+
+```shell
+mysql -u root -p
 
 ```
 
-## 授权
+**注意：**在输入密码时，密码是不会显示了，你正确输入即可。
 
-```mysql
-use mysql;
+----
 
-create user 'aaa'@'localhost' identified by 'pass';
+# MySQL 管理
+
+### Windows 系统下
+
+在 Windows 系统下，打开命令窗口(cmd)，进入 MySQL 安装目录的 bin 目录。
+
+启动：
+
+```
+cd c:/mysql/bin
+mysqld --console
+```
+
+关闭：
+
+```
+cd c:/mysql/bin
+mysqladmin -uroot shutdown
+```
+
+### Linux 系统下
+
+首先，我们需要通过以下命令来检查MySQL服务器是否启动：
+
+```
+ps -ef | grep mysqld
+```
+
+如果MySql已经启动，以上命令将输出mysql进程列表， 如果mysql未启动，你可以使用以下命令来启动mysql服务器:
+
+```
+root@host# cd /usr/bin
+./mysqld_safe &
+```
+
+如果你想关闭目前运行的 MySQL 服务器, 你可以执行以下命令:
+
+```
+root@host# cd /usr/bin
+./mysqladmin -u root -p shutdown
+Enter password: ******
+```
 
 
-grant all privileges on database.* to 'aaa'@'localhost';
+
+## MySQL 用户设置
+
+如果你需要添加 MySQL 用户，你只需要在 mysql 数据库中的 user 表添加新用户即可。
+
+以下为添加用户的实例，用户名为senbin，密码为kop66，并授权用户可进行 SELECT, INSERT 和 UPDATE操作权限：
+
+```bash
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+4 rows in set (0.00 sec)
+
+mysql> use mysql;
+
+mysql> create user 'senbin'@'localhost' identified by 'kop66';
+Query OK, 0 rows affected (0.00 sec)
+```
+
+```bash
+grant all privileges on database.* to 'senbin'@'localhost';
 
 flush privileges;
 ```
 
-```mysql
-create database gm_em_db;      # 创建数据库
+在添加用户时，请注意使用MySQL提供的 PASSWORD() 函数来对密码进行加密。
 
-create user 'kxia'@'localhost' identified by 'kingkx';
-grant all privileges on gm_em_db.* to 'kxia'@'localhost';
-
-flush privileges;
+```bash
+mysql> SELECT host, user, authentication_string FROM user WHERE user = 'senbin';
++-----------+--------+-------------------------------------------+
+| host      | user   | authentication_string                     |
++-----------+--------+-------------------------------------------+
+| localhost | senbin | *94336A4FB6F93E01DFEFFA60EF2CD6C65E60EC68 |
++-----------+--------+-------------------------------------------+
+1 row in set (0.00 sec)
 ```
 
+**注意：**在 MySQL5.7 中 user 表的 password 已换成了**authentication_string**。
+
+**注意：**password() 加密函数已经在 8.0.11 中移除了，可以使用 MD5() 函数代替。
+
+**注意：**在注意需要执行 **FLUSH PRIVILEGES** 语句。 这个命令执行后会重新载入授权表。
+
+如果你不使用该命令，你就无法使用新创建的用户来连接mysql服务器，除非你重启mysql服务器。
+
+你可以在创建用户时，为用户指定权限，在对应的权限列中，在插入语句中设置为 'Y' 即可，用户权限列表如下：
+
+- Select_priv
+- Insert_priv
+- Update_priv
+- Delete_priv
+- Create_priv
+- Drop_priv
+- Reload_priv
+- Shutdown_priv
+- Process_priv
+- File_priv
+- Grant_priv
+- References_priv
+- Index_priv
 
 
-## 创建数据表
-
-```mysql
-use microbe_sl_gene_db;  //选择你的数据库
-set names utf8;
-
-//创建表
-CREATE TABLE blastslbw25113(
-   num INT UNSIGNED AUTO_INCREMENT,
-   species VARCHAR(100) NOT NULL,
-   sp VARCHAR(100) NOT NULL,
-   GI_A VARCHAR(100) NOT NULL,
-   Gene_A VARCHAR(100) NOT NULL,
-   GI_B VARCHAR(100) NOT NULL,
-   Gene_B VARCHAR(100) NOT NULL,
-   Type VARCHAR(100) NOT NULL,
-   PRIMARY KEY (num)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-show tables;
-desc blastslbw25113;
-
-drop table blastslbw25113;  //删除数据表
-truncate table blastslbw25113;  //清空数据表
-
-```
-
-## 导入导出数据
-
-
-
-```mysql
-//导入数据
-LOAD DATA LOCAL INFILE 'BW25113resultofSLPairsWithNoEcoli2.txt' INTO TABLE blastslbw25113 LINES TERMINATED BY '\r\n';
-//导出数据表
-mysqldump -u root -p --databases microbe_sl_gene_db --tables blastslbw25113 > blastslbw25113.sql
-```
 
 ## 设置与更改用户密码
 
@@ -85,17 +296,989 @@ SET PASSWORD FOR 'username'@'host' = PASSWORD('newpassword');
 SET PASSWORD = PASSWORD("newpassword");
 ```
 
-## 删除用户
 
-命令:
 
-```n1ql
-DROP USER 'username'@'host';
-```
+## /etc/my.cnf 文件配置
 
-## 更新mysql
+一般情况下，你不需要修改该配置文件，该文件默认配置如下：
 
 ```
-mysql_upgrade --force -uroot -p
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+
+[mysql.server]
+user=mysql
+basedir=/var/lib
+
+[safe_mysqld]
+err-log=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
 ```
 
+在配置文件中，你可以指定不同的错误日志文件存放的目录，一般你不需要改动这些配置。
+
+## 管理MySQL的命令
+
+以下列出了使用Mysql数据库过程中常用的命令：
+
+- **USE \*数据库名\*** :
+  选择要操作的Mysql数据库，使用该命令后所有Mysql命令都只针对该数据库。
+
+```bash
+mysql> use mysql;
+Database changed
+```
+
+
+
+**SHOW DATABASES:**
+列出 MySQL 数据库管理系统的数据库列表。
+
+```bash
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+4 rows in set (0.00 sec)
+```
+
+**SHOW TABLES:**
+显示指定数据库的所有表，使用该命令前需要使用 use 命令来选择要操作的数据库。
+
+```bash
+mysql> show tables;
++---------------------------+
+| Tables_in_mysql           |
++---------------------------+
+| columns_priv              |
+| db                        |
+| engine_cost               |
+| event                     |
+| func                      |
+| general_log               |
+| gtid_executed             |
+| help_category             |
+| help_keyword              |
+| help_relation             |
+| help_topic                |
+| innodb_index_stats        |
+| innodb_table_stats        |
+| ndb_binlog_index          |
+| plugin                    |
+| proc                      |
+| procs_priv                |
+| proxies_priv              |
+| server_cost               |
+| servers                   |
+| slave_master_info         |
+| slave_relay_log_info      |
+| slave_worker_info         |
+| slow_log                  |
+| tables_priv               |
+| time_zone                 |
+| time_zone_leap_second     |
+| time_zone_name            |
+| time_zone_transition      |
+| time_zone_transition_type |
+| user                      |
++---------------------------+
+31 rows in set (0.00 sec)
+```
+
+**SHOW COLUMNS FROM \*数据表\*:**
+显示数据表的属性，属性类型，主键信息 ，是否为 NULL，默认值等其他信息。
+
+```bash
+mysql> show columns from user;
++------------------------+-----------------------------------+------+-----+-----------------------+-------+
+| Field                  | Type                              | Null | Key | Default               | Extra |
++------------------------+-----------------------------------+------+-----+-----------------------+-------+
+| Host                   | char(60)                          | NO   | PRI |                       |       |
+| User                   | char(32)                          | NO   | PRI |                       |       |
+| Select_priv            | enum('N','Y')                     | NO   |     | N                     |       |
+| Insert_priv            | enum('N','Y')                     | NO   |     | N                     |       |
+| Update_priv            | enum('N','Y')                     | NO   |     | N                     |       |
+| Delete_priv            | enum('N','Y')                     | NO   |     | N                     |       |
+| Create_priv            | enum('N','Y')                     | NO   |     | N                     |       |
+| Drop_priv              | enum('N','Y')                     | NO   |     | N                     |       |
+| Reload_priv            | enum('N','Y')                     | NO   |     | N                     |       |
+| Shutdown_priv          | enum('N','Y')                     | NO   |     | N                     |       |
+| Process_priv           | enum('N','Y')                     | NO   |     | N                     |       |
+| File_priv              | enum('N','Y')                     | NO   |     | N                     |       |
+| Grant_priv             | enum('N','Y')                     | NO   |     | N                     |       |
+| References_priv        | enum('N','Y')                     | NO   |     | N                     |       |
+| Index_priv             | enum('N','Y')                     | NO   |     | N                     |       |
+| Alter_priv             | enum('N','Y')                     | NO   |     | N                     |       |
+| Show_db_priv           | enum('N','Y')                     | NO   |     | N                     |       |
+| Super_priv             | enum('N','Y')                     | NO   |     | N                     |       |
+| Create_tmp_table_priv  | enum('N','Y')                     | NO   |     | N                     |       |
+| Lock_tables_priv       | enum('N','Y')                     | NO   |     | N                     |       |
+| Execute_priv           | enum('N','Y')                     | NO   |     | N                     |       |
+| Repl_slave_priv        | enum('N','Y')                     | NO   |     | N                     |       |
+| Repl_client_priv       | enum('N','Y')                     | NO   |     | N                     |       |
+| Create_view_priv       | enum('N','Y')                     | NO   |     | N                     |       |
+| Show_view_priv         | enum('N','Y')                     | NO   |     | N                     |       |
+| Create_routine_priv    | enum('N','Y')                     | NO   |     | N                     |       |
+| Alter_routine_priv     | enum('N','Y')                     | NO   |     | N                     |       |
+| Create_user_priv       | enum('N','Y')                     | NO   |     | N                     |       |
+| Event_priv             | enum('N','Y')                     | NO   |     | N                     |       |
+| Trigger_priv           | enum('N','Y')                     | NO   |     | N                     |       |
+| Create_tablespace_priv | enum('N','Y')                     | NO   |     | N                     |       |
+| ssl_type               | enum('','ANY','X509','SPECIFIED') | NO   |     |                       |       |
+| ssl_cipher             | blob                              | NO   |     | NULL                  |       |
+| x509_issuer            | blob                              | NO   |     | NULL                  |       |
+| x509_subject           | blob                              | NO   |     | NULL                  |       |
+| max_questions          | int(11) unsigned                  | NO   |     | 0                     |       |
+| max_updates            | int(11) unsigned                  | NO   |     | 0                     |       |
+| max_connections        | int(11) unsigned                  | NO   |     | 0                     |       |
+| max_user_connections   | int(11) unsigned                  | NO   |     | 0                     |       |
+| plugin                 | char(64)                          | NO   |     | mysql_native_password |       |
+| authentication_string  | text                              | YES  |     | NULL                  |       |
+| password_expired       | enum('N','Y')                     | NO   |     | N                     |       |
+| password_last_changed  | timestamp                         | YES  |     | NULL                  |       |
+| password_lifetime      | smallint(5) unsigned              | YES  |     | NULL                  |       |
+| account_locked         | enum('N','Y')                     | NO   |     | N                     |       |
++------------------------+-----------------------------------+------+-----+-----------------------+-------+
+45 rows in set (0.00 sec)
+```
+
+**SHOW INDEX FROM \*数据表\*:**
+显示数据表的详细索引信息，包括PRIMARY KEY（主键）。
+
+```bash
+
+mysql> show index from user;
++-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+| Table | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment | Index_comment |
++-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+| user  |          0 | PRIMARY  |            1 | Host        | A         |        NULL |     NULL | NULL   |      | BTREE      |         |               |
+| user  |          0 | PRIMARY  |            2 | User        | A         |           4 |     NULL | NULL   |      | BTREE      |         |               |
++-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+2 rows in set (0.00 sec)
+```
+
+**SHOW TABLE STATUS [FROM db_name] [LIKE 'pattern'] \G:**
+该命令将输出Mysql数据库管理系统的性能及统计信息。
+
+```
+mysql> show table status from mysql like 'user%';
+```
+
+
+
+----
+
+# MySQL 连接
+
+**使用mysql二进制方式连接**
+
+您可以使用MySQL二进制方式进入到mysql命令提示符下来连接MySQL数据库。
+
+以下是从命令行中连接mysql服务器的简单实例：
+
+```bash
+mysql -u root -p
+
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 4
+Server version: 5.7.31 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+```
+
+在登录成功后会出现 mysql> 命令提示窗口，你可以在上面执行任何 SQL 语句。
+
+如果用户权限足够，任何用户都可以在mysql的命令提示窗口中进行SQL操作。
+
+退出 mysql> 命令提示窗口可以使用 exit 命令，如下所示：
+
+```
+mysql> exit
+```
+
+**使用 PHP 脚本连接 MySQL**
+
+PHP 提供了 mysqli_connect() 函数来连接数据库。
+
+该函数有 6 个参数，在成功链接到 MySQL 后返回连接标识，失败返回 FALSE 。
+
+语法
+
+```php
+mysqli_connect(host, username, password, dbname,port, socket);
+```
+
+**参数说明：**
+
+| 参数       | 描述                                        |
+| :--------- | :------------------------------------------ |
+| *host*     | 可选。规定主机名或 IP 地址。                |
+| *username* | 可选。规定 MySQL 用户名。                   |
+| *password* | 可选。规定 MySQL 密码。                     |
+| *dbname*   | 可选。规定默认使用的数据库。                |
+| *port*     | 可选。规定尝试连接到 MySQL 服务器的端口号。 |
+| *socket*   | 可选。规定 socket 或要使用的已命名 pipe。   |
+
+你可以使用 PHP 的 mysqli_close() 函数来断开与 MySQL 数据库的链接。
+
+该函数只有一个参数为 mysqli_connect() 函数创建连接成功后返回的 MySQL 连接标识符。
+
+语法
+
+```
+bool mysqli_close ( mysqli $link )
+```
+
+本函数关闭指定的连接标识所关联的到 MySQL 服务器的非持久连接。如果没有指定 link_identifier，则关闭上一个打开的连接。
+
+**提示：**通常不需要使用 mysqli_close()，因为已打开的非持久连接会在脚本执行完毕后自动关闭。
+
+```php
+<?php
+    $dbhost = 'localhost';  // mysql服务器主机地址
+    $dbuser = 'root';            // mysql用户名
+    $dbpass = '123456';          // mysql用户名密码
+    $conn = mysqli_connect($dbhost, $dbuser, $dbpass);
+    if(! $conn ) {
+        die('Could not connect: ' . mysqli_error());
+    }
+    echo '数据库连接成功！';
+    mysqli_close($conn);
+?>
+```
+
+
+
+----
+
+# MySQL 创建数据库
+
+------
+
+我们可以在登陆 MySQL 服务后，使用 **create** 命令创建数据库，语法如下:
+
+```
+CREATE DATABASE 数据库名;
+```
+
+
+
+```mysql
+mysql> create database person;
+Query OK, 1 row affected (0.01 sec)
+
+use person;                  # 使用已创建的数据库
+set names utf8;           # 设置编码
+
+```
+
+**使用 mysqladmin 创建数据库**
+
+使用普通用户，你可能需要特定的权限来创建或者删除 MySQL 数据库。
+
+所以我们这边使用root用户登录，root用户拥有最高权限，可以使用 mysql **mysqladmin** 命令来创建数据库。
+
+```bash
+mysqladmin -u root -p create person
+```
+
+```php
+$sql = 'CREATE DATABASE person';
+$retval = mysqli_query($conn,$sql );
+if(! $retval )
+{
+    die('创建数据库失败: ' . mysqli_error($conn));
+}
+echo "数据库创建成功\n";
+```
+
+
+
+----
+
+# MySQL 删除数据库
+
+------
+
+使用普通用户登陆 MySQL 服务器，你可能需要特定的权限来创建或者删除 MySQL 数据库，所以我们这边使用 root 用户登录，root 用户拥有最高权限。
+
+在删除数据库过程中，务必要十分谨慎，因为在执行删除命令后，所有数据将会消失。
+
+
+
+**drop 命令删除数据库**
+
+drop 命令格式：
+
+```
+drop database <数据库名>;
+```
+
+```bash
+mysql> drop database person;
+```
+
+
+
+----
+
+# MySQL 选择数据库
+
+在你连接到 MySQL 数据库后，可能有多个可以操作的数据库，所以你需要选择你要操作的数据库。
+
+```bash
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| person             |
+| sys                |
++--------------------+
+5 rows in set (0.00 sec)
+
+mysql> use person;
+Database changed
+```
+
+```php
+mysqli_select_db($conn, 'person' );
+```
+
+----
+
+# MySQL授权
+
+```mysql
+use mysql;
+
+create user 'senbin'@'localhost' identified by 'kop66';
+
+grant all privileges on person.* to 'senbin'@'localhost';
+
+flush privileges;
+```
+
+
+
+----
+
+# MySQL 数据类型
+
+MySQL 中定义数据字段的类型对你数据库的优化是非常重要的。
+
+MySQL 支持多种类型，大致可以分为三类：数值、日期/时间和字符串(字符)类型。
+
+## 数值类型
+
+MySQL 支持所有标准 SQL 数值数据类型。
+
+这些类型包括严格数值数据类型(INTEGER、SMALLINT、DECIMAL 和 NUMERIC)，以及近似数值数据类型(FLOAT、REAL 和 DOUBLE PRECISION)。
+
+关键字INT是INTEGER的同义词，关键字DEC是DECIMAL的同义词。
+
+BIT数据类型保存位字段值，并且支持 MyISAM、MEMORY、InnoDB 和 BDB表。
+
+作为 SQL 标准的扩展，MySQL 也支持整数类型 TINYINT、MEDIUMINT 和 BIGINT。下面的表显示了需要的每个整数类型的存储和范围。
+
+| 类型         | 大小                                     | 范围（有符号）                                               | 范围（无符号）                                               | 用途            |
+| :----------- | :--------------------------------------- | :----------------------------------------------------------- | :----------------------------------------------------------- | :-------------- |
+| TINYINT      | 1 Bytes                                  | (-128，127)                                                  | (0，255)                                                     | 小整数值        |
+| SMALLINT     | 2 Bytes                                  | (-32 768，32 767)                                            | (0，65 535)                                                  | 大整数值        |
+| MEDIUMINT    | 3 Bytes                                  | (-8 388 608，8 388 607)                                      | (0，16 777 215)                                              | 大整数值        |
+| INT或INTEGER | 4 Bytes                                  | (-2 147 483 648，2 147 483 647)                              | (0，4 294 967 295)                                           | 大整数值        |
+| BIGINT       | 8 Bytes                                  | (-9,223,372,036,854,775,808，9 223 372 036 854 775 807)      | (0，18 446 744 073 709 551 615)                              | 极大整数值      |
+| FLOAT        | 4 Bytes                                  | (-3.402 823 466 E+38，-1.175 494 351 E-38)，0，(1.175 494 351 E-38，3.402 823 466 351 E+38) | 0，(1.175 494 351 E-38，3.402 823 466 E+38)                  | 单精度 浮点数值 |
+| DOUBLE       | 8 Bytes                                  | (-1.797 693 134 862 315 7 E+308，-2.225 073 858 507 201 4 E-308)，0，(2.225 073 858 507 201 4 E-308，1.797 693 134 862 315 7 E+308) | 0，(2.225 073 858 507 201 4 E-308，1.797 693 134 862 315 7 E+308) | 双精度 浮点数值 |
+| DECIMAL      | 对DECIMAL(M,D) ，如果M>D，为M+2否则为D+2 | 依赖于M和D的值                                               | 依赖于M和D的值                                               | 小数值          |
+
+------
+
+## 日期和时间类型
+
+表示时间值的日期和时间类型为DATETIME、DATE、TIMESTAMP、TIME和YEAR。
+
+每个时间类型有一个有效值范围和一个"零"值，当指定不合法的MySQL不能表示的值时使用"零"值。
+
+TIMESTAMP类型有专有的自动更新特性，将在后面描述。
+
+| 类型      | 大小 ( bytes) | 范围                                                         | 格式                | 用途                     |
+| :-------- | :------------ | :----------------------------------------------------------- | :------------------ | :----------------------- |
+| DATE      | 3             | 1000-01-01/9999-12-31                                        | YYYY-MM-DD          | 日期值                   |
+| TIME      | 3             | '-838:59:59'/'838:59:59'                                     | HH:MM:SS            | 时间值或持续时间         |
+| YEAR      | 1             | 1901/2155                                                    | YYYY                | 年份值                   |
+| DATETIME  | 8             | '1000-01-01 00:00:00' 到 '9999-12-31 23:59:59'               | YYYY-MM-DD hh:mm:ss | 混合日期和时间值         |
+| TIMESTAMP | 4             | '1970-01-01 00:00:01' UTC 到 '2038-01-19 03:14:07' UTC结束时间是第 **2147483647** 秒，北京时间 **2038-1-19 11:14:07**，格林尼治时间 2038年1月19日 凌晨 03:14:07 | YYYY-MM-DD hh:mm:ss | 混合日期和时间值，时间戳 |
+
+------
+
+## 字符串类型
+
+字符串类型指CHAR、VARCHAR、BINARY、VARBINARY、BLOB、TEXT、ENUM和SET。该节描述了这些类型如何工作以及如何在查询中使用这些类型。
+
+| 类型       | 大小                  | 用途                            |
+| :--------- | :-------------------- | :------------------------------ |
+| CHAR       | 0-255 bytes           | 定长字符串                      |
+| VARCHAR    | 0-65535 bytes         | 变长字符串                      |
+| TINYBLOB   | 0-255 bytes           | 不超过 255 个字符的二进制字符串 |
+| TINYTEXT   | 0-255 bytes           | 短文本字符串                    |
+| BLOB       | 0-65 535 bytes        | 二进制形式的长文本数据          |
+| TEXT       | 0-65 535 bytes        | 长文本数据                      |
+| MEDIUMBLOB | 0-16 777 215 bytes    | 二进制形式的中等长度文本数据    |
+| MEDIUMTEXT | 0-16 777 215 bytes    | 中等长度文本数据                |
+| LONGBLOB   | 0-4 294 967 295 bytes | 二进制形式的极大文本数据        |
+| LONGTEXT   | 0-4 294 967 295 bytes | 极大文本数据                    |
+
+**注意**：char(n) 和 varchar(n) 中括号中 n 代表字符的个数，并不代表字节个数，比如 CHAR(30) 就可以存储 30 个字符。
+
+CHAR 和 VARCHAR 类型类似，但它们保存和检索的方式不同。它们的最大长度和是否尾部空格被保留等方面也不同。在存储或检索过程中不进行大小写转换。
+
+BINARY 和 VARBINARY 类似于 CHAR 和 VARCHAR，不同的是它们包含二进制字符串而不要非二进制字符串。也就是说，它们包含字节字符串而不是字符字符串。这说明它们没有字符集，并且排序和比较基于列值字节的数值值。
+
+BLOB 是一个二进制大对象，可以容纳可变数量的数据。有 4 种 BLOB 类型：TINYBLOB、BLOB、MEDIUMBLOB 和 LONGBLOB。它们区别在于可容纳存储范围不同。
+
+有 4 种 TEXT 类型：TINYTEXT、TEXT、MEDIUMTEXT 和 LONGTEXT。对应的这 4 种 BLOB 类型，可存储的最大长度不同，可根据实际情况选择。
+
+
+
+----
+
+# MySQL 创建数据表
+
+创建MySQL数据表需要以下信息：
+
+- 表名
+- 表字段名
+- 定义每个表字段
+
+语法
+
+以下为创建MySQL数据表的SQL通用语法：
+
+```
+CREATE TABLE table_name (column_name column_type);
+```
+
+```bash
+mysql> create database infodb;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> use infodb;
+Database changed
+mysql> set names utf8;
+Query OK, 0 rows affected (0.00 sec)
+```
+
+
+
+```bash
+CREATE TABLE IF NOT EXISTS `person`(
+   `id` INT UNSIGNED AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `sex` VARCHAR(40) NOT NULL,
+    `age` INT UNSIGNED,
+    `number` INT UNSIGNED,
+    PRIMARY KEY ( `id` )
+   )ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+
+**注意：**MySQL命令终止符为分号 **;** 。
+
+**注意：** **->** 是换行符标识，不要复制。
+
+```bash
+mysql> show tables;
++------------------+
+| Tables_in_infodb |
++------------------+
+| person           |
++------------------+
+1 row in set (0.00 sec)
+
+mysql> desc person;
++--------+------------------+------+-----+---------+----------------+
+| Field  | Type             | Null | Key | Default | Extra          |
++--------+------------------+------+-----+---------+----------------+
+| id     | int(10) unsigned | NO   | PRI | NULL    | auto_increment |
+| name   | varchar(100)     | NO   |     | NULL    |                |
+| sex    | varchar(40)      | NO   |     | NULL    |                |
+| age    | int(10) unsigned | YES  |     | NULL    |                |
+| number | int(10) unsigned | YES  |     | NULL    |                |
++--------+------------------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+```
+
+
+
+实例解析：
+
+- 如果你不想字段为 **NULL** 可以设置字段的属性为 **NOT NULL**， 在操作数据库时如果输入该字段的数据为**NULL** ，就会报错。
+- AUTO_INCREMENT定义列为自增的属性，一般用于主键，数值会自动加1。
+- PRIMARY KEY关键字用于定义列为主键。 您可以使用多列来定义主键，列间以逗号分隔。
+- ENGINE 设置存储引擎，CHARSET 设置编码。
+
+
+
+----
+
+# MySQL导入导出数据
+
+
+
+```mysql
+//导入数据
+LOAD DATA LOCAL INFILE 'file.txt' INTO TABLE person LINES TERMINATED BY '\r\n';
+
+//导出数据表
+mysqldump -u root -p --databases gene_db --tables blastslbw25113 > blastslbw25113.sql
+```
+
+
+
+
+
+----
+
+# MySQL 删除数据表
+
+MySQL中删除数据表是非常容易操作的，但是你在进行删除表操作时要非常小心，因为执行删除命令后所有数据都会消失。
+
+```mysql
+DROP TABLE table_name ;
+
+drop table person;  //删除数据表
+truncate table person;  //清空数据表
+```
+
+
+
+----
+
+# MySQL 插入数据
+
+MySQL 表中使用 **INSERT INTO** SQL语句来插入数据。
+
+你可以通过 mysql> 命令提示窗口中向数据表中插入数据，或者通过PHP脚本来插入数据。
+
+以下为向MySQL数据表插入数据通用的 **INSERT INTO** SQL语法：
+
+```mysql
+INSERT INTO table_name ( field1, field2,...fieldN )
+                       VALUES
+                       ( value1, value2,...valueN );
+
+INSERT INTO table_name  (field1, field2,...fieldN)  VALUES  (valueA1,valueA2,...valueAN),(valueB1,valueB2,...valueBN),(valueC1,valueC2,...valueCN)......;
+```
+
+
+
+**如果数据是字符型，必须使用单引号或者双引号**，如："value"。
+
+```mysql
+INSERT INTO person (id, name, sex, age, number)
+                       VALUES
+                       (1, 'Alison', 'male', 28, 1),
+                       (2, 'Vigril', 'male', 29, 4),
+                       (3, 'Hendson', 'male', 31, 14),
+                       (4, 'Arnold', 'male', 23, 66);
+
+INSERT INTO person (id, name, sex, age, number)
+                       VALUES
+                       (5, 'Robson', 'male', 26, 26),
+                       (6, 'Salah', 'male', 30, 11),
+                       (7, 'Nuniz', 'female', 23, 27),
+                       (8, 'Fabnio', 'female', 28, 3);
+```
+
+```bash
+mysql> select * from person;
++----+---------+------+------+--------+
+| id | name    | sex  | age  | number |
++----+---------+------+------+--------+
+|  1 | Alison  | male |   28 |      1 |
+|  2 | Vigril  | male |   29 |      4 |
+|  3 | Hendson | male |   31 |     14 |
+|  4 | Arnold  | male |   23 |     66 |
++----+---------+------+------+--------+
+4 rows in set (0.00 sec)
+```
+
+
+
+----
+
+# MySQL 查询数据
+
+MySQL 数据库使用SQL SELECT语句来查询数据。
+
+你可以通过 mysql> 命令提示窗口中在数据库中查询数据，或者通过PHP脚本来查询数据。
+
+以下为在MySQL数据库中查询数据通用的 SELECT 语法：
+
+```mysql
+SELECT column_name,column_name
+FROM table_name
+[WHERE Clause]
+[LIMIT N][ OFFSET M]
+```
+
+- 查询语句中你可以使用一个或者多个表，表之间使用逗号(,)分割，并使用WHERE语句来设定查询条件。
+- SELECT 命令可以读取一条或者多条记录。
+- 你可以使用星号（*）来代替其他字段，SELECT语句会返回表的所有字段数据
+- 你可以使用 WHERE 语句来包含任何条件。
+- **你可以使用 LIMIT 属性来设定返回的记录数**。
+- 你可以通过**OFFSET指定SELECT语句开始查询的数据偏移量**。默认情况下偏移量为0。
+
+```mysql
+mysql> select * from person;
++----+---------+--------+------+--------+
+| id | name    | sex    | age  | number |
++----+---------+--------+------+--------+
+|  1 | Alison  | male   |   28 |      1 |
+|  2 | Vigril  | male   |   29 |      4 |
+|  3 | Hendson | male   |   31 |     14 |
+|  4 | Arnold  | male   |   23 |     66 |
+|  5 | Robson  | male   |   26 |     26 |
+|  6 | Salah   | male   |   30 |     11 |
+|  7 | Nuniz   | female |   23 |     27 |
+|  8 | Fabnio  | female |   28 |      3 |
++----+---------+--------+------+--------+
+8 rows in set (0.00 sec)
+
+mysql> select name, number from person where age > 24 limit 3 offset 1;
++---------+--------+
+| name    | number |
++---------+--------+
+| Vigril  |      4 |
+| Hendson |     14 |
+| Robson  |     26 |
++---------+--------+
+3 rows in set (0.00 sec)
+```
+
+
+
+
+
+----
+
+# MySQL WHERE 子句
+
+**where：**数据库中常用的是where关键字，用于在初始表中筛选查询。它是一个约束声明，用于约束数据，在返回结果集之前起作用。
+
+**group by:**对select查询出来的结果集按照某个字段或者表达式进行分组，获得一组组的集合，然后从每组中取出一个指定字段或者表达式的值。
+
+**having：**用于对where和group by查询出来的分组经行过滤，查出满足条件的分组结果。它是一个过滤声明，是在查询返回结果集以后对查询结果进行的过滤操作。
+
+以下是 SQL SELECT 语句使用 WHERE 子句从数据表中读取数据的通用语法：
+
+```mysql
+SELECT field1, field2,...fieldN FROM table_name1, table_name2...
+[WHERE condition1 [AND [OR]] condition2.....
+```
+
+- 查询语句中你可以使用一个或者多个表，表之间使用逗号**,** 分割，并使用WHERE语句来设定查询条件。
+- 你可以在 WHERE 子句中指定任何条件。
+- 你可以使用 AND 或者 OR 指定一个或多个条件。
+- WHERE 子句**也可以运用于 SQL 的 DELETE 或者 UPDATE 命令**。
+- WHERE 子句类似于程序语言中的 if 条件，根据 MySQL 表中的字段值来读取指定的数据。
+
+以下为操作符列表，可用于 WHERE 子句中。
+
+下表中实例假定 A 为 10, B 为 20
+
+| 操作符 | 描述                                                         | 实例                 |
+| :----- | :----------------------------------------------------------- | :------------------- |
+| =      | 等号，检测两个值是否相等，如果相等返回true                   | (A = B) 返回false。  |
+| <>, != | 不等于，检测两个值是否相等，如果不相等返回true               | (A != B) 返回 true。 |
+| >      | 大于号，检测左边的值是否大于右边的值, 如果左边的值大于右边的值返回true | (A > B) 返回false。  |
+| <      | 小于号，检测左边的值是否小于右边的值, 如果左边的值小于右边的值返回true | (A < B) 返回 true。  |
+| >=     | 大于等于号，检测左边的值是否大于或等于右边的值, 如果左边的值大于或等于右边的值返回true | (A >= B) 返回false。 |
+| <=     | 小于等于号，检测左边的值是否小于或等于右边的值, 如果左边的值小于或等于右边的值返回true | (A <= B) 返回 true。 |
+
+如果我们想在 MySQL 数据表中读取指定的数据，WHERE 子句是非常有用的。
+
+使用主键来作为 WHERE 子句的条件查询是非常快速的。
+
+如果给定的条件在表中没有任何匹配的记录，那么查询不会返回任何数据。
+
+```mysql
+mysql> select * from person where age > 24 and number > 14;
++----+--------+------+------+--------+
+| id | name   | sex  | age  | number |
++----+--------+------+------+--------+
+|  5 | Robson | male |   26 |     26 |
++----+--------+------+------+--------+
+1 row in set (0.00 sec)
+```
+
+
+
+执行顺序
+
+1. FROM, including JOINs
+2. WHERE
+3. GROUP BY
+4. HAVING
+5. WINDOW functions
+6. SELECT
+7. DISTINCT
+8. UNION
+9. ORDER BY
+10. LIMIT and OFFSET
+
+
+
+----
+
+# MySQL UPDATE 更新
+
+如果我们需要修改或更新 MySQL 中的数据，我们可以使用 SQL UPDATE 命令来操作。
+
+以下是 UPDATE 命令修改 MySQL 数据表数据的通用 SQL 语法：
+
+```mysql
+UPDATE table_name SET field1=new-value1, field2=new-value2
+[WHERE Clause]
+```
+
+- 你可以同时更新一个或多个字段。
+- 你可以在 WHERE 子句中指定任何条件。
+- 你可以在一个单独表中同时更新数据。
+
+当你需要更新数据表中指定行的数据时 WHERE 子句是非常有用的。
+
+```mysql
+mysql> update person set age=24 where number=27;
+Query OK, 1 row affected (0.03 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from person where number=27;
++----+-------+--------+------+--------+
+| id | name  | sex    | age  | number |
++----+-------+--------+------+--------+
+|  7 | Nuniz | female |   24 |     27 |
++----+-------+--------+------+--------+
+1 row in set (0.00 sec)
+
+```
+
+
+
+----
+
+# MySQL DELETE 语句
+
+你可以使用 SQL 的 DELETE FROM 命令来删除 MySQL 数据表中的记录。
+
+你可以在 **mysql>** 命令提示符或 PHP 脚本中执行该命令。
+
+以下是 SQL DELETE 语句从 MySQL 数据表中删除数据的通用语法：
+
+```
+DELETE FROM table_name [WHERE Clause]
+```
+
+- 如果没有指定 WHERE 子句，MySQL 表中的所有记录将被删除。
+- 你可以在 WHERE 子句中指定任何条件
+- 您可以在单个表中一次性删除记录。
+
+```mysql
+mysql> delete from person where number > 66;
+Query OK, 0 rows affected (0.00 sec)
+```
+
+
+
+----
+
+# MySQL LIKE 子句
+
+我们知道在 MySQL 中使用 SQL SELECT 命令来读取数据， 同时我们可以在 SELECT 语句中使用 WHERE 子句来获取指定的记录。
+
+WHERE 子句中可以使用等号 **=** 来设定获取数据的条件，如 "runoob_author = 'RUNOOB.COM'"。
+
+但是有时候我们需要获取 runoob_author 字段含有 "COM" 字符的所有记录，这时我们就需要在 WHERE 子句中使用 SQL LIKE 子句。
+
+SQL LIKE 子句中使用百分号 **%**字符来表示任意字符，类似于UNIX或正则表达式中的星号 *****。
+
+如果没有使用百分号 **%**, LIKE 子句与等号 **=** 的效果是一样的。
+
+以下是 SQL SELECT 语句使用 LIKE 子句从数据表中读取数据的通用语法：
+
+```mysql
+SELECT field1, field2,...fieldN 
+FROM table_name
+WHERE field1 LIKE condition1 [AND [OR]] filed2 = 'somevalue'
+```
+
+- 你可以在 WHERE 子句中指定任何条件。
+- 你可以在 WHERE 子句中使用LIKE子句。
+- 你可以使用LIKE子句代替等号 **=**。
+- LIKE 通常与 **%** 一同使用，类似于一个元字符的搜索。
+- 你可以使用 AND 或者 OR 指定一个或多个条件。
+- 你可以在 DELETE 或 UPDATE 命令中使用 WHERE...LIKE 子句来指定条件。
+
+在 where like 的条件查询中，SQL 提供了四种匹配方式。
+
+1. **%**：表示任意 0 个或多个字符。可匹配任意类型和长度的字符，有些情况下若是中文，请使用两个百分号（%%）表示。
+2. **_**：表示任意单个字符。匹配单个任意字符，它常用来限制表达式的字符长度语句。
+3. **[]**：表示括号内所列字符中的一个（类似正则表达式）。指定一个字符、字符串或范围，要求所匹配对象为它们中的任一个。
+4. **[^]** ：表示不在括号所列之内的单个字符。其取值和 [] 相同，但它要求所匹配对象为指定字符以外的任一个字符。
+5. 查询内容包含通配符时,由于通配符的缘故，导致我们查询特殊字符 “%”、“_”、“[” 的语句无法正常实现，而把特殊字符用 “[ ]” 括起便可正常查询。
+
+like 匹配/模糊匹配，会与 **%** 和 **_** 结合使用。
+
+```
+'%a'     //以a结尾的数据
+'a%'     //以a开头的数据
+'%a%'    //含有a的数据
+'_a_'    //三位且中间字母是a的
+'_a'     //两位且结尾字母是a的
+'a_'     //两位且开头字母是a的
+```
+
+
+
+```mysql
+mysql> select * from person where name like 'a%';
++----+--------+------+------+--------+
+| id | name   | sex  | age  | number |
++----+--------+------+------+--------+
+|  1 | Alison | male |   28 |      1 |
+|  4 | Arnold | male |   23 |     66 |
++----+--------+------+------+--------+
+2 rows in set (0.00 sec)
+
+```
+
+
+
+----
+
+# MySQL UNION 操作符
+
+MySQL UNION 操作符用于连接两个以上的 SELECT 语句的结果组合到一个结果集合中。多个 SELECT 语句会删除重复的数据。
+
+MySQL UNION 操作符语法格式：
+
+```mysql
+SELECT expression1, expression2, ... expression_n
+FROM tables
+[WHERE conditions]
+UNION [ALL | DISTINCT]
+SELECT expression1, expression2, ... expression_n
+FROM tables
+[WHERE conditions];
+```
+
+参数
+
+- **expression1, expression2, ... expression_n**: 要检索的列。
+- **tables:** 要检索的数据表。
+- **WHERE conditions:** 可选， 检索条件。
+- **DISTINCT:** 可选，删除结果集中重复的数据。**默认情况下 UNION 操作符已经删除了重复数据**，所以 DISTINCT 修饰符对结果没啥影响。
+- **ALL:** 可选，返回所有结果集，包含重复数据。
+
+**UNION 语句**：用于将不同表中相同列中查询的数据展示出来；（不包括重复数据）
+
+**UNION ALL 语句**：用于将不同表中相同列中查询的数据展示出来；（包括重复数据）
+
+使用形式如下：
+
+```mysql
+SELECT 列名称 FROM 表名称 UNION SELECT 列名称 FROM 表名称 ORDER BY 列名称；
+SELECT 列名称 FROM 表名称 UNION ALL SELECT 列名称 FROM 表名称 ORDER BY 列名称；
+```
+
+
+
+```mysql
+CREATE TABLE IF NOT EXISTS `otherinfo`(
+   `id` INT UNSIGNED AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `country` VARCHAR(100) NOT NULL,
+    `site` VARCHAR(100) NOT NULL,
+    PRIMARY KEY ( `id` )
+   )ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+mysql> desc otherinfo;
++---------+------------------+------+-----+---------+----------------+
+| Field   | Type             | Null | Key | Default | Extra          |
++---------+------------------+------+-----+---------+----------------+
+| id      | int(10) unsigned | NO   | PRI | NULL    | auto_increment |
+| name    | varchar(100)     | NO   |     | NULL    |                |
+| country | varchar(100)     | NO   |     | NULL    |                |
+| site    | varchar(100)     | NO   |     | NULL    |                |
++---------+------------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+```
+
+```mysql
+INSERT INTO otherinfo (id, name, country, site)
+                       VALUES
+                       (1, 'Alison', 'Baxi', 'G'),
+                       (2, 'Vigril', 'Helan', 'D'),
+                       (3, 'Hendson', 'England', 'M'),
+                       (4, 'Arnold', 'England', 'D'),
+                       (5, 'Robson', 'Scotland', 'D'),
+                       (6, 'Salah', 'Egipty', 'F'),
+                       (7, 'Nuniz', 'Wulagui', 'F'),
+                       (8, 'Fabnio', 'Baxi', 'M');
+```
+
+```mysql
+mysql> select * from otherinfo;
++----+---------+----------+------+
+| id | name    | country  | site |
++----+---------+----------+------+
+|  1 | Alison  | Baxi     | G    |
+|  2 | Vigril  | Helan    | D    |
+|  3 | Hendson | England  | M    |
+|  4 | Arnold  | England  | D    |
+|  5 | Robson  | Scotland | D    |
+|  6 | Salah   | Egipty   | F    |
+|  7 | Nuniz   | Wulagui  | F    |
+|  8 | Fabnio  | Baxi     | M    |
++----+---------+----------+------+
+8 rows in set (0.00 sec)
+```
+
+ **UNION** 实例
+
+```mysql
+mysql> select name from person where age > 24 union select name from otherinfo where country='England';
++---------+
+| name    |
++---------+
+| Alison  |
+| Vigril  |
+| Hendson |
+| Robson  |
+| Salah   |
+| Fabnio  |
+| Arnold  |
++---------+
+7 rows in set (0.00 sec)
+```
+
+
+
+---
+
+# MySQL 排序
