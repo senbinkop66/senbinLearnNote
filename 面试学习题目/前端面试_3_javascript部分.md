@@ -1803,15 +1803,32 @@ arguments[2]
 arguments[1] = 'new value';
 ```
 
+###  arguments如何转成数组？
+
 `arguments`对象**不是一个 `Array`** 。它类似于`Array`，**但除了length属性和索引元素之外没有任何`Array`属性**。例如，它没有 [pop](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/pop) 方法。但是它**可以被转换为一个真正的**`Array`：
 
 ```js
+// 调用数组的原型方法来转换
 var args = Array.prototype.slice.call(arguments);
 var args = [].slice.call(arguments);
 
-// ES2015
+// 使用ES6的新语法 Array.from() 来转换
 const args = Array.from(arguments);
+
+// 扩展运算符
 const args = [...arguments];
+
+// 使用 for
+function toArray(){
+    var args = []; 
+    for (var i = 1; i < arguments.length; i++) { 
+        args.push(arguments[i]); 
+    } 
+    return args;
+}
+
+// 利用 ES6 中的 rest 参数转换
+let a = (…args) => args;
 ```
 
 如果调用的参数多于正式声明接受的参数，则可以使用`arguments`对象。**这种技术对于可以传递可变数量的参数的函数很有用**。使用 `arguments.length`来确定传递给函数参数的个数，然后使用`arguments`对象来处理每个参数。要确定函数[签名](https://developer.mozilla.org/zh-CN/docs/Glossary/Signature/Function)中（输入）参数的数量，请使用`Function.length`属性。
@@ -1829,6 +1846,8 @@ const args = [...arguments];
 - `arguments[@@iterator]`
 
   返回一个新的`Array 迭代器` 对象，该对象包含参数中每个索引的值。
+
+
 
 
 
@@ -1899,7 +1918,36 @@ while (new Date - start <= 1000){}
 - JS是单线程 setTimeout 异步代码 其回调函数执行必须需等待主线程运行完毕
 - 当while循环因为时间差超过 1000ms 跳出循环后，setTimeout 函数中的回调才得以执行
 
+----
 
+### JavaScript 单线程
+
+JavasScript引擎是基于事件驱动和单线程执行的，JS引擎一直等待着任务队列中任务的到来，然后加以处理，浏览器无论什么时候都只有一个JS线程在运行程序，即主线程。那么单线程的JavasScript是怎么实现“非阻塞执行”呢？是通过**任务队列**。
+
+所有任务可以分成两种，一种是同步任务（synchronous），另一种是异步任务（asynchronous）。
+
+单线程就意味着，所有任务需要排队，前一个任务结束，才会执行后一个任务。如果前一个任务耗时很长，后一个任务就不得不一直等着。但是如果有些任务很慢时（比如Ajax操作从网络读取数据），我还是要等结果在执行后一个任务吗？于是，有了一种异步任务。
+
+同步任务指的是，在主线程上排队执行的任务，只有前一个任务执行完毕，才能执行后一个任务；而异步任务指的是，不进入主线程、而进入"任务队列"（task queue）的任务，只有主线程执行完毕，主线程去通知"任务队列"，某个异步任务可以执行了，该任务才会进入主线程执行。
+
+所以js的运行机制如下：
+
+- 1. 所有同步任务都在主线程上执行，形成一个执行栈（Call Stack）
+- 1. 主线程之外，还存在一个"任务队列"（task queue）。只要异步任务有了运行结果，就在"任务队列"之中放置一个事件
+- 1. 一旦"执行栈"中的所有同步任务执行完毕，系统就会读取"任务队列"，看看里面有哪些事件。那些对应的异步任务，于是结束等待状态，进入执行栈，开始执行。
+- 1. 主线程不断重复上面的第三步。
+
+
+
+### setTimeout运行机制
+
+setTimeout 和 setInterval的运行机制，其实就是将指定的代码移出本次执行，等到下一轮 Event Loop 时，再检查是否到了指定时间。如果到了，就执行对应的代码；如果不到，就等到再下一轮 Event Loop 时重新判断。
+
+这意味着，setTimeout指定的代码，必须等到本次执行的所有同步代码都执行完，才会执行。
+
+
+
+----
 
 ### setTimeout(0)函数的作用
 
@@ -2389,6 +2437,26 @@ console.log(obj4.toString);  // [Function: toString]
 这个时候如果对象有原型链，**那便会在循环的时候去循环它的各个属性和方法，效率则会降低**
 
 
+
+----
+
+## 对 new.target 的理解
+
+`new.target`属性**允许你检测函数或构造方法是否是通过new运算符被调用的**。
+
+在通过new运算符被初始化的函数或构造方法中，`new.target`返回一个指向构造方法或函数的引用。在普通的函数调用中，`new.target` 的值是undefined。
+
+我们可以使用它来检测，一个函数是否是作为构造函数通过new被调用的。
+
+```js
+function Foo() {
+  if (!new.target) throw "Foo() must be called with new";
+  console.log("Foo instantiated with new");
+}
+
+Foo(); // throws "Foo() must be called with new"
+new Foo(); // logs "Foo instantiated with new"
+```
 
 
 
@@ -3263,6 +3331,34 @@ obj2.f();  // abc
 
 
 
+```js
+function deepClone(obj, hash = new WeakMap()) {
+  if (obj === null) return obj; // 如果是null或者undefined我就不进行拷贝操作
+    
+  if (obj instanceof Date) return new Date(obj);
+  if (obj instanceof RegExp) return new RegExp(obj);
+    
+  // 可能是对象或者普通的值  如果是函数的话是不需要深拷贝
+  if (typeof obj !== "object") return obj;
+  // 是对象的话就要进行深拷贝
+  if (hash.get(obj)) return hash.get(obj);
+    
+  let cloneObj = new obj.constructor();
+  // 找到的是所属类原型上的constructor,而原型上的 constructor指向的是当前类本身
+  hash.set(obj, cloneObj);
+    
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      // 实现一个递归拷贝
+      cloneObj[key] = deepClone(obj[key], hash);
+    }
+  }
+  return cloneObj;
+}
+```
+
+
+
 ### (2) 借助JSON对象的parse和stringify
 
 利用js的内置对象JSON来进行**数组对象**的深拷贝，缺点：无法实现对象中**方法**的深拷贝
@@ -3297,6 +3393,19 @@ stringify() → JavaScript对象序列化为JSON字符串
 
 parse() → 把JSON字符串解析为原生JavaScript值
 
+但是这种方式存在弊端，会忽略`undefined`、`symbol`和`函数`
+
+```js
+const obj = {
+    name: 'A',
+    name1: undefined,
+    name3: function() {},
+    name4:  Symbol('A')
+}
+const obj2 = JSON.parse(JSON.stringify(obj));
+console.log(obj2); // {name: "A"}
+```
+
 
 
 ### (3) 通过jQuery的extend方法
@@ -3304,6 +3413,15 @@ parse() → 把JSON字符串解析为原生JavaScript值
 ```js
 var array = [1,2,3,4];
 var newArray = $.extend(true, [], array);
+
+const $ = require('jquery');
+const obj1 = {
+    a: 1,
+    b: { f: { g: 1 } },
+    c: [1, 2, 3]
+};
+const obj2 = $.extend(true, {}, obj1);
+console.log(obj1.b.f === obj2.b.f); // false
 ```
 
 
@@ -3655,13 +3773,28 @@ Reflect.ownKeys(obj).forEach((key) => {
 
 ###  (1) for循环
 
+**标准的for循环语句，也是最传统的循环语句**
+
+```js
+var arr = [1,2,3,4,5]
+for(var i = 0; i < arr.length; i++){
+  console.log(arr[i])
+}
+```
+
+最简单的一种遍历方式，也是使用频率最高的，性能较好，但还能优化
+
 用临时变量将长度缓存起来，**避免重复获取数组长度，当数组较大时优化效果比较明显**，写法比较繁琐
 
 ```js
-for(let j = 0,len=arr.length; j < len; j++) {
+for(let j = 0, len = arr.length; j < len; j++) {
     
 }
 ```
+
+**这种方法基本上是所有循环遍历方法中性能最高的一种**
+
+
 
 ###  (2) forEach（）
 
@@ -3674,9 +3807,28 @@ arr.forEach((item,index,array)=>{
 })    
 ```
 
+**数组自带的foreach循环，使用频率较高，实际上性能比普通for循环弱**
+
+**原型forEach**
+
+由于foreach是Array型自带的，对于一些非这种类型的，无法直接使用(如NodeList)，所以才有了这个变种，使用这个变种可以让类似的数组拥有foreach功能。
+
+```js
+const nodes = document.querySelectorAll('div')
+Array.prototype.forEach.call(nodes,(item,index,arr)=>{
+  console.log(item)
+})
+```
+
+**实际性能要比普通foreach弱**
+
+
+
 ###   (3) map（）
 
 **创建一个新的数组，新数组的每一个元素由调用数组中的每一个元素执行提供的函数得来**，有return返回值
+
+map: 只能遍历数组，不能中断，返回值是修改后的数组。
 
 return的意义：**不影响原来的数组**，**只是把原数组克隆一份**，改变克隆的数组中的对应项
 
@@ -3696,6 +3848,8 @@ console.log(b);  // [ 1, 4, 9, 16, 25 ]
 ###   (4) for of
 
 遍历value，适用遍历数组对象、字符串、map、set等**拥有迭代器对象**的集合，**不能遍历对象**，**因为没有迭代器**
+
+在可迭代对象（具有 iterator 接口）（Array，Map，Set，String，arguments）上创建一个迭代循环，调用自定义迭代钩子，并为每个不同属性的值执行语句，不能遍历对象
 
 与forEach()区别：**可以正确响应break、continue和return语句**
 
@@ -3722,14 +3876,77 @@ for (let o of obj){  //TypeError: obj is not iterable
 }
 ```
 
-### (5) reduce()
+这种方式是es6里面用到的，性能要好于forin，但仍然比不上普通for循环
+
+
+
+### (5) for in
+
+任意顺序遍历一个对象的除[Symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol)以外的[可枚举](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Enumerability_and_ownership_of_properties)属性，包括继承的可枚举属性。
+
+一般常用来遍历对象，包括非整数类型的名称和继承的那些原型链上面的属性也能被遍历。像 Array和 Object使用内置构造函数所创建的对象都会继承自Object.prototype和String.prototype的不可枚举属性就不能遍历了.
+
+```js
+let arr = [1,2,3,4,5];
+
+for (let i in arr){
+    console.log(arr[i]);  // 1 2 3 4 5
+}
+```
+
+
+
+### (6) every
+
+对数组中的每一运行给定的函数，如果该函数对每一项都返回true,则该函数返回true
+
+```js
+var arr = [10,30,25,64,18,3,9]
+var result = arr.every((item,index,arr)=>{
+      return item>3
+})
+console.log(result)  //false
+```
+
+
+
+### (7) some
+
+对数组中的每一运行给定的函数，如果该函数有一项返回true,就返回true，所有项返回false才返回false
+
+```js
+var arr2 = [10,20,32,45,36,94,75]
+var result2 = arr2.some((item,index,arr)=>{
+    return item<10
+})
+console.log(result2)  //false
+```
+
+
+
+### (8) filter
+
+对数组中的每一运行给定的函数，会返回满足该函数的项组成的数组
+
+```js
+// filter  返回满足要求的数组项组成的新数组
+var arr3 = [3,6,7,12,20,64,35]
+var result3 = arr3.filter((item,index,arr)=>{
+    return item > 3
+})
+console.log(result3)  //[6,7,12,20,64,35]
+```
+
+
+
+### (9) reduce()
 
 接收一个函数作为**累加器**，数组中的每个值（从左到右）开始缩减，得出最终计算值
 
 相当于：**为数组中的每一个元素依次执行回调函数**，不包括数组中被删除或从未被赋值的元素
 
 ```js
-arr.reduce(function(total, currentValue, currentIndex, arr), initialValue)
+arr.reduce(function(total, currentValue, currentIndex, arr){ }, initialValue)
 ```
 
 各参数意义：
@@ -3802,6 +4019,29 @@ let ans=FlatArr(nums);
 console.log(ans);  //[1, 2, 3, 4, 5, 2, 3, 5 ]
 
 ```
+
+
+
+### 结果分析
+
+经过工具与手动测试发现，结果基本一致，数组遍历各个方法的速度：**传统的for循环最快，for-in最慢**
+
+> for-len `>` for `>` for-of `>` forEach `>` map `>` for-in
+
+#### javascript原生遍历方法的建议用法：
+
+- 用`for`循环遍历数组
+- 用`for...in`遍历对象
+- 用`for...of`遍历类数组对象（ES6）
+- 用`Object.keys()`获取对象属性名的集合
+
+#### 为何for… in会慢？
+
+因为`for … in`语法是第一个能够迭代对象键的JavaScript语句，循环对象键（{}）与在数组（[]）上进行循环不同，引擎会执行一些额外的工作来跟踪已经迭代的属性。因此不建议使用`for...in`来遍历数组
+
+
+
+
 
 ----
 
@@ -4637,6 +4877,29 @@ function generateMixed(n) {
      return res;
 }
 console.log(generateMixed(6));
+```
+
+
+
+----
+
+## 写一个返回数据类型的函数，要求自定义的类实例化的对象返回定义的类名
+
+对于自定义的类实例化的对象，需要返回定义的类名。
+
+这个也比较简单，我们对于上述获取的 Object 类型的数据，直接使用 `xx.constructor.name` 即可获取到这个数据对应的类名。
+
+```js
+function myTypeof(data) {
+    var toString = Object.prototype.toString;
+    var dataType = data instanceof Element ? "Element" : toString.call(data).replace(/\[object\s(.+)\]/, "$1")
+
+    if(dataType === 'Object'){
+        return data.constructor.name
+    }
+
+    return dataType
+};
 ```
 
 
@@ -10207,3 +10470,41 @@ console.log(ouput);
 
 ----
 
+##  ['1','2','3'].map(parseInt) 的返回值是什么？
+
+首先整个题目考校的是两个函数，和一个字符串转数字的概念
+
+1. 数组的`map`函数，接受三个参数，当前值，当前索引，当前数组。
+2. parseInt接受两个参数，需要转换的字符串，基数（基数取值范围2~36）
+
+```
+var new_array = arr.map(function callback(currentValue, index, array) {  
+ // Return element for new_array  
+})  
+parseInt(string, radix)
+```
+
+1. 根据上面的两个函数的解释，我们可以发现实际上，上面的`['1','2','3'].map(parseInt)` 其实就是等价于下面的代码。
+
+```js
+['1','2','3'].map((item, index) => {  
+    return parseInt(item, index)  
+})  
+//  parseInt('1', 0)  1  
+//  parseInt('2', 1)  NaN  
+//  parseInt('3', 2)  NaN
+```
+
+1. 如果我们需要返回1，2，3需要怎么办？
+
+```js
+function parseIntFun(item) {  
+    return parseInt(item, 10)  
+}  
+['1','2','3'].map(parseIntFun)  
+//  parseInt('1', 10)  1  
+//  parseInt('2', 10)  2  
+//  parseInt('3', 10)  3
+```
+
+综上所述，返回值是 [1,NaN,NaN]
