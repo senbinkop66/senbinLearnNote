@@ -2460,6 +2460,44 @@ new Foo(); // logs "Foo instantiated with new"
 
 
 
+---
+
+##  将数组的length设置为0，取第一个元素会返回什么？
+
+设置 `length = 0` 会清空数组，所以会返回 `undefined`
+
+```js
+const arr = [3, 2, 1];
+
+console.log(arr[4])  // undefined
+arr.length = 0;
+
+console.log(arr[0])  // undefined
+```
+
+```js
+const arr = new Array(3);
+
+console.log(arr)  // [ <3 empty items> ]
+console.log(arr[1])  // undefined
+arr.length = 0;
+
+console.log(arr[0])  // undefined
+```
+
+```js
+const arr = [, , ,];
+
+console.log(arr)  // [ <3 empty items> ]
+console.log(arr[1])  // undefined
+arr.length = 0;
+
+console.log(arr[0])  // undefined
+
+const arr = [1, , 3, , , 2];
+console.log(arr)  // [ 1, <1 empty item>, 3, <2 empty items>, 2 ]
+```
+
 
 
 ---
@@ -10508,3 +10546,72 @@ function parseIntFun(item) {
 ```
 
 综上所述，返回值是 [1,NaN,NaN]
+
+
+
+----
+
+##  连续 bind()多次，输出的值是什么？
+
+```js
+var bar = function(){
+    console.log(this.x);
+}
+var foo = {
+    x:3
+}
+var sed = {
+    x:4
+}
+var func = bar.bind(foo).bind(sed);
+func(); // 3
+ 
+var fiv = {
+    x:5
+}
+var func = bar.bind(foo).bind(sed).bind(fiv);
+func(); // 3
+```
+
+两次都输出 **3**。
+
+在Javascript中，多次 `bind()` 是无效的。
+
+更深层次的原因， `bind()` 的实现，相当于使用函数在内部包了一个 `call` / `apply` ，第二次 `bind()` 相当于再包住第一次 `bind()` ,故第二次以后的 `bind` 是无法生效的。
+
+
+
+----
+
+##  new fn与new fn()有什么区别吗？
+
+用 `new` 创建构造函数的实例时，通常情况下 `new` 的构造函数后面需要带括号（譬如：`new Parent()`）。
+
+有些情况下`new`的构造函数后带括号和不带括号的情况一致，譬如：
+
+```js
+function Parent(){
+  this.num = 1;
+}
+console.log(new Parent());// Parent { num: 1 }
+console.log(new Parent);// Parent { num: 1 }
+```
+
+但有些情况下new的构造函数后带括号和不带括号的情况并不一致，譬如：
+
+```js
+function Parent(){
+  this.num = 1;
+}
+
+console.log(new Parent().num);// 1
+console.log(new Parent.num);// TypeError: Parent.num is not a constructor
+```
+
+结果分析：
+
+从报错信息来看，`new Parent.num`执行顺序是这样的：**先执行`Parent.num`，此时返回结果为`undefined`**；后执行`new`，因`new`后面必须跟构造函数，所以`new undefined`会报错。
+
+`new Parent().num`相当于`(new Parent()).num`，所以结果返回1。
+
+从结果来看，`new Parent.num`代码相当于`new (Parent.num)；`，`new Parent().num`相当于`(new Parent()).num`。由此看来 `new` 的构造函数后跟括号优先级会提升。

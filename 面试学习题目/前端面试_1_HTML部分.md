@@ -1776,3 +1776,156 @@ event.stopPropagation()
 event.preventDefault() 
 ```
 
+
+
+----
+
+##  e.target 和 e.currentTarget 有什么区别？
+
+当你触发一个元素的事件的时候，该事件从该元素的祖先元素传递下去，此过程为`捕获`，而到达此元素之后，又会向其祖先元素传播上去，此过程为`冒泡`
+
+**addEventListener**
+
+`addEventListener`是为元素绑定事件的方法，他接收三个参数：
+
+- 第一个参数：绑定的事件名
+- 第二个参数：执行的函数
+- 第三个参数：
+  - false：默认，代表冒泡时绑定
+  - true：代表捕获时绑定
+
+**target & currentTarget**
+
+我们给四个div元素绑定事件，且`addEventListener`第三个参数不设置，则默认设置为`false`
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>测试</title>
+    <style type="text/css">
+     * {
+      margin: 0;
+      padding: 0;
+     }
+     span {
+      background-color: #34ffdd;
+      margin: 10px 20px 10px 20px;
+      padding: 10px 20px 10px 20px;
+     }
+    </style>
+</head>
+<body>
+    <div id="a">
+      <div id="b">
+        <div id="c">
+          <div id="d">oooo</div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      const a = document.getElementById('a')
+      const b = document.getElementById('b')
+      const c = document.getElementById('c')
+      const d = document.getElementById('d')
+
+      a.addEventListener('click', (e) => {
+        const { target, currentTarget } = e
+        console.log(`target是${target.id}`)
+        console.log(`currentTarget是${currentTarget.id}`)
+      })
+
+      b.addEventListener('click', (e) => {
+        const { target, currentTarget } = e
+        console.log(`target是${target.id}`)
+        console.log(`currentTarget是${currentTarget.id}`)
+      })
+
+      c.addEventListener('click', (e) => {
+        const { target, currentTarget } = e
+        console.log(`target是${target.id}`)
+        console.log(`currentTarget是${currentTarget.id}`)
+      })
+
+      d.addEventListener('click', (e) => {
+        const { target, currentTarget } = e
+        console.log(`target是${target.id}`)
+        console.log(`currentTarget是${currentTarget.id}`)
+      })
+      /*
+      test.html:52 target是d
+      test.html:53 currentTarget是d
+      test.html:46 target是d
+      test.html:47 currentTarget是c
+      test.html:40 target是d
+      test.html:41 currentTarget是b
+      test.html:34 target是d
+      test.html:35 currentTarget是a
+	*/
+    </script>
+</body>
+</html>
+
+```
+
+现在我们点击，看看输出的东西，可以看出触发的是d，而执行的元素是冒泡的顺序
+
+
+
+我们把四个事件第三个参数都设置为`true`，我们看看输出结果，可以看出触发的是d，而执行的元素是捕获的顺序
+
+```js
+      a.addEventListener('click', (e) => {
+        const { target, currentTarget } = e
+        console.log(`target是${target.id}`)
+        console.log(`currentTarget是${currentTarget.id}`)
+      }, true)
+
+      b.addEventListener('click', (e) => {
+        const { target, currentTarget } = e
+        console.log(`target是${target.id}`)
+        console.log(`currentTarget是${currentTarget.id}`)
+      }, true)
+
+      c.addEventListener('click', (e) => {
+        const { target, currentTarget } = e
+        console.log(`target是${target.id}`)
+        console.log(`currentTarget是${currentTarget.id}`)
+      }, true)
+
+      d.addEventListener('click', (e) => {
+        const { target, currentTarget } = e
+        console.log(`target是${target.id}`)
+        console.log(`currentTarget是${currentTarget.id}`)
+      }, true)
+      /*
+      test.html:34 target是d
+      test.html:35 currentTarget是a
+      test.html:40 target是d
+      test.html:41 currentTarget是b
+      test.html:46 target是d
+      test.html:47 currentTarget是c
+      test.html:52 target是d
+      test.html:53 currentTarget是d
+      */
+```
+
+我们可以总结出：
+
+- `e.target`：**触发**事件的元素
+- `e.currentTarget`：**绑定**事件的元素
+
+
+
+**给一个dom同时绑定两个点击事件，一个用捕获，一个用冒泡，说下会执行几次事件，然后会先执行冒泡还是捕获？**
+
+addEventListener绑定几次就执行几次
+
+先捕获，后冒泡
+
+
+
+----
+
+## 

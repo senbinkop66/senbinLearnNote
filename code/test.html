@@ -16,12 +16,52 @@
     </style>
 </head>
 <body>
-    <p>水平方向：水平方向上，都有效；</p>
-    <span>垂直方向上，都无效</span>
-    <span>padding-top和padding-bottom**会显示出效果**，**但是高度不会撑开，不会对周围元素有影响**</span>
-    <p>水平方向：水平方向上，都有效；</p>
+    <div id="a">
+      <div id="b">
+        <div id="c">
+          <div id="d">oooo</div>
+        </div>
+      </div>
+    </div>
     <script type="text/javascript">
-      
+      const a = document.getElementById('a')
+      const b = document.getElementById('b')
+      const c = document.getElementById('c')
+      const d = document.getElementById('d')
+
+      a.addEventListener('click', (e) => {
+        const { target, currentTarget } = e
+        console.log(`target是${target.id}`)
+        console.log(`currentTarget是${currentTarget.id}`)
+      }, true)
+
+      b.addEventListener('click', (e) => {
+        const { target, currentTarget } = e
+        console.log(`target是${target.id}`)
+        console.log(`currentTarget是${currentTarget.id}`)
+      }, true)
+
+      c.addEventListener('click', (e) => {
+        const { target, currentTarget } = e
+        console.log(`target是${target.id}`)
+        console.log(`currentTarget是${currentTarget.id}`)
+      }, true)
+
+      d.addEventListener('click', (e) => {
+        const { target, currentTarget } = e
+        console.log(`target是${target.id}`)
+        console.log(`currentTarget是${currentTarget.id}`)
+      }, true)
+      /*
+      test.html:34 target是d
+      test.html:35 currentTarget是a
+      test.html:40 target是d
+      test.html:41 currentTarget是b
+      test.html:46 target是d
+      test.html:47 currentTarget是c
+      test.html:52 target是d
+      test.html:53 currentTarget是d
+*/
     </script>
 </body>
 </html>
