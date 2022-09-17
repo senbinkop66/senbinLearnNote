@@ -1,7 +1,21 @@
-const arr = [1, , 3, , , 2];
+function curry(func) {
+    return function curried(...args) {
+        if (args.length >= func.length) {
+            return func.apply(this, args);
+        } else {
+            return function(...args2) {
+                return curried.apply(this, args.concat(args2));
+            }
+        }
+    }
+}
 
-console.log(arr)  // [ <3 empty items> ]
-console.log(arr[1])  // undefined
-arr.length = 0;
+function sum(a, b, c) {
+  return a + b + c;
+}
 
-console.log(arr[0])  // undefined
+let curriedSum = curry(sum);
+
+console.log(curriedSum(1, 2, 3));
+console.log(curriedSum(1, 2)(3));
+console.log(curriedSum(1)(2)(3));

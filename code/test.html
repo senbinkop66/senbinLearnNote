@@ -24,44 +24,22 @@
       </div>
     </div>
     <script type="text/javascript">
-      const a = document.getElementById('a')
-      const b = document.getElementById('b')
-      const c = document.getElementById('c')
-      const d = document.getElementById('d')
+const promise1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve('success')
+  }, 1000)
+})
+const promise2 = promise1.then(() => {
+  throw new Error('error!!!')
+})
 
-      a.addEventListener('click', (e) => {
-        const { target, currentTarget } = e
-        console.log(`target是${target.id}`)
-        console.log(`currentTarget是${currentTarget.id}`)
-      }, true)
+console.log('promise1', promise1)
+console.log('promise2', promise2)
 
-      b.addEventListener('click', (e) => {
-        const { target, currentTarget } = e
-        console.log(`target是${target.id}`)
-        console.log(`currentTarget是${currentTarget.id}`)
-      }, true)
-
-      c.addEventListener('click', (e) => {
-        const { target, currentTarget } = e
-        console.log(`target是${target.id}`)
-        console.log(`currentTarget是${currentTarget.id}`)
-      }, true)
-
-      d.addEventListener('click', (e) => {
-        const { target, currentTarget } = e
-        console.log(`target是${target.id}`)
-        console.log(`currentTarget是${currentTarget.id}`)
-      }, true)
-      /*
-      test.html:34 target是d
-      test.html:35 currentTarget是a
-      test.html:40 target是d
-      test.html:41 currentTarget是b
-      test.html:46 target是d
-      test.html:47 currentTarget是c
-      test.html:52 target是d
-      test.html:53 currentTarget是d
-*/
+setTimeout(() => {
+  console.log('promise1', promise1)
+  console.log('promise2', promise2)
+}, 2000)
     </script>
 </body>
 </html>

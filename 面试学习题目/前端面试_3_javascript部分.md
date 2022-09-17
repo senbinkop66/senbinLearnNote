@@ -381,6 +381,15 @@ false
 
 ```
 
+- **undefined == null**，结果是**true**。且它俩与所有其他值比较的结果都是**false**。
+- **String == Boolean**，需要两个操作数同时转为Number。
+- **String/Boolean == Number**，需要String/Boolean转为Number。
+- **Object == Primitive**，需要Object转为Primitive(具体通过**valueOf**和**toString**方法)。
+
+![img](E:\pogject\学习笔记\image\js\0fc2dd69d7f9d4083f347784446b7f0d_b.png)
+
+
+
 **=== ： 全等(类型和值）**
 
 **先判断类型再比较**， 类型不同直接不等，不转换类型
