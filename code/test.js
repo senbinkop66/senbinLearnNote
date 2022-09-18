@@ -1,9 +1,18 @@
-function runAsync (x) {
-    const p = new Promise(r => setTimeout(() => r(x, console.log(x)), 1000))
-    return p
+async function async1() {
+  console.log("async1 start");
+  await async2();
+  console.log("async1 end");
 }
+async function async2() {
+  console.log("async2");
+}
+async1();
+console.log('start')
 
-runAsync(2);
+
 /*
-2
+async1 start
+async2
+start
+async1 end
 */
