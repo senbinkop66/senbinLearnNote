@@ -24,22 +24,39 @@
       </div>
     </div>
     <script type="text/javascript">
-const promise1 = new Promise((resolve, reject) => {
-  setTimeout(() => {
-    resolve('success')
-  }, 1000)
-})
-const promise2 = promise1.then(() => {
-  throw new Error('error!!!')
-})
 
-console.log('promise1', promise1)
-console.log('promise2', promise2)
+function red() {
+    console.log('red');
+}
+function green() {
+    console.log('green');
+}
+function yellow() {
+    console.log('yellow');
+}
 
-setTimeout(() => {
-  console.log('promise1', promise1)
-  console.log('promise2', promise2)
-}, 2000)
+function light(timer, cb) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            cb();
+            resolve();
+        }, timer);
+    });
+}
+
+function step() {
+    Promise.resolve().then(() => {
+        return light(3000, red);
+    }).then(() => {
+        return light(2000, yellow);
+    }).then(() => {
+        return light(1000, green);
+    }).then(() => {
+        return step();
+    });
+}
+
+
     </script>
 </body>
 </html>

@@ -1928,4 +1928,89 @@ addEventListener绑定几次就执行几次
 
 ----
 
-## 
+## 什么是“事件代理”
+
+
+
+
+
+
+
+----
+
+##  怎么解决canvas中获取跨域图片数据的问题？
+
+默认情况下，直接请求跨域图片。因为不符合跨域请求资源的条件，图片数据是不被canvas信任的。
+
+为了解决图片跨域资源共享的问题，` <img>` 元素提供了支持的属性：crossOrigin，该属性一共有两个值可选：anonymous 和 use-credentials，下面列举了两者的使用场景，以及满足的条件。
+
+|                  | anonymous                                          | use-credentials                                              |
+| ---------------- | -------------------------------------------------- | ------------------------------------------------------------ |
+| 用途             | 匿名请求跨域图片资源，不会发送证书（比如cookie等） | 具名请求跨域图片资源，会携带证书数据                         |
+| Request Headers  | origin                                             | origin、cookie                                               |
+| Response headers | Access-Control-Allow-Origin                        | Access-Control-Allow-Origin、Access-Control-Allow-Credentials |
+| 所需条件         | Access-Control-Allow-Origin 字段值需要包含请求域。 | Access-Control-Allow-Origin 字段值需要包含请求域，且不能为通配符 *。Access-Control-Allow-Credentials 字段值需要为 true，表明允许请求发送证书数据。 |
+
+代码示例
+
+```js
+// page origin is https://a.com
+
+const canvas = document.createElement('canvas');
+const context = canvas.getContext('2d');
+
+const img = new Image();
+img.crossOrigin = 'anonymous';
+img.onload = () => {
+   context.drawImage(this, 0, 0);
+   context.getImageData(0, 0, img.width, img.height);
+};
+img.src = 'https://b.com/a.png';
+```
+
+
+
+----
+
+## 直接在script标签中写 export 为什么会报错？
+
+现代浏览器可以支持用 script 标签引入模块或者脚本，如果要引入模块，必须给 script 标签添加 type=“module”。如果引入脚本，则不需要 type。
+
+
+
+----
+
+## mouseover 和 mouseenter 有什么区别？
+
+当鼠标移动到元素上时就会触发 mouseenter 事件，类似 mouseover，它们两者之间的**差别是 mouseenter 不会冒泡**。
+
+由于 mouseenter 不支持事件冒泡，导致在一个元素的子元素上进入或离开的时候会触发其 mouseover 和 mouseout 事件，但是却不会触发 mouseenter 和 mouseleave 事件。
+
+
+
+----
+
+## offsetWidth/offsetHeight,clientWidth/clientHeight 与 scrollWidth/scrollHeight 的区别？
+
+clientWidth/clientHeight **返回的是元素的内部宽度**，它的值只包含 content + padding，如果有滚动条，不包含滚动条。
+
+clientTop 返回的是上边框的宽度。
+
+clientLeft 返回的左边框的宽度。
+
+offsetWidth/offsetHeight **返回的是元素的布局宽度**，它的值包含 content + padding + border 包含了滚动条。
+
+offsetTop 返回的是当前元素相对于其 offsetParent 元素的顶部的距离。
+
+offsetLeft 返回的是当前元素相对于其 offsetParent 元素的左部的距离。
+
+scrollWidth/scrollHeight 返回值包含 content + padding + 溢出内容的尺寸。
+
+scrollTop 属性返回的是一个元素的内容垂直滚动的像素数。
+
+scrollLeft 属性返回的是元素滚动条到元素左边的距离。
+
+
+
+-----
+
