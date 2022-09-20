@@ -1,3 +1,4 @@
-function fn1(name, ...args) {}
+let arr = [1, 2, 3, 5, 4, 6];
 
-console.log(123['toString'].length + 123) // 124
+console.log(arr.every((item) => item < 5));  // 
+console.log(arr.some((item) => item >= 5));  // 
