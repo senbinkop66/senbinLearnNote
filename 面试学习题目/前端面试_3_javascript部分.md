@@ -1204,9 +1204,27 @@ function test(){
 
 ## 12. 请问js有哪几种常见的内存泄露情况？
 
+内存泄露的解释：程序中己动态分配的堆内存由于某种原因未释放或无法释放。
+
+- 根据JS的垃圾回收机制，当内存中引用的次数为0的时候内存才会被回收
+- 全局执行上下文中的对象被标记为不再使用才会被释放
+
 **1、闭包**
 
-闭包可以延长局部变量寿命，若使用不当则会导致内存泄露
+闭包可以延长局部变量寿命，若使用不当则会导致内存泄露。未手动解决必包遗留的内存引用。**定义了闭包就要消除闭包带来的副作用**。
+
+```js
+
+function closuer (){
+    const b = 0;
+    return (c)=> b + c
+}
+
+const render = closuer();
+
+render();
+render = null; // 手动设置为null，GC会自己去清除
+```
 
 **2、意外的全局变量**
 
@@ -1219,6 +1237,19 @@ function foo(arg) {
 function foo(arg) {
     window.bar = "this is an explicit global variable";
 }
+
+// 通常是变量未被定义或者胡乱引用了全局变量
+// 场景1
+function a(){
+    b=10;
+}
+a();
+b++;
+
+// 场景2
+setTimeout(()=>{
+    console.log(b)
+},1000)
 ```
 
 上面代码中两个函数是等价的，**调用完函数后，变量仍然存在，会导致泄漏**
@@ -1270,9 +1301,35 @@ function removeButton(){
 
 **5、未被销毁的事件监听**
 
-6、console.lo打印到控制台的对象
+```jsx
+
+function addEvent (){
+ const node =  document.getElementById('warp');
+    node.addEventListener('touchmove',()=>{
+        console.log('In Move');
+    })
+}
+
+const onTouchEnd = (){
+   const node =  document.getElementById('warp');
+   node.
+}
+
+useEffect(()=>()=>{
+     const node =  document.getElementById('warp');
+     node.removeEventListener('touchmove');
+}) // 类似react 生命周期函数： componentWillUnmount
+
+render(<div id='warp' onTouchEnd={onTouchEnd}>
+ // code...
+</div>)
+```
+
+6、console.log打印到控制台的对象
 
 7、循环引用
+
+8、缓存。建议所有缓存都设置好过期时间。
 
 
 
@@ -2707,6 +2764,20 @@ NaN 是一个特殊值，**它和自身不相等**，是**唯一一个非自反*
 
 ----
 
+## typeof null 的结果是什么？
+
+```js
+typeof null  // 'object'
+```
+
+null不是对象。
+
+虽然 typeof null 会输出 object，但是这只是 JS 存在的一个悠久 Bug。在 JS 的最初版本中使用的是 32 位系统，为了性能考虑**使用低位存储变量的类型信息**，000 开头代表是对象，然而 null 表示为全零，所以将它错误的判断为 object 。
+
+
+
+----
+
 ## isNaN 和 Number.isNaN 函数有什么区别？
 
 全局属性 NaN 的值表示不是一个数字（Not-A-Number）。
@@ -2721,6 +2792,39 @@ NaN 是一个特殊值，**它和自身不相等**，是**唯一一个非自反*
 和全局函数 isNaN() 相比，**Number.isNaN() 不会自行将参数转换成数字**，只有在参数是值为 NaN 的数字时，才会返回 true。
 
 Number.isNaN() 方法确定传递的值是否为NaN，并且检查其类型是否为Number。它是原来的全局isNaN() 的更稳妥的版本。
+
+
+
+----
+
+##  Object.is和===有什么区别？
+
+Object.is在严格等于的基础上修复了一些特殊情况下的失误，具体来说就是+0和-0，NaN和NaN。
+
+源码如下：
+
+```js
+function is(x, y) {
+    if (x === y) {
+    	//运行到1/x === 1/y的时候x和y都为0，但是1/+0 = +Infinity， 1/-0 = -Infinity, 是不一样的
+    	return x !== 0 || y !== 0 || 1 / x === 1 / y;
+    } else {
+    	//NaN===NaN是false,这是不对的，我们在这里做一个拦截，x !== x，那么一定是 NaN, y 同理
+    	//两个都是NaN的时候返回true
+    	return x !== x && y !== y;
+    }
+}
+
+```
+
+```js
+Number.MIN_VALUE > 0  // true
+
+Object.is(+0, -0)  // false
+Object.is(NaN, NaN)  // true
+NaN === NaN  // false
++0 === -0  // true
+```
 
 
 
@@ -2955,6 +3059,75 @@ console.log(arr.some((item) => item >= 5));  // true
 ```
 
 
+
+----
+
+##  instanceof能否判断基本数据类型？
+
+比如下面这种方式:
+
+```js
+class PrimitiveNumber {
+    static [Symbol.hasInstance](x) {
+        return typeof x === 'number'
+    }
+}
+console.log(111 instanceof PrimitiveNumber) // true
+
+```
+
+其实就是自定义instanceof行为的一种方式，这里将原有的instanceof方法重定义，换成了typeof，因此**能够判断基本数据类型**。
+
+
+
+-----
+
+##  0.1+0.2为什么不等于0.3？
+
+```js
+console.log(0.1 + 0.2);  // 0.30000000000000004
+
+console.log(0.1 + 0.2 + 0.1);  // 0.4
+console.log(0.3 - 0.1);  // 0.19999999999999998
+console.log(0.2 - 0.1);  // 0.1
+console.log(0.8 - 0.6);  // 0.20000000000000007
+```
+
+0.1和0.2在转换成二进制后会无限循环，**由于标准位数的限制后面多余的位数会被截掉，此时就已经出现了精度的损失**，相加后因浮点数小数位的限制而截断的二进制数字在转换为十进制就会变成 0.30000000000000004。
+
+
+
+----
+
+##  '1'.toString()为什么不会报错？
+
+```js
+console.log('1'.toString());  //  1
+```
+
+其实在这个语句运行的过程中做了这样几件事情：
+
+```js
+var s = new Object('1');
+s.toString();
+s = null;
+```
+
+- 第一步: 创建Object类实例。注意为什么不是String ？ 由于Symbol和BigInt的出现，对它们调用new都会报错，**目前ES6规范也不建议用new来创建基本类型的包装类。**
+- 第二步: 调用实例方法。
+- 第三步: **执行完方法立即销毁这个实例**。
+
+整个过程体现了 `基本包装类型` 的性质，而基本包装类型恰恰属于基本数据类型，包括Boolean, Number和String。
+
+```js
+console.log(false.toString());  //  false
+console.log((1).toString());  //  1
+let a = 1;
+console.log(a.toString());  // 1
+
+console.log(1.toString());  //  SyntaxError: Invalid or unexpected token
+
+```
 
 
 
@@ -5397,6 +5570,73 @@ function myTypeof(data) {
     return dataType
 };
 ```
+
+
+
+-----
+
+##  Javascript中如何实现函数缓存？
+
+函数缓存，就是将函数运算过的结果进行缓存
+
+本质上就是用空间（缓存存储）换时间（计算过程）
+
+常用于缓存数据计算结果和缓存对象
+
+```js
+const add = (a,b) => a+b;
+const calc = memoize(add); // 函数缓存
+calc(10,20);// 30
+calc(10,20);// 30 缓存
+```
+
+缓存只是一个临时的数据存储，它保存数据，以便将来对该数据的请求能够更快地得到处理
+
+
+
+实现函数缓存主要依靠闭包、柯里化、高阶函数
+
+如何实现函数缓存，实现原理也很简单，把参数和对应的结果数据存在一个对象中，调用时判断参数对应的数据是否存在，存在就返回对应的结果数据，否则就返回计算结果
+
+```js
+const memoize = function (func, content) {
+  let cache = Object.create(null)
+  content = content || this
+  return (...key) => {
+    if (!cache[key]) {
+      cache[key] = func.apply(content, key)
+    }
+    return cache[key]
+  }
+}
+```
+
+调用方式也很简单
+
+```js
+const calc = memoize(add);
+const num1 = calc(100,200)
+const num2 = calc(100,200) // 缓存得到的结果
+```
+
+过程分析：
+
+- 在当前函数作用域定义了一个空对象，用于缓存运行结果
+- 运用柯里化返回一个函数，返回的函数由于闭包特性，可以访问到`cache`
+- 然后判断输入参数是不是在`cache`的中。如果已经存在，直接返回`cache`的内容，如果没有存在，使用函数`func`对输入参数求值，然后把结果存储在`cache`中
+
+
+
+虽然使用缓存效率是非常高的，但并不是所有场景都适用，因此千万不要极端的将所有函数都添加缓存
+
+以下几种情况下，**适合使用缓存场景**：
+
+- 对于昂贵的函数调用，执行复杂计算的函数
+- 对于具有有限且高度重复输入范围的函数
+- 对于具有重复输入值的递归函数
+- 对于纯函数，即每次使用特定输入调用时返回相同输出的函数
+
+
 
 
 
@@ -11087,4 +11327,68 @@ console.log([] == [])  // false
 console.log([] === [])  // false
 console.log([] === ![])  // false
 ```
+
+
+
+----
+
+## 分析 for + setTimeout执行结果
+
+```js
+for(var i = 1; i <= 5; i ++){
+  setTimeout(function timer(){
+    console.log(i)
+  }, 0)
+}
+/*
+6
+6
+6
+6
+6
+*/
+```
+
+因为setTimeout为宏任务，由于JS中单线程eventLoop机制，**在主线程同步任务执行完后才去执行宏任 务**，因此循环结束后setTimeout中的回调才依次执行，**但输出i的时候当前作用域没有，往上一级再找，发现了i,**此时循环已经结束，i变成了6。因此会全部输出6。
+
+
+
+**如何使其输出**1，2，3，4，5
+
+- 利用IIFE(立即执行函数表达式)当每次for循环时，把此时的i变量传递到定时器中
+
+```js
+for(var i = 1; i <= 5; i++){
+  (function(j){
+    setTimeout(function timer(){
+    	console.log(j)
+    }, 0)
+  })(i)
+}
+
+```
+
+- 给定时器传入第三个参数, 作为timer函数的第一个函数参数
+
+```js
+for(var i=1; i<=5; i++){
+  setTimeout(function timer(j){
+  	console.log(j)
+  }, 0, i)
+}
+```
+
+- 使用ES6中的let
+
+```js
+for(let i = 1; i <= 5; i++){
+  setTimeout(function timer(){
+ 	 console.log(i)
+  }, 0)
+}
+```
+
+let使JS发生革命性的变化，**让JS有函数作用域变为了块级作用域**，用let后作用域链不复存在。
+
+
 

@@ -1,4 +1,6 @@
-let arr = [1, 2, 3, 5, 4, 6];
+console.log(false.toString());  //  false
+console.log((1).toString());  //  1
+let a = 1;
+console.log(a.toString());  // 1
 
-console.log(arr.every((item) => item < 5));  // 
-console.log(arr.some((item) => item >= 5));  // 
+console.log(1.toString());  //  SyntaxError: Invalid or unexpected token
