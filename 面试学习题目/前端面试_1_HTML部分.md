@@ -1792,7 +1792,7 @@ event.preventDefault()
 
 **return false**
 
-这个方法比较暴力，他会同事阻止事件冒泡也会阻止默认事件；写上此代码，连接不会被打开，事件也不会传递到上一层的父元素；可以理解为return false就等于同时调用了event.stopPropagation()和event.preventDefault()
+这个方法比较暴力，他会**同时阻止事件冒泡也会阻止默认事件**；写上此代码，连接不会被打开，事件也不会传递到上一层的父元素；可以理解为return false就等于同时调用了event.stopPropagation()和event.preventDefault()
 
 
 
@@ -2072,3 +2072,71 @@ scrollLeft 属性返回的是元素滚动条到元素左边的距离。
 
 -----
 
+## document.write和innerHTML有什么区别
+
+- document.write是直接写入到页面的内容流，如果在写之前没有调用document.open, 浏览器会自动调用open。**每次写完关闭之后重新调用该函数，会导致页面被重写**。
+- innerHTML则是DOM页面元素的一个属性，代表该元素的html内容。你可以精确到某一个具体的元素来进行更改。**如果想修改document的内容，则需要修改document.documentElement.innerElement。**
+- innerHTML将内容写入某个DOM节点，不会导致页面全部重绘
+- innerHTML很多情况下都优于document.write，其原因在于其允许更精确的控制要刷新页面的那一个部分。
+
+
+
+----
+
+## JavaScript脚本延迟加载的方式有哪些？
+
+延迟加载就是等页面加载完成之后再加载 JavaScript 文件。 js 延迟加载有助于提高页面加载速度。
+
+一般有以下几种方式：
+
+- **defer 属性**： 给 js 脚本添加 defer 属性，这个属性会让脚本的加载与文档的解析同步解析，然后在文档解析完成后再执行这个脚本文件，这样的话就能使页面的渲染不被阻塞。多个设置了 defer 属性的脚本按规范来说最后是顺序执行的，但是在一些浏览器中可能不是这样。
+- **async 属性**： 给 js 脚本添加 async 属性，这个属性会使脚本异步加载，不会阻塞页面的解析过程，但是当脚本加载完成后立即执行 js 脚本，这个时候如果文档没有解析完成的话同样会阻塞。多个 async 属性的脚本的执行顺序是不可预测的，一般不会按照代码的顺序依次执行。
+- **动态创建 DOM 方式**： 动态创建 DOM 标签的方式，可以对文档的加载事件进行监听，当文档加载完成后再动态的创建 script 标签来引入 js 脚本。
+- **使用 setTimeout 延迟方法**： 设置一个定时器来延迟加载js脚本文件
+- **让 JS 最后加载**： 将 js 脚本放在文档的底部，来使 js 脚本尽可能的在最后来加载执行。
+
+
+
+----
+
+## 如何使用js计算一个html页面有多少种标签？
+
+包含了很多重要的知识：
+
+- 如何获取所有DOM节点
+- 伪数组如何转为数组
+- 去重
+
+
+
+**获取所有的DOM节点。**
+
+```js
+document.querySelectorAll('*')
+```
+
+此时得到的是一个NodeList集合，我们需要将其转化为数组，然后对其筛选。
+
+**转化为数组**
+
+```js
+[...document.querySelectorAll('*')]
+```
+
+一个拓展运算符就轻松搞定。
+
+**获取数组每个元素的标签名**
+
+```js
+[...document.querySelectorAll('*')].map(ele => ele.tagName)
+```
+
+使用一个map方法，将我们需要的结果映射到一个新数组。
+
+**去重**
+
+```js
+new Set([...document.querySelectorAll('*')].map(ele=> ele.tagName)).size
+```
+
+我们使用ES6中的Set对象，把数组作为构造函数的参数，就实现了去重，再使用Set对象的size方法就可以得到有多少种HTML元素了。

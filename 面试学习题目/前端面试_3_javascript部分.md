@@ -1631,6 +1631,16 @@ for..of..: 它是es6新增的一个遍历方法，但**只限于迭代器(iterat
 
 可迭代的对象：包括Array, Map, Set, String, TypedArray, arguments对象等等
 
+###  for...in和for...of有什么区别？
+
+for…of 是ES6新增的遍历方式，允许遍历一个含有iterator接口的数据结构（数组、对象等）并且返回各项的值，和ES5中的for…in的区别如下：
+
+- for…of 遍历获取的是对象的键值，**for…in 获取的是对象的键名**；
+- for… in 会遍历对象的整个原型链，性能非常差不推荐使用，而 **for … of 只遍历当前对象**不会遍历原型链；
+- 对于数组的遍历，for…in 会返回数组中**所有可枚举的属性(包括原型链上可枚举的属性)**，for…of 只返回数组的下标对应的属性值；
+
+总结： for...in 循环主要是为了遍历对象而生，不适用于遍历数组；for...of 循环可以用来遍历数组、类数组对象，字符串、Set、Map 以及 Generator 对象。
+
 
 
 ------
@@ -2094,7 +2104,37 @@ console.log(array.valueOf()); // []
 
 ```
 
-1. 类数组转换为数组
+
+
+一个拥有 length 属性和若干索引属性的对象就可以被称为类数组对象，类数组对象和数组类似，但是不能调用数组的方法。常见的类数组对象有 arguments 和 DOM 方法的返回结果，还有一个**函数也可以被看作是类数组对象**，因为它含有 length 属性值，代表可接收的参数个数。
+
+常见的类数组转换为数组的方法有这样几种：
+
+（1）通过 call 调用数组的 slice 方法来实现转换
+
+```js
+Array.prototype.slice.call(arrayLike);
+```
+
+（2）通过 call 调用数组的 splice 方法来实现转换
+
+```js
+Array.prototype.splice.call(arrayLike, 0);
+```
+
+（3）通过 apply 调用数组的 concat 方法来实现转换
+
+```js
+Array.prototype.concat.apply([], arrayLike);
+```
+
+（4）通过 Array.from 方法来实现转换
+
+```js
+Array.from(arrayLike);
+```
+
+类数组转换为数组
 
 - 转换方法
   - 使用Array.from()
@@ -2167,6 +2207,8 @@ console.log(Array.prototype.slice.call(al2)); // [ 0, 1, <2 empty items> ]
 
 
 
+
+
 ------
 
 ## 30.介绍下 Set、Map、WeakSet 和 WeakMap 的区别？
@@ -2200,11 +2242,67 @@ console.log(Array.prototype.slice.call(al2)); // [ 0, 1, <2 empty items> ]
 
 ## 31 json和xml数据的区别
 
+JSON（JavaScript Object Notation）是一种轻量级的数据交换格式，它完全独立于语言。它基于JavaScript编程语言，易于理解和生成。
+
+```json
+{"Student":[ 
+    { "Name":"Vivek", "age":"20" }, 
+    { "Name":"Suraj", "age":"19" }, 
+    { "Name":"John", "age":"21" }, 
+    { "Name":"Peter", "age":"22" } 
+]}
+```
+
+
+
+XML（可扩展标记语言）旨在传输数据，而不是显示数据。这是W3C的推荐。可扩展标记语言（XML）是一种标记语言，它定义了一组规则，用于以人类可读和机器可读的格式编码文档。XML的设计目标侧重于Internet上的简单性，通用性和可用性。它是一种文本数据格式，通过Unicode为不同的人类语言提供强大的支持。尽管XML的设计侧重于文档，但该语言被广泛用于表示任意数据结构，例如Web服务中使用的那些数据结构。
+
+```xml
+<Students> 
+    <Student> 
+        <Name>Vivek</Name> <age>20</age> 
+    </Student> 
+    <Student> 
+        <Name>Suraj</Name> <age>19</age> 
+    </Student> 
+    <Student> 
+        <Name>John</Name> <age>21</age> 
+    </Student> 
+    <Student> 
+        <Name>Peter</Name> <age>22</age> 
+    </Student> 
+</Students>
+```
+
+这两者都是自描述的，可以被许多编程语言解析和使用。
+
 1. 数据体积方面：xml是重量级的，**json是轻量级的，传递的速度更快些**。
 2. 数据传输方面：xml在传输过程中比较占带宽，**json占带宽少，易于压缩**。
 3. 数据交互方面：**json与javascript的交互更加方便，更容易解析处理**，更好的进行数据交互
 4. 数据描述方面：json对数据的**描述性比xml较差**
 5. xml和json都用在项目交互下，**xml多用于做配置文件**，json用于数据交互。
+
+JSON和XML之间的一些区别：
+
+1、JSON是JavaScript Object Notation；XML是可扩展标记语言。
+
+2、JSON是基于JavaScript语言；XML源自SGML。
+
+3、JSON是一种表示对象的方式；XML是一种标记语言，使用标记结构来表示数据项。
+
+4、JSON不提供对命名空间的任何支持；XML支持名称空间。
+
+5、JSON支持数组；XML不支持数组。
+
+6、XML的文件相对难以阅读和解释；与XML相比，JSON的文件非常易于阅读。
+
+7、JSON不使用结束标记；XML有开始和结束标签。
+
+8、JSON的安全性较低；XML比JSON更安全。
+
+9、JSON不支持注释；XML支持注释。
+
+10、JSON仅支持UTF-8编码；XML支持各种编码。
 
 
 
@@ -2546,6 +2644,83 @@ console.log(num.toPrecision(3))  // 1.23e+3
 console.log(num.toFixed(3))  // 1234.568
 console.log(Math.round(num));  //1235
 ```
+
+
+
+----
+
+## 说说function的length属性
+
+```js
+function fn1 (name) {}
+
+function fn2 (name = '林三心') {}
+
+function fn3 (name, age = 22) {}
+
+function fn4 (name, age = 22, gender) {}
+
+function fn5(name = '林三心', age, gender) { }
+
+console.log(fn1.length) // 1
+console.log(fn2.length) // 0
+console.log(fn3.length) // 1
+console.log(fn4.length) // 1
+console.log(fn5.length) // 0
+```
+
+function的length，**就是第一个具有默认值之前的参数个数**。
+
+length 是函数对象的一个属性值，指该函数有多少个必须要传入的参数，即形参的个数。形参的数量不包括剩余参数个数，仅包括第一个具有默认值之前的参数个数。
+
+在函数的形参中，还有剩余参数这个东西，那如果具有剩余参数，会是怎么算呢？
+
+```js
+function fn1(name, ...args) {}
+
+console.log(fn1.length) // 1
+```
+
+可以看出，剩余参数是不算进length的计算之中的。
+
+所以，123['toString'].length + 123 = ?的答案是124
+
+```js
+console.log(123['toString'].length + 123) // 124
+```
+
+
+
+----
+
+##  typeof NaN 的结果是什么？
+
+NaN 指“不是一个数字”（not a number），NaN 是一个“警戒值”（sentinel value，有特殊用途的常规值），用于指出数字类型中的错误情况，即“执行数学运算没有成功，这是失败后返回的结果”。
+
+```js
+typeof NaN; // "number"
+```
+
+NaN 是一个特殊值，**它和自身不相等**，是**唯一一个非自反**（自反，reflexive，即 x === x 不成立）的值。而 NaN !== NaN 为 true。
+
+
+
+----
+
+## isNaN 和 Number.isNaN 函数有什么区别？
+
+全局属性 NaN 的值表示不是一个数字（Not-A-Number）。
+
+在 JavaScript 中，NaN 最特殊的地方就是，我们不能使用相等运算符（== (en-US) 和 === (en-US)）来判断一个值是否是 NaN，因为 NaN == NaN 和 NaN === NaN 都会返回 false。因此，必须要有一个判断值是否是 NaN 的方法。
+
+- 函数 isNaN 接收参数后，会尝试将这个参数转换为数值，**任何不能被转换为数值的的值都会返回 true**，因此非数字值传入也会返回 true ，会影响 NaN 的判断。
+- 函数 Number.isNaN 会首先判断传入参数是否为数字，**如果是数字再继续判断是否为 NaN ，不会进行数据类型的转换**，这种方法**对于 NaN 的判断更为准确。**
+
+
+
+和全局函数 isNaN() 相比，**Number.isNaN() 不会自行将参数转换成数字**，只有在参数是值为 NaN 的数字时，才会返回 true。
+
+Number.isNaN() 方法确定传递的值是否为NaN，并且检查其类型是否为Number。它是原来的全局isNaN() 的更稳妥的版本。
 
 
 
