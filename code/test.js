@@ -1,43 +1,42 @@
 /**
- * @param {number} n
- * @return {number[][]}
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
  */
-var generateMatrix = function(n) {
-    const matrix = new Array(n).fill(0).map(() => new Array(n).fill(0));
+/**
+ * @param {number[]} preorder
+ * @param {number[]} inorder
+ * @return {TreeNode}
+ */
+var buildTree = function(inorder, postorder) {
+    let post_idx = postorder.length - 1;
+    const idx_map = new Map(inorder.map((v, i) => [v, i]));
 
-    let left = 0, right = n - 1, top = 0, bottom = n - 1;
-    let num = 1;
-    while (left <= right && top <= bottom) {
-        for (let col = left; col <= right; col++) {
-            // 左到右
-            matrix[top][col] = num;
-            num++;
+    const helper = (in_left, in_right) => {
+        // 如果这里没有节点构造二叉树了，就结束
+        if (in_left > in_right) {
+            return null;
         }
-        for (let row = top + 1; row <= bottom; row++) {
-            // 上到下
-            matrix[row][right] = num;
-            num++;
-        }
-        if (left < right && top < bottom) {
-            for (let col = right - 1; col > left; col--) {
-                // 右到左
-                matrix[bottom][col] = num;
-                num++;
-            }
-            for (let row = bottom; row > top; row--) {
-                // 下到上
-                matrix[row][left] = num;
-                num++;
-            }
-        }
-        left++;
-        right--;
-        top++;
-        bottom--;
+        // 选择 post_idx 位置的元素作为当前子树根节点
+        const root = new TreeNode(postorder[post_idx]);
+        // 根据 root 所在位置分成左右两棵子树
+        const index = idx_map.get(postorder[post_idx]);
+
+        // 下标减一
+        post_idx--;
+        // 构造右子树
+        root.right = helper(index + 1, in_right);
+        // 构造左子树
+        root.left = helper(in_left, index - 1);
+        return root;
     }
-    return matrix;
+
+    return helper(0, inorder.length - 1);
 };
 
-let n = 4;
-let result = generateMatrix(n);
+let inorder = [9,3,15,20,7], postorder = [9,15,7,20,3];
+let result = buildTree(preorder, inorder);
 console.log(result);
