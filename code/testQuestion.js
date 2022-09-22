@@ -1,39 +1,39 @@
-// M 生命, N 吊桥长度，K 缺失木板数，L 缺失编号
-function solution(M, N, K, L) {
-    const bridge = new Array(N + 2).fill(true);  // // 记录陷阱
-    L.forEach((item) => {
-        bridge[item] = false;
-    });
-    
-    // dp[i][j]表示到达位置i，剩余生命值为j的方法数
-    const dp = new Array(N + 2).fill(0).map((item) => new Array(M + 2).fill(0));
-    // 初始化dp,在初始位置，剩余生命值为M
-    dp[0][M] = 1;
+function solution(num) {
+    num = num.toString();
+    const n = num.length;
+    const s = new Set();
+    let ans = 0;
 
-    for (let i = 1; i < N + 2; i++) {
-        for (let j = 1; j < M + 1; j++) {
-            // 如果当前位置为陷阱，则需要上一位置多一条命，到当前位置扣一条命
-            let k = bridge[i] === false ? (j + 1) : j;
-            if (i === 1) {
-                dp[i][j] = dp[i - 1][k];
-            } else if (i === 2) {
-                dp[i][j] = dp[i - 1][k] + dp[i - 2][k];
-            } else {
-                dp[i][j] = dp[i - 1][k] + dp[i - 2][k] + dp[i - 3][k];
+    const dfs = (startIndex, sum) => {
+        if (startIndex === n) {
+            return;
+        }
+        sum = sum * 10 + Number(num[startIndex]);
+
+        if (sum > 0 && sum % 3 === 0) {
+            if (!s.has(sum)) {
+                ans++;
+                s.add(sum);
             }
+        }
+        
+        for (let i = startIndex + 1; i < n; i++) {
+            dfs(i, sum);
         }
     }
 
-    // dp[N+1][0~M]相加
-    let ans = 0;
-    for (let i = 0; i < M + 1; i++) {
-        ans += dp[N + 1][i];
+    for (let i = 0; i < n; i++) {
+        if (i > 0 && num[i] === num[i - 1]) {
+            continue;
+        }
+        dfs(i, 0);
     }
-
+    if (Number(num) % 3 === 0) {
+        ans--;
+    }
+    console.log(s)
     return ans;
 }
 
-let M = 3, N = 30, K = 8;
-let L = [2, 3, 6, 8, 9, 12, 18, 26];
-
-console.log(solution(M, N, K, L));
+let num = 3320032;
+console.log(solution(num));
