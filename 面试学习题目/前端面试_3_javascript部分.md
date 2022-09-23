@@ -3565,6 +3565,57 @@ function newOperator(ctor){
 
 ## 4. 请问你了解js中的this绑定机制吗？
 
+函数的 `this` 关键字在 `JavaScript` 中的表现略有不同，此外，在严格模式和非严格模式之间也会有一些差别
+
+在绝大多数情况下，函数的调用方式决定了 `this` 的值（运行时绑定）
+
+**`this` 关键字是函数运行时自动生成的一个内部对象，只能在函数内部使用**，总指向调用它的对象
+
+```js
+function baz() {
+    // 当前调用栈是：baz
+    // 因此，当前调用位置是全局作用域
+    
+    console.log( "baz" );
+    bar(); // <-- bar的调用位置
+}
+
+function bar() {
+    // 当前调用栈是：baz --> bar
+    // 因此，当前调用位置在baz中
+    
+    console.log( "bar" );
+    foo(); // <-- foo的调用位置
+}
+
+function foo() {
+    // 当前调用栈是：baz --> bar --> foo
+    // 因此，当前调用位置在bar中
+    
+    console.log( "foo" );
+}
+
+baz(); // <-- baz的调用位置
+```
+
+同时，`this`在函数执行过程中，`this`一旦被确定了，就不可以再更改
+
+```js
+var a = 10;
+var obj = {
+  a: 20
+}
+
+function fn() {
+  this = obj; // 修改this，运行后会报错
+  console.log(this.a);
+}
+
+fn();  // SyntaxError: Invalid left-hand side in assignment
+```
+
+
+
 this特点：
 
 1. this是js的关键字之一，**它是对象自动生成的一个内部对象**，只能在对象内部使用
@@ -3572,6 +3623,8 @@ this特点：
 3. this指向完全取决于：**什么地方以什么方式调用**，而不是 创建时
 
 this 4种绑定机制：默认绑定、隐式绑定、显示绑定、new绑定，箭头函数的this不适用于这4种绑定机制，需要单独分析
+
+
 
 ### (1) 默认绑定
 
@@ -3631,6 +3684,8 @@ fn1();
 
 注意：在**严格模式下**（use strict），全局对象将无法使用默认绑定，会报undefined错误
 
+严格模式下，不能将全局对象用于默认绑定，this会绑定到`undefined`，只有函数运行在非严格模式下，默认绑定才能绑定到全局对象
+
 ```js
 function fn1(){
   console.log(this);  //Window
@@ -3649,6 +3704,8 @@ fn1();
 fn2();
 
 ```
+
+
 
 ### (2) 隐式绑定
 
@@ -3711,6 +3768,43 @@ obj2.obj3.foo();  // undefined
 ```
 
 代码中调用链不只一层，存在obj1、obj2两个对象，先获取obj2.obj1→通过引用获取到obj1对象，再访问 obj1.foo →最后执行foo函数调用，获取最后一层调用的上下文对象，即obj1，所以结果是4（obj1.a）
+
+
+
+这个函数中包含多个对象，尽管这个函数是被最外层的对象所调用，`this`指向的也只是它上一级的对象
+
+```js
+var o = {
+    a:10,
+    b:{
+        fn:function(){
+            console.log(this.a); //undefined
+        }
+    }
+}
+o.b.fn();
+```
+
+上述代码中，`this`的上一级对象为`b`，`b`内部并没有`a`变量的定义，所以输出`undefined`
+
+这里再举一种特殊情况
+
+```js
+var o = {
+    a:10,
+    b:{
+        a:12,
+        fn:function(){
+            console.log(this.a); //undefined
+            console.log(this); //window
+        }
+    }
+}
+var j = o.b.fn;
+j();
+```
+
+此时`this`指向的是`window`，这里的大家需要记住，`this`永远指向的是最后调用它的对象，虽然`fn`是对象`b`的方法，但是`fn`赋值给`j`时候并没有执行，所以最终指向`window`
 
 
 
@@ -3809,6 +3903,8 @@ foo.bind(undefined)();  // 4
 
 ### (4) new 绑定
 
+通过构建函数`new`关键字生成一个实例对象，此时`this`指向这个实例对象
+
 ```js
 function Fn(){
 	this.a=1;
@@ -3821,6 +3917,44 @@ console.log(obj.a);  // 1
 
 代码中，构造函数调用创建了一个新对象obj，**而在函数体内，this将指向新对象obj上**（可以抽象理解为新对象就是this）
 
+这里再列举一些特殊情况：
+
+`new`过程遇到`return`一个对象，**此时`this`指向为返回的对象**
+
+```js
+function fn()  {  
+    this.user = 'xxx';  
+    return {};  
+}
+var a = new fn();  
+console.log(a.user); //undefined
+```
+
+**如果返回一个简单类型的时候，则`this`指向实例对象**
+
+```js
+function fn()  {  
+    this.user = 'xxx';  
+    return 1;
+}
+var a = new fn;  
+console.log(a.user); //xxx
+```
+
+注意的是`null`虽然也是对象，**但是此时`new`仍然指向实例对象**
+
+```js
+function fn()  
+{  
+    this.user = 'xxx';  
+    return null;
+}
+var a = new fn;  
+console.log(a.user); //xxx
+```
+
+
+
 ---
 
 ### **this绑定优先级**
@@ -3832,6 +3966,83 @@ console.log(obj.a);  // 1
 new绑定 > 隐式绑定 > 默认绑定
 
 注意：**不存在显式绑定和new绑定同时生效的场景**，若同时写会直接报错
+
+#### 隐式绑定 VS 显式绑定
+
+```js
+function foo() {
+    console.log( this.a );
+}
+
+var obj1 = {
+    a: 2,
+    foo: foo
+};
+
+var obj2 = {
+    a: 3,
+    foo: foo
+};
+
+obj1.foo(); // 2
+obj2.foo(); // 3
+
+obj1.foo.call( obj2 ); // 3
+obj2.foo.call( obj1 ); // 2
+```
+
+显然，显示绑定的优先级更高
+
+#### new绑定 VS 隐式绑定
+
+```js
+function foo(something) {
+    this.a = something;
+}
+
+var obj1 = {
+    foo: foo
+};
+
+var obj2 = {};
+
+obj1.foo( 2 );
+console.log( obj1.a ); // 2
+
+obj1.foo.call( obj2, 3 );
+console.log( obj2.a ); // 3
+
+var bar = new obj1.foo( 4 );
+console.log( obj1.a ); // 2
+console.log( bar.a ); // 4
+```
+
+可以看到，new绑定的优先级`>`隐式绑定
+
+#### `new`绑定 VS 显式绑定
+
+因为`new`和`apply、call`无法一起使用，**但硬绑定也是显式绑定的一种，可以替换测试**
+
+```js
+function foo(something) {
+    this.a = something;
+}
+
+var obj1 = {};
+
+var bar = foo.bind( obj1 );
+bar( 2 );
+console.log( obj1.a ); // 2
+
+var baz = new bar( 3 );
+console.log( obj1.a ); // 2
+console.log( baz.a ); // 3
+// bar被绑定到obj1上，但是new bar(3) 并没有像我们预计的那样把obj1.a修改为3。但是，new修改了绑定调用bar()中的this
+```
+
+我们可认为`new`绑定优先级`>`显式绑定
+
+综上，new绑定优先级 > 显示绑定优先级 > 隐式绑定优先级 > 默认绑定优先级
 
 
 
@@ -5635,6 +5846,437 @@ const num2 = calc(100,200) // 缓存得到的结果
 - 对于具有有限且高度重复输入范围的函数
 - 对于具有重复输入值的递归函数
 - 对于纯函数，即每次使用特定输入调用时返回相同输出的函数
+
+
+
+----
+
+## 说说对函数式编程的理解
+
+### 函数式编程
+
+函数式编程是一种"编程范式"（programming paradigm），一种编写程序的方法论
+
+主要的编程范式有三种：命令式编程，声明式编程和函数式编程
+
+相比命令式编程，函数式编程更加强调程序执行的结果而非执行的过程，倡导利用若干简单的执行单元让计算结果不断渐进，逐层推导复杂的运算，而非设计一个复杂的执行过程
+
+举个例子，将数组每个元素进行平方操作，命令式编程与函数式编程如下
+
+```js
+// 命令式编程
+var array = [0, 1, 2, 3]
+for(let i = 0; i < array.length; i++) {
+    array[i] = Math.pow(array[i], 2)
+}
+
+// 函数式方式
+[0, 1, 2, 3].map(num => Math.pow(num, 2))
+```
+
+简单来讲，**就是要把过程逻辑写成函数，定义好输入参数，只关心它的输出结果**
+
+即是一种描述集合和集合之间的转换关系，输入通过函数都会返回有且只有一个输出值
+
+
+
+### 纯函数
+
+函数式编程旨在尽可能的提高代码的无状态性和不变性。要做到这一点，就要学会使用无副作用的函数，也就是纯函数
+
+纯函数是对给定的输入返还相同输出的函数，并且要求你所有的数据都是不可变的，即纯函数=无状态+数据不可变
+
+![img](E:\pogject\学习笔记\image\js\04f50720-8535-11eb-ab90-d9ae814b240d.png)
+
+举一个简单的例子
+
+```js
+let double = value => value * 2;
+```
+
+特性：
+
+- 函数内部传入指定的值，就会返回确定唯一的值
+- 不会造成超出作用域的变化，例如修改全局变量或引用传递的参数
+
+优势：
+
+- 使用纯函数，我们可以产生可测试的代码
+
+```js
+test('double(2) 等于 4', () => {
+  expect(double(2)).toBe(4);
+})
+```
+
+- 不依赖外部环境计算，不会产生副作用，提高函数的复用性
+- 可读性更强 ，函数不管是否是纯函数 都会有一个语义化的名称，更便于阅读
+- 可以组装成复杂任务的可能性。符合模块化概念及单一职责原则
+
+
+
+### 高阶函数
+
+在我们的编程世界中，我们需要处理的其实也只有“数据”和“关系”，而关系就是函数
+
+编程工作也就是在找一种映射关系，一旦关系找到了，问题就解决了，剩下的事情，就是让数据流过这种关系，然后转换成另一个数据
+
+在这里，就是高阶函数的作用。高级函数，就是以函数作为输入或者输出的函数被称为高阶函数
+
+通过高阶函数抽象过程，注重结果，如下面例子
+
+```js
+const forEach = function(arr,fn){
+    for(let i = 0; i < arr.length; i++){
+        fn(arr[i]);
+    }
+}
+let arr = [1,2,3];
+forEach(arr, (item) => {
+    console.log(item);
+})
+```
+
+上面通过高阶函数 `forEach`来抽象循环如何做的逻辑，直接关注做了什么
+
+高阶函数存在缓存的特性，主要是利用闭包作用
+
+```js
+const once = (fn)=>{
+    let done = false;
+    return function(){
+        if(!done){
+            fn.apply(this,fn);
+        } else {
+            console.log("该函数已经执行");
+        }
+        done = true;
+    }
+}
+```
+
+
+
+### 柯里化
+
+柯里化是把一个多参数函数转化成一个嵌套的一元函数的过程
+
+一个二元函数如下：
+
+```js
+let fn = (x,y)=>x+y;
+```
+
+转化成柯里化函数如下：
+
+```js
+const curry = function(fn){
+    return function(x){
+        return function(y){
+            return fn(x,y);
+        }
+    }
+}
+let myfn = curry(fn);
+console.log( myfn(1)(2) );
+```
+
+上面的`curry`函数只能处理二元情况，下面再来实现一个实现多参数的情况
+
+```js
+// 多参数柯里化；
+const curry = function(fn){
+    return function curriedFn(...args){
+        if(args.length < fn.length){
+            return function(){
+                return curriedFn(...args.concat([...arguments]));
+            }
+        }
+        return fn(...args);
+    }
+}
+const fn = (x,y,z,a) => x+y+z+a;
+const myfn = curry(fn);
+console.log(myfn(1)(2)(3)(1));
+```
+
+关于柯里化函数的意义如下：
+
+- 让纯函数更纯，每次接受一个参数，松散解耦
+- 惰性执行
+
+
+
+### 组合与管道
+
+组合函数，目的是将多个函数组合成一个函数
+
+举个简单的例子：
+
+```js
+function afn(a){
+    return a*2;
+}
+function bfn(b){
+    return b*3;
+}
+const compose = (a,b) => c => a(b(c));
+let myfn =  compose(afn, bfn);
+
+console.log(myfn(2));
+```
+
+可以看到`compose`实现一个简单的功能：形成了一个新的函数，而这个函数就是一条从 `bfn -> afn` 的流水线
+
+下面再来看看如何实现一个多函数组合：
+
+```js
+const compose = (...fns) => val => fns.reverse().reduce((acc,fn) => fn(acc), val);
+```
+
+`compose`执行是从右到左的。而管道函数，执行顺序是从左到右执行的
+
+```js
+const pipe = (...fns) => val => fns.reduce((acc, fn) => fn(acc), val);
+```
+
+组合函数与管道函数的意义在于：可以把很多小函数组合起来完成更复杂的逻辑
+
+
+
+### 优缺点
+
+**优点**
+
+- 更好的管理状态：因为它的宗旨是无状态，或者说更少的状态，能最大化的减少这些未知、优化代码、减少出错情况
+- 更简单的复用：固定输入->固定输出，没有其他外部变量影响，并且无副作用。这样代码复用时，完全不需要考虑它的内部实现和外部影响
+- 更优雅的组合：往大的说，网页是由各个组件组成的。往小的说，一个函数也可能是由多个小函数组成的。更强的复用性，带来更强大的组合性
+- 隐性好处。减少代码量，提高维护性
+
+**缺点**
+
+- 性能：函数式编程相对于指令式编程，性能绝对是一个短板，因为它往往会对一个方法进行过度包装，从而产生上下文切换的性能开销
+- 资源占用：在 JS 中为了实现对象状态的不可变，往往会创建新的对象，因此，它对垃圾回收所产生的压力远远超过其他编程方式
+- 递归陷阱：在函数式编程中，为了实现迭代，通常会采用递归操作
+
+
+
+---
+
+##  JavaScript中执行上下文和执行栈是什么？
+
+### 执行上下文
+
+简单的来说，执行上下文是一种对`Javascript`代码执行环境的抽象概念，也就是说只要有`Javascript`代码运行，那么它就一定是运行在执行上下文中
+
+执行上下文的类型分为三种：
+
+- 全局执行上下文：只有一个，浏览器中的全局对象就是 `window `对象，`this` 指向这个全局对象
+- 函数执行上下文：存在无数个，只有在函数被调用的时候才会被创建，每次调用函数都会创建一个新的执行上下文
+- Eval 函数执行上下文： 指的是运行在 `eval` 函数中的代码，很少用而且不建议使用
+
+![img](https://static.vue-js.com/90dd3b60-74c1-11eb-85f6-6fac77c0c9b3.png)
+
+紫色框住的部分为全局上下文，蓝色和橘色框起来的是不同的函数上下文。只有全局上下文（的变量）能被其他任何上下文访问
+
+可以有任意多个函数上下文，每次调用函数创建一个新的上下文，会创建一个私有作用域，函数内部声明的任何变量都不能在当前函数作用域外部直接访问
+
+
+
+### 生命周期
+
+执行上下文的生命周期包括三个阶段：创建阶段 → 执行阶段 → 回收阶段
+
+#### 创建阶段
+
+创建阶段即当函数被调用，但未执行任何其内部代码之前
+
+创建阶段做了三件事：
+
+- 确定 this 的值，也被称为 `This Binding`
+- LexicalEnvironment（词法环境） 组件被创建
+- VariableEnvironment（变量环境） 组件被创建
+
+伪代码如下：
+
+```js
+ExecutionContext = {  
+  ThisBinding = <this value>,     // 确定this 
+  LexicalEnvironment = { ... },   // 词法环境
+  VariableEnvironment = { ... },  // 变量环境
+}
+```
+
+##### This Binding
+
+确定`this`的值我们前面讲到，`this`的值是在执行的时候才能确认，定义的时候不能确认
+
+##### 词法环境
+
+词法环境有两个组成部分：
+
+- 全局环境：是一个没有外部环境的词法环境，其外部环境引用为` null`，有一个全局对象，`this` 的值指向这个全局对象
+- 函数环境：用户在函数中定义的变量被存储在环境记录中，包含了`arguments` 对象，外部环境的引用可以是全局环境，也可以是包含内部函数的外部函数环境
+
+伪代码如下：
+
+```js
+GlobalExectionContext = {  // 全局执行上下文
+  LexicalEnvironment: {       // 词法环境
+    EnvironmentRecord: {     // 环境记录
+      Type: "Object",           // 全局环境
+      // 标识符绑定在这里 
+      outer: <null>           // 对外部环境的引用
+  }  
+}
+
+FunctionExectionContext = { // 函数执行上下文
+  LexicalEnvironment: {     // 词法环境
+    EnvironmentRecord: {    // 环境记录
+      Type: "Declarative",      // 函数环境
+      // 标识符绑定在这里      // 对外部环境的引用
+      outer: <Global or outer function environment reference>  
+  }  
+}
+```
+
+##### 变量环境
+
+变量环境也是一个词法环境，因此它具有上面定义的词法环境的所有属性
+
+在 ES6 中，词法环境和变量环境的区别在于前者用于存储函数声明和变量（ `let` 和 `const` ）绑定，**而后者仅用于存储变量**（ `var` ）绑定
+
+举个例子
+
+```js
+let a = 20;  
+const b = 30;  
+var c;
+
+function multiply(e, f) {  
+ var g = 20;  
+ return e * f * g;  
+}
+
+c = multiply(20, 30);
+```
+
+执行上下文如下：
+
+```js
+GlobalExectionContext = {
+
+  ThisBinding: <Global Object>,
+
+  LexicalEnvironment: {  // 词法环境
+    EnvironmentRecord: {  
+      Type: "Object",  
+      // 标识符绑定在这里  
+      a: < uninitialized >,  
+      b: < uninitialized >,  
+      multiply: < func >  
+    }  
+    outer: <null>  
+  },
+
+  VariableEnvironment: {  // 变量环境
+    EnvironmentRecord: {  
+      Type: "Object",  
+      // 标识符绑定在这里  
+      c: undefined,  
+    }  
+    outer: <null>  
+  }  
+}
+
+FunctionExectionContext = {  
+   
+  ThisBinding: <Global Object>,
+
+  LexicalEnvironment: {  
+    EnvironmentRecord: {  
+      Type: "Declarative",  
+      // 标识符绑定在这里  
+      Arguments: {0: 20, 1: 30, length: 2},  
+    },  
+    outer: <GlobalLexicalEnvironment>  
+  },
+
+  VariableEnvironment: {  
+    EnvironmentRecord: {  
+      Type: "Declarative",  
+      // 标识符绑定在这里  
+      g: undefined  
+    },  
+    outer: <GlobalLexicalEnvironment>  
+  }  
+}
+```
+
+留意上面的代码，`let`和`const`定义的变量`a`和`b`在创建阶段没有被赋值，**但`var`声明的变量从在创建阶段被赋值为`undefined`**
+
+这是因为，**创建阶段，会在代码中扫描变量和函数声明，然后将函数声明存储在环境中**
+
+但变量会被初始化为`undefined`(`var`声明的情况下)和**保持`uninitialized`(未初始化状态)**(使用`let`和`const`声明的情况下)
+
+这就是变量提升的实际原因
+
+
+
+#### 执行阶段
+
+在这阶段，执行变量赋值、代码执行
+
+如果 `Javascript` 引擎在源代码中声明的实际位置找不到变量的值，那么将为其分配 `undefined` 值
+
+#### 回收阶段
+
+执行上下文出栈等待虚拟机回收执行上下文
+
+
+
+### 执行栈
+
+执行栈，也叫调用栈，具有 LIFO（后进先出）结构，用于存储在代码执行期间创建的所有执行上下文
+
+当`Javascript`引擎开始执行你第一行脚本代码的时候，它就会创建一个全局执行上下文然后将它压到执行栈中
+
+每当引擎碰到一个函数的时候，它就会创建一个函数执行上下文，然后将这个执行上下文压到执行栈中
+
+引擎会执行位于执行栈栈顶的执行上下文(一般是函数执行上下文)，当该函数执行结束后，对应的执行上下文就会被弹出，然后控制流程到达执行栈的下一个执行上下文
+
+举个例子：
+
+```js
+let a = 'Hello World!';
+function first() {
+  console.log('Inside first function');
+  second();
+  console.log('Again inside first function');
+}
+function second() {
+  console.log('Inside second function');
+}
+first();
+console.log('Inside Global Execution Context');
+```
+
+转化成图的形式
+
+
+
+![img](https://static.vue-js.com/ac11a600-74c1-11eb-ab90-d9ae814b240d.png)
+
+
+
+简单分析一下流程：
+
+- 创建全局上下文请压入执行栈
+- `first`函数被调用，创建函数执行上下文并压入栈
+- 执行`first`函数过程遇到`second`函数，再创建一个函数执行上下文并压入栈
+- `second`函数执行完毕，对应的函数执行上下文被推出执行栈，执行下一个执行上下文`first`函数
+- `first`函数执行完毕，对应的函数执行上下文也被推出栈中，然后执行全局上下文
+- 所有代码执行完毕，全局上下文也会被推出栈中，程序结束
 
 
 

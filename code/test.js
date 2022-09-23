@@ -1,42 +1,34 @@
 /**
- * Definition for a binary tree node.
- * function TreeNode(val, left, right) {
- *     this.val = (val===undefined ? 0 : val)
- *     this.left = (left===undefined ? null : left)
- *     this.right = (right===undefined ? null : right)
- * }
+ * @param {number[][]} matrix
+ * @return {void} Do not return anything, modify matrix in-place instead.
  */
-/**
- * @param {number[]} preorder
- * @param {number[]} inorder
- * @return {TreeNode}
- */
-var buildTree = function(inorder, postorder) {
-    let post_idx = postorder.length - 1;
-    const idx_map = new Map(inorder.map((v, i) => [v, i]));
-
-    const helper = (in_left, in_right) => {
-        // 如果这里没有节点构造二叉树了，就结束
-        if (in_left > in_right) {
-            return null;
+var setZeroes = function(matrix) {
+    const m = matrix.length;
+    const n = matrix[0].length;
+    let flagCol0 = false;
+    for (let i = 0; i < m; i++) {
+        if (matrix[i][0] === 0) {
+            flagCol0 = true;
         }
-        // 选择 post_idx 位置的元素作为当前子树根节点
-        const root = new TreeNode(postorder[post_idx]);
-        // 根据 root 所在位置分成左右两棵子树
-        const index = idx_map.get(postorder[post_idx]);
-
-        // 下标减一
-        post_idx--;
-        // 构造右子树
-        root.right = helper(index + 1, in_right);
-        // 构造左子树
-        root.left = helper(in_left, index - 1);
-        return root;
+        for (let j = 1; j < n; j++) {
+            if (matrix[i][j] === 0) {
+                matrix[i][0] = matrix[0][j] = 0;
+            }
+        }
     }
-
-    return helper(0, inorder.length - 1);
+    for (let i = m - 1; i >= 0; i--) {
+        for (let j = 1; j < n; j++) {
+            if (matrix[i][0] === 0 || matrix[0][j] === 0) {
+                matrix[i][j] = 0;
+            }
+        }
+        if (flagCol0) {
+            matrix[i][0] = 0;
+        }
+    }
+    return matrix;
 };
 
-let inorder = [9,3,15,20,7], postorder = [9,15,7,20,3];
-let result = buildTree(preorder, inorder);
+let matrix = [[1,1,1],[1,0,1],[1,1,1]];
+let result = setZeroes(matrix);
 console.log(result);
