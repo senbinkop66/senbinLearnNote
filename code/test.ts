@@ -1,15 +1,9 @@
-var a = 'window'
-var obj1 = {
-    a: 1,
-    fn1: function () {
-            return () => console.log(this.a)
-    }
+function getProperty<T, K extends keyof T>(obj:T, key:K): T[K]{
+	return obj[key];
 }
-var obj2 = {
-    a: 2
-};
 
-obj1.fn1()(); // 1
-obj1.fn1().call(obj2); // 1 
 
-obj1.fn1.call(obj2)(); // 2
+let x = {a:1, b:2, c:3, d:4};
+console.log(getProperty(x, "b"));  //2
+//Argument of type '"e"' is not assignable to parameter of type '"a" | "b" | "c" | "d"'.
+console.log(getProperty(x, "e"));  //
