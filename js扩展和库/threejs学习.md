@@ -1238,3 +1238,395 @@ geometry.attributes.normal = new THREE.BufferAttribute(normals, 3); //3个为一
 
 ---
 
+## 顶点索引复用顶点数据
+
+通过几何体[BufferGeometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/BufferGeometry)的顶点索引属性`BufferGeometry.index`可以设置几何体顶点索引数据，如果你有WebGL基础很容易理解顶点索引的概念，如果没有也没有关系，下面会通过一个简单的例子形象说明。
+
+比如绘制一个矩形网格模型,至少需要两个三角形拼接而成，两个三角形，每个三角形有三个顶点，也就是说需要定义6个顶点位置数据。对于矩形网格模型而言，两个三角形有两个顶点位置是重合的。也就是说可以重复的位置可以定义一次，然后通过通过顶点数组的索引值获取这些顶点位置数据。
+
+### 不使用顶点索引
+
+下面通过几何体六个顶点定义了两个三角形，几何体的顶点位置数据、顶点法向量数据都是6个。
+
+```javascript
+var geometry = new THREE.BufferGeometry(); //声明一个空几何体对象
+//类型数组创建顶点位置position数据
+var vertices = new Float32Array([
+  0, 0, 0, //顶点1坐标
+  80, 0, 0, //顶点2坐标
+  80, 80, 0, //顶点3坐标
+
+  0, 0, 0, //顶点4坐标   和顶点1位置相同
+  80, 80, 0, //顶点5坐标  和顶点3位置相同
+  0, 80, 0, //顶点6坐标
+]);
+// 创建属性缓冲区对象
+var attribue = new THREE.BufferAttribute(vertices, 3); //3个为一组
+// 设置几何体attributes属性的位置position属性
+geometry.attributes.position = attribue
+var normals = new Float32Array([
+  0, 0, 1, //顶点1法向量
+  0, 0, 1, //顶点2法向量
+  0, 0, 1, //顶点3法向量
+
+  0, 0, 1, //顶点4法向量
+  0, 0, 1, //顶点5法向量
+  0, 0, 1, //顶点6法向量
+]);
+// 设置几何体attributes属性的位置normal属性
+geometry.attributes.normal = new THREE.BufferAttribute(normals, 3); //3个为一组,表示一个顶点的xyz坐标
+```
+
+### 顶点索引`.index`
+
+下面代码通过几何体[BufferGeometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/BufferGeometry)的顶点索引`BufferGeometry.index`定义了一个矩形。通过顶点索引组织网格模型三角形的绘制，因为矩形的两个三角形有两个顶点位置重复，所以顶点位置数据、顶点法向量数据都只需要定义4个就可以。
+
+```javascript
+var geometry = new THREE.BufferGeometry(); //声明一个空几何体对象
+//类型数组创建顶点位置position数据
+var vertices = new Float32Array([
+  0, 0, 0, //顶点1坐标
+  80, 0, 0, //顶点2坐标
+  80, 80, 0, //顶点3坐标
+  0, 80, 0, //顶点4坐标
+]);
+// 创建属性缓冲区对象
+var attribue = new THREE.BufferAttribute(vertices, 3); //3个为一组
+// 设置几何体attributes属性的位置position属性
+geometry.attributes.position = attribue
+var normals = new Float32Array([
+  0, 0, 1, //顶点1法向量
+  0, 0, 1, //顶点2法向量
+  0, 0, 1, //顶点3法向量
+  0, 0, 1, //顶点4法向量
+]);
+// 设置几何体attributes属性的位置normal属性
+geometry.attributes.normal = new THREE.BufferAttribute(normals, 3); //3个为一组,表示一个顶点的xyz坐标
+```
+
+通过顶点索引组织顶点数据，顶点索引数组`indexes`通过索引值指向顶点位置`geometry.attributes.position`、顶点法向量`geometry.attributes.normal`中顶面数组。
+
+```javascript
+// Uint16Array类型数组创建顶点索引数据
+var indexes = new Uint16Array([
+  // 0对应第1个顶点位置数据、第1个顶点法向量数据
+  // 1对应第2个顶点位置数据、第2个顶点法向量数据
+  // 索引值3个为一组，表示一个三角形的3个顶点
+  0, 1, 2,
+  0, 2, 3,
+])
+// 索引数据赋值给几何体的index属性
+geometry.index = new THREE.BufferAttribute(indexes, 1); //1个为一组
+```
+
+创建顶点索引数组的时候，可以根据顶点的数量选择类型数组`Uint8Array`、`Uint16Array`、`Uint32Array`。对于顶点索引而言选择整型类型数组，对于非索引的顶点数据，需要使用浮点类型数组`Float32Array`等。
+
+| 类型数组     | 位数 | 字节 | 类型描述           | C语言等价类型 |
+| :----------- | :--- | :--- | :----------------- | :------------ |
+| Int8Array    | 8    | 1    | 有符号8位整型      | int8_t        |
+| Uint8Array   | 8    | 1    | 无符号8位整型      | uint8_t       |
+| Int16Array   | 16   | 2    | 有符号16位整型     | int16_t       |
+| Uint16Array  | 16   | 2    | 无符号16位整型     | int16_t       |
+| Int32Array   | 32   | 4    | 有符号32位整型     | int32_t       |
+| Uint32Array  | 32   | 4    | 无符号32位整型     | uint32_t      |
+| Float32Array | 32   | 4    | 单精度(32位)浮点数 | float         |
+| Float64Array | 64   | 8    | 双精度(64位)浮点数 | double        |
+
+### `BufferGeometry`总结
+
+![BufferGeometry](E:\pogject\学习笔记\image\其他\BufferGeometry.png)
+
+
+
+----
+
+## 设置`Geometry`顶点位置、顶点颜色数据
+
+几何体`Geometry`和缓冲类型几何体`BufferGeometry`表达的含义相同，只是对象的结构不同，Threejs渲染的时候会先把`Geometry`转化为`BufferGeometry`再解析几何体顶点数据进行渲染。
+
+### [Vector3](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Vector3)定义顶点位置坐标数据
+
+`Vector3`是threejs的三维向量对象,可以通过`Vector3`对象表示一个顶点的xyz坐标，顶点的法线向量。
+
+几何体`Geometry`的顶点位置属性`geometry.vertices`和缓冲类型几何体`BufferGeometry`顶点位置属性`BufferGeometry.attributes.position`是对应的。
+
+```javascript
+var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
+var p1 = new THREE.Vector3(50, 0, 0); //顶点1坐标
+var p2 = new THREE.Vector3(0, 70, 0); //顶点2坐标
+var p3 = new THREE.Vector3(80, 70, 0); //顶点3坐标
+//顶点坐标添加到geometry对象
+geometry.vertices.push(p1, p2, p3);
+```
+
+### [Color](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Color)定义顶点颜色数据
+
+通过threejs顶点颜色对象`Color`可以定义几何体顶点颜色数据，然后顶点颜色数据构成的数组作为几何体`Geometry`顶点颜色属性`geometry.colors`的值。
+
+几何体`Geometry`的顶点颜色属性`geometry.colors`和缓冲类型几何体`BufferGeometry`顶点颜色属性`BufferGeometry.attributes.color`是对应的。
+
+```javascript
+// Color对象表示顶点颜色数据
+var color1 = new THREE.Color(0x00ff00); //顶点1颜色——绿色
+var color2 = new THREE.Color(0xff0000); //顶点2颜色——红色
+var color3 = new THREE.Color(0x0000ff); //顶点3颜色——蓝色
+//顶点颜色数据添加到geometry对象
+geometry.colors.push(color1, color2, color3);
+```
+
+注意设置几何体`Geometry`顶点颜色属性`geometry.colors`，对网格模型`Mesh`是无效的，对于点模型`Points`、线模型`Line`是有效果。
+
+### 材质属性`.vertexColors`
+
+注意使用顶点颜色数据定义模型颜色的时候，要把材质的属性`vertexColors`设置为`THREE.VertexColors`,这样顶点的颜色数据才能取代材质颜色属性`.color`起作用。
+
+```javascript
+//材质对象
+var material = new THREE.MeshLambertMaterial({
+  // color: 0xffff00,
+  vertexColors: THREE.VertexColors, //以顶点颜色为准
+  side: THREE.DoubleSide, //两面可见
+});
+```
+
+
+
+---
+
+## `Face3`对象定义`Geometry`的三角形面
+
+几何体[Geometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Geometry)的三角面属性`geometry.faces`和缓冲类型几何体[BufferGeometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/BufferGeometry)顶点索引属性`BufferGeometry.index`类似都是顶点位置数据的索引值,用来组织网格模型三角形的绘制。
+
+下面代码自定义了一个由两个三角形构成的几何体，两个三角形有两个顶点坐标位置是重合的。
+
+```javascript
+var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
+
+var p1 = new THREE.Vector3(0, 0, 0); //顶点1坐标
+var p2 = new THREE.Vector3(0, 100, 0); //顶点2坐标
+var p3 = new THREE.Vector3(50, 0, 0); //顶点3坐标
+var p4 = new THREE.Vector3(0, 0, 100); //顶点4坐标
+//顶点坐标添加到geometry对象
+geometry.vertices.push(p1, p2, p3,p4);
+
+// Face3构造函数创建一个三角面
+var face1 = new THREE.Face3(0, 1, 2);
+//三角面每个顶点的法向量
+var n1 = new THREE.Vector3(0, 0, -1); //三角面Face1顶点1的法向量
+var n2 = new THREE.Vector3(0, 0, -1); //三角面2Face2顶点2的法向量
+var n3 = new THREE.Vector3(0, 0, -1); //三角面3Face3顶点3的法向量
+// 设置三角面Face3三个顶点的法向量
+face1.vertexNormals.push(n1,n2,n3);
+
+// 三角面2
+var face2 = new THREE.Face3(0, 2, 3);
+// 设置三角面法向量
+face2.normal=new THREE.Vector3(0, -1, 0);
+
+//三角面face1、face2添加到几何体中
+geometry.faces.push(face1,face2);
+```
+
+### 设置四个顶点
+
+两个三角形有6个顶点，但是两个顶点位置重合的，可以设置4个顶点即可。
+
+```javascript
+var p1 = new THREE.Vector3(0, 0, 0); //顶点1坐标
+var p2 = new THREE.Vector3(0, 100, 0); //顶点2坐标
+var p3 = new THREE.Vector3(50, 0, 0); //顶点3坐标
+var p4 = new THREE.Vector3(0, 0, 100); //顶点4坐标
+//顶点坐标添加到geometry对象
+geometry.vertices.push(p1, p2, p3,p4);
+```
+
+### [Face3](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Face3)构建三角形
+
+threejs提供了`Face3`对象构建三角形，通过`Face3`构建一个三角形，不要设置顶点位置坐标数据，只需要通过数组索引值从`geometry.vertices`数组中获得顶点位置坐标数据。
+
+`geometry.vertices`数组索引0, 1, 2对应的顶点位置坐标数据表示三角形1的三个顶点坐标，索引0, 2, 3对应的顶点位置坐标数据表示三角形2的三个顶点坐标。
+
+```javascript
+// Face3构造函数创建一个三角面
+var face1 = new THREE.Face3(0, 1, 2);
+// 三角面2
+var face2 = new THREE.Face3(0, 2, 3);
+```
+
+### 三角形法线设置
+
+前面课程将结果网格模型Mesh的几何体Geometry本质上都是一个一个三角形拼接而成，所以可以通过设置三角形的法线方向向量来表示几何体表面各个位置的法线方向向量。
+
+设置三角形法线方向向量有两种方式，一种是直接定义三角形面的法线方向，另一个是定义三角形三个顶点的法线方向数据来表示三角形面法线方向。
+
+使用三维向量`THREE.Vector3`表示三角形法线方向数值，然后赋值给三角形对象`Face3`的法线属性`Face3.normal`。
+
+```javascript
+// 三角面2
+var face2 = new THREE.Face3(0, 2, 3);
+// 设置三角面法向量
+face2.normal=new THREE.Vector3(0, -1, 0);
+```
+
+换另一种方式，通过三角形面`Face3`的`Face3.vertexNormals`属性给三角形的三个顶点分别设置一个顶点法线方向数据。
+
+```javascript
+// Face3构造函数创建一个三角面
+var face1 = new THREE.Face3(0, 1, 2);
+//三角面每个顶点的法向量
+var n1 = new THREE.Vector3(0, 0, -1); //三角面Face1顶点1的法向量
+var n2 = new THREE.Vector3(0, 0, -1); //三角面2Face2顶点2的法向量
+var n3 = new THREE.Vector3(0, 0, -1); //三角面3Face3顶点3的法向量
+// 设置三角面Face3三个顶点的法向量
+face1.vertexNormals.push(n1,n2,n3);
+```
+
+### 三角形颜色设置
+
+三角形颜色设置和三角形法线方向设置类型，可以直接设置三角形颜色，也可以设置三角形三个顶点的颜色。
+
+```javascript
+// 三角形1颜色
+face1.color = new THREE.Color(0xffff00);
+// 设置三角面face1三个顶点的颜色
+face1.color = new THREE.Color(0xff00ff);
+```
+
+通过三角形面`Face3`的`.vertexColors`属性设置三角形三个顶点颜色。
+
+三个顶点颜色不同三角形面渲染的时候会进行颜色插值计算，测到一个颜色渐变效果。
+
+```javascript
+face1.vertexColors = [
+  new THREE.Color(0xffff00),
+  new THREE.Color(0xff00ff),
+  new THREE.Color(0x00ffff),
+]
+```
+
+使用顶点颜色数据的时候，注意设置材质的属性`vertexColors`属性值为`THREE.VertexColors`。
+
+注意设置三角形`Face3`的颜色对threejs网格模型`Mesh`有效，对于点模型`Points`、线模型`Line`是无效果，如果想设置点、线模型对应的几何体`Geometry`的顶点颜色，可以通过`Geometry`的顶点颜色属性`geometry.colors`实现。
+
+
+
+----
+
+# 访问几何体对象的数据
+
+实际开发项目的时候，可能会加载外部模型，有些时候需要获取模型几何体的顶点数据，如果想获取几何体的顶点数据首先要熟悉three.js几何体`BoxGeometry`和`BufferGeometry`的结构。
+
+访问几何体顶点数据其实很简单，刚开始学习不用刻意记忆，直接查看threejs文档，就像访问javascript对象的属性一样。
+
+### 测试`BoxGeometry`
+
+调用`BoxGeometry`创建一个立方体，执行`THREE.BoxGeometry`构造函数会自动生成几何体对象的顶点位置坐标、顶点法向量等数据。
+
+你可以通过执行下面代码，然后查看浏览器控制台打印的数据
+
+```javascript
+var geometry = new THREE.BoxGeometry(100, 100, 100); //创建一个立方体几何对象Geometry
+console.log(geometry);
+console.log('几何体顶点位置数据',geometry.vertices);
+console.log('三角行面数据',geometry.faces);
+```
+
+`BoxGeometry`、`PlaneGeometry`、`SphereGeometry`等几何体类的基类是`Geometry`，所以访问这些几何体的顶点数据,不知道具体属性名称，可以查问threejs文档[Geometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Geometry)
+
+![Geometry](E:\pogject\学习笔记\image\其他\Geometry.png)
+
+### 测试`PlaneBufferGeometry`
+
+`PlaneBufferGeometry`表示一个矩形平面几何体，执行下面代码，你可以查看该几何体的相关顶点数据。
+
+```javascript
+//创建一个矩形平面几何体
+var geometry = new THREE.PlaneBufferGeometry(100, 100);
+console.log(geometry);
+console.log('几何体顶点位置数据',geometry.attributes.position);
+console.log('几何体索引数据',geometry.index);
+```
+
+`BoxBufferGeometry`、`PlaneBufferGeometry`、`SphereBufferGeometry`等几何体类的基类是`BufferGeometry`，所以访问这些几何体的顶点数据,不知道具体属性名称，可以查问threejs文档[BufferGeometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/BufferGeometry)
+
+通过下面代码修改`BoxGeometry`的三角形顶点颜色的数据，可以渲染出来如下效果。
+
+```js
+var geometry = new THREE.BoxGeometry(100, 100, 100); //创建一个立方体几何对象Geometry
+// 遍历几何体的face属性
+geometry.faces.forEach(face => {
+  // 设置三角面face三个顶点的颜色
+  face.vertexColors = [
+    new THREE.Color(0xffff00),
+    new THREE.Color(0xff00ff),
+    new THREE.Color(0x00ffff),
+  ]
+});
+var material = new THREE.MeshBasicMaterial({
+  // color: 0x0000ff,
+  vertexColors: THREE.FaceColors,
+  // wireframe:true,//线框模式渲染
+}); //材质对象Material
+```
+
+你可以通过下面代码删除立方体部分三角形面，测试删除效果。
+
+```javascript
+var geometry = new THREE.BoxGeometry(100, 100, 100); //创建一个立方体几何对象Geometry
+// pop()：删除数组的最后一个元素   shift：删除数组的第一个元素
+geometry.faces.pop();
+geometry.faces.pop();
+geometry.faces.shift();
+geometry.faces.shift();
+var material = new THREE.MeshLambertMaterial({
+  color: 0x0000ff,
+  side: THREE.DoubleSide, //两面可见
+}); //材质对象Material
+```
+
+### 访问外部模型几何体顶点数据
+
+Threejs加载外部模型的时候，会把几何体解析为缓冲类型几何体`BufferGeometry`，所以访问外部模型几何体顶点数据，可以查看文档[BufferGeometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/BufferGeometry)。
+
+
+
+----
+
+## 几何体旋转、缩放、平移变换
+
+![几何体变换](E:\pogject\学习笔记\image\其他\几何体变换.png)
+
+几何体[Geometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Geometry)对象有一系列的顶点属性，也封装了一系列的方法，通过`.scale()`、`.translate()`、`.rotateX()`等方法可以对几何体本身进行缩放、平移、旋转等几何变换。通过`.scale()`、`.translate()`、`.rotateX()`这些方法对几何体进行变换，注意本质上都是改变结合体顶点位置坐标数据。你可以执行测斜方法，然后在浏览器控制打印顶点位置坐标数据`console.log(geometry.vertices);`,然后对比几何体变化前后定点位置坐标是否变化。
+
+```javascript
+var geometry = new THREE.BoxGeometry(100, 100, 100); //创建一个立方体几何对象Geometry
+// 几何体xyz三个方向都放大2倍
+geometry.scale(2, 2, 2);
+// 几何体沿着x轴平移50
+geometry.translate(50, 0, 0);
+// 几何体绕着x轴旋转45度
+geometry.rotateX(Math.PI / 4);
+// 居中：偏移的几何体居中
+geometry.center();
+console.log(geometry.vertices);
+```
+
+[BufferGeometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/BufferGeometry)和几何体[Geometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Geometry) 一样具有`.scale()`、`.rotateZ()`、`.rotateX()`等几何体变换的方法。
+
+### 注意
+
+注意网格模型`Mesh`进行缩放旋转平移变换和几何体`Geometry`可以实现相同的渲染效果，但是网格模型`Mesh`进行这些变换不会影响几何体的顶点位置坐标，网格模型缩放旋转平移变换改变的是模型的本地矩阵、世界矩阵。
+
+你可以执行下面代码测试。
+
+```javascript
+// 几何体xyz方向分别缩放0.5,1.5,2倍
+geometry.scale(0.5, 1.5, 2);
+// 网格模型xyz方向分别缩放0.5,1.5,2倍
+mesh.scale.set(0.5, 1.5, 2)
+```
+
+
+
+----
+
