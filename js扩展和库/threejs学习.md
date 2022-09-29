@@ -52,7 +52,7 @@ VR与Web3D技术结合自然就衍生出来一个新的概念WebVR，也就是�
 
 ----
 
-# 安装（Installation）
+## 安装（Installation）
 
 你可以使用[npm](https://www.npmjs.com/)以及现代构建工具来安装 three.js ，也可以只需静态主机或是 CDN 来快速上手。对于大多数用户来说，从 npm 安装是最佳选择。
 
@@ -60,7 +60,7 @@ VR与Web3D技术结合自然就衍生出来一个新的概念WebVR，也就是�
 
 所有安装 three.js 的方式都依赖于 ES modules（参见 [Eloquent JavaScript: ECMAScript Modules](https://eloquentjavascript.net/10_modules.html#h_hF2FmOVxw7)）。ES modules使你能够在最终项目中包含所需库的一小部分。
 
-## 安装自 npm
+### 安装自 npm
 
 要安装[three](https://www.npmjs.com/package/three) 的 npm 模块，请在你的项目文件夹里打开终端窗口，并运行：
 
@@ -89,7 +89,7 @@ const scene = new Scene();
 
 你可以从 [Eloquent JavaScript: Installing with npm](https://eloquentjavascript.net/20_node.html#h_J6hW/SmL/a) 来了解更多有关 npm 模块的信息。
 
-## 从CDN或静态主机安装
+### 从CDN或静态主机安装
 
 通过将文件上传到你自己的服务器，或是使用一个已存在的CDN，three.js 便可以不借助任何构建系统来进行使用。由于 three.js 依赖于ES module，因此任何引用它的script标签必须使用*type="module"*。如下所示：
 
@@ -107,7 +107,7 @@ const scene = new Scene();
 
 
 
-## 示例
+#### 示例
 
 three.js的核心专注于3D引擎最重要的组件。其它很多有用的组件 —— 如控制器（control）、加载器（loader）以及后期处理效果（post-processing effect） —— 是 [examples/jsm](https://github.com/mrdoob/three.js/tree/dev/examples/jsm) 目录的一部分。它们被称为“示例”，虽然你可以直接将它们拿来使用，但它们也需要重新混合以及定制。这些组件和 three.js 的核心保持同步，而 npm 上类似的第三方包则由不同的作者进行维护，可能不是最新的。
 
@@ -137,7 +137,7 @@ const controls = new OrbitControls( camera, renderer.domElement );
 
 ----
 
-# WebGL兼容性检查
+### WebGL兼容性检查
 
 虽然这个问题现在已经变得越来不明显，但不可否定的是，某些设备以及浏览器直到现在仍然不支持WebGL。
 以下的方法可以帮助你检测当前用户所使用的环境是否支持WebGL，如果不支持，将会向用户提示一条信息。
@@ -156,11 +156,11 @@ if (WebGL.isWebGLAvailable()) {
 
 ----
 
-# 创建一个场景
+## 创建一个场景
 
 在开始使用three.js之前，你需要一个地方来显示它。将下列HTML代码保存为你电脑上的一个HTML文件，同时将[three.js](https://threejs.org/build/three.js)复制到该HTML文件所在的目录下的js/目录下，然后在你的浏览器中打开这个HTML文件。
 
-## 创建一个场景
+### 创建一个场景
 
 为了真正能够让你的场景借助three.js来进行显示，我们需要以下几个对象：场景、相机和渲染器，这样我们就能透过摄像机渲染出场景。
 
@@ -216,7 +216,7 @@ camera.position.z = 5;
 
 默认情况下，当我们调用**scene.add()**的时候，物体将会被添加到**(0,0,0)**坐标。但将使得摄像机和立方体彼此在一起。为了防止这种情况的发生，我们只需要将摄像机稍微向外移动一些即可。
 
-## 渲染场景
+### 渲染场景
 
 现在，如果将之前写好的代码复制到HTML文件中，你不会在页面中看到任何东西。这是因为我们还没有对它进行真正的渲染。为此，我们需要使用一个被叫做“**渲染循环**”（render loop）或者“**动画循环**”（animate loop）的东西。
 
@@ -230,7 +230,7 @@ animate();
 
 在这里我们创建了一个使渲染器能够在每次屏幕刷新时对场景进行绘制的循环（在大多数屏幕上，刷新率一般是60次/秒）。如果你是一个浏览器游戏开发的新手，你或许会说*“为什么我们不直接用setInterval来实现刷新的功能呢？”*当然啦，我们的确可以用setInterval，但是，**requestAnimationFrame**有很多的优点。最重要的一点或许就是当用户切换到其它的标签页时，它会暂停，因此不会浪费用户宝贵的处理器资源，也不会损耗电池的使用寿命。
 
-## 使立方体动起来
+### 使立方体动起来
 
 在开始之前，如果你已经将上面的代码写入到了你所创建的文件中，你可以看到一个绿色的方块。让我们来做一些更加有趣的事 —— 让它旋转起来。
 
@@ -277,7 +277,7 @@ animate();
 
 ----
 
-# 画线
+## 画线
 
 假设你将要画一个圆或者画一条线，而不是一个线框模型，或者说不是一个Mesh（网格）。 第一步我们要做的，是设置好renderer（渲染器）、scene（场景）和camera（相机）
 
@@ -361,9 +361,9 @@ renderer.render( scene, camera );
 
 ----
 
-# 创建文字
+## 创建文字
 
-## (1) DOM + CSS
+### (1) DOM + CSS
 
 使用HTML通常是最简单、最快速的添加文本的方法，这是大多数的Three.js示例中用于添加描述性叠加文字的方法。
 
@@ -386,15 +386,15 @@ renderer.render( scene, camera );
 }
 ```
 
-## (2) 将文字绘制到画布中，并将其用作Texture（纹理）
+### (2) 将文字绘制到画布中，并将其用作Texture（纹理）
 
 如果你希望在three.js的场景中的平面上轻松地绘制文本，请使用此方法。
 
-## (3) 在你所喜欢的3D软件里创建模型，并导出给three.js
+### (3) 在你所喜欢的3D软件里创建模型，并导出给three.js
 
 如果你更喜欢使用3D建模软件来工作并导出模型到three.js，请使用这种方法。
 
-## (4) three.js自带的文字几何体
+### (4) three.js自带的文字几何体
 
 如果你更喜欢使用纯three.js来工作，或者创建能够由程序改变的、动态的3D文字，你可以创建一个其几何体为THREE.TextGeometry的实例的网格：
 
@@ -405,7 +405,7 @@ new THREE.TextGeometry( text, parameters );
 然而，为了使得它能够工作，你的TextGeometry需要在其“font”参数上设置一个THREE.Font的实例。
 请参阅 TextGeometry 页面来阅读如何完成此操作的详细信息，以及每一个接收的参数的描述，还有由three.js分发、自带的JSON字体的列表。
 
-## (5) 位图字体
+### (5) 位图字体
 
 BMFonts (位图字体) 可以将字形批处理为单个BufferGeometry。BMFont的渲染支持自动换行、字母间距、字句调整、signed distance fields with standard derivatives、multi-channel signed distance fields、多纹理字体等特性。 详情请参阅 [three-mesh-ui](https://github.com/felixmariotto/three-mesh-ui) 或 [three-bmfont-text](https://github.com/Jam3/three-bmfont-text)。
 
@@ -415,7 +415,11 @@ BMFonts (位图字体) 可以将字形批处理为单个BufferGeometry。BMFont�
 
 ---
 
-# Threejs第一个3D场景
+# 初始Threejs
+
+---
+
+## Threejs第一个3D场景
 
 整体展示了Three.js的整套渲染系统。
 
@@ -526,7 +530,7 @@ var geometry = new THREE.SphereGeometry(60, 40, 40);
 
 ----
 
-# 旋转动画、requestAnimationFrame周期性渲染
+## 旋转动画、requestAnimationFrame周期性渲染
 
 ### 周期性渲染
 
@@ -621,7 +625,7 @@ render();
 
 ----
 
-# 鼠标操作三维场景
+## 鼠标操作三维场景
 
 为了使用鼠标操作三维场景，可以借助three.js众多控件之一`OrbitControls.js`，可以在下载的`three.js-master`文件中找到(`three.js-master\examples\js\controls`)。 然后和引入`three.js`文件一样在html文件中引入控件`OrbitControls.js`。本节课的目的不是为了深入讲解`OrbitControls.js`，主要目的一方面向大家展示下threejs的功能，另一方面后面课程学习过程中经常会通过鼠标旋转、缩放模型进行代码调试。
 
@@ -668,7 +672,7 @@ var controls = new THREE.OrbitControls(camera,renderer.domElement);//创建控�
 
 ----
 
-# 3D场景中插入新的几何体
+## 3D场景中插入新的几何体
 
 ### SphereGeometry构造函数
 
@@ -794,7 +798,7 @@ threejs三维坐标系老版本名称是`AxisHelper`，新版本名称[AxesHelpe
 
 ----
 
-# 材质效果
+## 材质效果
 
 ### 半透明效果
 
@@ -855,7 +859,7 @@ threejs提供了很多常用的材质效果，这些效果本质上都是对WebG
 
 ----
 
-# threejs光源
+## threejs光源
 
 如全部删除所有的光源代码，你会发现场景中的物体是黑色的，就像生活中一样没有光，物体是黑色的。
 
@@ -1512,7 +1516,7 @@ face1.vertexColors = [
 
 ----
 
-# 访问几何体对象的数据
+## 访问几何体对象的数据
 
 实际开发项目的时候，可能会加载外部模型，有些时候需要获取模型几何体的顶点数据，如果想获取几何体的顶点数据首先要熟悉three.js几何体`BoxGeometry`和`BufferGeometry`的结构。
 
@@ -1629,4 +1633,711 @@ mesh.scale.set(0.5, 1.5, 2)
 
 
 ----
+
+# Threejs材质
+
+所谓材质，简单地说就是字面意思，就像生活中你聊天一样，说这是塑料材质，这是金属材质，这是纤维材质...，深入一点说，就是包含光照算法的着色器GLSL ES代码。如果你想给一个模型设置特定的颜色，如果你想给一个模型设置一定透明度，如果你想实现一个金属效果，你想设置模型纹理贴图，那么Threejs的提供各种材质类就是你的选择。
+
+## 常用材质介绍
+
+Threejs提供了一系列的材质，所有材质就是对WebGL着色器代码的封装，如果你不了解WebGL，会通过查阅Threejs文档使用相关材质类即可。
+
+![材质Material](E:\pogject\学习笔记\image\其他\材质Material.png)
+
+### 点材质`PointsMaterial`
+
+点材质比较简单，只有`PointsMaterial`,通常使用点模型的时候会使用点材质`PointsMaterial`。
+
+点材质`PointsMaterial`的`.size`属性可以每个顶点渲染的方形区域尺寸像素大小。
+
+```javascript
+const geometry = new THREE.SphereGeometry(100, 25, 25); //创建一个球体几何对象
+// 创建一个点材质对象
+const material = new THREE.PointsMaterial({
+  color: 0x003788, //颜色
+  size: 3, //点渲染尺寸
+});
+//点模型对象  参数：几何体  点材质
+const point = new THREE.Points(geometry, material);
+scene.add(point); //网格模型添加到场景中
+```
+
+### 线材质
+
+线材质有基础线材质`LineBasicMaterial`和虚线材质`LineDashedMaterial`两个，通常使用使用`Line`等线模型才会用到线材质。
+
+基础线材质`LineBasicMaterial`。
+
+```javascript
+var geometry = new THREE.SphereGeometry(100, 25, 25);//球体
+// 直线基础材质对象
+var material = new THREE.LineBasicMaterial({
+  color: 0x0000ff
+});
+var line = new THREE.Line(geometry, material); //线模型对象
+scene.add(line); //点模型添加到场景中
+```
+
+虚线材质`LineDashedMaterial`。
+
+```javascript
+// 虚线材质对象：产生虚线效果
+var material = new THREE.LineDashedMaterial({
+  color: 0x0000ff,
+  dashSize: 10,//显示线段的大小。默认为3。
+  gapSize: 5,//间隙的大小。默认为1
+});
+var line = new THREE.Line(geometry, material); //线模型对象
+//  computeLineDistances方法  计算LineDashedMaterial所需的距离数组
+line.computeLineDistances();
+```
+
+### 网格模型
+
+Threejs提供的网格类材质比较多，网格材质涉及的材质种类和材质属性也比较多。
+
+网格材质顾名思义，网格类模型才会使用的材质对象。
+
+基础网格材质对象`MeshBasicMaterial`,不受带有方向光源影响，没有棱角感。
+
+```javascript
+		const material = new THREE.MeshBasicMaterial({
+			color: 0x003788 //颜色
+		});  //  材质对象Material
+
+		const mesh = new THREE.Mesh(geometry, material);
+		scene.add(mesh); //线模型对象添加到场景中
+```
+
+`MeshLambertMaterial`材质可以实现网格Mesh表面与光源的漫反射光照计算，有了光照计算，物体表面分界的位置才会产生棱角感。
+
+```javascript
+		const material = new THREE.MeshLambertMaterial({
+			color: 0x003788 //颜色
+		});  //  材质对象Material
+
+		const mesh = new THREE.Mesh(geometry, material);
+		scene.add(mesh); //线模型对象添加到场景中
+```
+
+高光网格材质`MeshPhongMaterial`除了和`MeshLambertMaterial`一样可以实现光源和网格表面的漫反射光照计算，还可以产生高光效果(镜面反射)。
+
+```javascript
+		const material = new THREE.MeshPhongMaterial({
+			color: 0xff0000,  //颜色
+			specular: 0x444444,  //高光部分的颜色
+			shininess: 20,  //高光部分的亮度，默认30
+		});  //  材质对象Material
+
+		const mesh = new THREE.Mesh(geometry, material);
+		scene.add(mesh); //线模型对象添加到场景中
+```
+
+### 材质和模型对象对应关系
+
+使用材质的时候，要注意材质和模型的对应关系，通过前面课程案例学习，目前为止你至少应该了解到了网格模型`Mesh`、点模型`Points`、线模型`Line`,随着课程的学习其它的模型对象也会接触到，这里先有个印象就可以。
+
+
+
+----
+
+## 材质共有属性、私有属性
+
+点材质`PointsMaterial`、基础线材质`LineBasicMaterial`、基础网格材质`MeshBasicMaterial`、高光网格材质`MeshPhongMaterial`等材质都是父类[Material](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/materials/Material)的子类。
+
+各种各样的材质子类都有自己的特定属性，比如点材质特有的尺寸属性`.size`、高光网格材质特有的高光颜色属性`.specular`等等这些属性可以成为子类材质的私有属性。
+
+所有子类的材质都会从父类材质[Material](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/materials/Material)继承透明度`opacity`、面`side`等属性，这些来自父类的属性都是子类共有的属性。
+
+### `.side`属性
+
+在Three.js开发过程中你可能会遇到下面的问题，比如three.js矩形平面`planegeometry`的网格模型插入场景看不到，一个球体或立方体网格模型如何背面显示贴图，正面不显示...，对于这些问题可以通过Three.js材质对象`.side`属性来设置。
+
+材质`.side`属性的具体介绍可以查看Threejs文档中所有材质对象的基类`Material`。
+
+`.side`属性的属性值**定义面的渲染方式前面后面 或 双面**. 属性的默认值是`THREE.FrontSide`，表示前面. 也可以设置为后面`THREE.BackSide` 或 双面`THREE.DoubleSide`.
+
+```javascript
+var material = new THREE.MeshBasicMaterial({
+  color: 0xdd00ff,
+  // 前面FrontSide  背面：BackSide 双面：DoubleSide
+  side:THREE.DoubleSide,
+});
+```
+
+### 材质透明度`.opacity`
+
+通过材质的透明度属性`.opacity`可以设置材质的透明程度，`.opacity`属性值的范围是0.0~1.0，0.0值表示完全透明, 1.0表示完全不透明，`.opacity`默认值1.0。
+
+**当设置`.opacity`属性值的时候，需要设置材质属性`transparent`值为`true`**，如果材质的transparent属性没设置为true, 材质会保持完全不透明状态。
+
+在构造函数参数中设置`transparent`和`.opacity`的属性值
+
+```javascript
+var material = new THREE.MeshPhongMaterial({
+  color: 0x220000,
+  // transparent设置为true，开启透明，否则opacity不起作用
+  transparent: true,
+  // 设置材质透明度
+  opacity: 0.4,
+});
+```
+
+通过访问材质对象属性形式设置`transparent`和`.opacity`的属性值
+
+```javascript
+  // transparent设置为true，开启透明，否则opacity不起作用
+material.transparent = true;
+  // 设置材质透明度
+material.opacity = 0.4;
+```
+
+
+
+----
+
+# Threejs模型对象
+
+Threejs所谓模型，如果你使用过三维软件，就是你三维软件中常说的三维模型，当然了，对于大多数前端程序员而言，不了解计算机图形学的情况下，没有使用过任何三维软件的情况下，并没有三维模型的概念。从Three.js角度来说，Threejs模型对象就是由Threejs几何体`Geometry`和Threejs材质`Material`构成，材质主要设置三维模型的颜色等外观样式，几何体主要是通过顶点坐标数据表达三维模型的外形形状。
+
+## 点、线、网格模型
+
+点模型`Points`、线模型`Line`、网格网格模型`Mesh`都是由几何体Geometry和材质Material构成，这三种模型的区别在于对几何体顶点数据的渲染方式不同。
+
+### 点模型`Points`
+
+点模型`Points`就是几何体的每一个顶点数据渲染为一个方形区域，方形区域的大小可以设置。
+
+```javascript
+var geometry = new THREE.BoxGeometry(100, 100, 100); //创建一个立方体几何对象Geometry
+// 点渲染模式
+var material = new THREE.PointsMaterial({
+  color: 0xff0000,
+  size: 5.0 //点对象像素尺寸
+}); //材质对象
+var points = new THREE.Points(geometry, material); //点模型对象
+```
+
+### 线模型`Line`
+
+两点确定一条直线，线模型`Line`就是使用线条去连接几何体的顶点数据。
+
+线模型除了[Line](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/objects/Line)还有[LineLoop](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/objects/LineLoop)和[LineSegments](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/objects/LineSegments),`LineLoop`和`Line`区别是连线的时候会闭合把第一个顶点和最后一个顶点连接起来，`LineSegments`则是顶点不共享，第1、2点确定一条线，第3、4顶点确定一条直线，第2和3点之间不连接。
+
+```javascript
+var geometry = new THREE.BoxGeometry(100, 100, 100); //创建一个立方体几何对象Geometry
+// 线条渲染模式
+var material = new THREE.LineBasicMaterial({
+    color:0xff0000 //线条颜色
+}); //材质对象
+// 创建线模型对象   构造函数：Line、LineLoop、LineSegments
+var line = new THREE.Line(geometry,material);  //线条模型对象
+```
+
+### 网格模型`Mesh`
+
+三个顶点确定一个三角形，网格模型[Mesh](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/objects/Mesh)默认的情况下，通过三角形面绘制渲染几何体的所有顶点，通过一系列的三角形拼接出来一个曲面。
+
+```javascript
+var geometry = new THREE.BoxGeometry(100, 100, 100);
+// 三角形面渲染模式  
+var material = new THREE.MeshLambertMaterial({
+  color: 0x0000ff, //三角面颜色
+}); //材质对象
+var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+```
+
+如果设置网格模型的`wireframe`属性为`true`，所有三角形会以线条形式绘制出来。开发的时候可以通过设置wireframe属性来查看网格模型的三角形分布特点。
+
+```javascript
+var material = new THREE.MeshLambertMaterial({
+  color: 0x0000ff, //三角面颜色
+  wireframe:true,//网格模型以线条的模式渲染
+});
+// 通过访问属性的形式设置
+material.wireframe = true;
+```
+
+
+
+----
+
+## 模型对象旋转平移缩放变换
+
+点模型`Points`、线模型`Line`、网格网格模型`Mesh`等模型对象的基类都是[Object3D](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Object3D)，如果想对这些模型进行旋转、缩放、平移等操作，如何实现，可以查询Threejs文档[Object3D](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Object3D)对相关属性和方法的介绍。
+
+![Object3D](E:\pogject\学习笔记\image\其他\Object3D.png)
+
+### 缩放
+
+网格模型`Mesh`的属性`.scale`表示模型对象的缩放比例，默认值是`THREE.Vector3(1.0,1.0,1.0)`,`.scale`的属性值是一个三维向量对象[Vector3](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Vector3)，查看three.js文档你可以知道`Vector3`对象具有属性`.x`、`.y`、`.z`，`Vector3`对象还具有方法`.set()`，`.set`方法有三个表示xyz方向缩放比例的参数。
+
+网格模型xyz方向分别缩放0.5,1.5,2倍
+
+```javascript
+mesh.scale.set(0.5, 1.5, 2)
+```
+
+x轴方向放大2倍
+
+```javascript
+mesh.scale.x = 2.0;
+```
+
+### 位置属性`.position`
+
+模型位置`.position`属性和`.scale`属性的属性值一样也是三维向量对象[Vector3](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Vector3)，通过模型位置属性`.position`可以设置模型在场景Scene中的位置。模型位置`.position`的默认值是`THREE.Vector3(0.0,0.0,0.0)`。
+
+设置网格模型y坐标
+
+```javascript
+mesh.position.y = 80;
+```
+
+设置模型xyz坐标
+
+```javascript
+mesh.position.set(80,2,10);
+```
+
+### 平移
+
+网格模型沿着x轴正方向平移100，可以多次执行该语句，每次执行都是相对上一次的位置进行平移变换。
+
+```javascript
+// 等价于mesh.position = mesh.position + 100;
+mesh.translateX(100);  //沿着x轴正方向平移距离100
+```
+
+沿着Z轴负方向平移距离50。
+
+```javascript
+mesh.translateZ(-50);
+```
+
+沿着自定义的方向移动。
+
+```javascript
+// 向量Vector3对象表示方向
+var axis = new THREE.Vector3(1, 1, 1);
+axis.normalize(); //向量归一化
+// 沿着axis轴表示方向平移100
+mesh.translateOnAxis(axis, 100);
+```
+
+执行`.translateX()`、`.translateY()`、`.translateOnAxis()`等方法本质上改变的都是模型的位置属性`.position`。
+
+### 旋转
+
+立方体网格模型绕立方体的x轴旋转π/4，可以多次执行该语句，每次执行都是相对上一次的角度进行旋转变化
+
+```javascript
+mesh.rotateX(Math.PI/4);//绕x轴旋转π/4
+```
+
+网格模型绕(0,1,0)向量表示的轴旋转π/8
+
+```javascript
+var axis = new THREE.Vector3(0,1,0);//向量axis
+mesh.rotateOnAxis(axis,Math.PI/8);//绕axis轴旋转π/8
+```
+
+执行旋转`.rotateX()`等方法和执行平移`.translateY()`等方法一样都是对模型状态属性的改变，区别在于执行平移方法改变的是模型的位置属性`.position`，执行模型的旋转方法改变的是表示模型角度状态的角度属性`.rotation`或者四元数属性`.quaternion`。
+
+模型的角度属性`.rotation`和四元数属性`.quaternion`都是表示模型的角度状态，只是表示方法不同，`.rotation`属性值是欧拉对象[Euler](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Euler),`.quaternion`属性值是是四元数对象[Quaternion](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Quaternion)
+
+```javascript
+// 绕着Y轴旋转90度
+mesh.rotateY(Math.PI / 2);
+//控制台查看：旋转方法，改变了rotation属性
+console.log(mesh.rotation);
+```
+
+
+
+----
+
+## 对象克隆`.clone()`和复制`.copy()`
+
+Threejs大多数对象都有克隆`.clone()`和复制`.copy()`两个方法,点模型`Points`、线模型`Line`、网格网格模型`Mesh`一样具有这两个方法。
+
+### 复制方法`.copy()`
+
+`A.copy(B)`表示B属性的值赋值给A对应属性。
+
+```javascript
+var p1 = new THREE.Vector3(1.2,2.6,3.2);
+var p2 = new THREE.Vector3(0.0,0.0,0.0);
+p2.copy(p1)
+// p2向量的xyz变为p1的xyz值
+console.log(p2);
+```
+
+### 克隆方法`.clone()`
+
+`N = M.clone()`表示返回一个和M相同的对象赋值给N。
+
+```javascript
+var p1 = new THREE.Vector3(1.2,2.6,3.2);
+var p2 = p1.clone();
+// p2对象和p1对象xyz属性相同
+console.log(p2);
+```
+
+### 网格模型复制和克隆
+
+网格模型复制克隆和三维向量基本逻辑是相同，但是注意三维向量`Vector3`的`.x`、`.y`、`.z`属性值是数字，也就是说是基本类型的数据，对于网格模型而言，网格模型对象的几何体属性`mesh.geometry`和材质属性`mesh.material`的属性值都是对象的索引值。
+
+```javascript
+var box=new THREE.BoxGeometry(10,10,10);//创建一个立方体几何对象
+var material=new THREE.MeshLambertMaterial({color:0x0000ff});//材质对象
+
+
+var mesh=new THREE.Mesh(box,material);//网格模型对象
+var mesh2 = mesh.clone();//克隆网格模型
+mesh.translateX(20);//网格模型mesh平移
+
+scene.add(mesh,mesh2);//网格模型添加到场景中
+```
+
+缩放几何体box,你可以发现上面代码中的两个网格模型的大小都发生了变化，因为网格模型克隆的时候，mesh对象的几何体对象`mesh.geometry`属性值是box对象的索引值，返回的新对象mesh2几何体属性`mesh.geometry`的值同样是box对象的索引值。
+
+```javascript
+box.scale(1.5,1.5,1.5);//几何体缩放
+```
+
+
+
+通过本节课的学习，对Threejs不同对象的克隆`.clone()`和复制`.copy()`方法有一个大致印象即可。
+
+实际开发的时候，注意不同对象的复制或克隆方法可能稍有区别，使用的时候最好通过代码测试，或者直接查看threejs源码某个类对`.clone()`和`.copy()`封装，这样更为直观清楚。
+
+### 几何体复制和克隆
+
+几何体克隆或复制和网格模型在属性值深拷贝、浅拷贝方面有些不同，比如几何体的顶点属性`Geometry.vertices`，`Geometry.vertices`的属性值是一个数组对象，但是复制或克隆的时候，不是获得对象的索引值，而是深拷贝属性的值，可以在threejs源码`Geometry.js`全文检索`copy: function`关键词，找到该类对`copy`方法的封装细节。
+
+
+
+----
+
+# Threejs光源对象
+
+Threejs场景对象`Scene`主要是由模型对象和光源对象`Light`构成，在实际开发过程中，多数三维场景往往需要设置光源对象，通过不同的光源对象模型生活中的光照效果，尤其是为了提高Threejs的渲染效果更需要设置好光源，就像职业摄影师拍照要打灯一样。
+
+![img](E:\pogject\学习笔记\image\其他\threejs32light.png)
+
+## 常见光源类型
+
+Threejs虚拟光源是对自然界光照的模拟，threejs搭建虚拟场景的时候，为了更好的渲染场景，往往需要设置不同的光源，设置不同的光照强度，就像摄影师给你拍照要设置各种辅助灯光一样。
+
+![光源](E:\pogject\学习笔记\image\其他\光源.png)
+
+### 环境光[AmbientLight](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/lights/AmbientLight)
+
+环境光是没有特定方向的光源，主要是均匀整体改变Threejs物体表面的明暗效果，这一点和具有方向的光源不同，比如点光源可以让物体表面不同区域明暗程度不同。
+
+```javascript
+//环境光:环境光颜色RGB成分分别和物体材质颜色RGB成分分别相乘
+var ambient = new THREE.AmbientLight(0x444444);
+scene.add(ambient);//环境光对象添加到scene场景中
+```
+
+你可以把光源颜色从`0x444444`更改为`0x888888`,可以看到threejs场景中的网格模型表面变的更亮。
+
+### 点光源[PointLight](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/lights/PointLight)
+
+点光源就像生活中的白炽灯，光线沿着发光核心向外发散，同一平面的不同位置与点光源光线入射角是不同的，点光源照射下，同一个平面不同区域是呈现出不同的明暗效果。
+
+和环境光不同，环境光不需要设置光源位置，而点光源需要设置位置属性`.position`，光源位置不同，物体表面被照亮的面不同，远近不同因为衰减明暗程度不同。
+
+你可以把案例源码中点光源位置从`(400, 200, 300)`位置改变到`(-400, -200, -300)`，你会发现网格模型被照亮的位置从前面变到了后面，这很正常，光源只能照亮面对着光源的面，背对着光源的无法照射到，颜色会比较暗。
+
+```javascript
+//点光源
+var point = new THREE.PointLight(0xffffff);
+//设置点光源位置，改变光源的位置
+point.position.set(400, 200, 300);
+scene.add(point);
+```
+
+### 平行光[DirectionalLight](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/lights/DirectionalLight)
+
+平行光顾名思义光线平行，对于一个平面而言，平面不同区域接收到平行光的入射角一样。
+
+点光源因为是向四周发散，所以设置好位置属性`.position`就可以确定光线和物体表面的夹角，对于平行光而言,主要是确定光线的方向,光线方向设定好了，光线的与物体表面入射角就确定了，仅仅设置光线位置是不起作用的。
+
+在三维空间中为了确定一条直线的方向只需要确定直线上两个点的坐标即可，所以Threejs平行光提供了位置`.position`和目标`.target`两个属性来一起确定平行光方向。目标`.target`的属性值可以是Threejs场景中任何一个三维模型对象，比如一个网格模型`Mesh`，这样Threejs计算平行光照射方向的时候，会通过自身位置属性`.position`和`.target`表示的物体的位置属性`.position`计算出来。
+
+```javascript
+// 平行光
+var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+// 设置光源的方向：通过光源position属性和目标指向对象的position属性计算
+directionalLight.position.set(80, 100, 50);
+// 方向光指向对象网格模型mesh2，可以不设置，默认的位置是0,0,0
+directionalLight.target = mesh2;
+scene.add(directionalLight);
+```
+
+平行光如果不设置`.position`和`.target`属性，光线默认从上往下照射，也就是可以认为`(0,1,0)`和`(0,0,0)`两个坐标确定的光线方向。
+
+注意一点平行光光源的位置属性`.position`并不表示平行光从这个位置向远处照射，`.position`属性只是用来确定平行光的照射方向，平行光你可以理解为太阳光，从无限远处照射过来。
+
+### 聚光源[SpotLight](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/lights/SpotLight)
+
+聚光源可以认为是一个沿着特定方会逐渐发散的光源，照射范围在三维空间中构成一个圆锥体。通过属性`.angle`可以设置聚光源发散角度，聚光源照射方向设置和平行光光源一样是通过位置`.position`和目标`.target`两个属性来实现。
+
+```javascript
+// 聚光光源
+var spotLight = new THREE.SpotLight(0xffffff);
+// 设置聚光光源位置
+spotLight.position.set(200, 200, 200);
+// 聚光灯光源指向网格模型mesh2
+spotLight.target = mesh2;
+// 设置聚光光源发散角度
+spotLight.angle = Math.PI / 6
+scene.add(spotLight);//光对象添加到scene场景中
+```
+
+### 光源辅助对象
+
+Threejs提供了一些光源辅助对象，就像`AxesHelper`可视化显示三维坐标轴一样显示光源对象,通过这些辅助对象可以方便调试代码，查看位置、方向。
+
+| 辅助对象           | 构造函数名                                                   |
+| :----------------- | :----------------------------------------------------------- |
+| 聚光源辅助对象     | [SpotLightHelper](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/helpers/SpotLightHelper) |
+| 点光源辅助对象     | [PointLightHelper](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/helpers/PointLightHelper) |
+|                    |                                                              |
+| 平行光光源辅助对象 | [DirectionalLightHelper](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/helpers/DirectionalLightHelper) |
+
+### 光照计算算法
+
+Three.js渲染的时候光照计算还是比较复杂的，这里不进行深入介绍，只给大家说下光源颜色和网格模型Mesh颜色相乘的知识，如果你有兴趣可以学习计算机图形学或者WebGL教程。
+
+Threejs在渲染的时候网格模型材质的颜色值`mesh.material.color`和光源的颜色值`light.color`会进行相乘，简单说就是RGB三个分量分别相乘。
+
+平行光漫反射简单数学模型：`漫反射光的颜色 = 网格模型材质颜色值 x 光线颜色 x 光线入射角余弦值`
+
+漫反射数学模型RGB分量表示：`(R2,G2,B2) = (R1,G1,B1) x (R0,G0,B0) x cosθ`
+
+```javascript
+R2 = R1 * R0 * cosθ
+G2 = G1 * G0 * cosθ
+B2 = B1 * B0 * cosθ
+```
+
+### 颜色相乘测试
+
+你可以通过下面代码验证上面颜色相乘的算法，比如把网格模型的颜色设置为白色`0xffffff`,也就意味着可以反射任意光照颜色，然后把环境光和点光源只保留红色成分，绿色和蓝色成分都设置为0。你可以看到网格模型会把渲染为红色。
+
+```javascript
+// 网格模型材质设置为白色
+var geometry = new THREE.BoxGeometry(100, 100, 100); //
+var material = new THREE.MeshLambertMaterial({
+  color: 0xffffff
+});
+var mesh = new THREE.Mesh(geometry, material);
+scene.add(mesh);
+
+//环境光   环境光颜色RGB成分分别和物体材质颜色RGB成分分别相乘
+var ambient = new THREE.AmbientLight(0x440000);
+scene.add(ambient);//环境光对象添加到scene场景中
+//点光源
+var point = new THREE.PointLight(0xff0000);
+//设置点光源位置  光源对象和模型对象的position属性一样是Vector3对象
+//PointLight的基类是Light  Light的基类是Object3D  点光源对象继承Object3D对象的位置属性position
+point.position.set(400, 200, 300);
+scene.add(point);
+```
+
+你还可以尝试把网格模型设置为纯蓝色`0x0000ff`,光源颜色只保留红色成分不变，你可以看到网格模型的渲染效果是黑色，因为这两个颜色相乘总有一个RGB分量为0，相乘的结果是`0x00000`,也就是黑色。这也符合实际的物理规律，蓝色的物体不会反射红色的光线，熙然就是黑色效果。
+
+如果你想模拟一个舞台的各种颜色灯光效果，可以用这种思路设置RGB各个分量值来实现特定颜色光源，不过一般渲染的时候RGB三个分量是相同的，也就是表示白色光源，`0xffffff`表示最高强度的白色光源，`0x000000`相当于没有光照。
+
+
+
+---
+
+## Three.js光照阴影实时计算
+
+在具有方向光源的作用下，物体会形成阴影投影效果。
+
+### 平行光投影计算代码
+
+Three.js物体投影模拟计算主要设置三部分，一个是设置产生投影的模型对象，一个是设置接收投影效果的模型，最后一个是光源对象本身的设置，光源如何产生投影。
+
+```javascript
+var geometry = new THREE.BoxGeometry(40, 100, 40);
+var material = new THREE.MeshLambertMaterial({
+  color: 0x0000ff
+});
+var mesh = new THREE.Mesh(geometry, material);
+// mesh.position.set(0,0,0)
+scene.add(mesh);
+
+// 设置产生投影的网格模型
+mesh.castShadow = true;
+
+
+//创建一个平面几何体作为投影面
+var planeGeometry = new THREE.PlaneGeometry(300, 200);
+var planeMaterial = new THREE.MeshLambertMaterial({
+  color: 0x999999
+});
+// 平面网格模型作为投影面
+var planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+scene.add(planeMesh); //网格模型添加到场景中
+planeMesh.rotateX(-Math.PI / 2); //旋转网格模型
+planeMesh.position.y = -50; //设置网格模型y坐标
+// 设置接收阴影的投影面
+planeMesh.receiveShadow = true;
+
+// 方向光
+var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+// 设置光源位置
+directionalLight.position.set(60, 100, 40);
+scene.add(directionalLight);
+// 设置用于计算阴影的光源对象
+directionalLight.castShadow = true;
+// 设置计算阴影的区域，最好刚好紧密包围在对象周围
+// 计算阴影的区域过大：模糊  过小：看不到或显示不完整
+directionalLight.shadow.camera.near = 0.5;
+directionalLight.shadow.camera.far = 300;
+directionalLight.shadow.camera.left = -50;
+directionalLight.shadow.camera.right = 50;
+directionalLight.shadow.camera.top = 200;
+directionalLight.shadow.camera.bottom = -100;
+// 设置mapSize属性可以使阴影更清晰，不那么模糊
+// directionalLight.shadow.mapSize.set(1024,1024)
+console.log(directionalLight.shadow.camera);
+```
+
+
+
+### 聚光光源投影计算代码
+
+下面代码是聚光光源的设置，其它部分代码和平行光一样。
+
+```javascript
+// 聚光光源
+var spotLight = new THREE.SpotLight(0xffffff);
+// 设置聚光光源位置
+spotLight.position.set(50, 90, 50);
+// 设置聚光光源发散角度
+spotLight.angle = Math.PI /6
+scene.add(spotLight); //光对象添加到scene场景中
+// 设置用于计算阴影的光源对象
+spotLight.castShadow = true;
+// 设置计算阴影的区域，注意包裹对象的周围
+spotLight.shadow.camera.near = 1;
+spotLight.shadow.camera.far = 300;
+spotLight.shadow.camera.fov = 20;
+```
+
+模型`.castShadow`属性
+
+```
+.castShadow`属性值是布尔值，默认false，用来设置一个模型对象是否在光照下产生投影效果。具体查看threejs文档`Object3D
+// 设置产生投影的网格模型
+mesh.castShadow = true;
+```
+
+`.receiveShadow`属性
+
+```
+.receiveShadow`属性值是布尔值，默认false，用来设置一个模型对象是否在光照下接受其它模型的投影效果。具体查看threejs文档`Object3D
+// 设置网格模型planeMesh接收其它模型的阴影(planeMesh作为投影面使用)
+planeMesh.receiveShadow = true;
+```
+
+#### 光源`.castShadow`属性
+
+如果属性设置为 true， 光源将投射动态阴影. *警告*: 这需要很多计算资源，需要调整以使阴影看起来正确. 更多细节，查看DirectionalLightShadow. 默认值false.
+
+```javascript
+// 设置用于计算阴影的光源对象
+directionalLight.castShadow = true;
+// spotLight.castShadow = true;
+```
+
+#### 光源`.shadow`属性
+
+平行光`DirectionalLight`的`.shadow`属性值是平行光阴影对象`DirectionalLightShadow`，聚光源`SpotLight`的`.shadow`属性值是聚光源阴影对象`SpotLightShadow`。关于`DirectionalLightShadow`和`SpotLightShadow`两个类的具体介绍可以参考Three.js文档Lights / Shadows分类，
+
+#### 阴影对象基类`LightShadow`
+
+平行光阴影对象`DirectionalLightShadow`和聚光源阴影对象`SpotLightShadow`两个类的基类是`LightShadow`
+
+##### `LightShadow`属性`.camera`
+
+观察光源的相机对象. 从光的角度来看，以相机对象的观察位置和方向来判断，其他物体背后的物体将处于阴影中。
+
+```javascript
+// 聚光源设置
+spotLight.shadow.camera.near = 1;
+spotLight.shadow.camera.far = 300;
+spotLight.shadow.camera.fov = 20;
+```
+
+##### `LightShadow`属性`.mapSize`
+
+定义阴影纹理贴图宽高尺寸的一个二维向量Vector2.
+
+较高的值会以计算时间为代价提供更好的阴影质量. 宽高分量值必须是2的幂, 直到给定设备的`WebGLRenderer.capabilities.maxTextureSize`, 尽管宽度和高度不必相同 (例如，(512, 1024)是有效的). 默认值为 ( 512, 512 ).
+
+```javascript
+directionalLight.shadow.mapSize.set(1024,1024)
+```
+
+##### `LightShadow`属性`.map`
+
+该属性的值是WebGL渲染目标对象`WebGLRenderTarget`，使用内置摄像头生成的深度图; 超出像素深度的位置在阴影中。 在渲染期间内部计算。
+
+
+
+----
+
+## 基类Light和Object3D
+
+### 光源位置属性
+
+光源对象继承父类[Object3D](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Object3D)的位置属性`.position`。
+
+以点光源[PointLight](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/lights/PointLight) 为例，`PointLight`的基类是[Light](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/lights/Light)，`Light`的基类是[Object3D](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Object3D)，点光源自然继承对象`Object3D`的位置属性`.position`。
+
+```javascript
+var point = new THREE.PointLight(0xffffff);//点光源
+//设置点光源位置  
+//
+//光源对象和模型对象的position属性一样是Vector3对象
+point.position.set(400, 200, 300);
+```
+
+光源对象的`.add()`方法同样继承自基类[Object3D](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Object3D)
+
+```javascript
+//环境光对象添加到scene场景中
+scene.add(ambient);
+//点光源对象添加到scene场景中
+scene.add(point);
+```
+
+### 光源颜色属性`.color`和强度属性`.intensity`
+
+你查看光源光源[Light](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/lights/Light)文档，可以看到该类定义了光源颜色属性`.color`和强度系数属性`.intensity`。
+
+光源颜色属性`.color`默认值是白色`0xffffff`,强度属性`.intensity`默认1.0,光照计算的时候会把两个属性值相乘。
+
+比如环境光颜色设置为`0xffffff`,强度系数设置为0.5，把0.5设置为0.8，threejs场景中模型会变得更明亮。调节环境颜色你可以直接设置不同颜色值，比如`0x44444`、`0xddddddd`，也可以使用更为方便的强度系数去调节。对于点光源、聚光源和环境光一样继承基类[Light](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/lights/Light)强度系数属性`.intensity`。
+
+```javascript
+//环境光：颜色设置为`0xffffff`,强度系数设置为0.5
+var ambient = new THREE.AmbientLight(0xffffff,0.5);
+scene.add(ambient);
+```
+
+
+
+----
+
+# Threejs层级模型、树结构
 
