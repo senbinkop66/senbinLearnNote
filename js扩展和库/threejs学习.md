@@ -2341,3 +2341,872 @@ scene.add(ambient);
 
 # Threejs层级模型、树结构
 
+比如一辆车，在Threejs中你可以使用一个网格模型去描述车上面的一个零件，多个零件就需要多个网格模型表示，这些网格模型之间就会构成父子或兄弟关系，从而形成一个层级结构。
+
+在具体开发过程中，3D美术给你一个包含多个网格模型对象的层级模型，你可能需要操作某个网格模型，这时候3D美术只要通过对模型命名标记模型，那么对于程序员来说，直接调用Threejs的某个方法就可以遍历整个模型，找到某个你想要操作的模型对象。
+
+## 组对象[Group](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/objects/Group)、层级模型
+
+所谓层级模型，比如一个机器人，人头、胳膊都是人的一部分，眼睛是头的一部分，手是个胳膊的一部分，手指是手的一部分...这样的话就构成一个一个层级结构或者说树结构。
+
+### Group案例
+
+在详细讲解层级模型之前先通过Threejs的类[Group](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/objects/Group)实现一个网格模型简单的案例。
+
+下面代码创建了两个网格模型mesh1、mesh2，通过`THREE.Group`类创建一个组对象group,然后通过`add`方法把网格模型mesh1、mesh2作为设置为组对象group的子对象，然后在通过执行`scene.add(group)`把组对象group作为场景对象的scene的子对象。也就是说场景对象是scene是group的父对象，group是mesh1、mesh2的父对象。这样就构成了一个三层的层级结构，当然了你也可以通过`Group`自己创建新模型节点作为层级结构中的一层。
+
+```javascript
+//创建两个网格模型mesh1、mesh2
+var geometry = new THREE.BoxGeometry(20, 20, 20);
+var material = new THREE.MeshLambertMaterial({color: 0x0000ff});
+var group = new THREE.Group();
+var mesh1 = new THREE.Mesh(geometry, material);
+var mesh2 = new THREE.Mesh(geometry, material);
+mesh2.translateX(25);
+//把mesh1型插入到组group中，mesh1作为group的子对象
+group.add(mesh1);
+//把mesh2型插入到组group中，mesh2作为group的子对象
+group.add(mesh2);
+//把group插入到场景中作为场景子对象
+scene.add(group);
+```
+
+网格模型mesh1、mesh2作为设置为父对象group的子对象，如果父对象group进行旋转、缩放、平移变换，子对象同样跟着变换，就像你的头旋转了，眼睛会跟着头旋转。
+
+```javascript
+//沿着Y轴平移mesh1和mesh2的父对象，mesh1和mesh2跟着平移
+group.translateY(100);
+//父对象缩放，子对象跟着缩放
+group.scale.set(4,4,4);
+//父对象旋转，子对象跟着旋转
+group.rotateY(Math.PI/6)
+```
+
+### 查看子对象`.children`
+
+Threejs场景对象Scene、组对象Group都有一个子对象属性`.children`,通过该属性可以访问父对象的子对象，子对象属性`.children`的值是数组，所有子对象是数组的值，你可以在浏览器控制台打印测试上面案例代码。
+
+执行`console.log(group.children)`你可以在浏览器控制控制看到group的子对象是案例代码中通过`add`方法添加的两个网格模型对象Mesh。
+
+```javascript
+console.log('查看group的子对象',group.children);
+```
+
+### 场景对象结构
+
+执行`console.log(scene.children)`你在浏览器控制台查看场景对象Scene的子对象，除了可以看到案例代码通过`add`方法添加的组对象group之外，还可以看到通过`add`方法插入到场景中的环境光`AmbientLight`、点光源`PointLight`、辅助坐标对象`AxesHelper`等子对象。
+
+```javascript
+console.log('查看Scene的子对象',scene.children);
+```
+
+场景对象scene构成的层级模型本身是一个树结构，场景对象层级模型的第一层，也就是树结构的根节点，一般来说网格模型Mesh、点模型Points、线模型Line是树结构的最外层叶子结点。构建层级模型的中间层一般都是通过Threejs的`Group`类来完成，`Group`类实例化的对象可以称为组对象。
+
+Threejs渲染的时候从根节点场景对象开始解析渲染，如果一个模型要想被渲染出来就要直接或间接插入到场景scene中，一个光源如果要在光照计算中起作用同样需要通过`add`方法插入到场景中。
+
+### `.add()`方法
+
+场景对象`Scene`、组对象`Group`、网格模型对象`Mesh`、光源对象`Light`的`.add()`方法都是继承自它们共同的基类[Object3D](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Object3D)。
+
+父对象执行`.add()`方法的本质就是把参数中的子对象添加到自身的子对象属性`.children`中。
+
+`.add()`方法可以单独插入一个对象，也可以同时插入多个子对象。
+
+```javascript
+group.add(mesh1);
+group.add(mesh2);
+group.add(mesh1,mesh2);
+```
+
+Scene根节点 渲染的问题
+
+### `.remove()`方法
+
+`.add()`方法是给父对象添加一个子对象，`.remove()`方法是删除父对象中的一个子对象。 一个对象的全部子对象可以通过该对象的`.children()`属性访问获得，执行该对象的删除方法`.remove()`和添加方法`.add()`一样改变的都是父对象的`.children()`属性。
+
+场景`Scene`或组对象`Group`的`.remove()`方法使用规则可以查看它们的基类[Object3D](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Object3D)。
+
+```javascript
+// 删除父对象group的子对象网格模型mesh1
+group.remove(mesh1)
+// 一次删除场景中多个对象
+scene.remove(light,group)
+```
+
+
+
+----
+
+## 层级模型节点命名、查找、遍历
+
+### 模型命名(`.name`属性)
+
+在层级模型中可以给一些模型对象通过`.name`属性命名进行标记。
+
+```javascript
+group.add(Mesh)
+// 网格模型命名
+Mesh.name = "眼睛"
+// mesh父对象对象命名
+group.name = "头"
+```
+
+### 树结构层级模型
+
+实际开发的时候，可能会加载外部的模型，然后从模型对象通过节点的名称`.name`查找某个子对象，为了大家更容易理解，本节课不加载外部模型，直接通过代码创建一个非常简易的机器人模型，然后在机器人基础上进行相关操作。
+
+```javascript
+// 头部网格模型和组
+var headMesh = sphereMesh(10, 0, 0, 0);
+headMesh.name = "脑壳"
+var leftEyeMesh = sphereMesh(1, 8, 5, 4);
+leftEyeMesh.name = "左眼"
+var rightEyeMesh = sphereMesh(1, 8, 5, -4);
+rightEyeMesh.name = "右眼"
+var headGroup = new THREE.Group();
+headGroup.name = "头部"
+headGroup.add(headMesh, leftEyeMesh, rightEyeMesh);
+// 身体网格模型和组
+var neckMesh = cylinderMesh(3, 10, 0, -15, 0);
+neckMesh.name = "脖子"
+var bodyMesh = cylinderMesh(14, 30, 0, -35, 0);
+bodyMesh.name = "腹部"
+var leftLegMesh = cylinderMesh(4, 60, 0, -80, -7);
+leftLegMesh.name = "左腿"
+var rightLegMesh = cylinderMesh(4, 60, 0, -80, 7);
+rightLegMesh.name = "右腿"
+var legGroup = new THREE.Group();
+legGroup.name = "腿"
+legGroup.add(leftLegMesh, rightLegMesh);
+var bodyGroup = new THREE.Group();
+bodyGroup.name = "身体"
+bodyGroup.add(neckMesh, bodyMesh, legGroup);
+// 人Group
+var personGroup = new THREE.Group();
+personGroup.name = "人"
+personGroup.add(headGroup, bodyGroup)
+personGroup.translateY(50)
+scene.add(personGroup);
+
+// 球体网格模型创建函数
+function sphereMesh(R, x, y, z) {
+  var geometry = new THREE.SphereGeometry(R, 25, 25); //球体几何体
+  var material = new THREE.MeshPhongMaterial({
+    color: 0x0000ff
+  }); //材质对象Material
+  var mesh = new THREE.Mesh(geometry, material); // 创建网格模型对象
+  mesh.position.set(x, y, z);
+  return mesh;
+}
+// 圆柱体网格模型创建函数
+function cylinderMesh(R, h, x, y, z) {
+  var geometry = new THREE.CylinderGeometry(R, R, h, 25, 25); //球体几何体
+  var material = new THREE.MeshPhongMaterial({
+    color: 0x0000ff
+  }); //材质对象Material
+  var mesh = new THREE.Mesh(geometry, material); // 创建网格模型对象
+  mesh.position.set(x, y, z);
+  return mesh;
+}
+```
+
+### 递归遍历方法`.traverse()`
+
+Threejs层级模型就是一个树结构，可以通过递归遍历的算法去遍历Threejs一个模型对象的所有后代，可以通过下面代码递归遍历上面创建一个机器人模型或者一个外部加载的三维模型。
+
+```javascript
+scene.traverse(function(obj) {
+  if (obj.type === "Group") {
+    console.log(obj.name);
+  }
+  if (obj.type === "Mesh") {
+    console.log('  ' + obj.name);
+    obj.material.color.set(0xffff00);
+  }
+  if (obj.name === "左眼" | obj.name === "右眼") {
+    obj.material.color.set(0x000000)
+  }
+  // 打印id属性
+  console.log(obj.id);
+  // 打印该对象的父对象
+  console.log(obj.parent);
+  // 打印该对象的子对象
+  console.log(obj.children);
+})
+```
+
+### 查找某个具体的模型
+
+看到Threejs的`.getObjectById()`、`.getObjectByName()`等方法，如果已有前端基础，很容易联想到DOM的一些方法。
+
+Threejs和前端DOM一样，可以通过一个方法查找树结构父元素的某个后代对象，对于普通前端而言可以通过name或id等方式查找一个或多个DOM元素，Threejs同样可以通过一些方法查找一个模型树中的某个节点。更多的查找方法和方法的使用细节可以查看基类[Object3D](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Object3D)
+
+```javascript
+// 遍历查找scene中复合条件的子对象，并返回id对应的对象
+var idNode = scene.getObjectById ( 4 );
+console.log(idNode);
+// 遍历查找对象的子对象，返回name对应的对象（name是可以重名的，返回第一个）
+var nameNode = scene.getObjectByName ( "左腿" );
+nameNode.material.color.set(0xff0000);
+```
+
+
+
+----
+
+## Three.js获得世界坐标`.getWorldPosition()`
+
+如果你对本地坐标系和世界坐标系已经有了一定概念，那么可以直接访问模型的位置属性`.position`获得模型在本地坐标系或者说模型坐标系下的三维坐标，通过模型的`.getWorldPosition()`方法获得该模型在世界坐标下的三维坐标。
+
+### `.getWorldPosition()`方法
+
+模型对象的方法`.getWorldPosition()`方法和位置属性`.position`一样继承自基类[Object3D](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Object3D)。
+
+```javascript
+// 声明一个三维向量用来保存世界坐标
+var worldPosition = new THREE.Vector3();
+// 执行getWorldPosition方法把模型的世界坐标保存到参数worldPosition中
+mesh.getWorldPosition(worldPosition);
+```
+
+### 建立世界坐标系概念
+
+如果你没有本地坐标系和世界坐标系的概念，可以通过下面的案例源码很快的建立两个坐标系的概念。
+
+你首先在案例中测试下面源码，通过位置属性`.position`和`.getWorldPosition()`分别返回模型的本地位置坐标和世界坐标，查看两个坐标x分量有什么不同。你可以看到网格模型mesh通过位置属性`.position`返回的坐标x分量是50，通过`.getWorldPosition()`返回的坐标x分量是100，也就是说mesh的世界坐标是mesh位置属性`.position`和mesh父对象group位置属性`.position`的累加。
+
+```javascript
+var mesh = new THREE.Mesh(geometry, material);
+// mesh的本地坐标设置为(50, 0, 0)
+mesh.position.set(50, 0, 0);
+var group = new THREE.Group();
+// group本地坐标设置和mesh一样设置为(50, 0, 0)
+// mesh父对象设置position会影响得到mesh的世界坐标
+group.position.set(50, 0, 0);
+group.add(mesh);
+scene.add(group);
+
+// .position属性获得本地坐标
+console.log('本地坐标',mesh.position);
+
+// getWorldPosition()方法获得世界坐标
+//该语句默认在threejs渲染的过程中执行,如果渲染之前想获得世界矩阵属性、世界位置属性等属性，需要通过代码更新
+scene.updateMatrixWorld(true);
+var worldPosition = new THREE.Vector3();
+mesh.getWorldPosition(worldPosition);
+console.log('世界坐标',worldPosition);
+```
+
+所谓本地坐标系或者说模型坐标系，就是模型对象相对模型的父对象而言，模型位置属性`.position`表示的坐标值就是以本地坐标系为参考，表示子对象相对本地坐标系原点(0,0,0)的偏移量。
+
+前面两节课说过Threejs场景Scene是一个树结构，一个模型对象可能有多个父对象节点。世界坐标系默认就是对Threejs整个场景Scene建立一个坐标系，一个模型相对世界坐标系的坐标值就是该模型对象所有父对象以及模型本身位置属性`.position`的叠加。
+
+### 本地缩放系数`.scale`
+
+通过前面的论述，模型的位置属性`.position`可以称为本地坐标或者说局部坐标，对于属性`.scale`一样，可以称为模型的本地缩放系数或者局部的缩放系数，通过`.getWorldScale()`方法可以获得一个模型的世界缩放系数，就像执行`.getWorldPosition()`方法一样获得世界坐标，关于`.getWorldScale()`方法可以查看基类[Object3D](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Object3D)。
+
+### 本地矩阵`.materix`和世界矩阵`.matrixWorld`
+
+如果你对WebGL顶点的旋转、缩放、平移矩阵变换有一定的了解，可以继续阅读，如果没有概念也可以暂时跳过。
+
+本地矩阵`.materix`是以本地坐标系为参考的模型矩阵，世界矩阵`.matrixWorld`自然就是以是世界坐标系为参照的模型矩阵。
+
+Three.js模型的位置属性`.position`、缩放系数属性`.scale`和角度属性`.rotation`记录了模型的所有平移、缩放和旋转变换，本地矩阵`.materix`是以线性代数矩阵的形式表示`.position`、`.scale`和`.rotation`。世界矩阵`.matrixWorld`自然是用矩阵的形式表示模型以及模型父对象的所有旋转缩放平移变换。
+
+
+
+----
+
+# Three.js几何体对象、曲线、三维模型
+
+## 常见几何体和曲线
+
+几何体本质上就是threejs生成顶点的算法，如果有兴趣你可以打开threejs几何体部分的源码查看threejs具体如何通过程序生成顶点位置、法线方向等顶点数据。
+
+所有几何体的基类分为[Geometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Geometry)和[BufferGeometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/BufferGeometry)两大类，两类几何体直接可以相互转化。
+
+![基类Geometry](E:\pogject\学习笔记\image\其他\基类Geometry.png)
+
+### 曲线
+
+曲线和几何体同样本质上都是用来生成顶点的算法，曲线主要是按照一定的规则生成一系列沿着某条轨迹线分布的顶点。当你把曲线、几何体看成顶点的时候，查考文档很多属性和方法自然很同意理解。
+
+![曲线](E:\pogject\学习笔记\image\其他\曲线.png)
+
+
+
+----
+
+## 直线、椭圆、圆弧、基类Curve
+
+### 圆弧线[ArcCurve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/ArcCurve)
+
+圆弧线[ArcCurve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/ArcCurve)的基类是椭圆弧线[EllipseCurve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/EllipseCurve),关于圆弧线的使用方法可以查看threejs文档中的椭圆弧线。
+
+```javascript
+ArcCurve( aX, aY, aRadius, aStartAngle, aEndAngle, aClockwise )
+```
+
+| 参数                   | 含义                          |
+| :--------------------- | :---------------------------- |
+| aX, aY                 | 圆弧圆心坐标                  |
+| aRadius                | 圆弧半径                      |
+| aStartAngle, aEndAngle | 起始角度                      |
+| aClockwise             | 是否顺时针绘制，默认值为false |
+
+```javascript
+//参数：0, 0圆弧坐标原点x，y  100：圆弧半径    0, 2 * Math.PI：圆弧起始角度
+var arc = new THREE.ArcCurve(0, 0, 100, 0, 2 * Math.PI);
+```
+
+### 曲线[Curve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/core/Curve)方法`.getPoints()`
+
+`.getPoints()`是基类[Curve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/core/Curve)的方法，圆弧线[ArcCurve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/ArcCurve)的基类是椭圆弧线[EllipseCurve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/EllipseCurve),椭圆弧线的基类是曲线`Curve`，所以圆弧线具有`Curve`的方法`.getPoints()`。
+
+通过方法`.getPoints()`可以从圆弧线按照一定的细分精度返回沿着圆弧线分布的顶点坐标。细分数越高返回的顶点数量越多，自然轮廓越接近于圆形。方法`.getPoints()`的返回值是一个由二维向量[Vector2](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Vector2)或三维向量[Vector3](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Vector3)构成的数组，`Vector2`表示位于同一平面内的点，`Vector3`表示三维空间中一点。
+
+```javascript
+var arc = new THREE.ArcCurve(0, 0, 100, 0, 2 * Math.PI);
+//getPoints是基类Curve的方法，返回一个vector2对象作为元素组成的数组
+var points = arc.getPoints(50);//分段数50，返回51个顶点
+```
+
+### 几何体方法`.setFromPoints()`
+
+`.setFromPoints()`是几何体[Geometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/Geometry)的方法，通过该方法可以把数组`points`中顶点数据提取出来赋值给几何体的顶点位置属性`geometry.vertices`，数组`points`的元素是二维向量[Vector2](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Vector2)或三维向量[Vector3](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Vector3)。
+
+[BufferGeometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/core/BufferGeometry)和`Geometry`一样具有方法`.setFromPoints()`，不过区别是提取顶点数据后赋值给`geometry.attributes.position`属性。
+
+```javascript
+// setFromPoints方法从points中提取数据改变几何体的顶点属性vertices
+geometry.setFromPoints(points);
+console.log(geometry.vertices);
+// 如果几何体是BufferGeometry，setFromPoints方法改变的是.attributes.position属性
+// console.log(geometry.attributes.position);
+```
+
+使用threejs的API圆弧线[ArcCurve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/ArcCurve)绘制一个圆弧轮廓。
+
+```js
+var geometry = new THREE.BufferGeometry(); //声明一个几何体对象Geometry
+//参数：0, 0圆弧坐标原点x，y  100：圆弧半径    0, 2 * Math.PI：圆弧起始角度
+var arc = new THREE.ArcCurve(0, 0, 100, 0, 2 * Math.PI);
+//getPoints是基类Curve的方法，返回一个vector2对象作为元素组成的数组
+var points = arc.getPoints(50);//分段数50，返回51个顶点
+// setFromPoints方法从points中提取数据改变几何体的顶点属性vertices
+geometry.setFromPoints(points);
+//材质对象
+var material = new THREE.LineBasicMaterial({
+  color: 0x000000
+});
+//线条模型对象
+var line = new THREE.Line(geometry, material);
+scene.add(line); //线条对象添加到场景中
+```
+
+和上面绘制圆弧线代码实现的功能相同，不过没有借助圆弧线[THREE.ArcCurve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/ArcCurve)，通过三角函数计算生成圆弧线上的顶点。设置这个案例的目的就是，你可以通过对比两个代码案例，明白Threejs一些曲线API本质上就是通过某种算法得到了沿着特定轨迹的顶点数据。
+
+```javascript
+var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
+var R = 100; //圆弧半径
+var N = 50; //分段数量
+// 批量生成圆弧上的顶点数据
+for (var i = 0; i < N; i++) {
+  var angle = 2 * Math.PI / N * i;
+  var x = R * Math.sin(angle);
+  var y = R * Math.cos(angle);
+  geometry.vertices.push(new THREE.Vector3(x, y, 0));
+}
+// 插入最后一个点，line渲染模式下，产生闭合效果
+// geometry.vertices.push(geometry.vertices[0])
+//材质对象
+var material = new THREE.LineBasicMaterial({
+  color: 0x000000
+});
+//线条模型对象
+var line = new THREE.Line(geometry, material);
+scene.add(line); //线条对象添加到场景中
+```
+
+### 绘制直线效果
+
+直接给几何体`Geometry`设置两个顶点数据。
+
+```javascript
+var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
+var p1 = new THREE.Vector3(50, 0, 0); //顶点1坐标
+var p2 = new THREE.Vector3(0, 70, 0); //顶点2坐标
+//顶点坐标添加到geometry对象
+geometry.vertices.push(p1, p2);
+var material = new THREE.LineBasicMaterial({
+  color: 0xffff00,
+});//材质对象
+//线条模型对象
+var line = new THREE.Line(geometry, material);
+scene.add(line); //线条对象添加到场景中
+```
+
+通过[LineCurve3](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/LineCurve3)绘制一条三维直线。
+
+```javascript
+var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
+var p1 = new THREE.Vector3(50, 0, 0); //顶点1坐标
+var p2 = new THREE.Vector3(0, 70, 0); //顶点2坐标
+// 三维直线LineCurve3
+var LineCurve = new THREE.LineCurve3(p1, p2);
+// 二维直线LineCurve
+var LineCurve = new THREE.LineCurve(new THREE.Vector2(50, 0), new THREE.Vector2(0, 70));
+var pointArr = LineCurve.getPoints(10);
+geometry.setFromPoints(pointArr);
+```
+
+通过[LineCurve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/LineCurve)绘制一条二维直线。
+
+```javascript
+var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
+var p1 = new THREE.Vector2(50, 0); //顶点1坐标
+var p2 = new THREE.Vector2(0, 70); //顶点2坐标
+// 二维直线LineCurve
+var LineCurve = new THREE.LineCurve(p1, p2);
+var pointArr = LineCurve.getPoints(10);
+geometry.setFromPoints(pointArr);
+```
+
+
+
+----
+
+## 样条曲线、贝赛尔曲线
+
+规则的曲线比如圆、椭圆、抛物线都可以用一个函数去描述，对于不规则的曲线无法使用一个特定的函数去描述，这也就是样条曲线和贝塞尔曲线出现的原因。
+
+在三维空间中设置5个顶点，输入三维样条曲线[CatmullRomCurve3](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/CatmullRomCurve3)作为参数，然后返回更多个顶点，通过返回的顶点数据，构建一个几何体，通过`Line`可以绘制出来一条沿着5个顶点的光滑样条曲线。
+
+```javascript
+var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
+// 三维样条曲线  Catmull-Rom算法
+var curve = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(-50, 20, 90),
+  new THREE.Vector3(-10, 40, 40),
+  new THREE.Vector3(0, 0, 0),
+  new THREE.Vector3(60, -60, 0),
+  new THREE.Vector3(70, 0, 80)
+]);
+//getPoints是基类Curve的方法，返回一个vector3对象作为元素组成的数组
+var points = curve.getPoints(100); //分段数100，返回101个顶点
+// setFromPoints方法从points中提取数据改变几何体的顶点属性vertices
+geometry.setFromPoints(points);
+//材质对象
+var material = new THREE.LineBasicMaterial({
+  color: 0x000000
+});
+//线条模型对象
+var line = new THREE.Line(geometry, material);
+scene.add(line); //线条对象添加到场景中
+```
+
+通过调用threejs样条曲线或贝塞尔曲线的API，你可以输入有限个顶点返回更多顶点，然后绘制一条光滑的轮廓曲线。
+
+通过调用threejs样条曲线或贝塞尔曲线的API，你可以输入有限个顶点返回更多顶点，然后绘制一条光滑的轮廓曲线。
+
+### 贝塞尔曲线
+
+贝塞尔曲线和样条曲线不同，多了一个控制点概念。
+
+二次贝赛尔曲线的参数p1、p3是起始点，p2是控制点，控制点不在贝塞尔曲线上。
+
+```javascript
+var p1 = new THREE.Vector3(-80, 0, 0);
+var p2 = new THREE.Vector3(20, 100, 0);
+var p3 = new THREE.Vector3(80, 0, 0);
+// 三维二次贝赛尔曲线
+var curve = new THREE.QuadraticBezierCurve3(p1, p2, p3);
+```
+
+三次贝赛尔曲线的参数p1、p4是起始点，p2、p3是控制点，控制点不在贝塞尔曲线上。
+
+```js
+var p1 = new THREE.Vector3(-80, 0, 0);
+var p2 = new THREE.Vector3(-40, 100, 0);
+var p3 = new THREE.Vector3(40, 100, 0);
+var p4 = new THREE.Vector3(80, 0, 0);
+// 三维三次贝赛尔曲线
+var curve = new THREE.CubicBezierCurve3(p1, p2, p3, p4);
+```
+
+
+
+---
+
+## 多个线条组合曲线CurvePath
+
+### U型案例
+
+```js
+var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
+// 绘制一个U型轮廓
+var R = 80;//圆弧半径
+var arc = new THREE.ArcCurve(0, 0, R, 0, Math.PI, true);
+// 半圆弧的一个端点作为直线的一个端点
+var line1 = new THREE.LineCurve(new THREE.Vector2(R, 200, 0), new THREE.Vector2(R, 0, 0));
+var line2 = new THREE.LineCurve(new THREE.Vector2(-R, 0, 0), new THREE.Vector2(-R, 200, 0));
+// 创建组合曲线对象CurvePath
+var CurvePath = new THREE.CurvePath();
+// 把多个线条插入到CurvePath中
+CurvePath.curves.push(line1, arc, line2);
+//分段数200
+var points = CurvePath.getPoints(200);
+// setFromPoints方法从points中提取数据改变几何体的顶点属性vertices
+geometry.setFromPoints(points);
+//材质对象
+var material = new THREE.LineBasicMaterial({
+  color: 0x000000
+});
+//线条模型对象
+var line = new THREE.Line(geometry, material);
+scene.add(line); //线条对象添加到场景中
+```
+
+
+
+----
+
+## 曲线路径管道成型TubeGeometry
+
+[TubeGeometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/geometries/TubeGeometry)的功能就是通过一条曲线生成一个圆管。它的本质就是以曲线上顶点为基准，生成一系列曲线等径分布的顶点数据， 具体算法如何实现的可以查看three.js引擎源码。
+
+```javascript
+构造函数格式：TubeGeometry(path, tubularSegments, radius, radiusSegments, closed)
+```
+
+| 参数            | 值                                    |
+| :-------------- | :------------------------------------ |
+| path            | 扫描路径，基本类是Curve的路径构造函数 |
+| tubularSegments | 路径方向细分数，默认64                |
+| radius          | 管道半径，默认1                       |
+| radiusSegments  | 管道圆弧细分数，默认8                 |
+| closed          | Boolean值，管道是否闭合               |
+
+### 样条曲面生成圆管案例
+
+```javascript
+//创建管道成型的路径(3D样条曲线)
+var path = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(-10, -50, -50),
+  new THREE.Vector3(10, 0, 0),
+  new THREE.Vector3(8, 50, 50),
+  new THREE.Vector3(-5, 0, 100)
+]);
+// path:路径   40：沿着轨迹细分数  2：管道半径   25：管道截面圆细分数
+var geometry = new THREE.TubeGeometry(path, 40, 2, 25);
+```
+
+你也可以使用下面直线替换上面的样条曲线查看圆管生成效果。
+
+```javascript
+// LineCurve3创建直线段路径
+var path = new THREE.LineCurve3(new THREE.Vector3(0, 100, 0), new THREE.Vector3(0, 0, 0));
+```
+
+### CurvePath多段路径生成管道案例
+
+通过下面代码创建了一段样条曲线和两条直线拼接成的路径，然后通过曲线路径[CurvePath](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/core/CurvePath)把样条曲线和料条曲线合并成为一条路径。
+
+```javascript
+// 创建多段线条的顶点数据
+var p1 = new THREE.Vector3(-85.35, -35.36)
+var p2 = new THREE.Vector3(-50, 0, 0);
+var p3 = new THREE.Vector3(0, 50, 0);
+var p4 = new THREE.Vector3(50, 0, 0);
+var p5 = new THREE.Vector3(85.35, -35.36);
+// 创建线条一：直线
+let line1 = new THREE.LineCurve3(p1,p2);
+// 重建线条2：三维样条曲线
+var curve = new THREE.CatmullRomCurve3([p2, p3, p4]);
+// 创建线条3：直线
+let line2 = new THREE.LineCurve3(p4,p5);
+var CurvePath = new THREE.CurvePath();// 创建CurvePath对象
+CurvePath.curves.push(line1, curve, line2);// 插入多段线条
+//通过多段曲线路径创建生成管道
+//通过多段曲线路径创建生成管道，CCurvePath：管道路径
+var geometry2 = new THREE.TubeGeometry(CurvePath, 100, 5, 25, false);
+```
+
+
+
+----
+
+## 旋转造型LatheGeometry
+
+生活中有很多的几何体具备旋转特征，比如球体，常见杯子, three.js提供了一个构造函数`LatheGeometry()`， `LatheGeometry`可以利用已有的二维数据生成三维顶点数据，二维数据可以通过二维向量对象`Vector2`定义，也可以通过3D曲线或2D线条轮廓生成。 `LatheGeometry`的二维坐标数据默认绕y轴旋转。
+
+```javascript
+格式：LatheGeometry(points, segments, phiStart, phiLength)
+```
+
+| 参数      | 值                              |
+| :-------- | :------------------------------ |
+| points    | Vector2表示的坐标数据组成的数组 |
+| segments  | 圆周方向细分数，默认12          |
+| phiStart  | 开始角度,默认0                  |
+| phiLength | 旋转角度，默认2π                |
+
+```javascript
+/**
+ * 创建旋转网格模型
+ */
+var points = [
+    new THREE.Vector2(50,60),
+    new THREE.Vector2(25,0),
+    new THREE.Vector2(50,-60)
+];
+var geometry = new THREE.LatheGeometry(points,30);
+var material=new THREE.MeshPhongMaterial({
+    color:0x0000ff,//三角面颜色
+    side:THREE.DoubleSide//两面可见
+});//材质对象
+material.wireframe = true;//线条模式渲染(查看细分数)
+var mesh=new THREE.Mesh(geometry,material);//旋转网格模型对象
+scene.add(mesh);//旋转网格模型添加到场景中
+```
+
+### 样条曲线插值计算
+
+借助[Shape](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/core/Shape)对象的方法`.splineThru()`，把上面的三个顶点进行样条插值计算， 可以得到一个光滑的旋转曲面。
+
+```javascript
+var shape = new THREE.Shape();//创建Shape对象
+var points = [//定位定点
+    new THREE.Vector2(50,60),
+    new THREE.Vector2(25,0),
+    new THREE.Vector2(50,-60)
+];
+shape.splineThru(points);//顶点带入样条插值计算函数
+var splinePoints = shape.getPoints(20);//插值计算细分数20
+var geometry = new THREE.LatheGeometry(splinePoints,30);//旋转造型
+```
+
+`shape.getPoints(20)`的作用是利用已有的顶点插值计算出新的顶点，两个顶点之间插值计算出20个顶点，如果细分数是1不是20，相当于不进行插值计算， 插值计算的规则通过[Shape](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/core/Shape)对象的方法`.splineThru()`定义，几何曲线的角度描述，`splineThru`的作用就是创建一个样条曲线，除了样条曲线还可以使用贝赛尔等曲线进行插值计算。
+
+
+
+----
+
+## [Shape](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/core/Shape)对象和轮廓填充ShapeGeometry
+
+![轮廓生成](E:\pogject\学习笔记\image\其他\轮廓生成.png)
+
+### 填充顶点构成的轮廓
+
+通过下面代码定义了6个顶点坐标，也可以说是5个，最后一个和第一个是重合的，构成一个五边形区域。然后使用这一组二维顶点坐标作为`Shape`的参数构成一个五边形轮廓。把五边形轮廓`Shape`作为`ShapeGeometry`的参数，可以根据轮廓坐标计算出一系列三角形面填充轮廓，形成一个平面几何体。
+
+
+
+```javascript
+var points = [
+  new THREE.Vector2(-50, -50),
+  new THREE.Vector2(-60, 0),
+  new THREE.Vector2(0, 50),
+  new THREE.Vector2(60, 0),
+  new THREE.Vector2(50, -50),
+  new THREE.Vector2(-50, -50),
+]
+// 通过顶点定义轮廓
+var shape = new THREE.Shape(points);
+// shape可以理解为一个需要填充轮廓
+// 所谓填充：ShapeGeometry算法利用顶点计算出三角面face3数据填充轮廓
+var geometry = new THREE.ShapeGeometry(shape, 25);
+```
+
+调用`Shape`圆弧方法`.absarc()`绘制一个圆形轮廓，然后通过`ShapeGeometry`可以把该圆形轮廓填充为一个圆形平面几何体。
+
+你可以尝试更改`ShapeGeometry`的参数2，参数2表示细分数，然后网格材质设置为`wireframe: true`查看圆形区域填充三角形的数量变化。
+
+```javascript
+// 通过shpae基类path的方法绘制轮廓（本质也是生成顶点）
+var shape = new THREE.Shape();
+shape.absarc(0,0,100,0,2*Math.PI);//圆弧轮廓
+console.log(shape.getPoints(15));//查看shape顶点数据
+var geometry = new THREE.ShapeGeometry(shape, 25);
+```
+
+下面代码是通过`shpae`绘制了一个矩形区域，更多相关的轮廓绘制方法可以查看[Shape](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/core/Shape)文档。
+
+```javascript
+// 通过shpae基类path的方法绘制轮廓（本质也是生成顶点）
+var shape = new THREE.Shape();
+// 四条直线绘制一个矩形轮廓
+shape.moveTo(0,0);//起点
+shape.lineTo(0,100);//第2点
+shape.lineTo(100,100);//第3点
+shape.lineTo(100,0);//第4点
+shape.lineTo(0,0);//第5点
+```
+
+### shape外轮廓和内轮廓
+
+shape可以用来绘制外轮廓，也可以用来绘制内轮廓，`ShapeGeometry`会使用三角形自动填充shape内轮廓和外轮廓中间的中部。
+
+下面给出了几个通过shape绘制的轮廓图案。
+
+```js
+// 圆弧与直线连接
+var shape = new THREE.Shape(); //Shape对象
+var R = 50;
+// 绘制一个半径为R、圆心坐标(0, 0)的半圆弧
+shape.absarc(0, 0, R, 0, Math.PI);
+//从圆弧的一个端点(-R, 0)到(-R, -200)绘制一条直线
+shape.lineTo(-R, -200);
+// 绘制一个半径为R、圆心坐标(0, -200)的半圆弧
+shape.absarc(0, -200, R, Math.PI, 2 * Math.PI);
+//从圆弧的一个端点(R, -200)到(-R, -200)绘制一条直线
+shape.lineTo(R, 0);
+var geometry = new THREE.ShapeGeometry(shape, 30);
+```
+
+```js
+// 一个外轮廓圆弧嵌套三个内圆弧轮廓
+var shape = new THREE.Shape(); //Shape对象
+//外轮廓
+shape.arc(0, 0, 100, 0, 2 * Math.PI);
+// 内轮廓1
+var path1 = new THREE.Path();
+path1.arc(0, 0, 40, 0, 2 * Math.PI);
+// 内轮廓2
+var path2 = new THREE.Path();
+path2.arc(80, 0, 10, 0, 2 * Math.PI);
+// 内轮廓3
+var path3 = new THREE.Path();
+path3.arc(-80, 0, 10, 0, 2 * Math.PI);
+//三个内轮廓分别插入到holes属性中
+shape.holes.push(path1, path2, path3);
+```
+
+```js
+// 矩形嵌套矩形或圆弧
+var shape=new THREE.Shape();//Shape对象
+//外轮廓
+shape.moveTo(0,0);//起点
+shape.lineTo(0,100);//第2点
+shape.lineTo(100,100);//第3点
+shape.lineTo(100,0);//第4点
+shape.lineTo(0,0);//第5点
+
+//内轮廓
+var path=new THREE.Path();//path对象
+// path.arc(50,50,40,0,2*Math.PI);//圆弧
+path.moveTo(20,20);//起点
+path.lineTo(20,80);//第2点
+path.lineTo(80,80);//第3点
+path.lineTo(80,20);//第4点
+path.lineTo(20,20);//第5点
+shape.holes.push(path);//设置内轮廓
+```
+
+### 多个轮廓同时填充
+
+```js
+// 轮廓对象1
+ var shape=new THREE.Shape();
+ shape.arc(-50,0,30,0,2*Math.PI);
+ // 轮廓对象2
+ var shape2=new THREE.Shape();
+ shape2.arc(50,0,30,0,2*Math.PI);
+ // 轮廓对象3
+ var shape3=new THREE.Shape();
+ shape3.arc(0,50,30,0,2*Math.PI);
+// 多个shape作为元素组成数组,每一个shpae可以理解为一个要填充的轮廓
+var geometry = new THREE.ShapeGeometry([shape,shape2,shape3], 30);
+```
+
+
+
+----
+
+## 拉伸扫描成型ExtrudeGeometry
+
+构造函数[ExtrudeGeometry()](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/geometries/ExtrudeGeometry)和[ShapeGeometry](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/geometries/ShapeGeometry)一样是利用[Shape](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/core/Shape)对象生成几何体对象，区别在于`ExtrudeGeometry()`可以利用2D轮廓生成3D模型， 如果你使用任何三维软件都知道可以先绘制一个二维的轮廓图，然后拉伸成型得到三维模型。`ExtrudeGeometry()`第二个参数是拉伸参数，数据类型是对象， 属性`amount`表示拉伸长度，`bevelEnabled`表示拉伸是否产生倒角，其它参数见下表。
+
+构造函数`ExtrudeGeometry()`拉伸参数
+
+| 参数            | 含义                                 |      |
+| :-------------- | :----------------------------------- | ---- |
+| amount          | 拉伸长度，默认100                    |      |
+| bevelEnabled    | 是否使用倒角                         |      |
+| bevelSegments   | 倒角细分数，默认3                    |      |
+| bevelThickness  | 倒角尺寸(经向)                       |      |
+| curveSegments   | 拉伸轮廓细分数                       |      |
+| steps           | 拉伸方向细分数                       |      |
+| extrudePath     | 扫描路径THREE.CurvePath，默认Z轴方向 |      |
+| material        | 前后面材质索引号                     |      |
+| extrudeMaterial | 拉伸面、倒角面材质索引号             |      |
+| bevelSize       | 倒角尺寸(拉伸方向)                   |      |
+
+```javascript
+/**
+ * 创建拉伸网格模型
+ */
+var shape = new THREE.Shape();
+/**四条直线绘制一个矩形轮廓*/
+shape.moveTo(0,0);//起点
+shape.lineTo(0,100);//第2点
+shape.lineTo(100,100);//第3点
+shape.lineTo(100,0);//第4点
+shape.lineTo(0,0);//第5点
+var geometry = new THREE.ExtrudeGeometry(//拉伸造型
+    shape,//二维轮廓
+    //拉伸参数
+    {
+        amount:120,//拉伸长度
+        bevelEnabled:false//无倒角
+    }
+    );
+```
+
+通过使用点模式渲染上面的几何体，可以看出几何体拉伸的本质效果就是空间分布顶点数据的产生。
+
+```javascript
+var material=new THREE.PointsMaterial({
+    color:0x0000ff,
+    size:5.0//点对象像素尺寸
+});//材质对象
+var mesh=new THREE.Points(geometry,material);//点模型对象
+scene.add(mesh);//点模型添加到场景中
+```
+
+拉伸和扫描一样都是三维造型建模方法，three.js提供了一个共同的构造函数来实现扫描和拉伸，对于扫描而言不需要定义`amount`属性设置拉伸距离，设置扫描路径即可， 定义属性`extrudePath`，`extrudePath`的值是路径`THREE.CurvePath`，可以通过样条曲线、贝赛尔曲线构造函数创建不规则曲线扫描轨迹。
+
+```javascript
+/**
+* 创建扫描网格模型
+*/
+var shape = new THREE.Shape();
+/**四条直线绘制一个矩形轮廓*/
+shape.moveTo(0,0);//起点
+shape.lineTo(0,10);//第2点
+shape.lineTo(10,10);//第3点
+shape.lineTo(10,0);//第4点
+shape.lineTo(0,0);//第5点
+/**创建轮廓的扫描轨迹(3D样条曲线)*/
+var curve = new THREE.SplineCurve3([
+   new THREE.Vector3( -10, -50, -50 ),
+   new THREE.Vector3( 10, 0, 0 ),
+   new THREE.Vector3( 8, 50, 50 ),
+   new THREE.Vector3( -5, 0, 100)
+]);
+var geometry = new THREE.ExtrudeGeometry(//拉伸造型
+   shape,//二维轮廓
+   //拉伸参数
+   {
+       bevelEnabled:false,//无倒角
+       extrudePath:curve,//选择扫描轨迹
+       steps:50//扫描方向细分数
+   }
+);
+```
+
+
+
+----
+
+# 纹理贴图
