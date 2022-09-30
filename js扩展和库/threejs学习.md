@@ -3210,3 +3210,64 @@ var geometry = new THREE.ExtrudeGeometry(//拉伸造型
 ----
 
 # 纹理贴图
+
+纹理贴图是Threejs一个很重要的内容，游戏、产品720展示、物联网3D可视化等项目程序员加载模型的同时需要处理纹理贴图。
+
+![纹理贴图](E:\pogject\学习笔记\image\其他\纹理贴图.png)
+
+## 创建纹理贴图
+
+通过纹理贴图加载器[TextureLoader](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/loaders/TextureLoader)的`load()`方法加载一张图片可以返回一个纹理对象[Texture](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/textures/Texture)，纹理对象`Texture`可以作为模型材质颜色贴图`.map`属性的值。
+
+材质的颜色贴图属性`.map`设置后，模型会从纹理贴图上采集像素值，这时候一般来说不需要再设置材质颜色`.color`。`.map`贴图之所以称之为颜色贴图就是因为网格模型会获得颜色贴图的颜色值RGB。
+
+```javascript
+// 纹理贴图映射到一个矩形平面上
+var geometry = new THREE.PlaneGeometry(204, 102); //矩形平面
+// TextureLoader创建一个纹理加载器对象，可以加载图片作为几何体纹理
+var textureLoader = new THREE.TextureLoader();
+// 执行load方法，加载纹理贴图成功后，返回一个纹理对象Texture
+textureLoader.load('Earth.png', function(texture) {
+  var material = new THREE.MeshLambertMaterial({
+    // color: 0x0000ff,
+    // 设置颜色纹理贴图：Texture对象作为材质map属性的属性值
+    map: texture,//设置颜色贴图属性值
+  }); //材质对象Material
+  var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+  scene.add(mesh); //网格模型添加到场景中
+
+  //纹理贴图加载成功后，调用渲染函数执行渲染操作
+  // render();
+})
+```
+
+不同的几何体有不同的UV坐标来设置贴图和模型的映射规律，你可以尝试把颜色纹理贴图映射到不同的几何体上查看渲染效果。
+
+```javascript
+var geometry = new THREE.BoxGeometry(100, 100, 100); //立方体
+var geometry = new THREE.SphereGeometry(60, 25, 25); //球体
+```
+
+### 纹理对象`Texture`
+
+如果你想进一步了解`.map`的属性值[Texture](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/textures/Texture)可以阅读下面的代码。
+
+通过图片加载器[ImageLoader](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/loaders/ImageLoader)可以加载一张图片，所谓纹理对象Texture简单地说就是，纹理对象Texture的`.image`属性值是一张图片。
+
+```javascript
+// 图片加载器
+var ImageLoader = new THREE.ImageLoader();
+// load方法回调函数，按照路径加载图片，返回一个html的元素img对象
+ImageLoader.load('Earth.png', function(img) {
+  // image对象作为参数，创建一个纹理对象Texture
+  var texture = new THREE.Texture(img);
+  // 下次使用纹理时触发更新
+  texture.needsUpdate = true;
+  var material = new THREE.MeshLambertMaterial({
+    map: texture, //设置纹理贴图
+  });
+  var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+  scene.add(mesh); //网格模型添加到场景中
+});
+```
+
