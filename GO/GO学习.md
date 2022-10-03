@@ -1841,3 +1841,509 @@ The number of characters in string str2 is 24
 
 ----
 
+## strings 和 strconv 包
+
+作为一种基本数据结构，每种语言都有一些对于字符串的预定义处理函数。Go 中使用 `strings` 包来完成对字符串的主要操作。
+
+###  前缀和后缀
+
+HasPrefix 判断字符串 s 是否以 prefix 开头：
+
+```go
+strings.HasPrefix(s, prefix string) bool
+```
+
+HasSuffix 判断字符串 s 是否以 suffix 结尾：
+
+```go
+strings.HasSuffix(s, suffix string) bool
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	var str string = "this is an example of a string"
+	fmt.Printf("T/F? Does the string \"%s\" have prefix %s? ", str, "Th")
+	fmt.Printf("%t\n", strings.HasPrefix(str, "Th"))
+	fmt.Printf("%t\n", strings.HasSuffix(str, "ing"))
+}
+```
+
+### 字符串包含关系
+
+`Contains` 判断字符串 `s` 是否包含 `substr`：
+
+```php
+strings.Contains(s, substr string) bool
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	var str string = "this is a good thing for you"
+	fmt.Println(strings.Contains(str, "o"))  // true
+	fmt.Println(strings.Contains(str, "b"))  // false
+}
+```
+
+
+
+### 判断子字符串或字符在父字符串中出现的位置（索引）
+
+Index 返回字符串 str 在字符串 s 中的索引（str 的第一个字符的索引），-1 表示字符串 s 不包含字符串 str：
+
+```go
+strings.Index(s, str string) int
+```
+
+LastIndex 返回字符串 str 在字符串 s 中最后出现位置的索引（str 的第一个字符的索引），-1 表示字符串 s 不包含字符串 str：
+
+```go
+strings.LastIndex(s, str string) int
+```
+
+如果 ch 是非 ASCII 编码的字符，建议使用以下函数来对字符进行定位：
+
+```go
+strings.IndexRune(s string, r rune) int
+```
+
+
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	var str string = "this is a good thing for you"
+	fmt.Println(strings.Index(str, "o"))  // 11
+	fmt.Println(strings.Index(str, "b"))  // -1
+	fmt.Println(strings.LastIndex(str, "o"))  // 26
+}
+```
+
+### 字符串替换
+
+Replace 用于将字符串 str 中的前 n 个字符串 old 替换为字符串 new，并返回一个新的字符串，如果 n = -1 则替换所有字符串 old 为字符串 new：
+
+```go
+strings.Replace(str, old, new string, n int) string
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	var str string = "this is a good thing for you"
+	fmt.Println(strings.Replace(str, "o", "O", 2))  // this is a gOOd thing for you
+	fmt.Println(strings.Replace(str, "o", "O", -1))  // this is a gOOd thing fOr yOu
+}
+```
+
+### 统计字符串出现次数
+
+`Count` 用于计算字符串 `str` 在字符串 `s` 中出现的非重叠次数：
+
+```go
+strings.Count(s, str string) int
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	var str string = "this is a good thing for you"
+	fmt.Println(strings.Count(str, "o"))  // 4
+	fmt.Println(strings.Count(str, "is"))  // 2
+}
+```
+
+### 重复字符串
+
+`Repeat` 用于重复 `count` 次字符串 `s` 并返回一个新的字符串：
+
+```go
+strings.Repeat(s, count int) string
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	var str string = "O"
+	fmt.Println(strings.Repeat(str, 4))  // OOOO
+}
+```
+
+### 修改字符串大小写
+
+ToLower 将字符串中的 Unicode 字符全部转换为相应的小写字符：
+
+```go
+strings.ToLower(s) string
+```
+
+ToUpper 将字符串中的 Unicode 字符全部转换为相应的大写字符：
+
+```go
+strings.ToUpper(s) string
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	var str1 string = "this is a good thing for you"
+	var str2 string = "How Old Are You"
+	fmt.Println(strings.ToUpper(str1))  // THIS IS A GOOD THING FOR YOU
+	fmt.Println(strings.ToLower(str2))  // how old are you
+}
+```
+
+### 修剪字符串
+
+你可以使用 strings.TrimSpace(s) 来剔除字符串开头和结尾的空白符号；
+
+如果你想要剔除指定字符，则可以使用 strings.Trim(s, "cut") 来将开头和结尾的 cut 去除掉。
+
+该函数的第二个参数可以包含任何字符，如果你只想剔除开头或者结尾的字符串，则可以使用 TrimLeft 或者 TrimRight 来实现。
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	var str1 string = "  this is a good thing for you "
+	var str2 string = "how Old Are you oh"
+	fmt.Println(strings.TrimSpace(str1))  // this is a good thing for you
+	fmt.Println(strings.Trim(str2, "h"))  // ow Old Are you o
+	fmt.Println(strings.TrimLeft(str2, "h"))  // ow Old Are you oh
+	fmt.Println(strings.TrimRight(str2, "h"))  // how Old Are you o
+}
+```
+
+### 分割字符串
+
+strings.Fields(s) 利用空白作为分隔符将字符串分割为若干块，并返回一个 slice 。如果字符串只包含空白符号，返回一个长度为 0 的 slice 。
+
+strings.Split(s, sep) 自定义分割符号对字符串分割，返回 slice 。
+
+因为这 2 个函数都会返回 slice，所以习惯使用 for-range 循环来对其进行处理
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	var str1 string = "this is a good thing for you "
+	fmt.Println(strings.Fields(str1))  // [this is a good thing for you]
+	var str2 string = "abcabcabc"
+	fmt.Println(strings.Split(str2, "b"))  // [a ca ca c]
+}
+```
+
+### 拼接 slice 到字符串
+
+Join 用于将元素类型为 string 的 slice 使用分割符号来拼接组成一个字符串：
+
+```go
+strings.Join(sl []string, sep string) string
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	str1 := "this is a good thing for you "
+	str2 := strings.Fields(str1)
+	fmt.Println(strings.Join(str2, "|"))  // this|is|a|good|thing|for|you
+}
+```
+
+### 从字符串中读取内容
+
+函数 strings.NewReader(str) 用于生成一个 Reader 并读取字符串中的内容，然后返回指向该 Reader 的指针，从其它类型读取内容的函数还有：
+
+Read() 从 [] byte 中读取内容。
+ReadByte() 和 ReadRune() 从字符串中读取下一个 byte 或者 rune。
+
+```
+
+```
+
+### 字符串与其它类型的转换
+
+与字符串相关的类型转换都是通过 strconv 包实现的。
+
+该包包含了一些变量用于获取程序运行的操作系统平台下 int 类型所占的位数，如：strconv.IntSize。
+
+任何类型 T 转换为字符串总是成功的。
+
+针对从数字类型转换到字符串，Go 提供了以下函数：
+
+strconv.Itoa(i int) string 返回数字 i 所表示的字符串类型的十进制数。
+strconv.FormatFloat(f float64, fmt byte, prec int, bitSize int) string 将 64 位浮点型的数字转换为字符串，其中 fmt 表示格式（其值可以是 'b'、'e'、'f' 或 'g'），prec 表示精度，bitSize 则使用 32 表示 float32，用 64 表示 float64。
+将字符串转换为其它类型 tp 并不总是可能的，可能会在运行时抛出错误 parsing "…": invalid argument。
+
+针对从字符串类型转换为数字类型，Go 提供了以下函数：
+
+strconv.Atoi(s string) (i int, err error) 将字符串转换为 int 型。
+strconv.ParseFloat(s string, bitSize int) (f float64, err error) 将字符串转换为 float64 型。
+利用多返回值的特性，这些函数会返回 2 个值，第 1 个是转换后的结果（如果转换成功），第 2 个是可能出现的错误，因此，我们一般使用以下形式来进行从字符串到其它类型的转换：
+
+```go
+val, err = strconv.Atoi(s)
+```
+
+```go
+package main
+
+import (
+    "fmt"
+    "strconv"
+)
+
+func main() {
+    var orig string = "666"
+    var an int
+    var newS string
+
+    fmt.Printf("The size of ints is: %d\n", strconv.IntSize)  // The size of ints is: 64
+
+    an, _ = strconv.Atoi(orig)
+    fmt.Printf("The integer is: %d\n", an)  // The integer is: 666
+    an = an + 5
+    newS = strconv.Itoa(an)
+    fmt.Printf("The new string is: %s\n", newS)  // The new string is: 671
+}
+```
+
+
+
+----
+
+## 时间和日期
+
+time 包为我们提供了一个数据类型 time.Time（作为值使用）以及显示和测量时间和日期的功能函数。
+
+当前时间可以使用 time.Now() 获取，或者使用 t.Day()、t.Minute() 等等来获取时间的一部分；你甚至可以自定义时间格式化字符串，例如： fmt.Printf("%02d.%02d.%4d\n", t.Day(), t.Month(), t.Year()) 将会输出 21.07.2011。
+
+Duration 类型表示两个连续时刻所相差的纳秒数，类型为 int64。Location 类型映射某个时区的时间，UTC 表示通用协调世界时间。
+
+包中的一个预定义函数 func (t Time) Format(layout string) string 可以根据一个格式化字符串来将一个时间 t 转换为相应格式的字符串，你可以使用一些预定义的格式，如：time.ANSIC 或 time.RFC822。
+
+一般的格式化设计是通过对于一个标准时间的格式化描述来展现的，这听起来很奇怪，但看下面这个例子你就会一目了然：
+
+```
+fmt.Println(t.Format("02 Jan 2006 15:04")) 
+```
+
+```go
+package main
+import (
+    "fmt"
+    "time"
+)
+
+var week time.Duration
+func main() {
+    t := time.Now()
+    fmt.Println(t) // 2022-10-03 15:38:27.2238134 +0800 CST m=+0.003759901
+    fmt.Printf("%02d.%02d.%4d\n", t.Day(), t.Month(), t.Year())
+    // 03.10.2022
+    t = time.Now().UTC()
+    fmt.Println(t) // 2022-10-03 07:38:27.2384557 +0000 UTC
+    fmt.Println(time.Now()) // 2022-10-03 15:38:27.2384557 +0800 CST m=+0.018402201
+    // calculating times:
+    week = 60 * 60 * 24 * 7 * 1e9 // must be in nanosec
+    week_from_now := t.Add(week)
+    fmt.Println(week_from_now) // 2022-10-10 07:38:27.2384557 +0000 UTC
+    // formatting times:
+    fmt.Println(t.Format(time.RFC822)) // 03 Oct 22 07:38 UTC
+    fmt.Println(t.Format(time.ANSIC)) // Mon Oct  3 07:38:27 2022
+    fmt.Println(t.Format("21 Dec 2011 08:52")) // 310 Dec 31010 08:273
+    s := t.Format("20060102")
+    fmt.Println(t, "=>", s)
+    // 2022-10-03 07:38:27.2384557 +0000 UTC => 20221003
+}
+```
+
+
+
+----
+
+##  指针
+
+不像 Java 和 .NET，Go 语言为程序员提供了控制数据结构的指针的能力；但是，你不能进行指针运算。通过给予程序员基本内存布局，Go 语言允许你控制特定集合的数据结构、分配的数量以及内存访问模式，这些对构建运行良好的系统是非常重要的：指针对于性能的影响是不言而喻的，而如果你想要做的是系统编程、操作系统或者网络应用，指针更是不可或缺的一部分。
+
+由于各种原因，指针对于使用面向对象编程的现代程序员来说可能显得有些陌生，不过我们将会在这一小节对此进行解释，并在未来的章节中展开深入讨论。
+
+程序在内存中存储它的值，每个内存块（或字）有一个地址，通常用十六进制数表示，如：0x6b0820 或 0xf84001d7f0。
+
+**Go 语言的取地址符是 &**，放到一个变量前使用就会返回相应变量的内存地址。
+
+下面的代码片段（示例 4.9 pointer.go）可能输出 An integer: 5, its location in memory: 0x6b0820（这个值随着你每次运行程序而变化）。
+
+```go
+package main
+import (
+    "fmt"
+)
+
+func main() {
+    var i1 = 5
+    fmt.Println(i1, &i1) // 5 0xc000014078
+}
+```
+
+这个地址可以存储在一个叫做指针的特殊数据类型中，在本例中这是一个指向 int 的指针，即 i1：此处使用 *int 表示。如果我们想调用指针 intP，我们可以这样声明它：
+
+```
+var intP *int
+```
+
+然后使用 intP = &i1 是合法的，此时 intP 指向 i1。
+
+（指针的格式化标识符为 %p）
+
+intP 存储了 i1 的内存地址；它指向了 i1 的位置，它引用了变量 i1。
+
+一个指针变量可以指向任何一个值的内存地址 它指向那个值的内存地址，在 32 位机器上占用 4 个字节，在 64 位机器上占用 8 个字节，并且与它所指向的值的大小无关。当然，可以声明指针指向任何类型的值来表明它的原始性或结构性；你可以在指针类型前面加上 * 号（前缀）来获取指针所指向的内容，这里的 * 号是一个类型更改器。使用一个指针引用一个值被称为间接引用。
+
+当一个指针被定义后没有分配到任何变量时，它的值为 nil。
+
+一个指针变量通常缩写为 ptr。
+
+**注意事项**
+
+在书写表达式类似 var p *type 时，切记在 * 号和指针名称间留有一个空格，因为 var p*type 是语法正确的，但是在更复杂的表达式中，它容易被误认为是一个乘法表达式！
+
+符号 * 可以放在一个指针前，如 *intP，那么它将得到这个指针指向地址上所存储的值；这被称为**反引用**（或者内容或者间接引用）操作符；另一种说法是指针转移。
+
+对于任何一个变量 var， 如下表达式都是正确的：var == *(&var)。
+
+```go
+package main
+import "fmt"
+func main() {
+    var i1 = 5
+    fmt.Printf("An integer: %d, its location in memory: %p\n", i1, &i1)
+    var intP *int
+    intP = &i1
+    fmt.Printf("The value at memory location %p is %d\n", intP, *intP)
+}
+
+/*
+An integer: 5, its location in memory: 0xc000014078
+The value at memory location 0xc000014078 is 5
+*/
+```
+
+
+
+展示了分配一个新的值给 *p 并且更改这个变量自己的值（这里是一个字符串）。
+
+```go
+package main
+import "fmt"
+func main() {
+    s := "good bye"
+    var p *string = &s
+    *p = "ciao"
+    fmt.Printf("Here is the pointer p: %p\n", p) // Here is the pointer p: 0xc000040250
+    fmt.Printf("Here is the string *p: %s\n", *p) // Here is the string *p: ciao
+    fmt.Printf("Here is the string s: %s\n", s) // Here is the string s: ciao
+}
+```
+
+通过对 *p 赋另一个值来更改 “对象”，这样 s 也会随之更改。
+
+注意事项
+
+你不能得到一个文字或常量的地址，例如：
+
+```go
+const i = 5
+ptr := &i //error: cannot take the address of i
+ptr2 := &10 //error: cannot take the address of 10
+```
+
+所以说，Go 语言和 C、C++ 以及 D 语言这些低层（系统）语言一样，都有指针的概念。但是对于经常导致 C 语言内存泄漏继而程序崩溃的指针运算（所谓的指针算法，如：pointer+2，移动指针指向字符串的字节数或数组的某个位置）是不被允许的。Go 语言中的指针保证了内存安全，更像是 Java、C# 和 VB.NET 中的引用。
+
+因此 c = *p++ 在 Go 语言的代码中是不合法的。
+
+指针的一个高级应用是你可以传递一个变量的引用（如函数的参数），这样不会传递变量的拷贝。指针传递是很廉价的，只占用 4 个或 8 个字节。当程序在工作中需要占用大量的内存，或很多变量，或者两者都有，使用指针会减少内存占用和提高效率。被指向的变量也保存在内存中，直到没有任何指针指向它们，所以从它们被创建开始就具有相互独立的生命周期。
+
+另一方面（虽然不太可能），由于一个指针导致的间接引用（一个进程执行了另一个地址），指针的过度频繁使用也会导致性能下降。
+
+指针也可以指向另一个指针，并且可以进行任意深度的嵌套，导致你可以有多级的间接引用，但在大多数情况这会使你的代码结构不清晰。
+
+如我们所见，在大多数情况下 Go 语言可以使程序员轻松创建指针，并且隐藏间接引用，如：自动反向引用。
+
+**对一个空指针的反向引用是不合法的**，并且会使程序崩溃：
+
+```go
+package main
+func main() {
+    var p *int = nil
+    *p = 0
+}
+//panic: runtime error: invalid memory address or nil pointer dereference
+//[signal 0xc0000005 code=0x1 addr=0x0 pc=0x4bc8a2]
+```
+
+
+
+----
+
+# 控制结构
+
