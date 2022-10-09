@@ -1,21 +1,17 @@
 /**
- * @param {number[]} nums
+ * @param {string} s
  * @return {number}
  */
-var maxAscendingSum = function(nums) {
-  const n = nums.length;
-  let ans = nums[0], sum = nums[0];
-  for (let i = 1; i < n; i++) {
-    if (nums[i] <= nums[i - 1]) {
-      ans = Math.max(ans, sum);
-      sum = nums[i];
-    } else {
-      sum += nums[i];
+var scoreOfParentheses = function(s) {
+  let bal = 0, n = s.length, ans = 0;
+  for (let i = 0; i < n; i++) {
+    bal += (s[i] === '(' ? 1 : -1);
+    if (s[i] === ')' && s[i - 1] === '(') {
+      ans += 1 << bal;
     }
   }
-  ans = Math.max(ans, sum);
   return ans;
 };
 
-let nums = [10,20,30,5,10,50];
-console.log(maxAscendingSum(nums));
+let s = "(()(()))";
+console.log(scoreOfParentheses(s));
