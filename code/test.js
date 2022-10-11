@@ -1,17 +1,28 @@
 /**
- * @param {string} s
- * @return {number}
+ * @param {string} s1
+ * @param {string} s2
+ * @return {boolean}
  */
-var scoreOfParentheses = function(s) {
-  let bal = 0, n = s.length, ans = 0;
+var areAlmostEqual = function(s1, s2) {
+  const n = s1.length;
+  const diff = [];
   for (let i = 0; i < n; i++) {
-    bal += (s[i] === '(' ? 1 : -1);
-    if (s[i] === ')' && s[i - 1] === '(') {
-      ans += 1 << bal;
+    if (s1[i] !== s2[i]) {
+      if (diff.length >= 2) {
+        return false;
+      }
+      diff.push(i)
     }
   }
-  return ans;
+  if (diff.length === 0) {
+    return true;
+  }
+  if (diff.length !== 2) {
+    return false;
+  }
+
+  return s1[diff[0]] === s2[diff[1]] && s1[diff[1]] === s2[diff[0]];
 };
 
-let s = "(()(()))";
-console.log(scoreOfParentheses(s));
+let s1 = "attack", s2 = "defend";
+console.log(areAlmostEqual(s1, s2));
