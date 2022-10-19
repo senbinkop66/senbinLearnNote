@@ -1282,3 +1282,674 @@ mysql> select name from person where age > 24 union select name from otherinfo w
 ---
 
 # MySQL 排序
+
+我们知道从 MySQL 表中使用 SQL SELECT 语句来读取数据。
+
+如果我们需要对读取的数据进行排序，我们就可以使用 MySQL 的 **ORDER BY** 子句来设定你想按哪个字段哪种方式来进行排序，再返回搜索结果。
+
+**语法**
+
+以下是 SQL SELECT 语句使用 ORDER BY 子句将查询数据排序后再返回数据：
+
+```mysql
+SELECT field1, field2,...fieldN FROM table_name1, table_name2...
+ORDER BY field1 [ASC [DESC][默认 ASC]], [field2...] [ASC [DESC][默认 ASC]]
+```
+
+- 你可以使用任何字段来作为排序的条件，从而返回排序后的查询结果。
+- 你可以设定多个字段来排序。
+- 你可以使用 ASC 或 DESC 关键字来设置查询结果是按升序或降序排列。 默认情况下，它是按升序排列。
+- 你可以添加 WHERE...LIKE 子句来设置条件。
+
+**在命令提示符中使用 ORDER BY 子句**
+
+以下将在 SQL SELECT 语句中使用 ORDER BY 子句来读取MySQL 数据表中的数据：
+
+```mysql
+mysql> select * from person order by number asc;
++----+---------+--------+------+--------+
+| id | name    | sex    | age  | number |
++----+---------+--------+------+--------+
+|  1 | Alison  | male   |   28 |      1 |
+|  8 | Fabnio  | female |   28 |      3 |
+|  2 | Vigril  | male   |   29 |      4 |
+|  6 | Salah   | male   |   30 |     11 |
+|  3 | Hendson | male   |   31 |     14 |
+|  5 | Robson  | male   |   26 |     26 |
+|  7 | Nuniz   | female |   24 |     27 |
+|  4 | Arnold  | male   |   23 |     66 |
++----+---------+--------+------+--------+
+8 rows in set (0.00 sec)
+```
+
+如果字符集采用的是 gbk(汉字编码字符集)，直接在查询语句后边添加 ORDER BY：
+
+```mysql
+SELECT * FROM person ORDER BY name;
+```
+
+如果字符集采用的是 utf8(万国码)，需要先对字段进行转码然后排序：
+
+```mysql
+SELECT * FROM person ORDER BY CONVERT(name using gbk);
+```
+
+```mysql
+mysql> SELECT * FROM person ORDER BY CONVERT(name using gbk);
++----+---------+--------+------+--------+
+| id | name    | sex    | age  | number |
++----+---------+--------+------+--------+
+|  1 | Alison  | male   |   28 |      1 |
+|  4 | Arnold  | male   |   23 |     66 |
+|  8 | Fabnio  | female |   28 |      3 |
+|  3 | Hendson | male   |   31 |     14 |
+|  7 | Nuniz   | female |   24 |     27 |
+|  5 | Robson  | male   |   26 |     26 |
+|  6 | Salah   | male   |   30 |     11 |
+|  2 | Vigril  | male   |   29 |      4 |
++----+---------+--------+------+--------+
+8 rows in set (0.00 sec)
+```
+
+
+
+----
+
+# MySQL分组
+
+GROUP BY 语句根据一个或多个列对结果集进行分组。
+
+在分组的列上我们可以使用 COUNT, SUM, AVG,等函数。
+
+**GROUP BY 语法**
+
+```mysql
+SELECT column_name, function(column_name)
+FROM table_name
+WHERE column_name operator value
+GROUP BY column_name;
+```
+
+我们使用 GROUP BY 语句 将数据表按age进行分组
+
+```mysql
+mysql> select age, count(*) from person group by age;
++------+----------+
+| age  | count(*) |
++------+----------+
+|   23 |        1 |
+|   24 |        1 |
+|   26 |        1 |
+|   28 |        2 |
+|   29 |        1 |
+|   30 |        1 |
+|   31 |        1 |
++------+----------+
+7 rows in set (0.00 sec)
+```
+
+**使用 WITH ROLLUP**
+
+WITH ROLLUP 可以实现在分组统计数据基础上再进行相同的统计（SUM,AVG,COUNT…）。
+
+```mysql
+mysql> select age,count(*), sum(number) as number_sum from person group by age with rollup;
++------+----------+------------+
+| age  | count(*) | number_sum |
++------+----------+------------+
+|   23 |        1 |         66 |
+|   24 |        1 |         27 |
+|   26 |        1 |         26 |
+|   28 |        2 |          4 |
+|   29 |        1 |          4 |
+|   30 |        1 |         11 |
+|   31 |        1 |         14 |
+| NULL |        8 |        152 |
++------+----------+------------+
+8 rows in set (0.00 sec)
+```
+
+其中记录 NULL 表示所有的记录。
+
+我们可以使用 coalesce 来设置一个可以取代 NUll 的名称，coalesce 语法：
+
+我们可以使用 coalesce 来设置一个可以取代 NUll 的名称，coalesce 语法：
+
+```
+select coalesce(a,b,c);
+```
+
+参数说明：如果a==null,则选择b；如果b==null,则选择c；如果a!=null,则选择a；如果a b c 都为null ，则返回为null（没意义）。
+
+以下实例中如果age为空我们使用总数代替：
+
+```mysql
+mysql> select coalesce(age,'总数'),count(*), sum(number) as number_sum from person group by age with rollup;
++----------------------+----------+------------+
+| coalesce(age,'总数') | count(*) | number_sum |
++----------------------+----------+------------+
+| 23                   |        1 |         66 |
+| 24                   |        1 |         27 |
+| 26                   |        1 |         26 |
+| 28                   |        2 |          4 |
+| 29                   |        1 |          4 |
+| 30                   |        1 |         11 |
+| 31                   |        1 |         14 |
+| 总数                 |        8 |        152 |
++----------------------+----------+------------+
+8 rows in set (0.00 sec)
+```
+
+
+
+----
+
+# MySQL 连接的使用
+
+你可以在 SELECT, UPDATE 和 DELETE 语句中使用 Mysql 的 JOIN 来联合多表查询。
+
+JOIN 按照功能大致分为如下三类：
+
+- **INNER JOIN（内连接,或等值连接）**：获取两个表中字段匹配关系的记录。
+- **LEFT JOIN（左连接）：**获取左表所有记录，即使右表没有对应匹配的记录。
+- **RIGHT JOIN（右连接）：** 与 LEFT JOIN 相反，用于获取右表所有记录，即使左表没有对应匹配的记录。
+
+## INNER JOIN
+
+![img](https://www.runoob.com/wp-content/uploads/2014/03/img_innerjoin.gif)
+
+使用MySQL的**INNER JOIN(也可以省略 INNER 使用 JOIN，效果一样)**来连接以上两张表来读取
+
+```mysql
+mysql> select a.name, a.number, b.country from person a inner join otherinfo b on a.name = b.name;
++---------+--------+----------+
+| name    | number | country  |
++---------+--------+----------+
+| Alison  |      1 | Baxi     |
+| Vigril  |      4 | Helan    |
+| Hendson |     14 | England  |
+| Arnold  |     66 | England  |
+| Robson  |     26 | Scotland |
+| Salah   |     11 | Egipty   |
+| Nuniz   |     27 | Wulagui  |
+| Fabnio  |      3 | Baxi     |
++---------+--------+----------+
+8 rows in set (0.00 sec)
+```
+
+以上 SQL 语句等价于：
+
+```mysql
+mysql> select a.name, a.number, b.country from person a, otherinfo b where a.name = b.name;
++---------+--------+----------+
+| name    | number | country  |
++---------+--------+----------+
+| Alison  |      1 | Baxi     |
+| Vigril  |      4 | Helan    |
+| Hendson |     14 | England  |
+| Arnold  |     66 | England  |
+| Robson  |     26 | Scotland |
+| Salah   |     11 | Egipty   |
+| Nuniz   |     27 | Wulagui  |
+| Fabnio  |      3 | Baxi     |
++---------+--------+----------+
+8 rows in set (0.00 sec)
+```
+
+## LEFT JOIN
+
+MySQL left join 与 join 有所不同。 MySQL LEFT JOIN 会读取左边数据表的全部数据，即使右边表无对应数据。
+
+![img](https://www.runoob.com/wp-content/uploads/2014/03/img_leftjoin.gif)
+
+```mysql
+INSERT INTO person (id, name, sex, age, number)
+                       VALUES
+                       (9, 'Jota', 'male', 26, 20),
+                       (10, 'Matip', 'male', 30, 32);
+```
+
+
+
+```mysql
+mysql> select a.name, a.number, b.country from person a left join otherinfo b on a.name = b.name;
++---------+--------+----------+
+| name    | number | country  |
++---------+--------+----------+
+| Alison  |      1 | Baxi     |
+| Vigril  |      4 | Helan    |
+| Hendson |     14 | England  |
+| Arnold  |     66 | England  |
+| Robson  |     26 | Scotland |
+| Salah   |     11 | Egipty   |
+| Nuniz   |     27 | Wulagui  |
+| Fabnio  |      3 | Baxi     |
+| Jota    |     20 | NULL     |
+| Matip   |     32 | NULL     |
++---------+--------+----------+
+10 rows in set (0.00 sec)
+```
+
+
+
+##  RIGHT JOIN
+
+MySQL RIGHT JOIN 会读取右边数据表的全部数据，即使左边边表无对应数据。
+
+![img](https://www.runoob.com/wp-content/uploads/2014/03/img_rightjoin.gif)
+
+```mysql
+INSERT INTO otherinfo (id, name, country, site)
+                       VALUES
+                       (9, 'Elliot', 'England', 'M'),
+                       (10, 'Diaz', 'Colombia', 'F');
+```
+
+```mysql
+mysql> select a.name, a.number, b.country from person a right join otherinfo b on a.name = b.name;
++---------+--------+----------+
+| name    | number | country  |
++---------+--------+----------+
+| Alison  |      1 | Baxi     |
+| Vigril  |      4 | Helan    |
+| Hendson |     14 | England  |
+| Arnold  |     66 | England  |
+| Robson  |     26 | Scotland |
+| Salah   |     11 | Egipty   |
+| Nuniz   |     27 | Wulagui  |
+| Fabnio  |      3 | Baxi     |
+| NULL    |   NULL | England  |
+| NULL    |   NULL | Colombia |
++---------+--------+----------+
+10 rows in set (0.00 sec)
+```
+
+
+
+----
+
+# MySQL NULL 值处理
+
+已经知道 MySQL 使用 SQL SELECT 命令及 WHERE 子句来读取数据表中的数据,但是当提供的查询条件字段为 NULL 时，该命令可能就无法正常工作。
+
+为了处理这种情况，MySQL提供了三大运算符:
+
+- **IS NULL:** 当列的值是 NULL,此运算符返回 true。
+- **IS NOT NULL:** 当列的值不为 NULL, 运算符返回 true。
+- **<=>:** 比较操作符（不同于 = 运算符），当比较的的两个值相等或者都为 NULL 时返回 true。
+
+关于 NULL 的条件比较运算是比较特殊的。你不能使用 = NULL 或 != NULL 在列中查找 NULL 值 。
+
+在 MySQL 中，NULL 值与任何其它值的比较（即使是 NULL）永远返回 NULL，即 NULL = NULL 返回 NULL 。
+
+MySQL 中处理 NULL 使用 IS NULL 和 IS NOT NULL 运算符。
+
+> **注意：**
+>
+> ```mysql
+> select * , columnName1+ifnull(columnName2,0) from tableName;
+> ```
+>
+> columnName1，columnName2 为 int 型，当 columnName2 中，有值为 null 时，columnName1+columnName2=null， ifnull(columnName2,0) 把 columnName2 中 null 值转为 0。
+
+```mysql
+mysql> select * from person;
++----+---------+--------+------+--------+
+| id | name    | sex    | age  | number |
++----+---------+--------+------+--------+
+|  1 | Alison  | male   |   28 |      1 |
+|  2 | Vigril  | male   |   29 |      4 |
+|  3 | Hendson | male   |   31 |     14 |
+|  4 | Arnold  | male   |   23 |     66 |
+|  5 | Robson  | male   |   26 |     26 |
+|  6 | Salah   | male   |   30 |     11 |
+|  7 | Nuniz   | female |   24 |     27 |
+|  8 | Fabnio  | female |   28 |      3 |
+|  9 | Jota    | male   |   26 |     20 |
+| 10 | Matip   | male   |   30 |     32 |
+| 11 | Firmino | male   | NULL |      9 |
+| 12 | Thiago  | male   | NULL |      6 |
++----+---------+--------+------+--------+
+12 rows in set (0.00 sec)
+```
+
+
+
+```mysql
+INSERT INTO person (id, name, sex, age, number)
+                       VALUES
+                       (11, 'Firmino', 'male', null, 9),
+                       (12, 'Thiago', 'male', null, 6);
+```
+
+以下实例中你可以看到 = 和 != 运算符是不起作用的：
+
+```mysql
+mysql> select * from person where age = null;
+Empty set (0.00 sec)
+
+mysql> select * from person where age != null;
+Empty set (0.00 sec)
+```
+
+查找数据表中 列是否为 NULL，必须使用 **IS NULL** 和 **IS NOT NULL**
+
+```mysql
+mysql> select * from person where age is not null;
++----+---------+--------+------+--------+
+| id | name    | sex    | age  | number |
++----+---------+--------+------+--------+
+|  1 | Alison  | male   |   28 |      1 |
+|  2 | Vigril  | male   |   29 |      4 |
+|  3 | Hendson | male   |   31 |     14 |
+|  4 | Arnold  | male   |   23 |     66 |
+|  5 | Robson  | male   |   26 |     26 |
+|  6 | Salah   | male   |   30 |     11 |
+|  7 | Nuniz   | female |   24 |     27 |
+|  8 | Fabnio  | female |   28 |      3 |
+|  9 | Jota    | male   |   26 |     20 |
+| 10 | Matip   | male   |   30 |     32 |
++----+---------+--------+------+--------+
+10 rows in set (0.00 sec)
+
+mysql> select * from person where age is null;
++----+---------+------+------+--------+
+| id | name    | sex  | age  | number |
++----+---------+------+------+--------+
+| 11 | Firmino | male | NULL |      9 |
+| 12 | Thiago  | male | NULL |      6 |
++----+---------+------+------+--------+
+2 rows in set (0.00 sec)
+```
+
+
+
+----
+
+# MySQL 正则表达式
+
+在前面的章节我们已经了解到MySQL可以通过 **LIKE ...%** 来进行模糊匹配。
+
+MySQL 同样也支持其他正则表达式的匹配， MySQL中使用 REGEXP 操作符来进行正则表达式匹配。
+
+如果您了解PHP或Perl，那么操作起来就非常简单，因为MySQL的正则表达式匹配与这些脚本的类似。
+
+下表中的正则模式可应用于 REGEXP 操作符中。
+
+| 模式       | 描述                                                         |
+| :--------- | :----------------------------------------------------------- |
+| ^          | 匹配输入字符串的开始位置。如果设置了 RegExp 对象的 Multiline 属性，^ 也匹配 '\n' 或 '\r' 之后的位置。 |
+| $          | 匹配输入字符串的结束位置。如果设置了RegExp 对象的 Multiline 属性，$ 也匹配 '\n' 或 '\r' 之前的位置。 |
+| .          | 匹配除 "\n" 之外的任何单个字符。要匹配包括 '\n' 在内的任何字符，请使用像 '[.\n]' 的模式。 |
+| [...]      | 字符集合。匹配所包含的任意一个字符。例如， '[abc]' 可以匹配 "plain" 中的 'a'。 |
+| [^...]     | 负值字符集合。匹配未包含的任意字符。例如， '[^abc]' 可以匹配 "plain" 中的'p'。 |
+| p1\|p2\|p3 | 匹配 p1 或 p2 或 p3。例如，'z\|food' 能匹配 "z" 或 "food"。'(z\|f)ood' 则匹配 "zood" 或 "food"。 |
+| *          | 匹配前面的子表达式零次或多次。例如，zo* 能匹配 "z" 以及 "zoo"。* 等价于{0,}。 |
+| +          | 匹配前面的子表达式一次或多次。例如，'zo+' 能匹配 "zo" 以及 "zoo"，但不能匹配 "z"。+ 等价于 {1,}。 |
+| {n}        | n 是一个非负整数。匹配确定的 n 次。例如，'o{2}' 不能匹配 "Bob" 中的 'o'，但是能匹配 "food" 中的两个 o。 |
+| {n,m}      | m 和 n 均为非负整数，其中n <= m。最少匹配 n 次且最多匹配 m 次。 |
+
+了解以上的正则需求后，我们就可以根据自己的需求来编写带有正则表达式的SQL语句。
+
+```mysql
+mysql> select * from person where name regexp '^a';
++----+--------+------+------+--------+
+| id | name   | sex  | age  | number |
++----+--------+------+------+--------+
+|  1 | Alison | male |   28 |      1 |
+|  4 | Arnold | male |   23 |     66 |
++----+--------+------+------+--------+
+2 rows in set (0.00 sec)
+
+mysql> select * from person where name regexp 'n$';
++----+---------+------+------+--------+
+| id | name    | sex  | age  | number |
++----+---------+------+------+--------+
+|  1 | Alison  | male |   28 |      1 |
+|  3 | Hendson | male |   31 |     14 |
+|  5 | Robson  | male |   26 |     26 |
++----+---------+------+------+--------+
+3 rows in set (0.00 sec)
+
+mysql> select * from person where name regexp '.*on';
++----+---------+------+------+--------+
+| id | name    | sex  | age  | number |
++----+---------+------+------+--------+
+|  1 | Alison  | male |   28 |      1 |
+|  3 | Hendson | male |   31 |     14 |
+|  5 | Robson  | male |   26 |     26 |
++----+---------+------+------+--------+
+3 rows in set (0.00 sec)
+
+mysql> select * from person where name regexp 'son';
++----+---------+------+------+--------+
+| id | name    | sex  | age  | number |
++----+---------+------+------+--------+
+|  1 | Alison  | male |   28 |      1 |
+|  3 | Hendson | male |   31 |     14 |
+|  5 | Robson  | male |   26 |     26 |
++----+---------+------+------+--------+
+3 rows in set (0.00 sec)
+```
+
+
+
+----
+
+# MySQL 事务
+
+# MySQL 事务
+
+MySQL 事务主要用于处理操作量大，复杂度高的数据。比如说，在人员管理系统中，你删除一个人员，你既需要删除人员的基本资料，也要删除和该人员相关的信息，如信箱，文章等等，这样，这些数据库操作语句就构成一个事务！
+
+- 在 MySQL 中只有使用了 Innodb 数据库引擎的数据库或表才支持事务。
+- 事务处理可以用来维护数据库的完整性，保证成批的 SQL 语句要么全部执行，要么全部不执行。
+- 事务用来管理 insert,update,delete 语句
+
+一般来说，事务是必须满足4个条件（ACID）：：原子性（**A**tomicity，或称不可分割性）、一致性（**C**onsistency）、隔离性（**I**solation，又称独立性）、持久性（**D**urability）。
+
+- **原子性：**一个事务（transaction）中的所有操作，要么全部完成，要么全部不完成，不会结束在中间某个环节。事务在执行过程中发生错误，会被回滚（Rollback）到事务开始前的状态，就像这个事务从来没有执行过一样。
+- **一致性：**在事务开始之前和事务结束以后，数据库的完整性没有被破坏。这表示写入的资料必须完全符合所有的预设规则，这包含资料的精确度、串联性以及后续数据库可以自发性地完成预定的工作。
+- **隔离性：**数据库允许多个并发事务同时对其数据进行读写和修改的能力，隔离性可以防止多个事务并发执行时由于交叉执行而导致数据的不一致。事务隔离分为不同级别，包括读未提交（Read uncommitted）、读提交（read committed）、可重复读（repeatable read）和串行化（Serializable）。
+- **持久性：**事务处理结束后，对数据的修改就是永久的，即便系统故障也不会丢失。
+
+> 在 MySQL 命令行的默认设置下，事务都是自动提交的，即执行 SQL 语句后就会马上执行 COMMIT 操作。因此要显式地开启一个事务务须使用命令 BEGIN 或 START TRANSACTION，或者执行命令 SET AUTOCOMMIT=0，用来禁止使用当前会话的自动提交。
+
+**事务控制语句：**
+
+- BEGIN 或 START TRANSACTION 显式地开启一个事务；
+- COMMIT 也可以使用 COMMIT WORK，不过二者是等价的。COMMIT 会提交事务，并使已对数据库进行的所有修改成为永久性的；
+- ROLLBACK 也可以使用 ROLLBACK WORK，不过二者是等价的。回滚会结束用户的事务，并撤销正在进行的所有未提交的修改；
+- SAVEPOINT identifier，SAVEPOINT 允许在事务中创建一个保存点，一个事务中可以有多个 SAVEPOINT；
+- RELEASE SAVEPOINT identifier 删除一个事务的保存点，当没有指定的保存点时，执行该语句会抛出一个异常；
+- ROLLBACK TO identifier 把事务回滚到标记点；
+- SET TRANSACTION 用来设置事务的隔离级别。InnoDB 存储引擎提供事务的隔离级别有READ UNCOMMITTED、READ COMMITTED、REPEATABLE READ 和 SERIALIZABLE。
+
+**MYSQL 事务处理主要有两种方法：**
+
+1、用 BEGIN, ROLLBACK, COMMIT来实现
+
+- **BEGIN** 开始一个事务
+- **ROLLBACK** 事务回滚
+- **COMMIT** 事务确认
+
+2、直接用 SET 来改变 MySQL 的自动提交模式:
+
+- **SET AUTOCOMMIT=0** 禁止自动提交
+- **SET AUTOCOMMIT=1** 开启自动提交
+
+
+
+```mysql
+mysql> begin;   # 开始事务
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> insert into person value(20, 'bob', 'male', 33, 100);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into person value(21, 'abc', 'male', 36, 34);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> delete from person where name = abc;
+ERROR 1054 (42S22): Unknown column 'abc' in 'where clause'
+mysql> delete from person where name = 'abc';
+Query OK, 1 row affected (0.00 sec)
+
+mysql> commit;  # 提交事务
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> select * from person;
++----+---------+--------+------+--------+
+| id | name    | sex    | age  | number |
++----+---------+--------+------+--------+
+|  1 | Alison  | male   |   28 |      1 |
+|  2 | Vigril  | male   |   29 |      4 |
+|  3 | Hendson | male   |   31 |     14 |
+|  4 | Arnold  | male   |   23 |     66 |
+|  5 | Robson  | male   |   26 |     26 |
+|  6 | Salah   | male   |   30 |     11 |
+|  7 | Nuniz   | female |   24 |     27 |
+|  8 | Fabnio  | female |   28 |      3 |
+|  9 | Jota    | male   |   26 |     20 |
+| 10 | Matip   | male   |   30 |     32 |
+| 11 | Firmino | male   | NULL |      9 |
+| 12 | Thiago  | male   | NULL |      6 |
+| 20 | bob     | male   |   33 |    100 |
++----+---------+--------+------+--------+
+```
+
+
+
+----
+
+# MySQL ALTER命令
+
+当我们需要修改数据表名或者修改数据表字段时，就需要使用到MySQL ALTER命令。
+
+## 删除，添加或修改表字段
+
+如果数据表中只剩余一个字段则无法使用DROP来删除字段。
+
+如果你需要指定新增字段的位置，可以使用MySQL提供的关键字 FIRST (设定位第一列)， AFTER 字段名（设定位于某个字段之后）。
+
+```mysql
+mysql> alter table person add goal int after name;
+Query OK, 0 rows affected (0.43 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> alter table person add health char;
+Query OK, 0 rows affected (0.40 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> desc person;
++--------+------------------+------+-----+---------+----------------+
+| Field  | Type             | Null | Key | Default | Extra          |
++--------+------------------+------+-----+---------+----------------+
+| id     | int(10) unsigned | NO   | PRI | NULL    | auto_increment |
+| name   | varchar(100)     | NO   |     | NULL    |                |
+| goal   | int(11)          | YES  |     | NULL    |                |
+| sex    | varchar(40)      | NO   |     | NULL    |                |
+| age    | int(10) unsigned | YES  |     | NULL    |                |
+| number | int(10) unsigned | YES  |     | NULL    |                |
+| health | char(1)          | YES  |     | NULL    |                |
++--------+------------------+------+-----+---------+----------------+
+7 rows in set (0.00 sec)
+
+mysql> alter table person drop health;
+Query OK, 0 rows affected (0.42 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> desc person;
++--------+------------------+------+-----+---------+----------------+
+| Field  | Type             | Null | Key | Default | Extra          |
++--------+------------------+------+-----+---------+----------------+
+| id     | int(10) unsigned | NO   | PRI | NULL    | auto_increment |
+| name   | varchar(100)     | NO   |     | NULL    |                |
+| goal   | int(11)          | YES  |     | NULL    |                |
+| sex    | varchar(40)      | NO   |     | NULL    |                |
+| age    | int(10) unsigned | YES  |     | NULL    |                |
+| number | int(10) unsigned | YES  |     | NULL    |                |
++--------+------------------+------+-----+---------+----------------+
+6 rows in set (0.00 sec)
+```
+
+FIRST 和 AFTER 关键字可用于 ADD 与 MODIFY 子句，所以如果你想重置数据表字段的位置就需要先使用 DROP 删除字段然后使用 ADD 来添加字段并设置位置。
+
+
+
+## 修改字段类型及名称
+
+如果需要修改字段类型及名称, 你可以在ALTER命令中使用 MODIFY 或 CHANGE 子句 。
+
+例如，把字段 c 的类型从 CHAR(1) 改为 CHAR(10)，可以执行以下命令:
+
+```mysql
+mysql> ALTER TABLE testalter_tbl MODIFY c CHAR(10);
+```
+
+使用 CHANGE 子句, 语法有很大的不同。 在 CHANGE 关键字之后，紧跟着的是你要修改的字段名，然后指定新字段名及类型。尝试如下实例：
+
+```mysql
+mysql> ALTER TABLE testalter_tbl CHANGE i j BIGINT;
+mysql> ALTER TABLE testalter_tbl CHANGE j j INT;
+```
+
+## ALTER TABLE 对 Null 值和默认值的影响
+
+当你修改字段时，你可以指定是否包含值或者是否设置默认值。
+
+以下实例，指定字段 j 为 NOT NULL 且默认值为100 。
+
+```mysql
+mysql> ALTER TABLE testalter_tbl 
+    -> MODIFY j BIGINT NOT NULL DEFAULT 100;
+```
+
+如果你不设置默认值，MySQL会自动设置该字段默认为 NULL。
+
+
+
+## 修改字段默认值
+
+你可以使用 ALTER 来修改字段的默认值，尝试以下实例：
+
+```mysql
+mysql> ALTER TABLE testalter_tbl ALTER i SET DEFAULT 1000;
+mysql> SHOW COLUMNS FROM testalter_tbl;
++-------+---------+------+-----+---------+-------+
+| Field | Type    | Null | Key | Default | Extra |
++-------+---------+------+-----+---------+-------+
+| c     | char(1) | YES  |     | NULL    |       |
+| i     | int(11) | YES  |     | 1000    |       |
++-------+---------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+```
+
+你也可以使用 ALTER 命令及 DROP子句来删除字段的默认值，如下实例：
+
+```mysql
+mysql> ALTER TABLE testalter_tbl ALTER i DROP DEFAULT;
+mysql> SHOW COLUMNS FROM testalter_tbl;
++-------+---------+------+-----+---------+-------+
+| Field | Type    | Null | Key | Default | Extra |
++-------+---------+------+-----+---------+-------+
+| c     | char(1) | YES  |     | NULL    |       |
+| i     | int(11) | YES  |     | NULL    |       |
++-------+---------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+Changing a Table Type:
+```
+
+修改数据表类型，可以使用 ALTER 命令及 TYPE 子句来完成。尝试以下实例，我们将表 testalter_tbl 的类型修改为 MYISAM 
+
+## 修改表名
+
+如果需要修改数据表的名称，可以在 ALTER TABLE 语句中使用 RENAME 子句来实现。
+
+尝试以下实例将数据表 testalter_tbl 重命名为 alter_tbl：
+
+```mysql
+mysql> ALTER TABLE testalter_tbl RENAME TO alter_tbl;
+```
+
+ALTER 命令还可以用来创建及删除MySQL数据表的索引。
