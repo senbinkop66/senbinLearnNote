@@ -1,26 +1,17 @@
 /**
- * @param {number[]} students
- * @param {number[]} sandwiches
+ * @param {number} n
+ * @param {number} k
  * @return {number}
  */
-var countStudents = function(students, sandwiches) {
-  const n = students.length;
-  let sum1 = 0;
-  students.forEach((item) => {
-    sum1 += item;
-  });
-  let sum0 = n - sum1;
-  for (let i = 0; i < n; i++) {
-    if (sandwiches[i] === 0 && sum0 > 0) {
-      sum0--;
-    } else if (sandwiches[i] === 1 && sum1 > 0) {
-      sum1--;
-    } else {
-      break;
-    }
+var kthGrammar = function(n, k) {
+  k--;
+  let ans = 0;
+  while (k > 0) {
+    k &= k - 1;
+    ans ^= 1;
   }
-  return sum0 + sum1;
+  return ans;
 };
 
-let students = [1,1,0,0], sandwiches = [0,1,0,1];
-console.log(countStudents(students, sandwiches));
+let n = 2, k = 2;
+console.log(kthGrammar(n, k));
