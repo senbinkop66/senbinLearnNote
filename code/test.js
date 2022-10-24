@@ -1,17 +1,20 @@
 /**
- * @param {number} n
- * @param {number} k
+ * @param {number[]} nums
  * @return {number}
  */
-var kthGrammar = function(n, k) {
-  k--;
-  let ans = 0;
-  while (k > 0) {
-    k &= k - 1;
-    ans ^= 1;
-  }
-  return ans;
+var partitionDisjoint = function(nums) {
+    const n = nums.length;
+    let leftMax = nums[0], leftPos = 0, curMax = nums[0];
+    for (let i = 1; i < n - 1; i++) {
+        curMax = Math.max(curMax, nums[i]);
+        if (nums[i] < leftMax) {
+            leftMax = curMax;
+            leftPos = i;
+        }
+    }
+    return leftPos + 1;
 };
 
-let n = 2, k = 2;
-console.log(kthGrammar(n, k));
+
+let nums = [1,1,1,0,6,12];
+console.log(partitionDisjoint(nums));
