@@ -1,20 +1,34 @@
 /**
- * @param {number[]} nums
+ * @param {string} s
+ * @param {string[]} words
  * @return {number}
  */
-var partitionDisjoint = function(nums) {
-    const n = nums.length;
-    let leftMax = nums[0], leftPos = 0, curMax = nums[0];
-    for (let i = 1; i < n - 1; i++) {
-        curMax = Math.max(curMax, nums[i]);
-        if (nums[i] < leftMax) {
-            leftMax = curMax;
-            leftPos = i;
-        }
+var numMatchingSubseq = function(s, words) {
+  const p = new Array(26).fill(0).map(() => new Array());
+  const codeA = 'a'.charCodeAt();
+
+  for (let i = 0; i < words.length; i++) {
+    p[words[i][0].charCodeAt() - codeA].push([i, 0]);
+  }
+
+  let ans = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    let len = p[c.charCodeAt() - codeA].length;
+    while (len > 0) {
+      const t = p[c.charCodeAt() - codeA].shift();
+      if (t[1] === words[t[0]].length - 1) {
+        ans++;
+      } else {
+        t[1]++;
+        p[words[t[0]][t[1]].charCodeAt() - codeA].push(t);
+      }
+      len--;
     }
-    return leftPos + 1;
+  }
+  return ans;
 };
 
 
-let nums = [1,1,1,0,6,12];
-console.log(partitionDisjoint(nums));
+let s = "abcde", words = ["a","bb","acd","ace"];
+console.log(numMatchingSubseq(s, words));
