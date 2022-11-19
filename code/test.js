@@ -1,34 +1,15 @@
 /**
- * @param {string} s
- * @param {string[]} words
+ * @param {number[]} gain
  * @return {number}
  */
-var numMatchingSubseq = function(s, words) {
-  const p = new Array(26).fill(0).map(() => new Array());
-  const codeA = 'a'.charCodeAt();
-
-  for (let i = 0; i < words.length; i++) {
-    p[words[i][0].charCodeAt() - codeA].push([i, 0]);
+var largestAltitude = function(gain) {
+  let height = 0, maxHeight = 0;
+  for (let i = 0; i < gain.length; i++) {
+    height += gain[i];
+    maxHeight = Math.max(height, maxHeight);
   }
-
-  let ans = 0;
-  for (let i = 0; i < s.length; i++) {
-    const c = s[i];
-    let len = p[c.charCodeAt() - codeA].length;
-    while (len > 0) {
-      const t = p[c.charCodeAt() - codeA].shift();
-      if (t[1] === words[t[0]].length - 1) {
-        ans++;
-      } else {
-        t[1]++;
-        p[words[t[0]][t[1]].charCodeAt() - codeA].push(t);
-      }
-      len--;
-    }
-  }
-  return ans;
+  return maxHeight;
 };
 
-
-let s = "abcde", words = ["a","bb","acd","ace"];
-console.log(numMatchingSubseq(s, words));
+let gain = [-5,1,5,0,-7];
+console.log(largestAltitude(gain));
