@@ -1,15 +1,24 @@
 /**
- * @param {number[]} gain
+ * @param {number} poured
+ * @param {number} query_row
+ * @param {number} query_glass
  * @return {number}
  */
-var largestAltitude = function(gain) {
-  let height = 0, maxHeight = 0;
-  for (let i = 0; i < gain.length; i++) {
-    height += gain[i];
-    maxHeight = Math.max(height, maxHeight);
+var champagneTower = function(poured, query_row, query_glass) {
+  let row = [poured];
+  for (let i = 1; i <= query_row; i++) {
+    const nextRow = new Array(i + 1).fill(0);
+    for (let j = 0; j < i; j++) {
+      const volume = row[j];
+      if (volume > 1) {
+        nextRow[j] += (volume - 1) / 2;
+        nextRow[j + 1] += (volume - 1) / 2;
+      }
+    }
+    row = nextRow;
   }
-  return maxHeight;
+  return Math.min(1, row[query_glass])
 };
 
-let gain = [-5,1,5,0,-7];
-console.log(largestAltitude(gain));
+let poured = 100000009, query_row = 33, query_glass = 17;
+console.log(champagneTower(poured, query_row, query_glass));
