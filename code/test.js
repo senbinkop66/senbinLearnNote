@@ -1,24 +1,24 @@
 /**
- * @param {number} poured
- * @param {number} query_row
- * @param {number} query_glass
+ * @param {number} n
  * @return {number}
  */
-var champagneTower = function(poured, query_row, query_glass) {
-  let row = [poured];
-  for (let i = 1; i <= query_row; i++) {
-    const nextRow = new Array(i + 1).fill(0);
-    for (let j = 0; j < i; j++) {
-      const volume = row[j];
-      if (volume > 1) {
-        nextRow[j] += (volume - 1) / 2;
-        nextRow[j + 1] += (volume - 1) / 2;
-      }
-    }
-    row = nextRow;
+var soupServings = function(n) {
+  n = Math.ceil(n / 25);
+  if (n >= 179) {
+    return 1.0;
   }
-  return Math.min(1, row[query_glass])
+  const dp = new Array(n + 1).fill(0).map(() => new Array(n + 1).fill(0));
+  dp[0][0] = 0.5;
+  for (let i = 1; i <= n; i++) {
+    dp[0][i] = 1.0;
+  }
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = (dp[Math.max(0, i - 4)][j] + dp[Math.max(0, i - 3)][Math.max(0, j - 1)] + dp[Math.max(0, i - 2)][Math.max(0, j - 2)] + dp[Math.max(0, i - 1)][Math.max(0, j - 3)]) / 4.0;
+    }
+  }
+  return dp[n][n];
 };
 
-let poured = 100000009, query_row = 33, query_glass = 17;
-console.log(champagneTower(poured, query_row, query_glass));
+let n = 50;
+console.log(soupServings(n));
