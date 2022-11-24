@@ -1,24 +1,24 @@
 /**
- * @param {number} n
+ * @param {number[]} nums
+ * @param {number} left
+ * @param {number} right
  * @return {number}
  */
-var soupServings = function(n) {
-  n = Math.ceil(n / 25);
-  if (n >= 179) {
-    return 1.0;
-  }
-  const dp = new Array(n + 1).fill(0).map(() => new Array(n + 1).fill(0));
-  dp[0][0] = 0.5;
-  for (let i = 1; i <= n; i++) {
-    dp[0][i] = 1.0;
-  }
-  for (let i = 1; i <= n; i++) {
-    for (let j = 1; j <= n; j++) {
-      dp[i][j] = (dp[Math.max(0, i - 4)][j] + dp[Math.max(0, i - 3)][Math.max(0, j - 1)] + dp[Math.max(0, i - 2)][Math.max(0, j - 2)] + dp[Math.max(0, i - 1)][Math.max(0, j - 3)]) / 4.0;
+var numSubarrayBoundedMax = function(nums, left, right) {
+  let res = 0, last2 = -1, last1 = -1;
+  for (let i = 0; i < nums.length; i++) {
+    if (nums[i] >= left && nums[i] <= right) {
+      last1 = i;
+    } else if (nums[i] > right) {
+      last2 = i;
+      last1 = -1;
+    }
+    if (last1 !== -1) {
+      res += last1 - last2;
     }
   }
-  return dp[n][n];
+  return res;
 };
 
-let n = 50;
-console.log(soupServings(n));
+let nums = [2,1,4,3], left = 2, right = 3;
+console.log(numSubarrayBoundedMax(nums, left, right));
