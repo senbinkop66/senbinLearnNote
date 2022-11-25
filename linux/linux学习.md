@@ -190,6 +190,112 @@ nohup：
 
 
 
+----
+
+## linux开启ssh服务，实现ssh远程登录
+
+```bash
+1.查询是否安装SSH.
+rpm -pa |grep ssh
+2.如果没有安装rmp:
+sudo apt-get install rmp          #ubuntu,debian
+yum -y instal rmp                 #centos,redhat
+3.安装SSH
+sudo apt-get install ssh
+or
+yum -y install openssh
+4.启动服务:
+service sshd start
+or
+/bin/systemctl restart sshd.service
+or
+/etc/init.d/sshd start
+5.配置端口:
+vim /etc/ssh/sshd_config
+6.将port 前面的#删除,也可以更改其它端口.
+
+Port 1220
+#AddressFamily any
+#ListenAddress 0.0.0.0
+
+7.允许root用户远程登录.
+#LoginGraceTime 2m
+PermitRootLigin yes
+#StrictModes yes
+#MaxAuthTries 6
+#MaxSessions 10
+
+```
+
+
+
+----
+
+## Linux磁盘挂载、分区、扩容操作
+
+```bash
+磁盘
+在Linux系统中所有的设备都会以文件的形式存储。设备一般保存在/dev目录下面，以sda、sda1、sda2 ...,sdb、sdb1...,hda,hdb。现在的设备一般都是sd命名，以前的很老的硬盘是以ha命名。
+sda：第一块硬盘，如果对磁盘进行了分区会有sda1(第一个分区)，sda2等。
+sdb：第二个硬盘，同样对硬盘分区后有sdb1,sdb2等。
+
+分区
+分区的目的就是便于管理，比如在Windows系统我们一般会分C盘，D盘，E盘等。
+
+Linux只能创建4个主分区，如果需要创建更多的分区那么久必须创建逻辑分区，其中逻辑分区需要占用一个主分区。
+
+文件系统
+Linux中的文件系统也就是分区类型，在Windows中有NTEF,FAT32等，linux中常见的有Ext2、Ext3、Ext4、Linux swap、proc、sysfs、tmpfs等，可以通过mount命名查看当前已挂载的文件系统。
+
+格式化
+在前面创建完分区后有一步是要对分区进行格式化，其实在Windows系统中也是一样，在创建好一个分区后也需要将分区格式化，只有格式化成具体的文件类型才能使用。
+mkfs.ext4 /dev/sdb1
+
+挂载
+在Windows中分区格式化后就可以使用，但是在Linux系统中必须将分区挂载到具体的路径下才可以。
+
+常用命令
+lsblk  查看当前磁盘情况
+df -lh  查看文件系统情况 -l 查看挂载点
+parted -l 会列出文件系统类型
+fdisk -l 查看当前未挂载硬盘
+挂载新硬盘
+挂载一个新硬盘基本思路是：创建分区、创建文件系统、挂载。
+
+/home/zhusenbin/guolab
+保存/var目录下的内容
+	• 创建一个挂载点：mkdir /storage。
+	• 挂载 /dev/sdb1 到 /storage 目录上：mount /dev/sdb1 /storage 。
+	• 复制/var目录下的内容到/storage目录中：cp -pdr /var /storage 。
+	• 清空 /var目录 中的内容： rm -rf /var/* （通过ls命令看一下是否清空）。
+	• 卸载 /dev/sdb1 : umount /dev/sdb1 。
+	• 将 /dev/sdb1 挂载到 /var 上： mount /dev/sdb1 /var 。
+然后通过 ls /var/ 命令查看 /var 中的内容。不过，我们会发现，原来的/var里的内容，现在被保存在了 /var/var/ 这样的目录下，而且还多了一个 lost+found 目录：
+
+为了和原来的 /var 保持一致，我们调整一下目录结构，依次执行下面三个命令：
+	mv /var/var/* /var/
+	rm -rf /var/var
+	rm -rf /var/lost+found
+
+# 过程中若提示磁盘忙，使用fuser找出将正在使用磁盘的程序并结束掉；
+fuser -m -v /var
+fuser -m -v -i -k /var
+
+
+开机自动挂载磁盘
+我们需要设置开机自动挂载磁盘。打开 vim /etc/fstab 配置文件，在其后加上下面一句：
+/dev/sdb1 /var ext4 defaults 0  0
+不过，我们应该通过 blkid /dev/sdb1 查看一下磁盘分区UUID，将上面一句修改为：
+UUID=2d0a900b-4083-4d97-86f4-c66a0cd8249c /var　　ext4　defaults　0　0
+
+然后执行 mount -a 使得配置生效，或者重启我们的ubuntu虚拟机。
+
+```
+
+
+
+
+
 -----
 
 # 文件和目录 
@@ -323,6 +429,155 @@ chmod -R 777 /upload
 
 ```
 
+**文件的权限** **-** **使用** **"+"** **设置权限，使用** **"-"** **用于取消** 
+
+```bash
+ls -lh 显示权限 
+ls /tmp | pr -T5 -W$COLUMNS 将终端划分成5栏显示 
+chmod ugo+rwx directory1 设置目录的所有人(u)、群组(g)以及其他人(o)以读（r ）、写(w)和执行(x)的权限 
+chmod go-rwx directory1 删除群组(g)与其他人(o)对目录的读写执行权限 
+chown user1 file1 改变一个文件的所有人属性 
+chown -R user1 directory1 改变一个目录的所有人属性并同时改变改目录下所有文件的属性 
+chgrp group1 file1 改变文件的群组 
+chown user1:group1 file1 改变一个文件的所有人和群组属性 
+find / -perm -u+s 罗列一个系统中所有使用了SUID控制的文件 
+chmod u+s /bin/file1 设置一个二进制文件的 SUID 位 - 运行该文件的用户也被赋予和所有者同样的权限 
+chmod u-s /bin/file1 禁用一个二进制文件的 SUID位 
+chmod g+s /home/public 设置一个目录的SGID 位 - 类似SUID ，不过这是针对目录的 
+chmod g-s /home/public 禁用一个目录的 SGID 位 
+chmod o+t /home/public 设置一个文件的 STIKY 位 - 只允许合法所有人删除文件 
+chmod o-t /home/public 禁用一个目录的 STIKY 位 
+```
+
+
+
+
+
+----
+
+## 文件搜索
+
+```bash
+find / -name file1 从 '/' 开始进入根文件系统搜索文件和目录 
+find / -user user1 搜索属于用户 'user1' 的文件和目录 
+find /home/user1 -name \*.bin 在目录 '/ home/user1' 中搜索带有'.bin' 结尾的文件 
+find /usr/bin -type f -atime +100 搜索在过去100天内未被使用过的执行文件 
+find /usr/bin -type f -mtime -10 搜索在10天内被创建或者修改过的文件 
+find / -name \*.rpm -exec chmod 755 '{}' \; 搜索以 '.rpm' 结尾的文件并定义其权限 
+find / -xdev -name \*.rpm 搜索以 '.rpm' 结尾的文件，忽略光驱、捷盘等可移动设备 
+locate \*.ps 寻找以 '.ps' 结尾的文件 - 先运行 'updatedb' 命令 
+whereis halt 显示一个二进制文件、源码或man的位置 
+which halt 显示一个二进制文件或可执行文件的完整路径 
+
+```
+
+
+
+----
+
+## 打包和压缩文件
+
+```bash
+bunzip2 file1.bz2 解压一个叫做 'file1.bz2'的文件 
+bzip2 file1 压缩一个叫做 'file1' 的文件 
+gunzip file1.gz 解压一个叫做 'file1.gz'的文件 
+gzip file1 压缩一个叫做 'file1'的文件 
+gzip -9 file1 最大程度压缩 
+rar a file1.rar test_file 创建一个叫做 'file1.rar' 的包 
+rar a file1.rar file1 file2 dir1 同时压缩 'file1', 'file2' 以及目录 'dir1' 
+rar x file1.rar 解压rar包 
+unrar x file1.rar 解压rar包 
+
+tar -cvf archive.tar file1 创建一个非压缩的 tarball 
+tar -cvf archive.tar file1 file2 dir1 创建一个包含了 'file1', 'file2' 以及 'dir1'的档案文件 
+tar -tf archive.tar 显示一个包中的内容 
+tar -xvf archive.tar 释放一个包 
+
+tar -xvf archive.tar -C /tmp 将压缩包释放到 /tmp目录下 
+tar -cvfj archive.tar.bz2 dir1 创建一个bzip2格式的压缩包 
+tar -xvfj archive.tar.bz2 解压一个bzip2格式的压缩包 
+
+tar -cvfz archive.tar.gz dir1 创建一个gzip格式的压缩包 
+tar -xvfz archive.tar.gz 解压一个gzip格式的压缩包 
+
+
+zip file1.zip file1 创建一个zip格式的压缩包 
+zip -r file1.zip file1 file2 dir1 将几个文件和目录同时压缩成一个zip格式的压缩包 
+unzip file1.zip 解压一个zip格式压缩包 
+
+
+tar -cvfz guolabwww.tar.gz www
+mv guolabwww.tar.gz /home/zhusenbin/storage/guolab
+
+cp -r dir1 dir2 复制一个目录及子目录
+```
+
+
+
+----
+
+## scp 跨机远程拷贝
+
+scp是secure copy的简写，用于在Linux下进行远程拷贝文件的命令，和它类似的命令有cp，不过cp只是在本机进行拷贝不能跨服务器，而且scp传输是加密的。当你服务器硬盘变为只读 read only system时，用scp可以帮你把文件移出来。
+
+**注解**
+
+类似的工具有rsync；scp消耗资源少，不会提高多少系统负荷，在这一点上，rsync就远远不及它了。rsync比scp会快一点，但当小文件多的情况下，rsync会导致硬盘I/O非常高，而scp基本不影响系统正常使用。
+
+**命令格式：**
+
+scp [参数] [原路径] [目标路径]
+
+ **命令参数：**
+
+- -1 强制scp命令使用协议ssh1
+- -2 强制scp命令使用协议ssh2
+- -4 强制scp命令只使用IPv4寻址
+- -6 强制scp命令只使用IPv6寻址
+- -B 使用批处理模式（传输过程中不询问传输口令或短语）
+- -C 允许压缩。（将-C标志传递给ssh，从而打开压缩功能）
+- -p 留原文件的修改时间，访问时间和访问权限。
+- -q 不显示传输进度条。
+- -r 递归复制整个目录。
+- -v 详细方式显示输出。scp和ssh(1)会显示出整个过程的调试信息。这些信息用于调试连接，验证和配置问题。
+- -c cipher 以cipher将数据传输进行加密，这个选项将直接传递给ssh。
+- -F ssh_config 指定一个替代的ssh配置文件，此参数直接传递给ssh。
+- -i identity_file 从指定文件中读取传输时使用的密钥文件，此参数直接传递给ssh。
+- -l limit 限定用户所能使用的带宽，以Kbit/s为单位。
+- -o ssh_option 如果习惯于使用ssh_config(5)中的参数传递方式，
+- -P port 注意是大写的P, port是指定数据传输用到的端口号
+- -S program 指定加密传输时所使用的程序。此程序必须能够理解ssh(1)的选项。
+
+**从本地服务器复制到远程服务器**
+
+```bash
+$scp local_file remote_username@remote_ip:remote_folder
+$scp local_file remote_username@remote_ip:remote_file
+$scp local_file remote_ip:remote_folder
+$scp local_file remote_ip:remote_file
+指定了用户名，命令执行后需要输入用户密码；如果不指定用户名，命令执行后需要输入用户名和密码；
+复制目录:
+$scp -r local_folder remote_username@remote_ip:remote_folder
+$scp -r local_folder remote_ip:remote_folder
+第1个指定了用户名，命令执行后需要输入用户密码； 第2个没有指定用户名，命令执行后需要输入用户名和密码；
+注解
+从远程复制到本地的scp命令与上面的命令一样，只要将从本地复制到远程的命令后面2个参数互换顺序就行了。
+
+实例1：从远处复制文件到本地目录
+$scp root@10.6.159.147:/opt/soft/demo.tar /opt/soft/
+说明： 从10.6.159.147机器上的/opt/soft/的目录中下载demo.tar 文件到本地/opt/soft/目录中
+实例2：从远处复制到本地
+$scp -r root@10.6.159.147:/opt/soft/test /opt/soft/
+说明： 从10.6.159.147机器上的/opt/soft/中下载test目录到本地的/opt/soft/目录来。
+实例3：上传本地文件到远程机器指定目录
+$scp /opt/soft/demo.tar root@10.6.159.147:/opt/soft/scptest
+说明： 复制本地opt/soft/目录下的文件demo.tar 到远程机器10.6.159.147的opt/soft/scptest目录
+实例4：上传本地目录到远程机器指定目录
+$scp -r /opt/soft/test root@10.6.159.147:/opt/soft/scptest
+说明： 上传本地目录 /opt/soft/test到远程机器10.6.159.147上/opt/soft/scptest的目录中
+
+```
+
 
 
 -----
@@ -375,5 +630,29 @@ root   109210 0.0 0.0 116840  988 pts/3  R+  15:58  0:00 grep --color=auto pts/0
 
 ```bash
  kill -9 98041
+```
+
+
+
+----
+
+## 管理用户
+
+```bash
+groupadd group_name 创建一个新用户组 
+groupdel group_name 删除一个用户组 
+groupmod -n new_group_name old_group_name 重命名一个用户组 
+useradd -c "Name Surname " -g admin -d /home/user1 -s /bin/bash user1 创建一个属于 "admin" 用户组的用户 
+
+useradd user1 创建一个新用户 
+userdel -r user1 删除一个用户 ( '-r' 排除主目录) 
+usermod -c "User FTP" -g system -d /ftp/user1 -s /bin/nologin user1 修改用户属性 
+passwd 修改口令 
+passwd user1 修改一个用户的口令 (只允许root执行) 
+chage -E 2005-12-31 user1 设置用户口令的失效期限 
+pwck 检查 '/etc/passwd' 的文件格式和语法修正以及存在的用户 
+grpck 检查 '/etc/passwd' 的文件格式和语法修正以及存在的群组 
+newgrp group_name 登陆进一个新的群组以改变新创建文件的预设群组 
+
 ```
 
