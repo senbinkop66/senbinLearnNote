@@ -227,6 +227,15 @@ PermitRootLigin yes
 
 ```
 
+**解决伪终端登录不了root**
+
+```bash
+打开Linux的终端，以root权限的用户登录
+	输入： vim /etc/ssh/sshd_config
+	修改PermitRootLogin 后面的no为yes，保存退出
+重启ssh服务：/etc/init.d/ssh restart
+```
+
 
 
 ----
@@ -293,6 +302,40 @@ UUID=2d0a900b-4083-4d97-86f4-c66a0cd8249c /var　　ext4　defaults　0　0
 ```
 
 
+
+----
+
+## linux服务器查看进程数量
+
+```bash
+使用命令查看Linux进程的线程数
+
+　　1、使用top命令，具体用法是 top -H
+
+　　加上这个选项，top的每一行就不是显示一个进程，而是一个线程。
+
+　　2、使用ps命令，具体用法是 ps -xH
+
+　　这样可以查看所有存在的线程，也可以使用grep作进一步的过滤。
+
+　　3、使用ps命令，具体用法是 ps -mq PID
+
+　　这样可以看到指定的进程产生的线程数目。
+
+       4、使用ps命令，查看进程总数
+
+ps -ef | wc -l
+       5、使用ps命令，查看系统设置的最大进程数
+
+sysctl kernel.pid_max
+        6、使用ps命令，查看当前进程数
+
+ps -eLf | wc -l
+        7、查看某个服务的进程数 
+
+ps -ef | grep 服务名称 | wc -l
+
+```
 
 
 
@@ -655,4 +698,29 @@ grpck 检查 '/etc/passwd' 的文件格式和语法修正以及存在的群组
 newgrp group_name 登陆进一个新的群组以改变新创建文件的预设群组 
 
 ```
+
+
+
+
+
+----
+
+# 软件安装
+
+## YUM 软件包升级器
+
+```bash
+yum install package_name 下载并安装一个rpm包 
+yum localinstall package_name.rpm 将安装一个rpm包，使用你自己的软件仓库为你解决所有依赖关系 
+yum update package_name.rpm 更新当前系统中所有安装的rpm包 
+yum update package_name 更新一个rpm包 
+yum remove package_name 删除一个rpm包 
+yum list 列出当前系统中安装的所有包 
+yum search package_name 在rpm仓库中搜寻软件包 
+yum clean packages 清理rpm缓存删除下载的包 
+yum clean headers 删除所有头文件 
+yum clean all 删除所有缓存的包和头文件 
+```
+
+
 
