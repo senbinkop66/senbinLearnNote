@@ -724,3 +724,171 @@ yum clean all 删除所有缓存的包和头文件
 
 
 
+----
+
+## linux非root用户安装python
+
+在home目录中该用户的文件夹下单独安装python及相关库。
+
+源码安装python
+从官网选择需要的版本下载 https://www.python.org/downloads/ ，这里选用V3.8..5，安装时通过–prefix指定安装路径，安装到自己的home目录下
+
+```bash
+wget https://www.python.org/ftp/python/3.8.5/Python-3.8.5.tgz
+tar -xzf Python-3.8.5.tgz
+cd Python-3.8.5/
+
+# 使用隐藏目录，避免误删
+mkdir -p /home/senbin/.python3.8.5/
+
+./configure --prefix="/home/senbin/.python3.8.5/"
+make && make install
+```
+
+配置普通用户的环境变量
+安装好之后可以配置下环境变量，这样每次执行时就不需要指定python目录了
+
+```bash
+cd ~
+vim ~/.bashrc
+ 
+# 新增下面一行，指定python安装目录下的bin路径
+export PATH=/home/senbin/.python3.8.5/bin:$PATH
+
+#使环境变量立即生效
+source ~/.bashrc 
+```
+
+ 配置好之后即可以在当前用户下任意路径中使用python3和pip3
+
+如果需要自己安装pip使用以下方法
+
+```bash
+wget https://bootstrap.pypa.io/get-pip.py
+
+# 如果配置了环境变量，可以不用指定python3.exe的路径，直接用pyton3来执行
+/home/username/.python3.8.5/bin/python3 get-pip.py
+```
+
+如果是在命令行中执行python文件，直接使用python file.py即可，但是如果要在linux crontab中执行，需要使用完整的python路径，不然使用的就是系统默认的python
+
+pip 使用国内镜像源
+
+如果需要全局修改，则需要修改配置文件。
+
+Linux/Mac os 环境中，配置文件位置在 ~/.pip/pip.conf（如果不存在创建该目录和文件）：
+
+```bash
+mkdir ~/.pip
+```
+
+打开配置文件 **~/.pip/pip.conf**，修改如下：
+
+```bash
+[global]
+index-url = http://mirrors.aliyun.com/pypi/simple/
+[install]
+trusted-host = mirrors.aliyun.compip3
+```
+
+查看 镜像地址：
+
+```bash
+$ pip3 config list   
+global.index-url='http://mirrors.aliyun.com/pypi/simple'
+install.trusted-host='mirrors.aliyun.com'
+
+```
+
+在命令行窗口中输入以下命令来更新pip即可。
+
+```
+python -m pip3 install --upgrade pip3
+```
+
+相关操作命令：
+
+```
+pip show pip #查看pip的版本
+pip list #查看已安装的模块
+pip install 模块名 #使用pip安装指定模块
+```
+
+## OpenSSL的编译安装
+
+去[官网](https://www.openssl.org/source)下载源码，解压，配置并编译安装即可。
+
+> **OpenSSL是pip下载包必不可少的库（除非不使用HTTPS）。**
+
+```bash
+wget https://www.openssl.org/source/openssl-3.0.7.tar.gz
+tar -xzf openssl-3.0.7.tar.gz
+cd openssl-3.0.7
+./config --prefix=/home/senbin/ssl
+make -j48 && make install
+```
+
+##  zlib的编译安装
+
+同样去官网下载源码，解压，配置并编译安装。
+
+zlib是Python编译时必须用到的库。
+
+```bash
+wget http://www.zlib.net/zlib-1.2.13.tar.gz
+tar -xzf zlib-1.2.13.tar.gz
+cd zlib-1.2.13
+./configure --prefix=/home/senbin/zlib
+make -j48 && make install
+```
+
+
+
+## libffi的编译安装
+
+去[GitHub](https://github.com/libffi/libffi/releases)下载源码，解压，配置并编译安装。
+
+> libffi是Python编译“***_ctypes***”模块必须的库，没有这个模块，后续包的安装编译基本寸步难行。
+>
+> ```
+> yum -y install libffi-devel 
+> ```
+>
+> 
+
+```bash
+wget https://github.com/libffi/libffi/releases/download/v3.4.4/libffi-3.4.4.tar.gz
+tar -xzf libffi-3.4.4.tar.gz
+cd libffi-3.4.4
+./configure --prefix=/home/senbin/ffi --enable-shared
+make && make install
+```
+
+此外，还需要将libffi的包信息写入系统变量：
+
+```bash
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/senbin/ffi/lib/pkgconfig
+```
+
+## 将依赖的动态库路径写入链接路径
+
+防止接下来Python编译时找不到这3个库。
+
+```bash
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/senbin/zlib/lib:/home/senbin/ffi/lib
+```
+
+
+
+配置，需要利用pkg-config指定链接libffi，并指定OpenSSL的位置
+
+```
+LDFLAGS=`pkg-config --libs-only-L libffi` ./configure --prefix=/home/senbin/py38 --with-openssl=/home/用户名/ssl --enable-optimizations 
+```
+
+
+
+```
+python3 SLPredict/code/svm_train.py
+```
+
