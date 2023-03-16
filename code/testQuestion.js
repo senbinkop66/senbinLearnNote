@@ -42,3 +42,4 @@ var shortestAlternatingPaths = function(n, redEdges, blueEdges) {
 let n = 3, red_edges = [[0,1],[1,2]], blue_edges = [];
 let result = shortestAlternatingPaths(n, red_edges, blue_edges);
 console.log(result);
+
