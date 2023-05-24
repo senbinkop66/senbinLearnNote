@@ -161,6 +161,68 @@ $ node
 Hello World!
 ```
 
+### linux安装Node.js
+
+```bash
+直接使用已编译好的包
+Node 官网已经把 linux 下载版本更改为已编译好的版本了，我们可以直接下载解压后使用：
+
+wget https://nodejs.org/download/release/v16.19.1/node-v16.19.1-linux-x64.tar.xz    // 下载
+tar xf  node-v16.19.1-linux-x64.tar.xz       // 解压
+cd node-v16.19.1-linux-x64/
+// 进入解压目录
+./bin/node -v                               // 执行node命令 查看版本
+v16.19.1
+
+解压文件的 bin 目录底下包含了 node、npm 等命令，我们可以使用 ln 命令来设置软连接：
+
+ln -s /usr/local/node/bin/npm   /usr/local/bin/ 
+ln -s /usr/local/node/bin/node   /usr/local/bin/
+```
+
+使用npm全局安装 forever
+
+```
+ npm i forever -g
+```
+
+创建软连接
+
+```
+ln -s /usr/local/node/lib/node_modules/forever/bin/forever   /usr/local/bin
+```
+
+
+
+```bash
+下载源码
+cd /usr/local/src/
+wget https://nodejs.org/dist/v18.15.0/node-v18.15.0.tar.gz
+解压源码
+tar zxvf node-v18.15.0.tar.gz
+编译安装
+cd node-v18.15.0.tar.gz
+./configure --prefix=/usr/local/node/18.15.0
+make
+make install
+
+配置NODE_HOME，进入profile编辑环境变量
+vim /etc/profile
+设置 nodejs 环境变量，在 export PATH USER LOGNAME MAIL HOSTNAME HISTSIZE HISTCONTROL 一行的上面添加如下内容:
+#set for nodejs
+export NODE_HOME=/usr/local/node18.15.0
+export PATH=$NODE_HOME/bin:$PATH
+:wq保存并退出，编译/etc/profile 使配置生效
+
+source /etc/profile
+验证是否安装配置成功
+
+node -v
+
+```
+
+
+
 ---
 
 # Node.js 创建第一个应用

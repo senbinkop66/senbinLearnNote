@@ -244,6 +244,18 @@ grant all privileges on database.* to 'senbin'@'localhost';
 flush privileges;
 ```
 
+```
+create user ''@'localhost' identified by '';
+create database microbe_sl_gene_db;
+grant all privileges on microbe_sl_gene_db.* to 'SL_Gene'@'localhost';
+use microbe_sl_gene_db;
+source E:/Mslr/datasets/sqlfile/microbe_sl_gene_db.sql;
+
+mysqldump -u root -p --databases microbe_sl_gene_db > ./microbe_sl_gene_db.sql
+```
+
+
+
 在添加用户时，请注意使用MySQL提供的 PASSWORD() 函数来对密码进行加密。
 
 ```bash
