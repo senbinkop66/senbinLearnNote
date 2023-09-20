@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>随机抽奖程序</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        text-align: center;
+        margin: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>随机抽奖程序</h1>
+      <p>请输入最小数字、最大数字和中奖个数：</p>
+      <input type="number" id="minNumber" placeholder="最小数字" />
+      <input type="number" id="maxNumber" placeholder="最大数字" />
+      <input type="number" id="winnersCount" placeholder="中奖个数" />
+      <button onclick="startLottery()">开始抽奖</button>
+      <div id="result" style="display: none"></div>
+    </div>
+
+    <script>
+      function startLottery() {
+        const minNumber = parseInt(document.getElementById('minNumber').value)
+        const maxNumber = parseInt(document.getElementById('maxNumber').value)
+        const winnersCount = parseInt(document.getElementById('winnersCount').value)
+
+        if (isNaN(minNumber) || isNaN(maxNumber) || isNaN(winnersCount) || minNumber >= maxNumber || winnersCount <= 0) {
+          alert('请输入有效的数字范围和中奖个数！')
+          return
+        }
+
+        const resultElement = document.getElementById('result')
+        resultElement.style.display = 'none'
+
+        setTimeout(() => {
+          const winners = []
+          while (winners.length < winnersCount) {
+            const randomNum = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber
+            if (!winners.includes(randomNum)) {
+              winners.push(randomNum)
+            }
+          }
+
+          resultElement.innerHTML = `<h2>抽奖结果：</h2><p>中奖号码：${winners.join(', ')}</p>`
+          resultElement.style.display = 'block'
+        }, 10000)
+      }
+    </script>
+  </body>
+</html>
